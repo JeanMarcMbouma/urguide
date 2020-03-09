@@ -25,7 +25,7 @@ Make yourself a Tourism guide at your ease and pace.
 11. A user can request a refund after an agreed period (see policy)
 12. A user could buy some coins and later pay for the tours using the platform's currency
 13. A user could redraw the funds to a bank card, account once a week
-14. A user receives a discount after N numbers of times he/she have used the service
+14. A user receives a discount after N numbers of times he/she has used the service
 15. A user could get a free tour from the platform provided he wins the built-in lottery
 16. A user can win a badge i.e: Silver, Gold, Platinum
 17. A user could boost his/her search appearance by applying for a membership:
@@ -33,12 +33,12 @@ Make yourself a Tourism guide at your ease and pace.
     - Premium (5% of gains go to the platform, Appears to the top 10 in local search, Organize unlimited size group tours, Create personalized Ads, create a commute, Schedule tours )
     
 18. A user could apply to a monthly, quaterly or yearly subscription to either Basic or Premium plans  
-19. A user could user Google Pay/Apple Pay payment platform (PayPal ?)
-20. A user could see their transaction history
-21. A user could see their tour / bid / agreement history
+19. A user could use Google Pay/Apple Pay payment platform (PayPal ?)
+20. A user could see his/her transaction history
+21. A user could see his/her tour / bid / agreement history
 22. All actions are audited
-23. A user could downlaod their data
-24. A user could delete their account
+23. A user could downlaod his/her data
+24. A user could delete his/her account
 25. A user could freeze their account for a specific period a time
 26. A user can choose to toggle his availablity, share his calendar 
 27. A user can use a use a barcode / Google / Apple / Microsoft account to authenticate to the app
