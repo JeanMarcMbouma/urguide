@@ -20,8 +20,8 @@ Make yourself a Tourism guide at your ease and pace.
 6. A user could change the bid (increase or decrease)
 7. A user could reject or accept a proposal
 8. A user can request an increase of the bid
-9. A user can pay either agree to pay the tour guide via the platform or at an agreed location/time
-10. A user can leave a positive/negative feedback about the tour via **Start rating** and user comments
+9. A user could either agree to pay the tour guide via the platform or at an agreed location/time
+10. A user can leave a positive/negative feedback about the tour via **5 Stars rating** and user comments
 11. A user can request a refund after an agreed period (see policy)
 12. A user could buy some coins and later pay for the tours using the platform's currency
 13. A user could redraw the funds to a bank card, account once a week
@@ -43,3 +43,5 @@ Make yourself a Tourism guide at your ease and pace.
 26. A user can choose to toggle his availablity, share his calendar 
 27. A user can use a use a barcode / Google / Apple / Microsoft account to authenticate to the app
 28. 2FA is required by default
+29. A user could join a tour
+30. A bid is as per participants
