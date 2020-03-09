@@ -15,7 +15,7 @@ Make yourself a Tourism guide at your ease and pace.
     - Short description
     - Telephone number
     - Country
-4. A user (guide) would create a photo galery which could other users while reviewing the offers
+4. A user (guide) would create a photo galery which could be used by other users when reviewing the offers
 5. A user could bid for a tour
 6. A user could change the bid (increase or decrease)
 7. A user could reject or accept a proposal
