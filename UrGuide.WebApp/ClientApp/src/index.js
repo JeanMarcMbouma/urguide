@@ -12,7 +12,7 @@ ReactDOM.render(
   <BrowserRouter basename={baseUrl}>
     <App />
   </BrowserRouter>,
-  rootElement);
+rootElement);
 
 // Uncomment the line above that imports the registerServiceWorker function
 // and the line below to register the generated service worker.
