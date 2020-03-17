@@ -2,6 +2,6 @@ import React, { Component } from 'react';
 export class ComponentChangePassword extends Component {
     render () {
         return (
-        <div>ComponentChangePassword</div>
+        <div className="col-lg-9">ComponentChangePassword</div>
     )}
 }

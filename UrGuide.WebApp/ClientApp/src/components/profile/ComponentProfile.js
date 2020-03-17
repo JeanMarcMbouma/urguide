@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-export class ComponentProfile extends Component {
+export class ComponentProfileInfo extends Component {
     render () {
         return (
-        <div>ComponentProfile</div>
+        <div className="col-lg-9">ComponentProfile</div>
     )}
 }
