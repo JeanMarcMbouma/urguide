@@ -116,7 +116,7 @@ export class LoginPage extends Component {
                   </Grid>
                   <Grid item>
                     <Link
-                      href="https://localhost:44336/sign-up"
+                      href="/sign-up"
                       variant="body2"
                     >
                       {"Don't have an account? Sign Up"}
