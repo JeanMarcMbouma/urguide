@@ -1,5 +1,5 @@
 ﻿import React, { Component } from "react";
-import Box from "./material-ui-core/Box";
+import Box from "@material-ui/core/Box";
 import Container from "@material-ui/core/Container";
 
 export class RegisterLayout extends Component {
