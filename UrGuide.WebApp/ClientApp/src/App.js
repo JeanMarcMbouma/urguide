@@ -3,6 +3,7 @@ import { Route } from "react-router";
 import { Switch } from "react-router-dom";
 import { LoginLayout } from "./components/LoginLayout";
 import { LoginPage } from "./components/LoginPage";
+import { Profile } from "./components/profile/Profile";
 import { RegisterLayout } from "./components/RegisterLayout";
 import { ClientRegistration } from "./components/ClientRegistration";
 import { GuideRegistration } from "./components/GuideRegistration";
@@ -30,9 +31,10 @@ export default class App extends Component {
             <Route exact path="/guide/sign-up" component={GuideRegistration} />
           </RegisterLayout>
         </Route>
-        <Route path={["/counter", "/fetch-data"]}>
+        <Route path={["/counter", "/fetch-data","/profile"]}>
           <Layout>
             <Route path="/counter" component={Counter} />
+            <Route path="/profile" component={Profile} />
             <AuthorizeRoute path="/fetch-data" component={FetchData} />
           </Layout>
         </Route>
