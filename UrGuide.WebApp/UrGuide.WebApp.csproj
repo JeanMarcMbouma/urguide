@@ -23,8 +23,16 @@
 
   <ItemGroup>
     <!-- Don't publish the SPA source files, but do show them in the project files list -->
+    <Compile Remove="ClientApp\src\components\material-ui-core\**" />
+    <Compile Remove="ClientApp\src\stylesheets\**" />
     <Content Remove="$(SpaRoot)**" />
+    <Content Remove="ClientApp\src\components\material-ui-core\**" />
+    <Content Remove="ClientApp\src\stylesheets\**" />
+    <EmbeddedResource Remove="ClientApp\src\components\material-ui-core\**" />
+    <EmbeddedResource Remove="ClientApp\src\stylesheets\**" />
     <None Remove="$(SpaRoot)**" />
+    <None Remove="ClientApp\src\components\material-ui-core\**" />
+    <None Remove="ClientApp\src\stylesheets\**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
   </ItemGroup>
 
