@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
 import { makeStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
 
 const uri = "https://picsum.photos/v2/list/?limit=9";
 
@@ -23,6 +24,9 @@ export function Gallery () {
         gridList: {
             height: 500,
         },
+        button:{
+            margin: 20,
+        }
     }));
 
     const classes = useStyles();
@@ -35,6 +39,9 @@ export function Gallery () {
                    <img src={tile.download_url} alt={tile.title} />
                 </GridListTile>))}
         </GridList>
+        <Button variant="contained" className = {classes.button} color="primary" component="span">
+          Upload
+        </Button>
         </div>
     )
 }
