@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -19,6 +19,13 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
+import InputAdornment from '@material-ui/core/InputAdornment';
+import IconButton from '@material-ui/core/IconButton';
+import Visibility from '@material-ui/icons/Visibility';
+import Input from '@material-ui/core/Input';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import FilledInput from '@material-ui/core/FilledInput';
+import OutlinedInput from '@material-ui/core/OutlinedInput';
 //import DateFnsUtils from "@date-io/date-fns";
 //import MuiPickersUtilsProvider from "@material-ui/pickers/MuiPickersUtilsProvider";
 //import KeyboardTimePicker from "@material-ui/pickers/DateTimePicker/KeyboardTimePicker";
@@ -27,6 +34,31 @@ import "./RegisterLayout.css";
 
 export class Step1 extends Component {
   static displayName = Step1.name;
+
+OnChangeConfirmation (e) {
+  let password = document.getElementById("password")
+  if(e.value!==password){
+    // e.state.error
+    alert("not the same passwords")
+  }
+}
+
+onChangeEmail (e) {
+  let email = e.value
+  let regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  let valid = regex.test(email);
+  if(!valid){
+    alert("incorrect email")
+  }
+}
+  onChangePassword(e) {
+    let password = e.value
+    let regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A -Za-z\d@$!%*?&]{ 8, 24 }$/
+    let valid = regex.test(password);
+    if (!valid) {
+      alert("incorrect password")
+    }
+  }
 
   render() {
     return (
@@ -42,6 +74,7 @@ export class Step1 extends Component {
               label="Email Address"
               name="email"
               autoComplete="email"
+              onChange={this.onChangeEmail}
             />
           </Grid>
           <Grid item xs={12}>
@@ -53,6 +86,7 @@ export class Step1 extends Component {
               label="Password"
               name="password"
               autoComplete="password"
+              onChange={this.onChangePassword}
             />
           </Grid>
           <Grid item xs={12}>
@@ -64,6 +98,7 @@ export class Step1 extends Component {
               label="Password Confirmation"
               name="passwordconfirmation"
               autoComplete="passwordconfirmation"
+              onChange={this.OnChangeConfirmation}
             />
           </Grid>
         </Grid>
