@@ -88,7 +88,7 @@ export class Step2 extends Component {
             <DatePicker />
           </Grid>
           <Grid item xs={12}>
-            <CountryPicker />
+            <CountryPicker region='Europe'/>
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <TextField

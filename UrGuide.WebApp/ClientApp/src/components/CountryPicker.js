@@ -4,11 +4,11 @@ import {
   MenuItem
 } from '@material-ui/core'
 
- const CountryPicker = () => {
+ const CountryPicker = ({region}) => {
   let [country, setCountry] = useState(null);
   let [countries, setCountries] = useState([])
   useEffect(()=>{
-    fetch('https://restcountries.eu/rest/v2/all').then(r => r.json())
+    fetch(`https://restcountries.eu/rest/v2/region/${region}`).then(r => r.json())
       .then(countries => {
         setCountries(countries);
         console.log(countries);

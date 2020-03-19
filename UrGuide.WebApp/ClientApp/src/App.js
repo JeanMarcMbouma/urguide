@@ -7,8 +7,6 @@ import { RegisterLayout } from "./components/RegisterLayout";
 import { ClientRegistration } from "./components/ClientRegistration";
 import { GuideRegistration } from "./components/GuideRegistration";
 import { Layout } from "./components/Layout";
-import { FetchData } from "./components/FetchData";
-import { Counter } from "./components/Counter";
 import AuthorizeRoute from "./components/api-authorization/AuthorizeRoute";
 import ApiAuthorizationRoutes from "./components/api-authorization/ApiAuthorizationRoutes";
 import { ApplicationPaths } from "./components/api-authorization/ApiAuthorizationConstants";
