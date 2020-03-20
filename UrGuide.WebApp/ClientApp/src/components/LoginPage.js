@@ -170,7 +170,6 @@ export function LoginPage  () {
                     fullWidth
                     variant="contained"
                     color="primary"
-                    onClick={CheckInputs}
                   >
                     Sign In
                   </Button>
