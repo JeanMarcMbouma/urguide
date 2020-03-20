@@ -2,12 +2,23 @@ import React, { Component } from "react";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
+import clsx from 'clsx';
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Link from "@material-ui/core/Link";
 import Paper from "@material-ui/core/Paper";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
+import FormControl from '@material-ui/core/FormControl';
+import IconButton from '@material-ui/core/IconButton';
+import OutlinedInput from '@material-ui/core/OutlinedInput';
+import FilledInput from '@material-ui/core/FilledInput';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import InputLabel from '@material-ui/core/InputLabel';
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import AccountCircle from '@material-ui/icons/AccountCircle';
+import Container from "@material-ui/core/Container";
 //import LockOutlinedIcon from "@material-ui/core/Icons/LockOutline";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
@@ -45,10 +56,43 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export class LoginPage extends Component {
-  static displayName = LoginPage.name;
+export function LoginPage  () {
+  const classes = useStyles();
 
-  render() {
+  const [values, setValues] = React.useState({
+    amount: '',
+    password: '',
+    email:'',
+    weight: '',
+    weightRange: '',
+    showPassword: false,
+  });
+
+  const handleChange = prop => event => {
+    setValues({ ...values, [prop]: event.target.value });
+  };
+
+  const handleClickShowPassword = () => {
+    setValues({ ...values, showPassword: !values.showPassword });
+  };
+
+  const handleMouseDownPassword = event => {
+    event.preventDefault();
+  };
+
+//   const CheckInputs = () =>
+// {
+//   let email = document.getElementById("EmailInput")
+//   let password = document.getElementById("PasswordInput")
+//     let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+//     let validEmail = regexEmail.test(email);
+//     let regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A -Za-z\d@$!%*?&]{ 8, 24 }$/
+//     let validPassword = regexPassword.test(password);
+//    if(!validEmail){
+//      alert("incorrect Inputs")
+//    }
+// }
+
     return (
       <div className="wrapper">
         <Grid container component="main" className={useStyles.root}>
@@ -72,28 +116,50 @@ export class LoginPage extends Component {
                 Sign in
               </Typography>
               <form className="login-form" noValidate>
-                <TextField
-                  variant="outlined"
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  autoFocus
-                />
-                <TextField
-                  variant="outlined"
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="current-password"
-                />
+                <Container component="main" maxWidth="xs" >
+                  <CssBaseline />
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <FormControl className={clsx(classes.margin, classes.textField)} variant="outlined">
+                        <InputLabel htmlFor="outlined-adornment-text">Email</InputLabel>
+                        <OutlinedInput
+                          id="EmailInput"
+                          type='text'
+                          endAdornment={
+                            <InputAdornment position="end">
+                              <AccountCircle />
+                            </InputAdornment>
+                          }
+                          labelWidth={70}
+                        />
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <FormControl className={clsx(classes.margin, classes.textField)} variant="outlined">
+                        <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+                        <OutlinedInput
+                          id="PasswordInput"
+                          type={values.showPassword ? 'text' : 'password'}
+                          value={values.password}
+                          onChange={handleChange('password')}
+                          endAdornment={
+                            <InputAdornment position="end">
+                              <IconButton
+                                aria-label="toggle password visibility"
+                                onClick={handleClickShowPassword}
+                                onMouseDown={handleMouseDownPassword}
+                                edge="end"
+                              >
+                                {values.showPassword ? <Visibility /> : <VisibilityOff />}
+                              </IconButton>
+                            </InputAdornment>
+                          }
+                          labelWidth={70}
+                        />
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+                </Container>
                 <FormControlLabel
                   control={<Checkbox value="remember" color="primary" />}
                   label="Remember me"
@@ -104,6 +170,7 @@ export class LoginPage extends Component {
                     fullWidth
                     variant="contained"
                     color="primary"
+                    onClick={CheckInputs}
                   >
                     Sign In
                   </Button>
@@ -133,4 +200,3 @@ export class LoginPage extends Component {
       </div>
     );
   }
-}
