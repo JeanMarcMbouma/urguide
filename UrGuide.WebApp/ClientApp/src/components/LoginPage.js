@@ -11,8 +11,7 @@ import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import FormControl from '@material-ui/core/FormControl';
 import IconButton from '@material-ui/core/IconButton';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
-import FilledInput from '@material-ui/core/FilledInput';
+import Input from '@material-ui/core/Input';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import InputLabel from '@material-ui/core/InputLabel';
 import Visibility from '@material-ui/icons/Visibility';
@@ -120,9 +119,9 @@ export function LoginPage  () {
                   <CssBaseline />
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
-                      <FormControl className={clsx(classes.margin, classes.textField)} variant="outlined">
-                        <InputLabel htmlFor="outlined-adornment-text">Email</InputLabel>
-                        <OutlinedInput
+                      <FormControl fullWidth className={clsx(classes.margin, classes.textField)} variant="outlined">
+                        <InputLabel htmlFor="adornment-text">Your email</InputLabel>
+                        <Input
                           id="EmailInput"
                           type='text'
                           endAdornment={
@@ -135,9 +134,9 @@ export function LoginPage  () {
                       </FormControl>
                     </Grid>
                     <Grid item xs={12}>
-                      <FormControl className={clsx(classes.margin, classes.textField)} variant="outlined">
-                        <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
-                        <OutlinedInput
+                      <FormControl fullWidth className={clsx(classes.margin, classes.textField)} variant="outlined">
+                        <InputLabel htmlFor="adornment-password">Password</InputLabel>
+                        <Input
                           id="PasswordInput"
                           type={values.showPassword ? 'text' : 'password'}
                           value={values.password}

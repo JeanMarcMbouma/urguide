@@ -9,9 +9,6 @@ export class MenuProfile extends Component {
                 <NavLink to="/profile/profileInfo">Profile Info</NavLink>
             </li>
             <li className="nav-item">
-                <NavLink to="/profile/AddGallery">Add gallery</NavLink>
-            </li>
-            <li className="nav-item">
                 <NavLink to="/profile/passwordChange">Password Change</NavLink>
             </li>
             <li className="nav-item">

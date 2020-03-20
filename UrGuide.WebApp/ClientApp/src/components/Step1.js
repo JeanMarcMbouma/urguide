@@ -1,41 +1,41 @@
 import React, { Fragment } from "react";
 import IconButton from '@material-ui/core/IconButton';
 import Input from '@material-ui/core/Input';
+import clsx from 'clsx';
 import InputLabel from '@material-ui/core/InputLabel';
 import InputAdornment from '@material-ui/core/InputAdornment';
+import FormControl from '@material-ui/core/FormControl';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Container from "@material-ui/core/Container";
 import "./RegisterLayout.css";
+import { makeStyles } from "@material-ui/core/styles";
 import { Grid } from "@material-ui/core";
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    minHeight: "100vh"
+  },
+  paper: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center"
+  },
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: "red"
+  },
+  form: {
+    width: "100%", // Fix IE 11 issue.
+    marginTop: theme.spacing(1)
+  }
+}));
 
 export function Step1 () {
 
-// const OnChangeConfirmation = (e) => {
-//   let password = document.getElementById("password")
-//   if(e.value!==password){
-//     alert("not the same passwords")
-//   }
-// }
-
-// const onChangeEmail = (e) => {
-//   let email = e.value
-//   let regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-//   let valid = regex.test(email);
-//   if(!valid){
-//     alert("incorrect email")
-//   }
-// }
-//   const onChangePassword = (e) => {
-//     let password = e.value
-//     let regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A -Za-z\d@$!%*?&]{ 8, 24 }$/
-//     let valid = regex.test(password);
-//     if (!valid) {
-//       alert("incorrect password")
-//     }
-//   }
+  const classes = useStyles();
 
   const [values, setValues] = React.useState({
     amount: '',
@@ -60,9 +60,10 @@ export function Step1 () {
   return (
     <Container component="main" maxWidth="xs" >
       <CssBaseline />
-      <Grid container spacing={2}>
+      <Grid container spacing={4}>
         <Grid item xs={12}>
-          <InputLabel htmlFor="input-with-icon-adornment">Email</InputLabel>
+          <FormControl fullWidth className={clsx(classes.margin, classes.textField)} variant="outlined">
+          <InputLabel htmlFor="input-with-icon-adornment">Your email</InputLabel>
           <Input
             endAdornment={
               <InputAdornment position="start">
@@ -70,8 +71,10 @@ export function Step1 () {
               </InputAdornment>
             }
           />
+          </FormControl>
         </Grid>
         <Grid item xs={12}>
+          <FormControl fullWidth className={clsx(classes.margin, classes.textField)} variant="outlined">
           <InputLabel htmlFor="standard-adornment-password">Password</InputLabel>
           <Input
             type={values.showPassword ? 'text' : 'password'}
@@ -88,8 +91,10 @@ export function Step1 () {
               </InputAdornment>
             }
           />
+          </FormControl>
         </Grid>
         <Grid item xs={12}>
+          <FormControl fullWidth className={clsx(classes.margin, classes.textField)} variant="outlined">
           <InputLabel htmlFor="standard-adornment-password">Password Confirm</InputLabel>
           <Input
             type={values.showPassword ? 'text' : 'password'}
@@ -106,49 +111,34 @@ export function Step1 () {
               </InputAdornment>
             }
           />
+          </FormControl>
         </Grid>
       </Grid>
     </Container>
   )
-      // <Container component="main" maxWidth="xs">
-      //   <CssBaseline />
-      //   <Grid container spacing={2}>
-      //     <Grid item xs={12}>
-      //       <TextField
-      //         variant="outlined"
-      //         required
-      //         fullWidth
-      //         id="email"
-      //         label="Email Address"
-      //         name="email"
-      //         autoComplete="email"
-      //         onChange={this.onChangeEmail}
-      //       />
-      //     </Grid>
-      //     <Grid item xs={12}>
-      //       <TextField
-      //         variant="outlined"
-      //         required
-      //         fullWidth
-      //         id="password"
-      //         label="Password"
-      //         name="password"
-      //         autoComplete="password"
-      //         onChange={this.onChangePassword}
-      //       />
-      //     </Grid>
-      //     <Grid item xs={12}>
-      //       <TextField
-      //         variant="outlined"
-      //         required
-      //         fullWidth
-      //         id="password-confirm"
-      //         label="Password Confirmation"
-      //         name="passwordconfirmation"
-      //         autoComplete="passwordconfirmation"
-      //         onChange={this.OnChangeConfirmation}
-      //       />
-      //     </Grid>
-      //   </Grid>
-      // </Container>;
+      
 }
+
+// const OnChangeConfirmation = (e) => {
+//   let password = document.getElementById("password")
+//   if(e.value!==password){
+//     alert("not the same passwords")
+//   }
+// }
+
+// const onChangeEmail = (e) => {
+//   let email = e.value
+//   let regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+//   let valid = regex.test(email);
+//   if(!valid){
+//     alert("incorrect email")
+//   }
+// }
+//   const onChangePassword = (e) => {
+//     let password = e.value
+//     let regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A -Za-z\d@$!%*?&]{ 8, 24 }$/
+//     let valid = regex.test(password);
+//     if (!valid) {
+//       alert("incorrect password")
+//     }
+//   }

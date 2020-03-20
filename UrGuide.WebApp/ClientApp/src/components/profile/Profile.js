@@ -3,7 +3,6 @@ import { Route } from 'react-router-dom';
 import { ComponentProfileInfo } from "./ComponentProfile"
 import { ComponentDeleteProfile } from "./ComponentDeleteProfile"
 import { ComponentChangePassword } from "./ComponentChangePassword"
-import { Gallery } from "./gallery"
 import { MenuProfile } from "./Menu"
 
 //This component create page where you can change profile information
@@ -14,7 +13,6 @@ export class Profile extends Component {
         <div className="row col-lg-12">
             <MenuProfile />
             <Route path="/profile/profileInfo" component={ComponentProfileInfo}/>
-            <Route path="/profile/AddGallery" component={Gallery} />
             <Route path="/profile/deleteProfile" component={ComponentDeleteProfile}/>
             <Route path="/profile/passwordChange" component={ComponentChangePassword}/>
         </div>
