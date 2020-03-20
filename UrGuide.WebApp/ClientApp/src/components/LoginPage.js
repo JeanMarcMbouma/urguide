@@ -155,12 +155,15 @@ export function LoginPage  () {
                         />
                       </FormControl>
                     </Grid>
+                    <Grid item xs={12}>
+                      <FormControlLabel
+                        control={<Checkbox value="remember" color="primary" />}
+                        label="Remember me"
+                      />
+                    </Grid>
                   </Grid>
                 </Container>
-                <FormControlLabel
-                  control={<Checkbox value="remember" color="primary" />}
-                  label="Remember me"
-                />
+                
                 <div className="submit-button-div">
                   <Button
                     type="submit"
