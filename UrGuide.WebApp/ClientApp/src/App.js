@@ -3,14 +3,16 @@ import { Route } from "react-router";
 import { Switch } from "react-router-dom";
 import { LoginLayout } from "./components/LoginLayout";
 import { LoginPage } from "./components/LoginPage";
+import { Profile } from "./components/profile/Profile";
 import { RegisterLayout } from "./components/RegisterLayout";
 import { ClientRegistration } from "./components/ClientRegistration";
 import { GuideRegistration } from "./components/GuideRegistration";
 import { Layout } from "./components/Layout";
+import { FetchData } from "./components/FetchData";
+import { Counter } from "./components/Counter";
 import AuthorizeRoute from "./components/api-authorization/AuthorizeRoute";
 import ApiAuthorizationRoutes from "./components/api-authorization/ApiAuthorizationRoutes";
 import { ApplicationPaths } from "./components/api-authorization/ApiAuthorizationConstants";
-import { Profile } from "./components/profile/Profile";
 
 export default class App extends Component {
   static displayName = App.name;
@@ -29,9 +31,11 @@ export default class App extends Component {
             <Route exact path="/guide/sign-up" component={GuideRegistration} />
           </RegisterLayout>
         </Route>
-        <Route path={["/profile"]}>
+        <Route path={["/counter", "/fetch-data","/profile"]}>
           <Layout>
-            <Route exact path="/profile" component={Profile} />
+            <Route path="/counter" component={Counter} />
+            <Route path="/profile" component={Profile} />
+            <AuthorizeRoute path="/fetch-data" component={FetchData} />
           </Layout>
         </Route>
       </Switch>

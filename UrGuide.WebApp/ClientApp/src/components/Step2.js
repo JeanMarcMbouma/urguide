@@ -24,13 +24,11 @@ import StepLabel from "@material-ui/core/StepLabel";
 //import KeyboardTimePicker from "@material-ui/pickers/DateTimePicker/KeyboardTimePicker";
 //import KeyboardDatePicker from "@material-ui/pickers/DatePicker/DatePicker";
 import "./RegisterLayout.css";
-import DatePicker from "./Date/Date";
-import CountryPicker from './CountryPicker'
 
 function readURL(input) {
   if (input.files && input.files[0]) {
     var reader = new FileReader();
-    reader.onload = function (e) {
+    reader.onload = function(e) {
       document.getElementById("imagePreview").style.backgroundImage =
         "url(" + e.target.result + ")";
       document.getElementById("imagePreview").style.display = "none";
@@ -85,10 +83,26 @@ export class Step2 extends Component {
             </Select>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <DatePicker />
+            <TextField
+              variant="outlined"
+              required
+              fullWidth
+              id="dateOfBirth"
+              label="Date of birth"
+              name="dateOfBirth"
+              autoComplete="dateOfBirth"
+            />
           </Grid>
           <Grid item xs={12}>
-            <CountryPicker region='Europe'/>
+            <TextField
+              variant="outlined"
+              required
+              fullWidth
+              id="country"
+              label="Country"
+              name="country"
+              autoComplete="country"
+            />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <TextField
