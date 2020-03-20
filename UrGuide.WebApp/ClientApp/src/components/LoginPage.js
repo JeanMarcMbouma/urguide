@@ -161,34 +161,34 @@ export function LoginPage  () {
                         label="Remember me"
                       />
                     </Grid>
+                    <Grid item xs={12}>
+                      <div className="submit-button-div">
+                        <Button
+                          type="submit"
+                          fullWidth
+                          variant="contained"
+                          color="primary">
+                          Sign In
+                        </Button>
+                      </div>
+                    </Grid>
+                    <Grid item xs={12} className="bottom-form" container>
+                      <Grid item xs>
+                        <Link href="#" variant="body2">
+                          Forgot password?
+                    </Link>
+                      </Grid>
+                      <Grid item>
+                        <Link
+                          href="/sign-up"
+                          variant="body2"
+                        >
+                          {"Don't have an account? Sign Up"}
+                        </Link>
+                      </Grid>
+                    </Grid>
                   </Grid>
                 </Container>
-                
-                <div className="submit-button-div">
-                  <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                  >
-                    Sign In
-                  </Button>
-                </div>
-                <Grid className="bottom-form" container>
-                  <Grid item xs>
-                    <Link href="#" variant="body2">
-                      Forgot password?
-                    </Link>
-                  </Grid>
-                  <Grid item>
-                    <Link
-                      href="/sign-up"
-                      variant="body2"
-                    >
-                      {"Don't have an account? Sign Up"}
-                    </Link>
-                  </Grid>
-                </Grid>
                 <Box mt={5}>
                   <Copyright />
                 </Box>
