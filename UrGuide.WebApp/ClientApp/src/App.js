@@ -9,16 +9,22 @@ import { ClientRegistration } from "./components/ClientRegistration";
 import { GuideRegistration } from "./components/GuideRegistration";
 import { Layout } from "./components/Layout";
 import { FetchData } from "./components/FetchData";
-import { Counter } from "./components/Counter";
+import Counter from "./components/Counter";
 import AuthorizeRoute from "./components/api-authorization/AuthorizeRoute";
 import ApiAuthorizationRoutes from "./components/api-authorization/ApiAuthorizationRoutes";
 import { ApplicationPaths } from "./components/api-authorization/ApiAuthorizationConstants";
-
+import UserContext from './UserContext';
 export default class App extends Component {
   static displayName = App.name;
-
+  
   render() {
     return (
+      <UserContext.Provider value={{
+        email: null, 
+        username: 'Guest', 
+        isLoggedIn: false,
+        token: null
+      }}>
       <Switch>
         <Route exact path={["/"]}>
           <LoginLayout>
@@ -39,6 +45,7 @@ export default class App extends Component {
           </Layout>
         </Route>
       </Switch>
+      </UserContext.Provider>
     );
 
     //  <Layout>
