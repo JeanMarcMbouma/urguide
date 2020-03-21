@@ -1,4 +1,4 @@
-export default async function UserReducer(state, action)  {
+export default function UserReducer(state, action)  {
     let context = {...state};
 
     switch (action.type) {
