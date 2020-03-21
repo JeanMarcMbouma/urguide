@@ -1,31 +1,23 @@
-import React, { Component } from 'react';
+import React, {useReducer, useContext } from 'react';
 
-export class Counter extends Component {
-  static displayName = Counter.name;
+import UserContext from './../UserContext'
+import UserReducer from './../UserReducer'
 
-  constructor(props) {
-    super(props);
-    this.state = { currentCount: 0 };
-    this.incrementCounter = this.incrementCounter.bind(this);
-  }
 
-  incrementCounter() {
-    this.setState({
-      currentCount: this.state.currentCount + 1
-    });
-  }
+const Counter = () => {
+  const ctx = useContext(UserContext);
+  const [state, dispatch] = useReducer(UserReducer, ctx);
+ 
+  return (
+    <>
+      User: {state.username}
+      <p>
 
-  render() {
-    return (
-      <div>
-        <h1>Counter</h1>
+        <button onClick={() => dispatch({type: 'login', data: 'jeanm'})}>Login</button>
+        <button hidden={!state.isLoggedIn} onClick={() => dispatch({type: 'logout', data: 'jeanm'})}>Logout</button>
+      </p>
+    </>
+  );
+};
 
-        <p>This is a simple example of a React component.</p>
-
-        <p aria-live="polite">Current count: <strong>{this.state.currentCount}</strong></p>
-
-        <button className="btn btn-primary" onClick={this.incrementCounter}>Increment</button>
-      </div>
-    );
-  }
-}
+export default Counter
