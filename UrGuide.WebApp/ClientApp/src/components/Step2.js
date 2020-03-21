@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, Fragment, useState } from "react";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -19,33 +19,65 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
-//import DateFnsUtils from "@date-io/date-fns";
-//import MuiPickersUtilsProvider from "@material-ui/pickers/MuiPickersUtilsProvider";
-//import KeyboardTimePicker from "@material-ui/pickers/DateTimePicker/KeyboardTimePicker";
-//import KeyboardDatePicker from "@material-ui/pickers/DatePicker/DatePicker";
+import DateFnsUtils from "@date-io/date-fns";
+import CreateIcon from "@material-ui/icons/Create";
 import "./RegisterLayout.css";
 
-function readURL(input) {
-  if (input.files && input.files[0]) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      document.getElementById("imagePreview").style.backgroundImage =
-        "url(" + e.target.result + ")";
-      document.getElementById("imagePreview").style.display = "none";
-      document.getElementById("imagePreview").style.opacity = 1;
-    };
-    reader.readAsDataURL(input.files[0]);
-  }
-}
-
 export class Step2 extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { country: "Select your country...", file: null };
+
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange(event) {
+    var file = URL.createObjectURL(event.target.files[0]);
+
+    this.setState({
+      file: file
+    });
+
+    document.getElementById("pic-previewer").style.backgroundImage =
+      "url('" + file + "')";
+  }
+
   render() {
     return (
       <Container component="main">
         <CssBaseline />
+        <Grid item xs={12}>
+          <Box mb={10}>
+            <div>
+              <h6>
+                2.Add personal informations that will lead people to find
+                you.
+              </h6>
+            </div>
+          </Box>
+        </Grid>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <div className="avatar-wrapper"><div className="avatar"></div></div>
+            <div className="avatar-wrapper">
+              <div className="avatar" id="pic-previewer"></div>
+              <div
+                className="create-icon"
+                onClick={e =>
+                  document.getElementById("profile-pic-input").click()
+                }
+              >
+                <span>
+                  <CreateIcon style={{ fontSize: 21 }} />
+                </span>
+              </div>
+            </div>
+            <input
+              type="file"
+              className="input-file"
+              id="profile-pic-input"
+              accept=".png,.jpg"
+              onChange={this.handleChange}
+            />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
@@ -73,13 +105,16 @@ export class Step2 extends Component {
           <Grid item xs={12} sm={6}>
             <Select
               variant="outlined"
-              labelId="demo-simple-select-outlined-label"
-              id="demo-simple-select-outlined"
               fullWidth
-              placeholder="Select your gender"
+              id="gender"
+              label="Gender"
+              name="gender"
+              defaultValue="default-gender"
+              autoComplete="gender"
             >
-              <MenuItem value={10}>Female</MenuItem>
-              <MenuItem value={20}>Male</MenuItem>
+              <MenuItem value="default-gender">Select your gender...</MenuItem>
+              <MenuItem value="Female">Female</MenuItem>
+              <MenuItem value="Male">Male</MenuItem>
             </Select>
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -87,22 +122,27 @@ export class Step2 extends Component {
               variant="outlined"
               required
               fullWidth
-              id="dateOfBirth"
-              label="Date of birth"
-              name="dateOfBirth"
-              autoComplete="dateOfBirth"
+              id="birthday"
+              label="Birthday"
+              name="birthday"
+              autoComplete="birthday"
             />
           </Grid>
           <Grid item xs={12}>
-            <TextField
+            <Select
               variant="outlined"
-              required
               fullWidth
               id="country"
               label="Country"
               name="country"
+              defaultValue="default-country"
               autoComplete="country"
-            />
+            >
+              <MenuItem value="default-country">
+                Select your country...
+              </MenuItem>
+              <MenuItem value="afghanistan">Afghanistan</MenuItem>
+            </Select>
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <TextField

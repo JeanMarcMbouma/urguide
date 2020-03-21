@@ -32,6 +32,13 @@ export class Step1 extends Component {
     return (
       <Container component="main" maxWidth="xs">
         <CssBaseline />
+        <Grid item xs={12}>
+          <Box mb={5}>
+            <div>
+              <h6>1.Enter your details for signing in the app.</h6>
+            </div>
+          </Box>
+        </Grid>
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField

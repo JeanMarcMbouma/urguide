@@ -73,6 +73,7 @@ export class LoginPage extends Component {
               </Typography>
               <form className="login-form" noValidate>
                 <TextField
+                  null
                   variant="outlined"
                   margin="normal"
                   required
@@ -82,6 +83,7 @@ export class LoginPage extends Component {
                   name="email"
                   autoComplete="email"
                   autoFocus
+                  helperText=""
                 />
                 <TextField
                   variant="outlined"
@@ -115,10 +117,7 @@ export class LoginPage extends Component {
                     </Link>
                   </Grid>
                   <Grid item>
-                    <Link
-                      href="/sign-up"
-                      variant="body2"
-                    >
+                    <Link href="/sign-up" variant="body2">
                       {"Don't have an account? Sign Up"}
                     </Link>
                   </Grid>
