@@ -3,8 +3,7 @@ export default async function UserReducer(state, action)  {
 
     switch (action.type) {
         case 'login':
-            var jsonData = await fetch(url);
-            context.token = jsonData;
+            // await fetch(url);
             context.username = action.data;
             context.isLoggedIn = true;
             return context;
