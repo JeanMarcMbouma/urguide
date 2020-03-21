@@ -26,6 +26,25 @@ import StepLabel from "@material-ui/core/StepLabel";
 import "./RegisterLayout.css";
 
 export class Step3 extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { country: "Select your country...", file: null };
+
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange(event) {
+    var file = URL.createObjectURL(event.target.files[0]);
+    var elementId = String(event.target.id);
+    elementId = elementId.substring(0, elementId.length - 2);
+    this.setState({
+      file: elementId //file
+    });
+
+    document.getElementById(elementId).style.backgroundImage =
+      "url('" + file + "')";
+  }
+
   render() {
     return (
       <Container component="main">
@@ -34,7 +53,7 @@ export class Step3 extends Component {
           <Box mb={5}>
             <div>
               <h6>
-                Now upload photos of places you'd want your guests to visit.
+                3.Now upload photos of places you'd want your guests to visit.
               </h6>
             </div>
           </Box>
@@ -42,49 +61,109 @@ export class Step3 extends Component {
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={4}>
             <Box>
-              <div className="photo-box text-center">
+              <div
+                className="photo-box text-center"
+                id="pic-1"
+                onClick={e => document.getElementById("pic-1-i").click()}
+              >
                 <span>Upload an image here</span>
-                <input className="input-file" type="file" accept="*png *jpg" />
+                <input
+                  className="input-file"
+                  id="pic-1-i"
+                  type="file"
+                  accept=".png,.jpg"
+                  onChange={this.handleChange}
+                />
               </div>
             </Box>
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <Box>
-              <div className="photo-box text-center">
+              <div
+                className="photo-box text-center"
+                id="pic-2"
+                onClick={e => document.getElementById("pic-2-i").click()}
+              >
                 <span>Upload an image here</span>
-                <input className="input-file" type="file" accept="*png *jpg" />
+                <input
+                  className="input-file"
+                  id="pic-2-i"
+                  type="file"
+                  accept=".png,.jpg"
+                  onChange={this.handleChange}
+                />
               </div>
             </Box>
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <Box>
-              <div className="photo-box text-center">
+              <div
+                className="photo-box text-center"
+                id="pic-3"
+                onClick={e => document.getElementById("pic-3-i").click()}
+              >
                 <span>Upload an image here</span>
-                <input className="input-file" type="file" accept="*png *jpg" />
+                <input
+                  className="input-file"
+                  id="pic-3-i"
+                  type="file"
+                  accept=".png,.jpg"
+                  onChange={this.handleChange}
+                />
               </div>
             </Box>
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <Box>
-              <div className="photo-box text-center">
+              <div
+                className="photo-box text-center"
+                id="pic-4"
+                onClick={e => document.getElementById("pic-4-i").click()}
+              >
                 <span>Upload an image here</span>
-                <input className="input-file" type="file" accept="*png *jpg" />
+                <input
+                  className="input-file"
+                  id="pic-4-i"
+                  type="file"
+                  accept=".png,.jpg"
+                  onChange={this.handleChange}
+                />
               </div>
             </Box>
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <Box>
-              <div className="photo-box text-center">
+              <div
+                className="photo-box text-center"
+                id="pic-5"
+                onClick={e => document.getElementById("pic-5-i").click()}
+              >
                 <span>Upload an image here</span>
-                <input className="input-file" type="file" accept="*png *jpg" />
+                <input
+                  className="input-file"
+                  id="pic-5-i"
+                  type="file"
+                  accept=".png,.jpg"
+                  onChange={this.handleChange}
+                />
               </div>
             </Box>
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <Box>
-              <div className="photo-box text-center">
+              <div
+                className="photo-box text-center"
+                id="pic-6"
+                onClick={e => document.getElementById("pic-6-i").click()}
+              >
                 <span>Upload an image here</span>
-                <input className="input-file" type="file" accept="*png *jpg" />
+                <input
+                  className="input-file"
+                  id="pic-6-i"
+                  type="file"
+                  accept=".png,.jpg"
+                  onChange={this.handleChange}
+                />
               </div>
             </Box>
           </Grid>

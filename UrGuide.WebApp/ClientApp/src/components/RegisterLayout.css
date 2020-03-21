@@ -8,6 +8,12 @@
   margin-block-end: 50px;
   text-decoration: none;
 }
+
+.select {
+  z-index: 999 !important;
+  height: 60px;
+}
+
 .typo {
   margin-bottom: 30px;
 }
@@ -30,11 +36,29 @@
   height: 125px;
   width: 125px;
   border-radius: 100px;
-  border: 4px solid #d3d3d3;
+  /* border: 4px solid #d3d3d3; */
   padding: 0px;
-  background-color: #d3d3d3;
+  /* background-color: #d3d3d3; */
+  background-image: url(https://i7.pngguru.com/preview/1016/429/148/computer-icons-download-avatar-avatar.jpg);
+  background-size: cover;
+  background-position: center center;
 }
 
+.create-icon {
+  padding: 2px 3px 4px 2px;
+  height: 30px;
+  width: 30px;
+  border-radius: 50px;
+  cursor: pointer;
+  border: 3px solid black;
+  margin-left: -20px;
+  margin-top: -28px;
+  background-color: #dedede;
+}
+
+.create-icon:hover {
+  background-color: #c4c4c4;
+}
 .photo-box {
   display: -webkit-flex;
   display: flex;
@@ -48,6 +72,8 @@
   width: 100%;
   background-color: #d3d3d3;
   cursor: pointer;
+  background-position: center center;
+  background-size: cover;
 }
 
 .input-file {

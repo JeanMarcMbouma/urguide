@@ -12,7 +12,7 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import Container from "@material-ui/core/Container";
 import "./RegisterLayout.css";
 import { makeStyles } from "@material-ui/core/styles";
-import { Grid } from "@material-ui/core";
+import { Grid, Box } from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -61,6 +61,13 @@ export function Step1 () {
     <Container component="main" maxWidth="xs" >
       <CssBaseline />
       <Grid container spacing={4}>
+      <Grid item xs={12}>
+          <Box mb={5}>
+            <div>
+              <h6>1.Enter your details for signing in the app.</h6>
+            </div>
+          </Box>
+        </Grid>
         <Grid item xs={12}>
           <FormControl fullWidth className={clsx(classes.margin, classes.textField)} variant="outlined">
           <InputLabel htmlFor="input-with-icon-adornment">Your email</InputLabel>
