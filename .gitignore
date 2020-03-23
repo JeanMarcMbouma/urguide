@@ -3,3 +3,8 @@
 ################################################################################
 
 /.vs/UrGuide
+/.vs
+/node_modules/react-select-country-list
+node_modules
+**/.vscode/launch.json
+**/.vscode/tasks.json
