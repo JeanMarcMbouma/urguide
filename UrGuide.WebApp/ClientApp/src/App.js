@@ -14,6 +14,7 @@ import AuthorizeRoute from "./components/api-authorization/AuthorizeRoute";
 import ApiAuthorizationRoutes from "./components/api-authorization/ApiAuthorizationRoutes";
 import { ApplicationPaths } from "./components/api-authorization/ApiAuthorizationConstants";
 import UserContext from './UserContext';
+import Home from "./components/MainPage/Home"
 export default class App extends Component {
   static displayName = App.name;
   
@@ -37,8 +38,9 @@ export default class App extends Component {
             <Route exact path="/guide/sign-up" component={GuideRegistration} />
           </RegisterLayout>
         </Route>
-        <Route path={["/counter", "/fetch-data","/profile"]}>
+        <Route path={["/counter","/home", "/fetch-data","/profile"]}>
           <Layout>
+              <Route path="/home" component={Home} />
             <Route path="/counter" component={Counter} />
             <Route path="/profile" component={Profile} />
             <AuthorizeRoute path="/fetch-data" component={FetchData} />
