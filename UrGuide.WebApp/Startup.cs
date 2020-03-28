@@ -35,7 +35,10 @@ namespace UrGuide.WebApp
             services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddIdentityServer()
+            services.AddIdentityServer(options => {
+                options.UserInteraction.LoginUrl = "/sign-in";
+                options.UserInteraction.LogoutUrl = "/account/logout";
+            })
                 .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
 
             services.AddAuthentication()

@@ -33,6 +33,6 @@ export const ApplicationPaths = {
   LogOut: `${prefix}/${LogoutActions.Logout}`,
   LoggedOut: `${prefix}/${LogoutActions.LoggedOut}`,
   LogOutCallback: `${prefix}/${LogoutActions.LogoutCallback}`,
-  IdentityRegisterPath: '/Identity/Account/Register',
+  IdentityRegisterPath: '/sign-up',
   IdentityManagePath: '/Identity/Account/Manage'
 };
