@@ -43,7 +43,7 @@ namespace UrGuide.WebApp.Controllers
                 await HttpContext.SignInAsync(user.Id, user.UserName);
                 if(Url.IsLocalUrl(returnUrl) || Interaction.IsValidReturnUrl(returnUrl))
                     return LocalRedirect(returnUrl);
-                return Ok();
+                return Ok(returnUrl);
             }
             return BadRequest();
         }
