@@ -19,7 +19,6 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
-import DateFnsUtils from "@date-io/date-fns";
 import CreateIcon from "@material-ui/icons/Create";
 import "./RegisterLayout.css";
 

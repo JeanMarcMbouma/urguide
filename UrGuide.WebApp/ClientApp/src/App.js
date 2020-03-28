@@ -40,7 +40,7 @@ export default class App extends Component {
         </Route>
         <Route path={["/counter","/home", "/fetch-data","/profile"]}>
           <Layout>
-              <Route path="/home" component={Home} />
+            <Route path="/home" component={Home} />
             <Route path="/counter" component={Counter} />
             <Route path="/profile" component={Profile} />
             <AuthorizeRoute path="/fetch-data" component={FetchData} />
