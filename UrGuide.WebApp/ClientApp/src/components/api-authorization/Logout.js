@@ -82,7 +82,7 @@ export class Logout extends Component {
                     throw new Error("Invalid authentication result status.");
             }
         } else {
-            this.setState({ message: "You successfully logged out!" });
+            await this.navigateToReturnUrl(ApplicationPaths.DefaultLoginRedirectPath);
         }
     }
 
