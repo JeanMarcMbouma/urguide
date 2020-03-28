@@ -29,8 +29,8 @@ const Header = () => {
 
   const classes = useStyles();
   return (
-    <>
-      <div className={(classes.header)}>
+    <div className='col-lg-12'>
+      <div className={(classes.header )}>
         <div className={(classes.font)}><b>UrGuide</b></div>
         <HomeOutlinedIcon></HomeOutlinedIcon>
         <SearchIcon></SearchIcon>
@@ -41,7 +41,7 @@ const Header = () => {
           {/* <button onClick={() => dispatch({ type: 'logged', data: 'MrIhor'})}>Log in</button>
           <button hidden={!state.isLoggedIn} onClick={() => dispatch({ type: 'unlogged', data: 'MrIhor' })}>Log out</button> */}
       </div>
-    </>
+    </div>
   )
 }
 
