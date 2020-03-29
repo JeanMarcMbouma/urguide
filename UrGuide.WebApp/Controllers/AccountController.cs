@@ -1,5 +1,6 @@
 ﻿using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -127,6 +128,7 @@ namespace UrGuide.WebApp.Controllers
             return Forbid();
         }
 
+        [Authorize]
         [HttpPost("changepassword")]
         public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordModel model, 
             [FromServices]Services.IEmailService emailService,
@@ -153,6 +155,7 @@ namespace UrGuide.WebApp.Controllers
             return BadRequest(ErrorEnvelop.Create(result.Errors));
         }
 
+        [Authorize]
         [HttpGet("logout")]
         public async Task<IActionResult> Signout(string returnUrl = null)
         {
