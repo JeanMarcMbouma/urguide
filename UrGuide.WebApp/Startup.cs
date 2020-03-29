@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
 using UrGuide.WebApp.Data;
@@ -11,7 +8,6 @@ using UrGuide.WebApp.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Swashbuckle.AspNetCore;
 using Microsoft.OpenApi.Models;
 
 namespace UrGuide.WebApp
@@ -55,6 +51,8 @@ namespace UrGuide.WebApp
             {
                 configuration.RootPath = "ClientApp/build";
             });
+
+            services.AddScoped<Services.IEmailService, Services.EmailService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
