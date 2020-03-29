@@ -87,10 +87,10 @@ const LoginForm = () => {
 
     const getReturnUrl = (state) => {
         const params = new URLSearchParams(window.location.search);
-        const fromQuery = params.get('ReturnUrl');
+        const fromQuery = params.get(QueryParameterNames.ReturnUrl);
         if (fromQuery && !fromQuery.startsWith(`${window.location.origin}/`)) {
-            var url = `${window.location.origin}${fromQuery}`;
-            return url;
+            // This is an extra check to prevent open redirects.
+            throw new Error("Invalid return url. The return url needs to have the same origin as the current page.")
         }
         return (state && state.returnUrl) || fromQuery || `${window.location.origin}/`;
     }
@@ -101,7 +101,7 @@ const LoginForm = () => {
     }
     const login = async function (state) {
         const returnUrl = getReturnUrl();
-        const response = await fetch(`/login?returnUrl=${returnUrl}`, {
+        const response = await fetch('/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -109,10 +109,10 @@ const LoginForm = () => {
             body: JSON.stringify({
                 userName: state.email,
                 password: state.password,
-                persist: state.isRemembered
+                persist: state.isRemembered,
+                returnUrl
             })
         });
-
         if (response.status == 200 || response.status == 304) {
             navigateToReturnUrl(returnUrl);
         }
