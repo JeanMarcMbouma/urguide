@@ -106,6 +106,7 @@ const LoginForm = () => {
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'include',
             body: JSON.stringify({
                 userName: state.email,
                 password: state.password,
@@ -115,6 +116,15 @@ const LoginForm = () => {
         });
         if (response.status == 200 || response.status == 304) {
             navigateToReturnUrl(returnUrl);
+        } else {
+            // we got an error
+            if (response.status == 400) // BadRequest
+            {
+                var errors = await response.json();
+                console.log(errors);
+            } else {
+                // Account has certainly been locked-out
+            }
         }
     }
 
