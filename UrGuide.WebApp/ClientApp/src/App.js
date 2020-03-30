@@ -10,13 +10,13 @@ import { GuideRegistration } from "./components/guide-registration/GuideRegistra
 import { Layout } from "./components/Layout";
 import UserContext from './UserContext';
 import Home from "./components/MainPage/Home"
+
 import AuthorizeRoute from "./components/api-authorization/AuthorizeRoute";
 import ApiAuthorizationRoutes from "./components/api-authorization/ApiAuthorizationRoutes";
 import { ApplicationPaths } from './components/api-authorization/ApiAuthorizationConstants';
 
 export default class App extends Component {
     static displayName = App.name;
-
     render() {
         return (
             <UserContext.Provider value={{
