@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
-using System.Net.Mail;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using SendGrid.Helpers.Mail;
@@ -34,16 +32,16 @@ namespace UrGuide.WebApp.Services
             };
 
             var apiKey = Environment.GetEnvironmentVariable("SENDGRID_URGUIDE_API_KEY");
-            var message = new MailMessage("noreply@urguide.org", email);
-            message.Subject = subject;
-            message.Body = messageBody;
-            message.BodyEncoding = Encoding.UTF8;
-            message.IsBodyHtml = true;
-            message.Priority = MailPriority.High;
+            
             var client = new SendGrid.SendGridClient(apiKey);
             var mail = MailHelper.CreateSingleEmail(new EmailAddress("noreply@urguide.org", "UrGuide"), new EmailAddress(email), subject, messageBody, messageBody);
+            mail.TemplateId = "d-eee7f1abc3a94f13a49ab087f6268be5";
+            mail.SetTemplateData(new { Subject = subject, Content = messageBody });
             var response = await client.SendEmailAsync(mail, cancellationToken);
-           
+            if(response.StatusCode != System.Net.HttpStatusCode.Accepted)
+            {
+                var error = await response.Body.ReadAsStringAsync();
+            }
         }
     }
 }
