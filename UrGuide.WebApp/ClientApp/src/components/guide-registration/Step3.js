@@ -11,266 +11,49 @@ import {
 import "./GuideRegistration.css";
 
 export function Step3(props) {
-  function handleChange(event) {
-    var file = URL.createObjectURL(event.target.files[0]);
-    var elementId = String(event.target.id);
-    elementId = elementId.substring(0, elementId.length - 2);
+  //function handleChange(event) {
+  //  var file = URL.createObjectURL(event.target.files[0]);
+  //  var elementId = String(event.target.id);
+  //  elementId = elementId.substring(0, elementId.length - 2);
 
-    document.getElementById(elementId).style.backgroundImage =
-      "url('" + file + "')";
-  }
+  //  document.getElementById(elementId).style.backgroundImage =
+  //    "url('" + file + "')";
+  //}
 
-  const firstPicGrid =
-    props.first && !props.newly ? (
-      <Grid item xs={12} sm={6} md={4}>
-        <Box>
-          <div
-            className="photo-box text-center"
-            id="pic-1"
-            onClick={e => document.getElementById("pic-1-i").click()}
-          >
-            <span>Upload an image here</span>
-            <input
-              className="input-file"
-              id="pic-1-i"
-              type="file"
-              accept=".png,.jpg"
-              onChange={handleChange}
-            />
-          </div>
-        </Box>
-        <FormHelperText error>please upload an image here.</FormHelperText>
-      </Grid>
-    ) : (
-      <Grid item xs={12} sm={6} md={4}>
-        <Box>
-          <div
-            className="photo-box text-center"
-            id="pic-1"
-            onClick={e => document.getElementById("pic-1-i").click()}
-          >
-            <span>Upload an image here</span>
-            <input
-              className="input-file"
-              id="pic-1-i"
-              type="file"
-              accept=".png,.jpg"
-              onChange={handleChange}
-            />
-          </div>
-        </Box>
-      </Grid>
-    );
 
-  const secondPicGrid =
-    props.second && !props.newly ? (
-      <Grid item xs={12} sm={6} md={4}>
-        <Box>
-          <div
-            className="photo-box text-center"
-            id="pic-2"
-            onClick={e => document.getElementById("pic-2-i").click()}
-          >
-            <span>Upload an image here</span>
-            <input
-              className="input-file"
-              id="pic-2-i"
-              type="file"
-              accept=".png,.jpg"
-              onChange={handleChange}
-            />
-          </div>
-        </Box>
-        <FormHelperText error>please upload an image here.</FormHelperText>
-      </Grid>
-    ) : (
-      <Grid item xs={12} sm={6} md={4}>
-        <Box>
-          <div
-            className="photo-box text-center"
-            id="pic-2"
-            onClick={e => document.getElementById("pic-2-i").click()}
-          >
-            <span>Upload an image here</span>
-            <input
-              className="input-file"
-              id="pic-2-i"
-              type="file"
-              accept=".png,.jpg"
-              onChange={handleChange}
-            />
-          </div>
-        </Box>
-      </Grid>
-    );
-
-  const thirdPicGrid =
-    props.third && !props.newly ? (
-      <Grid item xs={12} sm={6} md={4}>
-        <Box>
-          <div
-            className="photo-box text-center"
-            id="pic-3"
-            onClick={e => document.getElementById("pic-3-i").click()}
-          >
-            <span>Upload an image here</span>
-            <input
-              className="input-file"
-              id="pic-3-i"
-              type="file"
-              accept=".png,.jpg"
-              onChange={handleChange}
-            />
-          </div>
-        </Box>
-        <FormHelperText error>please upload an image here.</FormHelperText>
-      </Grid>
-    ) : (
-      <Grid item xs={12} sm={6} md={4}>
-        <Box>
-          <div
-            className="photo-box text-center"
-            id="pic-3"
-            onClick={e => document.getElementById("pic-3-i").click()}
-          >
-            <span>Upload an image here</span>
-            <input
-              className="input-file"
-              id="pic-3-i"
-              type="file"
-              accept=".png,.jpg"
-              onChange={handleChange}
-            />
-          </div>
-        </Box>
-      </Grid>
-    );
-
-  const fourthPicGrid =
-    props.fourth && !props.newly ? (
-      <Grid item xs={12} sm={6} md={4}>
-        <Box>
-          <div
-            className="photo-box text-center"
-            id="pic-4"
-            onClick={e => document.getElementById("pic-4-i").click()}
-          >
-            <span>Upload an image here</span>
-            <input
-              className="input-file"
-              id="pic-4-i"
-              type="file"
-              accept=".png,.jpg"
-              onChange={handleChange}
-            />
-          </div>
-        </Box>
-        <FormHelperText error>please upload an image here.</FormHelperText>
-      </Grid>
-    ) : (
-      <Grid item xs={12} sm={6} md={4}>
-        <Box>
-          <div
-            className="photo-box text-center"
-            id="pic-4"
-            onClick={e => document.getElementById("pic-4-i").click()}
-          >
-            <span>Upload an image here</span>
-            <input
-              className="input-file"
-              id="pic-4-i"
-              type="file"
-              accept=".png,.jpg"
-              onChange={handleChange}
-            />
-          </div>
-        </Box>
-      </Grid>
-    );
-
-  const fifthPicGrid =
-    props.fifth && !props.newly ? (
-      <Grid item xs={12} sm={6} md={4}>
-        <Box>
-          <div
-            className="photo-box text-center"
-            id="pic-5"
-            onClick={e => document.getElementById("pic-5-i").click()}
-          >
-            <span>Upload an image here</span>
-            <input
-              className="input-file"
-              id="pic-5-i"
-              type="file"
-              accept=".png,.jpg"
-              onChange={handleChange}
-            />
-          </div>
-        </Box>
-        <FormHelperText error>please upload an image here.</FormHelperText>
-      </Grid>
-    ) : (
-      <Grid item xs={12} sm={6} md={4}>
-        <Box>
-          <div
-            className="photo-box text-center"
-            id="pic-5"
-            onClick={e => document.getElementById("pic-5-i").click()}
-          >
-            <span>Upload an image here</span>
-            <input
-              className="input-file"
-              id="pic-5-i"
-              type="file"
-              accept=".png,.jpg"
-              onChange={handleChange}
-            />
-          </div>
-        </Box>
-      </Grid>
-    );
-
-  const sixthPicGrid =
-    props.sixth && !props.newly ? (
-      <Grid item xs={12} sm={6} md={4}>
-        <Box>
-          <div
-            className="photo-box text-center"
-            id="pic-6"
-            onClick={e => document.getElementById("pic-6-i").click()}
-          >
-            <span>Upload an image here</span>
-            <input
-              className="input-file"
-              id="pic-6-i"
-              type="file"
-              accept=".png,.jpg"
-              onChange={handleChange}
-            />
-          </div>
-        </Box>
-        <FormHelperText error>please upload an image here.</FormHelperText>
-      </Grid>
-    ) : (
-      <Grid item xs={12} sm={6} md={4}>
-        <Box>
-          <div
-            className="photo-box text-center"
-            id="pic-6"
-            onClick={e => document.getElementById("pic-6-i").click()}
-          >
-            <span>Upload an image here</span>
-            <input
-              className="input-file"
-              id="pic-6-i"
-              type="file"
-              accept=".png,.jpg"
-              onChange={handleChange}
-            />
-          </div>
-        </Box>
-      </Grid>
-    );
+    const terms = (<><Grid item xs={12}>
+        <Box mt={5}>
+            <h6>1. Lorem Ipsum is simply dummy text of the printing and typesetting industry.</h6>
+            <p>
+              Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum
+          </p>
+                </Box>
+    </Grid>
+        <Grid item xs={12}>
+            <Box mt={5}>
+                <h6>2. Lorem Ipsum is simply dummy text of the printing and typesetting industry.</h6>
+                <p>
+                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum
+          </p>
+            </Box>
+        </Grid>
+        <Grid item xs={12}>
+            <Box mt={5}>
+                <h6>3. Lorem Ipsum is simply dummy text of the printing and typesetting industry.</h6>
+                <p>
+                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum
+          </p>
+            </Box>
+        </Grid>
+        <Grid item xs={12}>
+            <Box mt={5}>
+                <h6>4. Lorem Ipsum is simply dummy text of the printing and typesetting industry.</h6>
+                <p>
+                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum
+          </p>
+            </Box>
+        </Grid>
+    </>);
 
   const consent =
     props.consent && !props.newly ? (
@@ -315,18 +98,13 @@ export function Step3(props) {
         <Box mb={5}>
           <div>
             <h6>
-              3.Now upload photos of places you'd want your guests to visit.
+              3.Before using Urguide you must carefully read our terms and policies.
             </h6>
           </div>
         </Box>
       </Grid>
       <Grid container spacing={2}>
-        {firstPicGrid}
-        {secondPicGrid}
-        {thirdPicGrid}
-        {fourthPicGrid}
-        {fifthPicGrid}
-        {sixthPicGrid}
+              {terms}
         {consent}
       </Grid>
     </Container>

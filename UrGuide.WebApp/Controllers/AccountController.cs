@@ -65,7 +65,9 @@ namespace UrGuide.WebApp.Controllers
             var newUser = new ApplicationUser
             {
                 UserName = model.UserName,
-                Email = model.UserName
+                Email = model.UserName,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
             };
             
             var result = await userManager.CreateAsync(newUser, model.Password);
@@ -74,6 +76,53 @@ namespace UrGuide.WebApp.Controllers
             {
                 var confirmationToken = await userManager.GenerateEmailConfirmationTokenAsync(newUser);
                 var url = Url.ActionLink(nameof(ConfirmEmail), "Account", new {confirmationToken, newUser.Email });
+                // send email
+                var message = $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(url)}'>clicking here</a>.";
+                await emailService.Send(newUser.Email, message, Services.EmailService.MessageTypes.Confirmation, cancellationToken).ConfigureAwait(false);
+                return Ok(returnUrl);
+            }
+            return BadRequest(ErrorEnvelop.Create(result.Errors));
+        }
+
+        [HttpPost("/newguide")]
+        public async Task<IActionResult> NewGuide([FromBody]NewGuideModel model,
+            [FromServices]Services.IEmailService emailService,
+            CancellationToken cancellationToken,
+            string returnUrl = null)
+        {
+            var userManager = SignInManager.UserManager;
+            var user = await userManager.FindByNameAsync(model.UserName);
+            if (user != null)
+            {
+                return StatusCode(StatusCodes.Status409Conflict);
+            }
+
+            var birthday = model.Birthday != null ? DateTime.Parse(model.Birthday) : DateTime.Now;
+
+            var newUser = new ApplicationUser
+            {
+                UserName = model.UserName,
+                Email = model.UserName,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                IsGuide = model.IsGuide,
+                Profile = model.Profile,
+                Gender = model.Gender,
+                Birthday = birthday,
+                Country = model.Country,
+                City = model.City,
+                PhoneNumber = model.Phone,
+                Address = model.Address,
+                Description = model.Description,
+                Date = DateTime.Now,
+            };
+
+            var result = await userManager.CreateAsync(newUser, model.Password);
+
+            if (result.Succeeded)
+            {
+                var confirmationToken = await userManager.GenerateEmailConfirmationTokenAsync(newUser);
+                var url = Url.ActionLink(nameof(ConfirmEmail), "Account", new { confirmationToken, newUser.Email });
                 // send email
                 var message = $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(url)}'>clicking here</a>.";
                 await emailService.Send(newUser.Email, message, Services.EmailService.MessageTypes.Confirmation, cancellationToken).ConfigureAwait(false);

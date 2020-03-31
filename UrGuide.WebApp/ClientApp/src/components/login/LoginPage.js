@@ -209,8 +209,8 @@ const LoginForm = () => {
                 />
             </FormControl>
             <FormHelperText error>
-                your password must contains at least 8 alpha-numeric characters.
-      </FormHelperText>
+                your password must contains minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character.
+        </FormHelperText>
         </Grid>
     ) : (
             <Grid item xs={12}>

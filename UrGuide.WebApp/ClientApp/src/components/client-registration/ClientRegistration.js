@@ -70,6 +70,7 @@ function Copyright() {
   );
 }
 
+
 const userStyles = makeStyles(theme => ({
   paper: {
     marginTop: theme.spacing(8),
@@ -90,7 +91,68 @@ const userStyles = makeStyles(theme => ({
   }
 }));
 
+
+const getReturnUrl = (state) => {
+    const params = new URLSearchParams(window.location.search);
+    const fromQuery = params.get('ReturnUrl');
+    if (fromQuery && !fromQuery.startsWith(`${window.location.origin}/`)) {
+        var url = `${window.location.origin}${fromQuery}`;
+        return url;
+    }
+    return (state && state.returnUrl) || fromQuery || `${window.location.origin}/`;
+}
+const navigateToReturnUrl = (returnUrl) => {
+    // It's important that we do a replace here so that we remove the callback uri with the
+    // fragment containing the tokens from the browser history.
+    window.location.replace(returnUrl);
+}
+
+const createUser = async function (state) {
+    const returnUrl = getReturnUrl();
+    const response = await fetch(`/register?returnUrl=${returnUrl}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            userName: state.email,
+            password: state.password,
+            firstName: state.firstName,
+            lastName: state.lastName,
+
+        
+        })
+    });
+
+    if (response.status == 200 || response.status == 304) {
+        navigateToReturnUrl(returnUrl);
+    } else {
+        // we got an error
+        if (response.status == 400) // BadRequest
+        {
+            var errors = await response.json();
+            console.log(errors);
+        } else {
+            // Account has certainly been locked-out
+        }
+    }
+}
+
+
 const ClientRegister = () => {
+
+    const [values, setValues] = React.useState({
+        firstName: '',
+        lastName: '',
+        password: '',
+        email: '',
+    });
+
+    const handleChange = prop => event => {
+        setValues({ ...values, [prop]: event.target.value });
+    };
+
   const ctx = useContext(ClientContext);
   const [state, dispatch] = useReducer(ClientReducer, ctx);
   const firstNameTextField = state.fnameError ? (
@@ -101,7 +163,9 @@ const ClientRegister = () => {
       required
       fullWidth
       id="client-fname"
-      label="First Name"
+          label="First Name"
+          value={values.firstName}
+          onChange={handleChange("firstName")}
       autoFocus
       error
       helperText="This field is required."
@@ -112,7 +176,9 @@ const ClientRegister = () => {
       name="firstName"
       variant="outlined"
       required
-      fullWidth
+              fullWidth
+              value={values.firstName}
+              onChange={handleChange("firstName")}
       id="client-fname"
       label="First Name"
       autoFocus
@@ -127,7 +193,9 @@ const ClientRegister = () => {
       required
       fullWidth
       id="client-lname"
-      label="Last Name"
+          label="Last Name"
+          value={values.lastName}
+          onChange={handleChange("lastName")}
       autoFocus
       error
       helperText="This field is required."
@@ -137,7 +205,9 @@ const ClientRegister = () => {
       autoComplete="lname"
       name="lastName"
       variant="outlined"
-      required
+              required
+              value={values.lastName}
+              onChange={handleChange("lastName")}
       fullWidth
       id="client-lname"
       label="Last Name"
@@ -153,7 +223,9 @@ const ClientRegister = () => {
       id="client-email"
       label="Email Address"
       name="email"
-      autoComplete="email"
+          autoComplete="email"
+          value={values.email}
+          onChange={handleChange("email")}
       error
       helperText="please enter a valid email address."
     />
@@ -163,7 +235,9 @@ const ClientRegister = () => {
       required
       fullWidth
       id="client-email"
-      label="Email Address"
+              label="Email Address"
+              value={values.email}
+              onChange={handleChange("email")}
       name="email"
       autoComplete="email"
     />
@@ -178,9 +252,11 @@ const ClientRegister = () => {
       label="Password"
       type="password"
       id="client-password"
-      autoComplete="current-password"
+          autoComplete="current-password"
+          value={values.password}
+          onChange={handleChange("password")}
       error
-      helperText="your password must contains at least 8 alpha-numeric characters."
+          helperText="your password must contains minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character."
     />
   ) : (
     <TextField
@@ -188,7 +264,9 @@ const ClientRegister = () => {
       required
       fullWidth
       name="password"
-      label="Password"
+              label="Password"
+              value={values.password}
+              onChange={handleChange("password")}
       type="password"
       id="client-password"
       autoComplete="current-password"
@@ -225,7 +303,8 @@ const ClientRegister = () => {
               <Checkbox
                 value="allowExtraEmails"
                 color="primary"
-                id="client-checkbox"
+                              id="client-checkbox"
+                              
               />
             }
             label="I agree with UrGuide's Terms and Conditons."
@@ -248,7 +327,8 @@ const ClientRegister = () => {
                 lastName: document.getElementById("client-lname").value,
                 email: document.getElementById("client-email").value,
                 password: document.getElementById("client-password").value,
-                isChecked: document.getElementById("client-checkbox").checked
+                  isChecked: document.getElementById("client-checkbox").checked,
+                  sendData: createUser
               }
             })
           }
@@ -261,9 +341,11 @@ const ClientRegister = () => {
 };
 
 export class ClientRegistration extends Component {
-  static displayName = ClientRegistration.name;
+    static displayName = ClientRegistration.name;
 
-  render() {
+
+    render() {
+
     return (
       <div>
         <Box mb={5}>

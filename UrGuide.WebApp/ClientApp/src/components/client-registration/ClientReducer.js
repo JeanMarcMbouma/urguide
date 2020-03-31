@@ -10,7 +10,7 @@ export default function ClientReducer(state, action) {
       context.isChecked = action.data.isChecked;
       let nameRegex = /^[^-\s][\w\s-]+$/;
       let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-      let passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+      let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
       let validfname = nameRegex.test(context.firstName);
       let validlname = nameRegex.test(context.lastName);
       let validEmail = regexEmail.test(context.email);
@@ -19,6 +19,10 @@ export default function ClientReducer(state, action) {
       context.fnameError = validfname ? false : true;
       context.lnameError = validlname ? false : true;
       context.passwordError = validpassword ? false : true;
+          if (!context.emailError && !context.fnameError && !context.lnameError && !context.passwordError && context.isChecked)
+          {
+              action.data.sendData(state);
+          }
       return context;
   }
 }
