@@ -51,10 +51,10 @@ export default function LeftBar() {
 
       const classes = useStyles();
       return(
-        <div className="col-lg-3 shadow-lg w-auto p-2 m-0 bg-white rounded">
+        <div className="col-lg-3 shadow-lg w-auto px-2 m-0 bg-white rounded">
             <div className={`col-lg-12 m-2 p-0 my-3 ${classes.text}`}><b>Top categories</b></div>
             {categories.map(category => 
-                <div className="col-lg-12 row shadow-lg w-auto p-2 m-2 mb-4 bg-white rounded">
+                <div className="col-lg-12 row shadow-lg w-auto p-2 mx-2 my-2 bg-white rounded">
                     <div className="col-lg-4">
                         <Avatar className={classes.large} src={category.href} variant="rounded"/>
                     </div>
