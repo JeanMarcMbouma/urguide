@@ -25,13 +25,33 @@ export function Step2(props) {
     var file = URL.createObjectURL(event.target.files[0]);
 
     document.getElementById("pic-previewer").style.backgroundImage =
-      "url('" + file + "')";
-  }
+          "url('" + file + "')";
+
+    }
+
+
+    const [values, setValues] = React.useState({
+        firstName: '',
+        lastName: '',
+        gender: 'Female',
+        birthday: '',
+        country: 'Afghanistan',
+        city: '',
+        phone: '',
+        address: '',
+        description: '',
+        picture:'',
+    });
+
+    const handleChangedValue = prop => event => {
+        setValues({ ...values, [prop]: event.target.value });
+    };
 
   const [selectedDate, setSelectedDate] = React.useState(new Date());
 
   const handleDateChange = date => {
-    setSelectedDate(date);
+      setSelectedDate(date);
+
   };
 
   const profilePicGrid =
@@ -89,7 +109,8 @@ export function Step2(props) {
           <InputLabel error htmlFor="input-with-icon-adornment">
             First Name
           </InputLabel>
-          <Input error id="firstName" />
+                  <Input error id="firstName" value={values.firstName}
+                      onChange={handleChangedValue("firstName")} />
         </FormControl>
         <FormHelperText error>This field is required.</FormHelperText>
       </Grid>
@@ -99,7 +120,8 @@ export function Step2(props) {
           <InputLabel htmlFor="input-with-icon-adornment">
             First Name
           </InputLabel>
-          <Input id="firstName" />
+                      <Input id="firstName" value={values.firstName}
+                          onChange={handleChangedValue("firstName")} />
         </FormControl>
       </Grid>
     );
@@ -111,7 +133,8 @@ export function Step2(props) {
           <InputLabel error htmlFor="input-with-icon-adornment">
             Last Name
           </InputLabel>
-          <Input error id="lastName" />
+                  <Input error id="lastName" value={values.lastName}
+                      onChange={handleChangedValue("lastName")}  />
         </FormControl>
         <FormHelperText error>This field is required.</FormHelperText>
       </Grid>
@@ -119,7 +142,8 @@ export function Step2(props) {
       <Grid item xs={12} sm={6}>
         <FormControl fullWidth variant="outlined">
           <InputLabel htmlFor="input-with-icon-adornment">Last Name</InputLabel>
-          <Input id="lastName" />
+                      <Input id="lastName" value={values.lastName}
+                          onChange={handleChangedValue("lastName")} />
         </FormControl>
       </Grid>
     );
@@ -135,7 +159,9 @@ export function Step2(props) {
         labelId="gender-label"
         name="gender"
         defaultValue="Female"
-        autoComplete="gender"
+              autoComplete="gender"
+              value={values.gender}
+              onChange={handleChangedValue("gender")}
       >
         <MenuItem value="Female">Female</MenuItem>
         <MenuItem value="Male">Male</MenuItem>
@@ -180,7 +206,8 @@ export function Step2(props) {
         labelId="residence-country"
         name="country"
         defaultValue="Afghanistan"
-        autoComplete="country"
+              autoComplete="country"
+            
       >
         {countriesList}
       </Select>
@@ -194,7 +221,8 @@ export function Step2(props) {
           <InputLabel error htmlFor="input-with-icon-adornment">
             City of residence
           </InputLabel>
-          <Input error id="city" />
+                  <Input error id="city" value={values.city}
+                      onChange={handleChangedValue("city")} />
         </FormControl>
         <FormHelperText error>Please enter your city.</FormHelperText>
       </Grid>
@@ -204,7 +232,8 @@ export function Step2(props) {
           <InputLabel htmlFor="input-with-icon-adornment">
             City of residence
           </InputLabel>
-          <Input id="city" />
+                      <Input id="city" value={values.city}
+                          onChange={handleChangedValue("city")} />
         </FormControl>
       </Grid>
     );
@@ -216,7 +245,8 @@ export function Step2(props) {
           <InputLabel error htmlFor="input-with-icon-adornment">
             Phone Number
           </InputLabel>
-          <Input error id="phone" />
+                  <Input error id="phone" value={values.phone}
+                      onChange={handleChangedValue("phone")} />
         </FormControl>
         <FormHelperText error>
           Please enter a valid phone number.
@@ -228,7 +258,8 @@ export function Step2(props) {
           <InputLabel htmlFor="input-with-icon-adornment">
             Phone Number
           </InputLabel>
-          <Input id="phone" />
+                      <Input id="phone" value={values.phone}
+                          onChange={handleChangedValue("phone")} />
         </FormControl>
       </Grid>
     );
@@ -240,7 +271,8 @@ export function Step2(props) {
           <InputLabel error htmlFor="input-with-icon-adornment">
             Address
           </InputLabel>
-          <Input error id="address" />
+                  <Input error id="address" value={values.address}
+                      onChange={handleChangedValue("address")} />
         </FormControl>
         <FormHelperText error>Please enter your address.</FormHelperText>
       </Grid>
@@ -248,7 +280,8 @@ export function Step2(props) {
       <Grid item xs={12} sm={6}>
         <FormControl fullWidth variant="outlined">
           <InputLabel htmlFor="input-with-icon-adornment"> Address</InputLabel>
-          <Input id="address" />
+                      <Input id="address" value={values.address}
+                          onChange={handleChangedValue("address")} />
         </FormControl>
       </Grid>
     );
@@ -260,7 +293,8 @@ export function Step2(props) {
           <InputLabel error htmlFor="input-with-icon-adornment">
             Short Description
           </InputLabel>
-          <Input error id="description" multiline rows={6} rowsMax={6} />
+                  <Input error id="description" value={values.description}
+                      onChange={handleChangedValue("description")} multiline rows={6} rowsMax={6} />
         </FormControl>
         <FormHelperText error>
           Your description must have a minimum of 100 characters and a maximum
@@ -273,7 +307,8 @@ export function Step2(props) {
           <InputLabel htmlFor="input-with-icon-adornment">
             Short Description
           </InputLabel>
-          <Input id="description" multiline rows={6} rowsMax={6} />
+                      <Input id="description" value={values.description}
+                          onChange={handleChangedValue("description")} multiline rows={6} rowsMax={6} />
         </FormControl>
       </Grid>
     );

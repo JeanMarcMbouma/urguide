@@ -4,7 +4,7 @@ export default function GuideReducer(state, action) {
   let context = { ...state };
   context.step = action.data.step;
   let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  let passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+  let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
   let nameRegex = /^[^-\s][\w\s-]+$/;
   //step1
   context.email = action.data.email;
@@ -14,6 +14,7 @@ export default function GuideReducer(state, action) {
   context.firstName = action.data.firstName;
   context.lastName = action.data.lastName;
   context.profilePic = action.data.profilePic;
+  context.picture = action.data.picture;
   context.gender = action.data.gender;
   context.birthday = action.data.birthday;
   context.country = action.data.country;
@@ -22,12 +23,6 @@ export default function GuideReducer(state, action) {
   context.phone = action.data.phone;
   context.description = action.data.description;
   //step3
-  context.picture1 = action.data.picture1;
-  context.picture2 = action.data.picture2;
-  context.picture3 = action.data.picture3;
-  context.picture4 = action.data.picture4;
-  context.picture5 = action.data.picture5;
-  context.picture6 = action.data.picture6;
   context.isChecked = action.data.isChecked;
   var description = String(context.description);
 
@@ -64,12 +59,6 @@ export default function GuideReducer(state, action) {
     isDescriptionGotProperLength && validdesrcription ? false : true;
 
   //step3
-  context.pic1Error = action.data.picture1 != 0 ? false : true;
-  context.pic2Error = action.data.picture2 != 0 ? false : true;
-  context.pic3Error = action.data.picture3 != 0 ? false : true;
-  context.pic4Error = action.data.picture4 != 0 ? false : true;
-  context.pic5Error = action.data.picture5 != 0 ? false : true;
-  context.pic6Error = action.data.picture6 != 0 ? false : true;
   context.isChecked = action.data.isChecked ? false : true;
 
   switch (action.type) {
@@ -115,18 +104,14 @@ export default function GuideReducer(state, action) {
     case "submit":
       context.newly =
         context.step === 2 &&
-        !context.pic1Error &&
-        !context.pic2Error &&
-        !context.pic3Error &&
-        !context.pic4Error &&
-        !context.pic5Error &&
-        !context.pic6Error &&
         !context.isChecked
           ? true
           : false;
-      if (context.newly) {
-        alert("data sent!"); //send data here.
-        return context;
+          if (context.newly) {
+              action.data.sendData(state);
+
+              return context;
+
       } else {
         return context;
       }
