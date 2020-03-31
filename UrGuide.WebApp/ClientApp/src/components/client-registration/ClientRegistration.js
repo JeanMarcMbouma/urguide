@@ -133,7 +133,7 @@ const createUser = async function (state) {
     });
 
     if (response.status == 200 || response.status == 304) {
-        navigateToReturnUrl(returnUrl);
+        navigateToReturnUrl(`${window.location.origin}/sign-up-confirm`);
     } else {
         // we got an error
         if (response.status == 400) // BadRequest
