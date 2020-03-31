@@ -8,6 +8,10 @@ const useStyles = makeStyles(theme => ({
       width: theme.spacing(6.8),
       height: theme.spacing(11),
     },
+    text: {
+        textTransform:'uppercase',
+        fontSize:'12px',
+    }
   }));
 
 export default function LeftBar() {
@@ -47,17 +51,17 @@ export default function LeftBar() {
 
       const classes = useStyles();
     return(
-        <div className="col-lg-3 shadow-lg p-2 m-1 bg-white rounded">
-            <Typography variant="h5" className="m-1" component="p">Top categories</Typography>
+        <div className="col-lg-3 shadow-lg w-auto px-2 m-0 bg-white rounded">
+            <div className={`col-lg-12 m-2 p-0 my-3 ${classes.text}`}><b>Top categories</b></div>
             {categories.map(category => 
-                <div className="col-lg-12 row shadow-lg p-2 m-1bg-white rounded">
+                <div className="col-lg-12 row shadow-lg w-auto p-2 mx-2 my-2 bg-white rounded">
                     <div className="col-lg-4">
                         <Avatar className={classes.large} src={category.href} variant="rounded"/>
                     </div>
                     <div className="col-lg-8">
-                        <Typography variant="h6" component="p">{category.name}</Typography>
-                        <Typography variant="subtitle1" color="textSecondary" component="p">{category.current} excursions</Typography>
-                    </div>
+                         <Typography variant="h6" component="p">{category.name}</Typography>
+                         <Typography variant="subtitle1" color="textSecondary" component="p">{category.current} excursions</Typography>
+                   </div>
                 </div>
                 )}
         </div>

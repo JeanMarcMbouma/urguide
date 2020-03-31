@@ -7,7 +7,7 @@ import Popular from './LeftSidebar/Popular';
 export default function Home () {
   return (
     <div className="container-fluid">
-      <div className='row col-12'>
+      <div className='row col-12 mb-2'>
         <Header />
         <LeftBar />
         <CentralBar />

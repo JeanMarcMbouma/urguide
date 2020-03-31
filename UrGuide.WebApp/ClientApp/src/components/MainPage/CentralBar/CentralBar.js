@@ -54,7 +54,6 @@ export default function CentralBar() {
         name:"Excursion around Cherkassy",
         description:"I will show you this beautiful town",
         price:"250",
-        photo:"https://images.pexels.com/photos/3442567/pexels-photo-3442567.jpeg?cs=srgb&dl=aerial-photo-of-a-city-3442567.jpg&fm=jpg",
         category:"mix",
         currentHuman:"12",
         LimitHuman:"30",
@@ -67,7 +66,6 @@ export default function CentralBar() {
         description:"I will show you the biggest football field in Kyiv",
         category:"sport",
         price:"450",
-        photo:"https://images.pexels.com/photos/2787267/pexels-photo-2787267.jpeg?cs=srgb&dl=vehicles-on-road-beside-sea-2787267.jpg&fm=jpg",
         currentHuman:"9",
         LimitHuman:"30",
         author:"Lena",
@@ -81,16 +79,11 @@ export default function CentralBar() {
             {posts.map(post =>
                 <Card className="shadow-lg p-3 mb-3 bg-white rounded">
                     <CardHeader
-                        avatar={<Avatar alt="profile photo" src={post.profilePhoto} />}
-                        title={post.author}
-                        subheader={post.dateStart}/>
-                    <CardMedia
-                        image={post.photo}
-                        title="Paella dish"
-                    />
+                        avatar={<Avatar alt="profile photo" src={post.profilePhoto} />} 
+                        title={<Typography variant="body1" component="p">{post.author} | {post.name} | {post.category}</ Typography>}
+                        subheader={post.dateStart}
+                        />
                     <CardContent>
-                        <Typography variant="h6" component="p">{post.name}</Typography>
-                        <Typography variant="subtitle1" color="textSecondary" component="p">{post.category}</Typography>
                         <Typography variant="subtitle1" component="p">{post.description}</Typography>
                     </CardContent>
                     <CardActions className="d-flex justify-content-around">
