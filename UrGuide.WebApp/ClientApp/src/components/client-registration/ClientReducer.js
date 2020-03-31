@@ -6,7 +6,8 @@ export default function ClientReducer(state, action) {
       context.firstName = action.data.firstName;
       context.lastName = action.data.lastName;
       context.email = action.data.email;
-      context.password = action.data.password;
+          context.password = action.data.password;
+          context.confirmPassword = action.data.confirmPassword;
       context.isChecked = action.data.isChecked;
       let nameRegex = /^[^-\s][\w\s-]+$/;
       let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -18,8 +19,10 @@ export default function ClientReducer(state, action) {
       context.emailError = validEmail ? false : true;
       context.fnameError = validfname ? false : true;
       context.lnameError = validlname ? false : true;
-      context.passwordError = validpassword ? false : true;
-          if (!context.emailError && !context.fnameError && !context.lnameError && !context.passwordError && context.isChecked)
+          context.passwordError = validpassword ? false : true;
+          context.passwordsDontMatch =
+              context.confirmPassword === context.password ? false : true;
+          if (!context.emailError && !context.fnameError && !context.lnameError && !context.passwordError && !context.passwordsDontMatch && context.isChecked )
           {
               action.data.sendData(state);
           }

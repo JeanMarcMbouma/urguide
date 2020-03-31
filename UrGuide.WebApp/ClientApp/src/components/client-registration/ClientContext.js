@@ -5,10 +5,12 @@ const ClientContext = createContext({
   lastName: null,
   email: null,
   password: null,
+  confirmPassword: null,
   fnameError: false,
   lnameError: false,
   emailError: false,
-  passwordError: false,
+    passwordError: false,
+    passwordsDontMatch: false,
   isChecked: true
 });
 
