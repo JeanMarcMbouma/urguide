@@ -137,7 +137,7 @@ namespace UrGuide.WebApp.Controllers
             var user = await userManager.FindByEmailAsync(email);
             var result = await userManager.ConfirmEmailAsync(user, confirmationToken);
             if(result.Succeeded)
-                return Ok();
+                return Redirect("/email-confirmed");
             return Forbid();
         }
 

@@ -13,6 +13,7 @@ import Home from "./components/MainPage/Home"
 import AuthorizeRoute from "./components/api-authorization/AuthorizeRoute";
 import ApiAuthorizationRoutes from "./components/api-authorization/ApiAuthorizationRoutes";
 import { ApplicationPaths } from './components/api-authorization/ApiAuthorizationConstants';
+import EmailConfirmation from './components/confirmation/EmailConfirmation';
 
 export default class App extends Component {
     static displayName = App.name;
@@ -26,6 +27,7 @@ export default class App extends Component {
                 token: null
             }}>
                 <Switch>
+                    <Route exact path="/email-confirmed" component={EmailConfirmation}></Route>
                     <Route path={ApplicationPaths.ApiAuthorizationPrefix} component={ApiAuthorizationRoutes} />
                     <Route exact path={["/sign-in"]}>
                         <LoginLayout>
