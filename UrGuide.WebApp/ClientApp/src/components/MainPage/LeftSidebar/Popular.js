@@ -8,7 +8,13 @@ const useStyles = makeStyles (theme => ({
     color: '#FF7B77',
     fontSize: '12px',
     textTransform: 'uppercase',
-
+    marginLeft:'65px'
+  },
+  more:{
+    color: '#FF7B77',
+    fontSize: '12px',
+    textTransform: 'uppercase',
+    marginLeft:'93px'
   },
   title: {
     fontSize: '12px',
@@ -61,21 +67,21 @@ const Popular = props => {
   ));
 
   return (
-    <div className="col-lg-3">
-      <div className="col-lg-12 row p-0 mb-3 mt-3">
-        <div className={`col-lg-8 font-weight-bold ${classes.title}`}>
+    <div className="col-lg-3 bg-white rounded shadow-lg">
+      <div className="d-lg-flex p-0 mb-3 mt-3">
+        <div className={`font-weight-bold ${classes.title}`}>
           Popular posts
         </div>
-        <div className={`col-lg-4 font-weight-bold text-right ${classes.btn}`}>
+        <div className={`font-weight-bold ${classes.more}`}>
           More
         </div>
       </div>
       <div>{postsElement}</div>
-      <div className="col-lg-12 row p-0 mb-3 mt-3">
-        <div className={`col-lg-10 font-weight-bold ${classes.title}`}>
+      <div className="d-lg-flex p-0 mb-3 mt-3">
+        <div className={`font-weight-bold ${classes.title}`}>
           Friends Suggestions
         </div>
-        <div className={`col-lg-2 font-weight-bold text-right ${classes.btn}`}>
+        <div className={`font-weight-bold ${classes.btn}`}>
           All
         </div>
       </div>
