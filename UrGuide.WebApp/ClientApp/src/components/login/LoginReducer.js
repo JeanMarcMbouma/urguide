@@ -7,12 +7,16 @@ export default function LoginReducer(state, action) {
             context.password = action.data.password;
             context.isRemembered = action.data.isRemembered;
             let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-            let passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+            let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
             let validEmail = regexEmail.test(context.email);
             let validpassword = passwordRegex.test(context.password);
             context.emailError = validEmail ? false : true;
             context.passwordError = validpassword ? false : true;
-            action.data.callback(context);
+            if (validEmail && validpassword)
+            {
+                action.data.callback(context);
+            }
+            
             return context;
     }
 }

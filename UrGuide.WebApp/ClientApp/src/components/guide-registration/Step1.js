@@ -38,9 +38,10 @@ const useStyles = makeStyles(theme => ({
 export function Step1(props) {
   const classes = useStyles();
 
-  const [values, setValues] = React.useState({
-    amount: "",
-    password: "",
+    const [values, setValues] = React.useState({
+      email: '',
+      password: '',
+      confirmPassword:'',
     weight: "",
     weightRange: "",
     showPassword: false
@@ -71,7 +72,9 @@ export function Step1(props) {
           </InputLabel>
           <Input
             error
-            id="guide-email"
+                      id="guide-email"
+                      value={values.email}
+                      onChange={handleChange("email")}
             endAdornment={
               <InputAdornment position="start">
                 <AccountCircle />
@@ -94,7 +97,9 @@ export function Step1(props) {
             Your email
           </InputLabel>
           <Input
-            id="guide-email"
+                          id="guide-email"
+                          value={values.email}
+                          onChange={handleChange("email")}
             endAdornment={
               <InputAdornment position="start">
                 <AccountCircle />
@@ -120,8 +125,9 @@ export function Step1(props) {
           <Input
             id="guide-password"
             error
-            type={values.showPassword ? "text" : "password"}
-            onChange={handleChange("password")}
+                      type={values.showPassword ? "text" : "password"}
+                      value={values.password}
+                      onChange={handleChange("password")}
             endAdornment={
               <InputAdornment position="end">
                 <IconButton
@@ -136,7 +142,7 @@ export function Step1(props) {
           />
         </FormControl>
         <FormHelperText error>
-          your password must contains at least 8 alpha-numeric characters.
+          your password must contains minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character.
         </FormHelperText>
       </Grid>
     ) : (
@@ -153,7 +159,8 @@ export function Step1(props) {
           <Input
             id="guide-password"
             type={values.showPassword ? "text" : "password"}
-            onChange={handleChange("password")}
+                          onChange={handleChange("password")}
+                          value={values.password}
             endAdornment={
               <InputAdornment position="end">
                 <IconButton
@@ -185,7 +192,9 @@ export function Step1(props) {
             id="confirm-password"
             error
             type={values.showPassword ? "text" : "password"}
-            onChange={handleChange("password")}
+                      onChange={handleChange("confirmPassword")}
+                      value={values.confirmPassword}
+     
             endAdornment={
               <InputAdornment position="end">
                 <IconButton
@@ -216,7 +225,8 @@ export function Step1(props) {
           <Input
             id="confirm-password"
             type={values.showPassword ? "text" : "password"}
-            onChange={handleChange("password")}
+                          onChange={handleChange("confirmPassword")}
+                          value={values.confirmPassword}
             endAdornment={
               <InputAdornment position="end">
                 <IconButton

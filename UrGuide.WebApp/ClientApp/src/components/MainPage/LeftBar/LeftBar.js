@@ -50,7 +50,7 @@ export default function LeftBar() {
     ]
 
       const classes = useStyles();
-      return(
+    return(
         <div className="col-lg-3 shadow-lg w-auto px-2 m-0 bg-white rounded">
             <div className={`col-lg-12 m-2 p-0 my-3 ${classes.text}`}><b>Top categories</b></div>
             {categories.map(category => 

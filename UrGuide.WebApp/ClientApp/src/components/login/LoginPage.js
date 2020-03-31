@@ -106,6 +106,7 @@ const LoginForm = () => {
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'include',
             body: JSON.stringify({
                 userName: state.email,
                 password: state.password,
@@ -115,6 +116,15 @@ const LoginForm = () => {
         });
         if (response.status == 200 || response.status == 304) {
             navigateToReturnUrl(returnUrl);
+        } else {
+            // we got an error
+            if (response.status == 400) // BadRequest
+            {
+                var errors = await response.json();
+                console.log(errors);
+            } else {
+                // Account has certainly been locked-out
+            }
         }
     }
 
@@ -199,8 +209,8 @@ const LoginForm = () => {
                 />
             </FormControl>
             <FormHelperText error>
-                your password must contains at least 8 alpha-numeric characters.
-      </FormHelperText>
+                your password must contains minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character.
+        </FormHelperText>
         </Grid>
     ) : (
             <Grid item xs={12}>

@@ -45,7 +45,7 @@ const stepperStyles = makeStyles(theme => ({
 }));
 
 function getSteps() {
-  return ["Login Details", "Personal Informations", "Setup Gallery"];
+  return ["Login Details", "Personal Informations", "Terms & Policies"];
 }
 
 function getStepContent(stepIndex, state) {
@@ -73,15 +73,11 @@ function getStepContent(stepIndex, state) {
             />
           </div>
           <div className="not-active">
-            <Step3
-              first={state.pic1Error}
-              second={state.pic2Error}
-              third={state.pic3Error}
-              fourth={state.pic4Error}
-              fifth={state.pic5Error}
-              sixth={state.pic6Error}
-              consent={state.isChecked}
-            />
+                  <Step3
+
+                      consent={state.isChecked}
+                      newly={state.newly}
+                  />
           </div>
         </div>
       );
@@ -112,12 +108,7 @@ function getStepContent(stepIndex, state) {
           </div>
           <div className="not-active">
             <Step3
-              first={state.pic1Error}
-              second={state.pic2Error}
-              third={state.pic3Error}
-              fourth={state.pic4Error}
-              fifth={state.pic5Error}
-              sixth={state.pic6Error}
+     
               consent={state.isChecked}
               newly={state.newly}
             />
@@ -149,16 +140,11 @@ function getStepContent(stepIndex, state) {
             />
           </div>
           <div className="active">
-            <Step3
-              first={state.pic1Error}
-              second={state.pic2Error}
-              third={state.pic3Error}
-              fourth={state.pic4Error}
-              fifth={state.pic5Error}
-              sixth={state.pic6Error}
-              consent={state.isChecked}
-              newly={state.newly}
-            />
+                  <Step3
+
+                      consent={state.isChecked}
+                      newly={state.newly}
+                  />
           </div>
         </div>
       );
@@ -178,6 +164,69 @@ function getStepContent(stepIndex, state) {
       );
   }
 }
+
+
+const getReturnUrl = (state) => {
+    const params = new URLSearchParams(window.location.search);
+    const fromQuery = params.get('ReturnUrl');
+    if (fromQuery && !fromQuery.startsWith(`${window.location.origin}/`)) {
+        var url = `${window.location.origin}${fromQuery}`;
+        return url;
+    }
+    return (state && state.returnUrl) || fromQuery || `${window.location.origin}/`;
+}
+const navigateToReturnUrl = (returnUrl) => {
+    // It's important that we do a replace here so that we remove the callback uri with the
+    // fragment containing the tokens from the browser history.
+    window.location.replace(returnUrl);
+}
+
+
+
+const createGuide = async function (state) {
+
+    const date = state.birthday;
+    const birthday = date.toString();
+    const returnUrl = getReturnUrl() + "sign-in";
+    const response = await fetch(`/newguide?returnUrl=${returnUrl}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            userName: state.email,
+            password: state.password,
+            confirmPassword: state.confirmPassword,
+            firstName: state.firstName,
+            lastName: state.lastName,
+            birthday: birthday,
+            profile: URL.createObjectURL(state.picture),
+            gender: state.gender,
+            country: state.country,
+            city: state.city,
+            address: state.address,
+            phone: state.phone,
+            description: state.description,
+            isguide:true,
+
+        })
+    });
+
+    if (response.status == 200 || response.status == 304) {
+        navigateToReturnUrl(returnUrl);
+    } else {
+        // we got an error
+        if (response.status == 400) // BadRequest
+        {
+            var errors = await response.json();
+            console.log(errors);
+        } else {
+            // Account has certainly been locked-out
+        }
+    }
+}
+
 
 const userStyles = makeStyles(theme => ({
   paper: {
@@ -227,30 +276,26 @@ function Context() {
               confirmPassword: document.getElementById("confirm-password")
                 .value,
               profilePic: document.getElementById("profile-pic-input").files
-                .length,
+                    .length,
+                picture: document.getElementById("profile-pic-input").files[0],
               firstName: document.getElementById("firstName").value,
               lastName: document.getElementById("lastName").value,
-              gender: document.getElementById("gender").value,
+                gender: document.getElementsByName("gender")[0].value,
               birthday: document.getElementById("date-picker-inline").value,
-              country: document.getElementById("country").value,
+                country: document.getElementsByName("country")[0].value,
               city: document.getElementById("city").value,
               phone: document.getElementById("phone").value,
               address: document.getElementById("address").value,
               description: document.getElementById("description").value,
-              picture1: document.getElementById("pic-1-i").files.length,
-              picture2: document.getElementById("pic-2-i").files.length,
-              picture3: document.getElementById("pic-3-i").files.length,
-              picture4: document.getElementById("pic-4-i").files.length,
-              picture5: document.getElementById("pic-5-i").files.length,
-              picture6: document.getElementById("pic-6-i").files.length,
               isChecked: document.getElementById("guide-checkbox").checked,
-              step: activeStep
+                step: activeStep,
+               
             }
           })
         }
         className={stepperStyles.backButton}
-      >
-        Go Back
+          >
+              Go Back
       </Button>
     ) : (
       <span></span>
@@ -272,24 +317,20 @@ function Context() {
               confirmPassword: document.getElementById("confirm-password")
                 .value,
               profilePic: document.getElementById("profile-pic-input").files
-                .length,
+                    .length,
+                picture: document.getElementById("profile-pic-input").files[0],
               firstName: document.getElementById("firstName").value,
               lastName: document.getElementById("lastName").value,
-              gender: document.getElementById("gender").value,
-              birthday: document.getElementById("date-picker-inline").value,
-              country: document.getElementById("country").value,
+                gender: document.getElementsByName("gender")[0].value,
+                birthday: document.getElementById("date-picker-inline").value,
+                country: document.getElementsByName("country")[0].value,
               city: document.getElementById("city").value,
               phone: document.getElementById("phone").value,
               address: document.getElementById("address").value,
               description: document.getElementById("description").value,
-              picture1: document.getElementById("pic-1-i").files.length,
-              picture2: document.getElementById("pic-2-i").files.length,
-              picture3: document.getElementById("pic-3-i").files.length,
-              picture4: document.getElementById("pic-4-i").files.length,
-              picture5: document.getElementById("pic-5-i").files.length,
-              picture6: document.getElementById("pic-6-i").files.length,
               isChecked: document.getElementById("guide-checkbox").checked,
-              step: activeStep
+                step: activeStep,
+                sendData: createGuide
             }
           })
         }
@@ -308,24 +349,20 @@ function Context() {
             email: document.getElementById("guide-email").value,
             password: document.getElementById("guide-password").value,
             confirmPassword: document.getElementById("confirm-password").value,
-            profilePic: document.getElementById("profile-pic-input").files.length,
+              profilePic: document.getElementById("profile-pic-input").files.length,
+              picture: document.getElementById("profile-pic-input").files[0],
             firstName: document.getElementById("firstName").value,
             lastName: document.getElementById("lastName").value,
-            gender: document.getElementById("gender").value,
-            birthday: document.getElementById("date-picker-inline").value,
-            country: document.getElementById("country").value,
+              gender: document.getElementsByName("gender")[0].value,
+              birthday: document.getElementById("date-picker-inline").value,
+              country: document.getElementsByName("country")[0].value,
             city: document.getElementById("city").value,
             phone: document.getElementById("phone").value,
             address: document.getElementById("address").value,
             description: document.getElementById("description").value,
-            picture1: document.getElementById("pic-1-i").files.length,
-            picture2: document.getElementById("pic-2-i").files.length,
-            picture3: document.getElementById("pic-3-i").files.length,
-            picture4: document.getElementById("pic-4-i").files.length,
-            picture5: document.getElementById("pic-5-i").files.length,
-            picture6: document.getElementById("pic-6-i").files.length,
             isChecked: document.getElementById("guide-checkbox").checked,
-            step: activeStep
+            step: activeStep,
+           
           }
         })}
       >
@@ -348,7 +385,7 @@ function Context() {
         <Container maxWidth={maxWidth}>
           <Box mt={4} mb={4}>
             {getStepContent(activeStep, state)}
-          </Box>
+                  </Box>
           <Box ml={3}>
             {BackButton}
             {NextButton}
@@ -364,7 +401,7 @@ export class GuideRegistration extends Component {
 
   render() {
     return (
-      <Box mb={18}>
+        <Box mb={18}>
         <form className={userStyles.form} noValidate>
           <Context />
         </form>
