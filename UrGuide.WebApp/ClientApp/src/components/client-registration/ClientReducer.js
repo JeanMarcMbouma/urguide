@@ -24,7 +24,7 @@ export default function ClientReducer(state, action) {
               context.confirmPassword === context.password ? false : true;
           if (!context.emailError && !context.fnameError && !context.lnameError && !context.passwordError && !context.passwordsDontMatch && context.isChecked )
           {
-              action.data.sendData(state);
+              action.data.sendData(context);
           }
       return context;
   }
