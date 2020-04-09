@@ -1,22 +1,11 @@
 ﻿import React from "react";
 import {
-    Grid,
-    Box,
     makeStyles,
-    FormHelperText,
-    IconButton,
-    Input,
-    InputLabel,
-    InputAdornment,
-    FormControl,
-    Container,
-    CssBaseline,
     Button
 } from "@material-ui/core";
 import Rating from '@material-ui/lab/Rating';
 import EditIcon from '@material-ui/icons/Edit';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import clsx from "clsx";
 import "./UserStyle.css";
 
 const useStyles = makeStyles((theme) => ({

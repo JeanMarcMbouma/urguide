@@ -83,8 +83,8 @@ export default function CentralBar() {
                         <span>Want to write a new post ?</span>
                     </div>
                 </div>
-                {posts.map(post =>
-                    <div className="p-3 mb-3 bg-white rounded post-card">
+                {posts.map((post, i) =>
+                    <div key={i} className="p-3 mb-3 bg-white rounded post-card">
                         <CardHeader
                             avatar={<Avatar alt="profile photo" src={post.profilePhoto} />}
                             title={<Typography variant="body1" component="p">{post.author} | {post.name} | {post.category}</ Typography>}

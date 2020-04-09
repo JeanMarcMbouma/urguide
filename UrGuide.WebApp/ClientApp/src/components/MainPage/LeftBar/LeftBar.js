@@ -45,8 +45,8 @@ export default function LeftBar() {
     return(
         <div className="col-lg-3 w-auto px-2 m-0 leftbar">
             <div className={`col-lg-12 m-2 p-0 my-3 ${classes.text}`}><b>Top categories</b></div>
-            {categories.map(category => 
-                <div className="col-lg-12 row w-auto p-2 mx-2 my-2 mb-4">
+            {categories.map((category, i) => 
+                <div key={i} className="col-lg-12 row w-auto p-2 mx-2 my-2 mb-4">
                     <div className="col-lg-6">
                         <Avatar className={classes.large} src={category.href} variant="rounded"/>
                     </div>

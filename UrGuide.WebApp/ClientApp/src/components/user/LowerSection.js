@@ -1,35 +1,14 @@
 ﻿import React from "react";
 import {
-    Grid,
-    Box,
     makeStyles,
-    FormHelperText,
     IconButton,
-    Input,
-    InputLabel,
-    InputAdornment,
-    FormControl,
-    Container,
-    Card,
     Button
 } from "@material-ui/core";
-import Rating from '@material-ui/lab/Rating';
-import clsx from "clsx";
 import "./UserStyle.css";
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import LocationOnIcon from '@material-ui/icons/LocationOn';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        display: 'flex',
-        flexDirection: 'column',
-        '& > * + *': {
-            marginTop: theme.spacing(1),
-        },
-
-    }
-}));
 
 
 const buttonStyles = makeStyles(theme => ({
@@ -126,7 +105,6 @@ function GalleryCard() {
 
 export function LowerSection() {
 
-    const classes = buttonStyles();
 
     return (
         <div>
