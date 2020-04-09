@@ -7,6 +7,7 @@ import { Profile } from "./components/profile/Profile";
 import { RegisterLayout } from "./components/RegisterLayout";
 import { ClientRegistration } from "./components/client-registration/ClientRegistration";
 import { GuideRegistration } from "./components/guide-registration/GuideRegistration";
+import { UserProfile } from "./components/user/UserProfile";
 import { Layout } from "./components/Layout";
 import UserContext from './UserContext';
 import Home from "./components/MainPage/Home"
@@ -44,8 +45,8 @@ export default class App extends Component {
                         </RegisterLayout>
                     </Route>
                     <Layout>
-                        <AuthorizeRoute path="/" component={Home} />
-                        <AuthorizeRoute path="/profile" component={Profile} />
+                        <AuthorizeRoute path="/user" component={UserProfile} />
+                        <AuthorizeRoute path="/feed" component={Home} />
                     </Layout>
                 </Switch>
             </UserContext.Provider>

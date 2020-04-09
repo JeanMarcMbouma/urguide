@@ -1,0 +1,20 @@
+﻿
+.copyright-div{
+    margin-top:15px;
+    font-weight:300;
+    font-size:15px;
+    color:#808080;
+}
+.rightbar {
+    position:fixed;
+    right: 20px;
+    top: 80px;
+    height:100%;
+}
+
+
+@media only screen and (max-width: 576px) {
+    .rightbar {
+        display: none;
+    }
+}

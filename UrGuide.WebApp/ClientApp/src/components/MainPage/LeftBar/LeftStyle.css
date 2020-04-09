@@ -1,0 +1,12 @@
+﻿.leftbar {
+    position: fixed;
+    left: 20px;
+    top: 80px;
+}
+
+@media only screen and (max-width: 990px) {
+    .leftbar {
+        display: none;
+    }
+}
+

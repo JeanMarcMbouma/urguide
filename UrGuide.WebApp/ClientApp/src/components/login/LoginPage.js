@@ -114,7 +114,7 @@ const LoginForm = () => {
                 returnUrl
             })
         });
-        if (response.status == 200 || response.status == 304) {
+        if (response.status == 200 || response.status == 304 || response.status == 204) {
             navigateToReturnUrl(returnUrl);
         } else {
             // we got an error

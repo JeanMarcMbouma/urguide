@@ -1,12 +1,14 @@
 import React from 'react'
 import Avatar from '@material-ui/core/Avatar';
+import Card from '@material-ui/core/Card';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import './LeftStyle.css';
 
 const useStyles = makeStyles(theme => ({
     large: {
-      width: theme.spacing(6.8),
-      height: theme.spacing(11),
+      width: '100%',//theme.spacing(6.8),
+      height: '80px',
     },
     text: {
         textTransform:'uppercase',
@@ -28,19 +30,9 @@ export default function LeftBar() {
             current: "183"
         },
         {
-            name:"Fun",
-            href:"https://images.pexels.com/photos/433452/pexels-photo-433452.jpeg?cs=srgb&dl=action-adults-celebration-clouds-433452.jpg&fm=jpg",
-            current: "13"
-        },
-        {
             name:"Child",
             href:"https://images.pexels.com/photos/298825/pexels-photo-298825.jpeg?cs=srgb&dl=wood-people-creative-hand-298825.jpg&fm=jpg",
             current: "33"
-        },
-        {
-            name:"Mix",
-            href:"https://images.pexels.com/photos/3225528/pexels-photo-3225528.jpeg?cs=srgb&dl=colorful-cliffside-village-3225528.jpg&fm=jpg",
-            current: "70"
         },
         {
             name:"Nature",
@@ -51,14 +43,14 @@ export default function LeftBar() {
 
       const classes = useStyles();
     return(
-        <div className="col-lg-3 shadow-lg w-auto px-2 m-0 bg-white rounded">
+        <div className="col-lg-3 w-auto px-2 m-0 leftbar">
             <div className={`col-lg-12 m-2 p-0 my-3 ${classes.text}`}><b>Top categories</b></div>
             {categories.map(category => 
-                <div className="col-lg-12 row shadow-lg w-auto p-2 mx-2 my-2 bg-white rounded">
-                    <div className="col-lg-4">
+                <div className="col-lg-12 row w-auto p-2 mx-2 my-2 mb-4">
+                    <div className="col-lg-6">
                         <Avatar className={classes.large} src={category.href} variant="rounded"/>
                     </div>
-                    <div className="col-lg-8">
+                    <div className="col-lg-6">
                          <Typography variant="h6" component="p">{category.name}</Typography>
                          <Typography variant="subtitle1" color="textSecondary" component="p">{category.current} excursions</Typography>
                    </div>

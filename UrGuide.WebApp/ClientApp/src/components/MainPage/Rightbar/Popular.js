@@ -2,24 +2,34 @@ import React from 'react';
 import Posts from './Posts/Posts';
 import Friends from './FriendsSuggestion/Friends';
 import {makeStyles} from '@material-ui/core';
+import './RightStyle.css';
 
 const useStyles = makeStyles (theme => ({
   btn: {
     color: '#FF7B77',
     fontSize: '12px',
     textTransform: 'uppercase',
-    marginLeft:'65px'
+    marginLeft:'10px'
   },
   more:{
     color: '#FF7B77',
     fontSize: '12px',
     textTransform: 'uppercase',
     marginLeft:'93px'
-  },
+    },
+    suggestions: {
+     marginTop:'20px',
+    },
   title: {
     fontSize: '12px',
     textTransform:'uppercase'
-  },
+    },
+    popular: {
+        backgroundColor: '#f7f8fa',
+        height: '100%',
+        width: 'auto',
+        paddingBottom:'30px'
+    }
 }));
 
 const Popular = props => {
@@ -37,12 +47,6 @@ const Popular = props => {
       title: 'Shannen Dohart shares updata on her...',
       description: 'This some description about the post title',
     },
-    {
-      id: 3,
-      href: 'https://cdn4.vectorstock.com/i/1000x1000/42/83/avatar-social-media-isolated-icon-design-vector-10704283.jpg',
-      title: 'Lawmaker.Border wall threaters',
-      description: 'This some description about the post title',
-    },
   ];
   let friends = [
     {
@@ -56,7 +60,7 @@ const Popular = props => {
       href: 'https://www.clipartmax.com/png/middle/257-2572603_user-man-social-avatar-profile-icon-man-avatar-in-circle.png',
       name: 'Digby Martins',
       email: '@martins',
-    },
+      },
   ];
 
   let friendsElement = friends.map (f => (
@@ -64,28 +68,39 @@ const Popular = props => {
   ));
   let postsElement = posts.map (p => (
     <Posts href={p.href} title={p.title} description={p.description} />
-  ));
+  )); 
 
   return (
-    <div className="col-lg-3 bg-white rounded shadow-lg">
-      <div className="d-lg-flex p-0 mb-3 mt-3">
-        <div className={`font-weight-bold ${classes.title}`}>
-          Popular posts
+      <div className={`col-sm-5 col-md-5 col-lg-3 col-xl-3 rounded rightbar ${classes.popular}`} >
+          <div>
+              <div className="d-lg-flex p-0 mb-3 mt-3">
+                  <div className={`font-weight-bold ${classes.title}`}>
+                      Popular posts
         </div>
-        <div className={`font-weight-bold ${classes.more}`}>
-          More
+                  <div className={`font-weight-bold ${classes.more}`}>
+                      MORE
         </div>
-      </div>
-      <div>{postsElement}</div>
-      <div className="d-lg-flex p-0 mb-3 mt-3">
-        <div className={`font-weight-bold ${classes.title}`}>
-          Friends Suggestions
-        </div>
-        <div className={`font-weight-bold ${classes.btn}`}>
-          All
-        </div>
-      </div>
-      {friendsElement}
+              </div>
+              <div>{postsElement}</div>
+              <div className={classes.suggestions} >
+                  <div className="d-lg-flex p-0 mb-3 mt-3">
+                      <div className={`font-weight-bold ${classes.title}`}>
+                          Friends Suggestions
+                </div>
+                  </div>
+                  <div>
+                      {friendsElement}
+                  </div>
+                  <div className={`font-weight-bold ${classes.btn}`}>
+                      SEE MORE
+                  </div>
+           </div>
+          </div>
+          <div className='copyright-div'>
+              <span>Terms - Conditions - Cookies</span>
+              <br />
+              <span>&copy; Urguide 2020</span>
+          </div>
     </div>
   );
 };
