@@ -1,6 +1,7 @@
 import React from 'react'
 import { Component } from 'react';
 import authService from './AuthorizeService';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { AuthenticationResultStatus } from './AuthorizeService';
 import { LoginActions, QueryParameterNames, ApplicationPaths } from './ApiAuthorizationConstants';
 
@@ -51,7 +52,7 @@ export class Login extends Component {
         } else {
             switch (action) {
                 case LoginActions.Login:
-                    return (<div>Processing login</div>);
+                    return (<div><CircularProgress /></div>);
                 case LoginActions.LoginCallback:
                     return (<div>Processing login callback</div>);
                 case LoginActions.Profile:
