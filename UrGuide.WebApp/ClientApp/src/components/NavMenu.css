@@ -16,3 +16,60 @@ html {
 .box-shadow {
   box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
 }
+
+.content {
+    /*background-color: #f9faff;*/
+    background-color: #f7f8fa;
+    padding-top: 80px;
+}
+
+.navigation-bar {
+    /*padding:15px 0px 0px 0px;*/
+    background-color: white;
+    -webkit-box-shadow: 1px 5px 6px -5px rgba(219,219,219,1);
+    -moz-box-shadow: 1px 5px 6px -5px rgba(219,219,219,1);
+    box-shadow: 1px 5px 6px -5px rgba(219,219,219,1);
+    border-bottom: 1px solid #dedede;
+    margin-bottom: 30px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 5;
+}
+
+.navbarRow {
+    padding-top: 8px;
+    height: 65px;
+    margin-bottom:0px;
+  
+}
+
+.left-div {
+    height: 40px;
+}
+
+.centered-div {
+    height: 40px;
+
+}
+
+
+.right-div {
+    height: 40px;
+}
+.username{
+    padding-top:16px;
+}
+
+@media only screen and (max-width: 768px) {
+    .username {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 588px) {
+    .centered-div {
+        display: none;
+    }
+}
+

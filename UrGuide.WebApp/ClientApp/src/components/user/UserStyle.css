@@ -1,0 +1,122 @@
+﻿
+.user-page-container {
+    margin-top: 20px;
+}
+
+.avatar-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 55px;
+}
+
+.avatar {
+  height: 100px;
+  width: 100px;
+  border-radius: 100px;
+  /* border: 4px solid #d3d3d3; */
+  padding: 0px;
+   background-color: #d3d3d3;
+  background-image: url("../../images/avatar.png");
+  background-size: cover;
+  background-position: center center;
+}
+
+.rating-and-reviews {
+    margin-top: -30px;
+
+}
+
+.reviews {
+    margin-top: 4px;
+ 
+    font-size: 15px;
+}
+
+.nav-btn-div {
+    margin-top: 130px;
+    margin-right: 5px;
+}
+/*.edit-profile-btn {
+    margin-right: 20px;
+}
+.new-gallery-btn{
+    margin:10px;
+}*/
+
+.lower-section {
+    margin-top: 15px;
+}
+
+.about-card {
+    height: auto;
+    font-size: 14px;
+    background-color: white;
+    padding: 20px 8px 12px 18px;
+    border-radius: 2px;
+    margin: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+}
+
+.gallery-card {
+    height: auto;
+    background-color: white;
+    padding: 20px 35px 20px 35px;
+    border-radius: 2px;
+    /*margin-bottom: 20px;*/
+    margin: 5px;
+    margin-bottom:30px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+}
+
+
+.btn-title {
+    margin-left: 8px;
+    font-size: 14px !important;
+}
+
+.photo-div{
+
+    padding:8px;
+    margin-bottom:4px;
+}
+.location{
+    font-size:20px;
+    font-weight:300;
+    color:#acacac;
+}
+.date {
+    font-size: 15px;
+    font-weight: 300;
+    color: #acacac;
+}
+.photo {
+    height: 180px;
+    width: 100%;
+    background-color: #e8e8e8;
+}
+@media only screen and (max-width: 993px) {
+   
+
+    .about {
+        margin-bottom: 20px;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .nav-btn-div {
+        margin-top: 50px;
+        margin-right: 5px;
+    }
+
+    
+}
+
+
+
+

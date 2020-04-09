@@ -1,5 +1,5 @@
 import React from 'react';
-import {Avatar} from '@material-ui/core';
+import {Avatar, Card} from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import {makeStyles} from '@material-ui/core/styles';
 
@@ -17,7 +17,7 @@ const useStyles = makeStyles (theme => ({
 const Posts = props => {
   const classes = useStyles ();
   return (
-    <div className="col-lg-12 shadow-lg bg-white rounded p-2 mb-2">
+    <Card className="col-lg-12 bg-white rounded p-2 mb-2">
       <div className="media p-0">
         <Avatar className="mr-3" src={props.href} alt="profile photo" />
         <div className="media-body">
@@ -38,7 +38,7 @@ const Posts = props => {
         </Typography>
         <div className={`font-weight-bold text-right ${classes.btn}`}>Read</div>
       </div>
-    </div>
+      </Card>
   );
 };
 

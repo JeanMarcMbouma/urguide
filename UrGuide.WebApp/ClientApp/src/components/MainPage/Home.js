@@ -1,19 +1,17 @@
 import React from 'react';
 import LeftBar from './LeftBar/LeftBar';
 import CentralBar from './CentralBar/CentralBar';
-import Header from './Header';
-import Popular from './LeftSidebar/Popular';
+import Popular from './Rightbar/Popular';
+import './Home.css';
 
-export default function Home () {
-  return (
-    <div className="container-fluid">
-      <div className='row col-12 mb-2'>
-        <Header />
-        <LeftBar />
-        <CentralBar />
-        <Popular />
-      </div>
-      {/* RightBar */}
-    </div>
+export default function Home() {
+    return (
+        <div className='home-content'>
+            <div className='row justify-content-between'>
+                <LeftBar />
+                <CentralBar />
+                <Popular />
+            </div>
+        </div>
   );
 }
