@@ -14,6 +14,7 @@ import CardMedia from '@material-ui/core/CardMedia';
 import TextField from '@material-ui/core/TextField';
 import ChatIcon from '@material-ui/icons/Chat';
 import PropTypes from 'prop-types';
+import './CentralStyle.css';
 import { withStyles } from '@material-ui/core/styles';
 
 const styles = {
@@ -75,29 +76,36 @@ export default function CentralBar() {
     ]
     
     return (
-        <div className="col-lg-6">
-            {posts.map(post =>
-                <Card className="shadow-lg p-3 mb-3 bg-white rounded">
-                    <CardHeader
-                        avatar={<Avatar alt="profile photo" src={post.profilePhoto} />} 
-                        title={<Typography variant="body1" component="p">{post.author} | {post.name} | {post.category}</ Typography>}
-                        subheader={post.dateStart}
+        <div className="col-12 col-sm-7 col-md-7 col-lg-6 col-xl-5 timeline">
+            <div className='container'>
+                <div className="p-3 mb-3 bg-white rounded new-post-card" >
+                    <div className='new-post-btn' >
+                        <span>Want to write a new post ?</span>
+                    </div>
+                </div>
+                {posts.map((post, i) =>
+                    <div key={i} className="p-3 mb-3 bg-white rounded post-card">
+                        <CardHeader
+                            avatar={<Avatar alt="profile photo" src={post.profilePhoto} />}
+                            title={<Typography variant="body1" component="p">{post.author} | {post.name} | {post.category}</ Typography>}
+                            subheader={post.dateStart}
                         />
-                    <CardContent>
-                        <Typography variant="subtitle1" component="p">{post.description}</Typography>
-                    </CardContent>
-                    <CardActions className="d-flex justify-content-around">
-                        <IconButton aria-label="share">
-                            <ShareIcon />
-                        </IconButton>
-                        <IconButton>
-                            <ChatIcon />
-                        </IconButton>
-                        <ButtonP color="red">for {post.price}</ButtonP>
-                        <ButtonP color="blue">{`${post.currentHuman}/${post.LimitHuman}`}</ButtonP>
-                    </CardActions>
-                </Card>
-            )}
+                        <CardContent>
+                            <Typography variant="subtitle1" component="p">{post.description}</Typography>
+                        </CardContent>
+                        <CardActions className="d-flex justify-content-around">
+                            <IconButton aria-label="share">
+                                <ShareIcon />
+                            </IconButton>
+                            <IconButton>
+                                <ChatIcon />
+                            </IconButton>
+                            <ButtonP color="red">for {post.price}</ButtonP>
+                            <ButtonP color="blue">{`${post.currentHuman}/${post.LimitHuman}`}</ButtonP>
+                        </CardActions>
+                    </div>
+                )}
+            </div>
         </div>
     )
 }
