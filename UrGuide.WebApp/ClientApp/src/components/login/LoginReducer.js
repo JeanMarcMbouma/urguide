@@ -1,3 +1,46 @@
+
+const navigateToReturnUrl = (returnUrl) => {
+    // It's important that we do a replace here so that we remove the callback uri with the
+    // fragment containing the tokens from the browser history.
+    window.location.replace(returnUrl);
+}
+
+async function login(state) {
+
+    
+    const returnUrl = state.returnUrl;
+    const response = await fetch('/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            userName: state.email,
+            password: state.password,
+            persist: state.isRemembered,
+            returnUrl
+        })
+    });
+    if (response.status == 200 || response.status == 304 || response.status == 204) {
+
+        navigateToReturnUrl(returnUrl);
+    }
+    else
+    {
+        // we got an error
+        if (response.status == 400) // BadRequest
+        {
+          
+            return response;
+
+        }
+
+   
+    }
+
+}
+
 export default function LoginReducer(state, action) {
     let context = { ...state };
 
@@ -6,15 +49,26 @@ export default function LoginReducer(state, action) {
             context.email = action.data.email;
             context.password = action.data.password;
             context.isRemembered = action.data.isRemembered;
+            context.returnUrl = action.data.returnUrl
             let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
             let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
             let validEmail = regexEmail.test(context.email);
             let validpassword = passwordRegex.test(context.password);
             context.emailError = validEmail ? false : true;
             context.passwordError = validpassword ? false : true;
+            context.passwordErrorMessage = context.passwordError ? "your password must contains minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character." : '';
             if (validEmail && validpassword)
             {
-                action.data.callback(context);
+               // action.data.callback(context);
+               
+
+                const response = login(context);
+
+                if (response)
+                {
+
+                    context.LoginFailed = 'Invalid login attempt.';
+                }
             }
             
             return context;

@@ -1,4 +1,6 @@
-import React, { useReducer, useContext } from "react";
+import React, {
+    useReducer, useContext, Component
+} from "react";
 import {
     Grid,
     Box,
@@ -99,34 +101,40 @@ const LoginForm = () => {
         // fragment containing the tokens from the browser history.
         window.location.replace(returnUrl);
     }
-    const login = async function (state) {
-        const returnUrl = getReturnUrl();
-        const response = await fetch('/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-                userName: state.email,
-                password: state.password,
-                persist: state.isRemembered,
-                returnUrl
-            })
-        });
-        if (response.status == 200 || response.status == 304 || response.status == 204) {
-            navigateToReturnUrl(returnUrl);
-        } else {
-            // we got an error
-            if (response.status == 400) // BadRequest
-            {
-                var errors = await response.json();
-                console.log(errors);
-            } else {
-                // Account has certainly been locked-out
-            }
-        }
-    }
+    //const login = async function (state) {
+    //    const returnUrl = getReturnUrl();
+    //    const response = await fetch('/login', {
+    //        method: 'POST',
+    //        headers: {
+    //            'Content-Type': 'application/json',
+    //        },
+    //        credentials: 'include',
+    //        body: JSON.stringify({
+    //            userName: state.email,
+    //            password: state.password,
+    //            persist: state.isRemembered,
+    //            returnUrl
+    //        })
+    //    });
+    //    if (response.status == 200 || response.status == 304 || response.status == 204) {
+    //        navigateToReturnUrl(returnUrl);
+    //    } else {
+    //        // we got an error
+    //        if (response.status == 400) // BadRequest
+    //        {
+    //            var errors = await response.json();
+    //            console.log(errors);
+
+    //            state.passwordError = "Invalid email address or password.";
+    //        }
+    //        else
+    //        {
+    //            // Account has certainly been locked-out
+    //        }
+    //    }
+    //}
+
+    const LoginFailedWarning = (<span className='text-danger'>{state.LoginFailed}</span>);
 
     const emailTextField = state.emailError ? (
         <Grid item xs={12}>
@@ -209,7 +217,7 @@ const LoginForm = () => {
                 />
             </FormControl>
             <FormHelperText error>
-                your password must contains minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character.
+                {state.passwordErrorMessage}
         </FormHelperText>
         </Grid>
     ) : (
@@ -245,6 +253,9 @@ const LoginForm = () => {
 
     return (
         <>
+            {LoginFailedWarning}
+            <br />
+            <br/>
             {emailTextField}
             {passwordTextField}
             <Grid item xs={12}>
@@ -268,7 +279,8 @@ const LoginForm = () => {
                                     email: values.email,
                                     password: values.password,
                                     isRemembered: document.getElementById("remember-me").checked,
-                                    callback: login
+                                    //callback: login
+                                    returnUrl: getReturnUrl(),
                                 }
                             })
                         }
@@ -280,55 +292,59 @@ const LoginForm = () => {
         </>
     );
 };
-export function LoginPage() {
-    return (
-        <div className="wrapper">
-            <Grid container component="main" className={useStyles.root}>
-                <CssBaseline />
-                <Grid item xs={false} sm={4} md={7} className="back-img"></Grid>
-                <Grid
-                    item
-                    xs={12}
-                    sm={8}
-                    md={5}
-                    component={Paper}
-                    className="login-side"
-                    elevation={0}
-                    square
-                >
-                    <div className="login-paper">
-                        <div className="login-avatar-wrapper">
-                            <div className="login-avatar"></div>
-                        </div>
-                        <Typography component="h1" variant="h5" className="text-center">
-                            Sign in
-            </Typography>
-                        <form className="login-form" noValidate>
-                            <Container component="main" maxWidth="xs">
-                                <CssBaseline />
-                                <Grid container spacing={2}>
-                                    <LoginForm />
-                                    <Grid item xs={12} className="bottom-form" container>
-                                        <Grid item xs>
-                                            <Link href="#" variant="body2">
-                                                Forgot password?
+export class LoginPage extends Component  {
+
+
+    render() {
+        return (
+            <div className="wrapper">
+                <Grid container component="main" className={useStyles.root}>
+                    <CssBaseline />
+                    <Grid item xs={false} sm={4} md={7} className="back-img"></Grid>
+                    <Grid
+                        item
+                        xs={12}
+                        sm={8}
+                        md={5}
+                        component={Paper}
+                        className="login-side"
+                        elevation={0}
+                        square
+                    >
+                        <div className="login-paper">
+                            <Typography component="h1" variant="h5" className="text-center">
+                                Sign in
+                            </Typography>
+                            <form className="login-form" noValidate>
+                                
+                                <Container component="main" maxWidth="xs">
+                                    <CssBaseline />
+                                    <br />
+                                    <br />
+                                    <Grid container spacing={2}>
+                                        <LoginForm />
+                                        <Grid item xs={12} className="bottom-form" container>
+                                            <Grid item xs>
+                                                <Link href="#" variant="body2">
+                                                    Forgot password?
                       </Link>
-                                        </Grid>
-                                        <Grid item>
-                                            <Link href="/sign-up" variant="body2">
-                                                {"Don't have an account? Sign Up"}
-                                            </Link>
+                                            </Grid>
+                                            <Grid item>
+                                                <Link href="/sign-up" variant="body2">
+                                                    {"Don't have an account? Sign Up"}
+                                                </Link>
+                                            </Grid>
                                         </Grid>
                                     </Grid>
-                                </Grid>
-                            </Container>
-                            <Box mt={5}>
-                                <Copyright />
-                            </Box>
-                        </form>
-                    </div>
+                                </Container>
+                                <Box mt={5}>
+                                    <Copyright />
+                                </Box>
+                            </form>
+                        </div>
+                    </Grid>
                 </Grid>
-            </Grid>
-        </div>
-    );
+            </div>
+        );
+    }
 }
