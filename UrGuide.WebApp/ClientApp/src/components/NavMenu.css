@@ -4,6 +4,7 @@
   word-break: break-all;
 }
 
+
 html {
   font-size: 14px;
 }
@@ -21,6 +22,7 @@ html {
     /*background-color: #f9faff;*/
     background-color: #f7f8fa;
     padding-top: 80px;
+    z-index:-1;
 }
 
 .navigation-bar {
@@ -34,7 +36,7 @@ html {
     position: fixed;
     top: 0;
     width: 100%;
-    z-index: 5;
+    z-index:1;
 }
 
 .navbarRow {

@@ -33,7 +33,7 @@ namespace UrGuide.WebApp.Controllers
             var result = await SignInManager.PasswordSignInAsync(model.UserName, model.Password, model.Persist, true);
             if (!result.Succeeded)
             {
-                return BadRequest(ErrorEnvelop.Create(new[]{"Bad login details"}));
+                return BadRequest(ErrorEnvelop.Create(new[]{"Invalid email address or password."}));
             }
             if (result.IsLockedOut)
             {
@@ -44,8 +44,9 @@ namespace UrGuide.WebApp.Controllers
                 
             }
             await HttpContext.SignInAsync(user.Id, user.UserName);
-            if(Url.IsLocalUrl(returnUrl) || Interaction.IsValidReturnUrl(returnUrl))
-                return LocalRedirect(returnUrl);
+           // if(Url.IsLocalUrl(returnUrl) || Interaction.IsValidReturnUrl(returnUrl))
+           // return LocalRedirect(returnUrl);
+            
             return Ok(returnUrl);
         }
 
