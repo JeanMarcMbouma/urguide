@@ -1,8 +1,8 @@
 import React from 'react'
 import { Component } from 'react';
 import authService from './AuthorizeService';
+import Loader from './loader';
 import { AuthenticationResultStatus } from './AuthorizeService';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { QueryParameterNames, LogoutActions, ApplicationPaths } from './ApiAuthorizationConstants';
 
 // The main responsibility of this component is to handle the user's logout process.
@@ -54,7 +54,7 @@ export class Logout extends Component {
             const action = this.props.action;
             switch (action) {
                 case LogoutActions.Logout:
-                    return (<div><CircularProgress /></div>);
+                    return (<Loader />);
                 case LogoutActions.LogoutCallback:
                     return (<div>Processing logout callback</div>);
                 case LogoutActions.LoggedOut:
