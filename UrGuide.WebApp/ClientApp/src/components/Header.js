@@ -47,10 +47,10 @@ const Header = () => {
         <nav className='navigation-bar'>
             <div className="container-fluid" >
                 <div className="row justify-content-between navbarRow">
-                    <div className="col-2">
+                    <div className="col-8 col-sm-2 col-md-2 col-lg-2 ">
                         <NavbarBrand tag={Link} to="/" className={(classes.font)}>UrGuide</NavbarBrand>
                     </div>
-                    <div className="col-8 col-sm-6 col-md-6 col-lg-5 centered-div"  >
+                    <div className="col-7 col-sm-6 col-md-6 col-lg-5 centered-div"  >
                         <div className='row justify-content-center'>
                             <div className='col-3 col-md-3 col-lg-2 mid-1'>
                                 <Link to="/">
@@ -79,7 +79,7 @@ const Header = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="col-5 col-sm-3 col-md-3 right-div">
+                    <div className="col-3 col-sm-3 col-md-3 right-div">
                         <div className='row justify-content-center'>
                             <Link to="/user">
                                 <div className='col-6 col-sm-6 col-md-3'>
