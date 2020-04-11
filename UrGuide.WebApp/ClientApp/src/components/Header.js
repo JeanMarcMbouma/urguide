@@ -47,7 +47,7 @@ const Header = () => {
         <nav className='navigation-bar'>
             <div className="container-fluid" >
                 <div className="row justify-content-between navbarRow">
-                    <div className="col-2">
+                    <div className="col-6 col-sm-3 col-lg-3">
                         <NavbarBrand tag={Link} to="/" className={(classes.font)}>UrGuide</NavbarBrand>
                     </div>
                     <div className="col-8 col-sm-6 col-md-6 col-lg-5 centered-div"  >
@@ -79,20 +79,20 @@ const Header = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="col-5 col-sm-3 col-md-3 right-div">
-                        <div className='row justify-content-center'>
+                    <div className="col-6 col-sm-3 col-md-3 right-div">
+                        <div className='row justify-content-start'>
                             <Link to="/user">
-                                <div className='col-6 col-sm-6 col-md-3'>
+                                <div className='col-3 col-sm-6 col-md-3'>
                                     <IconButton className={classes.avatarButton}>
                                         <Avatar className={(classes.avatar)} src='https://img.favpng.com/20/5/24/social-media-computer-icons-avatar-user-internet-png-favpng-DwdFSAXdR58nGmLe4y67jEej0.jpg' />
                                     </IconButton>
                                 </div>
                             </Link>
 
-                            <div className='col-md-5 username'>
+                            <div className='col-4 col-md-3 col-lg-4 username'>
                                 <span>MrIhor</span>
                             </div>
-                            <div className=' col-6 col-sm-6 col-md-3' >
+                            <div className='col-3 col-sm-3 col-md-2' >
                                 <IconButton>
                                     <NotificationsNoneOutlinedIcon />
                                 </IconButton>

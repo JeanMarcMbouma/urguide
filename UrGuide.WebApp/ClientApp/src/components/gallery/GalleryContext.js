@@ -1,0 +1,19 @@
+﻿import React, { createContext } from "react";
+
+var data = new Array();
+
+const GalleryContext = createContext({
+    title: null,
+    location: null,
+    description: null,
+    titleError: false,
+    locationError: false,
+    descriptionError: false,
+    files: data,
+    currentFile: null,
+    idToRemove: 0,
+    emptyGalleryMessage:'',
+   
+});
+
+export default GalleryContext;

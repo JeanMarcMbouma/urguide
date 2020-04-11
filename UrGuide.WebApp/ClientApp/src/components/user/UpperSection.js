@@ -1,7 +1,9 @@
 ﻿import React from "react";
 import {
     makeStyles,
-    Button
+    Button,
+    Link,
+    IconButton
 } from "@material-ui/core";
 import Rating from '@material-ui/lab/Rating';
 import EditIcon from '@material-ui/icons/Edit';
@@ -74,7 +76,9 @@ export function UpperSection() {
                     <div className="nav-btn-div">
                         <div className={classes.root} >
                             <Button variant="contained" color="default"><EditIcon fontSize="small" /> <span className='btn-title'>Edit profile</span></Button>
-                            <Button variant="contained" color="default" ><AddCircleIcon fontSize="small" /> <span className='btn-title'>New gallery</span></Button>
+                            <Link style={{ textDecoration:`none` }} href="/gallery/new" color="primary">
+                                    <AddCircleIcon fontSize="small" /> Create new gallery
+                               </Link>
                             </div>
                     </div>
                   
