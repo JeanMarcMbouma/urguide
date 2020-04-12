@@ -9,7 +9,7 @@ namespace UrGuide.WebApp.Models
     {
         public long Id { get; set; }
 
-        public string Photo { get; set; }
+        public string FilePath { get; set; }
 
         public bool HasPost { get; set; }
 
@@ -18,5 +18,7 @@ namespace UrGuide.WebApp.Models
         public long PostId { get; set; }
 
         public string UserId { get; set; }
+
+        public string Description { get; set; }
     }
 }

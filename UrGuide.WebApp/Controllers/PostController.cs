@@ -15,11 +15,11 @@ namespace UrGuide.WebApp.Controllers
     
     [ApiController]
     [Route("[controller]")]
-    public class PostsController : ControllerBase
+    public class PostController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public PostsController(ApplicationDbContext context)
+        public PostController(ApplicationDbContext context)
         {
             _context = context;
         }
@@ -58,7 +58,7 @@ namespace UrGuide.WebApp.Controllers
 
             foreach (var shot in model.Photos)
             {
-                Shot img = new Shot { Photo = shot, HasPost = true, PostId = post.Id, UserId = user.Id };
+                Shot img = new Shot { FilePath = shot, HasPost = true, PostId = post.Id, UserId = user.Id };
 
                 _context.Shots_Table.Add(img);
                 await _context.SaveChangesAsync();

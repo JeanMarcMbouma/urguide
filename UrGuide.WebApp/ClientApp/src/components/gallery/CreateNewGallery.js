@@ -13,6 +13,24 @@ import "./Gallery.css";
 
 function Gallery() {
 
+    const [values, setValues] = React.useState({
+        gallery1: '',
+        gallery2: '',
+        gallery3: '',
+        gallery4: '',
+        gallery5: '',
+        gallery6: '',
+        gallery7: '',
+        gallery8: '',
+        gallery9: '',
+        gallery10: '',
+    });
+
+    const handleChangeValue = prop => event => {
+        setValues({ ...values, [prop]: event.target.value });
+
+        document.getElementById(`${prop}`).value = event.target.value;
+    };
 
     const ctx = useContext(GalleryContext);
     const [state, dispatch] = useReducer(GalleryReducer, ctx);
@@ -28,10 +46,19 @@ function Gallery() {
             id: data.length,
             href: file,
             description: '',
-            name:`gallery-${data.length}`
+            name:`gallery${data.length}`
         };
 
         document.getElementById('data-sender').click();
+
+    }
+
+    function handledescription(index, name) {
+
+        if (state.files.length > 0) {
+
+            state.files[index].description = document.getElementById(`${name}`).value;
+        }
 
     }
     
@@ -56,7 +83,7 @@ function Gallery() {
                     </div>
                 </div>
                 <div className="card-body">
-                    <TextField id={f.name} fullWidth label="Description (optional)"  variant="outlined"  multiline rows={4} rowsMax={4} />
+                    <TextField id={f.name} onChange={e => handledescription(f.id, f.name)}  fullWidth label="Description (optional)"  variant="outlined"  multiline rows={4} rowsMax={4} />
                 </div>
             </div>
         </div>

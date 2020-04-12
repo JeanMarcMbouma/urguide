@@ -1,7 +1,6 @@
 
 const navigateToReturnUrl = (returnUrl) => {
-    // It's important that we do a replace here so that we remove the callback uri with the
-    // fragment containing the tokens from the browser history.
+
     window.location.replace(returnUrl);
 }
 
@@ -31,8 +30,12 @@ async function login(state) {
         // we got an error
         if (response.status == 400) // BadRequest
         {
+
           
+
             return response;
+
+
 
         }
 
@@ -59,10 +62,10 @@ export default function LoginReducer(state, action) {
             context.passwordErrorMessage = context.passwordError ? "your password must contains minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character." : '';
             if (validEmail && validpassword)
             {
-               // action.data.callback(context);
-               
-
+              
                 const response = login(context);
+
+                console.log(response);
 
                 if (response)
                 {
