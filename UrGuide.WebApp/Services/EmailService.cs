@@ -34,7 +34,7 @@ namespace UrGuide.WebApp.Services
             var apiKey = Environment.GetEnvironmentVariable("SENDGRID_URGUIDE_API_KEY");
             
             var client = new SendGrid.SendGridClient(apiKey);
-            var mail = MailHelper.CreateSingleEmail(new EmailAddress("noreply@urguide.org", "UrGuide"), new EmailAddress(email), subject, messageBody, messageBody);
+            var mail = MailHelper.CreateSingleEmail(new EmailAddress("noreply@urguide.org", "UrGuide"), new EmailAddress(email), subject, null, messageBody);
             mail.TemplateId = "d-eee7f1abc3a94f13a49ab087f6268be5";
             mail.SetTemplateData(new { Subject = subject, Content = messageBody });
             var response = await client.SendEmailAsync(mail, cancellationToken);

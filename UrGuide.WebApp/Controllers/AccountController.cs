@@ -76,7 +76,7 @@ namespace UrGuide.WebApp.Controllers
             if (result.Succeeded)
             {
                 var confirmationToken = await userManager.GenerateEmailConfirmationTokenAsync(newUser);
-                var url = Url.ActionLink(nameof(ConfirmEmail), "Account", new {confirmationToken, newUser.Email });
+                var url = Url.ActionLink(nameof(ConfirmEmail), "Account", new { confirmationToken, email = newUser.Email });
                 // send email
                 var message = $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(url)}'>clicking here</a>.";
                 await emailService.Send(newUser.Email, message, Services.EmailService.MessageTypes.Confirmation, cancellationToken).ConfigureAwait(false);
