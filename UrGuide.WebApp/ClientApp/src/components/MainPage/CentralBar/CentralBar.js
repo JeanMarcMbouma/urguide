@@ -41,19 +41,21 @@ const styles = {
       height: 30,
       padding: '0 30px',
     },
-  };  
+};
 
-  function ButtonInPosts(props) {
+
+function ButtonInPosts(props) {
     const { classes, color, ...other } = props;
     return <Button className={classes.root} {...other} />;
-  }
+};
   
-  ButtonInPosts.propTypes = {
+ButtonInPosts.propTypes = {
     classes: PropTypes.object.isRequired,
     color: PropTypes.oneOf(['blue', 'red']).isRequired,
-  };
+};
 
-  const ButtonP = withStyles(styles)(ButtonInPosts);
+
+const ButtonP = withStyles(styles)(ButtonInPosts);
 
 export default function CentralBar() {
 
