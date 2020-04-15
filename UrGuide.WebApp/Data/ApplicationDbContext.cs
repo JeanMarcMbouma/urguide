@@ -13,5 +13,11 @@ namespace UrGuide.WebApp.Data
             IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
         {
         }
+
+        public DbSet<Post> Posts_Table { get; set; }
+
+        public DbSet<Gallery> Galleries_Table { get; set; }
+
+        public DbSet<Shot> Shots_Table { get; set; }
     }
 }

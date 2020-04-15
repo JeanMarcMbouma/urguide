@@ -33,7 +33,7 @@ namespace UrGuide.WebApp.Controllers
             var result = await SignInManager.PasswordSignInAsync(model.UserName, model.Password, model.Persist, true);
             if (!result.Succeeded)
             {
-                return BadRequest(ErrorEnvelop.Create(new[]{"Bad login details"}));
+                return BadRequest(ErrorEnvelop.Create(new[]{"Invalid email address or password."}));
             }
             if (result.IsLockedOut)
             {
@@ -44,8 +44,9 @@ namespace UrGuide.WebApp.Controllers
                 
             }
             await HttpContext.SignInAsync(user.Id, user.UserName);
-            if(Url.IsLocalUrl(returnUrl) || Interaction.IsValidReturnUrl(returnUrl))
-                return LocalRedirect(returnUrl);
+           // if(Url.IsLocalUrl(returnUrl) || Interaction.IsValidReturnUrl(returnUrl))
+           // return LocalRedirect(returnUrl);
+            
             return Ok(returnUrl);
         }
 
@@ -75,9 +76,10 @@ namespace UrGuide.WebApp.Controllers
             if (result.Succeeded)
             {
                 var confirmationToken = await userManager.GenerateEmailConfirmationTokenAsync(newUser);
-                var url = Url.ActionLink(nameof(ConfirmEmail), "Account", new {confirmationToken, newUser.Email });
+                var url = Url.ActionLink(nameof(ConfirmEmail), "Account", new { confirmationToken, email = newUser.Email });
                 // send email
-                var message = $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(url)}'>clicking here</a>.";
+                var link = $"<a href='{url}'>clicking here</a>";
+                var message = $"Please confirm your account by {HtmlEncoder.Default.Encode(link)}.";
                 await emailService.Send(newUser.Email, message, Services.EmailService.MessageTypes.Confirmation, cancellationToken).ConfigureAwait(false);
                 return Ok(returnUrl);
             }
@@ -124,7 +126,7 @@ namespace UrGuide.WebApp.Controllers
                 var confirmationToken = await userManager.GenerateEmailConfirmationTokenAsync(newUser);
                 var url = Url.ActionLink(nameof(ConfirmEmail), "Account", new { confirmationToken, newUser.Email });
                 // send email
-                var message = $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(url)}'>clicking here</a>.";
+                var message = $"Please confirm your account by <a href='{url}'>clicking here</a>.";
                 await emailService.Send(newUser.Email, message, Services.EmailService.MessageTypes.Confirmation, cancellationToken).ConfigureAwait(false);
                 return Ok(returnUrl);
             }
