@@ -6,7 +6,8 @@ const AddPhoto = () => {
   const ctx = useContext (AddPhotoContext);
   const [state, dispatch] = useReducer (AddPhotoReducer, ctx);
   var currentFile = null;
-
+  const fileInput = React.createRef();
+  const dataSender = React.createRef();
   let data = state.files;
 
   function handleChange (event) {
@@ -19,7 +20,7 @@ const AddPhoto = () => {
       name: `gallery-${data.length}`,
     };
 
-    document.getElementById ('data-sender').click ();
+    dataSender.current.click ();
   }
 
   return (
@@ -27,12 +28,14 @@ const AddPhoto = () => {
       <input
         type="file"
         className="input-file"
+        ref={fileInput}
         id="file-init"
         accept=".png,.jpg"
         onChange={handleChange}
       />
       <button
-        id="data-sender"
+        disabled={state.files.length>=3}
+        ref={dataSender}
         className="input-file"
         onClick={() =>
           dispatch ({
@@ -48,7 +51,7 @@ const AddPhoto = () => {
         fullWidth
         variant="contained"
         color="default"
-        onClick={e => document.getElementById ('file-init').click ()}
+        onClick={e => fileInput.current.click()}
       >
         <PhotoLibraryIcon />
         <span>UPLOAD PHOTOS OR VIDEOS</span>
