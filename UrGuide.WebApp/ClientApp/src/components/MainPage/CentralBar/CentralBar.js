@@ -26,6 +26,7 @@ import './CentralStyle.css';
 import {withStyles} from '@material-ui/core/styles';
 import AddPhoto, {PhotoX} from './../../AddPhoto/AddPhoto';
 import AddPhotoContext from './../../AddPhoto/AddPhotoContext';
+
 const styles = {
   root: {
     background: props =>
