@@ -43,7 +43,12 @@ namespace UrGuide.WebApp.Controllers
             if(result.RequiresTwoFactor) {
                 
             }
-            await HttpContext.SignInAsync(user.Id, user.UserName);
+
+            var claims = new System.Security.Claims.Claim []{
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.FirstName)
+            };
+            
+            await HttpContext.SignInAsync(user.Id, user.UserName, claims);
            // if(Url.IsLocalUrl(returnUrl) || Interaction.IsValidReturnUrl(returnUrl))
            // return LocalRedirect(returnUrl);
             

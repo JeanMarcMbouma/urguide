@@ -25,7 +25,6 @@ import { Visibility, VisibilityOff, AccountCircle } from "@material-ui/icons";
 import LoginContext from "./LoginContext";
 import LoginReducer from "./LoginReducer";
 import "./LoginPage.css";
-import Login from './../api-authorization/Login'
 
 import {  QueryParameterNames } from './../api-authorization/ApiAuthorizationConstants';
 
