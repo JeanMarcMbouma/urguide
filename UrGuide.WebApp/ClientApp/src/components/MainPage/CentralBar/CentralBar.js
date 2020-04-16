@@ -71,16 +71,17 @@ const ButtonP = withStyles (styles) (ButtonInPosts);
 export default function CentralBar () {
   const user = useContext (UserContext);
   const uploadButton = React.createRef ();
+  const [ViewPostCreating, setViewPostCreating] = useState (false);
 
   const [context, setContext] = React.useState ({
     files: [],
     currentFile: null,
   });
 
-  const update = files => {
-    setContext ({files});
+  const update = ctx => {
+    setContext ({...ctx});
   };
-  
+
   let posts = [
     {
       name: 'Excursion around Cherkassy',
@@ -177,28 +178,21 @@ export default function CentralBar () {
   }
 
   function ViewPost () {
-    const [ViewPostCreating, setViewPostCreating] = useState ('button');
-
-    if (ViewPostCreating === 'button') {
-      return (
-        <div
-          onClick={() => setViewPostCreating ('post')}
-          className={`col-lg-12 p-3 mb-3 bg-white rounded new-post-card`}
+    
+    return !ViewPostCreating 
+      ? <div className={`col-lg-12 p-3 mb-3 bg-white rounded new-post-card`}
         >
-          <div className="new-post-btn">
+          <div className="new-post-btn"  onClick={() => setViewPostCreating (true)}>
             <span>Want to write a new post ?</span>
           </div>
         </div>
-      );
-    } else {
-      return (
-        <div
+      : <div
           className={`col-lg-12 p-3 mb-3 bg-white rounded shadow-lg bg-white rounded`}
         >
           <div className="col-lg-12 d-flex justify-content-between">
             <Typography variant="h5">Create your post!</Typography>
             <ButtonP
-              onClick={() => setViewPostCreating ('button')}
+              onClick={() => setViewPostCreating (false)}
               variant="outlined"
               color="blue"
             >
@@ -224,10 +218,8 @@ export default function CentralBar () {
             <TextField label="Price" variant="outlined" />
             <DatePicker />
             <ChipsArray />
-            <AddPhotoContext.Provider value={context}>
-              <PhotoX />
-              <AddPhoto fileInput={uploadButton} update={update} />
-            </AddPhotoContext.Provider>
+            <PhotoX />
+            <AddPhoto fileInput={uploadButton} update={update} />
           </div>
           <div className="col-lg-12 my-2">
             <ButtonGroup
@@ -247,16 +239,15 @@ export default function CentralBar () {
           <div className="col-lg-12">
             <ButtonP fullWidth variant="outlined" color="blue">Publish</ButtonP>
           </div>
-        </div>
-      );
-    }
+        </div>;
   }
 
   return (
     <div className="col-12 col-sm-7 col-md-7 col-lg-6 col-xl-5 timeline">
       <div className="container">
-
-        <ViewPost />
+        <AddPhotoContext.Provider value={context}>
+          <ViewPost />
+        </AddPhotoContext.Provider>
         {posts.map ((post, i) => (
           <div key={i} className="p-3 mb-3 bg-white rounded post-card">
             <CardHeader

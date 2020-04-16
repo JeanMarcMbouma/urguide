@@ -8,10 +8,7 @@ const AddPhoto = ({fileInput, update}) => {
   const ctx = useContext (AddPhotoContext);
   const [state, dispatch] = useReducer (AddPhotoReducer, ctx);
 
-  React.useEffect(() => {
-    update(state.files);
-  }, [state])
-  console.log(ctx)
+
   var currentFile = null;
   const dataSender = React.createRef();
   let data = state.files;
@@ -27,6 +24,7 @@ const AddPhoto = ({fileInput, update}) => {
     };
 
     dataSender.current.click ();
+    update({...state});
   }
 
   return (
@@ -64,8 +62,8 @@ export const PhotoX = () => {
   return (
     <AddPhotoContext.Consumer>
       {
-       ({files}) => ( files.length ? ( <div className="p-3 mb-3 bg-white rounded">
-        {files.map((f, index) => <img key={f.name} src={f.href} height='100' width='120'/>)}
+       ({files}) => ( files.length ? ( <div className="mb-3 mt-3 ml-1 bg-white rounded">
+        {files.map((f, index) => <img key={f.name} src={f.href} height='80' width='100' className='mr-2'/>)}
         </div>) : <></>
         )
       }
