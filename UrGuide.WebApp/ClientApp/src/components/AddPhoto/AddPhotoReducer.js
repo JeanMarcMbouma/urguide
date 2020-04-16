@@ -9,8 +9,6 @@ export default function AddPhotoReducer (state, action) {
         context.files.push (context.currentFile);
       }
 
-      console.log (context.files);
-
       return context;
 
       break;
