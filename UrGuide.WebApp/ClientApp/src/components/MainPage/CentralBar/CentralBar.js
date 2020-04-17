@@ -69,8 +69,7 @@ ButtonInPosts.propTypes = {
 const ButtonP = withStyles (styles) (ButtonInPosts);
 
 export default function CentralBar () {
-  const {oidcUser} = useReactOidc();
-  const { profile } = oidcUser || {profile : {}};
+  
   const uploadButton = React.createRef ();
   const [ViewPostCreating, setViewPostCreating] = useState (false);
 
@@ -82,7 +81,15 @@ export default function CentralBar () {
   const update = ctx => {
     setContext ({...ctx});
   };
-
+  const {oidcUser} = useReactOidc();
+  if (!oidcUser)
+  {
+    return (
+      <></>
+    )
+  }
+  const { profile } = oidcUser;
+  
   let posts = [
     {
       name: 'Excursion around Cherkassy',
