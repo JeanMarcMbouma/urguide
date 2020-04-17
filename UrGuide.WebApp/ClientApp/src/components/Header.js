@@ -40,7 +40,7 @@ const Header = () => {
   const {oidcUser} = useReactOidc();
 
   const classes = useStyles ();
-  return !oidcUser ? (<></>) : (
+  return !oidcUser || !oidcUser.profile ? (<></>) : (
     <nav className="navigation-bar">
       <div className="container-fluid">
         <div className="row justify-content-between navbarRow">

@@ -1,6 +1,5 @@
 import React, {useState, useContext} from 'react';
 import {makeStyles} from '@material-ui/core/styles';
-import UserContext from '../../../UserContext';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
@@ -37,6 +36,7 @@ import {withStyles} from '@material-ui/core/styles';
 import {SdCard} from '@material-ui/icons';
 import AddPhoto, {PhotoX} from './../../AddPhoto/AddPhoto';
 import AddPhotoContext from './../../AddPhoto/AddPhotoContext';
+import { useReactOidc} from '@axa-fr/react-oidc-context';
 
 const styles = {
   root: {
@@ -69,7 +69,8 @@ ButtonInPosts.propTypes = {
 const ButtonP = withStyles (styles) (ButtonInPosts);
 
 export default function CentralBar () {
-  const user = useContext (UserContext);
+  const {oidcUser} = useReactOidc();
+  const { profile } = oidcUser || {profile : {}};
   const uploadButton = React.createRef ();
   const [ViewPostCreating, setViewPostCreating] = useState (false);
 
@@ -202,7 +203,7 @@ export default function CentralBar () {
           <div className="col-lg-12 d-flex justify-content-start my-4">
             <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
             <Typography className="m-0 px-4" variant="h6">
-              {user.username}
+              {profile.name}
             </Typography>
           </div>
           <div className="col-lg-12">

@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {Route} from 'react-router';
-import {Switch, Redirect, BrowserRouter as Router} from 'react-router-dom';
+import {Switch, Redirect} from 'react-router-dom';
 import {LoginLayout} from './components/login/LoginLayout';
 import {LoginPage} from './components/login/LoginPage';
 import {RegisterLayout} from './components/RegisterLayout';
@@ -13,7 +13,6 @@ import {
 import {UserProfile} from './components/user/UserProfile';
 import {CreateNewGallery} from './components/gallery/CreateNewGallery';
 import {Layout} from './components/Layout';
-import UserContext from './UserContext';
 import Home from './components/MainPage/Home';
 import EmailConfirmation from './components/confirmation/EmailConfirmation';
 import RegistrationConfirmation
@@ -25,74 +24,79 @@ import {
   InMemoryWebStorage,
   withOidcSecure,
 } from '@axa-fr/react-oidc-context';
-import oidcConfiguration from './components/auth/configuration';
-import Loader from './components/api-authorization/loader'
+import Loader from './components/api-authorization/loader';
 
 export default class App extends Component {
+  constructor (props) {
+    super (props);
+    const baseUrl = 'https://localhost:5001';
+    this.configuration = {
+      client_id: 'UrGuide.WebApp',
+      redirect_uri: `${baseUrl}/authentication/login-callback`,
+      response_type: 'code',
+      post_logout_redirect_uri: baseUrl,
+      scope: 'openid profile',
+      authority: '/',
+      silent_redirect_uri: `${baseUrl}/authentication/silent_callback`,
+      automaticSilentRenew: true,
+      loadUserInfo: true,
+    };
+    console.log (this.configuration);
+  }
   static displayName = App.name;
 
   render () {
     return (
       <AuthenticationProvider
-        configuration={oidcConfiguration}
+        configuration={this.configuration}
         loggerLevel={oidcLog.DEBUG}
         isEnabled={true}
         callbackComponentOverride={Home}
         UserStore={InMemoryWebStorage}
         authenticating={Loader}
       >
+        <Switch>
+          <Route exact path="/email-confirmed" component={EmailConfirmation} />
+          <Route
+            exact
+            path="/sign-up-confirm"
+            component={RegistrationConfirmation}
+          />
 
-        <UserContext.Provider
-          value={{
-            email: null,
-            username: 'Guest',
-            isLoggedIn: false,
-            token: null,
-          }}
-        >
-          <Router>
-            <Switch>
+          <Route path="/sign-in">
+            <LoginLayout>
+              <Route exact path="/sign-in" component={LoginPage} />
+            </LoginLayout>
+          </Route>
+          <Route path="/(sign-up|guide/sign-up|authentication/register)">
+            <RegisterLayout>
+              <Route exact path="/sign-up" component={ClientRegistration} />
               <Route
                 exact
-                path="/email-confirmed"
-                component={EmailConfirmation}
+                path="/authentication/register"
+                component={ClientRegistration}
               />
               <Route
                 exact
-                path="/sign-up-confirm"
-                component={RegistrationConfirmation}
+                path="/guide/sign-up"
+                component={GuideRegistration}
               />
-            
-              <Route path="/sign-in">
-                <LoginLayout>
-                  <Route exact path="/sign-in" component={LoginPage} />
-                </LoginLayout>
-              </Route>
-              <Route path="/(sign-up|guide/sign-up|authentication/register)">
-                <RegisterLayout>
-                  <Route exact path="/sign-up" component={ClientRegistration} />
-                  <Route
-                    exact
-                    path="/authentication/register"
-                    component={ClientRegistration}
-                  />
-                  <Route
-                    exact
-                    path="/guide/sign-up"
-                    component={GuideRegistration}
-                  />
-                </RegisterLayout>
-              </Route>
-              <Layout>
+            </RegisterLayout>
+          </Route>
+          <Route path="/(user|feed|gallery/new)">
+            <Layout>
 
-                <Route path="/user" component={withOidcSecure(UserProfile)} />
-                <Route path="/feed" component={withOidcSecure(Home)} />
-                <Route exact path="/" render={() => <Redirect to="/feed" />} />
-                <Route path="/gallery/new" component={withOidcSecure(CreateNewGallery)} />
-              </Layout>
-            </Switch>
-          </Router>
-        </UserContext.Provider>
+              <Route path="/user" component={withOidcSecure (UserProfile)} />
+              <Route path="/feed" component={withOidcSecure (Home)} />
+
+              <Route
+                path="/gallery/new"
+                component={withOidcSecure (CreateNewGallery)}
+              />
+            </Layout>
+          </Route>
+          <Route exact path="/" render={() => <Redirect to="/feed" />} />
+        </Switch>
       </AuthenticationProvider>
     );
   }
