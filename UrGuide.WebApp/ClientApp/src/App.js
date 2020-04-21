@@ -87,7 +87,7 @@ export default class App extends Component {
             <Layout>
 
               <Route path="/user" component={withOidcSecure (UserProfile)} />
-              <Route path="/feed" component={withOidcSecure (Home)} />
+              <Route path="/feed" component={Home} />
 
               <Route
                 path="/gallery/new"

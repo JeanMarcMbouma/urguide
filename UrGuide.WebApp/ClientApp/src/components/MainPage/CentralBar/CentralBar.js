@@ -81,7 +81,13 @@ export default function CentralBar () {
   const update = ctx => {
     setContext ({...ctx});
   };
-  const {oidcUser} = useReactOidc();
+  const {oidcUser} = {
+    oidcUser: {
+      profile: {
+        name: 'Demo'
+      }
+    }
+  } // useReactOidc();
   if (!oidcUser)
   {
     return (
