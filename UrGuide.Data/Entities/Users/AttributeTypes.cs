@@ -1,0 +1,37 @@
+﻿namespace UrGuide.Data.Entities.Users
+{
+    public enum AttributeTypes
+    {
+        BackgroundImage,
+        BackgroundColor,
+        Rating,
+        EmailOptIn,
+        TwoFactorAuthOptIn,
+        UserName,
+        NickName,
+        Organization,
+        LinkedIn,
+        Twitter,
+        FaceBook,
+        Google,
+        Instagram,
+        SocialLink,
+        Subscription,
+        BirthDayOptIn,
+        Consent,
+        GuideOptIn,
+        Gender,
+        Phone,
+        Address,
+        Frozen,
+        FrozenPeriod,
+        CreditCard1,
+        CreditCard2,
+        EmailAddress,
+        FirstName,
+        LastName,
+        Country,
+        City,
+        BirthDay
+    }
+}

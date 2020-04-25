@@ -1,0 +1,16 @@
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Services\bin\Debug\netstandard2.1\UrGuide.Data.dll
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Services\bin\Debug\netstandard2.1\UrGuide.Model.dll
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Services\bin\Debug\netstandard2.1\UrGuide.Data.pdb
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Services\obj\Debug\netstandard2.1\UrGuide.Services.csprojAssemblyReference.cache
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Services\obj\Debug\netstandard2.1\UrGuide.Services.AssemblyInfoInputs.cache
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Services\obj\Debug\netstandard2.1\UrGuide.Services.AssemblyInfo.cs
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Services\bin\Debug\netstandard2.1\UrGuide.Shared.dll
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Services\bin\Debug\netstandard2.1\UrGuide.Services.deps.json
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Services\bin\Debug\netstandard2.1\UrGuide.Services.dll
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Services\bin\Debug\netstandard2.1\UrGuide.Services.pdb
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Services\bin\Debug\netstandard2.1\UrGuide.Model.pdb
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Services\bin\Debug\netstandard2.1\UrGuide.Shared.pdb
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Services\obj\Debug\netstandard2.1\UrGuide.Services.csproj.CoreCompileInputs.cache
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Services\obj\Debug\netstandard2.1\UrGuide.Services.csproj.CopyComplete
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Services\obj\Debug\netstandard2.1\UrGuide.Services.dll
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Services\obj\Debug\netstandard2.1\UrGuide.Services.pdb

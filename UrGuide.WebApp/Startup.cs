@@ -1,16 +1,16 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
 using UrGuide.WebApp.Data;
-using UrGuide.WebApp.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Identity;
 using System;
+using UrGuide.WebApp.Extensions;
+using UrGuide.Services.Extensions;
+using FluentValidation.AspNetCore;
 
 namespace UrGuide.WebApp
 {
@@ -26,23 +26,12 @@ namespace UrGuide.WebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+            services.AddUrGuideAuthServices(Configuration);
 
-            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
-
-            services.AddIdentityServer(options => {
-                options.UserInteraction.LoginUrl = "/sign-in";
-                options.UserInteraction.LogoutUrl = "/account/logout";
-            })
-                .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
-
-            services.AddAuthentication()
-                .AddIdentityServerJwt();
-
-            services.AddControllersWithViews();
+            services.AddUrGuideServices(Configuration);
+            
+            
+            services.AddControllersWithViews().AddFluentValidation();
             services.AddRazorPages();
             services.AddSwaggerGen(c =>
             {
@@ -71,7 +60,10 @@ namespace UrGuide.WebApp
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            serviceProvider.GetRequiredService<ApplicationDbContext>().Database.Migrate();
+
+            serviceProvider.GetRequiredService<UrGuideAuthContext>().Database.Migrate();
+            serviceProvider.GetRequiredService<UrGuide.Data.UrGuideContext>().Database.Migrate();
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
