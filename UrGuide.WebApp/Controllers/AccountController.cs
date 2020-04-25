@@ -1,11 +1,8 @@
-﻿using IdentityServer4.Services;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Model.Users;
@@ -40,7 +37,6 @@ namespace UrGuide.WebApp.Controllers
 
         [HttpPost("/register")]
         public async Task<IActionResult> Register([FromBody]CreateUserCommand model,
-            [FromServices]Services.IEmailService emailService, 
             CancellationToken cancellationToken,
             string returnUrl = null)
         {
@@ -50,22 +46,11 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
             }
 
-            if (!result.HasError)
-            {
-                //var confirmationToken = await userManager.GenerateEmailConfirmationTokenAsync(newUser);
-                //var url = Url.ActionLink(nameof(ConfirmEmail), "Account", new { confirmationToken, email = newUser.Email });
-                //// send email
-                //var link = $"<a href='{url}'>clicking here</a>";
-                //var message = $"Please confirm your account by {HtmlEncoder.Default.Encode(link)}.";
-                //await emailService.Send(newUser.Email, message, Services.EmailService.MessageTypes.Confirmation, cancellationToken).ConfigureAwait(false);
-                return Ok(returnUrl);
-            }
-            return BadRequest(ErrorEnvelop.Create(result.Errors));
+            return !result.HasError ? Ok(returnUrl) : (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors));
         }
 
         [HttpPost("/newguide")]
         public async Task<IActionResult> NewGuide([FromBody]CreateGuideCommand model,
-            [FromServices]Services.IEmailService emailService,
             CancellationToken cancellationToken,
             string returnUrl = null)
         {
@@ -75,17 +60,7 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
             }
 
-            if (!result.HasError)
-            {
-                //var confirmationToken = await userManager.GenerateEmailConfirmationTokenAsync(newUser);
-                //var url = Url.ActionLink(nameof(ConfirmEmail), "Account", new { confirmationToken, email = newUser.Email });
-                //// send email
-                //var link = $"<a href='{url}'>clicking here</a>";
-                //var message = $"Please confirm your account by {HtmlEncoder.Default.Encode(link)}.";
-                //await emailService.Send(newUser.Email, message, Services.EmailService.MessageTypes.Confirmation, cancellationToken).ConfigureAwait(false);
-                return Ok(returnUrl);
-            }
-            return BadRequest(ErrorEnvelop.Create(result.Errors));
+            return !result.HasError ? Ok(returnUrl) : (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors));
         }
 
         [HttpGet("confirmEmail")]
@@ -100,7 +75,6 @@ namespace UrGuide.WebApp.Controllers
 
         [HttpGet("forgetpassword")]
         public async Task<IActionResult> ForgetPassword([FromQuery]string email, 
-            [FromServices]Services.IEmailService emailService,
             CancellationToken cancellationToken) {
             //var userManager = SignInManager.UserManager;
             //var user = await userManager.FindByEmailAsync(email);
@@ -119,7 +93,6 @@ namespace UrGuide.WebApp.Controllers
 
         [HttpPost("resetpassword")]
         public async Task<IActionResult> ResetPassord([FromBody]PasswordResetModel model,
-            [FromServices]Services.IEmailService emailService,
             CancellationToken cancellationToken) {
             //var userManager = SignInManager.UserManager;
             //var user = await userManager.FindByEmailAsync(model.Email);
@@ -137,7 +110,6 @@ namespace UrGuide.WebApp.Controllers
         [Authorize]
         [HttpPost("changepassword")]
         public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordModel model, 
-            [FromServices]Services.IEmailService emailService,
             CancellationToken cancellationToken)
         {
             return Ok();

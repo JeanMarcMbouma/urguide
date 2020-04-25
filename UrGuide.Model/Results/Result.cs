@@ -7,7 +7,7 @@ namespace UrGuide.Model.Results
 {
     public abstract class Result
     {
-        public static Result<TResult> Of<TResult>(TResult data) => new Result<TResult>(data);
+        public static Result<TResult> Of<TResult>(TResult data = default) => new Result<TResult>(data);
         public struct EmptyStruct { }
         public static Result<EmptyStruct> Empty = Of(new EmptyStruct());
     }

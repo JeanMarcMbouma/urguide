@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Data;
+using UrGuide.Model.Messages;
 using UrGuide.Model.Results;
 using UrGuide.Model.Users;
 using UrGuide.Services.Contracts;
+using UrGuide.Shared;
 using UrGuide.Shared.Contracts;
 
 namespace UrGuide.Services.Users
@@ -17,13 +19,15 @@ namespace UrGuide.Services.Users
             IUserContext userContext,
             IAuthService authService,
             ILogger<UserService> logger,
-            IMapper mapper)
+            IMapper mapper,
+            IEmailService emailService)
         {
             Context = context ?? throw new System.ArgumentNullException(nameof(context));
             UserContext = userContext ?? throw new System.ArgumentNullException(nameof(userContext));
             AuthService = authService ?? throw new System.ArgumentNullException(nameof(authService));
             Logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
             Mapper = mapper ?? throw new System.ArgumentNullException(nameof(mapper));
+            EmailService = emailService ?? throw new System.ArgumentNullException(nameof(emailService));
         }
 
         public UrGuideContext Context { get; }
@@ -31,6 +35,7 @@ namespace UrGuide.Services.Users
         public IAuthService AuthService { get; }
         public ILogger<UserService> Logger { get; }
         public IMapper Mapper { get; }
+        public IEmailService EmailService { get; }
 
         public async Task<Result<bool>> DeleteUserAccountAsync(string userId, CancellationToken cancellationToken)
         {
@@ -69,14 +74,14 @@ namespace UrGuide.Services.Users
         public async Task<Result<bool>> RegisterGuideAsync(CreateGuideCommand createGuide, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            Result<string> userId = await AuthService.RegisterGuideAsync(createGuide, cancellationToken);
+            Result<(string userId, string confirmationToken)> userId = await AuthService.RegisterGuideAsync(createGuide, cancellationToken);
             if (userId.HasError)
             {
                 return Result.Of(false).Combine(userId);
             }
             var user = new Data.Entities.Users.User
             {
-                UserId = userId.Data,
+                UserId = userId.Data.userId,
                 ProfileImage = new Data.Entities.Users.Image
                 {
                     ImageBase64 = createGuide.ProfileImage
@@ -101,20 +106,28 @@ namespace UrGuide.Services.Users
 
             Context.Users.Add(user);
             await Context.SaveChangesAsync(cancellationToken);
+            _ = EmailService.SendAsync(new SendDirectMessageCommand
+            {
+                To = createGuide.Email,
+                ToName = createGuide.FirstName,
+                Content = "Please confirm your account",
+                Subject = "Email Confirmation",
+                Link = UserContext.ResolveUrl(MessageTypes.Confirmation, new { userId.Data.confirmationToken, createGuide.Email })
+            });
             return Result.Of(true);
         }
 
         public async Task<Result<bool>> RegisterUserAsync(CreateUserCommand createUser, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            Result<string> userId = await AuthService.RegisterUserAsync(createUser, cancellationToken);
+            Result<(string userId, string confirmationToken)> userId = await AuthService.RegisterUserAsync(createUser, cancellationToken);
             if (userId.HasError)
             {
                 return Result.Of(false).Combine(userId);
             }
             var user = new Data.Entities.Users.User
             {
-                UserId = userId.Data
+                UserId = userId.Data.userId
             };
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailOptIn), Value = Constants.Yes });
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailAddress), Value = createUser.Email });
@@ -126,6 +139,15 @@ namespace UrGuide.Services.Users
 
             Context.Users.Add(user);
             await Context.SaveChangesAsync(cancellationToken);
+            _ = EmailService.SendAsync(new SendDirectMessageCommand
+            {
+                To = createUser.Email,
+                ToName = createUser.FirstName,
+                Content = "Please confirm your account",
+                Subject = "Email Confirmation",
+                LinkText = "Activate your account",
+                Link = UserContext.ResolveUrl(MessageTypes.Confirmation, new { userId.Data.confirmationToken, createUser.Email })
+            });
             return Result.Of(true);
         }
 

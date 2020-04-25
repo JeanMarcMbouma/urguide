@@ -10,5 +10,7 @@ namespace UrGuide.Shared.Contracts
         string UserName { get; set; }
         string Id_Token { get; set; }
         string ProfileImage { get; }
+
+        string ResolveUrl(MessageTypes confirmation, object parameters);
     }
 }

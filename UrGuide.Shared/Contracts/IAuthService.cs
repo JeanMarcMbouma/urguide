@@ -10,8 +10,8 @@ namespace UrGuide.Shared.Contracts
 {
     public interface IAuthService
     {
-        Task<Result<string>> RegisterUserAsync(CreateUserCommand createUser, CancellationToken cancellationToken);
-        Task<Result<string>> RegisterGuideAsync(CreateGuideCommand createGuide, CancellationToken cancellationToken);
+        Task<Result<(string userId, string confirmationToken)>> RegisterUserAsync(CreateUserCommand createUser, CancellationToken cancellationToken);
+        Task<Result<(string userId, string confirmationToken)>> RegisterGuideAsync(CreateGuideCommand createGuide, CancellationToken cancellationToken);
         Task<Result<string>> LoginAsync(LoginCommand login, CancellationToken cancellationToken);
     }
 }

@@ -43,7 +43,7 @@ namespace UrGuide.WebApp
                 configuration.RootPath = "ClientApp/build";
             });
 
-            services.AddScoped<Services.IEmailService, Services.EmailService>();
+           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

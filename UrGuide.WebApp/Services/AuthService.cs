@@ -8,7 +8,7 @@ using UrGuide.Model.Users;
 using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Entities;
 
-namespace UrGuide.Auth
+namespace UrGuide.WebApp.Services
 {
     public class AuthService : IAuthService
     {
@@ -28,25 +28,25 @@ namespace UrGuide.Auth
             var result = await SignInManager.PasswordSignInAsync(login.UserName, login.Password, login.Persist, true);
             if (!result.Succeeded)
             {
-                return Result.Of<string>(null).WithErrors("Invalid login attempt.");
+                return Result.Of<string>().WithErrors("Invalid login attempt.");
             }
             if (result.IsLockedOut)
             {
-                return Result.Of<string>(null).WithErrors("Your account has been locked out.");
+                return Result.Of<string>().WithErrors("Your account has been locked out.");
             }
             var user = await SignInManager.UserManager.FindByNameAsync(login.UserName);
-
+            
             return Result.Of(user.Id);
         }
 
-        public async Task<Result<string>> RegisterGuideAsync(CreateGuideCommand createGuide, CancellationToken cancellationToken)
+        public async Task<Result<(string userId, string confirmationToken)>> RegisterGuideAsync(CreateGuideCommand createGuide, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var userManager = SignInManager.UserManager;
             var user = await userManager.FindByNameAsync(createGuide.Email);
-            if(user != null)
+            if (user != null)
             {
-                return Result.Of<string>(null).WithErrors("Account already exist");
+                return Result.Of<(string userId, string confirmationToken)>().WithErrors("Account already exist");
             }
             user = new UrGuideUser
             {
@@ -61,7 +61,7 @@ namespace UrGuide.Auth
             var result = await userManager.CreateAsync(user, createGuide.Password);
             if (!result.Succeeded)
             {
-                var r = Result.Of<string>(null).WithErrors("User's registration failed.");
+                var r = Result.Of<(string userId, string confirmationToken)>().WithErrors("User's registration failed.");
                 result.Errors.ToList().ForEach(e =>
                 {
                     r.WithErrors(e.Description);
@@ -69,17 +69,18 @@ namespace UrGuide.Auth
                 return r;
             }
 
-            return Result.Of(user.Id);
+            var emailConfirmationToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            return Result.Of((user.Id, emailConfirmationToken));
         }
 
-        public async Task<Result<string>> RegisterUserAsync(CreateUserCommand createUser, CancellationToken cancellationToken)
+        public async Task<Result<(string userId, string confirmationToken)>> RegisterUserAsync(CreateUserCommand createUser, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var userManager = SignInManager.UserManager;
             var user = await userManager.FindByNameAsync(createUser.Email);
             if (user != null)
             {
-                return Result.Of<string>(null).WithErrors("Account already exist");
+                return Result.Of<(string userId, string confirmationToken)>().WithErrors("Account already exist");
             }
             user = new UrGuideUser
             {
@@ -92,7 +93,7 @@ namespace UrGuide.Auth
             var result = await userManager.CreateAsync(user, createUser.Password);
             if (!result.Succeeded)
             {
-                var r = Result.Of<string>(null).WithErrors("User's registration failed.");
+                var r = Result.Of<(string userId, string confirmationToken)>().WithErrors("User's registration failed.");
                 result.Errors.ToList().ForEach(e =>
                 {
                     r.WithErrors(e.Description);
@@ -100,7 +101,8 @@ namespace UrGuide.Auth
                 return r;
             }
 
-            return Result.Of(user.Id);
+            var emailConfirmationToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            return Result.Of((user.Id, emailConfirmationToken));
         }
     }
 }
