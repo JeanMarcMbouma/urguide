@@ -8,3 +8,11 @@
 node_modules
 **/.vscode/launch.json
 **/.vscode/tasks.json
+bin
+BIN
+Bin
+obj
+OBJ
+Obj
+*.cache
+*.FileListAbsolute.txt

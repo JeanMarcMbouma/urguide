@@ -1,16 +1,17 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
 using UrGuide.WebApp.Data;
-using UrGuide.WebApp.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Identity;
 using System;
+using UrGuide.WebApp.Extensions;
+using UrGuide.Services.Extensions;
+using FluentValidation.AspNetCore;
+using AspNetCoreRateLimit;
 
 namespace UrGuide.WebApp
 {
@@ -26,26 +27,41 @@ namespace UrGuide.WebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+            services.AddUrGuideAuthServices(Configuration);
 
-            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddUrGuideServices(Configuration);
 
-            services.AddIdentityServer(options => {
-                options.UserInteraction.LoginUrl = "/sign-in";
-                options.UserInteraction.LogoutUrl = "/account/logout";
-            })
-                .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+            //load general configuration from appsettings.json
+            services.Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"));
 
-            services.AddAuthentication()
-                .AddIdentityServerJwt();
+            //load ip rules from appsettings.json
+            services.Configure<IpRateLimitPolicies>(Configuration.GetSection("IpRateLimitPolicies"));
 
-            services.AddControllersWithViews();
+            // inject counter and rules stores
+            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+
+            services.AddControllersWithViews(options => {
+                options.Filters.Add(typeof(Filters.SaveChangeActionFilter));
+            }).AddFluentValidation();
             services.AddRazorPages();
             services.AddSwaggerGen(c =>
             {
+                c.AddSecurityDefinition("BearerAuth", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.OpenIdConnect,
+                    Scheme = "Bearer"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                       {
+                           Reference = new OpenApiReference{ Type = ReferenceType.SecurityScheme, Id="BearerAuth"}
+                       },
+                       Array.Empty<string>()
+                    }
+                });
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ur Guide API", Version = "v1" });
             });
             // In production, the React files will be served from this directory
@@ -54,7 +70,7 @@ namespace UrGuide.WebApp
                 configuration.RootPath = "ClientApp/build";
             });
 
-            services.AddScoped<Services.IEmailService, Services.EmailService>();
+            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -71,7 +87,12 @@ namespace UrGuide.WebApp
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            serviceProvider.GetRequiredService<ApplicationDbContext>().Database.Migrate();
+
+            serviceProvider.GetRequiredService<UrGuideAuthContext>().Database.Migrate();
+            serviceProvider.GetRequiredService<UrGuide.Data.UrGuideContext>().Database.Migrate();
+
+            app.UseIpRateLimiting();
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();

@@ -1,0 +1,9 @@
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Model\bin\Debug\netstandard2.0\UrGuide.Model.deps.json
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Model\bin\Debug\netstandard2.0\UrGuide.Model.dll
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Model\bin\Debug\netstandard2.0\UrGuide.Model.pdb
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Model\obj\Debug\netstandard2.0\UrGuide.Model.csprojAssemblyReference.cache
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Model\obj\Debug\netstandard2.0\UrGuide.Model.csproj.CoreCompileInputs.cache
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Model\obj\Debug\netstandard2.0\UrGuide.Model.AssemblyInfoInputs.cache
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Model\obj\Debug\netstandard2.0\UrGuide.Model.AssemblyInfo.cs
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Model\obj\Debug\netstandard2.0\UrGuide.Model.dll
+F:\WORK\MboumaBiz\UrGuide\UrGuide.Model\obj\Debug\netstandard2.0\UrGuide.Model.pdb

@@ -1,0 +1,97 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETStandard,Version=v2.1": {
+      "UrGuide.Model/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "compile": {
+          "bin/placeholder/UrGuide.Model.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/UrGuide.Model.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "UrGuide.Model/1.0.0": {
+      "type": "project",
+      "path": "../UrGuide.Model/UrGuide.Model.csproj",
+      "msbuildProject": "../UrGuide.Model/UrGuide.Model.csproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETStandard,Version=v2.1": [
+      "UrGuide.Model >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\Marc\\.nuget\\packages\\": {},
+    "C:\\Microsoft\\Xamarin\\NuGet\\": {},
+    "C:\\PROGRAM FILES\\DOTNET\\sdk\\NuGetFallbackFolder": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "F:\\WORK\\MboumaBiz\\UrGuide\\UrGuide.Shared\\UrGuide.Shared.csproj",
+      "projectName": "UrGuide.Shared",
+      "projectPath": "F:\\WORK\\MboumaBiz\\UrGuide\\UrGuide.Shared\\UrGuide.Shared.csproj",
+      "packagesPath": "C:\\Users\\Marc\\.nuget\\packages\\",
+      "outputPath": "F:\\WORK\\MboumaBiz\\UrGuide\\UrGuide.Shared\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Microsoft\\Xamarin\\NuGet\\",
+        "C:\\PROGRAM FILES\\DOTNET\\sdk\\NuGetFallbackFolder"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\Marc\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "netstandard2.1"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "D:\\NUGET": {},
+        "D:\\Program Files (x86)\\Progress\\Telerik UI for ASP.NET Core R2 2019\\wrappers\\aspnetcore\\Binaries\\AspNet.Core": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "projectReferences": {
+            "F:\\WORK\\MboumaBiz\\UrGuide\\UrGuide.Model\\UrGuide.Model.csproj": {
+              "projectPath": "F:\\WORK\\MboumaBiz\\UrGuide\\UrGuide.Model\\UrGuide.Model.csproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "netstandard2.1": {
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "NETStandard.Library": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\PROGRAM FILES\\DOTNET\\sdk\\3.1.201\\RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

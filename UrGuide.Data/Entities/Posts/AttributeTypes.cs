@@ -1,0 +1,25 @@
+﻿namespace UrGuide.Data.Entities.Posts
+{
+    public enum AttributeTypes
+    {
+        BackgroundColor,
+        PeriodActive,
+        AgeRating,
+        Rating,
+        Views,
+        Likes,
+        Dislikes,
+        Shared,
+        Top1000,
+        Top100,
+        Top10,
+        Country,
+        Region,
+        City,
+        AllocatedSeats,
+        Currency,
+        Amount,
+        BidOptIn,
+        NumberOfPosts
+    }
+}
