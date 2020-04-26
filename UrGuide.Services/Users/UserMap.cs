@@ -22,7 +22,7 @@ namespace UrGuide.Services.Users
                 .ForMember(u => u.Rating, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Rating))))
                 .ForMember(u => u.IsGuide, x => x.MapFrom(f =>
                     f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.GuideOptIn)
-                    && a.Value == "1")))
+                    && a.Value == Constants.Yes)))
                 .ForMember(u => u.IsPremium, x => x.MapFrom(f =>
                     f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Subscription)
                     && a.Value == nameof(Subscriptions.Premium))));

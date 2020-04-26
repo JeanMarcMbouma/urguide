@@ -7,7 +7,7 @@ namespace UrGuide.Data.Entities.Shared
     {
         public ImageCatalog()
         {
-            Images = new List<Image>();
+            Images = new HashSet<Image>();
         }
         public string Id { get; set; }
         public DateTime Created { get; set; }

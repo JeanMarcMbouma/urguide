@@ -7,7 +7,7 @@ namespace UrGuide.Data.Entities.Shared
     {
         public Image()
         {
-            Attributes = new List<GenericAttribute>();
+            Attributes = new HashSet<GenericAttribute>();
         }
         public string Id { get; set; }
         public string ImageBase64 { get; set; }
