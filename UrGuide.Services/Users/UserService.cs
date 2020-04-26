@@ -20,7 +20,8 @@ namespace UrGuide.Services.Users
             IAuthService authService,
             ILogger<UserService> logger,
             IMapper mapper,
-            IEmailService emailService)
+            IEmailService emailService,
+            IWebHelper webHelper)
         {
             Context = context ?? throw new System.ArgumentNullException(nameof(context));
             UserContext = userContext ?? throw new System.ArgumentNullException(nameof(userContext));
@@ -28,6 +29,7 @@ namespace UrGuide.Services.Users
             Logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
             Mapper = mapper ?? throw new System.ArgumentNullException(nameof(mapper));
             EmailService = emailService ?? throw new System.ArgumentNullException(nameof(emailService));
+            WebHelper = webHelper ?? throw new System.ArgumentNullException(nameof(webHelper));
         }
 
         public UrGuideContext Context { get; }
@@ -36,6 +38,7 @@ namespace UrGuide.Services.Users
         public ILogger<UserService> Logger { get; }
         public IMapper Mapper { get; }
         public IEmailService EmailService { get; }
+        public IWebHelper WebHelper { get; }
 
         public async Task<Result<bool>> DeleteUserAccountAsync(string userId, CancellationToken cancellationToken)
         {
@@ -45,7 +48,6 @@ namespace UrGuide.Services.Users
             {
                 var user = await Context.Users.FindAsync(userId, cancellationToken);
                 Context.Users.Remove(user);
-                await Context.SaveChangesAsync(cancellationToken);
                 return Result.Of(true);
             }
             catch (System.Exception e)
@@ -107,14 +109,13 @@ namespace UrGuide.Services.Users
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Subscription), Value = nameof(Subscriptions.Premium) });
 
             Context.Users.Add(user);
-            await Context.SaveChangesAsync(cancellationToken);
-            _ = EmailService.SendAsync(new SendDirectMessageCommand
+            await EmailService.SendAsync(new SendDirectMessageCommand
             {
                 To = createGuide.Email,
                 ToName = createGuide.FirstName,
                 Content = "Please confirm your account",
                 Subject = "Email Confirmation",
-                Link = UserContext.ResolveUrl(MessageTypes.Confirmation, new { userId.Data.confirmationToken, createGuide.Email })
+                Link = WebHelper.ResolveUrl(MessageTypes.Confirmation, new { userId.Data.confirmationToken, createGuide.Email })
             });
             return Result.Of(true);
         }
@@ -138,17 +139,18 @@ namespace UrGuide.Services.Users
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Consent), Value = Constants.Yes });
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.GuideOptIn), Value = Constants.No });
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Subscription), Value = nameof(Subscriptions.None) });
+            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.FirstName), Value = createUser.FirstName });
+            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.LastName), Value = createUser.LastName });
 
             Context.Users.Add(user);
-            await Context.SaveChangesAsync(cancellationToken);
-            _ = EmailService.SendAsync(new SendDirectMessageCommand
+            await EmailService.SendAsync(new SendDirectMessageCommand
             {
                 To = createUser.Email,
                 ToName = createUser.FirstName,
                 Content = "Please confirm your account",
                 Subject = "Email Confirmation",
                 LinkText = "Activate your account",
-                Link = UserContext.ResolveUrl(MessageTypes.Confirmation, new { userId.Data.confirmationToken, createUser.Email })
+                Link = WebHelper.ResolveUrl(MessageTypes.Confirmation, new { userId.Data.confirmationToken, createUser.Email })
             });
             return Result.Of(true);
         }
@@ -171,7 +173,6 @@ namespace UrGuide.Services.Users
             {
                 attr.Value = attribute.Value;
             }
-            await Context.SaveChangesAsync(cancellationToken);
             return Result.Of(true);
         }
     }

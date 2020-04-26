@@ -11,6 +11,7 @@ using System;
 using UrGuide.WebApp.Extensions;
 using UrGuide.Services.Extensions;
 using FluentValidation.AspNetCore;
+using AspNetCoreRateLimit;
 
 namespace UrGuide.WebApp
 {
@@ -29,12 +30,38 @@ namespace UrGuide.WebApp
             services.AddUrGuideAuthServices(Configuration);
 
             services.AddUrGuideServices(Configuration);
-            
-            
-            services.AddControllersWithViews().AddFluentValidation();
+
+            //load general configuration from appsettings.json
+            services.Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"));
+
+            //load ip rules from appsettings.json
+            services.Configure<IpRateLimitPolicies>(Configuration.GetSection("IpRateLimitPolicies"));
+
+            // inject counter and rules stores
+            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+
+            services.AddControllersWithViews(options => {
+                options.Filters.Add(typeof(Filters.SaveChangeActionFilter));
+            }).AddFluentValidation();
             services.AddRazorPages();
             services.AddSwaggerGen(c =>
             {
+                c.AddSecurityDefinition("BearerAuth", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.OpenIdConnect,
+                    Scheme = "Bearer"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                       {
+                           Reference = new OpenApiReference{ Type = ReferenceType.SecurityScheme, Id="BearerAuth"}
+                       },
+                       Array.Empty<string>()
+                    }
+                });
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ur Guide API", Version = "v1" });
             });
             // In production, the React files will be served from this directory
@@ -43,7 +70,7 @@ namespace UrGuide.WebApp
                 configuration.RootPath = "ClientApp/build";
             });
 
-           
+            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -63,6 +90,8 @@ namespace UrGuide.WebApp
 
             serviceProvider.GetRequiredService<UrGuideAuthContext>().Database.Migrate();
             serviceProvider.GetRequiredService<UrGuide.Data.UrGuideContext>().Database.Migrate();
+
+            app.UseIpRateLimiting();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

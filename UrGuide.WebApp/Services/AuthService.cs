@@ -12,16 +12,21 @@ namespace UrGuide.WebApp.Services
 {
     public class AuthService : IAuthService
     {
-        public AuthService(SignInManager<UrGuideUser> signInManager, IUserContext userContext, IEmailService emailService)
+        public AuthService(SignInManager<UrGuideUser> signInManager, 
+            IUserContext userContext, 
+            IEmailService emailService,
+            IWebHelper webHelper)
         {
             SignInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
             UserContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             EmailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
+            WebHelper = webHelper ?? throw new ArgumentNullException(nameof(webHelper));
         }
 
         public SignInManager<UrGuideUser> SignInManager { get; }
         public IUserContext UserContext { get; }
         public IEmailService EmailService { get; }
+        public IWebHelper WebHelper { get; }
 
         public async Task<Result<bool>> ChangePasswordAsync(ChangePasswordModel model, CancellationToken cancellationToken)
         {
@@ -160,7 +165,7 @@ namespace UrGuide.WebApp.Services
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
                 {
                     Content = "Please reset your password",
-                    Link = UserContext.ResolveUrl(Shared.MessageTypes.PasswordReset, new ResetPasswordModel
+                    Link = WebHelper.ResolveUrl(Shared.MessageTypes.PasswordReset, new ResetPasswordModel
                     {
                         ConfirmationToken = confirmationToken,
                         Email = passwordResetRequest.Email
@@ -179,6 +184,7 @@ namespace UrGuide.WebApp.Services
         public async Task<Result<bool>> ResetPasswordAsync(ResetPasswordModel resetPasswordModel, CancellationToken cancellationToken)
         {
             var userManager = SignInManager.UserManager;
+
             var user = await userManager.FindByEmailAsync(resetPasswordModel.Email);
             if (user != null)
             {

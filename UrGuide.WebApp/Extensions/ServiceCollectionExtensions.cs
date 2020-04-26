@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,9 +16,17 @@ namespace UrGuide.WebApp.Extensions
     {
         public static IServiceCollection AddUrGuideAuthServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddScoped<IUrlHelper>(factory =>
+            {
+                var actionContext = factory.GetService<IActionContextAccessor>()
+                                               .ActionContext;
+                return new UrlHelper(actionContext);
+            });
+            services.AddTransient<IEmailService, EmailService>();
+            services.AddTransient<IWebHelper, WebHelper>();
             services.AddTransient<IAuthService, AuthService>();
             services.AddScoped<IUserContext, UserContext>();
-            services.AddTransient<IEmailService, EmailService>();
 
             services.AddDbContext<UrGuideAuthContext>(options =>
                 options.UseSqlServer(
