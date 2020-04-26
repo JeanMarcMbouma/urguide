@@ -14,7 +14,7 @@ namespace UrGuide.WebApp.Extensions
         public static IServiceCollection AddUrGuideAuthServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddTransient<IAuthService, AuthService>();
-            services.AddTransient<IUserContext, UserContext>();
+            services.AddScoped<IUserContext, UserContext>();
             services.AddTransient<IEmailService, EmailService>();
 
             services.AddDbContext<UrGuideAuthContext>(options =>

@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Model.Users;
 using UrGuide.Services.Contracts;
+using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Models;
 
 namespace UrGuide.WebApp.Controllers
@@ -16,15 +17,17 @@ namespace UrGuide.WebApp.Controllers
     public class AccountController : Controller
     {
 
-        public AccountController(IUserService userService)
+        public AccountController(IUserService userService, IAuthService authService)
         {
-           UserService = userService ?? throw new ArgumentNullException(nameof(userService));
+            UserService = userService ?? throw new ArgumentNullException(nameof(userService));
+            AuthService = authService ?? throw new ArgumentNullException(nameof(authService));
         }
 
         public IUserService UserService { get; }
+        public IAuthService AuthService { get; }
 
         [HttpPost("/login")]
-        public async Task<IActionResult> Login([FromBody]LoginCommand model, CancellationToken cancellationToken, string returnUrl = null)
+        public async Task<IActionResult> Login([FromBody] Model.Users.LoginModel model, CancellationToken cancellationToken, string returnUrl = null)
         {
             var result = await UserService.LoginAsync(model, cancellationToken);
             if (result.HasError)
@@ -36,75 +39,44 @@ namespace UrGuide.WebApp.Controllers
         }
 
         [HttpPost("/register")]
-        public async Task<IActionResult> Register([FromBody]CreateUserCommand model,
+        public async Task<IActionResult> Register([FromBody]CreateUserModel model,
             CancellationToken cancellationToken,
             string returnUrl = null)
         {
             var result = await UserService.RegisterUserAsync(model, cancellationToken);
-            if (result.HasError)
-            {
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
-            }
-
             return !result.HasError ? Ok(returnUrl) : (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors));
         }
 
         [HttpPost("/newguide")]
-        public async Task<IActionResult> NewGuide([FromBody]CreateGuideCommand model,
+        public async Task<IActionResult> NewGuide([FromBody]CreateGuideModel model,
             CancellationToken cancellationToken,
             string returnUrl = null)
         {
             var result = await UserService.RegisterGuideAsync(model, cancellationToken);
-            if (result.HasError)
-            {
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
-            }
-
             return !result.HasError ? Ok(returnUrl) : (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors));
         }
 
         [HttpGet("confirmEmail")]
-        public async Task<IActionResult> ConfirmEmail([FromQuery]string confirmationToken, [FromQuery]string email){
-            //var userManager = SignInManager.UserManager;
-            //var user = await userManager.FindByEmailAsync(email);
-            //var result = await userManager.ConfirmEmailAsync(user, confirmationToken);
-            //if(result.Succeeded)
-            //    return Redirect("/email-confirmed");
+        public async Task<IActionResult> ConfirmEmail([FromQuery]EmailConfirmationModel emailConfirmation, CancellationToken cancellationToken)
+        {
+            var result = await AuthService.ConfirmEmailAsync(emailConfirmation, cancellationToken);
+            if(!result.HasError)
+                return Redirect("/email-confirmed");
             return Forbid();
         }
 
         [HttpGet("forgetpassword")]
-        public async Task<IActionResult> ForgetPassword([FromQuery]string email, 
+        public async Task<IActionResult> ForgetPassword([FromQuery]PasswordResetRequestModel model, 
             CancellationToken cancellationToken) {
-            //var userManager = SignInManager.UserManager;
-            //var user = await userManager.FindByEmailAsync(email);
-            //if(user != null) {
-            //    var confirmationToken = await userManager.GeneratePasswordResetTokenAsync(user);
-            //    // ideally send to the user email
-            //    var url = Url.Link("pforget", new {confirmationToken, email});
-            //    var message = $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(url)}'>clicking here</a>.";
-            //    await emailService.Send(email, message, Services.EmailService.MessageTypes.PasswordReset, cancellationToken).ConfigureAwait(false);
-            //    #if DEBUG
-            //    return Ok(confirmationToken);
-            //    #endif
-            //}
+            await AuthService.RequestPasswordResetAsync(model, cancellationToken);
             return Ok();
         }
 
         [HttpPost("resetpassword")]
-        public async Task<IActionResult> ResetPassord([FromBody]PasswordResetModel model,
+        public async Task<IActionResult> ResetPassord([FromBody]ResetPasswordModel model,
             CancellationToken cancellationToken) {
-            //var userManager = SignInManager.UserManager;
-            //var user = await userManager.FindByEmailAsync(model.Email);
-            //if(user != null) {
-            //    var confirmationResult = await userManager.ResetPasswordAsync(user, model.ConfirmationToken, model.Password);
-            //    if (confirmationResult.Succeeded) {
-            //        await emailService.Send(user.Email, "Your password was reset successfully.", Services.EmailService.MessageTypes.PasswordReset, cancellationToken).ConfigureAwait(false);
-            //        return Ok();
-            //    }
-            //    return BadRequest(ErrorEnvelop.Create(confirmationResult.Errors));
-            //}
-            return Forbid();
+            var result = await AuthService.ResetPasswordAsync(model, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok();
         }
 
         [Authorize]
@@ -112,26 +84,8 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordModel model, 
             CancellationToken cancellationToken)
         {
-            return Ok();
-            //var userManager = SignInManager.UserManager;
-            //var user = await userManager.FindByEmailAsync(model.Email);
-            //if (!User.Identity.IsAuthenticated || user?.UserName != User.Identity.Name)
-            //{
-            //    if(user != null)
-            //        await emailService.Send(user.Email, "An attempt was made to change your password.", 
-            //        Services.EmailService.MessageTypes.ChangePassword, cancellationToken).ConfigureAwait(false);
-            //    return Forbid();
-            //}
-
-            //var result = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.Password);
-            //if(result.Succeeded)
-            //{
-            //    await emailService.Send(user.Email, "Your password was changed successfully.",
-            //           Services.EmailService.MessageTypes.ChangePassword, cancellationToken).ConfigureAwait(false);
-            //    return Ok();
-            //}
-
-            //return BadRequest(ErrorEnvelop.Create(result.Errors));
+            var result = await AuthService.ChangePasswordAsync(model, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok();
         }
 
         [Authorize]

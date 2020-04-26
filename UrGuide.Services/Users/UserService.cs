@@ -62,16 +62,18 @@ namespace UrGuide.Services.Users
             return Result.Of(Mapper.Map<User>(user));
         }
 
-        public async Task<Result<User>> LoginAsync(LoginCommand login, CancellationToken cancellationToken)
+        public async Task<Result<User>> LoginAsync(LoginModel login, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var userId = await AuthService.LoginAsync(login, cancellationToken);
             if (userId.HasError)
                 return Result.Of<User>(null).Combine(userId);
-            return await GetUserAsync(userId.Data, cancellationToken);
+            var user = await GetUserAsync(userId.Data, cancellationToken);
+            UserContext.Use(user.Data);
+            return user;
         }
 
-        public async Task<Result<bool>> RegisterGuideAsync(CreateGuideCommand createGuide, CancellationToken cancellationToken)
+        public async Task<Result<bool>> RegisterGuideAsync(CreateGuideModel createGuide, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             Result<(string userId, string confirmationToken)> userId = await AuthService.RegisterGuideAsync(createGuide, cancellationToken);
@@ -117,7 +119,7 @@ namespace UrGuide.Services.Users
             return Result.Of(true);
         }
 
-        public async Task<Result<bool>> RegisterUserAsync(CreateUserCommand createUser, CancellationToken cancellationToken)
+        public async Task<Result<bool>> RegisterUserAsync(CreateUserModel createUser, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             Result<(string userId, string confirmationToken)> userId = await AuthService.RegisterUserAsync(createUser, cancellationToken);

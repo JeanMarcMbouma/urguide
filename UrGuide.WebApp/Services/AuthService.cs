@@ -12,16 +12,60 @@ namespace UrGuide.WebApp.Services
 {
     public class AuthService : IAuthService
     {
-        public AuthService(SignInManager<UrGuideUser> signInManager, IUserContext userContext)
+        public AuthService(SignInManager<UrGuideUser> signInManager, IUserContext userContext, IEmailService emailService)
         {
             SignInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
             UserContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
+            EmailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
         }
 
         public SignInManager<UrGuideUser> SignInManager { get; }
         public IUserContext UserContext { get; }
+        public IEmailService EmailService { get; }
 
-        public async Task<Result<string>> LoginAsync(LoginCommand login, CancellationToken cancellationToken)
+        public async Task<Result<bool>> ChangePasswordAsync(ChangePasswordModel model, CancellationToken cancellationToken)
+        {
+            var userManager = SignInManager.UserManager;
+            var user = await userManager.FindByEmailAsync(model.Email);
+            if (!UserContext.IsAuthenticated|| user?.UserName != UserContext.UserName)
+            {
+                if (user != null)
+                    await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                    {
+                        Content = "An attempt was made to change your password.",
+                        Subject = "Change password",
+                        To = user.Email,
+                        ToName = user.FirstName
+                    }).ConfigureAwait(false);
+                return Result.Of(false).WithErrors("Failed to change a user's password");
+            }
+
+            var result = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.Password);
+            if (result.Succeeded)
+            {
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = "Your password was changed successfully.",
+                    Subject = "Change password",
+                    To = user.Email,
+                    ToName = user.FirstName
+                }).ConfigureAwait(false);
+                return Result.Of(true);
+            }
+            return Result.Of(false).WithErrors("Failed to change a user's password");
+        }
+
+        public async Task<Result<bool>> ConfirmEmailAsync(EmailConfirmationModel emailConfirmation, CancellationToken cancellationToken)
+        {
+            var userManager = SignInManager.UserManager;
+            var user = await userManager.FindByEmailAsync(emailConfirmation.Email);
+            var result = await userManager.ConfirmEmailAsync(user, emailConfirmation.ConfirmationToken);
+            if (result.Succeeded)
+                return Result.Of(true);
+            return Result.Of(false).WithErrors("Email confirmation failed");
+        }
+
+        public async Task<Result<string>> LoginAsync(LoginModel login, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -39,7 +83,7 @@ namespace UrGuide.WebApp.Services
             return Result.Of(user.Id);
         }
 
-        public async Task<Result<(string userId, string confirmationToken)>> RegisterGuideAsync(CreateGuideCommand createGuide, CancellationToken cancellationToken)
+        public async Task<Result<(string userId, string confirmationToken)>> RegisterGuideAsync(CreateGuideModel createGuide, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var userManager = SignInManager.UserManager;
@@ -73,7 +117,7 @@ namespace UrGuide.WebApp.Services
             return Result.Of((user.Id, emailConfirmationToken));
         }
 
-        public async Task<Result<(string userId, string confirmationToken)>> RegisterUserAsync(CreateUserCommand createUser, CancellationToken cancellationToken)
+        public async Task<Result<(string userId, string confirmationToken)>> RegisterUserAsync(CreateUserModel createUser, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var userManager = SignInManager.UserManager;
@@ -103,6 +147,55 @@ namespace UrGuide.WebApp.Services
 
             var emailConfirmationToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
             return Result.Of((user.Id, emailConfirmationToken));
+        }
+
+        public async Task<Result<bool>> RequestPasswordResetAsync(PasswordResetRequestModel passwordResetRequest, CancellationToken cancellationToken)
+        {
+            var userManager = SignInManager.UserManager;
+            var user = await userManager.FindByEmailAsync(passwordResetRequest.Email).ConfigureAwait(false);
+            if (user != null)
+            {
+                var confirmationToken = await userManager.GeneratePasswordResetTokenAsync(user);
+
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = "Please reset your password",
+                    Link = UserContext.ResolveUrl(Shared.MessageTypes.PasswordReset, new ResetPasswordModel
+                    {
+                        ConfirmationToken = confirmationToken,
+                        Email = passwordResetRequest.Email
+                    }),
+                    LinkText = "Reset your password",
+                    Subject = "Password reset",
+                    To = passwordResetRequest.Email,
+                    ToName = user.FirstName
+                }).ConfigureAwait(false);
+
+                return Result.Of(true);
+            }
+            return Result.Of(false).WithErrors("Failed to generate a password reset token");
+        }
+
+        public async Task<Result<bool>> ResetPasswordAsync(ResetPasswordModel resetPasswordModel, CancellationToken cancellationToken)
+        {
+            var userManager = SignInManager.UserManager;
+            var user = await userManager.FindByEmailAsync(resetPasswordModel.Email);
+            if (user != null)
+            {
+                var confirmationResult = await userManager.ResetPasswordAsync(user, resetPasswordModel.ConfirmationToken, resetPasswordModel.Password);
+                if (confirmationResult.Succeeded)
+                {
+                    await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                    {
+                        Subject = "Password reset",
+                        Content = "Your password was successfully reset.",
+                        To = user.Email,
+                        ToName = user.FirstName
+                    }).ConfigureAwait(false);
+                    return Result.Of(true);
+                }
+            }
+            return Result.Of(false).WithErrors("Failed to reset your password");
         }
     }
 }

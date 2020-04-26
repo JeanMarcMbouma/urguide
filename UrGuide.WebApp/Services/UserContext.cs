@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using UrGuide.Model.Users;
 using UrGuide.Shared;
 using UrGuide.Shared.Contracts;
 
@@ -13,16 +14,17 @@ namespace UrGuide.WebApp.Services
             HttpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             Url = url ?? throw new ArgumentNullException(nameof(url));
         }
-        public string UserId => string.Empty;
-
-        public string UserName { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string Id_Token { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        public string ProfileImage => throw new NotImplementedException();
 
         public IHttpContextAccessor HttpContextAccessor { get; }
-
         public IUrlHelper Url { get; }
+
+        public string UserId { get; private set; }
+        public string UserName { get; private set; }
+        public string Id_Token { get; private set; }
+
+        public string ProfileImage { get; private set; }
+
+        public bool IsAuthenticated => HttpContextAccessor.HttpContext.User.Identity.IsAuthenticated;
 
         public string ResolveUrl(MessageTypes confirmation, object parameters)
         {
@@ -31,13 +33,20 @@ namespace UrGuide.WebApp.Services
                 case MessageTypes.Confirmation:
                     return Url.ActionLink("ConfirmEmail", "Account", parameters);
                 case MessageTypes.PasswordReset:
-                    break;
+                    return Url.Action("pforget", parameters);
                 case MessageTypes.ChangePassword:
                     break;
                 default:
                     break;
             }
             throw new NotImplementedException();
+        }
+
+        public void Use(User user)
+        {
+            UserId = user.Id;
+            UserName = user.UserName;
+            ProfileImage = user.ProfileImage;
         }
     }
 }

@@ -13,8 +13,8 @@ namespace UrGuide.Services.Contracts
         Task<Result<User>> GetUserAsync(string userId, CancellationToken cancellationToken);
         Task<Result<bool>> SetUserAttributeAsync(string userId, SetUserAttribute attribute, CancellationToken cancellationToken);
         Task<Result<bool>> DeleteUserAccountAsync(string userId, CancellationToken cancellationToken);
-        Task<Result<bool>> RegisterUserAsync(CreateUserCommand createUser, CancellationToken cancellationToken);
-        Task<Result<bool>> RegisterGuideAsync(CreateGuideCommand createGuide, CancellationToken cancellationToken);
-        Task<Result<User>> LoginAsync(LoginCommand login, CancellationToken cancellationToken);
+        Task<Result<bool>> RegisterUserAsync(CreateUserModel createUser, CancellationToken cancellationToken);
+        Task<Result<bool>> RegisterGuideAsync(CreateGuideModel createGuide, CancellationToken cancellationToken);
+        Task<Result<User>> LoginAsync(LoginModel login, CancellationToken cancellationToken);
     }
 }

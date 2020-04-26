@@ -4,7 +4,7 @@ using System.Text;
 
 namespace UrGuide.Model.Users
 {
-    public class CreateGuideCommand
+    public class CreateGuideModel
     {
         public string Email { get; set; }
         public string Password { get; set; }
