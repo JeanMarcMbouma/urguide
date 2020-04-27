@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace UrGuide.Shared.Contracts
 {
@@ -8,9 +9,8 @@ namespace UrGuide.Shared.Contracts
     {
         string UserId { get; }
         string UserName { get; }
-        string Id_Token { get; }
-        string ProfileImage { get;  }
+        Task<string> Id_Token { get; }
+        Task<string> Access_Token { get; }
         bool IsAuthenticated { get; }
-        void Use(Model.Users.User user);
     }
 }

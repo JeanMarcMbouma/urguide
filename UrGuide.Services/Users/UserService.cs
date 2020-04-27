@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Data;
+using UrGuide.Model;
 using UrGuide.Model.Messages;
 using UrGuide.Model.Results;
 using UrGuide.Model.Users;
@@ -40,19 +41,22 @@ namespace UrGuide.Services.Users
         public IEmailService EmailService { get; }
         public IWebHelper WebHelper { get; }
 
-        public async Task<Result<bool>> DeleteUserAccountAsync(string userId, CancellationToken cancellationToken)
+        public async Task<Result<bool>> DeleteUserAccountAsync(CancellationToken cancellationToken)
         {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
+
             cancellationToken.ThrowIfCancellationRequested();
 
             try
             {
-                var user = await Context.Users.FindAsync(userId, cancellationToken);
+                var user = await Context.Users.FindAsync(new { UserContext.UserId }, cancellationToken);
                 Context.Users.Remove(user);
                 return Result.Of(true);
             }
             catch (System.Exception e)
             {
-                Logger.LogError(e, "Failed to delete a user account: UserId: {0}", userId);
+                Logger.LogError(e, "Failed to delete a user account: UserId: {0}", UserContext.UserId);
                 return Result.Of(false).WithErrors("Failed to delete a user account");
             }
         }
@@ -71,7 +75,6 @@ namespace UrGuide.Services.Users
             if (userId.HasError)
                 return Result.Of<User>(null).Combine(userId);
             var user = await GetUserAsync(userId.Data, cancellationToken);
-            UserContext.Use(user.Data);
             return user;
         }
 
@@ -155,10 +158,13 @@ namespace UrGuide.Services.Users
             return Result.Of(true);
         }
 
-        public async Task<Result<bool>> SetUserAttributeAsync(string userId, SetUserAttribute attribute, CancellationToken cancellationToken)
+        public async Task<Result<bool>> SetUserAttributeAsync(SetAttribute attribute, CancellationToken cancellationToken)
         {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
+
             cancellationToken.ThrowIfCancellationRequested();
-            var user = await Context.Users.FindAsync(userId, cancellationToken);
+            var user = await Context.Users.FindAsync(new { UserContext.UserId }, cancellationToken);
             var attributes = user.Attributes;
             var attr = attributes.FirstOrDefault(a => a.Name == attribute.Name);
             if (attr == null)

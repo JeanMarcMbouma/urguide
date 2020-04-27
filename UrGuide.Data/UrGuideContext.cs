@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using UrGuide.Data.Entities.Messages;
 using UrGuide.Data.Entities.Posts;
+using UrGuide.Data.Entities.Shared;
 using UrGuide.Data.Entities.Users;
 
 namespace UrGuide.Data
@@ -12,6 +13,7 @@ namespace UrGuide.Data
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Post> Posts { get; set; }
         public virtual DbSet<Notification> Messages { get; set; }
+        public virtual DbSet<ImageCatalog> ImageCatalogs { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {

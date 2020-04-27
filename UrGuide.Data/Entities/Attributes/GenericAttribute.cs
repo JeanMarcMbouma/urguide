@@ -7,5 +7,15 @@ namespace UrGuide.Data.Entities.Attributes
     {
         public string Name { get; set; }
         public string Value { get; set; }
+
+        public static implicit operator string (GenericAttribute attribute)
+        {
+            return attribute.Value;
+        }
+
+        public override string ToString()
+        {
+            return Value;
+        }
     }
 }

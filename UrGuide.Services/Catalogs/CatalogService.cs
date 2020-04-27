@@ -1,0 +1,194 @@
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using UrGuide.Data;
+using UrGuide.Model;
+using UrGuide.Model.Catalogs;
+using UrGuide.Model.Results;
+using UrGuide.Services.Contracts;
+using UrGuide.Shared.Contracts;
+
+namespace UrGuide.Services.Catalogs
+{
+    class CatalogService : ICatalogService
+    {
+        public CatalogService(IUserContext userContext, UrGuideContext context, IMapper mapper)
+        {
+            UserContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
+            Context = context ?? throw new ArgumentNullException(nameof(context));
+            Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        }
+
+        public IUserContext UserContext { get; }
+        public UrGuideContext Context { get; }
+        public IMapper Mapper { get; }
+
+        public async Task<Result<bool>> AddImageToCatalogAsync(string catalogId, ImageFileModel imageFile, CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var catalog = await Context.ImageCatalogs.Include(x => x.Images)
+                .Include(x => x.User)
+                .Where(x => x.User.UserId == UserContext.UserId)
+                .FirstOrDefaultAsync(x => x.Id == catalogId, cancellationToken);
+            if (catalog == null)
+                return Result.Of(false).WithErrors("Catalog doesn't exists");
+            catalog.Images.Add(new Data.Entities.Shared.Image
+            {
+                ImageBase64 = imageFile.ImageBase64,
+                MimeType = GetImageMimeType(imageFile.Name)
+            });
+            await Context.SaveChangesAsync(cancellationToken);
+            return Result.Of(true);
+        }
+
+        public async Task<Result<ImageCatalogModel>> CreateCatalogAsync(CreateImageCatalogModel catalogModel, CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of<ImageCatalogModel>().WithErrors(ErrorMessages.NotAuthenticated);
+            cancellationToken.ThrowIfCancellationRequested();
+            var user = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
+            var catalog = new Data.Entities.Shared.ImageCatalog
+            {
+                Created = DateTime.UtcNow,
+                User = user
+            };
+
+            foreach (var file in catalogModel.Files)
+            {
+                var image = new Data.Entities.Shared.Image
+                {
+                    ImageBase64 = file.ImageBase64,
+                    MimeType = GetImageMimeType(file.Name)
+                };
+                image.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(file.Name), Value = file.Name });
+                catalog.Images.Add(image);
+            }
+            catalog.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(catalogModel.Name), Value = catalogModel.Name });
+            catalog.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(catalogModel.Description), Value = catalogModel.Description });
+            Context.ImageCatalogs.Add(catalog);
+            await Context.SaveChangesAsync(cancellationToken);
+            return Result.Of(Mapper.Map<ImageCatalogModel>(catalog));
+        }
+
+        private string GetImageMimeType(string name)
+        {
+            var ext = System.IO.Path.GetExtension(name);
+            return ext switch
+            {
+                "png" => "image/png",
+                "jpg" => "image/jpg",
+                "tif" => "image/tiff",
+                "tiff" => "image/tiff",
+                "webp" => "image/webp",
+                "gif" => "image/gif",
+                _ => "image/jpeg"
+            };
+        }
+
+        public async Task<Result<ImageCatalogModel>> GetCatalogAsync(string catalogId, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var catalog = await Context.ImageCatalogs.FindAsync(new[] { catalogId }, cancellationToken);
+            if (catalog == null)
+                return Result.Of<ImageCatalogModel>().WithErrors("Catalog doesn't exists");
+            return Result.Of(Mapper.Map<ImageCatalogModel>(catalog));
+        }
+
+        public async Task<Result<IEnumerable<ImageCatalogModel>>> GetCatalogsAsync(string userId, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var catalogs = await Context.ImageCatalogs.Include(c => c.User).Where(x => x.User.UserId == userId)
+                .Select(catalog => Mapper.Map<ImageCatalogModel>(catalog))
+                .ToListAsync(cancellationToken);
+            return Result.Of(catalogs.AsEnumerable());
+        }
+
+        public async Task<Result<bool>> RemoveCatalogAsync(string catalogId, CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var catalog = await Context.ImageCatalogs
+                    .Include(x => x.User)
+                    .Where(x => x.User.UserId == UserContext.UserId && x.Id == catalogId).FirstOrDefaultAsync(cancellationToken);
+            if (catalog == null)
+                return Result.Of(false).WithErrors("Catalog doesn't exists");
+
+            Context.ImageCatalogs.Remove(catalog);
+
+            await Context.SaveChangesAsync(cancellationToken);
+            return Result.Of(true);
+        }
+
+        public async Task<Result<bool>> RemoveImageFromCatalogAsync(string catalogId, string[] imageIds, CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var catalog = await Context.ImageCatalogs.Include(x => x.Images)
+                .Include(x => x.User)
+                .Where(x => x.User.UserId == UserContext.UserId)
+                .FirstOrDefaultAsync(x => x.Id == catalogId, cancellationToken);
+            if (catalog == null)
+                return Result.Of(false).WithErrors("Catalog doesn't exists");
+            var images = catalog.Images.Where(i => imageIds.Any(v => v.Equals(i.Id))).ToList();
+            images.ForEach(i => catalog.Images.Remove(i));
+
+            await Context.SaveChangesAsync(cancellationToken);
+            return Result.Of(true);
+        }
+
+        public Task<Result<bool>> SetCataglogAttributeAsync(string catalogId, SetAttribute attribute, CancellationToken cancellationToken)
+        {
+            return SetCataglogAttributesAsync(catalogId, new[] { attribute }, cancellationToken);
+        }
+
+        public async Task<Result<bool>> SetCataglogAttributesAsync(string catalogId, SetAttribute[] attributes, CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var catalog = await Context.ImageCatalogs.Include(x => x.Attributes)
+                .Include(x => x.User)
+                .Where(x => x.User.UserId == UserContext.UserId)
+                .FirstOrDefaultAsync(x => x.Id == catalogId, cancellationToken);
+            if (catalog == null)
+                return Result.Of(false).WithErrors("Catalog doesn't exists");
+
+            var genericAttributes = catalog.Attributes;
+            foreach (var attribute in attributes)
+            {
+                var attr = genericAttributes.FirstOrDefault(a => a.Name == attribute.Name);
+                if (attr == null)
+                {
+                    catalog.Attributes.Add(new Data.Entities.Attributes.GenericAttribute
+                    {
+                        Name = attribute.Name,
+                        Value = attribute.Value
+                    });
+                }
+                else
+                {
+                    attr.Value = attribute.Value;
+                }
+            }
+
+            await Context.SaveChangesAsync(cancellationToken);
+            return Result.Of(true);
+        }
+    }
+}

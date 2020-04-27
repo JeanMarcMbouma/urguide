@@ -1,37 +1,31 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using System;
-using UrGuide.Model.Users;
-using UrGuide.Shared;
 using UrGuide.Shared.Contracts;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Identity;
+using UrGuide.WebApp.Entities;
+using Microsoft.AspNetCore.Authentication;
+using System.Threading.Tasks;
 
 namespace UrGuide.WebApp.Services
 {
     public class UserContext : IUserContext
     {
-        public UserContext(IHttpContextAccessor httpContextAccessor)
+        public UserContext(IHttpContextAccessor httpContextAccessor, 
+            SignInManager<UrGuideUser> signInManager)
         {
             HttpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            SignInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
         }
 
         public IHttpContextAccessor HttpContextAccessor { get; }
+        public SignInManager<UrGuideUser> SignInManager { get; }
 
-        public string UserId { get; private set; }
-        public string UserName { get; private set; }
-        public string Id_Token { get; private set; }
 
-        public string ProfileImage { get; private set; }
+        public string UserId => SignInManager.UserManager.GetUserId(HttpContextAccessor.HttpContext.User);
+        public string UserName => HttpContextAccessor.HttpContext.User.Identity.Name;
+        public Task<string> Id_Token => HttpContextAccessor.HttpContext.GetTokenAsync("id_token");
+        public Task<string> Access_Token => HttpContextAccessor.HttpContext.GetTokenAsync("access_token");
 
         public bool IsAuthenticated => HttpContextAccessor.HttpContext.User.Identity.IsAuthenticated;
-
-        public void Use(User user)
-        {
-            UserId = user.Id;
-            UserName = user.UserName;
-            ProfileImage = user.ProfileImage;
-        }
     }
 }
