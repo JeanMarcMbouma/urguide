@@ -12,6 +12,7 @@ using UrGuide.WebApp.Extensions;
 using UrGuide.Services.Extensions;
 using FluentValidation.AspNetCore;
 using AspNetCoreRateLimit;
+using System.Collections.Generic;
 
 namespace UrGuide.WebApp
 {
@@ -47,21 +48,23 @@ namespace UrGuide.WebApp
             services.AddRazorPages();
             services.AddSwaggerGen(c =>
             {
-                c.AddSecurityDefinition("BearerAuth", new OpenApiSecurityScheme
+                c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
                 {
-                    Type = SecuritySchemeType.OpenIdConnect,
-                    Scheme = "Bearer"
-                });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
+                    Type = SecuritySchemeType.OAuth2,
+                    Flows = new OpenApiOAuthFlows
                     {
-                        new OpenApiSecurityScheme
-                       {
-                           Reference = new OpenApiReference{ Type = ReferenceType.SecurityScheme, Id="BearerAuth"}
-                       },
-                       Array.Empty<string>()
+                        Implicit = new OpenApiOAuthFlow
+                        {
+                            AuthorizationUrl = new Uri("/connect/authorize", UriKind.Relative),
+                            TokenUrl = new Uri("/connect/token", UriKind.Relative),
+                            Scopes = new Dictionary<string, string>
+                            {
+                                
+                            }
+                        }
                     }
                 });
+                c.OperationFilter<Filters.AuthorizeCheckOperationFilter>();
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ur Guide API", Version = "v1" });
             });
             // In production, the React files will be served from this directory
@@ -102,6 +105,7 @@ namespace UrGuide.WebApp
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ur Guide API v1");
+                c.OAuthClientId("urguide_swagger_ui");
             });
             app.UseAuthentication();
             app.UseIdentityServer();

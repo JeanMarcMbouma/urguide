@@ -23,9 +23,6 @@ namespace UrGuide.Data.Configurations
             builder.HasOne(x => x.User)
                 .WithMany().HasForeignKey("UserId");
 
-            builder.HasMany(x => x.Categories)
-                .WithOne();
-
             builder.OwnsMany(x => x.Attributes, a =>
             {
                 a.ToTable("Post_Attributes", Constants.Schema);

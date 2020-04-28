@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UrGuide.Data;
 
 namespace UrGuide.Data.Migrations
 {
     [DbContext(typeof(UrGuideContext))]
-    partial class UrGuideContextModelSnapshot : ModelSnapshot
+    [Migration("20200428151409_Removed_Catagory_From_Post")]
+    partial class Removed_Catagory_From_Post
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

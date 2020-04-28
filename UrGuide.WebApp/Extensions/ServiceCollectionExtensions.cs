@@ -5,10 +5,12 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
 using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Data;
 using UrGuide.WebApp.Entities;
 using UrGuide.WebApp.Services;
+using static IdentityModel.OidcConstants;
 
 namespace UrGuide.WebApp.Extensions
 {
@@ -40,7 +42,19 @@ namespace UrGuide.WebApp.Extensions
                 options.UserInteraction.LoginUrl = "/sign-in";
                 options.UserInteraction.LogoutUrl = "/account/logout";
             })
-                .AddApiAuthorization<UrGuideUser, UrGuideAuthContext>();
+                .AddApiAuthorization<UrGuideUser, UrGuideAuthContext>(options =>
+                {
+                    options.Clients.Add(new IdentityServer4.Models.Client
+                    {
+                        RedirectUris = { "https://localhost:5001/swagger/oauth2-redirect.html" },
+                        ClientName = "urguide_swagger_ui",
+                        ClientId = "urguide_swagger_ui",
+                        AllowedScopes = { IdentityServer4.IdentityServerConstants.StandardScopes.OpenId },
+                        AllowedGrantTypes = { GrantTypes.Implicit },
+                        RequireConsent = false,
+                        AllowAccessTokensViaBrowser = true
+                    });
+                });
 
             services.AddAuthentication()
                 .AddIdentityServerJwt();

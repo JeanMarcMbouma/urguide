@@ -11,7 +11,6 @@ namespace UrGuide.Data.Entities.Posts
         public Post()
         {
             Attributes = new HashSet<GenericAttribute>();
-            Categories = new HashSet<Category>();
         }
 
 
@@ -21,9 +20,6 @@ namespace UrGuide.Data.Entities.Posts
         public DateTime DateOfPublication { get; set; }
         public DateTime LastUpdated { get; set; }
 
-
-
-        public virtual ICollection<Category> Categories { get; protected set; }
         public virtual ICollection<GenericAttribute> Attributes { get; protected set; }
         public virtual ImageCatalog Catalog { get; set; }
         public virtual User User { get; set; }
