@@ -51,7 +51,7 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
-        [HttpPut("{postId}/attributes/set/{name}")]
+        [HttpPut("{postId}/attributes/{name}/set")]
         public async Task<IActionResult> EditAttribute(string postId, string name, SetAttribute attribute, CancellationToken cancellationToken)
         {
             if (name != attribute.Name)
@@ -72,7 +72,7 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
-        [HttpDelete("{postId}/attributes/delete/{name}")]
+        [HttpDelete("{postId}/attributes/{name}/delete")]
         public async Task<IActionResult> RemoveAttribute(string postId, string name, CancellationToken cancellationToken)
         {
             
