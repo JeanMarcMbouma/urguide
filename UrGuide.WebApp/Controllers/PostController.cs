@@ -1,144 +1,90 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using UrGuide.WebApp.Data;
+using UrGuide.Model;
+using UrGuide.Model.Posts;
+using UrGuide.Services.Contracts;
 using UrGuide.WebApp.Models;
 
 namespace UrGuide.WebApp.Controllers
 {
 
 
-    //[ApiController]
-    //[Route("[controller]")]
-    //public class PostController : ControllerBase
-    //{
-    //    private readonly ApplicationDbContext _context;
+    [ApiController]
+    [Route("[controller]")]
+    [Authorize]
+    public class PostController : ControllerBase
+    {
+        private readonly IPostService _postService;
 
-    //    public PostController(ApplicationDbContext context)
-    //    {
-    //        _context = context;
-    //    }
+        public PostController(IPostService postService)
+        {
+            _postService = postService ?? throw new ArgumentNullException(nameof(postService));
+        }
 
-    //    [HttpGet]
-    //    public async Task<ActionResult<IEnumerable<Post>>> GetPosts()
-    //    {
-    //        return await _context.Posts_Table.ToListAsync();
-    //    }
+        [HttpGet]
+        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        {
+            var result = await _postService.GetLast10PostsAsync(cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
 
-    //    //[Authorize]
-    //    [HttpPost("newpost")]
-    //    public async Task<ActionResult<Post>> NewPost([FromBody]CreatePostModel model)
-    //    {
-    //        if (!ModelState.IsValid)
-    //        {
-    //            return BadRequest(ModelState);
-    //        }
-    //        var user = _context.Users.Find(model.UserId);
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody]PostCreationModel model, CancellationToken cancellationToken)
+        {
+            var result = await _postService.CreatePostAsync(model, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
 
-    //        if(user == null)
-    //        {
-    //            return BadRequest(ErrorEnvelop.Create(new[] { "No user found." }));
-    //        }
 
-    //        Post post = new Post
-    //        {
-    //            Text = model.Text,
-    //            Date = DateTime.Now,
-    //            UserId = user.Id,
+        [HttpPut("{postId}")]
+        public async Task<IActionResult> Edit(string postId, PostUpdateModel model, CancellationToken cancellationToken)
+        {
+            if (postId != model.Id)
+            {
+                return BadRequest();
+            }
 
-    //        };
+            var result = await _postService.UpdatePostAsync(model, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
 
-    //        _context.Posts_Table.Add(post);
-    //        await _context.SaveChangesAsync();
+        [HttpPut("{postId}/attributes/set/{name}")]
+        public async Task<IActionResult> EditAttribute(string postId, string name, SetAttribute attribute, CancellationToken cancellationToken)
+        {
+            if (name != attribute.Name)
+            {
+                return BadRequest();
+            }
 
-    //        foreach (var shot in model.Photos)
-    //        {
-    //            Shot img = new Shot { FilePath = shot, HasPost = true, PostId = post.Id, UserId = user.Id };
+            var result = await _postService.UpdatePostAttributesAsync(postId, new[] { attribute }, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
 
-    //            _context.Shots_Table.Add(img);
-    //            await _context.SaveChangesAsync();
-    //        }
+        [HttpPut("{postId}/attributes/batchupdate")]
+        public async Task<IActionResult> EditAttributes(string postId, SetAttribute[] attributes, CancellationToken cancellationToken)
+        {
+            if (attributes == null)
+                return BadRequest();
+            var result = await _postService.UpdatePostAttributesAsync(postId, attributes, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
 
-    //        return Ok( new { action = "inserted" });
+        [HttpDelete("{postId}/attributes/delete/{name}")]
+        public async Task<IActionResult> RemoveAttribute(string postId, string name, CancellationToken cancellationToken)
+        {
+            
+            var result = await _postService.UpdatePostAttributesAsync(postId, new[] { new SetAttribute { Name = name, Value = string.Empty } }, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
 
-    //        //return CreatedAtAction("GetPost", new { id = post.Id }, post);
-    //    }
-
-    //    [HttpGet("{id}")]
-    //    public async Task<ActionResult<Post>> GetPost(long id)
-    //    {
-    //        var post = await _context.Posts_Table.FindAsync(id);
-
-    //        if (post == null)
-    //        {
-    //            return NotFound();
-    //        }
-
-    //        return post;
-    //    }
-
-    //    [Authorize]
-    //    [HttpPut("{id}")]
-    //    public async Task<IActionResult> EditPost(long id, Post post)
-    //    {
-    //        if (id != post.Id)
-    //        {
-    //            return BadRequest();
-    //        }
-
-    //        _context.Entry(post).State = EntityState.Modified;
-
-    //        try
-    //        {
-    //            await _context.SaveChangesAsync();
-    //        }
-    //        catch (DbUpdateConcurrencyException)
-    //        {
-    //            if (!PostExists(id))
-    //            {
-    //                return NotFound();
-    //            }
-    //            else
-    //            {
-    //                throw;
-    //            }
-    //        }
-
-    //        return Ok(new { action = "updated" });
-    //    }
-
-    //    [Authorize]
-    //    [HttpDelete("{id}")]
-    //    public async Task<ActionResult<Post>> DeletePost(long id)
-    //    {
-    //        var post = await _context.Posts_Table.FindAsync(id);
-    //        if (post == null)
-    //        {
-    //            return NotFound();
-    //        }
-
-    //        var shots = _context.Shots_Table.Where(x => x.PostId == post.Id).ToList();
-
-    //        foreach( var shot in shots)
-    //        {
-
-    //            _context.Shots_Table.Remove(shot);
-    //            await _context.SaveChangesAsync();
-    //        }
-
-    //        _context.Posts_Table.Remove(post);
-    //        await _context.SaveChangesAsync();
-
-    //        return Ok(new { action = "deleted" });
-    //    }
-
-    //    private bool PostExists(long id)
-    //    {
-    //        return _context.Posts_Table.Any(e => e.Id == id);
-    //    }
-    //}
+        [HttpDelete("{postId}")]
+        public async Task<IActionResult> DeletePost(string postId, CancellationToken cancellationToken)
+        {
+            var result = await _postService.DeletePostAsync(postId, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
+    }
 }

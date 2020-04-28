@@ -94,7 +94,13 @@ namespace UrGuide.Services.Abstraction
                 }
                 else
                 {
-                    attr.Value = attribute.Value;
+                    if(string.IsNullOrEmpty(attribute.Value))
+                    {
+                        catalog.Attributes.Remove(attr);
+                    } else
+                    {
+                        attr.Value = attribute.Value;
+                    }
                 }
             }
 
