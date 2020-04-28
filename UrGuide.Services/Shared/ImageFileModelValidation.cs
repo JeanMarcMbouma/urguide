@@ -1,8 +1,9 @@
 ﻿using FluentValidation;
+using UrGuide.Model.Shared;
 
 namespace UrGuide.Services.Shared
 {
-    class ImageFileModelValidation : AbstractValidator<Model.Catalogs.ImageFileModel>
+    class ImageFileModelValidation : AbstractValidator<ImageFileModel>
     {
         public ImageFileModelValidation()
         {

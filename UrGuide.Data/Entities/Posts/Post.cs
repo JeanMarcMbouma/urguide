@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using UrGuide.Data.Entities.Attributes;
+using UrGuide.Data.Entities.Contracts;
 using UrGuide.Data.Entities.Shared;
 using UrGuide.Data.Entities.Users;
 
 namespace UrGuide.Data.Entities.Posts
 {
-    public class Post
+    public class Post : IAttributeEnabledEntity, IUserOwnedEntity
     {
         public Post()
         {

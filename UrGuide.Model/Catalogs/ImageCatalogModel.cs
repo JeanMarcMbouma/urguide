@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UrGuide.Model.Shared;
 
 namespace UrGuide.Model.Catalogs
 {

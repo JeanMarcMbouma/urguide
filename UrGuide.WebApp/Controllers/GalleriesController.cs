@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UrGuide.Model.Shared;
 using UrGuide.Services.Contracts;
 using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Models;
@@ -68,7 +69,7 @@ namespace UrGuide.WebApp.Controllers
         }
 
         [HttpPut("{catalogId}/images")]
-        public async Task<IActionResult> AddImage(string catalogId, [FromBody]Model.Catalogs.ImageFileModel imageFile, CancellationToken cancellationToken)
+        public async Task<IActionResult> AddImage(string catalogId, [FromBody]ImageFileModel imageFile, CancellationToken cancellationToken)
         {
             var result = await CatalogService.AddImageToCatalogAsync(catalogId, imageFile, cancellationToken);
             if (result.HasError)

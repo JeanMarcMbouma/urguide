@@ -88,7 +88,7 @@ namespace UrGuide.Services.Users
             }
             var user = new Data.Entities.Users.User
             {
-                UserId = userId.Data.userId,
+                Id = userId.Data.userId,
                 ProfileImage = new Data.Entities.Users.Image
                 {
                     ImageBase64 = createGuide.ProfileImage
@@ -133,7 +133,7 @@ namespace UrGuide.Services.Users
             }
             var user = new Data.Entities.Users.User
             {
-                UserId = userId.Data.userId
+                Id = userId.Data.userId
             };
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailOptIn), Value = Constants.Yes });
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailAddress), Value = createUser.Email });

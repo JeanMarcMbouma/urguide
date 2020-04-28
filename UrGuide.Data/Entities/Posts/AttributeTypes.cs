@@ -20,6 +20,16 @@
         Currency,
         Amount,
         BidOptIn,
-        NumberOfPosts
+        NumberOfPosts,
+        Categories,
+        DateStart,
+        TimeStart,
+        GeoLocation,
+        DateEnd,
+        TimeEnd,
+        PublicationDate,
+        LastEdit,
+        Status,
+        LastBid
     }
 }

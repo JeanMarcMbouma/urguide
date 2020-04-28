@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using UrGuide.Data.Entities.Attributes;
+using UrGuide.Data.Entities.Contracts;
 
 namespace UrGuide.Data.Entities.Shared
 {
-    public class ImageCatalog
+    public class ImageCatalog : IUserOwnedEntity, IAttributeEnabledEntity
     {
         public ImageCatalog()
         {

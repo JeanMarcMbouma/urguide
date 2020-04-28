@@ -6,26 +6,40 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Data;
+using UrGuide.Data.Entities.Shared;
 using UrGuide.Model;
 using UrGuide.Model.Catalogs;
 using UrGuide.Model.Results;
+using UrGuide.Model.Shared;
+using UrGuide.Services.Abstraction;
 using UrGuide.Services.Contracts;
+using UrGuide.Services.Helpers;
 using UrGuide.Shared.Contracts;
 
 namespace UrGuide.Services.Catalogs
 {
-    class CatalogService : ICatalogService
+    class CatalogService : BaseService, ICatalogService
     {
-        public CatalogService(IUserContext userContext, UrGuideContext context, IMapper mapper)
+        public CatalogService(IUserContext userContext, UrGuideContext context, IMapper mapper) : base(context, userContext)
         {
-            UserContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
-            Context = context ?? throw new ArgumentNullException(nameof(context));
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public IUserContext UserContext { get; }
-        public UrGuideContext Context { get; }
         public IMapper Mapper { get; }
+
+        public async Task<Result<bool>> AddCatalogToPostAsync(Data.Entities.Posts.Post post, CreateImageCatalogModel catalogModel, CancellationToken cancellationToken)
+        {
+            if (post is null)
+            {
+                return Result.Of(false).WithErrors("No post was given");
+            }
+
+            var result = await CreateCatalogInternal(catalogModel, cancellationToken);
+            if (result.HasError)
+                return Result.Of(false).Combine(result).WithErrors("Failed to add a catalog to post");
+            post.Catalog = result.Data;
+            return Result.Of(true);
+        }
 
         public async Task<Result<bool>> AddImageToCatalogAsync(string catalogId, ImageFileModel imageFile, CancellationToken cancellationToken)
         {
@@ -36,14 +50,14 @@ namespace UrGuide.Services.Catalogs
 
             var catalog = await Context.ImageCatalogs.Include(x => x.Images)
                 .Include(x => x.User)
-                .Where(x => x.User.UserId == UserContext.UserId)
+                .Where(x => x.User.Id == UserContext.UserId)
                 .FirstOrDefaultAsync(x => x.Id == catalogId, cancellationToken);
             if (catalog == null)
                 return Result.Of(false).WithErrors("Catalog doesn't exists");
             catalog.Images.Add(new Data.Entities.Shared.Image
             {
                 ImageBase64 = imageFile.ImageBase64,
-                MimeType = GetImageMimeType(imageFile.Name)
+                MimeType = FileExtensionHelper.GetImageMimeType(imageFile)
             });
             await Context.SaveChangesAsync(cancellationToken);
             return Result.Of(true);
@@ -54,8 +68,15 @@ namespace UrGuide.Services.Catalogs
             if (!UserContext.IsAuthenticated)
                 return Result.Of<ImageCatalogModel>().WithErrors(ErrorMessages.NotAuthenticated);
             cancellationToken.ThrowIfCancellationRequested();
+            var catalog = await CreateCatalogInternal(catalogModel, cancellationToken);
+            await Context.SaveChangesAsync(cancellationToken);
+            return Result.Of(Mapper.Map<ImageCatalogModel>(catalog.Data));
+        }
+
+        private async Task<Result<ImageCatalog>> CreateCatalogInternal(CreateImageCatalogModel catalogModel, CancellationToken cancellationToken)
+        {
             var user = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
-            var catalog = new Data.Entities.Shared.ImageCatalog
+            var catalog = new ImageCatalog
             {
                 Created = DateTime.UtcNow,
                 User = user
@@ -66,7 +87,7 @@ namespace UrGuide.Services.Catalogs
                 var image = new Data.Entities.Shared.Image
                 {
                     ImageBase64 = file.ImageBase64,
-                    MimeType = GetImageMimeType(file.Name)
+                    MimeType = FileExtensionHelper.GetImageMimeType(file)
                 };
                 image.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(file.Name), Value = file.Name });
                 catalog.Images.Add(image);
@@ -74,23 +95,7 @@ namespace UrGuide.Services.Catalogs
             catalog.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(catalogModel.Name), Value = catalogModel.Name });
             catalog.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(catalogModel.Description), Value = catalogModel.Description });
             Context.ImageCatalogs.Add(catalog);
-            await Context.SaveChangesAsync(cancellationToken);
-            return Result.Of(Mapper.Map<ImageCatalogModel>(catalog));
-        }
-
-        private string GetImageMimeType(string name)
-        {
-            var ext = System.IO.Path.GetExtension(name);
-            return ext switch
-            {
-                "png" => "image/png",
-                "jpg" => "image/jpg",
-                "tif" => "image/tiff",
-                "tiff" => "image/tiff",
-                "webp" => "image/webp",
-                "gif" => "image/gif",
-                _ => "image/jpeg"
-            };
+            return Result.Of(catalog);
         }
 
         public async Task<Result<ImageCatalogModel>> GetCatalogAsync(string catalogId, CancellationToken cancellationToken)
@@ -105,7 +110,7 @@ namespace UrGuide.Services.Catalogs
         public async Task<Result<IEnumerable<ImageCatalogModel>>> GetCatalogsAsync(string userId, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var catalogs = await Context.ImageCatalogs.Include(c => c.User).Where(x => x.User.UserId == userId)
+            var catalogs = await Context.ImageCatalogs.Include(c => c.User).Where(x => x.User.Id == userId)
                 .Select(catalog => Mapper.Map<ImageCatalogModel>(catalog))
                 .ToListAsync(cancellationToken);
             return Result.Of(catalogs.AsEnumerable());
@@ -120,7 +125,7 @@ namespace UrGuide.Services.Catalogs
 
             var catalog = await Context.ImageCatalogs
                     .Include(x => x.User)
-                    .Where(x => x.User.UserId == UserContext.UserId && x.Id == catalogId).FirstOrDefaultAsync(cancellationToken);
+                    .Where(x => x.User.Id == UserContext.UserId && x.Id == catalogId).FirstOrDefaultAsync(cancellationToken);
             if (catalog == null)
                 return Result.Of(false).WithErrors("Catalog doesn't exists");
 
@@ -139,7 +144,7 @@ namespace UrGuide.Services.Catalogs
 
             var catalog = await Context.ImageCatalogs.Include(x => x.Images)
                 .Include(x => x.User)
-                .Where(x => x.User.UserId == UserContext.UserId)
+                .Where(x => x.User.Id == UserContext.UserId)
                 .FirstOrDefaultAsync(x => x.Id == catalogId, cancellationToken);
             if (catalog == null)
                 return Result.Of(false).WithErrors("Catalog doesn't exists");
@@ -150,45 +155,10 @@ namespace UrGuide.Services.Catalogs
             return Result.Of(true);
         }
 
-        public Task<Result<bool>> SetCataglogAttributeAsync(string catalogId, SetAttribute attribute, CancellationToken cancellationToken)
+
+        public Task<Result<bool>> SetCataglogAttributesAsync(string catalogId, SetAttribute[] attributes, CancellationToken cancellationToken)
         {
-            return SetCataglogAttributesAsync(catalogId, new[] { attribute }, cancellationToken);
-        }
-
-        public async Task<Result<bool>> SetCataglogAttributesAsync(string catalogId, SetAttribute[] attributes, CancellationToken cancellationToken)
-        {
-            if (!UserContext.IsAuthenticated)
-                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var catalog = await Context.ImageCatalogs.Include(x => x.Attributes)
-                .Include(x => x.User)
-                .Where(x => x.User.UserId == UserContext.UserId)
-                .FirstOrDefaultAsync(x => x.Id == catalogId, cancellationToken);
-            if (catalog == null)
-                return Result.Of(false).WithErrors("Catalog doesn't exists");
-
-            var genericAttributes = catalog.Attributes;
-            foreach (var attribute in attributes)
-            {
-                var attr = genericAttributes.FirstOrDefault(a => a.Name == attribute.Name);
-                if (attr == null)
-                {
-                    catalog.Attributes.Add(new Data.Entities.Attributes.GenericAttribute
-                    {
-                        Name = attribute.Name,
-                        Value = attribute.Value
-                    });
-                }
-                else
-                {
-                    attr.Value = attribute.Value;
-                }
-            }
-
-            await Context.SaveChangesAsync(cancellationToken);
-            return Result.Of(true);
+            return SetAttributesRestrictedToUserAsync<ImageCatalog>(catalogId, attributes, cancellationToken);
         }
     }
 }

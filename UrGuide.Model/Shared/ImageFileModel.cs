@@ -1,4 +1,4 @@
-﻿namespace UrGuide.Model.Catalogs
+﻿namespace UrGuide.Model.Shared
 {
     public class ImageFileModel
     {

@@ -9,8 +9,8 @@ namespace UrGuide.Data.Configurations
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.ToTable("Users", Constants.Schema);
-            builder.HasKey(x => x.UserId);
-            builder.Property(x => x.UserId).IsRequired();
+            builder.HasKey(x => x.Id);
+            builder.Property(x => x.Id).HasColumnName("UserId").IsRequired();
             builder.Property(x => x.LastActivityDate);
             builder.OwnsOne(x => x.ProfileImage, p => {
                 p.ToTable("User_Images", Constants.Schema);
