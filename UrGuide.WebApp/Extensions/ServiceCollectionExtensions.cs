@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using IdentityModel;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -42,20 +43,30 @@ namespace UrGuide.WebApp.Extensions
                 options.UserInteraction.LoginUrl = "/sign-in";
                 options.UserInteraction.LogoutUrl = "/account/logout";
             })
-                .AddApiAuthorization<UrGuideUser, UrGuideAuthContext>(options =>
+            .AddApiAuthorization<UrGuideUser, UrGuideAuthContext>(options =>
+            {
+                options.Clients.Add(new IdentityServer4.Models.Client
                 {
-                    options.Clients.Add(new IdentityServer4.Models.Client
-                    {
-                        RedirectUris = { "https://localhost:5001/swagger/oauth2-redirect.html" },
-                        ClientName = "urguide_swagger_ui",
-                        ClientId = "urguide_swagger_ui",
-                        AllowedScopes = { IdentityServer4.IdentityServerConstants.StandardScopes.OpenId },
-                        AllowedGrantTypes = { GrantTypes.Implicit },
-                        RequireConsent = false,
-                        AllowAccessTokensViaBrowser = true
-                    });
+                    ClientName = "UrGuide.WebAPI",
+                    ClientId = "UrGuide.WebAPI",
+                    AllowedScopes = { StandardScopes.OpenId },
+                    AllowedGrantTypes = { GrantTypes.ClientCredentials },
+                    RequireConsent = false,
+                    AllowAccessTokensViaBrowser = true,
+                    RequireClientSecret = false,
+                    ClientSecrets = { new IdentityServer4.Models.Secret("secret".ToSha256()) }
                 });
-
+            });
+            /*
+             ,
+          "UrGuide.WebAPI": {
+            "Profile": "SPA",
+            "RedirectUri": "https://localhost:5001/swagger/oauth2-redirect.html",
+            "LogoutUri": "https://localhost:5001/swagger/oauth2-logout.html",
+            "ResponseType" :  "code",
+            "Scope": "profile openid"
+          }
+             */
             services.AddAuthentication()
                 .AddIdentityServerJwt();
 

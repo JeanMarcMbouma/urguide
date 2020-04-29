@@ -13,6 +13,8 @@ using UrGuide.Services.Extensions;
 using FluentValidation.AspNetCore;
 using AspNetCoreRateLimit;
 using System.Collections.Generic;
+using static IdentityModel.OidcConstants;
+using IdentityModel;
 
 namespace UrGuide.WebApp
 {
@@ -53,13 +55,14 @@ namespace UrGuide.WebApp
                     Type = SecuritySchemeType.OAuth2,
                     Flows = new OpenApiOAuthFlows
                     {
-                        Implicit = new OpenApiOAuthFlow
+                        ClientCredentials = new OpenApiOAuthFlow
                         {
                             AuthorizationUrl = new Uri("/connect/authorize", UriKind.Relative),
                             TokenUrl = new Uri("/connect/token", UriKind.Relative),
                             Scopes = new Dictionary<string, string>
                             {
-                                
+                                { StandardScopes.OpenId, "UrGuide Web API" },
+                                { StandardScopes.Profile, "User's profile" }
                             }
                         }
                     }
@@ -105,7 +108,8 @@ namespace UrGuide.WebApp
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ur Guide API v1");
-                c.OAuthClientId("urguide_swagger_ui");
+                c.OAuthClientId("UrGuide.WebAPI");
+                c.OAuthClientSecret("secret".ToSha256());
             });
             app.UseAuthentication();
             app.UseIdentityServer();
