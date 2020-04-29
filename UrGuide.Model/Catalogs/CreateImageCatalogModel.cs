@@ -7,10 +7,10 @@ namespace UrGuide.Model.Catalogs
     {
         public CreateImageCatalogModel()
         {
-            Files = new HashSet<ImageFileModel>();
+            Files = new HashSet<ImageFileCreateModel>();
         }
         public string Name { get; set; }
         public string Description { get; set; }
-        public ICollection<ImageFileModel> Files { get; set; }
+        public ICollection<ImageFileCreateModel> Files { get; set; }
     }
 }

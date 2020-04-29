@@ -3,7 +3,7 @@
     class FileExtensionHelper
     {
         public static string GetImageMimeType(Model.Shared.ImageFileModel file) => GetImageMimeType(file.Name);
-        
+        public static string GetImageMimeType(Model.Shared.ImageFileCreateModel file) => GetImageMimeType(file.Name);
         public static string GetImageMimeType(string name)
         {
             var ext = System.IO.Path.GetExtension(name);

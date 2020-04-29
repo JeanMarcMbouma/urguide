@@ -69,7 +69,7 @@ namespace UrGuide.WebApp.Controllers
         }
 
         [HttpPut("{catalogId}/images")]
-        public async Task<IActionResult> AddImage(string catalogId, [FromBody]ImageFileModel imageFile, CancellationToken cancellationToken)
+        public async Task<IActionResult> AddImage(string catalogId, [FromBody]ImageFileCreateModel imageFile, CancellationToken cancellationToken)
         {
             var result = await CatalogService.AddImageToCatalogAsync(catalogId, imageFile, cancellationToken);
             if (result.HasError)

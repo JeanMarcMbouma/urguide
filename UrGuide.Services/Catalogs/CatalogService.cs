@@ -41,7 +41,7 @@ namespace UrGuide.Services.Catalogs
             return Result.Of(true);
         }
 
-        public async Task<Result<bool>> AddImageToCatalogAsync(string catalogId, ImageFileModel imageFile, CancellationToken cancellationToken)
+        public async Task<Result<bool>> AddImageToCatalogAsync(string catalogId, ImageFileCreateModel imageFile, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
@@ -54,7 +54,7 @@ namespace UrGuide.Services.Catalogs
                 .FirstOrDefaultAsync(x => x.Id == catalogId, cancellationToken);
             if (catalog == null)
                 return Result.Of(false).WithErrors("Catalog doesn't exists");
-            catalog.Images.Add(new Data.Entities.Shared.Image
+            catalog.Images.Add(new Image
             {
                 ImageBase64 = imageFile.ImageBase64,
                 MimeType = FileExtensionHelper.GetImageMimeType(imageFile)
@@ -84,7 +84,7 @@ namespace UrGuide.Services.Catalogs
 
             foreach (var file in catalogModel.Files)
             {
-                var image = new Data.Entities.Shared.Image
+                var image = new Image
                 {
                     ImageBase64 = file.ImageBase64,
                     MimeType = FileExtensionHelper.GetImageMimeType(file)

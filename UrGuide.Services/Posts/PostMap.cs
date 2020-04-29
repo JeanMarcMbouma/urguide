@@ -23,8 +23,9 @@ namespace UrGuide.Services.Posts
                 .ForMember(x => x.Rating, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.Rating))))
                 .ForMember(x => x.PublicationDate, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.PublicationDate))))
                 .ForMember(x => x.Categories, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.Categories)).Value.Split(',', StringSplitOptions.RemoveEmptyEntries)))
-                .ForMember(x => x.Images, x => x.MapFrom(f => f.Catalog.Images.Select(i => new ImageFileModel
+                .ForMember(x => x.Images, x => x.MapFrom(f => f.Catalog.Images.Select(i => new ImageFileCreateModel
                 {
+                    Id = i.Id, 
                     ImageBase64 = i.ImageBase64,
                     Name = i.Attributes.First(a => a.Name == nameof(Model.Catalogs.CreateImageCatalogModel.Name))
                 })))

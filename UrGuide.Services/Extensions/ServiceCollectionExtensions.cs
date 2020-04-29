@@ -24,10 +24,11 @@ namespace UrGuide.Services.Extensions
 
             // Shared
             services.AddTransient<IValidator<SetAttribute>, SetAttributeValidation>();
-            services.AddTransient<IValidator<ImageFileModel>, ImageFileModelValidation>();
+            services.AddTransient<IValidator<ImageFileCreateModel>, ImageFileModelValidation>();
 
             // Users
             services.AddTransient<IValidator<Model.Users.CreateGuideModel>, GuideValidation>();
+            services.AddTransient<IValidator<Model.Users.LoginModel>, LoginValidation>();
             services.AddTransient<IValidator<Model.Users.CreateUserModel>, CreateUserValidation>();
             services.AddTransient<IValidator<Model.Users.ChangePasswordModel>, ChangePasswordValidation>();
             services.AddTransient<IValidator<Model.Users.ResetPasswordModel>, ResetPasswordValidation>();

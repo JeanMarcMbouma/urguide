@@ -27,7 +27,7 @@ namespace UrGuide.WebApp.Controllers
         public IAuthService AuthService { get; }
 
         [HttpPost("/login")]
-        public async Task<IActionResult> Login([FromBody] Model.Users.LoginModel model, CancellationToken cancellationToken, string returnUrl = null)
+        public async Task<IActionResult> Login([FromBody] LoginModel model, CancellationToken cancellationToken, string returnUrl = null)
         {
             var result = await UserService.LoginAsync(model, cancellationToken);
             if (result.HasError)

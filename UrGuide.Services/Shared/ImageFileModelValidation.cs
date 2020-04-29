@@ -3,7 +3,7 @@ using UrGuide.Model.Shared;
 
 namespace UrGuide.Services.Shared
 {
-    class ImageFileModelValidation : AbstractValidator<ImageFileModel>
+    class ImageFileModelValidation : AbstractValidator<ImageFileCreateModel>
     {
         public ImageFileModelValidation()
         {

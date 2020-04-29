@@ -7,7 +7,7 @@ namespace UrGuide.Model.Posts
     {
         public PostModel()
         {
-            Images = new HashSet<ImageFileModel>();
+            Images = new HashSet<ImageFileCreateModel>();
             Categories = new HashSet<string>();
         }
         public string Id { get; set; }
@@ -29,6 +29,6 @@ namespace UrGuide.Model.Posts
 
         public ICollection<string> Categories { get; protected set; }
 
-        public ICollection<ImageFileModel> Images { get; protected set; }
+        public ICollection<ImageFileCreateModel> Images { get; protected set; }
     }
 }
