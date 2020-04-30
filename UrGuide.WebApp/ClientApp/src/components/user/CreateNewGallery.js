@@ -6,10 +6,11 @@ import {
 import PhotoLibraryIcon from '@material-ui/icons/PhotoLibrary';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
-import { GalleryDetails } from "./GalleryDetails";
-import GalleryContext from "./GalleryContext";
-import GalleryReducer from "./GalleryReducer";
-import "./Gallery.css";
+import { GalleryDetails } from "../../components/user/gallery/GalleryDetails";
+import GalleryContext from "../../components/user/gallery/GalleryContext";
+import GalleryReducer from "../../components/user/gallery/GalleryReducer";
+import { UpperSection } from "./UpperSection";
+import "../user/gallery/Gallery.css";
 
 function Gallery() {
 
@@ -92,13 +93,6 @@ function Gallery() {
     return (
         <div className="row justify-content-between">
             <div className="col-12 col-md-6 col-lg-5 col-xl-4">
-                <div>
-                    <Link style={{ textDecoration: `none`, fontSize: `20px`, fontWeight: `bolder` }} href="/user" color="primary">
-                        <KeyboardBackspaceIcon fontSize="small" /> Back
-                               </Link>
-                    <span style={{ fontSize: `20px`, fontWeight: `bold` }}> | Create New Gallery.</span>
-                 </div>
-                <br/>
                 <div className='details-card'>
                     <Grid item xs={12}>
                         <Box mb={5} mt={3}>
@@ -170,8 +164,17 @@ function Gallery() {
 export class CreateNewGallery extends Component {
     render() {
         return (
-            <div className="container-fluid gallery">
-               <Gallery />   
+            <div className="container-fluid user-page-container">
+                <div className="row">
+                    <div className="col-12">
+                        <UpperSection />
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-12 lower-section gallery">
+                        <Gallery />   
+                    </div>
+                </div>
             </div>
         )
     }

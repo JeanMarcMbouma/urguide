@@ -1,7 +1,6 @@
 ﻿import React from "react";
 import {
   Grid,
-  Box,
   FormHelperText,
   InputLabel,
   FormControl,
@@ -9,7 +8,6 @@ import {
   Container,
   CssBaseline
 } from "@material-ui/core";
-import CreateIcon from "@material-ui/icons/Create";
 import "./Gallery.css";
 
 export function GalleryDetails(props) {

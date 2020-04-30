@@ -18,3 +18,38 @@
         display: none;
     }
 }
+
+.text{
+    font-size:15px;
+
+}
+
+.btn{
+    color:#FF7B77;
+    font-size: 12px;
+    text-transform:uppercase;
+    margin-left: 10px;
+}
+
+.more {
+    color: #FF7B77;
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-left: 93px;
+}
+
+.suggestions {
+    margin-top: 20px;
+}
+
+.title {
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.popular {
+    background-color: #f7f8fa;
+    height: 100%;
+    width: auto;
+    padding-bottom: 30px;
+}

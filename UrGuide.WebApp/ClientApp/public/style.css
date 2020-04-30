@@ -1,8 +1,12 @@
 ﻿body,
 html {
-    background-color: white !important;
+ 
     height: 100%;
-    margin: 0px;
+    margin: 0;
    
+}
+
+a {
+    text-decoration: none !important;
 }
 
