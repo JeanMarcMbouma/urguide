@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UrGuide.Model.Catalogs;
 using UrGuide.Model.Shared;
 using UrGuide.Services.Contracts;
 using UrGuide.Shared.Contracts;
@@ -12,7 +14,7 @@ namespace UrGuide.WebApp.Controllers
 {
 
     [ApiController]
-    [Route("[controller]")]
+    [Route("catalogs")]
     [Authorize]
     public class GalleriesController : ControllerBase
     {
@@ -27,7 +29,8 @@ namespace UrGuide.WebApp.Controllers
         }
 
         // GET: api/Gallery
-        [HttpGet]
+        [HttpGet("{userId}/all")]
+        [ProducesDefaultResponseType(typeof(IEnumerable<ImageCatalogModel>))]
 
         public async Task<IActionResult> Get(string userId, CancellationToken cancellationToken)
         {
@@ -35,7 +38,8 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
-        [HttpGet("{catalogId}")]
+        [HttpGet("{catalogId}/retrieve")]
+        [ProducesDefaultResponseType(typeof(ImageCatalogModel))]
 
         public async Task<IActionResult> GetById(string catalogId, CancellationToken cancellationToken)
         {
@@ -44,7 +48,7 @@ namespace UrGuide.WebApp.Controllers
         }
 
         // PUT: api/Gallery/5
-        [HttpPut("{catalogId}")]
+        [HttpPut("{catalogId}/update")]
         public async Task<IActionResult> Update(string catalogId, [FromBody]Model.Catalogs.UpdateImageCatalogModel model, CancellationToken cancellationToken)
         {
             if (catalogId != model.CatalogId)
@@ -57,7 +61,7 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
-        [HttpPut("{catalogId}/images/{imageId}/remove")]
+        [HttpPut("update/{catalogId}/images/{imageId}/remove")]
         public async Task<IActionResult> RemoveImage(string catalogId, string imageId, CancellationToken cancellationToken)
         {
             var result = await CatalogService.RemoveImageFromCatalogAsync(catalogId, new[] {
@@ -68,7 +72,7 @@ namespace UrGuide.WebApp.Controllers
             return await GetById(catalogId, cancellationToken);
         }
 
-        [HttpPut("{catalogId}/images")]
+        [HttpPut("update/{catalogId}/addimage")]
         public async Task<IActionResult> AddImage(string catalogId, [FromBody]ImageFileCreateModel imageFile, CancellationToken cancellationToken)
         {
             var result = await CatalogService.AddImageToCatalogAsync(catalogId, imageFile, cancellationToken);
@@ -78,7 +82,8 @@ namespace UrGuide.WebApp.Controllers
         }
 
         // POST: api/Galleries
-        [HttpPost]
+        [HttpPost("create")]
+        [ProducesDefaultResponseType(typeof(ImageCatalogModel))]
         public async Task<IActionResult> Create([FromBody]Model.Catalogs.CreateImageCatalogModel model, CancellationToken cancellationToken)
         {
             var result = await CatalogService.CreateCatalogAsync(model, cancellationToken);
@@ -86,7 +91,7 @@ namespace UrGuide.WebApp.Controllers
         }
 
         // DELETE: api/Galleries/5
-        [HttpDelete("{catalogId}")]
+        [HttpDelete("{catalogId}/remove")]
         public async Task<IActionResult> Delete(string catalogId, CancellationToken cancellationToken)
         {
             var result = await CatalogService.RemoveCatalogAsync(catalogId, cancellationToken);
