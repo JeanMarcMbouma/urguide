@@ -29,98 +29,9 @@ export interface IClient {
      */
     newguide(returnUrl: string | undefined, body: CreateGuideModel | undefined): Promise<void>;
     /**
-     * @param email (optional) 
-     * @param confirmationToken (optional) 
      * @return Success
      */
-    confirmEmail(email: string | undefined, confirmationToken: string | undefined): Promise<void>;
-    /**
-     * @param email (optional) 
-     * @return Success
-     */
-    forgetpassword(email: string | undefined): Promise<void>;
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
-    resetpassword(body: ResetPasswordModel | undefined): Promise<void>;
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
-    changepassword(body: ChangePasswordModel | undefined): Promise<void>;
-    /**
-     * @param returnUrl (optional) 
-     * @return Success
-     */
-    logout(returnUrl: string | undefined): Promise<void>;
-    /**
-     * @return Success
-     */
-    all(userId: string): Promise<void>;
-    /**
-     * @return Success
-     */
-    retrieve(catalogId: string): Promise<void>;
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
-    update(catalogId: string, body: UpdateImageCatalogModel | undefined): Promise<void>;
-    /**
-     * @return Success
-     */
-    remove(catalogId: string, imageId: string): Promise<void>;
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
-    addimage(catalogId: string, body: ImageFileCreateModel | undefined): Promise<void>;
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
-    create(body: CreateImageCatalogModel | undefined): Promise<void>;
-    /**
-     * @return Success
-     */
-    remove2(catalogId: string): Promise<void>;
-    /**
-     * @return Success
-     */
-    configuration(clientId: string): Promise<void>;
-    /**
-     * @return Success
-     */
-    last10(): Promise<void>;
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
-    create2(body: PostCreationModel | undefined): Promise<void>;
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
-    update2(postId: string, body: PostUpdateModel | undefined): Promise<void>;
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
-    update3(postId: string, name: string, body: SetAttribute | undefined): Promise<void>;
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
-    batchupdate(postId: string, body: SetAttribute[] | undefined): Promise<void>;
-    /**
-     * @return Success
-     */
-    remove3(postId: string, name: string): Promise<void>;
-    /**
-     * @return Success
-     */
-    remove4(postId: string): Promise<void>;
+    _configuration(clientId: string): Promise<void>;
 }
 
 export class Client implements IClient {
@@ -260,6 +171,82 @@ export class Client implements IClient {
             });
         }
         return Promise.resolve<void>(<any>null);
+    }
+
+    /**
+     * @return Success
+     */
+    _configuration(clientId: string): Promise<void> {
+        let url_ = this.baseUrl + "/_configuration/{clientId}";
+        if (clientId === undefined || clientId === null)
+            throw new Error("The parameter 'clientId' must be defined.");
+        url_ = url_.replace("{clientId}", encodeURIComponent("" + clientId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.process_configuration(_response);
+        });
+    }
+
+    protected process_configuration(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(<any>null);
+    }
+}
+
+export interface IAccountClient {
+    /**
+     * @param email (optional) 
+     * @param confirmationToken (optional) 
+     * @return Success
+     */
+    confirmEmail(email: string | undefined, confirmationToken: string | undefined): Promise<void>;
+    /**
+     * @param email (optional) 
+     * @return Success
+     */
+    forgetpassword(email: string | undefined): Promise<void>;
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    resetpassword(body: ResetPasswordModel | undefined): Promise<void>;
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    changepassword(body: ChangePasswordModel | undefined): Promise<void>;
+    /**
+     * @param returnUrl (optional) 
+     * @return Success
+     */
+    logout(returnUrl: string | undefined): Promise<void>;
+}
+
+export class AccountClient implements IAccountClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl ? baseUrl : "";
     }
 
     /**
@@ -472,11 +459,47 @@ export class Client implements IClient {
         }
         return Promise.resolve<void>(<any>null);
     }
+}
 
+export interface ICatalogsClient {
+    /**
+     * @return Error
+     */
+    all(userId: string): Promise<ImageCatalogModel[]>;
+    /**
+     * @return Error
+     */
+    retrieve(catalogId: string): Promise<ImageCatalogModel>;
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    update(catalogId: string, body: UpdateImageCatalogModel | undefined): Promise<void>;
+    /**
+     * @param body (optional) 
+     * @return Error
+     */
+    create(body: CreateImageCatalogModel | undefined): Promise<ImageCatalogModel>;
     /**
      * @return Success
      */
-    all(userId: string): Promise<void> {
+    remove(catalogId: string): Promise<void>;
+}
+
+export class CatalogsClient implements ICatalogsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl ? baseUrl : "";
+    }
+
+    /**
+     * @return Error
+     */
+    all(userId: string): Promise<ImageCatalogModel[]> {
         let url_ = this.baseUrl + "/catalogs/{userId}/all";
         if (userId === undefined || userId === null)
             throw new Error("The parameter 'userId' must be defined.");
@@ -486,6 +509,7 @@ export class Client implements IClient {
         let options_ = <RequestInit>{
             method: "GET",
             headers: {
+                "Accept": "application/json"
             }
         };
 
@@ -494,14 +518,10 @@ export class Client implements IClient {
         });
     }
 
-    protected processAll(response: Response): Promise<void> {
+    protected processAll(response: Response): Promise<ImageCatalogModel[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 401) {
+        if (status === 401) {
             return response.text().then((_responseText) => {
             return throwException("Unauthorized", status, _responseText, _headers);
             });
@@ -509,18 +529,24 @@ export class Client implements IClient {
             return response.text().then((_responseText) => {
             return throwException("Forbidden", status, _responseText, _headers);
             });
-        } else if (status !== 200 && status !== 204) {
+        } else {
             return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultDatadefault)) {
+                resultdefault = [] as any;
+                for (let item of resultDatadefault)
+                    resultdefault!.push(ImageCatalogModel.fromJS(item));
+            }
+            return resultdefault;
             });
         }
-        return Promise.resolve<void>(<any>null);
     }
 
     /**
-     * @return Success
+     * @return Error
      */
-    retrieve(catalogId: string): Promise<void> {
+    retrieve(catalogId: string): Promise<ImageCatalogModel> {
         let url_ = this.baseUrl + "/catalogs/{catalogId}/retrieve";
         if (catalogId === undefined || catalogId === null)
             throw new Error("The parameter 'catalogId' must be defined.");
@@ -530,6 +556,7 @@ export class Client implements IClient {
         let options_ = <RequestInit>{
             method: "GET",
             headers: {
+                "Accept": "application/json"
             }
         };
 
@@ -538,14 +565,10 @@ export class Client implements IClient {
         });
     }
 
-    protected processRetrieve(response: Response): Promise<void> {
+    protected processRetrieve(response: Response): Promise<ImageCatalogModel> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 401) {
+        if (status === 401) {
             return response.text().then((_responseText) => {
             return throwException("Unauthorized", status, _responseText, _headers);
             });
@@ -553,12 +576,14 @@ export class Client implements IClient {
             return response.text().then((_responseText) => {
             return throwException("Forbidden", status, _responseText, _headers);
             });
-        } else if (status !== 200 && status !== 204) {
+        } else {
             return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = ImageCatalogModel.fromJS(resultDatadefault);
+            return resultdefault;
             });
         }
-        return Promise.resolve<void>(<any>null);
     }
 
     /**
@@ -611,6 +636,113 @@ export class Client implements IClient {
     }
 
     /**
+     * @param body (optional) 
+     * @return Error
+     */
+    create(body: CreateImageCatalogModel | undefined): Promise<ImageCatalogModel> {
+        let url_ = this.baseUrl + "/catalogs/create";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCreate(_response);
+        });
+    }
+
+    protected processCreate(response: Response): Promise<ImageCatalogModel> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = ImageCatalogModel.fromJS(resultDatadefault);
+            return resultdefault;
+            });
+        }
+    }
+
+    /**
+     * @return Success
+     */
+    remove(catalogId: string): Promise<void> {
+        let url_ = this.baseUrl + "/catalogs/{catalogId}/remove";
+        if (catalogId === undefined || catalogId === null)
+            throw new Error("The parameter 'catalogId' must be defined.");
+        url_ = url_.replace("{catalogId}", encodeURIComponent("" + catalogId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRemove(_response);
+        });
+    }
+
+    protected processRemove(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(<any>null);
+    }
+}
+
+export interface IImagesClient {
+    /**
+     * @return Success
+     */
+    remove(catalogId: string, imageId: string): Promise<void>;
+}
+
+export class ImagesClient implements IImagesClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl ? baseUrl : "";
+    }
+
+    /**
      * @return Success
      */
     remove(catalogId: string, imageId: string): Promise<void> {
@@ -655,6 +787,25 @@ export class Client implements IClient {
             });
         }
         return Promise.resolve<void>(<any>null);
+    }
+}
+
+export interface IUpdateClient {
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    addimage(catalogId: string, body: ImageFileCreateModel | undefined): Promise<void>;
+}
+
+export class UpdateClient implements IUpdateClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl ? baseUrl : "";
     }
 
     /**
@@ -705,143 +856,50 @@ export class Client implements IClient {
         }
         return Promise.resolve<void>(<any>null);
     }
+}
 
+export interface IPostsClient {
+    /**
+     * @return Error
+     */
+    last10(): Promise<PostModel[]>;
+    /**
+     * @param body (optional) 
+     * @return Error
+     */
+    create(body: PostCreationModel | undefined): Promise<PostModel>;
     /**
      * @param body (optional) 
      * @return Success
      */
-    create(body: CreateImageCatalogModel | undefined): Promise<void> {
-        let url_ = this.baseUrl + "/catalogs/create";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_ = <RequestInit>{
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCreate(_response);
-        });
-    }
-
-    protected processCreate(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(<any>null);
-    }
-
+    update(postId: string, body: PostUpdateModel | undefined): Promise<void>;
     /**
      * @return Success
      */
-    remove2(catalogId: string): Promise<void> {
-        let url_ = this.baseUrl + "/catalogs/{catalogId}/remove";
-        if (catalogId === undefined || catalogId === null)
-            throw new Error("The parameter 'catalogId' must be defined.");
-        url_ = url_.replace("{catalogId}", encodeURIComponent("" + catalogId));
-        url_ = url_.replace(/[?&]$/, "");
+    remove(postId: string): Promise<void>;
+}
 
-        let options_ = <RequestInit>{
-            method: "DELETE",
-            headers: {
-            }
-        };
+export class PostsClient implements IPostsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processRemove2(_response);
-        });
-    }
-
-    protected processRemove2(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(<any>null);
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl ? baseUrl : "";
     }
 
     /**
-     * @return Success
+     * @return Error
      */
-    configuration(clientId: string): Promise<void> {
-        let url_ = this.baseUrl + "/_configuration/{clientId}";
-        if (clientId === undefined || clientId === null)
-            throw new Error("The parameter 'clientId' must be defined.");
-        url_ = url_.replace("{clientId}", encodeURIComponent("" + clientId));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <RequestInit>{
-            method: "GET",
-            headers: {
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processConfiguration(_response);
-        });
-    }
-
-    protected processConfiguration(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(<any>null);
-    }
-
-    /**
-     * @return Success
-     */
-    last10(): Promise<void> {
+    last10(): Promise<PostModel[]> {
         let url_ = this.baseUrl + "/posts/last10";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
             method: "GET",
             headers: {
+                "Accept": "application/json"
             }
         };
 
@@ -850,14 +908,10 @@ export class Client implements IClient {
         });
     }
 
-    protected processLast10(response: Response): Promise<void> {
+    protected processLast10(response: Response): Promise<PostModel[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 401) {
+        if (status === 401) {
             return response.text().then((_responseText) => {
             return throwException("Unauthorized", status, _responseText, _headers);
             });
@@ -865,19 +919,25 @@ export class Client implements IClient {
             return response.text().then((_responseText) => {
             return throwException("Forbidden", status, _responseText, _headers);
             });
-        } else if (status !== 200 && status !== 204) {
+        } else {
             return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultDatadefault)) {
+                resultdefault = [] as any;
+                for (let item of resultDatadefault)
+                    resultdefault!.push(PostModel.fromJS(item));
+            }
+            return resultdefault;
             });
         }
-        return Promise.resolve<void>(<any>null);
     }
 
     /**
      * @param body (optional) 
-     * @return Success
+     * @return Error
      */
-    create2(body: PostCreationModel | undefined): Promise<void> {
+    create(body: PostCreationModel | undefined): Promise<PostModel> {
         let url_ = this.baseUrl + "/posts/create";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -888,22 +948,19 @@ export class Client implements IClient {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             }
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processCreate2(_response);
+            return this.processCreate(_response);
         });
     }
 
-    protected processCreate2(response: Response): Promise<void> {
+    protected processCreate(response: Response): Promise<PostModel> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 401) {
+        if (status === 401) {
             return response.text().then((_responseText) => {
             return throwException("Unauthorized", status, _responseText, _headers);
             });
@@ -911,19 +968,21 @@ export class Client implements IClient {
             return response.text().then((_responseText) => {
             return throwException("Forbidden", status, _responseText, _headers);
             });
-        } else if (status !== 200 && status !== 204) {
+        } else {
             return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = PostModel.fromJS(resultDatadefault);
+            return resultdefault;
             });
         }
-        return Promise.resolve<void>(<any>null);
     }
 
     /**
      * @param body (optional) 
      * @return Success
      */
-    update2(postId: string, body: PostUpdateModel | undefined): Promise<void> {
+    update(postId: string, body: PostUpdateModel | undefined): Promise<void> {
         let url_ = this.baseUrl + "/posts/{postId}/update";
         if (postId === undefined || postId === null)
             throw new Error("The parameter 'postId' must be defined.");
@@ -941,11 +1000,11 @@ export class Client implements IClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processUpdate2(_response);
+            return this.processUpdate(_response);
         });
     }
 
-    protected processUpdate2(response: Response): Promise<void> {
+    protected processUpdate(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -969,10 +1028,82 @@ export class Client implements IClient {
     }
 
     /**
+     * @return Success
+     */
+    remove(postId: string): Promise<void> {
+        let url_ = this.baseUrl + "/posts/{postId}/remove";
+        if (postId === undefined || postId === null)
+            throw new Error("The parameter 'postId' must be defined.");
+        url_ = url_.replace("{postId}", encodeURIComponent("" + postId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRemove(_response);
+        });
+    }
+
+    protected processRemove(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(<any>null);
+    }
+}
+
+export interface IAttributesClient {
+    /**
      * @param body (optional) 
      * @return Success
      */
-    update3(postId: string, name: string, body: SetAttribute | undefined): Promise<void> {
+    update(postId: string, name: string, body: SetAttribute | undefined): Promise<void>;
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    batchupdate(postId: string, body: SetAttribute[] | undefined): Promise<void>;
+    /**
+     * @return Success
+     */
+    remove(postId: string, name: string): Promise<void>;
+}
+
+export class AttributesClient implements IAttributesClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl ? baseUrl : "";
+    }
+
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    update(postId: string, name: string, body: SetAttribute | undefined): Promise<void> {
         let url_ = this.baseUrl + "/posts/{postId}/attributes/{name}/update";
         if (postId === undefined || postId === null)
             throw new Error("The parameter 'postId' must be defined.");
@@ -993,11 +1124,11 @@ export class Client implements IClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processUpdate3(_response);
+            return this.processUpdate(_response);
         });
     }
 
-    protected processUpdate3(response: Response): Promise<void> {
+    protected processUpdate(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -1072,7 +1203,7 @@ export class Client implements IClient {
     /**
      * @return Success
      */
-    remove3(postId: string, name: string): Promise<void> {
+    remove(postId: string, name: string): Promise<void> {
         let url_ = this.baseUrl + "/posts/{postId}/attributes/{name}/remove";
         if (postId === undefined || postId === null)
             throw new Error("The parameter 'postId' must be defined.");
@@ -1089,55 +1220,11 @@ export class Client implements IClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processRemove3(_response);
+            return this.processRemove(_response);
         });
     }
 
-    protected processRemove3(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(<any>null);
-    }
-
-    /**
-     * @return Success
-     */
-    remove4(postId: string): Promise<void> {
-        let url_ = this.baseUrl + "/posts/{postId}/remove";
-        if (postId === undefined || postId === null)
-            throw new Error("The parameter 'postId' must be defined.");
-        url_ = url_.replace("{postId}", encodeURIComponent("" + postId));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <RequestInit>{
-            method: "DELETE",
-            headers: {
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processRemove4(_response);
-        });
-    }
-
-    protected processRemove4(response: Response): Promise<void> {
+    protected processRemove(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -1433,50 +1520,6 @@ export interface IChangePasswordModel {
     currentPassword?: string | undefined;
 }
 
-export class UpdateImageCatalogModel implements IUpdateImageCatalogModel {
-    catalogId?: string | undefined;
-    name?: string | undefined;
-    description?: string | undefined;
-
-    constructor(data?: IUpdateImageCatalogModel) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.catalogId = _data["catalogId"];
-            this.name = _data["name"];
-            this.description = _data["description"];
-        }
-    }
-
-    static fromJS(data: any): UpdateImageCatalogModel {
-        data = typeof data === 'object' ? data : {};
-        let result = new UpdateImageCatalogModel();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["catalogId"] = this.catalogId;
-        data["name"] = this.name;
-        data["description"] = this.description;
-        return data; 
-    }
-}
-
-export interface IUpdateImageCatalogModel {
-    catalogId?: string | undefined;
-    name?: string | undefined;
-    description?: string | undefined;
-}
-
 export class ImageFileCreateModel implements IImageFileCreateModel {
     imageBase64?: string | undefined;
     name?: string | undefined;
@@ -1519,6 +1562,106 @@ export interface IImageFileCreateModel {
     imageBase64?: string | undefined;
     name?: string | undefined;
     id?: string | undefined;
+}
+
+export class ImageCatalogModel implements IImageCatalogModel {
+    catalogId?: string | undefined;
+    name?: string | undefined;
+    description?: string | undefined;
+    files?: ImageFileCreateModel[] | undefined;
+
+    constructor(data?: IImageCatalogModel) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.catalogId = _data["catalogId"];
+            this.name = _data["name"];
+            this.description = _data["description"];
+            if (Array.isArray(_data["files"])) {
+                this.files = [] as any;
+                for (let item of _data["files"])
+                    this.files!.push(ImageFileCreateModel.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): ImageCatalogModel {
+        data = typeof data === 'object' ? data : {};
+        let result = new ImageCatalogModel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["catalogId"] = this.catalogId;
+        data["name"] = this.name;
+        data["description"] = this.description;
+        if (Array.isArray(this.files)) {
+            data["files"] = [];
+            for (let item of this.files)
+                data["files"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IImageCatalogModel {
+    catalogId?: string | undefined;
+    name?: string | undefined;
+    description?: string | undefined;
+    files?: ImageFileCreateModel[] | undefined;
+}
+
+export class UpdateImageCatalogModel implements IUpdateImageCatalogModel {
+    catalogId?: string | undefined;
+    name?: string | undefined;
+    description?: string | undefined;
+
+    constructor(data?: IUpdateImageCatalogModel) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.catalogId = _data["catalogId"];
+            this.name = _data["name"];
+            this.description = _data["description"];
+        }
+    }
+
+    static fromJS(data: any): UpdateImageCatalogModel {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateImageCatalogModel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["catalogId"] = this.catalogId;
+        data["name"] = this.name;
+        data["description"] = this.description;
+        return data; 
+    }
+}
+
+export interface IUpdateImageCatalogModel {
+    catalogId?: string | undefined;
+    name?: string | undefined;
+    description?: string | undefined;
 }
 
 export class CreateImageCatalogModel implements ICreateImageCatalogModel {
@@ -1571,6 +1714,126 @@ export interface ICreateImageCatalogModel {
     name?: string | undefined;
     description?: string | undefined;
     files?: ImageFileCreateModel[] | undefined;
+}
+
+export class PostModel implements IPostModel {
+    id?: string | undefined;
+    text?: string | undefined;
+    description?: string | undefined;
+    price?: string | undefined;
+    rating?: string | undefined;
+    likes?: number;
+    dislikes?: number;
+    publicationDate?: string | undefined;
+    lastEditDate?: string | undefined;
+    startingBid?: string | undefined;
+    lastBid?: string | undefined;
+    status?: string | undefined;
+    seats?: number;
+    startDate?: string | undefined;
+    endDate?: string | undefined;
+    startTime?: string | undefined;
+    readonly categories?: string[] | undefined;
+    readonly images?: ImageFileCreateModel[] | undefined;
+
+    constructor(data?: IPostModel) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.text = _data["text"];
+            this.description = _data["description"];
+            this.price = _data["price"];
+            this.rating = _data["rating"];
+            this.likes = _data["likes"];
+            this.dislikes = _data["dislikes"];
+            this.publicationDate = _data["publicationDate"];
+            this.lastEditDate = _data["lastEditDate"];
+            this.startingBid = _data["startingBid"];
+            this.lastBid = _data["lastBid"];
+            this.status = _data["status"];
+            this.seats = _data["seats"];
+            this.startDate = _data["startDate"];
+            this.endDate = _data["endDate"];
+            this.startTime = _data["startTime"];
+            if (Array.isArray(_data["categories"])) {
+                (<any>this).categories = [] as any;
+                for (let item of _data["categories"])
+                    (<any>this).categories!.push(item);
+            }
+            if (Array.isArray(_data["images"])) {
+                (<any>this).images = [] as any;
+                for (let item of _data["images"])
+                    (<any>this).images!.push(ImageFileCreateModel.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): PostModel {
+        data = typeof data === 'object' ? data : {};
+        let result = new PostModel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["text"] = this.text;
+        data["description"] = this.description;
+        data["price"] = this.price;
+        data["rating"] = this.rating;
+        data["likes"] = this.likes;
+        data["dislikes"] = this.dislikes;
+        data["publicationDate"] = this.publicationDate;
+        data["lastEditDate"] = this.lastEditDate;
+        data["startingBid"] = this.startingBid;
+        data["lastBid"] = this.lastBid;
+        data["status"] = this.status;
+        data["seats"] = this.seats;
+        data["startDate"] = this.startDate;
+        data["endDate"] = this.endDate;
+        data["startTime"] = this.startTime;
+        if (Array.isArray(this.categories)) {
+            data["categories"] = [];
+            for (let item of this.categories)
+                data["categories"].push(item);
+        }
+        if (Array.isArray(this.images)) {
+            data["images"] = [];
+            for (let item of this.images)
+                data["images"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IPostModel {
+    id?: string | undefined;
+    text?: string | undefined;
+    description?: string | undefined;
+    price?: string | undefined;
+    rating?: string | undefined;
+    likes?: number;
+    dislikes?: number;
+    publicationDate?: string | undefined;
+    lastEditDate?: string | undefined;
+    startingBid?: string | undefined;
+    lastBid?: string | undefined;
+    status?: string | undefined;
+    seats?: number;
+    startDate?: string | undefined;
+    endDate?: string | undefined;
+    startTime?: string | undefined;
+    categories?: string[] | undefined;
+    images?: ImageFileCreateModel[] | undefined;
 }
 
 export class PostCreationModel implements IPostCreationModel {
