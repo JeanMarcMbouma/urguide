@@ -36,6 +36,7 @@ import {withStyles} from '@material-ui/core/styles';
 import {SdCard} from '@material-ui/icons';
 import AddPhoto, {PhotoX} from './../../AddPhoto/AddPhoto';
 import AddPhotoContext from './../../AddPhoto/AddPhotoContext';
+import Modal from 'react-bootstrap/Modal'
 //import { useReactOidc} from '@axa-fr/react-oidc-context';
 
 const styles = {
@@ -191,77 +192,82 @@ export default function CentralBar () {
     );
   }
 
-  function ViewPost () {
+    function ViewPost() {
+
+        const [show, setShow] = useState(false);
     
-    return !ViewPostCreating 
-      ? <div className={`col-lg-12 p-3 mb-3 bg-white rounded new-post-card`}
+    return (<>
+            <div className={`col-lg-12 p-3 mb-3 bg-white rounded new-post-card`}>
+                <div className="new-post-btn" onClick={() => setShow(true)}>
+                    <span>Want to write a new post ?</span>
+                </div>
+            </div>
+            <Modal
+            size="md"
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+            animation={true}
+            show={show}
+            onHide={() => setShow(false)}
         >
-          <div className="new-post-btn"  onClick={() => setViewPostCreating (true)}>
-            <span>Want to write a new post ?</span>
-          </div>
-        </div>
-      : <div
-          className={`col-lg-12 p-3 mb-3 bg-white rounded shadow-lg bg-white rounded`}
-        >
-          <div className="col-lg-12 d-flex justify-content-between">
-            <Typography variant="h5">Create your post!</Typography>
-            <ButtonP
-              onClick={() => setViewPostCreating (false)}
-              variant="outlined"
-              color="blue"
-            >
-              X
-            </ButtonP>
-          </div>
-          <div className="col-lg-12 d-flex justify-content-start my-4">
-            <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
-            <Typography className="m-0 px-4" variant="h6">
-              {profile.name}
-            </Typography>
-          </div>
-          <div className="col-lg-12">
-            <TextField fullWidth label="Name" variant="outlined" />
-            <TextField
-              fullWidth
-              className="my-2"
-              label="Short description"
-              multiline
-              rows="6"
-              variant="outlined"
-            />
-            <TextField label="Price" variant="outlined" />
-            <DatePicker />
-            <ChipsArray />
-            <PhotoX />
-            <AddPhoto fileInput={uploadButton} update={update} />
-          </div>
-          <div className="col-lg-12 my-2">
-            <ButtonGroup
-              fullWidth
-              size="large"
-              color="primary"
-              aria-label="large outlined primary button group"
-            >
-              <Button onClick={() => uploadButton.current.click ()}>
-                <PhotoIcon />
-              </Button>
-              <Button><VideoLibraryIcon /></Button>
-              <Button><AddLocationIcon /></Button>
-              <Button><MoreHorizIcon /></Button>
-            </ButtonGroup>
-          </div>
-          <div className="col-lg-12">
-            <ButtonP fullWidth variant="outlined" color="blue">Publish</ButtonP>
-          </div>
-        </div>;
+            <Modal.Header closeButton>
+                <Modal.Title id="contained-modal-title-vcenter">
+                    Modal heading
+        </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                    <div className="col-lg-12 d-flex justify-content-start my-4">
+                        <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
+                        <Typography className="m-0 px-4" variant="h6">
+                            {profile.name}
+                        </Typography>
+                    </div>
+                    <div className="col-lg-12">
+                        <TextField fullWidth label="Name" variant="outlined" />
+                        <TextField
+                            fullWidth
+                            className="my-2"
+                            label="Short description"
+                            multiline
+                            rows="6"
+                            variant="outlined"
+                        />
+                        <TextField label="Price" variant="outlined" />
+                        <DatePicker />
+                        <ChipsArray />
+                        <PhotoX />
+                        <AddPhoto fileInput={uploadButton} update={update} />
+                    </div>
+                    <div className="col-lg-12 my-2">
+                        <ButtonGroup
+                            fullWidth
+                            size="large"
+                            color="primary"
+                            aria-label="large outlined primary button group"
+                        >
+                            <Button onClick={() => uploadButton.current.click()}>
+                                <PhotoIcon />
+                            </Button>
+                            <Button><VideoLibraryIcon /></Button>
+                            <Button><AddLocationIcon /></Button>
+                            <Button><MoreHorizIcon /></Button>
+                        </ButtonGroup>
+                    </div>
+            </Modal.Body>
+            <Modal.Footer>
+                <div className="col-lg-12">
+                    <ButtonP fullWidth variant="outlined" color="blue">Publish</ButtonP>
+                </div>
+            </Modal.Footer>
+        </Modal></>);
   }
 
   return (
     <div className="col-12 col-sm-7 col-md-7 col-lg-6 col-xl-5 timeline">
       <div className="container">
-        <AddPhotoContext.Provider value={context}>
+              <AddPhotoContext.Provider value={context}>
           <ViewPost />
-        </AddPhotoContext.Provider>
+              </AddPhotoContext.Provider>
         {posts.map ((post, i) => (
           <div key={i} className="p-3 mb-3 bg-white rounded post-card">
             <CardHeader
@@ -294,3 +300,65 @@ export default function CentralBar () {
     </div>
   );
 }
+
+
+//<div className={`col-lg-12 p-3 mb-3 bg-white rounded new-post-card`}
+//>
+//    <div className="new-post-btn" onClick={() => setViewPostCreating(true)}>
+//        <span>Want to write a new post ?</span>
+//    </div>
+//</div>
+//                : <div
+//    className={`col-lg-12 p-3 mb-3 bg-white rounded shadow-lg bg-white rounded`}
+//>
+//    <div className="col-lg-12 d-flex justify-content-between">
+//        <Typography variant="h5">Create your post!</Typography>
+//        <ButtonP
+//            onClick={() => setViewPostCreating(false)}
+//            variant="outlined"
+//            color="blue"
+//        >
+//            X
+//            </ButtonP>
+//    </div>
+//    <div className="col-lg-12 d-flex justify-content-start my-4">
+//        <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
+//        <Typography className="m-0 px-4" variant="h6">
+//            {profile.name}
+//        </Typography>
+//    </div>
+//    <div className="col-lg-12">
+//        <TextField fullWidth label="Name" variant="outlined" />
+//        <TextField
+//            fullWidth
+//            className="my-2"
+//            label="Short description"
+//            multiline
+//            rows="6"
+//            variant="outlined"
+//        />
+//        <TextField label="Price" variant="outlined" />
+//        <DatePicker />
+//        <ChipsArray />
+//        <PhotoX />
+//        <AddPhoto fileInput={uploadButton} update={update} />
+//    </div>
+//    <div className="col-lg-12 my-2">
+//        <ButtonGroup
+//            fullWidth
+//            size="large"
+//            color="primary"
+//            aria-label="large outlined primary button group"
+//        >
+//            <Button onClick={() => uploadButton.current.click()}>
+//                <PhotoIcon />
+//            </Button>
+//            <Button><VideoLibraryIcon /></Button>
+//            <Button><AddLocationIcon /></Button>
+//            <Button><MoreHorizIcon /></Button>
+//        </ButtonGroup>
+//    </div>
+//    <div className="col-lg-12">
+//        <ButtonP fullWidth variant="outlined" color="blue">Publish</ButtonP>
+//    </div>
+//</div>

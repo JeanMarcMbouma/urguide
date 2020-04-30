@@ -7,7 +7,6 @@ import {
 import LocationOnIcon from '@material-ui/icons/LocationOn';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import { Link } from 'react-router-dom';
-import { UpperSection } from "./UpperSection";
 import "./UserStyle.css";
 
 
@@ -149,17 +148,10 @@ function Layout() {
 export default class Galleries extends Component {
     render() {
         return (
-            <div className="container-fluid user-page-container">
-                <div className="row">
-                    <div className="col-12">
-                        <UpperSection />
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-12 lower-section">
-                       
-                        <Layout />
-                    </div>
+            <div className="row">
+                <div className="col-12 lower-section">
+
+                    <Layout />
                 </div>
             </div>
         )

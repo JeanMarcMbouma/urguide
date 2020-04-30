@@ -54,7 +54,7 @@ const Header = () => {
                             <div className='col-3 col-md-3 col-lg-2 mid-1'>
                                 <Link to="/">
                                     <IconButton>
-                                        <HomeOutlinedIcon />
+                                        <HomeOutlinedIcon fontSize="large" />
                                     </IconButton>
                                 </Link>
 
@@ -62,20 +62,20 @@ const Header = () => {
                             <div className='col-3 col-md-3 col-lg-2 mid-2'>
                                 <Link to="/explorer">
                                     <IconButton>
-                                        <SearchIcon />
+                                        <SearchIcon fontSize="large" />
                                     </IconButton>
                                 </Link>
                             </div>
                             <div className='col-3 col-md-3 col-lg-2 mid-3'>
                                 <Link to="/user">
                                     <IconButton>
-                                        <PersonIcon />
+                                        <PersonIcon fontSize="large" />
                                     </IconButton>
                                 </Link>
                             </div>
                             <div className='col-3 col-md-3 col-lg-2 mid-3'>
                                 <IconButton>
-                                    <MailOutlineIcon />
+                                    <MailOutlineIcon fontSize="large" />
                                 </IconButton>
                             </div>
                         </div>

@@ -5,7 +5,7 @@ import { LoginLayout } from './components/login/LoginLayout';
 import { LoginPage } from './components/login/LoginPage';
 import { RegisterLayout } from './components/RegisterLayout';
 import Explorer from "./components/explorer/Explorer";
-import Profile from "./components/user/Profile ";
+import Profile from "./components/user/Profile";
 import {
     ClientRegistration,
 } from './components/client-registration/ClientRegistration';

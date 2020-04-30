@@ -217,7 +217,7 @@ function Profile() {
             );
     return (
         <div className='edit-profile-card' component="main">
-            <CssBaseline />
+ 
             <h5 className='text-muted'>Change your information.</h5>
             <br />
             <br />

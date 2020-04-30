@@ -1,5 +1,4 @@
 ﻿import React, { Component, useContext, useReducer } from 'react';
-import { Route } from 'react-router-dom';
 import {
     Grid, Button, IconButton, Box, TextField, Link
 } from "@material-ui/core";
@@ -150,7 +149,7 @@ function Gallery() {
                         </div>
                     </Grid>
                 </div>
-        </div>
+            </div>
             <div className="col-12 col-md-6 col-lg-7 col-xl-8 gallery-content">
                 <div className='row'>
                     {Cards}

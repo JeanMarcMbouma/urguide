@@ -5,8 +5,7 @@ import {
   InputLabel,
   FormControl,
   Input,
-  Container,
-  CssBaseline
+  Container
 } from "@material-ui/core";
 import "./Gallery.css";
 
@@ -94,8 +93,6 @@ export function GalleryDetails(props) {
             );
 
     return ( <Container component="main">
-            <CssBaseline />
-          
         <Grid container spacing={2}>
             {galleryTitleGrid}
             {galleryLocationGrid}

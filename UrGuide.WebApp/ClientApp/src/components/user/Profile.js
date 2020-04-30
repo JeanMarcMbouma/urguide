@@ -12,7 +12,7 @@ import Posts from "./Posts";
 import Galleries from "./Galleries";
 import EditProfile from "./EditProfile";
 import ChangePassword from "./ChangePassword";
-import UpperSection from "./UpperSection";
+import { UpperSection } from "./UpperSection";
 import {
     BrowserRouter as Router,
     Switch,
@@ -22,6 +22,7 @@ import {
     useRouteMatch
 } from "react-router-dom";
 import { CreateNewGallery } from "./CreateNewGallery";
+
 
 export default function Explorer() {
 
@@ -50,7 +51,7 @@ export default function Explorer() {
                 <Route path={`${path}/edit/password`}>
                     <ChangePassword />
                 </Route>
-                <Route path={`${path}/new/gallery`}>
+                <Route path={`${path}/gallery/new`}>
                     <CreateNewGallery />
                 </Route>
             </Switch>

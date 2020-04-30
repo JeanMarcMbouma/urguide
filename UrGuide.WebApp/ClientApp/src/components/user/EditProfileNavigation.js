@@ -17,10 +17,10 @@ export default function EditProfileNavigation() {
                     <br />
                 </div>
                 <div className='col-11 edit-panel-link'>
-                    <Link to='/edit/profile' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><PersonIcon fontSize="small" /> <span className='btn-title'>Personal Information</span></Link>
+                    <Link to='/user/edit/profile' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><PersonIcon fontSize="small" /> <span className='btn-title'>Personal Information</span></Link>
                 </div>
                 <div className='col-11 edit-panel-link'>
-                    <Link to='/edit/password' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><VisibilityIcon fontSize="small" /> <span className='btn-title'>Change Password</span></Link>
+                    <Link to='/user/edit/password' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><VisibilityIcon fontSize="small" /> <span className='btn-title'>Change Password</span></Link>
                 </div>
                 <div className='col-11 edit-panel-link'>
                     <Link to='/Home' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><PaymentIcon fontSize="small" /> <span className='btn-title'>Credit Card Details</span></Link>

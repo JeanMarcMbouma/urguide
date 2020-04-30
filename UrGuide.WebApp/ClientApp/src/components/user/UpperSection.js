@@ -94,17 +94,17 @@ export function UpperSection() {
                                 </Link>
                             </div>
                             <div className='col-12 col-lg-2'>
-                                <Link style={{ textDecoration: `none` }} tag={Link} className="text-dark" to="/galleries" color="primary">
+                                <Link style={{ textDecoration: `none` }} tag={Link} className="text-dark" to="/user/galleries" color="primary">
                                     <span className='btn-title'>Galleries (7)</span>
                                 </Link>
                             </div>
                             <div className='col-12 col-lg-2'>
-                                <Link style={{ textDecoration: `none` }} tag={Link} className="text-dark" to="/edit/profile" color="primary">
+                                <Link style={{ textDecoration: `none` }} tag={Link} className="text-dark" to="/user/edit/profile" color="primary">
                                     <EditIcon fontSize="small" /> <span className='btn-title'>Edit profile</span>
                                 </Link>
                             </div>
                             <div className='col-12 col-lg-2'>
-                                <Link style={{ textDecoration: `none` }} tag={Link} className="text-dark" to="/gallery/new" color="primary">
+                                <Link style={{ textDecoration: `none` }} tag={Link} className="text-dark" to="/user/gallery/new" color="primary">
                                     <PhotoCameraIcon fontSize="small" /> <span className='btn-title'>New Gallery</span>
                                 </Link>
                             </div>

@@ -151,7 +151,6 @@ function ChangePasswordForm() {
 
     return (
         <div className='edit-profile-card' component="main">
-            <CssBaseline />
             <h5 className='text-muted'>Change your login details</h5>
             <br />
             <br />

@@ -24,6 +24,11 @@
     padding:10px 0px 0px 12px;
 }
 
+.modal-backdrop {
+    background-color:#f1f1f1;
+    opacity:0.3;
+}
+
 .new-post-btn:hover{
     opacity:0.8;
 }
