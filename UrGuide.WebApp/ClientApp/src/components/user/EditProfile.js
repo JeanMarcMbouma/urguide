@@ -16,7 +16,6 @@ import {
 import MomentUtils from "@date-io/moment";
 import CreateIcon from "@material-ui/icons/Create";
 import Countries from "./../guide-registration/Countries";
-import { UpperSection } from "./UpperSection";
 import EditProfileNavigation from "./EditProfileNavigation";
 import "./UserStyle.css";
 
@@ -268,16 +267,9 @@ function Layout(){
 export default class EditProfile extends Component {
     render() {
         return (
-            <div className="container-fluid user-page-container">
-                <div className="row">
-                    <div className="col-12">
-                        <UpperSection />
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-12 lower-section">
-                        <Layout />
-                    </div>
+            <div className="row">
+                <div className="col-12 lower-section">
+                    <Layout />
                 </div>
             </div>
         )

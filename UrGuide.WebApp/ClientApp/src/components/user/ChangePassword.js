@@ -13,7 +13,6 @@ import {
     CssBaseline,
     Button
 } from "@material-ui/core";
-import { UpperSection } from "./UpperSection";
 import EditProfileNavigation from "./EditProfileNavigation";
 import { Visibility, VisibilityOff, AccountCircle } from "@material-ui/icons";
 import clsx from "clsx";
@@ -196,18 +195,12 @@ function Layout() {
 export default class ChangePassword extends Component {
     render() {
         return (
-            <div className="container-fluid user-page-container">
-                <div className="row">
-                    <div className="col-12">
-                        <UpperSection />
-                    </div>
-                </div>
+          
                 <div className="row">
                     <div className="col-12 lower-section">
                         <Layout />
                     </div>
                 </div>
-            </div>
         )
     }
 }

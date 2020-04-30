@@ -6,10 +6,8 @@ import {
 } from "@material-ui/core";
 import LocationOnIcon from '@material-ui/icons/LocationOn';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import Modal from 'react-bootstrap/Modal';
 import { Link } from 'react-router-dom';
 import { UpperSection } from "./UpperSection";
-import Post from "../post/Post";
 import "./UserStyle.css";
 
 
@@ -24,33 +22,6 @@ const buttonStyles = makeStyles(theme => ({
         },
     },
 }));
-
-function ItemModal() {
-    const [show, setShow] = useState(false);
-
-    return (
-        <>
-            <Button variant="primary" onClick={() => setShow(true)}>
-                Custom Width Modal
-      </Button>
-
-            <Modal
-                animation={false}
-                show={show}
-                onHide={() => setShow(false)}
-            
-                dialogClassName="my-modal-dialog"
-                aria-labelledby="example-custom-modal-styling-title"
-            >
-                <Modal.Header closeButton>
-                </Modal.Header>
-                <Modal.Body>
-                    <Post/>
-                </Modal.Body>
-            </Modal>
-        </>
-    );
-}
 
 
 function FollowingCard() {
@@ -190,7 +161,6 @@ export default class Galleries extends Component {
                         <Layout />
                     </div>
                 </div>
-                <ItemModal />
             </div>
         )
     }

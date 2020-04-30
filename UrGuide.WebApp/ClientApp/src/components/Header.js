@@ -13,12 +13,7 @@ import { NavbarBrand, Container } from 'reactstrap';
 //import ProfileContext from './Reducers/ProfileContext';
 //import ProfileReducer from './Reducers/ProfileReducer';
 import { Avatar } from '@material-ui/core';
-import GetUserContext from '../UserContext';
-import {Link} from 'react-router-dom';
-import './NavMenu.css';
-import {NavbarBrand, Container} from 'reactstrap';
-import {Avatar} from '@material-ui/core';
-import {AuthenticationContext, useReactOidc} from '@axa-fr/react-oidc-context';
+//import {AuthenticationContext, useReactOidc} from '@axa-fr/react-oidc-context';
 
 const useStyles = makeStyles (() => ({
   header: {
@@ -44,8 +39,7 @@ const useStyles = makeStyles (() => ({
 }));
 
 const Header = () => {
-    //const ctx = useContext(ProfileContext);
-    //const [state, dispatch] = useReducer(ProfileReducer, ctx);
+
 
     const classes = useStyles();
     return (
@@ -66,9 +60,11 @@ const Header = () => {
 
                             </div>
                             <div className='col-3 col-md-3 col-lg-2 mid-2'>
-                                <IconButton>
-                                    <SearchIcon />
-                                </IconButton>
+                                <Link to="/explorer">
+                                    <IconButton>
+                                        <SearchIcon />
+                                    </IconButton>
+                                </Link>
                             </div>
                             <div className='col-3 col-md-3 col-lg-2 mid-3'>
                                 <Link to="/user">

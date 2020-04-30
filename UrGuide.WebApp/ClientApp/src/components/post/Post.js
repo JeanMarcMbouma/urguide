@@ -113,16 +113,12 @@ function Comment() {
         <div className='row'>
             <div className='col-12'>
                 <div className='row'>
-                    <div className='col-2 col-sm-1'>
-                        <Link to="/user">
-                            <Avatar alt="profile photo" src={'...'} />
-                        </Link>
-                    </div>
-                    <div className='col-8 col-md-8' >
-                        <Link to="/user">
-                            <span className='cmt-name'>John Stephens</span>
-                        </Link>
-                        <p className='cmt-time text-muted'>5 minutes ago.</p>
+                    <div className='col-12' >
+                        <CardHeader
+                            avatar={<Link to='/user'><Avatar alt="profile photo" src={'...'} /></Link>}
+                            title={<Typography variant="body1" component="p"><Link to='/user'>{'John Stephens'}</Link></ Typography>}
+                            subheader={'12/10/2019, 10:34 AM'}
+                        />
                     </div>
                 </div>
             </div>

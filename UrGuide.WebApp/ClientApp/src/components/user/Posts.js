@@ -12,7 +12,6 @@ import {
 } from "@material-ui/core";
 import ChatIcon from '@material-ui/icons/Chat';
 import ShareIcon from '@material-ui/icons/Share';
-import { UpperSection } from "./UpperSection";
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import "./UserStyle.css";
@@ -142,16 +141,9 @@ function Layout() {
 export default class Posts extends Component {
     render() {
         return (
-            <div className="container-fluid user-page-container">
-                <div className="row">
-                    <div className="col-12">
-                        <UpperSection />
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-12 lower-section">
-                        <Layout />
-                    </div>
+            <div className="row">
+                <div className="col-12 lower-section">
+                    <Layout />
                 </div>
             </div>
         )

@@ -9,7 +9,6 @@ import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
 import { GalleryDetails } from "../../components/user/gallery/GalleryDetails";
 import GalleryContext from "../../components/user/gallery/GalleryContext";
 import GalleryReducer from "../../components/user/gallery/GalleryReducer";
-import { UpperSection } from "./UpperSection";
 import "../user/gallery/Gallery.css";
 
 function Gallery() {
@@ -164,16 +163,9 @@ function Gallery() {
 export class CreateNewGallery extends Component {
     render() {
         return (
-            <div className="container-fluid user-page-container">
-                <div className="row">
-                    <div className="col-12">
-                        <UpperSection />
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-12 lower-section gallery">
-                        <Gallery />   
-                    </div>
+            <div className="row">
+                <div className="col-12 lower-section gallery">
+                    <Gallery />
                 </div>
             </div>
         )

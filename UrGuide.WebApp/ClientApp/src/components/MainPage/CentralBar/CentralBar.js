@@ -36,7 +36,7 @@ import {withStyles} from '@material-ui/core/styles';
 import {SdCard} from '@material-ui/icons';
 import AddPhoto, {PhotoX} from './../../AddPhoto/AddPhoto';
 import AddPhotoContext from './../../AddPhoto/AddPhotoContext';
-import { useReactOidc} from '@axa-fr/react-oidc-context';
+//import { useReactOidc} from '@axa-fr/react-oidc-context';
 
 const styles = {
   root: {
