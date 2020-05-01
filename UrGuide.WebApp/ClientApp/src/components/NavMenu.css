@@ -4,18 +4,22 @@
   word-break: break-all;
 }
 
-
-/*html {
-    font-size: 14px;
+.active-icon {
+    color: #1265d7 !important;
+   
 }
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}*/
+.active-div {
+    border-bottom-color: #2c81f5;
+    border-bottom-style: solid;
+}
+
+button:focus {
+    outline: none;
+    box-shadow: none;
+}
 
 .box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
 }
 
 .content {
@@ -52,7 +56,7 @@
 
 .centered-div {
     height: 40px;
-
+   margin-top:-2px;
 }
 
 

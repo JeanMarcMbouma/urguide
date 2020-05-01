@@ -48,58 +48,58 @@ ButtonInPosts.propTypes = {
 
 const ButtonP = withStyles(styles)(ButtonInPosts);
 
-function FollowingCard() {
+//function FollowingCard() {
 
 
-    return (
-        <div className="container-fluid following-card">
-            <div>
-                <h6 className='text-muted'>Following (1200)</h6>
-                <br />
-            </div>
-            <div className='row'>
+//    return (
+//        <div className="container-fluid following-card">
+//            <div>
+//                <h6 className='text-muted'>Following (1200)</h6>
+//                <br />
+//            </div>
+//            <div className='row'>
 
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+//                <div className='col-4 follower-div'>
+//                    <div className='follower-div-photo'>
+//                    </div>
+//                </div>
+//                <div className='col-4 follower-div'>
+//                    <div className='follower-div-photo'>
+//                    </div>
+//                </div>
+//                <div className='col-4 follower-div'>
+//                    <div className='follower-div-photo'>
+//                    </div>
+//                </div>
+//                <div className='col-4 follower-div'>
+//                    <div className='follower-div-photo'>
+//                    </div>
+//                </div>
+//                <div className='col-4 follower-div'>
+//                    <div className='follower-div-photo'>
+//                    </div>
+//                </div>
+//                <div className='col-4 follower-div'>
+//                    <div className='follower-div-photo'>
+//                    </div>
+//                </div>
+//                <div className='col-4 follower-div'>
+//                    <div className='follower-div-photo'>
+//                    </div>
+//                </div>
+//                <div className='col-4 follower-div'>
+//                    <div className='follower-div-photo'>
+//                    </div>
+//                </div>
+//                <div className='col-4 follower-div'>
+//                    <div className='follower-div-photo'>
+//                    </div>
+//                </div>
+//            </div>
+//        </div>
+//    );
 
-}
+//}
 
 
 function Layout() {
@@ -126,9 +126,6 @@ function Layout() {
     </div>);
 
     return (<div className='row justify-content-center'>
-        <div className="col-12 col-lg-4 about">
-            <FollowingCard />
-        </div>
         <div className="col-12 col-lg-5">
             {post}
             {post}

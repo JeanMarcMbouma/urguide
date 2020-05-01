@@ -8,7 +8,9 @@ import { Link } from 'react-router-dom';
 import Rating from '@material-ui/lab/Rating';
 import EditIcon from '@material-ui/icons/Edit';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
+import AppsIcon from '@material-ui/icons/Apps';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
+import NotesIcon from '@material-ui/icons/Notes';
 import "./UserStyle.css";
 
 const useStyles = makeStyles((theme) => ({
@@ -63,6 +65,28 @@ const classes = useStyles();
 
 }
 
+function ActivateLink(event) {
+
+    var buttons = document.querySelectorAll("a");
+
+    [].forEach.call(buttons, function (el) {
+        el.classList.remove("active-nav-link");
+    });
+
+    var divs = document.querySelectorAll("div");
+
+    [].forEach.call(divs, function (el) {
+        el.classList.remove("active-nav-col");
+    });
+
+    var target = event.target;
+    var icon = target.closest("a");
+    var div = target.closest("div div");
+    //alert(target);
+    icon.className += ' active-nav-link';
+    div.className += ' active-nav-col';
+
+}
 
 export function UpperSection() {
 
@@ -88,23 +112,23 @@ export function UpperSection() {
                     </div>
                     <div className="nav-btn-div container">
                         <div className='row nav-btn-row justify-content-center' >
-                            <div className='col-12 col-lg-2 nav-col'>
-                                <Link style={{ textDecoration: `none` }} tag={Link} className="text-dark" to="/user" color="primary">
-                                    <span className='btn-title'>Posts (104)</span>
+                            <div className='col-12 col-sm-3 col-xl-2 nav-col text-center'>
+                                <Link style={{ textDecoration: `none` }} tag={Link}  to="/user" color="primary" onClick={(e) => ActivateLink(e)} >
+                                    <NotesIcon fontSize="small" /> <span className='btn-title'>Posts (104)</span>
                                 </Link>
                             </div>
-                            <div className='col-12 col-lg-2'>
-                                <Link style={{ textDecoration: `none` }} tag={Link} className="text-dark" to="/user/galleries" color="primary">
-                                    <span className='btn-title'>Galleries (7)</span>
+                            <div className='col-12 col-sm-3 col-xl-2 nav-col text-center'>
+                                <Link style={{ textDecoration: `none` }} tag={Link}  to="/user/galleries" color="primary" onClick={(e) => ActivateLink(e)} >
+                                    <AppsIcon fontSize="small" /> <span className='btn-title'>Galleries (7)</span>
                                 </Link>
                             </div>
-                            <div className='col-12 col-lg-2'>
-                                <Link style={{ textDecoration: `none` }} tag={Link} className="text-dark" to="/user/edit/profile" color="primary">
+                            <div className='col-12 col-sm-3 col-xl-2 nav-col text-center'>
+                                <Link style={{ textDecoration: `none` }} tag={Link}  to="/user/edit/profile" color="primary" onClick={(e) => ActivateLink(e)} >
                                     <EditIcon fontSize="small" /> <span className='btn-title'>Edit profile</span>
                                 </Link>
                             </div>
-                            <div className='col-12 col-lg-2'>
-                                <Link style={{ textDecoration: `none` }} tag={Link} className="text-dark" to="/user/gallery/new" color="primary">
+                            <div className='col-12 col-sm-3 col-xl-2 nav-col text-center'>
+                                <Link style={{ textDecoration: `none` }} tag={Link}  to="/user/gallery/new" color="primary" onClick={(e) => ActivateLink(e)} >
                                     <PhotoCameraIcon fontSize="small" /> <span className='btn-title'>New Gallery</span>
                                 </Link>
                             </div>

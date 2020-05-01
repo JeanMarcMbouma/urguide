@@ -38,43 +38,65 @@ const useStyles = makeStyles (() => ({
   },
 }));
 
+function ActivateLink(event) {
+
+    var buttons = document.querySelectorAll("button");
+
+    [].forEach.call(buttons, function (el) {
+        el.classList.remove("active-icon");
+    });
+
+    var divs = document.querySelectorAll("div");
+
+    [].forEach.call(divs, function (el) {
+        el.classList.remove("active-div");
+    });
+
+    var target = event.target;
+    var icon = target.closest("button");
+    var div = target.closest("div"); 
+    icon.className += ' active-icon';
+    div.className += ' active-div';
+ 
+}
+
+
 const Header = () => {
 
 
     const classes = useStyles();
     return (
-        <nav className='navigation-bar'>
+        <nav className='navigation-bar' >
             <div className="container-fluid" >
                 <div className="row justify-content-between navbarRow">
                     <div className="col-6 col-sm-3 col-lg-3">
                         <NavbarBrand tag={Link} to="/" className={(classes.font)}>UrGuide</NavbarBrand>
                     </div>
-                    <div className="col-8 col-sm-6 col-md-6 col-lg-5 centered-div"  >
-                        <div className='row justify-content-center'>
-                            <div className='col-3 col-md-3 col-lg-2 mid-1'>
-                                <Link to="/">
-                                    <IconButton>
+                    <div className="col-8 col-sm-6 col-md-6 col-lg-4 centered-div"  >
+                        <div className='row justify-content-end'>
+                            <div className='col-3 col-md-3 col-lg-3 mid-2 text-center'>
+                                <Link to="/feed"  >
+                                    <IconButton onClick={(e) => ActivateLink(e)}>
                                         <HomeOutlinedIcon fontSize="large" />
                                     </IconButton>
                                 </Link>
-
                             </div>
-                            <div className='col-3 col-md-3 col-lg-2 mid-2'>
-                                <Link to="/explorer">
-                                    <IconButton>
+                            <div className='col-3 col-md-3 col-lg-3 mid-2 text-center'>
+                                <Link to="/explorer"  >
+                                    <IconButton onClick={(e) => ActivateLink(e)}>
                                         <SearchIcon fontSize="large" />
                                     </IconButton>
                                 </Link>
                             </div>
-                            <div className='col-3 col-md-3 col-lg-2 mid-3'>
-                                <Link to="/user">
-                                    <IconButton>
+                            <div className='col-3 col-md-3 col-lg-3 mid-3 text-center'>
+                                <Link to="/user"  >
+                                    <IconButton onClick={(e) => ActivateLink(e)} >
                                         <PersonIcon fontSize="large" />
                                     </IconButton>
                                 </Link>
                             </div>
-                            <div className='col-3 col-md-3 col-lg-2 mid-3'>
-                                <IconButton>
+                            <div className='col-3 col-md-3 col-lg-3 mid-3 text-center'  >
+                                <IconButton  onClick={(e) => ActivateLink(e)}>
                                     <MailOutlineIcon fontSize="large" />
                                 </IconButton>
                             </div>
@@ -83,7 +105,7 @@ const Header = () => {
                     <div className="col-6 col-sm-3 col-md-3 right-div">
                         <div className='row justify-content-start'>
                             <Link to="/user">
-                                <div className='col-3 col-sm-6 col-md-3'>
+                                <div className='col-2 col-sm-6 col-md-3'>
                                     <IconButton className={classes.avatarButton}>
                                         <Avatar className={(classes.avatar)} src='https://img.favpng.com/20/5/24/social-media-computer-icons-avatar-user-internet-png-favpng-DwdFSAXdR58nGmLe4y67jEej0.jpg' />
                                     </IconButton>
@@ -93,7 +115,7 @@ const Header = () => {
                             <div className='col-4 col-md-3 col-lg-4 username'>
                                 <span>MrIhor</span>
                             </div>
-                            <div className='col-3 col-sm-3 col-md-2' >
+                            <div className='col-1 col-sm-1' >
                                 <IconButton>
                                     <NotificationsNoneOutlinedIcon />
                                 </IconButton>
