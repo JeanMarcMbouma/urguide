@@ -1,8 +1,13 @@
 ﻿body,
 html {
-    background-color: white !important;
+ 
     height: 100%;
-    margin: 0px;
-   
+    margin: 0;
+    font-size:15px !important;
+}
+
+a {
+    text-decoration: none !important;
+    color:#161616 !important;
 }
 

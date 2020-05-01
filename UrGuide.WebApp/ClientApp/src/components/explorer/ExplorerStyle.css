@@ -1,0 +1,158 @@
+﻿.search-bar {
+    position: fixed;
+    background-color: white;
+    margin:-15px -15px 0px -15px;
+    height: 70px;
+    padding-top:10px;
+    padding-left:-4px;
+    padding-right:4px;
+    width: 100%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    z-index:4;
+}
+
+.search-container {
+    width: 100%;
+    height: 50px;
+    position: relative;
+}
+
+.searchbar {
+    font-size: 16px;
+    width: 100%;
+    height: 50px;
+    border: none;
+    outline: none;
+    border-radius: 2.5rem;
+    border: 1px solid #d8d8d8;
+    padding: 5px 4px 2px 25px;
+    transition: all .2s;
+    transition-delay: .1s;
+}
+    .searchbar:focus {
+        border: 2px solid #1477d5;
+    }
+
+
+.button-search {
+    height: 24px;
+    position: absolute;
+    top: 0.8rem;
+    right: 1rem;
+    transition: all .2s;
+    transition-delay: .1s;
+}
+
+    .button-search:hover {
+        cursor: pointer;
+    }
+
+
+.main {
+    background-color: white;
+    margin-left: -14px;
+    margin-right: -14px;
+    margin-top: 40px;
+}
+
+.tags-div {
+
+    height:auto;
+    margin-top:50px;
+    width: 100%;
+    z-index: 2;
+    padding: 40px 4px 0px 4px;
+}
+
+.tags-label{
+    font-size:16px;
+    font-weight:500;
+    margin-left:10px;
+    margin-right:10px;
+}
+
+.tag {
+    margin-right: 10px !important;
+    margin: 6px;
+    margin-bottom: 10px !important;
+}
+
+.unclicked-tag {
+    background-color:#dbe5ff !important;
+    color:#161616 !important;
+}
+
+.clicked-tag {
+    background-color: #587acc !important;
+    color: white !important;
+}
+
+
+.square-grid {
+    margin-top: 40px;
+    overflow-x:hidden;
+}
+
+.square-grid-item {
+    height: 340px;
+    padding: 0px !important;
+    background-size: cover;
+    background-position: center center;
+}
+
+
+.user-profile{
+    height:40px !important;
+    width:40px !important;
+    border:2px solid white !important;
+}
+
+.inner-container {
+    height: 100%;
+    width: 100%;
+    visibility:hidden;
+    opacity: 0.8;
+    background-color: black !important;
+    cursor: pointer;
+}
+
+.square-grid-item:hover .inner-container {
+    visibility: visible;
+}
+
+.user-name{
+    color:white;
+}
+.spot-location {
+    color:white;
+}
+
+.inner-top {
+    height: 70px;
+    top: 0;
+}
+
+.inner-bottom{
+    position:relative;
+    bottom:0;  
+}
+
+.likes-div {
+    margin-right: -45px;
+}
+
+.feedback-icon{
+    color:white;
+}
+.feedback-icon:hover{
+    color:#e12424;
+}
+
+.feedback-number {
+    color: white !important;
+    font-size:15px;
+    font-weight:400;
+}
+
+

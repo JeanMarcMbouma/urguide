@@ -1,15 +1,14 @@
 ﻿import React, { Component, useContext, useReducer } from 'react';
-import { Route } from 'react-router-dom';
 import {
     Grid, Button, IconButton, Box, TextField, Link
 } from "@material-ui/core";
 import PhotoLibraryIcon from '@material-ui/icons/PhotoLibrary';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
-import { GalleryDetails } from "./GalleryDetails";
-import GalleryContext from "./GalleryContext";
-import GalleryReducer from "./GalleryReducer";
-import "./Gallery.css";
+import { GalleryDetails } from "../../components/user/gallery/GalleryDetails";
+import GalleryContext from "../../components/user/gallery/GalleryContext";
+import GalleryReducer from "../../components/user/gallery/GalleryReducer";
+import "../user/gallery/Gallery.css";
 
 function Gallery() {
 
@@ -92,13 +91,6 @@ function Gallery() {
     return (
         <div className="row justify-content-between">
             <div className="col-12 col-md-6 col-lg-5 col-xl-4">
-                <div>
-                    <Link style={{ textDecoration: `none`, fontSize: `20px`, fontWeight: `bolder` }} href="/user" color="primary">
-                        <KeyboardBackspaceIcon fontSize="small" /> Back
-                               </Link>
-                    <span style={{ fontSize: `20px`, fontWeight: `bold` }}> | Create New Gallery.</span>
-                 </div>
-                <br/>
                 <div className='details-card'>
                     <Grid item xs={12}>
                         <Box mb={5} mt={3}>
@@ -157,7 +149,7 @@ function Gallery() {
                         </div>
                     </Grid>
                 </div>
-        </div>
+            </div>
             <div className="col-12 col-md-6 col-lg-7 col-xl-8 gallery-content">
                 <div className='row'>
                     {Cards}
@@ -170,8 +162,10 @@ function Gallery() {
 export class CreateNewGallery extends Component {
     render() {
         return (
-            <div className="container-fluid gallery">
-               <Gallery />   
+            <div className="row">
+                <div className="col-12 lower-section gallery">
+                    <Gallery />
+                </div>
             </div>
         )
     }

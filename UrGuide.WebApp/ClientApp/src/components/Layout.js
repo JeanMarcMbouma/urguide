@@ -5,6 +5,7 @@ import './NavMenu.css';
 import { makeStyles } from '@material-ui/core/styles';
 import LinearProgress from '@material-ui/core/LinearProgress';
 
+
 //const useStyles = makeStyles(theme => ({
 //    root: {
 //        width: '100%',
@@ -28,10 +29,14 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 //}
 
 export class Layout extends Component {
-  static displayName = Layout.name;
 
-  render () {
-      return (
+
+ 
+
+    render() {
+
+  
+       return (
           <>
               <Header />
               <div className="container-fluid content">
@@ -44,6 +49,8 @@ export class Layout extends Component {
               </div>
          </>
     );
-  }
+    }
+
+   
 }
 
