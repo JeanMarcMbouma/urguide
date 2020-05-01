@@ -41,7 +41,7 @@ namespace UrGuide.Services.Posts
                 LastUpdated = DateTime.UtcNow
             };
 
-            var extFiles = new List<ImageFileModel>();
+            var extFiles = new List<ImageFileCreateModel>();
             if(model.Video != null)
             {
                 extFiles.Add(model.Video);

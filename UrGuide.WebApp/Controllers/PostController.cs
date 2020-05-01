@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -13,7 +14,7 @@ namespace UrGuide.WebApp.Controllers
 
 
     [ApiController]
-    [Route("[controller]")]
+    [Route("posts")]
     [Authorize]
     public class PostController : ControllerBase
     {
@@ -24,14 +25,16 @@ namespace UrGuide.WebApp.Controllers
             _postService = postService ?? throw new ArgumentNullException(nameof(postService));
         }
 
-        [HttpGet]
+        [HttpGet("last10")]
+        [ProducesDefaultResponseType(typeof(IEnumerable<PostModel>))]
         public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
             var result = await _postService.GetLast10PostsAsync(cancellationToken);
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
-        [HttpPost]
+        [HttpPost("create")]
+        [ProducesDefaultResponseType(typeof(PostModel))]
         public async Task<IActionResult> Create([FromBody]PostCreationModel model, CancellationToken cancellationToken)
         {
             var result = await _postService.CreatePostAsync(model, cancellationToken);
@@ -39,7 +42,7 @@ namespace UrGuide.WebApp.Controllers
         }
 
 
-        [HttpPut("{postId}")]
+        [HttpPut("{postId}/update")]
         public async Task<IActionResult> Edit(string postId, PostUpdateModel model, CancellationToken cancellationToken)
         {
             if (postId != model.Id)
@@ -51,7 +54,7 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
-        [HttpPut("{postId}/attributes/{name}/set")]
+        [HttpPut("{postId}/attributes/{name}/update")]
         public async Task<IActionResult> EditAttribute(string postId, string name, SetAttribute attribute, CancellationToken cancellationToken)
         {
             if (name != attribute.Name)
@@ -72,7 +75,7 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
-        [HttpDelete("{postId}/attributes/{name}/delete")]
+        [HttpDelete("{postId}/attributes/{name}/remove")]
         public async Task<IActionResult> RemoveAttribute(string postId, string name, CancellationToken cancellationToken)
         {
             
@@ -80,7 +83,7 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
-        [HttpDelete("{postId}")]
+        [HttpDelete("{postId}/remove")]
         public async Task<IActionResult> DeletePost(string postId, CancellationToken cancellationToken)
         {
             var result = await _postService.DeletePostAsync(postId, cancellationToken);

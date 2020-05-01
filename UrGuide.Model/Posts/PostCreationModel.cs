@@ -8,7 +8,7 @@ namespace UrGuide.Model.Posts
     {
         public PostCreationModel()
         {
-            Images = new HashSet<ImageFileModel>();
+            Images = new HashSet<ImageFileCreateModel>();
             Categories = new HashSet<string>();
         }
 
@@ -20,7 +20,7 @@ namespace UrGuide.Model.Posts
         public int Seats { get; set; }
         public string GeoLocation { get; set; }
         public ICollection<string> Categories { get; set; }
-        public ICollection<ImageFileModel> Images { get; set; }
-        public ImageFileModel Video { get; set; }
+        public ICollection<ImageFileCreateModel> Images { get; set; }
+        public ImageFileCreateModel Video { get; set; }
     }
 }
