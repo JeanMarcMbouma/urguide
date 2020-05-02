@@ -64,7 +64,7 @@ namespace UrGuide.Services.Users
         public async Task<Result<User>> GetUserAsync(string userId, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var user = await Context.Users.FindAsync(userId, cancellationToken);
+            var user = await Context.Users.FindAsync(new[] { userId }, cancellationToken);
             return Result.Of(Mapper.Map<User>(user));
         }
 

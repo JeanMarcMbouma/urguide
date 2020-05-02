@@ -15,7 +15,6 @@
     "material-ui-icons": "1.0.0-alpha.19",
     "merge": "^1.2.1",
     "moment": "2.24.0",
-    "moment-locales-webpack-plugin": "1.2.0",
     "oidc-client": "^1.10.1",
     "react": "^16.13.0",
     "react-bootstrap": "^1.0.1",
