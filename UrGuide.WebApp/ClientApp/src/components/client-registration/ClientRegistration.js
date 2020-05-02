@@ -122,7 +122,7 @@ const createUser = async function (state) {
         },
         credentials: 'include',
         body: JSON.stringify({
-            userName: state.email,
+            email: state.email,
             password: state.password,
             confirmPassword: state.confirmPassword,
             firstName: state.firstName,

@@ -83,41 +83,42 @@ export default function CentralBar () {
   const update = ctx => {
     setContext ({...ctx});
   };
-    const [posts, setPosts] = useState([]);
+    //const [posts, setPosts] = useState([]);
     const { user } = useAuthContext();
-    const { profile } = user;
+    const { profile } = user || {
+        profile: { name:'guest'} } ;
 
-    useMemo(async () => {
-        const api = new PostsClient();
-        var result = await api.last10();
-        const post = result[0];
-        setPosts(result);
-    }, []);
+    //useMemo(async () => {
+    //    const api = new PostsClient();
+    //    var result = await api.last10();
+    //    const post = result[0];
+    //    setPosts(result);
+    //}, []);
   
-  //let posts = [
-  //  {
-  //    name: 'Excursion around Cherkassy',
-  //    description: 'I will show you this beautiful town',
-  //    price: '250',
-  //    category: 'mix',
-  //    currentHuman: '12',
-  //    LimitHuman: '30',
-  //    author: 'Ivanna',
-  //    dateStart: '12.04.20',
-  //    profilePhoto: 'https://images.pexels.com/photos/3541390/pexels-photo-3541390.jpeg?cs=srgb&dl=close-up-photo-of-woman-wearing-red-sweater-3541390.jpg&fm=jpg',
-  //  },
-  //  {
-  //    name: 'Football field in Kyiv',
-  //    description: 'I will show you the biggest football field in Kyiv',
-  //    category: 'sport',
-  //    price: '450',
-  //    currentHuman: '9',
-  //    LimitHuman: '30',
-  //    author: 'Lena',
-  //    dateStart: '01.05.20',
-  //    profilePhoto: 'https://images.pexels.com/photos/3690085/pexels-photo-3690085.jpeg?cs=srgb&dl=photo-of-woman-wearing-black-turtle-neck-top-3690085.jpg&fm=jpg',
-  //  },
-  //];
+  let posts = [
+    {
+      name: 'Excursion around Cherkassy',
+      description: 'I will show you this beautiful town',
+      price: '250',
+      category: 'mix',
+      currentHuman: '12',
+      LimitHuman: '30',
+      author: 'Ivanna',
+      dateStart: '12.04.20',
+      profilePhoto: 'https://images.pexels.com/photos/3541390/pexels-photo-3541390.jpeg?cs=srgb&dl=close-up-photo-of-woman-wearing-red-sweater-3541390.jpg&fm=jpg',
+    },
+    {
+      name: 'Football field in Kyiv',
+      description: 'I will show you the biggest football field in Kyiv',
+      category: 'sport',
+      price: '450',
+      currentHuman: '9',
+      LimitHuman: '30',
+      author: 'Lena',
+      dateStart: '01.05.20',
+      profilePhoto: 'https://images.pexels.com/photos/3690085/pexels-photo-3690085.jpeg?cs=srgb&dl=photo-of-woman-wearing-black-turtle-neck-top-3690085.jpg&fm=jpg',
+    },
+  ];
 
   function DatePicker () {
     const [selectedDate, setSelectedDate] = React.useState (

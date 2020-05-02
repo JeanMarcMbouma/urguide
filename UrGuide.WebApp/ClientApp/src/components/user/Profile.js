@@ -24,7 +24,7 @@ import {
 import { CreateNewGallery } from "./CreateNewGallery";
 
 
-export default function Explorer() {
+export default function Profile() {
 
     let { path, url } = useRouteMatch();
 

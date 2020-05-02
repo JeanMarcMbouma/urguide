@@ -4,7 +4,7 @@ import { Switch, Redirect } from 'react-router-dom';
 import { LoginLayout } from './components/login/LoginLayout';
 import { LoginPage } from './components/login/LoginPage';
 import { RegisterLayout } from './components/RegisterLayout';
-import Explorer from "./components/explorer/Explorer";
+import Discover from "./components/discover/Discover";
 import Profile from "./components/user/Profile";
 import {
     ClientRegistration,
@@ -61,13 +61,13 @@ export default class App extends Component {
                             />
                         </RegisterLayout>
                     </Route>
-                    <AuthRoute path="/(user|feed|explorer)">
+                    <Route path="/(user|feed|discover)">
                         <Layout>
                             <Route path="/user" component={Profile} />
                             <Route path="/feed" component={Home} />
-                            <Route path="/explorer" component={Explorer} />
+                            <Route path="/discover" component={Discover} />
                         </Layout>
-                    </AuthRoute>
+                    </Route>
                     <Route exact path="/" render={() => <Redirect to="/feed" />} />
                 </Switch>
             </AuthContext.Provider>

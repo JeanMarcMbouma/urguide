@@ -82,7 +82,7 @@ const Header = () => {
                                 </Link>
                             </div>
                             <div className='col-3 col-md-3 col-lg-3 mid-2 text-center'>
-                                <Link to="/explorer"  >
+                                <Link to="/discover"  >
                                     <IconButton onClick={(e) => ActivateLink(e)}>
                                         <SearchIcon fontSize="large" />
                                     </IconButton>

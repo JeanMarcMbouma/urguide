@@ -20,7 +20,7 @@ import {
     useRouteMatch
 } from "react-router-dom";
 import Post from "../post/Post";
-import "./ExplorerStyle.css";
+import "./DiscoverStyle.css";
 
 
 class Cards extends Component {
@@ -174,7 +174,7 @@ class Cards extends Component {
 }
 
 
-export default function Explorer() {
+export default function Discover() {
 
     let { path, url } = useRouteMatch();
 

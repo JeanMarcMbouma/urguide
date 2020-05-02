@@ -11,6 +11,7 @@ const onLoading = (dispatch) => () => dispatch({ type: 'loading' });
 
 
 export const UserReducer = (state, action) => {
+    console.log(state);
     switch (action.type) {
         case 'login':
             return { ...state, isLoggedIn: true, user: action.user, loading: false, logginOut: false };
@@ -35,6 +36,11 @@ class AuthService {
         this._onLoggingOut = () => {}
     }
 
+     navigateToReturnUrl(returnUrl){
+
+        window.location.replace(returnUrl);
+    }
+
     async signIn(returnUrl) {
         await this._initManager();
         this._onLoading();
@@ -44,10 +50,22 @@ class AuthService {
                 return;
             }
         } catch (e) {
+            console.log(e);
 
+            try {
+                const popUpUser = await this._mgr.signinPopup(this.createArguments());
+                return;
+            } catch (e) {
+
+            }
         }
         
-        await this._mgr.signinRedirect(this.createArguments({ returnUrl }));
+        try {
+            await this._mgr.signinRedirect(this.createArguments({ returnUrl }));
+            this.navigateToReturnUrl(returnUrl);
+        } catch (e) {
+
+        }
     }
 
     async signOut() {
@@ -156,6 +174,6 @@ export const useSecure = (component) => {
             console.log('done')
         }
     }, [loggingOut, manager, returnUrl, allowed, user]);
-
+    console.log(user);
     return !allowed ? authenticating : component;
 }
