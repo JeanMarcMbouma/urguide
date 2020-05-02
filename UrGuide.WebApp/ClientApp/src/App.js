@@ -20,6 +20,8 @@ import RegistrationConfirmation
 import AuthRoute from './components/api-authorization/AuthRoute'
 import authService, { AuthContext, defaultState } from './components/api-authorization/AuthService'
 import Loader from './components/api-authorization/loader';
+import { ApplicationPaths } from './components/api-authorization/ApiAuthorizationConstants';
+import LoginCallback from './components/api-authorization/LoginCallback';
 
 export default class App extends Component {
     constructor(props) {
@@ -61,14 +63,15 @@ export default class App extends Component {
                             />
                         </RegisterLayout>
                     </Route>
-                    <AuthRoute path="/(user|feed|explorer)">
+                    <Route path="/(user|feed|explorer)">
                         <Layout>
                             <Route path="/user" component={Profile} />
-                            <Route path="/feed" component={Home} />
+                            <AuthRoute path="/feed" component={Home} />
                             <Route path="/explorer" component={Explorer} />
                         </Layout>
-                    </AuthRoute>
+                    </Route>
                     <Route exact path="/" render={() => <Redirect to="/feed" />} />
+                    <Route exact path={ApplicationPaths.LoginCallback} component={LoginCallback} />
                 </Switch>
             </AuthContext.Provider>
         );

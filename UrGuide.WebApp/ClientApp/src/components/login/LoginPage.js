@@ -27,6 +27,7 @@ import LoginReducer from "./LoginReducer";
 import "./LoginPage.css";
 
 import {  QueryParameterNames } from './../api-authorization/ApiAuthorizationConstants';
+import authService from "../api-authorization/AuthService";
 
 function Copyright() {
     return (
@@ -86,53 +87,7 @@ const LoginForm = () => {
     const ctx = useContext(LoginContext);
     const [state, dispatch] = useReducer(LoginReducer, ctx);
 
-    const getReturnUrl = (state) => {
-        const params = new URLSearchParams(window.location.search);
-        const fromQuery = params.get(QueryParameterNames.ReturnUrl);
-        if (fromQuery && !fromQuery.startsWith(`${window.location.origin}/`)) {
-            // This is an extra check to prevent open redirects.
-            throw new Error("Invalid return url. The return url needs to have the same origin as the current page.")
-        }
-        return (state && state.returnUrl) || fromQuery || `${window.location.origin}/`;
-    }
-    const navigateToReturnUrl = (returnUrl) => {
-        // It's important that we do a replace here so that we remove the callback uri with the
-        // fragment containing the tokens from the browser history.
-        window.location.replace(returnUrl);
-    }
-    //const login = async function (state) {
-    //    const returnUrl = getReturnUrl();
-    //    const response = await fetch('/login', {
-    //        method: 'POST',
-    //        headers: {
-    //            'Content-Type': 'application/json',
-    //        },
-    //        credentials: 'include',
-    //        body: JSON.stringify({
-    //            userName: state.email,
-    //            password: state.password,
-    //            persist: state.isRemembered,
-    //            returnUrl
-    //        })
-    //    });
-    //    if (response.status == 200 || response.status == 304 || response.status == 204) {
-    //        navigateToReturnUrl(returnUrl);
-    //    } else {
-    //        // we got an error
-    //        if (response.status == 400) // BadRequest
-    //        {
-    //            var errors = await response.json();
-    //            console.log(errors);
-
-    //            state.passwordError = "Invalid email address or password.";
-    //        }
-    //        else
-    //        {
-    //            // Account has certainly been locked-out
-    //        }
-    //    }
-    //}
-
+    
     const LoginFailedWarning = (<span className='text-danger'>{state.LoginFailed}</span>);
 
     const emailTextField = state.emailError ? (
@@ -278,8 +233,7 @@ const LoginForm = () => {
                                     email: values.email,
                                     password: values.password,
                                     isRemembered: document.getElementById("remember-me").checked,
-                                    //callback: login
-                                    returnUrl: getReturnUrl(),
+                                    returnUrl: authService.getReturnUrl(),
                                 }
                             })
                         }

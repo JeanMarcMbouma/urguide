@@ -1,4 +1,5 @@
 import { Client, LoginModel, ApiException } from './../../api'
+import authService from '../api-authorization/AuthService';
 const navigateToReturnUrl = (returnUrl: any) => {
 
     window.location.replace(returnUrl);
@@ -16,8 +17,7 @@ async function login(state: any) {
 
     try {
         await client.login(returnUrl, loginModel);
-        navigateToReturnUrl(returnUrl);
-        return null;
+        await authService.completeSignIn(returnUrl);
     } catch (e) {
         state.LoginFailed = (<ApiException>e).message;
     }

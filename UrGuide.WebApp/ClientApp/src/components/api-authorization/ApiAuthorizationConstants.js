@@ -1,7 +1,7 @@
 export const ApplicationName = 'UrGuide.WebApp';
 
 export const QueryParameterNames = {
-  ReturnUrl: 'returnUrl',
+  ReturnUrl: 'ReturnUrl',
   Message: 'message'
 };
 
