@@ -43,12 +43,22 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\src\components\api-authorization\AuthService.js" />
+    <None Remove="ClientApp\src\components\login\LoginReducer.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\UrGuide.Services\UrGuide.Services.csproj" />
     <ProjectReference Include="..\UrGuide.Shared\UrGuide.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Pages\Shared\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\components\api-authorization\AuthService.js" />
+    <TypeScriptCompile Include="ClientApp\src\components\login\LoginReducer.ts" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

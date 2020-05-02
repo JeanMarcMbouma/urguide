@@ -12,7 +12,7 @@ namespace UrGuide.Services.Catalogs
                 .ForMember(x => x.Description, x => x.MapFrom(f => f.Attributes.First(a => a.Name == nameof(Model.Catalogs.CreateImageCatalogModel.Description))))
                 .ForMember(x => x.Name, x => x.MapFrom(f => f.Attributes.First(a => a.Name == nameof(Model.Catalogs.CreateImageCatalogModel.Name))))
                 .ForMember(x => x.CatalogId, x => x.MapFrom(f => f.Id))
-                .ForMember(x => x.Files, x => x.MapFrom(f => f.Images.Select(i => new ImageFileCreateModel
+                .ForMember(x => x.Files, x => x.MapFrom(f => f.Images.Select(i => new ImageFileModel
                 {
                     Id = i.Id,
                     ImageBase64 = i.ImageBase64,

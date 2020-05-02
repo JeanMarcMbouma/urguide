@@ -8,6 +8,6 @@ namespace UrGuide.Model.Catalogs
         public string CatalogId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public ICollection<ImageFileCreateModel> Files { get; set; }
+        public ICollection<ImageFileModel> Files { get; set; }
     }
 }

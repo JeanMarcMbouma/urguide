@@ -5,5 +5,6 @@
     {
         public string ImageBase64 { get; set; }
         public string Name { get; set; }
+        public string Id { get; set; }
     }
 }

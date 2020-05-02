@@ -125,7 +125,7 @@ namespace UrGuide.WebApp
             app.UseSpa(spa =>
             {
                 spa.Options.SourcePath = "ClientApp";
-
+                spa.Options.StartupTimeout = TimeSpan.FromMinutes(5);
                 if (env.IsDevelopment())
                 {
                     spa.UseReactDevelopmentServer(npmScript: "start");

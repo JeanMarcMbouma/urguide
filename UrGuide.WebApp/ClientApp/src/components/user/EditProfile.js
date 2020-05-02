@@ -25,9 +25,7 @@ function Profile() {
 
         document.getElementById("pic-previewer").style.backgroundImage =
             "url('" + file + "')";
-
     }
-
 
     const [values, setValues] = React.useState({
         firstName: '',
