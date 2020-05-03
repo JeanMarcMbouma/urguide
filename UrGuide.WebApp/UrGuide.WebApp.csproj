@@ -43,6 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\src\api\ClientFactory.ts" />
     <None Remove="ClientApp\src\components\api-authorization\AuthService.js" />
     <None Remove="ClientApp\src\components\login\LoginReducer.ts" />
   </ItemGroup>
@@ -57,6 +58,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\httpclient\index.ts" />
     <TypeScriptCompile Include="ClientApp\src\components\api-authorization\AuthService.js" />
     <TypeScriptCompile Include="ClientApp\src\components\login\LoginReducer.ts" />
   </ItemGroup>

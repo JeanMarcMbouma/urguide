@@ -1,4 +1,5 @@
 import { Client, LoginModel, ApiException } from './../../api'
+import { HttpClientFactory} from './../../httpclient'
 import authService from '../api-authorization/AuthService';
 const navigateToReturnUrl = (returnUrl: any) => {
 
@@ -8,7 +9,8 @@ const navigateToReturnUrl = (returnUrl: any) => {
 async function login(state: any) {
 
     const returnUrl = state.returnUrl;
-    const client = new Client();
+    const client = HttpClientFactory.getClient();
+
     const loginModel = new LoginModel({
         userName: state.email,
         password: state.password,

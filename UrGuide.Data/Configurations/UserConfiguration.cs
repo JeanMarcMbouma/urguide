@@ -12,6 +12,8 @@ namespace UrGuide.Data.Configurations
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id).HasColumnName("UserId").IsRequired();
             builder.Property(x => x.LastActivityDate);
+            builder.Ignore(x => x.FullName);
+
             builder.OwnsOne(x => x.ProfileImage, p => {
                 p.ToTable("User_Images", Constants.Schema);
                 p.WithOwner().HasForeignKey("UserId");

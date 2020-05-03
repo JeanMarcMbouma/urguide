@@ -36,7 +36,10 @@ namespace UrGuide.Services.Posts
                 .ForMember(x => x.StartTime, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.TimeStart))))
                 .ForMember(x => x.Status, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.Status))))
                 .ForMember(x => x.StartingBid, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.Amount))))
-                .ForMember(x => x.LastBid, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.LastBid))));
+                .ForMember(x => x.LastBid, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.LastBid))))
+                .ForMember(x => x.AuthorId, x => x.MapFrom(p => p.User != null ? p.User.Id : Constants.EmptyGuid))
+                .ForMember(x => x.Author, x => x.MapFrom(p => p.User != null ? p.User.FullName : Constants.Unknown))
+                .ForMember(x => x.AuthorAvatar, x => x.MapFrom(p => p.User != null && p.User.ProfileImage != null ? p.User.ProfileImage.ImageBase64 : Constants.UnknownImage));
         }
     }
 }

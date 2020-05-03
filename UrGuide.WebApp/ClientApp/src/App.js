@@ -22,6 +22,7 @@ import authService, { AuthContext, defaultState } from './components/api-authori
 import Loader from './components/api-authorization/loader';
 import { ApplicationPaths } from './components/api-authorization/ApiAuthorizationConstants';
 import LoginCallback from './components/api-authorization/LoginCallback';
+import LogoutCallback from './components/api-authorization/LogoutCallback';
 
 export default class App extends Component {
     constructor(props) {
@@ -72,6 +73,7 @@ export default class App extends Component {
                     </Route>
                     <Route exact path="/" render={() => <Redirect to="/feed" />} />
                     <Route exact path={ApplicationPaths.LoginCallback} component={LoginCallback} />
+                    <Route exact path={ApplicationPaths.LogOutCallback} component={LogoutCallback} />
                 </Switch>
             </AuthContext.Provider>
         );

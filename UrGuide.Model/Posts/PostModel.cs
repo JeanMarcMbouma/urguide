@@ -30,5 +30,8 @@ namespace UrGuide.Model.Posts
         public ICollection<string> Categories { get; protected set; }
 
         public ICollection<ImageFileCreateModel> Images { get; protected set; }
+        public string AuthorId { get; set; }
+        public string Author { get; set; }
+        public string AuthorAvatar { get; set; }
     }
 }
