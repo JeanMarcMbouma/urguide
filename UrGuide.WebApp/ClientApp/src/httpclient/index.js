@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var api_1 = require("../api");
 var originalFetch = fetch;
@@ -7,8 +18,10 @@ var Http = /** @class */ (function () {
         this.user = user;
     }
     Http.prototype.fetch = function (url, init) {
+        console.log('arguments', init, this.user);
         if (this.user && this.user.access_token && init) {
-            init.headers['Authorization'] = "Bearer: " + this.user.access_token;
+            var options = __assign(__assign({}, init), { Authorization: "Bearer: " + this.user.access_token });
+            return originalFetch(url, options);
         }
         return originalFetch(url, init);
     };
