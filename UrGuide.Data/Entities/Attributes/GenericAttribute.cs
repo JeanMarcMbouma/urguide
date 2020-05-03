@@ -13,6 +13,12 @@ namespace UrGuide.Data.Entities.Attributes
             return attribute.Value;
         }
 
+        public static implicit operator int(GenericAttribute attribute)
+        {
+            return int.TryParse(attribute.Value, out int val) ? val : 0;
+        }
+
+
         public override string ToString()
         {
             return Value;

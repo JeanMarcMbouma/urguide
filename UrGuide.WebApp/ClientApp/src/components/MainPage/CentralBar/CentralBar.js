@@ -246,7 +246,7 @@ export default function CentralBar() {
                 {posts.map((post, i) => (
                     <div key={i} className="p-3 mb-3 bg-white rounded post-card">
                         <CardHeader
-                            avatar={<Avatar alt="profile photo" src={post.author.image} />}
+                            avatar={<Avatar alt="profile photo" src={post.authorAvatar} />}
                             title={
                                 <Typography variant="body1" component="p">
                                     {post.author} | {post.text} | {post.categories}
