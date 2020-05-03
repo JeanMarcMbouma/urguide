@@ -36,7 +36,7 @@ export class Client {
             body: content_,
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             }
         };
 
@@ -1435,6 +1435,9 @@ export class ImageCatalogModel implements IImageCatalogModel {
     name?: string | undefined;
     description?: string | undefined;
     files?: ImageFileModel[] | undefined;
+    authorId?: string | undefined;
+    author?: string | undefined;
+    authorAvatar?: string | undefined;
 
     constructor(data?: IImageCatalogModel) {
         if (data) {
@@ -1455,6 +1458,9 @@ export class ImageCatalogModel implements IImageCatalogModel {
                 for (let item of _data["files"])
                     this.files!.push(ImageFileModel.fromJS(item));
             }
+            this.authorId = _data["authorId"];
+            this.author = _data["author"];
+            this.authorAvatar = _data["authorAvatar"];
         }
     }
 
@@ -1475,6 +1481,9 @@ export class ImageCatalogModel implements IImageCatalogModel {
             for (let item of this.files)
                 data["files"].push(item.toJSON());
         }
+        data["authorId"] = this.authorId;
+        data["author"] = this.author;
+        data["authorAvatar"] = this.authorAvatar;
         return data; 
     }
 }
@@ -1484,6 +1493,9 @@ export interface IImageCatalogModel {
     name?: string | undefined;
     description?: string | undefined;
     files?: ImageFileModel[] | undefined;
+    authorId?: string | undefined;
+    author?: string | undefined;
+    authorAvatar?: string | undefined;
 }
 
 export class UpdateImageCatalogModel implements IUpdateImageCatalogModel {
@@ -1640,7 +1652,10 @@ export class PostModel implements IPostModel {
     endDate?: string | undefined;
     startTime?: string | undefined;
     readonly categories?: string[] | undefined;
-    readonly images?: ImageFileCreateModel[] | undefined;
+    readonly images?: ImageFileModel[] | undefined;
+    authorId?: string | undefined;
+    author?: string | undefined;
+    authorAvatar?: string | undefined;
 
     constructor(data?: IPostModel) {
         if (data) {
@@ -1677,8 +1692,11 @@ export class PostModel implements IPostModel {
             if (Array.isArray(_data["images"])) {
                 (<any>this).images = [] as any;
                 for (let item of _data["images"])
-                    (<any>this).images!.push(ImageFileCreateModel.fromJS(item));
+                    (<any>this).images!.push(ImageFileModel.fromJS(item));
             }
+            this.authorId = _data["authorId"];
+            this.author = _data["author"];
+            this.authorAvatar = _data["authorAvatar"];
         }
     }
 
@@ -1717,6 +1735,9 @@ export class PostModel implements IPostModel {
             for (let item of this.images)
                 data["images"].push(item.toJSON());
         }
+        data["authorId"] = this.authorId;
+        data["author"] = this.author;
+        data["authorAvatar"] = this.authorAvatar;
         return data; 
     }
 }
@@ -1739,7 +1760,10 @@ export interface IPostModel {
     endDate?: string | undefined;
     startTime?: string | undefined;
     categories?: string[] | undefined;
-    images?: ImageFileCreateModel[] | undefined;
+    images?: ImageFileModel[] | undefined;
+    authorId?: string | undefined;
+    author?: string | undefined;
+    authorAvatar?: string | undefined;
 }
 
 export class PostCreationModel implements IPostCreationModel {
