@@ -30,6 +30,7 @@ namespace UrGuide.WebApp.Controllers
 
         // GET: api/Gallery
         [HttpGet("{userId}/all")]
+        [AllowAnonymous]
         [ProducesDefaultResponseType(typeof(IEnumerable<ImageCatalogModel>))]
 
         public async Task<IActionResult> Get(string userId, CancellationToken cancellationToken)
@@ -40,7 +41,7 @@ namespace UrGuide.WebApp.Controllers
 
         [HttpGet("{catalogId}/retrieve")]
         [ProducesDefaultResponseType(typeof(ImageCatalogModel))]
-
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(string catalogId, CancellationToken cancellationToken)
         {
             var result = await CatalogService.GetCatalogAsync(catalogId, cancellationToken);

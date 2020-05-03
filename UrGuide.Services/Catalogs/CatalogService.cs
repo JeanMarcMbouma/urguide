@@ -59,6 +59,8 @@ namespace UrGuide.Services.Catalogs
                 ImageBase64 = imageFile.ImageBase64,
                 MimeType = FileExtensionHelper.GetImageMimeType(imageFile)
             });
+
+            catalog.LastUpdated = DateTime.UtcNow;
             await Context.SaveChangesAsync(cancellationToken);
             return Result.Of(true);
         }
@@ -79,7 +81,8 @@ namespace UrGuide.Services.Catalogs
             var catalog = new ImageCatalog
             {
                 Created = DateTime.UtcNow,
-                User = user
+                User = user,
+                LastUpdated = DateTime.UtcNow
             };
 
             foreach (var file in catalogModel.Files)
@@ -112,6 +115,7 @@ namespace UrGuide.Services.Catalogs
             cancellationToken.ThrowIfCancellationRequested();
             var catalogs = await Context.ImageCatalogs.Include(c => c.User).Where(x => x.User.Id == userId)
                 .Select(catalog => Mapper.Map<ImageCatalogModel>(catalog))
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
             return Result.Of(catalogs.AsEnumerable());
         }
@@ -150,7 +154,7 @@ namespace UrGuide.Services.Catalogs
                 return Result.Of(false).WithErrors("Catalog doesn't exists");
             var images = catalog.Images.Where(i => imageIds.Any(v => v.Equals(i.Id))).ToList();
             images.ForEach(i => catalog.Images.Remove(i));
-
+            catalog.LastUpdated = DateTime.UtcNow;
             await Context.SaveChangesAsync(cancellationToken);
             return Result.Of(true);
         }
