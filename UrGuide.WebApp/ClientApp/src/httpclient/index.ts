@@ -11,9 +11,10 @@ class Http implements IHttp {
     constructor(private user?: User) {
 
     }
-    fetch(url: RequestInfo, init: RequestInit): Promise<Response> {
-        if (this.user!.access_token) {
-            init.headers['Authorization'] = `Bearer: ${this.user.access_token}`;
+    fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
+        if (this.user!.access_token && init) {
+
+            (<any>init).headers['Authorization'] = `Bearer: ${this.user!.access_token}`;
         }
         return originalFetch(url, init);
     }
@@ -25,14 +26,14 @@ export class HttpClientFactory {
     }
 
     static getCatalogClient(user?: User): CatalogsClient {
-        return new CatalogsClient(null, new Http(user));
+        return new CatalogsClient("", new Http(user));
     }
 
     static getAccountClient(user?: User): AccountClient {
-        return new AccountClient(null, new Http(user));
+        return new AccountClient("", new Http(user));
     }
 
     static getClient(): Client {
-        return new Client(null, new Http());
+        return new Client("", new Http());
     }
 }

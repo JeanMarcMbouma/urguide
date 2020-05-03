@@ -16,6 +16,7 @@ const LoginCallBack = () => {
     
     const url = window.location.href;
     authService.completeSignIn(url);
+    const styles = useStyles();
     return (
         <div className={styles.positionLoader}>
             <CircularProgress />
