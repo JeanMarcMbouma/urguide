@@ -93,8 +93,6 @@ export default function CentralBar() {
     useMemo(async () => {
         const api = HttpClientFactory.getPostClient(user);
         var result = await api.last10();
-        const post = result[0];
-        post.publicationDate
         setPosts(result);
     }, [user]);
 
