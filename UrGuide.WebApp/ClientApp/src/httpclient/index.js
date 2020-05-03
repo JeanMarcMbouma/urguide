@@ -7,7 +7,7 @@ var Http = /** @class */ (function () {
         this.user = user;
     }
     Http.prototype.fetch = function (url, init) {
-        if (this.user.access_token && init) {
+        if (this.user && this.user.access_token && init) {
             init.headers['Authorization'] = "Bearer: " + this.user.access_token;
         }
         return originalFetch(url, init);

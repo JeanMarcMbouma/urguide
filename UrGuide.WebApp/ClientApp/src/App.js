@@ -29,7 +29,7 @@ export default class App extends Component {
         super(props);
         this.state = defaultState;
         this.state.manager = authService;
-        this.state.authenticating = <Loader/>;
+        this.state.authenticating = <Loader />;
     }
     static displayName = App.name;
 

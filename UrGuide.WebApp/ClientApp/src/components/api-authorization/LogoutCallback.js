@@ -3,15 +3,18 @@ import {
     Grid,
     Button
 } from '@material-ui/core';
+import { useAuthContext } from './AuthService';
 
 const LogoutCallback = () => {
+    const { manager } = useAuthContext();
     const gotoSignIn = () => {
         // It's important that we do a replace here so that we remove the callback uri with the
         // fragment containing the tokens from the browser history.
-        window.location.replace(`${window.location.origin}/sign-in`);
+        
+        manager.signIn(window.location.href);
     }
     return (
-        <Grid container xs={12}>
+        <Grid container>
             <p className='col-12 text-center text-success'>
                 You're logged out!
             </p>
@@ -20,7 +23,7 @@ const LogoutCallback = () => {
                     variant="contained"
                     color="primary"
                 >
-                    {"Go to Sign In"}
+                    {"Sign In"}
                 </Button>
             </p>
         </Grid>

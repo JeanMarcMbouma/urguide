@@ -12,7 +12,7 @@ class Http implements IHttp {
 
     }
     fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
-        if (this.user!.access_token && init) {
+        if (this.user && this.user.access_token && init) {
 
             (<any>init).headers['Authorization'] = `Bearer: ${this.user!.access_token}`;
         }

@@ -2,7 +2,7 @@
 import { Route } from 'react-router-dom'
 import { useAuth } from './AuthService'
 import { QueryParameterNames, ApplicationPaths } from './ApiAuthorizationConstants';
-import { Redirect } from 'react-router-dom';
+import LogoutCallback from './LogoutCallback'
 
 export default function AuthRoute(props) {
     const [ready, setReady] = useState(false);
@@ -10,8 +10,7 @@ export default function AuthRoute(props) {
 
     useEffect(() => {
         manager.isAuthenticated();
-        if (isLoggedIn)
-            setReady(true);
+        setReady(true);
     }, [manager, user, isLoggedIn])
     var link = document.createElement("a");
     link.href = props.path;
@@ -26,7 +25,7 @@ export default function AuthRoute(props) {
                 if (user) {
                     return <Component {...props} />
                 } else {
-                    return <Redirect to={redirectUrl} />
+                    return <LogoutCallback />
                 }
             }} />
     }
