@@ -40,7 +40,7 @@ class Cards extends Component {
         const cards = this.state.images.map((img, i) =>
           
                 <div key={i} className={`col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 square-grid-item`} style={{ backgroundImage: `url(${img.href})` }} >
-                <Link to={`${'/explorer'}/${img.id}`}>
+                <Link to={`${'/discover'}/${img.id}`}>
                 <table className="inner-container">
                         <tr>
                             <td valign="top">

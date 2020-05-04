@@ -108,6 +108,7 @@ namespace UrGuide.Services.Posts
                 return Result.Of(false).WithErrors(ErrorMessages.NotFoundEntityForKey);
             post.Text = model.Text;
             post.Description = model.Description;
+            post.LastUpdated = DateTime.UtcNow;
             await Context.SaveChangesAsync(cancellationToken);
             return Result.Of(true);
         }

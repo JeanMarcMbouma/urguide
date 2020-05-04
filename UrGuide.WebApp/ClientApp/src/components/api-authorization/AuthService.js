@@ -1,6 +1,6 @@
-﻿import React, { useCallback, useEffect, useState } from 'react';
+﻿import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { UserManager, WebStorageStateStore } from 'oidc-client';
-import { ApplicationPaths, ApplicationName} from './ApiAuthorizationConstants';
+import { ApplicationPaths, ApplicationName, QueryParameterNames } from './ApiAuthorizationConstants';
 
 
 const onLoadUser = (dispatch) => (user) => dispatch({ type: 'login', user });
@@ -11,22 +11,28 @@ const onLoading = (dispatch) => () => dispatch({ type: 'loading' });
 
 
 export const UserReducer = (state, action) => {
-    console.log(state);
+    let res = { ...state };
     switch (action.type) {
         case 'login':
-            return { ...state, isLoggedIn: true, user: action.user, loading: false, logginOut: false };
+            res = { ...state, isLoggedIn: true, user: action.user, logginOut: false };
+            break;
         case 'loading':
-            return { ...state, loading: true, logginOut: false };
+            res = { ...state, loading: true, logginOut: false };
+            break;
         case 'logout':
-            return { ...state, loading: false, user: null, loggingOut: true };
+            res = { ...state, user: null, loggingOut: true };
+            break;
         case 'token_expired':
-            return { ...state, loading: false, loggingOut: true };
+            res = { ...state, loggingOut: true };
+            break;
         default:
             return { ...state, isLoggedIn: false, user: null, loading: true, logginOut: false };
     }
+    console.log(res);
+    return res;
 }
 class AuthService {
-
+    
     constructor() {
         this._mgr = null;
         this._user = null;
@@ -36,36 +42,72 @@ class AuthService {
         this._onLoggingOut = () => {}
     }
 
-     navigateToReturnUrl(returnUrl){
+    async isAuthenticated() {
+        const user = await this.getUser();
+        return !!user;
+    }
 
+    async getUser() {
+        if (this._user && this._user.profile) {
+            return this._user.profile;
+        }
+
+        await this._initManager();
+        const user = await this._mgr.getUser();
+        var result = user && user.profile;
+        if (result && !this._user) {
+            this._user = user;
+            this._onLoadUser(user);
+        }
+        return result;
+    }
+
+
+    getReturnUrl(state){
+        const params = new URLSearchParams(window.location.search);
+        const fromQuery = params.get(QueryParameterNames.ReturnUrl);
+       
+        return (state && state.returnUrl) || fromQuery || `${window.location.origin}/`;
+    }
+
+    navigateToReturnUrl(returnUrl){
+        // It's important that we do a replace here so that we remove the callback uri with the
+        // fragment containing the tokens from the browser history.
         window.location.replace(returnUrl);
     }
+
+
+    async completeSignIn(returnUrl) {
+        try {
+            await this._initManager();
+            const user = await this._mgr.signinCallback(returnUrl);
+            this._onLoadUser(user);
+            this.navigateToReturnUrl(this.getReturnUrl(user.state));
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
 
     async signIn(returnUrl) {
         await this._initManager();
         this._onLoading();
         try {
             const user = await this._mgr.signinSilent();
-            if (user) {
-                return;
-            }
+            this._onLoadUser(user);
+            return;
         } catch (e) {
             console.log(e);
-
             try {
-                const popUpUser = await this._mgr.signinPopup(this.createArguments());
+                const user = await this._mgr.signinPopup(this.createArguments());
+                this._onLoadUser(user);
                 return;
             } catch (e) {
-
+                console.log(e);
             }
         }
         
-        try {
-            await this._mgr.signinRedirect(this.createArguments({ returnUrl }));
-            this.navigateToReturnUrl(returnUrl);
-        } catch (e) {
-
-        }
+        await this._mgr.signinRedirect(this.createArguments({ returnUrl }));
     }
 
     async signOut() {
@@ -75,10 +117,6 @@ class AuthService {
 
     createArguments(state) {
         return { useReplaceToNavigate: true, data: state };
-    }
-
-    isAuthRequired() {
-        return this._user == null;
     }
 
     async _initManager() {
@@ -148,32 +186,52 @@ export const useAuthContext = () => {
 
 export const useAuth = () => {
     const state = useAuthContext();
-    state.manager._onLoading = useCallback(user => onLoading(dispatch)(user), []);
-    state.manager._onLoadUser = useCallback(user => onLoadUser(dispatch)(user), []);
-    state.manager._onUserUnloaded = useCallback(user => onUserUnloaded(dispatch)(user), []);
-    state.manager._onLoggingOut = useCallback(() => onLoggingOut(dispatch)(), []);
     const [reducer, dispatch] = React.useReducer(UserReducer, state);
+    reducer.manager._onLoading = useCallback(user => onLoading(dispatch)(user), []);
+    reducer.manager._onLoadUser = useCallback(user => onLoadUser(dispatch)(user), []);
+    reducer.manager._onUserUnloaded = useCallback(user => onUserUnloaded(dispatch)(user), []);
+    reducer.manager._onLoggingOut = useCallback(() => onLoggingOut(dispatch)(), []);
     return reducer;
+}
+
+export const useAuthUser = () => {
+    const { user, manager } = useAuth();
+    const [authUser, setAuthUser] = useState(user);
+    console.log(user);
+    useEffect(() => {
+        async function checkUser() {
+            if (await manager.isAuthenticated()) {
+                if (manager._user && !authUser) {
+                    setAuthUser(manager._user);
+                }
+            }
+        }
+
+        checkUser();
+        return () => { };
+    }, [manager, authUser]);
+
+    return authUser;
 }
 
 export const useSecure = (component) => {
     const returnUrl = window.location.href;
    // const redirectUrl = `${ApplicationPaths.Login}?${QueryParameterNames.ReturnUrl}=${encodeURI(returnUrl)}`;
     const [allowed, setAllowed] = useState(false);
-    const { loggingOut, manager, authenticating, user } = useAuth();
+    const { loading, manager, authenticating, user } = useAuth();
 
     useEffect(() => {
-        if (!loggingOut) {
+        if (!loading) {
             manager.signIn(returnUrl);
-            if (user && !allowed) {
-                setAllowed(true);
-            }
+            
         }
-
+        if (user && !allowed) {
+            setAllowed(true);
+        }
         return () => {
             console.log('done')
         }
-    }, [loggingOut, manager, returnUrl, allowed, user]);
-    console.log(user);
+    }, [loading, manager, returnUrl, allowed, user]);
+    console.log(loading, manager, authenticating, user);
     return !allowed ? authenticating : component;
 }

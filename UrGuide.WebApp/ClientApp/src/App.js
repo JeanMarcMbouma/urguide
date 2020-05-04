@@ -4,7 +4,7 @@ import { Switch, Redirect } from 'react-router-dom';
 import { LoginLayout } from './components/login/LoginLayout';
 import { LoginPage } from './components/login/LoginPage';
 import { RegisterLayout } from './components/RegisterLayout';
-import Discover from "./components/discover/Discover";
+import Explorer from "./components/explorer/Explorer";
 import Profile from "./components/user/Profile";
 import {
     ClientRegistration,
@@ -20,13 +20,16 @@ import RegistrationConfirmation
 import AuthRoute from './components/api-authorization/AuthRoute'
 import authService, { AuthContext, defaultState } from './components/api-authorization/AuthService'
 import Loader from './components/api-authorization/loader';
+import { ApplicationPaths } from './components/api-authorization/ApiAuthorizationConstants';
+import LoginCallback from './components/api-authorization/LoginCallback';
+import LogoutCallback from './components/api-authorization/LogoutCallback';
 
 export default class App extends Component {
     constructor(props) {
         super(props);
         this.state = defaultState;
         this.state.manager = authService;
-        this.state.authenticating = <Loader/>;
+        this.state.authenticating = <Loader />;
     }
     static displayName = App.name;
 
@@ -61,14 +64,16 @@ export default class App extends Component {
                             />
                         </RegisterLayout>
                     </Route>
-                    <Route path="/(user|feed|discover)">
+                    <Route path="/(user|feed|explorer)">
                         <Layout>
                             <Route path="/user" component={Profile} />
-                            <Route path="/feed" component={Home} />
-                            <Route path="/discover" component={Discover} />
+                            <AuthRoute path="/feed" component={Home} />
+                            <Route path="/explorer" component={Explorer} />
                         </Layout>
                     </Route>
                     <Route exact path="/" render={() => <Redirect to="/feed" />} />
+                    <Route exact path={ApplicationPaths.LoginCallback} component={LoginCallback} />
+                    <Route exact path={ApplicationPaths.LogOutCallback} component={LogoutCallback} />
                 </Switch>
             </AuthContext.Provider>
         );

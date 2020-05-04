@@ -6,38 +6,59 @@ import { makeStyles } from '@material-ui/core/styles';
 import LinearProgress from '@material-ui/core/LinearProgress';
 
 
-//const useStyles = makeStyles(theme => ({
-//    root: {
-//        width: '100%',
-//        '& > * + *': {
-//            marginTop: theme.spacing(2),
+
+const useStyles = makeStyles(theme => ({
+    root: {
+        width: '100%',
+        '& > * + *': {
+            marginTop: theme.spacing(2),
          
-//        },
-//        zIndex: 3,
-//        position:'fixed'
-//    },
-//}));
+        },
+        zIndex: 3,
+        position:'fixed'
+    },
+}));
 
-//function LinearIndeterminate() {
-//    const classes = useStyles();
+function LinearIndeterminate() {
+    const classes = useStyles();
 
-//    return (
-//        <div className={classes.root} id='progress-bar'>
-//            <LinearProgress />
-//        </div>
-//    );
-//}
+    return (
+        <div className={classes.root} id='progress-bar'>
+            <LinearProgress />
+        </div>
+    );
+}
 
 export class Layout extends Component {
 
+    constructor(props) {
+        super(props);
+        this.handleLoad = this.handleLoad.bind(this);
+        this.state = { Loading:true}
+    }
 
+    componentDidMount() {
+        window.addEventListener('load', this.handleLoad);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('load', this.handleLoad)
+    }
+
+    handleLoad() {
+        this.setState(state => ({
+            Loading: !state.Loading
+        }));
+    }
  
 
     render() {
 
+        const loader = this.state.Loading ? <LinearIndeterminate /> : null;
   
        return (
-          <>
+           <>
+               {loader}
               <Header />
               <div className="container-fluid content">
               

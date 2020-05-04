@@ -26,6 +26,7 @@ namespace UrGuide.WebApp.Controllers
         }
 
         [HttpGet("last10")]
+        [AllowAnonymous]
         [ProducesDefaultResponseType(typeof(IEnumerable<PostModel>))]
         public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {

@@ -88,6 +88,10 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok();
         }
 
+        //[Authorize]
+        //[HttpPost("updateuser")]
+        //public async Task<IActionResult> UpdateUser([From])
+
         [Authorize]
         [HttpGet("logout")]
         public async Task<IActionResult> Signout(string returnUrl = null)
