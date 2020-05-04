@@ -12,6 +12,7 @@ namespace UrGuide.Services.Contracts
     public interface ICatalogService
     {
         Task<Result<IEnumerable<ImageCatalogModel>>> GetCatalogsAsync(string userId, CancellationToken cancellationToken);
+        Task<Result<IEnumerable<ImageCatalogModel>>> GetCatalogsAsync(CancellationToken cancellationToken);
         Task<Result<ImageCatalogModel>> GetCatalogAsync(string catalogId, CancellationToken cancellationToken);
         Task<Result<ImageCatalogModel>> CreateCatalogAsync(CreateImageCatalogModel catalogModel, CancellationToken cancellationToken);
         Task<Result<bool>> AddCatalogToPostAsync(Post post, CreateImageCatalogModel catalogModel, CancellationToken cancellationToken);

@@ -19,6 +19,7 @@ namespace UrGuide.Data.Configurations
             builder.Property(x => x.Description).HasMaxLength(2000).IsRequired();
             builder.Property(x => x.DateOfPublication).IsRequired();
             builder.Property(x => x.LastUpdated);
+            builder.Property(x => x.Location);
 
             builder.HasOne(x => x.User)
                 .WithMany().HasForeignKey("UserId");

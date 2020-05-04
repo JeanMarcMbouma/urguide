@@ -13,6 +13,7 @@ using UrGuide.Model.Results;
 using UrGuide.Model.Shared;
 using UrGuide.Services.Abstraction;
 using UrGuide.Services.Contracts;
+using UrGuide.Services.Extensions;
 using UrGuide.Services.Helpers;
 using UrGuide.Shared.Contracts;
 
@@ -20,14 +21,20 @@ namespace UrGuide.Services.Posts
 {
     class PostService : BaseService, IPostService
     {
-        public PostService(UrGuideContext context, IUserContext userContext, ICatalogService catalogService, IMapper mapper) : base(context, userContext)
+        public PostService(UrGuideContext context,
+                           IUserContext userContext,
+                           ICatalogService catalogService,
+                           IMapper mapper,
+                           IIPStackService iPStackService) : base(context, userContext)
         {
             CatalogService = catalogService ?? throw new ArgumentNullException(nameof(catalogService));
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            IPStackService = iPStackService ?? throw new ArgumentNullException(nameof(iPStackService));
         }
 
         public ICatalogService CatalogService { get; }
         public IMapper Mapper { get; }
+        public IIPStackService IPStackService { get; }
 
         public async Task<Result<PostModel>> CreatePostAsync(PostCreationModel model, CancellationToken cancellationToken)
         {
@@ -40,6 +47,8 @@ namespace UrGuide.Services.Posts
                 Description = model.Description,
                 LastUpdated = DateTime.UtcNow
             };
+
+            await post.SetLocationAsync(UserContext, IPStackService);
 
             var extFiles = new List<ImageFileCreateModel>();
             if(model.Video != null)
@@ -90,11 +99,13 @@ namespace UrGuide.Services.Posts
 
         public async Task<Result<IEnumerable<PostModel>>> GetLast10PostsAsync(CancellationToken cancellationToken)
         {
+            var geo = await IPStackService.GetLocationAsync(UserContext);
+
             var posts = await Context.Posts.Include(x => x.Attributes)
                 .Include(x => x.Catalog)
                 .ThenInclude(x => x.Images)
                 .ThenInclude(x => x.Attributes)
-                .Where(x => x.User.Id == UserContext.UserId)
+                .Where(x => x.Location == null || geo == null || x.Location.Distance(geo) <= Constants.Distance)
                 .OrderByDescending(x => x.LastUpdated)
                 .Take(10).AsNoTracking().ToListAsync(cancellationToken);
             return Result.Of(Mapper.Map<IEnumerable<PostModel>>(posts));

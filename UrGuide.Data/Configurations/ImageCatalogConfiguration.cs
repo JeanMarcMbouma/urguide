@@ -15,10 +15,10 @@ namespace UrGuide.Data.Configurations
             builder.Property(x => x.LastUpdated);
             builder.HasOne(x => x.User)
                 .WithMany().HasForeignKey("UserId");
-
+            builder.Property(x => x.Location);
             builder.OwnsMany(x => x.Images, i => {
                 i.ToTable("Image_Catalog_Files", Constants.Schema);
-                i.WithOwner().HasForeignKey("Image_CatalogId");
+                i.WithOwner();
                 i.HasKey(x => x.Id).HasName("PK_Image_Catalog_Files");
                 i.Property(x => x.Id).HasDefaultValueSql(Constants.GuidFn);
                 i.Property(x => x.ImageBase64).HasColumnName("FileBase64").IsRequired();

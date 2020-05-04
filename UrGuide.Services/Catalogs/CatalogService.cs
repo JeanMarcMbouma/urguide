@@ -13,6 +13,7 @@ using UrGuide.Model.Results;
 using UrGuide.Model.Shared;
 using UrGuide.Services.Abstraction;
 using UrGuide.Services.Contracts;
+using UrGuide.Services.Extensions;
 using UrGuide.Services.Helpers;
 using UrGuide.Shared.Contracts;
 
@@ -20,12 +21,18 @@ namespace UrGuide.Services.Catalogs
 {
     class CatalogService : BaseService, ICatalogService
     {
-        public CatalogService(IUserContext userContext, UrGuideContext context, IMapper mapper) : base(context, userContext)
+        public CatalogService(
+            IUserContext userContext,
+            UrGuideContext context,
+            IMapper mapper,
+            IIPStackService iPStackService) : base(context, userContext)
         {
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            IPStackService = iPStackService ?? throw new ArgumentNullException(nameof(iPStackService));
         }
 
         public IMapper Mapper { get; }
+        public IIPStackService IPStackService { get; }
 
         public async Task<Result<bool>> AddCatalogToPostAsync(Data.Entities.Posts.Post post, CreateImageCatalogModel catalogModel, CancellationToken cancellationToken)
         {
@@ -85,6 +92,8 @@ namespace UrGuide.Services.Catalogs
                 LastUpdated = DateTime.UtcNow
             };
 
+            await catalog.SetLocationAsync(UserContext, IPStackService);
+
             foreach (var file in catalogModel.Files)
             {
                 var image = new Image
@@ -114,6 +123,19 @@ namespace UrGuide.Services.Catalogs
         {
             cancellationToken.ThrowIfCancellationRequested();
             var catalogs = await Context.ImageCatalogs.Include(c => c.User).Where(x => x.User.Id == userId)
+                .Select(catalog => Mapper.Map<ImageCatalogModel>(catalog))
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+            return Result.Of(catalogs.AsEnumerable());
+        }
+
+        public async Task<Result<IEnumerable<ImageCatalogModel>>> GetCatalogsAsync(CancellationToken cancellationToken)
+        {
+            var geo = await IPStackService.GetLocationAsync(UserContext);
+
+            cancellationToken.ThrowIfCancellationRequested();
+            var catalogs = await Context.ImageCatalogs.Include(c => c.User)
+                .Where(x => x.Location == null || geo == null || x.Location.Distance(geo) <= Constants.Distance)
                 .Select(catalog => Mapper.Map<ImageCatalogModel>(catalog))
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);

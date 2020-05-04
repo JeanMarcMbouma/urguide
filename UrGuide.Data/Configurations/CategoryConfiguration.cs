@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 using UrGuide.Data.Entities.Posts;
 
 namespace UrGuide.Data.Configurations
@@ -17,15 +18,50 @@ namespace UrGuide.Data.Configurations
             builder.Property(x => x.LastUpdated);
             builder.Property(x => x.Name).HasColumnName("CategoryName")
                 .IsRequired().HasMaxLength(200);
+            builder.Property(x => x.Image).IsRequired();
 
-            builder.OwnsOne(x => x.Image);
-            builder.OwnsMany(x => x.Attributes, a =>
+            builder.HasData(new Category
             {
-                a.ToTable("Post_Categories_Attributes", Constants.Schema);
-                a.WithOwner().HasForeignKey("CategoryId");
-                a.Property(x => x.Name).IsRequired().HasMaxLength(200);
-                a.Property(x => x.Value).IsRequired();
-                a.HasKey("Id");
+                Created = new System.DateTime(2020, 05, 1, 12, 0,0),
+                Name = "Sport",
+                LastUpdated = new System.DateTime(2020, 05, 1, 12, 0, 0),
+                Image = "images/sport.png",
+                Id = Guid.NewGuid().ToString("D")
+            }, new Category
+            {
+                Created = new System.DateTime(2020, 05, 1, 12, 0, 0),
+                Name = "Nature",
+                LastUpdated = new System.DateTime(2020, 05, 1, 12, 0, 0),
+                Image = "images/nature.png",
+                Id = Guid.NewGuid().ToString("D")
+            }, new Category
+            {
+                Created = new System.DateTime(2020, 05, 1, 12, 0, 0),
+                Name = "Child",
+                LastUpdated = new System.DateTime(2020, 05, 1, 12, 0, 0),
+                Image = "images/child.png",
+                Id = Guid.NewGuid().ToString("D")
+            }, new Category
+            {
+                Created = new System.DateTime(2020, 05, 1, 12, 0, 0),
+                Name = "Historical",
+                LastUpdated = new System.DateTime(2020, 05, 1, 12, 0, 0),
+                Image = "images/historical.png",
+                Id = Guid.NewGuid().ToString("D")
+            }, new Category
+            {
+                Created = new System.DateTime(2020, 05, 1, 12, 0, 0),
+                Name = "Amusement",
+                LastUpdated = new System.DateTime(2020, 05, 1, 12, 0, 0),
+                Image = "images/amusement.png",
+                Id = Guid.NewGuid().ToString("D")
+            }, new Category
+            {
+                Created = new System.DateTime(2020, 05, 1, 12, 0, 0),
+                Name = "Extreme",
+                LastUpdated = new System.DateTime(2020, 05, 1, 12, 0, 0),
+                Image = "images/extreme.png",
+                Id = Guid.NewGuid().ToString("D")
             });
         }
     }
