@@ -35,6 +35,8 @@ import {
 } from '@material-ui/pickers';
 import { withStyles } from '@material-ui/core/styles';
 import { SdCard } from '@material-ui/icons';
+import { connect } from 'react-redux'
+
 
 const styles = {
     root: {
@@ -66,34 +68,9 @@ const styles = {
 
   const ButtonP = withStyles(styles)(ButtonInPosts);
 
-export default function CentralBar() {
+  function CentralBar(props) {
 
     const user = useContext(UserContext)
-    let posts = [
-    {
-        name:"Excursion around Cherkassy",
-        description:"I will show you this beautiful town",
-        price:"250",
-        category:"mix",
-        currentHuman:"12",
-        LimitHuman:"30",
-        author:"Ivanna",
-        dateStart:"12.04.20",
-        profilePhoto:"https://images.pexels.com/photos/3541390/pexels-photo-3541390.jpeg?cs=srgb&dl=close-up-photo-of-woman-wearing-red-sweater-3541390.jpg&fm=jpg",
-    },
-    {
-        name:"Football field in Kyiv",
-        description:"I will show you the biggest football field in Kyiv",
-        category:"sport",
-        price:"450",
-        currentHuman:"9",
-        LimitHuman:"30",
-        author:"Lena",
-        dateStart:"01.05.20",
-        profilePhoto:"https://images.pexels.com/photos/3690085/pexels-photo-3690085.jpeg?cs=srgb&dl=photo-of-woman-wearing-black-turtle-neck-top-3690085.jpg&fm=jpg",
-    },
-    ]
-
 
     function DatePicker() {
 
@@ -208,15 +185,13 @@ export default function CentralBar() {
             </div>)
         }
     }
-
-
-
+    
     return (
         <div className="col-12 col-sm-7 col-md-7 col-lg-6 col-xl-5 timeline">
             <div className='container'>
 
                 <ViewPost />
-                {posts.map((post, i) =>
+                {props.Posts.map((post, i) =>
                     <div key={i} className="p-3 mb-3 bg-white rounded post-card">
                         <CardHeader
                             avatar={<Avatar alt="profile photo" src={post.profilePhoto} />}
@@ -242,3 +217,9 @@ export default function CentralBar() {
         </div>
     )
 }
+
+const mapStateToProps = (state) => {
+  return {Posts: state.Posts}
+}
+
+export default connect(mapStateToProps)(CentralBar)
