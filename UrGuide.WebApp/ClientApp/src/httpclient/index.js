@@ -18,9 +18,9 @@ var Http = /** @class */ (function () {
         this.user = user;
     }
     Http.prototype.fetch = function (url, init) {
-        console.log('arguments', init, this.user);
-        if (this.user && this.user.access_token && init) {
-            var options = __assign(__assign({}, init), { Authorization: "Bearer: " + this.user.access_token });
+        if (this.user && this.user.access_token) {
+            var headers = init.headers;
+            var options = __assign(__assign({}, init), { headers: __assign(__assign({}, headers), { Authorization: this.user.token_type + " " + this.user.access_token }) });
             return originalFetch(url, options);
         }
         return originalFetch(url, init);

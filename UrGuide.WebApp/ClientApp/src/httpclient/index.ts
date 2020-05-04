@@ -11,10 +11,14 @@ class Http implements IHttp {
     constructor(private user?: User) {
 
     }
-    fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
-        console.log('arguments', init, this.user);
-        if (this.user && this.user.access_token && init) {
-            const options = <RequestInit>{ ...init, Authorization:  `Bearer: ${this.user!.access_token}`};
+    fetch(url: RequestInfo, init: RequestInit): Promise<Response> {
+
+        if (this.user && this.user.access_token) {
+
+            const { headers } = init;
+            const options = {
+                ...init, headers: { ...headers, Authorization: `${this.user.token_type} ${this.user.access_token}` } };
+
             return originalFetch(url, options);
         }
         return originalFetch(url, init);

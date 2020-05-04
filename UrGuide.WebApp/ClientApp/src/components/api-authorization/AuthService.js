@@ -187,11 +187,31 @@ export const useAuthContext = () => {
 export const useAuth = () => {
     const state = useAuthContext();
     const [reducer, dispatch] = React.useReducer(UserReducer, state);
-    state.manager._onLoading = useCallback(user => onLoading(dispatch)(user), []);
-    state.manager._onLoadUser = useCallback(user => onLoadUser(dispatch)(user), []);
-    state.manager._onUserUnloaded = useCallback(user => onUserUnloaded(dispatch)(user), []);
-    state.manager._onLoggingOut = useCallback(() => onLoggingOut(dispatch)(), []);
+    reducer.manager._onLoading = useCallback(user => onLoading(dispatch)(user), []);
+    reducer.manager._onLoadUser = useCallback(user => onLoadUser(dispatch)(user), []);
+    reducer.manager._onUserUnloaded = useCallback(user => onUserUnloaded(dispatch)(user), []);
+    reducer.manager._onLoggingOut = useCallback(() => onLoggingOut(dispatch)(), []);
     return reducer;
+}
+
+export const useAuthUser = () => {
+    const { user, manager } = useAuth();
+    const [authUser, setAuthUser] = useState(user);
+    console.log(user);
+    useEffect(() => {
+        async function checkUser() {
+            if (await manager.isAuthenticated()) {
+                if (manager._user && !authUser) {
+                    setAuthUser(manager._user);
+                }
+            }
+        }
+
+        checkUser();
+        return () => { };
+    }, [manager, authUser]);
+
+    return authUser;
 }
 
 export const useSecure = (component) => {

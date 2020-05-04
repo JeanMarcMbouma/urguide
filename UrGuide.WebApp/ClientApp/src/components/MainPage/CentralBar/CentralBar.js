@@ -37,7 +37,7 @@ import { SdCard } from '@material-ui/icons';
 import AddPhoto, { PhotoX } from './../../AddPhoto/AddPhoto';
 import AddPhotoContext from './../../AddPhoto/AddPhotoContext';
 import { Modal } from 'react-bootstrap'
-import { useAuthContext } from '../../api-authorization/AuthService';
+import { useAuthContext, useAuth, useAuthUser } from '../../api-authorization/AuthService';
 import { PostsClient, PostUpdateModel } from '../../../api';
 import { HttpClientFactory } from '../../../httpclient';
 
@@ -85,7 +85,7 @@ export default function CentralBar() {
         setContext({ ...ctx });
     };
     const [posts, setPosts] = useState([]);
-    const { user } = useAuthContext();
+    const user = useAuthUser();
     const { profile } = user || {
         profile: {}
     };
