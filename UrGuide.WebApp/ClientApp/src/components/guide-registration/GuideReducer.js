@@ -37,7 +37,7 @@ export default function GuideReducer(state, action) {
   let validcountry = nameRegex.test(context.country);
   let validcity = nameRegex.test(context.city);
   let validaddress = nameRegex.test(context.address);
-  let validdesrcription = nameRegex.test(context.desrcription);
+  let validdesrcription = nameRegex.test(context.description);
 
   //errors
   //step1

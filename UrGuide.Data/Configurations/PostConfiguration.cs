@@ -1,0 +1,36 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using UrGuide.Data.Entities.Posts;
+
+namespace UrGuide.Data.Configurations
+{
+    class PostConfiguration : IEntityTypeConfiguration<Post>
+    {
+        public void Configure(EntityTypeBuilder<Post> builder)
+        {
+            builder.ToTable("Posts", Constants.Schema);
+            builder.HasKey(x => x.Id).HasName("PK_Posts");
+            builder.Property(x => x.Id).HasColumnName("PostId")
+                .HasDefaultValueSql(Constants.GuidFn);
+            builder.Property(x => x.Text).HasColumnName("Title").HasMaxLength(200).IsRequired();
+            builder.Property(x => x.Description).HasMaxLength(2000).IsRequired();
+            builder.Property(x => x.DateOfPublication).IsRequired();
+            builder.Property(x => x.LastUpdated);
+
+            builder.HasOne(x => x.User)
+                .WithMany().HasForeignKey("UserId");
+
+            builder.OwnsMany(x => x.Attributes, a =>
+            {
+                a.ToTable("Post_Attributes", Constants.Schema);
+                a.WithOwner().HasForeignKey("PostId");
+                a.Property(x => x.Name).IsRequired().HasMaxLength(200);
+                a.Property(x => x.Value).IsRequired();
+                a.HasKey("Id");
+            });
+        }
+    }
+}

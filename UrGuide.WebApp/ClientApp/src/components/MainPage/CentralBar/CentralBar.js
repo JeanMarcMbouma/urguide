@@ -1,6 +1,5 @@
-import React , { useState , useContext } from 'react';
+import React, { useState, useContext, useMemo } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import UserContext from '../../../UserContext'
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
@@ -29,177 +28,237 @@ import 'date-fns';
 import Grid from '@material-ui/core/Grid';
 import DateFnsUtils from '@date-io/date-fns';
 import {
-  MuiPickersUtilsProvider,
-  KeyboardTimePicker,
-  KeyboardDatePicker,
+    MuiPickersUtilsProvider,
+    KeyboardTimePicker,
+    KeyboardDatePicker,
 } from '@material-ui/pickers';
 import { withStyles } from '@material-ui/core/styles';
 import { SdCard } from '@material-ui/icons';
 import { connect } from 'react-redux'
-
+import AddPhoto, { PhotoX } from './../../AddPhoto/AddPhoto';
+import AddPhotoContext from './../../AddPhoto/AddPhotoContext';
+import { Modal } from 'react-bootstrap'
+import { useAuthContext, useAuth, useAuthUser } from '../../api-authorization/AuthService';
+import { PostsClient, PostUpdateModel } from '../../../api';
+import { HttpClientFactory } from '../../../httpclient';
 
 const styles = {
     root: {
-      background: props =>
-        props.color === 'red'
-          ? 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)'
-          : 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-      border: 0,
-      borderRadius: 3,
-      boxShadow: props =>
-        props.color === 'red'
-          ? '0 3px 5px 2px rgba(255, 105, 135, .3)'
-          : '0 3px 5px 2px rgba(33, 203, 243, .3)',
-      color: 'white',
-      height: 30,
-      padding: '0 30px',
+        background: props =>
+            props.color === 'red'
+                ? 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)'
+                : 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+        border: 0,
+        borderRadius: 3,
+        boxShadow: props =>
+            props.color === 'red'
+                ? '0 3px 5px 2px rgba(255, 105, 135, .3)'
+                : '0 3px 5px 2px rgba(33, 203, 243, .3)',
+        color: 'white',
+        height: 30,
+        padding: '0 30px',
     },
-  };  
+};
 
-  function ButtonInPosts(props) {
+function ButtonInPosts(props) {
     const { classes, color, ...other } = props;
     return <Button className={classes.root} {...other} />;
-  }
-  
-  ButtonInPosts.propTypes = {
+}
+
+ButtonInPosts.propTypes = {
     classes: PropTypes.object.isRequired,
     color: PropTypes.oneOf(['blue', 'red']).isRequired,
-  };
+};
 
-  const ButtonP = withStyles(styles)(ButtonInPosts);
+const ButtonP = withStyles(styles)(ButtonInPosts);
 
   function CentralBar(props) {
 
-    const user = useContext(UserContext)
+    const uploadButton = React.createRef();
+    const [ViewPostCreating, setViewPostCreating] = useState(false);
+
+    const [context, setContext] = React.useState({
+        files: [],
+        currentFile: null,
+    });
+
+    const update = ctx => {
+        setContext({ ...ctx });
+    };
+    const [posts, setPosts] = useState([]);
+    const user = useAuthUser();
+    const { profile } = user || {
+        profile: {}
+    };
+
+    useMemo(async () => {
+        const api = HttpClientFactory.getPostClient(user);
+        var result = await api.last10();
+        setPosts(result);
+    }, [user]);
+
 
     function DatePicker() {
+        const [selectedDate, setSelectedDate] = React.useState(
+            new Date('2020-04-13T14:48:54')
+        );
 
-        const [selectedDate, setSelectedDate] = React.useState(new Date('2020-04-13T14:48:54'));
-      
-        const handleDateChange = (date) => {
-          setSelectedDate(date);
+        const handleDateChange = date => {
+            setSelectedDate(date);
         };
-      
+
         return (
-          <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <Grid container justify="space-around">
-              <KeyboardDatePicker
-                disableToolbar
-                variant="inline"
-                format="MM/dd/yyyy"
-                margin="normal"
-                label="Choose date"
-                value={selectedDate}
-                onChange={handleDateChange}
-                KeyboardButtonProps={{
-                  'aria-label': 'change date',
-                }}
-              />
-              <KeyboardTimePicker
-                margin="normal"
-                label="Choose time"
-                value={selectedDate}
-                onChange={handleDateChange}
-                KeyboardButtonProps={{
-                  'aria-label': 'change time',
-                }}
-              />
-            </Grid>
-          </MuiPickersUtilsProvider>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                <Grid container justify="space-around">
+                    <KeyboardDatePicker
+                        disableToolbar
+                        variant="inline"
+                        format="MM/dd/yyyy"
+                        margin="normal"
+                        label="Choose date"
+                        value={selectedDate}
+                        onChange={handleDateChange}
+                        KeyboardButtonProps={{
+                            'aria-label': 'change date',
+                        }}
+                    />
+                    <KeyboardTimePicker
+                        margin="normal"
+                        label="Choose time"
+                        value={selectedDate}
+                        onChange={handleDateChange}
+                        KeyboardButtonProps={{
+                            'aria-label': 'change time',
+                        }}
+                    />
+                </Grid>
+            </MuiPickersUtilsProvider>
         );
     }
 
-
     function ChipsArray() {
-      const [chipData, setChipData] = React.useState([
-        { key: 0, label: 'Sport', checked:false },
-        { key: 1, label: 'Historical', checked:false },
-        { key: 2, label: 'Child', checked:false },
-        { key: 3, label: 'Nature', checked:false },
-        { key: 4, label: 'Other', checked:false },
-      ]);
-    
-      return (
-        <Paper className="col-lg-12 d-flex justify-content-between">
-          {chipData.map((data) => {
-            return (
-              <Chip
-                key={data.key}
-                color="primary"
-                variant={data.checked ? 'default' : 'outlined' }
-                label={data.label}
-                className='my-2'
-                onClick={() => {
-                  let newChipsData = [...chipData]
-                  newChipsData[data.key].checked = !newChipsData[data.key].checked;
-                  setChipData(newChipsData)
-                }}
-              />
-            );
-          })}
-        </Paper>
-      );
-    }
+        const [chipData, setChipData] = React.useState([
+            { key: 0, label: 'Sport', checked: false },
+            { key: 1, label: 'Historical', checked: false },
+            { key: 2, label: 'Child', checked: false },
+            { key: 3, label: 'Nature', checked: false },
+            { key: 4, label: 'Other', checked: false },
+        ]);
 
+        return (
+            <Paper className="col-lg-12 d-flex justify-content-between">
+                {chipData.map(data => {
+                    return (
+                        <Chip
+                            key={data.key}
+                            color="primary"
+                            variant={data.checked ? 'default' : 'outlined'}
+                            label={data.label}
+                            className="my-2"
+                            onClick={() => {
+                                let newChipsData = [...chipData];
+                                newChipsData[data.key].checked = !newChipsData[data.key]
+                                    .checked;
+                                setChipData(newChipsData);
+                            }}
+                        />
+                    );
+                })}
+            </Paper>
+        );
+    }
 
     function ViewPost() {
 
-        const [ViewPostCreating, setViewPostCreating] = useState('button');
+        const [show, setShow] = useState(false);
 
-        if (ViewPostCreating==='button') {
-            return (
-            <div onClick={() => setViewPostCreating('post')} className={`col-lg-12 p-3 mb-3 bg-white rounded new-post-card`} >
-                <div className='new-post-btn' >
+        return (<>
+            <div className={`col-lg-12 p-3 mb-3 bg-white rounded new-post-card`}>
+                <div className="new-post-btn" onClick={() => setShow(true)}>
                     <span>Want to write a new post ?</span>
                 </div>
-            </div>)
-        } else {
-            return(
-            <div className={`col-lg-12 p-3 mb-3 bg-white rounded shadow-lg bg-white rounded`}>
-                <div className="col-lg-12 d-flex justify-content-between">
-                    <Typography variant="h5">Create your post!</Typography>
-                    <ButtonP onClick={() => setViewPostCreating('button')} variant="outlined" color="blue">X</ButtonP>
-                </div>
-                <div className="col-lg-12 d-flex justify-content-start my-4">
-                    <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
-                    <Typography className="m-0 px-4" variant="h6">{user.username}</Typography>
-                </div>
-                <div className="col-lg-12">
-                    <TextField fullWidth label="Name" variant="outlined" />
-                    <TextField fullWidth className="my-2" label="Short description" multiline rows="6" variant="outlined"/>
-                    <TextField label="Price" variant="outlined" />
-                    <DatePicker />
-                    <ChipsArray />
-                </div>
-                <div className="col-lg-12 my-2">
-                    <ButtonGroup fullWidth size="large" color="primary" aria-label="large outlined primary button group">
-                        <Button><PhotoIcon /></Button>
-                        <Button><VideoLibraryIcon /></Button>
-                        <Button><AddLocationIcon /></Button>
-                        <Button><MoreHorizIcon /></Button>
-                    </ButtonGroup>
-                </div>
-                <div className="col-lg-12">
-                    <ButtonP fullWidth variant="outlined" color="blue">Publish</ButtonP>
-                </div>
-            </div>)
-        }
+            </div>
+            <Modal
+                size="md"
+                aria-labelledby="contained-modal-title-vcenter"
+                centered
+                animation={true}
+                show={show}
+                onHide={() => setShow(false)}
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title id="contained-modal-title-vcenter">
+                        Modal heading
+        </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="col-lg-12 d-flex justify-content-start my-4">
+                        <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
+                        <Typography className="m-0 px-4" variant="h6">
+                            {profile.name}
+                        </Typography>
+                    </div>
+                    <div className="col-lg-12">
+                        <TextField fullWidth label="Name" variant="outlined" />
+                        <TextField
+                            fullWidth
+                            className="my-2"
+                            label="Short description"
+                            multiline
+                            rows="6"
+                            variant="outlined"
+                        />
+                        <TextField label="Price" variant="outlined" />
+                        <DatePicker />
+                        <ChipsArray />
+                        <PhotoX />
+                        <AddPhoto fileInput={uploadButton} update={update} />
+                    </div>
+                    <div className="col-lg-12 my-2">
+                        <ButtonGroup
+                            fullWidth
+                            size="large"
+                            color="primary"
+                            aria-label="large outlined primary button group"
+                        >
+                            <Button onClick={() => uploadButton.current.click()}>
+                                <PhotoIcon />
+                            </Button>
+                            <Button><VideoLibraryIcon /></Button>
+                            <Button><AddLocationIcon /></Button>
+                            <Button><MoreHorizIcon /></Button>
+                        </ButtonGroup>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <div className="col-lg-12">
+                        <ButtonP fullWidth variant="outlined" color="blue">Publish</ButtonP>
+                    </div>
+                </Modal.Footer>
+            </Modal></>);
     }
-    
+
     return (
         <div className="col-12 col-sm-7 col-md-7 col-lg-6 col-xl-5 timeline">
-            <div className='container'>
-
-                <ViewPost />
-                {props.Posts.map((post, i) =>
+            <div className="container">
+                <AddPhotoContext.Provider value={context}>
+                    <ViewPost />
+                </AddPhotoContext.Provider>
+                {props.Posts.map((post, i) => (
                     <div key={i} className="p-3 mb-3 bg-white rounded post-card">
                         <CardHeader
-                            avatar={<Avatar alt="profile photo" src={post.profilePhoto} />}
-                            title={<Typography variant="body1" component="p">{post.author} | {post.name} | {post.category}</ Typography>}
-                            subheader={post.dateStart}
+                            avatar={<Avatar alt="profile photo" src={post.authorAvatar} />}
+                            title={
+                                <Typography variant="body1" component="p">
+                                    {post.author} | {post.text} | {post.categories}
+                                </Typography>
+                            }
+                            subheader={post.publicationDate}
                         />
                         <CardContent>
-                            <Typography variant="subtitle1" component="p">{post.description}</Typography>
+                            <Typography variant="subtitle1" component="p">
+                                {post.description}
+                            </Typography>
                         </CardContent>
                         <CardActions className="d-flex justify-content-around">
                             <IconButton aria-label="share">
@@ -209,10 +268,10 @@ const styles = {
                                 <ChatIcon />
                             </IconButton>
                             <ButtonP color="red">for {post.price}</ButtonP>
-                            <ButtonP color="blue">{`${post.currentHuman}/${post.LimitHuman}`}</ButtonP>
+                            <ButtonP color="blue">{`${post.seats}`}</ButtonP>
                         </CardActions>
                     </div>
-                )}
+                ))}
             </div>
         </div>
     )

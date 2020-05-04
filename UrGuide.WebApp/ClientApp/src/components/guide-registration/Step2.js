@@ -320,7 +320,6 @@ export function Step2(props) {
           <div>
             <h6>
               2.Add personal informations that will lead people to find you.
-              {props.gender}
             </h6>
           </div>
         </Box>

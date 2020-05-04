@@ -1,7 +1,7 @@
 export const ApplicationName = 'UrGuide.WebApp';
 
 export const QueryParameterNames = {
-  ReturnUrl: 'returnUrl',
+  ReturnUrl: 'ReturnUrl',
   Message: 'message'
 };
 
@@ -25,7 +25,7 @@ export const ApplicationPaths = {
   DefaultLoginRedirectPath: '/',
   ApiAuthorizationClientConfigurationUrl: `/_configuration/${ApplicationName}`,
   ApiAuthorizationPrefix: prefix,
-  Login: `${prefix}/${LoginActions.Login}`,
+    Login: `/sign-in`,
   LoginFailed: `${prefix}/${LoginActions.LoginFailed}`,
   LoginCallback: `${prefix}/${LoginActions.LoginCallback}`,
   Register: `${prefix}/${LoginActions.Register}`,

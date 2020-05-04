@@ -1,16 +1,20 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
 using UrGuide.WebApp.Data;
-using UrGuide.WebApp.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Identity;
 using System;
+using UrGuide.WebApp.Extensions;
+using UrGuide.Services.Extensions;
+using FluentValidation.AspNetCore;
+using AspNetCoreRateLimit;
+using System.Collections.Generic;
+using static IdentityModel.OidcConstants;
+using IdentityModel;
 
 namespace UrGuide.WebApp
 {
@@ -26,26 +30,44 @@ namespace UrGuide.WebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+            services.AddUrGuideAuthServices(Configuration);
 
-            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddUrGuideServices(Configuration);
 
-            services.AddIdentityServer(options => {
-                options.UserInteraction.LoginUrl = "/sign-in";
-                options.UserInteraction.LogoutUrl = "/account/logout";
-            })
-                .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+            //load general configuration from appsettings.json
+            services.Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"));
 
-            services.AddAuthentication()
-                .AddIdentityServerJwt();
+            //load ip rules from appsettings.json
+            services.Configure<IpRateLimitPolicies>(Configuration.GetSection("IpRateLimitPolicies"));
 
-            services.AddControllersWithViews();
+            // inject counter and rules stores
+            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+
+            services.AddControllersWithViews(options => {
+                options.Filters.Add(typeof(Filters.SaveChangeActionFilter));
+            }).AddFluentValidation();
             services.AddRazorPages();
             services.AddSwaggerGen(c =>
             {
+                c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.OAuth2,
+                    Flows = new OpenApiOAuthFlows
+                    {
+                        ClientCredentials = new OpenApiOAuthFlow
+                        {
+                            AuthorizationUrl = new Uri("/connect/authorize", UriKind.Relative),
+                            TokenUrl = new Uri("/connect/token", UriKind.Relative),
+                            Scopes = new Dictionary<string, string>
+                            {
+                                { StandardScopes.OpenId, "UrGuide Web API" },
+                                { StandardScopes.Profile, "User's profile" }
+                            }
+                        }
+                    }
+                });
+                c.OperationFilter<Filters.AuthorizeCheckOperationFilter>();
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ur Guide API", Version = "v1" });
             });
             // In production, the React files will be served from this directory
@@ -54,7 +76,7 @@ namespace UrGuide.WebApp
                 configuration.RootPath = "ClientApp/build";
             });
 
-            services.AddScoped<Services.IEmailService, Services.EmailService>();
+            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -71,7 +93,12 @@ namespace UrGuide.WebApp
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            serviceProvider.GetRequiredService<ApplicationDbContext>().Database.Migrate();
+
+            serviceProvider.GetRequiredService<UrGuideAuthContext>().Database.Migrate();
+            serviceProvider.GetRequiredService<UrGuide.Data.UrGuideContext>().Database.Migrate();
+
+            app.UseIpRateLimiting();
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
@@ -81,6 +108,8 @@ namespace UrGuide.WebApp
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ur Guide API v1");
+                c.OAuthClientId("UrGuide.WebAPI");
+                c.OAuthClientSecret("secret".ToSha256());
             });
             app.UseAuthentication();
             app.UseIdentityServer();
@@ -96,7 +125,7 @@ namespace UrGuide.WebApp
             app.UseSpa(spa =>
             {
                 spa.Options.SourcePath = "ClientApp";
-
+                spa.Options.StartupTimeout = TimeSpan.FromMinutes(5);
                 if (env.IsDevelopment())
                 {
                     spa.UseReactDevelopmentServer(npmScript: "start");
