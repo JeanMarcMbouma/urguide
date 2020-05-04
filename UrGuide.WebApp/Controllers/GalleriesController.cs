@@ -39,6 +39,17 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
+        // GET: api/Gallery
+        [HttpGet("all")]
+        [AllowAnonymous]
+        [ProducesDefaultResponseType(typeof(IEnumerable<ImageCatalogModel>))]
+
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+        {
+            var result = await CatalogService.GetCatalogsAsync(cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
+
         [HttpGet("{catalogId}/retrieve")]
         [ProducesDefaultResponseType(typeof(ImageCatalogModel))]
         [AllowAnonymous]

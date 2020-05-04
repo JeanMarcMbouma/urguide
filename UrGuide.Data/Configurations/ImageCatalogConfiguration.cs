@@ -15,7 +15,7 @@ namespace UrGuide.Data.Configurations
             builder.Property(x => x.LastUpdated);
             builder.HasOne(x => x.User)
                 .WithMany().HasForeignKey("UserId");
-
+            builder.Property(x => x.Location);
             builder.OwnsMany(x => x.Images, i => {
                 i.ToTable("Image_Catalog_Files", Constants.Schema);
                 i.WithOwner().HasForeignKey("Image_CatalogId");

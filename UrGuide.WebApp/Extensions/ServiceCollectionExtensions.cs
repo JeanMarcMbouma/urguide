@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
+using UrGuide.Shared.Configuration;
 using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Data;
 using UrGuide.WebApp.Entities;
@@ -19,6 +20,7 @@ namespace UrGuide.WebApp.Extensions
     {
         public static IServiceCollection AddUrGuideAuthServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.Configure<IPStackConfiguration>(configuration.GetSection("IpStack"));
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddScoped<IUrlHelper>(factory =>
             {
@@ -30,7 +32,7 @@ namespace UrGuide.WebApp.Extensions
             services.AddTransient<IWebHelper, WebHelper>();
             services.AddTransient<IAuthService, AuthService>();
             services.AddScoped<IUserContext, UserContext>();
-
+            services.AddTransient<IIPStackService, IPStackService>();
             services.AddDbContext<UrGuideAuthContext>(options =>
                 options.UseSqlServer(
                     configuration.GetConnectionString("Id4")));

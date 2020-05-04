@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NetTopologySuite.Geometries;
 using UrGuide.Data;
 
 namespace UrGuide.Data.Migrations
@@ -75,6 +76,10 @@ namespace UrGuide.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ImageLink")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
 
@@ -88,6 +93,62 @@ namespace UrGuide.Data.Migrations
                         .HasName("PK_Post_Categories");
 
                     b.ToTable("Post_Categories","ug");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "d1442a22-adc5-4eab-a232-6ae1fe1ad4f5",
+                            Archived = false,
+                            Created = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            ImageLink = "images/sport.png",
+                            LastUpdated = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Sport"
+                        },
+                        new
+                        {
+                            Id = "62cf86ff-755d-46fd-bf8d-ca08ba353451",
+                            Archived = false,
+                            Created = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            ImageLink = "images/nature.png",
+                            LastUpdated = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Nature"
+                        },
+                        new
+                        {
+                            Id = "057e7c41-48a2-40af-83f7-86495daa66bb",
+                            Archived = false,
+                            Created = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            ImageLink = "images/child.png",
+                            LastUpdated = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Child"
+                        },
+                        new
+                        {
+                            Id = "4dc654b1-c887-4000-8e53-309f2aad0e3d",
+                            Archived = false,
+                            Created = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            ImageLink = "images/historical.png",
+                            LastUpdated = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Historical"
+                        },
+                        new
+                        {
+                            Id = "9d78cfc4-2299-445c-9c38-d6dd9d081f2b",
+                            Archived = false,
+                            Created = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            ImageLink = "images/amusement.png",
+                            LastUpdated = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Amusement"
+                        },
+                        new
+                        {
+                            Id = "3f35dba7-d527-4c70-80cb-68d25ee2b332",
+                            Archived = false,
+                            Created = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            ImageLink = "images/extreme.png",
+                            LastUpdated = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Extreme"
+                        });
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Posts.Post", b =>
@@ -111,6 +172,9 @@ namespace UrGuide.Data.Migrations
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
+
+                    b.Property<Point>("Location")
+                        .HasColumnType("geography");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -145,6 +209,9 @@ namespace UrGuide.Data.Migrations
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
 
+                    b.Property<Point>("Location")
+                        .HasColumnType("geography");
+
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
@@ -158,13 +225,17 @@ namespace UrGuide.Data.Migrations
 
             modelBuilder.Entity("UrGuide.Data.Entities.Users.User", b =>
                 {
-                    b.Property<string>("UserId")
+                    b.Property<string>("Id")
+                        .HasColumnName("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("LastActivityDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("UserId");
+                    b.Property<Point>("Location")
+                        .HasColumnType("geography");
+
+                    b.HasKey("Id");
 
                     b.ToTable("Users","ug");
                 });
@@ -200,95 +271,6 @@ namespace UrGuide.Data.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("MessageId");
-                        });
-                });
-
-            modelBuilder.Entity("UrGuide.Data.Entities.Posts.Category", b =>
-                {
-                    b.OwnsMany("UrGuide.Data.Entities.Attributes.GenericAttribute", "Attributes", b1 =>
-                        {
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int")
-                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                            b1.Property<string>("CategoryId")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(450)");
-
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(200)")
-                                .HasMaxLength(200);
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("CategoryId");
-
-                            b1.ToTable("Post_Categories_Attributes","ug");
-
-                            b1.WithOwner()
-                                .HasForeignKey("CategoryId");
-                        });
-
-                    b.OwnsOne("UrGuide.Data.Entities.Shared.Image", "Image", b1 =>
-                        {
-                            b1.Property<string>("CategoryId")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("nvarchar(450)");
-
-                            b1.Property<string>("Id")
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("ImageBase64")
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("ImageCatalogId")
-                                .HasColumnType("nvarchar(450)");
-
-                            b1.Property<string>("MimeType")
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("CategoryId");
-
-                            b1.HasIndex("ImageCatalogId");
-
-                            b1.ToTable("Post_Categories");
-
-                            b1.WithOwner()
-                                .HasForeignKey("CategoryId");
-
-                            b1.HasOne("UrGuide.Data.Entities.Shared.ImageCatalog", "ImageCatalog")
-                                .WithMany()
-                                .HasForeignKey("ImageCatalogId");
-
-                            b1.OwnsMany("UrGuide.Data.Entities.Attributes.GenericAttribute", "Attributes", b2 =>
-                                {
-                                    b2.Property<string>("ImageCategoryId")
-                                        .HasColumnType("nvarchar(450)");
-
-                                    b2.Property<int>("Id")
-                                        .ValueGeneratedOnAdd()
-                                        .HasColumnType("int")
-                                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                                    b2.Property<string>("Name")
-                                        .HasColumnType("nvarchar(max)");
-
-                                    b2.Property<string>("Value")
-                                        .HasColumnType("nvarchar(max)");
-
-                                    b2.HasKey("ImageCategoryId", "Id");
-
-                                    b2.ToTable("Post_Categories_Attributes1");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("ImageCategoryId");
-                                });
                         });
                 });
 

@@ -1,11 +1,12 @@
-﻿using System;
+﻿using NetTopologySuite.Geometries;
+using System;
 using System.Collections.Generic;
 using UrGuide.Data.Entities.Attributes;
 using UrGuide.Data.Entities.Contracts;
 
 namespace UrGuide.Data.Entities.Shared
 {
-    public class ImageCatalog : IUserOwnedEntity, IAttributeEnabledEntity
+    public class ImageCatalog : IUserOwnedEntity, IAttributeEnabledEntity, IGeoEntity
     {
         public ImageCatalog()
         {
@@ -18,5 +19,6 @@ namespace UrGuide.Data.Entities.Shared
         public virtual Users.User User { get; set; }
         public virtual ICollection<Image> Images { get; protected set; }
         public virtual ICollection<GenericAttribute> Attributes { get; protected set; }
+        public virtual Point Location { get; set; }
     }
 }

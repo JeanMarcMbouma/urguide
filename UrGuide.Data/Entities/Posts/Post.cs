@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetTopologySuite.Geometries;
+using System;
 using System.Collections.Generic;
 using UrGuide.Data.Entities.Attributes;
 using UrGuide.Data.Entities.Contracts;
@@ -7,7 +8,7 @@ using UrGuide.Data.Entities.Users;
 
 namespace UrGuide.Data.Entities.Posts
 {
-    public class Post : IAttributeEnabledEntity, IUserOwnedEntity
+    public class Post : IAttributeEnabledEntity, IUserOwnedEntity, IGeoEntity
     {
         public Post()
         {
@@ -24,5 +25,6 @@ namespace UrGuide.Data.Entities.Posts
         public virtual ICollection<GenericAttribute> Attributes { get; protected set; }
         public virtual ImageCatalog Catalog { get; set; }
         public virtual User User { get; set; }
+        public virtual Point Location { get; set; }
     }
 }
