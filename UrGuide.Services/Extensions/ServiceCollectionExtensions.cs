@@ -48,7 +48,7 @@ namespace UrGuide.Services.Extensions
 
             services.AddDbContext<Data.UrGuideContext>(options =>
                 options.UseSqlServer(
-                    configuration.GetConnectionString("Data")));
+                    configuration.GetConnectionString("Data"), options => options.UseNetTopologySuite()));
 
             return services;
         }

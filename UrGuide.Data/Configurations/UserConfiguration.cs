@@ -13,6 +13,7 @@ namespace UrGuide.Data.Configurations
             builder.Property(x => x.Id).HasColumnName("UserId").IsRequired();
             builder.Property(x => x.LastActivityDate);
             builder.Ignore(x => x.FullName);
+            builder.Property(x => x.Location);
 
             builder.OwnsOne(x => x.ProfileImage, p => {
                 p.ToTable("User_Images", Constants.Schema);

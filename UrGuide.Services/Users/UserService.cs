@@ -11,6 +11,7 @@ using UrGuide.Model.Users;
 using UrGuide.Services.Contracts;
 using UrGuide.Shared;
 using UrGuide.Shared.Contracts;
+using UrGuide.Services.Extensions;
 
 namespace UrGuide.Services.Users
 {
@@ -22,7 +23,8 @@ namespace UrGuide.Services.Users
             ILogger<UserService> logger,
             IMapper mapper,
             IEmailService emailService,
-            IWebHelper webHelper)
+            IWebHelper webHelper,
+            IIPStackService iPStackService)
         {
             Context = context ?? throw new System.ArgumentNullException(nameof(context));
             UserContext = userContext ?? throw new System.ArgumentNullException(nameof(userContext));
@@ -31,6 +33,7 @@ namespace UrGuide.Services.Users
             Mapper = mapper ?? throw new System.ArgumentNullException(nameof(mapper));
             EmailService = emailService ?? throw new System.ArgumentNullException(nameof(emailService));
             WebHelper = webHelper ?? throw new System.ArgumentNullException(nameof(webHelper));
+            IPStackService = iPStackService ?? throw new System.ArgumentNullException(nameof(iPStackService));
         }
 
         public UrGuideContext Context { get; }
@@ -40,6 +43,7 @@ namespace UrGuide.Services.Users
         public IMapper Mapper { get; }
         public IEmailService EmailService { get; }
         public IWebHelper WebHelper { get; }
+        public IIPStackService IPStackService { get; }
 
         public async Task<Result<bool>> DeleteUserAccountAsync(CancellationToken cancellationToken)
         {
@@ -74,8 +78,9 @@ namespace UrGuide.Services.Users
             var userId = await AuthService.LoginAsync(login, cancellationToken);
             if (userId.HasError)
                 return Result.Of<User>(null).Combine(userId);
-            var user = await GetUserAsync(userId.Data, cancellationToken);
-            return user;
+            var user = await Context.Users.FindAsync(new[] { userId.Data }, cancellationToken);
+            user.LastActivityDate = System.DateTime.UtcNow;
+            return Result.Of(Mapper.Map<User>(user));
         }
 
         public async Task<Result<bool>> RegisterGuideAsync(CreateGuideModel createGuide, CancellationToken cancellationToken)
@@ -111,6 +116,8 @@ namespace UrGuide.Services.Users
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.BirthDay), Value = createGuide.BirthDay });
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Subscription), Value = nameof(Subscriptions.Premium) });
 
+            await user.SetLocationAsync(UserContext, IPStackService);
+
             Context.Users.Add(user);
             await EmailService.SendAsync(new SendDirectMessageCommand
             {
@@ -118,6 +125,7 @@ namespace UrGuide.Services.Users
                 ToName = createGuide.FirstName,
                 Content = "Please confirm your account",
                 Subject = "Email Confirmation",
+                LinkText = "Activate your account",
                 Link = WebHelper.ResolveUrl(MessageTypes.Confirmation, new { userId.Data.confirmationToken, createGuide.Email })
             });
             return Result.Of(true);
@@ -145,7 +153,10 @@ namespace UrGuide.Services.Users
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.FirstName), Value = createUser.FirstName });
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.LastName), Value = createUser.LastName });
 
+            await user.SetLocationAsync(UserContext, IPStackService);
+
             Context.Users.Add(user);
+
             await EmailService.SendAsync(new SendDirectMessageCommand
             {
                 To = createUser.Email,
