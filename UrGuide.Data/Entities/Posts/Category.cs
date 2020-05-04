@@ -10,7 +10,7 @@ namespace UrGuide.Data.Entities.Posts
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public string Image { get; set; }
+        public string ImageLink { get; set; }
         public bool Archived { get; set; }
         public DateTime Created { get; set; }
         public DateTime LastUpdated { get; set; }

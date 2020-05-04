@@ -1,9 +1,10 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using NetTopologySuite.Geometries;
 
 namespace UrGuide.Data.Migrations
 {
-    public partial class Initial_01 : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -29,12 +30,30 @@ namespace UrGuide.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Post_Categories",
+                schema: "ug",
+                columns: table => new
+                {
+                    CategoryId = table.Column<string>(nullable: false, defaultValueSql: "NEWID()"),
+                    CategoryName = table.Column<string>(maxLength: 200, nullable: false),
+                    ImageLink = table.Column<string>(nullable: false),
+                    Archived = table.Column<bool>(nullable: false),
+                    Created = table.Column<DateTime>(nullable: false),
+                    LastUpdated = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Post_Categories", x => x.CategoryId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 schema: "ug",
                 columns: table => new
                 {
                     UserId = table.Column<string>(nullable: false),
-                    LastActivityDate = table.Column<DateTime>(nullable: false)
+                    LastActivityDate = table.Column<DateTime>(nullable: false),
+                    Location = table.Column<Point>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -71,7 +90,8 @@ namespace UrGuide.Data.Migrations
                     Image_CatalogId = table.Column<string>(nullable: false, defaultValueSql: "NEWID()"),
                     Created = table.Column<DateTime>(nullable: false),
                     LastUpdated = table.Column<DateTime>(nullable: false),
-                    UserId = table.Column<string>(nullable: true)
+                    UserId = table.Column<string>(nullable: true),
+                    Location = table.Column<Point>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -160,6 +180,29 @@ namespace UrGuide.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Image_Catalogs_Attributes",
+                schema: "ug",
+                columns: table => new
+                {
+                    ImageCatalogId = table.Column<string>(nullable: false),
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(nullable: true),
+                    Value = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Image_Catalogs_Attributes", x => new { x.ImageCatalogId, x.Id });
+                    table.ForeignKey(
+                        name: "FK_Image_Catalogs_Attributes_Image_Catalogs_ImageCatalogId",
+                        column: x => x.ImageCatalogId,
+                        principalSchema: "ug",
+                        principalTable: "Image_Catalogs",
+                        principalColumn: "Image_CatalogId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Posts",
                 schema: "ug",
                 columns: table => new
@@ -170,7 +213,8 @@ namespace UrGuide.Data.Migrations
                     DateOfPublication = table.Column<DateTime>(nullable: false),
                     LastUpdated = table.Column<DateTime>(nullable: false),
                     CatalogId = table.Column<string>(nullable: true),
-                    UserId = table.Column<string>(nullable: true)
+                    UserId = table.Column<string>(nullable: true),
+                    Location = table.Column<Point>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -237,85 +281,18 @@ namespace UrGuide.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Post_Categories",
+            migrationBuilder.InsertData(
                 schema: "ug",
-                columns: table => new
+                table: "Post_Categories",
+                columns: new[] { "CategoryId", "Archived", "Created", "ImageLink", "LastUpdated", "CategoryName" },
+                values: new object[,]
                 {
-                    CategoryId = table.Column<string>(nullable: false, defaultValueSql: "NEWID()"),
-                    CategoryName = table.Column<string>(maxLength: 200, nullable: false),
-                    Image_Id = table.Column<string>(nullable: true),
-                    Image_ImageBase64 = table.Column<string>(nullable: true),
-                    Image_MimeType = table.Column<string>(nullable: true),
-                    Image_ImageCatalogId = table.Column<string>(nullable: true),
-                    Archived = table.Column<bool>(nullable: false),
-                    Created = table.Column<DateTime>(nullable: false),
-                    LastUpdated = table.Column<DateTime>(nullable: false),
-                    PostId = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Post_Categories", x => x.CategoryId);
-                    table.ForeignKey(
-                        name: "FK_Post_Categories_Posts_PostId",
-                        column: x => x.PostId,
-                        principalSchema: "ug",
-                        principalTable: "Posts",
-                        principalColumn: "PostId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Post_Categories_Image_Catalogs_Image_ImageCatalogId",
-                        column: x => x.Image_ImageCatalogId,
-                        principalSchema: "ug",
-                        principalTable: "Image_Catalogs",
-                        principalColumn: "Image_CatalogId",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Post_Categories_Attributes",
-                schema: "ug",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(maxLength: 200, nullable: false),
-                    Value = table.Column<string>(nullable: false),
-                    CategoryId = table.Column<string>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Post_Categories_Attributes", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Post_Categories_Attributes_Post_Categories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalSchema: "ug",
-                        principalTable: "Post_Categories",
-                        principalColumn: "CategoryId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Post_Categories_Attributes1",
-                schema: "ug",
-                columns: table => new
-                {
-                    ImageCategoryId = table.Column<string>(nullable: false),
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: true),
-                    Value = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Post_Categories_Attributes1", x => new { x.ImageCategoryId, x.Id });
-                    table.ForeignKey(
-                        name: "FK_Post_Categories_Attributes1_Post_Categories_ImageCategoryId",
-                        column: x => x.ImageCategoryId,
-                        principalSchema: "ug",
-                        principalTable: "Post_Categories",
-                        principalColumn: "CategoryId",
-                        onDelete: ReferentialAction.Cascade);
+                    { "d1442a22-adc5-4eab-a232-6ae1fe1ad4f5", false, new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "images/sport.png", new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "Sport" },
+                    { "62cf86ff-755d-46fd-bf8d-ca08ba353451", false, new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "images/nature.png", new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "Nature" },
+                    { "057e7c41-48a2-40af-83f7-86495daa66bb", false, new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "images/child.png", new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "Child" },
+                    { "4dc654b1-c887-4000-8e53-309f2aad0e3d", false, new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "images/historical.png", new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "Historical" },
+                    { "9d78cfc4-2299-445c-9c38-d6dd9d081f2b", false, new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "images/amusement.png", new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "Amusement" },
+                    { "3f35dba7-d527-4c70-80cb-68d25ee2b332", false, new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "images/extreme.png", new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "Extreme" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -355,24 +332,6 @@ namespace UrGuide.Data.Migrations
                 column: "PostId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Post_Categories_PostId",
-                schema: "ug",
-                table: "Post_Categories",
-                column: "PostId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Post_Categories_Image_ImageCatalogId",
-                schema: "ug",
-                table: "Post_Categories",
-                column: "Image_ImageCatalogId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Post_Categories_Attributes_CategoryId",
-                schema: "ug",
-                table: "Post_Categories_Attributes",
-                column: "CategoryId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Posts_CatalogId",
                 schema: "ug",
                 table: "Posts",
@@ -405,6 +364,10 @@ namespace UrGuide.Data.Migrations
                 schema: "ug");
 
             migrationBuilder.DropTable(
+                name: "Image_Catalogs_Attributes",
+                schema: "ug");
+
+            migrationBuilder.DropTable(
                 name: "Message_Links",
                 schema: "ug");
 
@@ -413,11 +376,7 @@ namespace UrGuide.Data.Migrations
                 schema: "ug");
 
             migrationBuilder.DropTable(
-                name: "Post_Categories_Attributes",
-                schema: "ug");
-
-            migrationBuilder.DropTable(
-                name: "Post_Categories_Attributes1",
+                name: "Post_Categories",
                 schema: "ug");
 
             migrationBuilder.DropTable(
@@ -434,10 +393,6 @@ namespace UrGuide.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Notifications",
-                schema: "ug");
-
-            migrationBuilder.DropTable(
-                name: "Post_Categories",
                 schema: "ug");
 
             migrationBuilder.DropTable(

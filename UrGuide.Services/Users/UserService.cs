@@ -125,6 +125,7 @@ namespace UrGuide.Services.Users
                 ToName = createGuide.FirstName,
                 Content = "Please confirm your account",
                 Subject = "Email Confirmation",
+                LinkText = "Activate your account",
                 Link = WebHelper.ResolveUrl(MessageTypes.Confirmation, new { userId.Data.confirmationToken, createGuide.Email })
             });
             return Result.Of(true);

@@ -18,51 +18,63 @@ namespace UrGuide.Data.Configurations
             builder.Property(x => x.LastUpdated);
             builder.Property(x => x.Name).HasColumnName("CategoryName")
                 .IsRequired().HasMaxLength(200);
-            builder.Property(x => x.Image).IsRequired();
+            builder.Property(x => x.ImageLink).IsRequired();
 
-            builder.HasData(new Category
-            {
-                Created = new System.DateTime(2020, 05, 1, 12, 0,0),
-                Name = "Sport",
-                LastUpdated = new System.DateTime(2020, 05, 1, 12, 0, 0),
-                Image = "images/sport.png",
-                Id = Guid.NewGuid().ToString("D")
-            }, new Category
-            {
-                Created = new System.DateTime(2020, 05, 1, 12, 0, 0),
-                Name = "Nature",
-                LastUpdated = new System.DateTime(2020, 05, 1, 12, 0, 0),
-                Image = "images/nature.png",
-                Id = Guid.NewGuid().ToString("D")
-            }, new Category
-            {
-                Created = new System.DateTime(2020, 05, 1, 12, 0, 0),
-                Name = "Child",
-                LastUpdated = new System.DateTime(2020, 05, 1, 12, 0, 0),
-                Image = "images/child.png",
-                Id = Guid.NewGuid().ToString("D")
-            }, new Category
-            {
-                Created = new System.DateTime(2020, 05, 1, 12, 0, 0),
-                Name = "Historical",
-                LastUpdated = new System.DateTime(2020, 05, 1, 12, 0, 0),
-                Image = "images/historical.png",
-                Id = Guid.NewGuid().ToString("D")
-            }, new Category
-            {
-                Created = new System.DateTime(2020, 05, 1, 12, 0, 0),
-                Name = "Amusement",
-                LastUpdated = new System.DateTime(2020, 05, 1, 12, 0, 0),
-                Image = "images/amusement.png",
-                Id = Guid.NewGuid().ToString("D")
-            }, new Category
-            {
-                Created = new System.DateTime(2020, 05, 1, 12, 0, 0),
-                Name = "Extreme",
-                LastUpdated = new System.DateTime(2020, 05, 1, 12, 0, 0),
-                Image = "images/extreme.png",
-                Id = Guid.NewGuid().ToString("D")
-            });
+            builder.HasData(
+                new Category
+                {
+                    Id = "d1442a22-adc5-4eab-a232-6ae1fe1ad4f5",
+                    Archived = false,
+                    Created = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                    ImageLink = "images/sport.png",
+                    LastUpdated = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                    Name = "Sport"
+                },
+                new Category
+                {
+                    Id = "62cf86ff-755d-46fd-bf8d-ca08ba353451",
+                    Archived = false,
+                    Created = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                    ImageLink = "images/nature.png",
+                    LastUpdated = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                    Name = "Nature"
+                },
+                new Category
+                {
+                    Id = "057e7c41-48a2-40af-83f7-86495daa66bb",
+                    Archived = false,
+                    Created = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                    ImageLink = "images/child.png",
+                    LastUpdated = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                    Name = "Child"
+                },
+                new Category
+                {
+                    Id = "4dc654b1-c887-4000-8e53-309f2aad0e3d",
+                    Archived = false,
+                    Created = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                    ImageLink = "images/historical.png",
+                    LastUpdated = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                    Name = "Historical"
+                },
+                new Category
+                {
+                    Id = "9d78cfc4-2299-445c-9c38-d6dd9d081f2b",
+                    Archived = false,
+                    Created = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                    ImageLink = "images/amusement.png",
+                    LastUpdated = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                    Name = "Amusement"
+                },
+                new Category
+                {
+                    Id = "3f35dba7-d527-4c70-80cb-68d25ee2b332",
+                    Archived = false,
+                    Created = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                    ImageLink = "images/extreme.png",
+                    LastUpdated = new DateTime(2020, 5, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                    Name = "Extreme"
+                });
         }
     }
 }
