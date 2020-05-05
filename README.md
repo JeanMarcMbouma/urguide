@@ -34,9 +34,24 @@ Make yourself a Tourism guide at your ease and pace.
 
 - [ ]  A user can request an increase of the bid
 
-- [ ] A user could either agree to pay the tour guide via the platform or at an agreed location/time
+- [ ]  A user could see his/her tour / bid / agreement history
+
+- [ ]  All actions are audited
+
+- [ ]  A user could downlaod his/her data
+
+- [ ]  A user could delete his/her account
 
 - [ ]  A user can leave a positive/negative feedback about the tour via **5 Stars rating** and user comments
+
+- [ ] A user could either agree to pay the tour guide via the platform or at an agreed location/time
+
+- [ ]  A user could join a tour
+
+- [ ]  A bid is as per participants
+
+
+## NICE TO HAVE
 
 - [ ]  A user can request a refund after an agreed period (see policy)
 
@@ -61,14 +76,6 @@ Make yourself a Tourism guide at your ease and pace.
 
 - [ ]  A user could see his/her transaction history
 
-- [ ]  A user could see his/her tour / bid / agreement history
-
-- [ ]  All actions are audited
-
-- [ ]  A user could downlaod his/her data
-
-- [ ]  A user could delete his/her account
-
 - [ ]  A user could freeze their account for a specific period a time
 
 - [ ] A user can choose to toggle his availablity, share his calendar 
@@ -76,8 +83,3 @@ Make yourself a Tourism guide at your ease and pace.
 - [ ]  A user can use a use a barcode / Google / Apple / Microsoft account to authenticate to the app
 
 - [ ]  2FA is required by default
-
-- [ ]  A user could join a tour
-
-- [ ]  A bid is as per participants
-
