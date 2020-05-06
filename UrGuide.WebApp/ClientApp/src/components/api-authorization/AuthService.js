@@ -196,8 +196,8 @@ export const useAuth = () => {
 
 export const useAuthUser = () => {
     const { user, manager } = useAuth();
-    const [authUser, setAuthUser] = useState(user);
-    console.log(user);
+    const [authUser, setAuthUser] = useState(null);
+
     useEffect(() => {
         async function checkUser() {
             if (await manager.isAuthenticated()) {
@@ -209,7 +209,7 @@ export const useAuthUser = () => {
 
         checkUser();
         return () => { };
-    }, [manager, authUser]);
+    }, [manager, authUser, user]);
 
     return authUser;
 }

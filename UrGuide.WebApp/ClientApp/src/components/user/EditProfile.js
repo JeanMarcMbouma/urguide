@@ -44,11 +44,12 @@ function Profile() {
         picture: '',
     });
 
-    useMemo(() => {
+    useMemo(async () => {
+        if (!user)
+            return;
         var client = HttpClientFactory.getClient(user);
-        client.getdetails().done(data => {
-            setValues(data);
-        });
+        var data = await client.getdetails();
+        setValues(data);
     }, [user]);
 
     const handleChangedValue = prop => event => {

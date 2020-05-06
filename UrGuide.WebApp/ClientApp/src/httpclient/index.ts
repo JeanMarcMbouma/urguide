@@ -38,7 +38,7 @@ export class HttpClientFactory {
         return new AccountClient("", new Http(user));
     }
 
-    static getClient(): Client {
-        return new Client("", new Http());
+    static getClient(user?: User): Client {
+        return new Client("", new Http(user));
     }
 }
