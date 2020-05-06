@@ -40,8 +40,8 @@ var HttpClientFactory = /** @class */ (function () {
     HttpClientFactory.getAccountClient = function (user) {
         return new api_1.AccountClient("", new Http(user));
     };
-    HttpClientFactory.getClient = function () {
-        return new api_1.Client("", new Http());
+    HttpClientFactory.getClient = function (user) {
+        return new api_1.Client("", new Http(user));
     };
     return HttpClientFactory;
 }());

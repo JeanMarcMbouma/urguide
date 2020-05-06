@@ -12,7 +12,7 @@ class Http implements IHttp {
 
     }
     fetch(url: RequestInfo, init: RequestInit): Promise<Response> {
-
+        console.log(this.user);
         if (this.user && this.user.access_token) {
 
             const { headers } = init;
