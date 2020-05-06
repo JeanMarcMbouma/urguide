@@ -9,7 +9,6 @@ namespace UrGuide.Shared.Contracts
     public interface IUserContext
     {
         string UserId { get; }
-        string UserName { get; }
         Task<string> Id_Token { get; }
         Task<string> Access_Token { get; }
         bool IsAuthenticated { get; }
