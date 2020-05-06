@@ -21,7 +21,6 @@ namespace UrGuide.WebApp.Services
         public IHttpContextAccessor HttpContextAccessor { get; }
         public SignInManager<UrGuideUser> SignInManager { get; }
 
-
         public string UserId => SignInManager.UserManager.GetUserId(HttpContextAccessor.HttpContext.User);
         public string UserName => SignInManager.UserManager.GetUserName(HttpContextAccessor.HttpContext.User);
         public Task<string> Id_Token => HttpContextAccessor.HttpContext.GetTokenAsync("id_token");

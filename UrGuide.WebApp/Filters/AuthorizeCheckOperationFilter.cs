@@ -11,8 +11,9 @@ namespace UrGuide.WebApp.Filters
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             // Check for authorize attribute
-            var hasAuthorize = context.MethodInfo.DeclaringType.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any() ||
-                               context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any();
+            var hasAuthorize = (context.MethodInfo.DeclaringType.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any() ||
+                               context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any())
+                               && !context.MethodInfo.GetCustomAttributes(true).OfType<AllowAnonymousAttribute>().Any();
 
             if (!hasAuthorize) return;
             var requiredScopes = context.MethodInfo
@@ -20,7 +21,6 @@ namespace UrGuide.WebApp.Filters
                                     .OfType<AuthorizeAttribute>()
                                     .Select(attr => attr.Policy)
                                     .Distinct();
-
             
             operation.Responses.TryAdd("401", new OpenApiResponse { Description = "Unauthorized" });
             operation.Responses.TryAdd("403", new OpenApiResponse { Description = "Forbidden" });

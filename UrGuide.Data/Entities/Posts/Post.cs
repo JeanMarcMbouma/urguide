@@ -8,7 +8,7 @@ using UrGuide.Data.Entities.Users;
 
 namespace UrGuide.Data.Entities.Posts
 {
-    public class Post : IAttributeEnabledEntity, IUserOwnedEntity, IGeoEntity
+    public class Post : IAttributeEnabledEntity, IUserOwnedEntity, IGeoEntity, ILastUpdatableEntity
     {
         public Post()
         {

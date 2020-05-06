@@ -6,7 +6,7 @@ using UrGuide.Data.Entities.Contracts;
 
 namespace UrGuide.Data.Entities.Shared
 {
-    public class ImageCatalog : IUserOwnedEntity, IAttributeEnabledEntity, IGeoEntity
+    public class ImageCatalog : IUserOwnedEntity, IAttributeEnabledEntity, IGeoEntity, ILastUpdatableEntity
     {
         public ImageCatalog()
         {

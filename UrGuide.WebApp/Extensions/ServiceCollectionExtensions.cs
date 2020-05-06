@@ -44,6 +44,8 @@ namespace UrGuide.WebApp.Extensions
             {
                 options.UserInteraction.LoginUrl = "/sign-in";
                 options.UserInteraction.LogoutUrl = "/account/logout";
+
+             
             })
             .AddApiAuthorization<UrGuideUser, UrGuideAuthContext>(options =>
             {
@@ -58,6 +60,7 @@ namespace UrGuide.WebApp.Extensions
                     RequireClientSecret = false,
                     ClientSecrets = { new IdentityServer4.Models.Secret("secret".ToSha256()) }
                 });
+
             });
             /*
              ,

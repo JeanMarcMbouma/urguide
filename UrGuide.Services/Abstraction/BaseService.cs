@@ -39,18 +39,18 @@ namespace UrGuide.Services.Abstraction
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var catalog = await Context.Set<TInput>().Include(x => x.Attributes)
+            var item = await Context.Set<TInput>().Include(x => x.Attributes)
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-            if (catalog == null)
+            if (item == null)
                 return Result.Of(false).WithErrors($"Entity with the given id  '{id}' doesn't exists");
 
-            var genericAttributes = catalog.Attributes;
+            var genericAttributes = item.Attributes;
             foreach (var attribute in attributes)
             {
-                var attr = genericAttributes.FirstOrDefault(a => a.Name == attribute.Name);
+                var attr = genericAttributes.FirstOrDefault(a => a.Name.Equals(attribute.Name, System.StringComparison.OrdinalIgnoreCase));
                 if (attr == null)
                 {
-                    catalog.Attributes.Add(new Data.Entities.Attributes.GenericAttribute
+                    item.Attributes.Add(new Data.Entities.Attributes.GenericAttribute
                     {
                         Name = attribute.Name,
                         Value = attribute.Value
@@ -60,6 +60,10 @@ namespace UrGuide.Services.Abstraction
                 {
                     attr.Value = attribute.Value;
                 }
+            }
+            if (item is ILastUpdatableEntity entity)
+            {
+                entity.LastUpdated = DateTime.UtcNow;
             }
 
             await Context.SaveChangesAsync(cancellationToken);
@@ -73,20 +77,20 @@ namespace UrGuide.Services.Abstraction
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var catalog = await Context.Set<TInput>().Include(x => x.Attributes)
+            var item = await Context.Set<TInput>().Include(x => x.Attributes)
                 .Include(x => x.User)
                 .Where(x => x.User.Id == UserContext.UserId)
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-            if (catalog == null)
+            if (item == null)
                 return Result.Of(false).WithErrors($"Entity with the given id  '{id}' doesn't exists");
 
-            var genericAttributes = catalog.Attributes;
+            var genericAttributes = item.Attributes;
             foreach (var attribute in attributes)
             {
-                var attr = genericAttributes.FirstOrDefault(a => a.Name == attribute.Name);
+                var attr = genericAttributes.FirstOrDefault(a => a.Name.Equals(attribute.Name, System.StringComparison.OrdinalIgnoreCase));
                 if (attr == null)
                 {
-                    catalog.Attributes.Add(new Data.Entities.Attributes.GenericAttribute
+                    item.Attributes.Add(new Data.Entities.Attributes.GenericAttribute
                     {
                         Name = attribute.Name,
                         Value = attribute.Value
@@ -96,12 +100,17 @@ namespace UrGuide.Services.Abstraction
                 {
                     if(string.IsNullOrEmpty(attribute.Value))
                     {
-                        catalog.Attributes.Remove(attr);
+                        item.Attributes.Remove(attr);
                     } else
                     {
                         attr.Value = attribute.Value;
                     }
                 }
+            }
+
+            if(item is ILastUpdatableEntity entity)
+            {
+                entity.LastUpdated = DateTime.UtcNow;
             }
 
             await Context.SaveChangesAsync(cancellationToken);
