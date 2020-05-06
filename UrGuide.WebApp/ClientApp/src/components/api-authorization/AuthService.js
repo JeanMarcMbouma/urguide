@@ -196,7 +196,7 @@ export const useAuth = () => {
 
 export const useAuthUser = () => {
     const { user, manager } = useAuth();
-    const [authUser, setAuthUser] = useState(null);
+    const [authUser, setAuthUser] = useState(user);
 
     useEffect(() => {
         async function checkUser() {
