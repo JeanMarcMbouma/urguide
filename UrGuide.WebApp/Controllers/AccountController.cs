@@ -91,7 +91,7 @@ namespace UrGuide.WebApp.Controllers
 
         [Authorize]
         [HttpGet("/getdetails")]
-        [ProducesDefaultResponseType(typeof(IEnumerable<User>))]
+        [ProducesDefaultResponseType(typeof(User))]
         public async Task<IActionResult> GetDetails(CancellationToken cancellationToken)
         {
             var result = await UserService.GetDetailsAsync(cancellationToken);

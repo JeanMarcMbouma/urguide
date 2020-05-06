@@ -1,4 +1,4 @@
-﻿import React, { Component } from "react";
+﻿import React, { Component, useMemo } from "react";
 import {
     Grid,
     InputLabel,
@@ -18,6 +18,8 @@ import CreateIcon from "@material-ui/icons/Create";
 import Countries from "./../guide-registration/Countries";
 import EditProfileNavigation from "./EditProfileNavigation";
 import "./UserStyle.css";
+import { useAuthUser } from "../api-authorization/AuthService";
+import { HttpClientFactory } from "../../httpclient";
 
 function Profile() {
     function handleChange(event) {
@@ -26,6 +28,8 @@ function Profile() {
         document.getElementById("pic-previewer").style.backgroundImage =
             "url('" + file + "')";
     }
+
+    const user = useAuthUser();
 
     const [values, setValues] = React.useState({
         firstName: '',
@@ -39,6 +43,13 @@ function Profile() {
         description: '',
         picture: '',
     });
+
+    useMemo(() => {
+        var client = HttpClientFactory.getClient(user);
+        client.getdetails().done(data => {
+            setValues(data);
+        });
+    }, [user]);
 
     const handleChangedValue = prop => event => {
         setValues({ ...values, [prop]: event.target.value });
