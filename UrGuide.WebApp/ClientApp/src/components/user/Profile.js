@@ -22,9 +22,10 @@ import {
     useRouteMatch
 } from "react-router-dom";
 import { CreateNewGallery } from "./CreateNewGallery";
+import UserContext from "./../UserContext";
 
 
-export default function Profile() {
+function ProfileLayout() {
 
     let { path, url } = useRouteMatch();
 
@@ -58,4 +59,24 @@ export default function Profile() {
 
             </div>
     );
+}
+
+export default class Profile extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            data: [],
+            error: null,
+            isLoaded: false,
+        };
+    
+    }
+
+
+    render() {
+        return (<UserContext.Provider value={{ userData: this.state.data }} >
+            <ProfileLayout />
+        </UserContext.Provider>);
+    }
+
 }

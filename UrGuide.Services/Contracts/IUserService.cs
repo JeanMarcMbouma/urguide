@@ -14,5 +14,7 @@ namespace UrGuide.Services.Contracts
         Task<Result<bool>> RegisterUserAsync(CreateUserModel createUser, CancellationToken cancellationToken);
         Task<Result<bool>> RegisterGuideAsync(CreateGuideModel createGuide, CancellationToken cancellationToken);
         Task<Result<User>> LoginAsync(LoginModel login, CancellationToken cancellationToken);
+        Task<Result<bool>> UpdateGuideAsync(UpdateGuideModel updateGuide, CancellationToken cancellationToken);
+        Task<Result<User>> GetDetailsAsync();
     }
 }

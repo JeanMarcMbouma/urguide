@@ -32,12 +32,12 @@ export default function GuideReducer(state, action) {
   let validfname = nameRegex.test(context.firstName);
   let validlname = nameRegex.test(context.lastName);
   let isDescriptionGotProperLength =
-    description.length > 100 && description.length < 500 ? true : false;
+   description.length > 100 && description.length < 500 ? true : false;
   let validgender = context.gender === "null" ? false : true;
   let validcountry = nameRegex.test(context.country);
   let validcity = nameRegex.test(context.city);
   let validaddress = nameRegex.test(context.address);
-  let validdesrcription = nameRegex.test(context.description);
+  let validdescription = nameRegex.test(description);
 
   //errors
   //step1
@@ -56,7 +56,7 @@ export default function GuideReducer(state, action) {
   context.phoneError = context.phone != "" ? false : true;
   context.addressError = validaddress ? false : true;
   context.descriptionError =
-    isDescriptionGotProperLength && validdesrcription ? false : true;
+    isDescriptionGotProperLength && validdescription ? false : true;
 
   //step3
   context.isChecked = action.data.isChecked ? false : true;

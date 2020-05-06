@@ -17,6 +17,8 @@ namespace UrGuide.Services.Users
             RuleFor(x => x.Country).NotEmpty();
             RuleFor(x => x.Gender).NotEmpty();
             RuleFor(x => x.BirthDay).NotEmpty();
+            RuleFor(x => x.ProfileImage).NotEmpty();
+            RuleFor(x => x.Description).NotEmpty().MinimumLength(100).MaximumLength(500);
         }
     }
 }

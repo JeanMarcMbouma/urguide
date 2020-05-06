@@ -1,6 +1,7 @@
 ﻿import React, { createContext } from "react";
 
 const ChangePasswordContext = createContext({
+    user:null,
     email: null,
     password: null,
     confirmPassword: null,

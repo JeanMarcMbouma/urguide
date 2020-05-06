@@ -1223,6 +1223,7 @@ export class CreateGuideModel implements ICreateGuideModel {
     phone?: string | undefined;
     birthDay?: string | undefined;
     profileImage?: string | undefined;
+    description?: string | undefined;
 
     constructor(data?: ICreateGuideModel) {
         if (data) {
@@ -1247,6 +1248,7 @@ export class CreateGuideModel implements ICreateGuideModel {
             this.phone = _data["phone"];
             this.birthDay = _data["birthDay"];
             this.profileImage = _data["profileImage"];
+            this.description = _data["description"];
         }
     }
 
@@ -1271,6 +1273,7 @@ export class CreateGuideModel implements ICreateGuideModel {
         data["phone"] = this.phone;
         data["birthDay"] = this.birthDay;
         data["profileImage"] = this.profileImage;
+        data["description"] = this.description;
         return data; 
     }
 }

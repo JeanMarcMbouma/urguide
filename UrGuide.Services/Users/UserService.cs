@@ -12,6 +12,7 @@ using UrGuide.Services.Contracts;
 using UrGuide.Shared;
 using UrGuide.Shared.Contracts;
 using UrGuide.Services.Extensions;
+using System.Collections.Generic;
 
 namespace UrGuide.Services.Users
 {
@@ -114,6 +115,7 @@ namespace UrGuide.Services.Users
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Address), Value = createGuide.Address });
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Gender), Value = createGuide.Gender });
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.BirthDay), Value = createGuide.BirthDay });
+            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Description), Value = createGuide.Description });
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Subscription), Value = nameof(Subscriptions.Premium) });
 
             await user.SetLocationAsync(UserContext, IPStackService);
@@ -192,5 +194,63 @@ namespace UrGuide.Services.Users
             }
             return Result.Of(true);
         }
+
+        public async Task<Result<bool>> UpdateGuideAsync(UpdateGuideModel updateGuide, CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var user = await Context.Users.FindAsync(new { UserContext.UserId }, cancellationToken);
+
+            if (user == null)
+            {
+                return Result.Of(false).WithErrors("User not found.");
+            }
+            try
+            {
+              
+                if (updateGuide.ProfileImage != null)
+                {
+                    user.ProfileImage.ImageBase64 = updateGuide.ProfileImage;
+                }
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.FirstName), Value = updateGuide.FirstName });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.LastName), Value = updateGuide.LastName });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Phone), Value = updateGuide.Phone });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Country), Value = updateGuide.Country });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.City), Value = updateGuide.City });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Address), Value = updateGuide.Address });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Gender), Value = updateGuide.Gender });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.BirthDay), Value = updateGuide.BirthDay });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Description), Value = updateGuide.Description });
+                Context.Users.Update(user);
+
+                return Result.Of(true);
+            }
+            catch (System.Exception e)
+            {
+                Logger.LogError(e, "Failed to update the account: UserId: {0}", UserContext.UserId);
+                return Result.Of(false).WithErrors("Failed to update your informations.");
+            }
+
+        }
+
+        public async Task<Result<User>> GetDetailsAsync()
+        { 
+
+            if (!UserContext.IsAuthenticated)
+                return Result.Of<User>().WithErrors(ErrorMessages.NotAuthenticated);
+
+            var user = await Context.Users.FindAsync(new[] { UserContext.UserId });
+            //cancellationToken.ThrowIfCancellationRequested();
+            if (user == null)
+                return Result.Of<User>().WithErrors("User not found.");
+
+            return Result.Of(Mapper.Map<User>(user));
+
+        }
+
+       
     }
 }

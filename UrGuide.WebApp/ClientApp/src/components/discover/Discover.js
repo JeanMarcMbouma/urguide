@@ -194,7 +194,7 @@ export default function Discover() {
                 </div>
                 <Switch>
                     <Route exact path={path} >
-                       <Cards />
+                        <Cards />
                     </Route>
                     <Route path={`${path}/:id`}>
                         <Post />

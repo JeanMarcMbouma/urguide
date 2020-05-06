@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Model.Users;
@@ -88,9 +89,23 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok();
         }
 
-        //[Authorize]
-        //[HttpPost("updateuser")]
-        //public async Task<IActionResult> UpdateUser([From])
+        [Authorize]
+        [HttpGet("/getdetails")]
+        [ProducesDefaultResponseType(typeof(IEnumerable<User>))]
+        public async Task<IActionResult> GetDetails()
+        {
+            var result = await UserService.GetDetailsAsync();
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("/updateguide")]
+        public async Task<IActionResult> UpdateGuide([FromBody]UpdateGuideModel model, CancellationToken cancellationToken)
+        {
+            var result = await UserService.UpdateGuideAsync(model, cancellationToken);
+
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok();
+        }
 
         [Authorize]
         [HttpGet("logout")]

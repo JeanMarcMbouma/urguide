@@ -1,4 +1,4 @@
-﻿import React, { Component } from "react";
+﻿import React, { Component, useContext, useReducer, useState } from "react";
 import {
         Grid,
     Box,
@@ -11,10 +11,14 @@ import {
     FormControl,
     Container,
     CssBaseline,
-    Button
+    Button,
+
 } from "@material-ui/core";
+import ChangePasswordContext from "./changepassword/ChangePasswordContext";
+import ChangePasswordReducer from "./changepassword/ChangePasswordReducer";
 import EditProfileNavigation from "./EditProfileNavigation";
 import { Visibility, VisibilityOff, AccountCircle } from "@material-ui/icons";
+import { useAuthContext, useAuth, useAuthUser } from '../api-authorization/AuthService';
 import clsx from "clsx";
 import "./UserStyle.css";
 
@@ -41,10 +45,22 @@ const useStyles = makeStyles(theme => ({
 function ChangePasswordForm() {
     const classes = useStyles();
 
-    const [values, setValues] = React.useState({
-        email: '',
+    const user = useAuthUser();
+    const { profile } = user || {
+        profile: {}
+    };
+
+    const ctx = useContext(ChangePasswordContext);
+    const [state, dispatch] = useReducer(ChangePasswordReducer, ctx);
+
+    state.email = profile['name'];
+    state.user = user;
+
+    const [values, setValues] = useState({
+        email: state.email,
         password: '',
         confirmPassword: '',
+        currentPassword: '',
         weight: "",
         weightRange: "",
         showPassword: false
@@ -62,32 +78,67 @@ function ChangePasswordForm() {
         event.preventDefault();
     };
 
-    const emailTextField =  (
-        <Grid item xs={12} sm={6}>
-                    <FormControl
-                        fullWidth
-                        className={clsx(classes.margin, classes.textField)}
-                        variant="outlined"
-                    >
-                        <InputLabel htmlFor="input-with-icon-adornment">
-                            Your email
-          </InputLabel>
-                        <Input
-                            id="guide-email"
-                            value={values.email}
-                            onChange={handleChange("email")}
-                            endAdornment={
-                                <InputAdornment position="start">
-                                    <AccountCircle />
-                                </InputAdornment>
-                            }
-                        />
-                    </FormControl>
-                </Grid>
-            );
 
-    const passwordTextField =  (
-        <Grid item xs={12} sm={6}>
+    return (
+        <div className='edit-profile-card' component="main">
+            <form 
+            >
+            <h5 className='text-muted'>Change your login details</h5>
+            <br />
+            <br />
+            <br />
+            <Grid container spacing={4}>
+                    <Grid item xs={12} sm={6}>
+                        <FormControl
+                            fullWidth
+                            className={clsx(classes.margin, classes.textField)}
+                            variant="outlined"
+                        >
+                            <InputLabel htmlFor="input-with-icon-adornment">
+                                Your email
+          </InputLabel>
+                            <Input
+                                id="guide-email"
+                                value={values.email}
+                                onChange={handleChange("email")}
+                                endAdornment={
+                                    <InputAdornment position="start">
+                                        <AccountCircle />
+                                    </InputAdornment>
+                                }
+                            />
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <FormControl
+                            emailTextField
+                            fullWidth
+                            className={clsx(classes.margin, classes.textField)}
+                            variant="outlined"
+                        >
+                            <InputLabel htmlFor="standard-adornment-password">
+                                Current Password
+          </InputLabel>
+                            <Input
+                                id="current-password"
+                                type={values.showPassword ? "text" : "password"}
+                                onChange={handleChange("currentPassword")}
+                                value={values.currentPassword}
+                                endAdornment={
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={handleClickShowPassword}
+                                            onMouseDown={handleMouseDownPassword}
+                                        >
+                                            {values.showPassword ? <Visibility /> : <VisibilityOff />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                }
+                            />
+                        </FormControl>
+                    </Grid>
+                <Grid item xs={12} sm={6}>
                     <FormControl
                         emailTextField
                         fullWidth
@@ -116,10 +167,7 @@ function ChangePasswordForm() {
                         />
                     </FormControl>
                 </Grid>
-            );
-
-    const passwordConfirmation =  (
-        <Grid item xs={12} sm={6} >
+                <Grid item xs={12} sm={6} >
                     <FormControl
                         fullWidth
                         className={clsx(classes.margin, classes.textField)}
@@ -146,28 +194,29 @@ function ChangePasswordForm() {
                             }
                         />
                     </FormControl>
+                    </Grid>
                 </Grid>
-            );
-
-    return (
-        <div className='edit-profile-card' component="main">
-            <h5 className='text-muted'>Change your login details</h5>
-            <br />
-            <br />
-            <br />
-            <Grid container spacing={4}>
-                {emailTextField}
-                {passwordTextField}
-                {passwordConfirmation}
-            </Grid>
             <br />        
             <br />        
             <Button
-                variant="contained"
-                color="primary"
+                    variant="contained"
+                    color="primary"
+                    type="button"
+                    onClick={() =>
+                        dispatch({
+                            type: "changePassword",
+                            data: {
+                                email: values.email,
+                                password: values.password,
+                                confirmPassword: values.confirmPassword,
+                                currentPassword: values.currentPassword,
+                                user: state.user,
+                            }
+                        })}
             >
                 Save Changes
               </Button>
+            </form>
         </div>
     );
 }

@@ -3,7 +3,9 @@ import { HttpClientFactory } from './../../../httpclient'
 
 async function changePassword(state: any) {
 
-    const client = HttpClientFactory.getAccountClient();
+    console.log(state.user);
+
+    const client = HttpClientFactory.getAccountClient(state.user);
 
     const model = new ChangePasswordModel({
         email: state.email,
@@ -18,7 +20,7 @@ async function changePassword(state: any) {
             
     }
     catch (e)  {
-        state.error = (<ApiException>e).message;
+        state.error = (<ApiException>e).result;
 
         console.log(state.error);
 
@@ -33,11 +35,11 @@ export default function ChangePasswordReducer(state: any, action: any) {
 
     switch (action.type) {
         case "changePassword":
+            context.user = action.data.user;
             context.email = action.data.email;
             context.password = action.data.password;
             context.confirmPassword = action.data.confirmPassword;
             context.currentPassword = action.data.currentPassword;
-
             changePassword(context);
 
             return context;

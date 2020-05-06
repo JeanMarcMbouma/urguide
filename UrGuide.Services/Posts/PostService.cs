@@ -81,8 +81,7 @@ namespace UrGuide.Services.Posts
 
 
             Context.Posts.Add(post);
-
-            await Context.SaveChangesAsync(cancellationToken);
+            await Context.SaveChangesAsync(cancellationToken); 
             return Result.Of(Mapper.Map<PostModel>(post));
         }
 

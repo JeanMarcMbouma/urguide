@@ -32,6 +32,7 @@
         LastName,
         Country,
         City,
-        BirthDay
+        BirthDay,
+        Description
     }
 }
