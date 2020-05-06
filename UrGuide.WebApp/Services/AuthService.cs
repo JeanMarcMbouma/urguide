@@ -32,7 +32,7 @@ namespace UrGuide.WebApp.Services
         {
             var userManager = SignInManager.UserManager;
             var user = await userManager.FindByEmailAsync(model.Email);
-            if (!UserContext.IsAuthenticated|| user?.UserName != UserContext.UserName)
+            if (!UserContext.IsAuthenticated|| user?.Id != UserContext.UserId)
             {
                 if (user != null)
                     await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand

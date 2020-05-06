@@ -6,6 +6,7 @@ using UrGuide.WebApp.Entities;
 using Microsoft.AspNetCore.Authentication;
 using System.Threading.Tasks;
 using System.Net;
+using System.Security.Claims;
 
 namespace UrGuide.WebApp.Services
 {
@@ -21,7 +22,7 @@ namespace UrGuide.WebApp.Services
         public IHttpContextAccessor HttpContextAccessor { get; }
         public SignInManager<UrGuideUser> SignInManager { get; }
 
-        public string UserId => SignInManager.UserManager.GetUserId(HttpContextAccessor.HttpContext.User);
+        public string UserId => HttpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
         public string UserName => SignInManager.UserManager.GetUserName(HttpContextAccessor.HttpContext.User);
         public Task<string> Id_Token => HttpContextAccessor.HttpContext.GetTokenAsync("id_token");
         public Task<string> Access_Token => HttpContextAccessor.HttpContext.GetTokenAsync("access_token");
