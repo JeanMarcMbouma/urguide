@@ -32,8 +32,6 @@ Make yourself a Tourism guide at your ease and pace.
 
 - [ ]  A user could reject or accept a proposal
 
-- [ ]  A user can request an increase of the bid
-
 - [ ]  A user could see his/her tour / bid / agreement history
 
 - [ ]  All actions are audited
