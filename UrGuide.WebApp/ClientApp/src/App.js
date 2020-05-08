@@ -68,7 +68,7 @@ export default class App extends Component {
                     <Route path="/(user|feed|discover)">
                         <Layout>
                             <Route path="/user" component={Profile} />
-                            <AuthRoute path="/feed" component={Home} />
+                            <Route path="/feed" component={Home} />
                             <Route path="/discover" component={Discover} />
                         </Layout>
                     </Route>

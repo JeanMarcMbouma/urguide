@@ -84,19 +84,7 @@ render()  {
               </div>
               <div>{this.state.loading ? <PostsSkeleton /> : postsElement}
               </div>
-        <div className='suggestions' >
-          <div className="d-lg-flex p-0 mb-3 mt-3">
-            <div className='font-weight-bold title'>
-              Friends Suggestions
-                </div>
-          </div>
-                  <div>
-                      {this.state.loading ? <SuggestionsSkeleton /> : friendsElement}
-          </div>
-          <div className='font-weight-bold btn'>
-                      {this.state.loading ? <></> : <span>SEE MORE</span> }
-                  </div>
-        </div>
+
       </div>
       <div className='copyright-div'>
         <span>Terms - Conditions - Cookies</span>
