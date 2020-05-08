@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using UrGuide.Data.Entities.Attributes;
-using UrGuide.Data.Entities.Contracts;
-using UrGuide.Data.Entities.Shared;
 
 namespace UrGuide.Data.Entities.Posts
 {

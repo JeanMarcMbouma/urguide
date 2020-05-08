@@ -19,6 +19,7 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<Contracts.IUserService, UserService>();
             services.AddTransient<Contracts.ICatalogService, CatalogService>();
             services.AddTransient<Contracts.IPostService, PostService>();
+            services.AddTransient<Contracts.IBidService, PostService>();
 
             // Validation
 
@@ -43,6 +44,7 @@ namespace UrGuide.Services.Extensions
             // Post
             services.AddTransient<IValidator<Model.Posts.PostCreationModel>, PostCreationModelValidation>();
             services.AddTransient<IValidator<Model.Posts.PostUpdateModel>, PostUpdateModelValidation>();
+            services.AddTransient<IValidator<Model.Posts.BidModel>, BidModelValidation>();
 
             services.AddAutoMapper(typeof(UserMap));
 

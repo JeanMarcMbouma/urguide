@@ -1,8 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using UrGuide.Data.Entities.Posts;
 
 namespace UrGuide.Data.Configurations
@@ -23,6 +20,41 @@ namespace UrGuide.Data.Configurations
 
             builder.HasOne(x => x.User)
                 .WithMany().HasForeignKey("UserId");
+
+            builder.OwnsOne(x => x.Bid, b =>
+            {
+                b.ToTable("Post_Bids", Constants.Schema);
+                b.WithOwner().HasForeignKey("PostId");
+                b.HasKey(x => x.Id);
+                b.Property(x => x.Id).HasDefaultValueSql(Constants.GuidFn);
+                b.Property(x => x.NewValue).IsRequired().HasMaxLength(200);
+                b.Property(x => x.OldValue).HasMaxLength(200);
+                b.Property(x => x.LastUpdated).IsRequired();
+                b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_Post_Bids_Users");
+            });
+
+            builder.OwnsMany(x => x.BidHistories, b =>
+            {
+                b.ToTable("Post_Bids_History", Constants.Schema);
+                b.WithOwner().HasForeignKey("PostId");
+                b.HasKey(x => x.Id);
+                b.Property(x => x.Id).HasDefaultValueSql(Constants.GuidFn);
+                b.Property(x => x.Value).IsRequired().HasMaxLength(200);
+                b.Property(x => x.Created).IsRequired();
+                b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_Post_Bids_History_Users");
+            });
+
+            builder.OwnsMany(x => x.Feedback, b =>
+            {
+                b.ToTable("Post_Feedback", Constants.Schema);
+                b.WithOwner().HasForeignKey("PostId");
+                b.HasKey(x => x.Id);
+                b.Property(x => x.Id).HasDefaultValueSql(Constants.GuidFn);
+                b.Property(x => x.Text).IsRequired().HasMaxLength(2000);
+                b.Property(x => x.Created).IsRequired();
+                b.Property(x => x.Rating).IsRequired();
+                b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_Post_Feedback_Users");
+            });
 
             builder.OwnsMany(x => x.Attributes, a =>
             {

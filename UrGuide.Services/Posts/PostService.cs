@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,22 +20,51 @@ using UrGuide.Shared.Contracts;
 
 namespace UrGuide.Services.Posts
 {
-    class PostService : BaseService, IPostService
+    class PostService : BaseService, IPostService, IBidService
     {
         public PostService(UrGuideContext context,
                            IUserContext userContext,
                            ICatalogService catalogService,
                            IMapper mapper,
-                           IIPStackService iPStackService) : base(context, userContext)
+                           IIPStackService iPStackService,
+                           ILogger<PostService> logger) : base(context, userContext)
         {
             CatalogService = catalogService ?? throw new ArgumentNullException(nameof(catalogService));
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             IPStackService = iPStackService ?? throw new ArgumentNullException(nameof(iPStackService));
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public ICatalogService CatalogService { get; }
         public IMapper Mapper { get; }
         public IIPStackService IPStackService { get; }
+        public ILogger<PostService> Logger { get; }
+
+        public async Task<Result<PostModel>> AcceptBidAsync(string postId, CancellationToken cancellationToken)
+        {
+            if (UserContext.IsAuthenticated)
+                return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
+
+            cancellationToken.ThrowIfCancellationRequested();
+            var post = await Context.Posts
+                .Include(x => x.Bid)
+                .ThenInclude(x => x.Author)
+                .Include(x => x.BidHistories)
+                .ThenInclude(x => x.Author)
+                .Include(x => x.Attributes).FirstOrDefaultAsync(x => x.Id == postId, cancellationToken);
+            if (post == null)
+                return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
+            try
+            {
+                post.AcceptBid();
+                return Result.Of(Mapper.Map<PostModel>(post));
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Cannot accept the current bid. State corrupted: {0}", postId);
+                return Result.Of<PostModel>().WithErrors(e.Message);
+            }
+        }
 
         public async Task<Result<PostModel>> CreatePostAsync(PostCreationModel model, CancellationToken cancellationToken)
         {
@@ -108,6 +138,60 @@ namespace UrGuide.Services.Posts
                 .OrderByDescending(x => x.LastUpdated)
                 .Take(10).AsNoTracking().ToListAsync(cancellationToken);
             return Result.Of(Mapper.Map<IEnumerable<PostModel>>(posts));
+        }
+
+        public async Task<Result<PostModel>> OpenBidAsync(BidModel model, CancellationToken cancellationToken)
+        {
+            if (UserContext.IsAuthenticated)
+                return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
+
+            cancellationToken.ThrowIfCancellationRequested();
+            var post = await Context.Posts
+                .Include(x => x.Bid)
+                .ThenInclude(x => x.Author)
+                .Include(x => x.BidHistories)
+                .ThenInclude(x => x.Author)
+                .Include(x => x.Attributes).FirstOrDefaultAsync(x => x.Id == model.PostId, cancellationToken);
+            if (post == null)
+                return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
+            try
+            {
+                var user = await Context.Users.FindAsync(new { UserContext.UserId }, cancellationToken);
+
+                post.NewBid(model.Value, user);
+                return Result.Of(Mapper.Map<PostModel>(post));
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Cannot accept the current bid. State corrupted: {0}", model.PostId);
+                return Result.Of<PostModel>().WithErrors(e.Message);
+            }
+        }
+
+        public async Task<Result<PostModel>> RejectBidAsync(string postId, CancellationToken cancellationToken)
+        {
+            if (UserContext.IsAuthenticated)
+                return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
+
+            cancellationToken.ThrowIfCancellationRequested();
+            var post = await Context.Posts
+                .Include(x => x.Bid)
+                .ThenInclude(x => x.Author)
+                .Include(x => x.BidHistories)
+                .ThenInclude(x => x.Author)
+                .Include(x => x.Attributes).FirstOrDefaultAsync(x => x.Id == postId, cancellationToken);
+            if (post == null)
+                return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
+            try
+            {
+                post.RejectBid();
+                return Result.Of(Mapper.Map<PostModel>(post));
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Cannot reject the current bid. State corrupted: {0}", postId);
+                return Result.Of<PostModel>().WithErrors(e.Message);
+            }
         }
 
         public async Task<Result<bool>> UpdatePostAsync(PostUpdateModel model, CancellationToken cancellationToken)
