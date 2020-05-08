@@ -538,6 +538,14 @@ export class BidClient {
             result200 = PostModel.fromJS(resultData200);
             return result200;
             });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -577,6 +585,14 @@ export class BidClient {
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result200 = PostModel.fromJS(resultData200);
             return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
@@ -618,12 +634,64 @@ export class BidClient {
             result200 = PostModel.fromJS(resultData200);
             return result200;
             });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
         return Promise.resolve<PostModel>(<any>null);
+    }
+
+    /**
+     * @return Success
+     */
+    history(postId: string): Promise<BidHistoryModel[]> {
+        let url_ = this.baseUrl + "/bid/{postId}/history";
+        if (postId === undefined || postId === null)
+            throw new Error("The parameter 'postId' must be defined.");
+        url_ = url_.replace("{postId}", encodeURIComponent("" + postId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "POST",
+            headers: {
+                "Accept": "text/plain"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processHistory(_response);
+        });
+    }
+
+    protected processHistory(response: Response): Promise<BidHistoryModel[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(BidHistoryModel.fromJS(item));
+            }
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BidHistoryModel[]>(<any>null);
     }
 }
 
@@ -1051,6 +1119,42 @@ export class PostsClient {
     }
 
     /**
+     * @return Error
+     */
+    last100(): Promise<PostModel[]> {
+        let url_ = this.baseUrl + "/posts/last100";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processLast100(_response);
+        });
+    }
+
+    protected processLast100(response: Response): Promise<PostModel[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultDatadefault)) {
+                resultdefault = [] as any;
+                for (let item of resultDatadefault)
+                    resultdefault!.push(PostModel.fromJS(item));
+            }
+            return resultdefault;
+            });
+        }
+    }
+
+    /**
      * @param body (optional) 
      * @return Error
      */
@@ -1186,6 +1290,45 @@ export class PostsClient {
             });
         }
         return Promise.resolve<void>(<any>null);
+    }
+
+    /**
+     * @return Error
+     */
+    itineraries(postId: string): Promise<ItineraryModel[]> {
+        let url_ = this.baseUrl + "/posts/{postId}/itineraries";
+        if (postId === undefined || postId === null)
+            throw new Error("The parameter 'postId' must be defined.");
+        url_ = url_.replace("{postId}", encodeURIComponent("" + postId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processItineraries(_response);
+        });
+    }
+
+    protected processItineraries(response: Response): Promise<ItineraryModel[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultDatadefault)) {
+                resultdefault = [] as any;
+                for (let item of resultDatadefault)
+                    resultdefault!.push(ItineraryModel.fromJS(item));
+            }
+            return resultdefault;
+            });
+        }
     }
 }
 
@@ -2024,6 +2167,54 @@ export interface IPostModel {
     authorAvatar?: string | undefined;
 }
 
+export class BidHistoryModel implements IBidHistoryModel {
+    value?: string | undefined;
+    author?: string | undefined;
+    authorImage?: string | undefined;
+    created?: string | undefined;
+
+    constructor(data?: IBidHistoryModel) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.value = _data["value"];
+            this.author = _data["author"];
+            this.authorImage = _data["authorImage"];
+            this.created = _data["created"];
+        }
+    }
+
+    static fromJS(data: any): BidHistoryModel {
+        data = typeof data === 'object' ? data : {};
+        let result = new BidHistoryModel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["value"] = this.value;
+        data["author"] = this.author;
+        data["authorImage"] = this.authorImage;
+        data["created"] = this.created;
+        return data; 
+    }
+}
+
+export interface IBidHistoryModel {
+    value?: string | undefined;
+    author?: string | undefined;
+    authorImage?: string | undefined;
+    created?: string | undefined;
+}
+
 export class ImageCatalogModel implements IImageCatalogModel {
     catalogId?: string | undefined;
     name?: string | undefined;
@@ -2228,6 +2419,50 @@ export interface ICreateImageCatalogModel {
     files?: ImageFileCreateModel[] | undefined;
 }
 
+export class ItineraryModel implements IItineraryModel {
+    title?: string | undefined;
+    description?: string | undefined;
+    ordinal?: number;
+
+    constructor(data?: IItineraryModel) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.title = _data["title"];
+            this.description = _data["description"];
+            this.ordinal = _data["ordinal"];
+        }
+    }
+
+    static fromJS(data: any): ItineraryModel {
+        data = typeof data === 'object' ? data : {};
+        let result = new ItineraryModel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["title"] = this.title;
+        data["description"] = this.description;
+        data["ordinal"] = this.ordinal;
+        return data; 
+    }
+}
+
+export interface IItineraryModel {
+    title?: string | undefined;
+    description?: string | undefined;
+    ordinal?: number;
+}
+
 export class PostCreationModel implements IPostCreationModel {
     text?: string | undefined;
     description?: string | undefined;
@@ -2239,6 +2474,8 @@ export class PostCreationModel implements IPostCreationModel {
     categories?: string[] | undefined;
     images?: ImageFileCreateModel[] | undefined;
     video?: ImageFileCreateModel | undefined;
+    itineraries?: ItineraryModel[] | undefined;
+    bidOptIn?: boolean;
 
     constructor(data?: IPostCreationModel) {
         if (data) {
@@ -2269,6 +2506,12 @@ export class PostCreationModel implements IPostCreationModel {
                     this.images!.push(ImageFileCreateModel.fromJS(item));
             }
             this.video = _data["video"] ? ImageFileCreateModel.fromJS(_data["video"]) : <any>undefined;
+            if (Array.isArray(_data["itineraries"])) {
+                this.itineraries = [] as any;
+                for (let item of _data["itineraries"])
+                    this.itineraries!.push(ItineraryModel.fromJS(item));
+            }
+            this.bidOptIn = _data["bidOptIn"];
         }
     }
 
@@ -2299,6 +2542,12 @@ export class PostCreationModel implements IPostCreationModel {
                 data["images"].push(item.toJSON());
         }
         data["video"] = this.video ? this.video.toJSON() : <any>undefined;
+        if (Array.isArray(this.itineraries)) {
+            data["itineraries"] = [];
+            for (let item of this.itineraries)
+                data["itineraries"].push(item.toJSON());
+        }
+        data["bidOptIn"] = this.bidOptIn;
         return data; 
     }
 }
@@ -2314,6 +2563,8 @@ export interface IPostCreationModel {
     categories?: string[] | undefined;
     images?: ImageFileCreateModel[] | undefined;
     video?: ImageFileCreateModel | undefined;
+    itineraries?: ItineraryModel[] | undefined;
+    bidOptIn?: boolean;
 }
 
 export class PostUpdateModel implements IPostUpdateModel {

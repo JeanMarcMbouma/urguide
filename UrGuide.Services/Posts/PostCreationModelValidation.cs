@@ -13,4 +13,14 @@ namespace UrGuide.Services.Posts
             RuleFor(x => x.Images).Must(f => f.Count <= 3).WithMessage("You cannot upload more than three images");
         }
     }
+
+    class ItineraryModelValidation : AbstractValidator<ItineraryModel>
+    {
+        public ItineraryModelValidation()
+        {
+            RuleFor(x => x.Title).NotEmpty();
+            RuleFor(x => x.Description).NotEmpty();
+            RuleFor(x => x.Ordinal).GreaterThan(0);
+        }
+    }
 }

@@ -17,6 +17,7 @@ namespace UrGuide.Data.Entities.Posts
             Attributes = new HashSet<GenericAttribute>();
             BidHistories = new HashSet<BidHistory>();
             Feedback = new HashSet<Feedback>();
+            Itineraries = new HashSet<Itinerary>();
         }
 
 
@@ -29,6 +30,7 @@ namespace UrGuide.Data.Entities.Posts
         public virtual ICollection<GenericAttribute> Attributes { get; protected set; }
         public virtual ICollection<BidHistory> BidHistories { get; protected set; }
         public virtual ICollection<Feedback> Feedback { get; protected set; }
+        public virtual ICollection<Itinerary> Itineraries { get; protected set; }
         public virtual Bid Bid { get; set; }
         public virtual ImageCatalog Catalog { get; set; }
         public virtual User User { get; set; }
@@ -49,13 +51,15 @@ namespace UrGuide.Data.Entities.Posts
 
             if (Bid == null)
             {
+                var priceAttr = Attributes.First(f => f.Name == nameof(AttributeTypes.Amount));
                 Bid = new Bid
                 {
                     NewValue = value,
                     Author = user,
-                    LastUpdated = DateTime.UtcNow
+                    LastUpdated = DateTime.UtcNow,
+                    OldValue = priceAttr
                 };
-            } 
+            }
             else
             {
                 var newHistory = new BidHistory
@@ -74,7 +78,7 @@ namespace UrGuide.Data.Entities.Posts
 
         public void AcceptBid()
         {
-            if(Bid != null)
+            if (Bid != null)
             {
                 var history = new BidHistory
                 {
@@ -91,7 +95,8 @@ namespace UrGuide.Data.Entities.Posts
                 if (lastBid != null)
                 {
                     lastBid.Value = Bid.OldValue;
-                } else
+                }
+                else
                 {
                     Attributes.Add(new GenericAttribute
                     {
@@ -100,7 +105,7 @@ namespace UrGuide.Data.Entities.Posts
                     });
                 }
                 priceAttr.Value = Bid.NewValue;
-            } 
+            }
             else
             {
                 throw new InvalidOperationException("You cannot accept an empty bid");

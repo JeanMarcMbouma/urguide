@@ -44,6 +44,17 @@ namespace UrGuide.Data.Configurations
                 b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_Post_Bids_History_Users");
             });
 
+            builder.OwnsMany(x => x.Itineraries, b =>
+            {
+                b.ToTable("Post_Itineraries", Constants.Schema);
+                b.WithOwner().HasForeignKey("PostId");
+                b.HasKey(x => x.Id);
+                b.Property(x => x.Id).HasDefaultValueSql(Constants.GuidFn);
+                b.Property(x => x.Title).IsRequired().HasMaxLength(100);
+                b.Property(x => x.Description).IsRequired().HasMaxLength(500);
+                b.Property(x => x.Ordinal).IsRequired().HasColumnType("tinyint");
+            });
+
             builder.OwnsMany(x => x.Feedback, b =>
             {
                 b.ToTable("Post_Feedback", Constants.Schema);

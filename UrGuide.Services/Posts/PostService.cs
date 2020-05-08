@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,18 +28,21 @@ namespace UrGuide.Services.Posts
                            ICatalogService catalogService,
                            IMapper mapper,
                            IIPStackService iPStackService,
-                           ILogger<PostService> logger) : base(context, userContext)
+                           ILogger<PostService> logger,
+                           IEmailService emailService) : base(context, userContext)
         {
             CatalogService = catalogService ?? throw new ArgumentNullException(nameof(catalogService));
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             IPStackService = iPStackService ?? throw new ArgumentNullException(nameof(iPStackService));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            EmailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
         }
 
         public ICatalogService CatalogService { get; }
         public IMapper Mapper { get; }
         public IIPStackService IPStackService { get; }
         public ILogger<PostService> Logger { get; }
+        public IEmailService EmailService { get; }
 
         public async Task<Result<PostModel>> AcceptBidAsync(string postId, CancellationToken cancellationToken)
         {
@@ -57,6 +61,25 @@ namespace UrGuide.Services.Posts
             try
             {
                 post.AcceptBid();
+                var author = post.Bid.Author.Attributes;
+                var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
+                var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = @$"
+Congratulation, {authorFirstName}
+Your bid was accepted:
+Post: <strong>{post.Text}</strong>
+{post.Description}
+...
+
+Old price: <em>{post.Bid.OldValue}</em>
+---------------------------------------
+New price: <em>{post.Bid.NewValue}</em>",
+                    Subject = "Your bid was accepted",
+                    To = authorEmail,
+                    ToName = authorFirstName
+                });
                 return Result.Of(Mapper.Map<PostModel>(post));
             }
             catch (Exception e)
@@ -108,7 +131,21 @@ namespace UrGuide.Services.Posts
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Views), Value = Constants.Zero });
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.PublicationDate), Value = DateTimeHelper.GetDateTime(post.DateOfPublication) });
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Status), Value = Constants.Active });
+            
+            if(model.BidOptIn)
+            {
+                post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.BidOptIn), Value = Constants.Yes });
+            }
 
+            foreach (var it in model.Itineraries)
+            {
+                post.Itineraries.Add(new Itinerary
+                {
+                    Description = it.Description,
+                    Ordinal = it.Ordinal,
+                    Title = it.Title
+                });
+            }
 
             Context.Posts.Add(post);
             await Context.SaveChangesAsync(cancellationToken); 
@@ -126,19 +163,40 @@ namespace UrGuide.Services.Posts
             return Result.Of(true);
         }
 
-        public async Task<Result<IEnumerable<PostModel>>> GetLast10PostsAsync(CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<ItineraryModel>>> GetItinerariesAsync(string postId, CancellationToken cancellationToken)
+        {
+            var post = await Context.Posts.Include(x => x.Itineraries)
+                .FirstOrDefaultAsync(p => p.Id == postId, cancellationToken);
+            if (post == null)
+                return Result.Of<IEnumerable<ItineraryModel>>().WithErrors(ErrorMessages.NotFoundEntityForKey);
+            return Result.Of(Mapper.Map<IEnumerable<ItineraryModel>>(post.Itineraries));
+        }
+
+        public Task<Result<IEnumerable<PostModel>>> GetLast10PostsAsync(CancellationToken cancellationToken)
+        {
+            return GetPagedData(0, 10, cancellationToken);
+        }
+
+        private async Task<Result<IEnumerable<PostModel>>> GetPagedData(int offset, int size, CancellationToken cancellationToken)
         {
             var geo = await IPStackService.GetLocationAsync(UserContext);
 
             var posts = await Context.Posts.Include(x => x.Attributes)
-                .Include(x => x.Catalog)
-                .ThenInclude(x => x.Images)
-                .ThenInclude(x => x.Attributes)
-                .Where(x => x.Location == null || geo == null || x.Location.Distance(geo) <= Constants.Distance)
-                .OrderByDescending(x => x.LastUpdated)
-                .Take(10).AsNoTracking().ToListAsync(cancellationToken);
+                            .Include(x => x.Catalog)
+                            .ThenInclude(x => x.Images)
+                            .ThenInclude(x => x.Attributes)
+                            .Where(x => x.Location == null || geo == null || x.Location.Distance(geo) <= Constants.Distance)
+                            .OrderByDescending(x => x.LastUpdated)
+                            .Skip(offset)
+                            .Take(size).AsNoTracking().ToListAsync(cancellationToken);
             return Result.Of(Mapper.Map<IEnumerable<PostModel>>(posts));
         }
+
+        public Task<Result<IEnumerable<PostModel>>> GetLast100PostsAsync(CancellationToken cancellationToken)
+        {
+            return GetPagedData(0, 100, cancellationToken);
+        }
+
 
         public async Task<Result<PostModel>> OpenBidAsync(BidModel model, CancellationToken cancellationToken)
         {
@@ -154,11 +212,38 @@ namespace UrGuide.Services.Posts
                 .Include(x => x.Attributes).FirstOrDefaultAsync(x => x.Id == model.PostId, cancellationToken);
             if (post == null)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
+
+            if(!post.Attributes.Any(a => a.Name == nameof(AttributeTypes.BidOptIn)))
+            {
+                return Result.Of<PostModel>().WithErrors("This post is not biddable.");
+            }
+
             try
             {
                 var user = await Context.Users.FindAsync(new { UserContext.UserId }, cancellationToken);
 
                 post.NewBid(model.Value, user);
+                var myUser = await Context.Users.FirstAsync(x => x.Id == UserContext.UserId, cancellationToken);
+                var author = myUser.Attributes;
+                var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
+                var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = @$"
+Hi, {authorFirstName}
+You received a new proposal:
+Post: <strong>{post.Text}</strong>
+{post.Description}
+...
+
+Old price: <em>{post.Bid.OldValue}</em>
+---------------------------------------
+New price: <em>{post.Bid.NewValue}</em>",
+                    Subject = "New proposal",
+                    To = authorEmail,
+                    ToName = authorFirstName
+                });
+
                 return Result.Of(Mapper.Map<PostModel>(post));
             }
             catch (Exception e)
@@ -184,7 +269,25 @@ namespace UrGuide.Services.Posts
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
             try
             {
+                var author = post.Bid.Author.Attributes;
+                var value = post.Bid.NewValue;
                 post.RejectBid();
+                var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
+                var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = @$"
+Hi, {authorFirstName}
+Your bid was rejected by the owner:
+Post: <strong>{post.Text}</strong>
+{post.Description}
+...
+
+Your bid: <em>{value}</em>",
+                    Subject = "Your bid was rejected",
+                    To = authorEmail,
+                    ToName = authorFirstName
+                });
                 return Result.Of(Mapper.Map<PostModel>(post));
             }
             catch (Exception e)
@@ -210,6 +313,16 @@ namespace UrGuide.Services.Posts
         public Task<Result<bool>> UpdatePostAttributesAsync(string id, SetAttribute[] attributes, CancellationToken cancellationToken)
         {
             return SetAttributesRestrictedToUserAsync<Post>(id, attributes, cancellationToken);
+        }
+
+        public async Task<Result<IEnumerable<BidHistoryModel>>> GetBidHistoryAsync(string postId, CancellationToken cancellationToken)
+        {
+            var post = await Context.Posts.Include(p => p.BidHistories).Where(x => x.Id == postId)
+               .FirstOrDefaultAsync(cancellationToken);
+            if (post == null)
+                return Result.Of<IEnumerable<BidHistoryModel>>().WithErrors(ErrorMessages.NotFoundEntityForKey);
+
+            return Result.Of(Mapper.Map<IEnumerable<BidHistoryModel>>(post.BidHistories.OrderByDescending(x => x.Created)));
         }
     }
 }

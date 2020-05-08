@@ -34,6 +34,15 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
+        [HttpGet("last100")]
+        [AllowAnonymous]
+        [ProducesDefaultResponseType(typeof(IEnumerable<PostModel>))]
+        public async Task<IActionResult> Last100(CancellationToken cancellationToken)
+        {
+            var result = await _postService.GetLast100PostsAsync(cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
+
         [HttpPost("create")]
         [ProducesDefaultResponseType(typeof(PostModel))]
         public async Task<IActionResult> Create([FromBody]PostCreationModel model, CancellationToken cancellationToken)
@@ -88,6 +97,15 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> DeletePost(string postId, CancellationToken cancellationToken)
         {
             var result = await _postService.DeletePostAsync(postId, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
+
+        [HttpGet("{postId}/itineraries")]
+        [ProducesDefaultResponseType(typeof(IEnumerable<ItineraryModel>))]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetItineraries(string postId, CancellationToken cancellationToken)
+        {
+            var result = await _postService.GetItinerariesAsync(postId, cancellationToken);
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
     }

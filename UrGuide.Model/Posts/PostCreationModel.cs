@@ -10,6 +10,7 @@ namespace UrGuide.Model.Posts
         {
             Images = new HashSet<ImageFileCreateModel>();
             Categories = new HashSet<string>();
+            Itineraries = new HashSet<ItineraryModel>();
         }
 
         public string Text { get; set; }
@@ -22,5 +23,7 @@ namespace UrGuide.Model.Posts
         public ICollection<string> Categories { get; set; }
         public ICollection<ImageFileCreateModel> Images { get; set; }
         public ImageFileCreateModel Video { get; set; }
+        public ICollection<ItineraryModel> Itineraries { get; set; }
+        public bool BidOptIn { get; set; }
     }
 }

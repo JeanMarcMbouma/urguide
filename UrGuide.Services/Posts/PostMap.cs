@@ -40,6 +40,15 @@ namespace UrGuide.Services.Posts
                 .ForMember(x => x.AuthorId, x => x.MapFrom(p => p.User != null ? p.User.Id : Constants.EmptyGuid))
                 .ForMember(x => x.Author, x => x.MapFrom(p => p.User != null ? p.User.FullName : Constants.Unknown))
                 .ForMember(x => x.AuthorAvatar, x => x.MapFrom(p => p.User != null && p.User.ProfileImage != null ? p.User.ProfileImage.ImageBase64 : Constants.UnknownImage));
+
+            CreateMap<Itinerary, ItineraryModel>()
+                .ReverseMap();
+
+            CreateMap<BidHistory, BidHistoryModel>()
+                .ForMember(x => x.Value, x => x.MapFrom(y => y.Value))
+                .ForMember(x => x.Created, x => x.MapFrom(y => y.Created.ToString("dd-MMM-yyyy")))
+                .ForMember(x => x.Author, x => x.MapFrom(y => y.Author.FullName))
+                .ForMember(x => x.AuthorImage, x => x.MapFrom(y => y.Author.ProfileImage));
         }
     }
 }

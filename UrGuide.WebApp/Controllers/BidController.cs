@@ -52,5 +52,14 @@ namespace UrGuide.WebApp.Controllers
             var result = await BidService.RejectBidAsync(postId, cancellationToken);
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
+
+        [HttpPost("{postId}/history")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<BidHistoryModel>))]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetHistory(string postId, CancellationToken cancellationToken)
+        {
+            var result = await BidService.GetBidHistoryAsync(postId, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
     }
 }

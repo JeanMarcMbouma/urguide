@@ -11,8 +11,10 @@ namespace UrGuide.Services.Contracts
     {
         Task<Result<PostModel>> CreatePostAsync(PostCreationModel model, CancellationToken cancellationToken);
         Task<Result<IEnumerable<PostModel>>> GetLast10PostsAsync(CancellationToken cancellationToken);
+        Task<Result<IEnumerable<PostModel>>> GetLast100PostsAsync(CancellationToken cancellationToken);
         Task<Result<bool>> UpdatePostAsync(PostUpdateModel model, CancellationToken cancellationToken);
         Task<Result<bool>> DeletePostAsync(string id, CancellationToken cancellationToken);
         Task<Result<bool>> UpdatePostAttributesAsync(string id, SetAttribute[] attributes, CancellationToken cancellationToken);
+        Task<Result<IEnumerable<ItineraryModel>>> GetItinerariesAsync(string postId, CancellationToken cancellationToken);
     }
 }
