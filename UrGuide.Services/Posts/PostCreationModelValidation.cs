@@ -10,7 +10,7 @@ namespace UrGuide.Services.Posts
             RuleFor(x => x.Categories).NotEmpty();
             RuleFor(x => x.Text).NotEmpty();
             RuleFor(x => x.Description).NotEmpty();
-            RuleFor(x => x.Images).Must(f => f.Count <= 3).WithMessage("You cannot upload more than three images");
+            RuleFor(x => x.Images).Must(f => f.Count <= Constants.MaxImageCountPerPost).WithMessage($"You cannot upload more than {Constants.MaxImageCountPerPost} images");
         }
     }
 
