@@ -31,7 +31,8 @@ namespace UrGuide.Services.Users
                 .ForMember(u => u.IsPremium, x => x.MapFrom(f =>
                     f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Subscription)
                     && a.Value == nameof(Subscriptions.Premium))));
-         
+
+
         }
     }
 }

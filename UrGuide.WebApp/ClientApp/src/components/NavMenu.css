@@ -29,9 +29,11 @@ button:focus {
 
 .content {
     /*background-color:white;*/
+    height: auto;
+    bottom: 0;
     background-color: #f7f8fa;
     padding-top: 80px;
-    z-index:-1;
+    z-index: -1;
 }
 
 .navigation-bar {
