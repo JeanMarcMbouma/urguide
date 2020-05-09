@@ -42,14 +42,13 @@ Make yourself a Tourism guide at your ease and pace.
 
 - [ ]  A user can leave a positive/negative feedback about the tour via **5 Stars rating** and user comments
 
-- [ ] A user could either agree to pay the tour guide via the platform or at an agreed location/time
-
 - [ ]  A user could join a tour
-
-- [ ]  A bid is as per participants
 
 
 ## NICE TO HAVE
+
+
+- [ ] A user could either agree to pay the tour guide via the platform or at an agreed location/time
 
 - [ ]  A user can request a refund after an agreed period (see policy)
 
