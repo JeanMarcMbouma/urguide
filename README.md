@@ -23,14 +23,14 @@ Make yourself a Tourism guide at your ease and pace.
     - Short description
     - Telephone number
     - Country
+    
+- [x]  A user could bid for a tour
+
+- [x]  A user could change the bid (increase or decrease)
+
+- [x]  A user could reject or accept a proposal
 
 # TODO
-
-- [ ]  A user could bid for a tour
-
-- [ ]  A user could change the bid (increase or decrease)
-
-- [ ]  A user could reject or accept a proposal
 
 - [ ]  A user could see his/her tour / bid / agreement history
 
