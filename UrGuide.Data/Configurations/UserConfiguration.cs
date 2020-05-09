@@ -30,6 +30,18 @@ namespace UrGuide.Data.Configurations
                 a.Property(x => x.Value).IsRequired();
                 a.HasKey("Id");
             });
+
+            builder.OwnsMany(x => x.Feedback, b =>
+            {
+                b.ToTable("User_Feedback", Constants.Schema);
+                b.WithOwner().HasForeignKey("UserId");
+                b.HasKey(x => x.Id).HasName("PK_User_Feedback");
+                b.Property(x => x.Id).HasDefaultValueSql(Constants.GuidFn);
+                b.Property(x => x.Text).IsRequired().HasMaxLength(2000);
+                b.Property(x => x.Created).IsRequired();
+                b.Property(x => x.Rating).IsRequired();
+                b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_User_Feedback_Users");
+            });
         }
     }
 }

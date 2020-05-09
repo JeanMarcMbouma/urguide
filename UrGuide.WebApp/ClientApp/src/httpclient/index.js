@@ -18,6 +18,7 @@ var Http = /** @class */ (function () {
         this.user = user;
     }
     Http.prototype.fetch = function (url, init) {
+        console.log(this.user);
         if (this.user && this.user.access_token) {
             var headers = init.headers;
             var options = __assign(__assign({}, init), { headers: __assign(__assign({}, headers), { Authorization: this.user.token_type + " " + this.user.access_token }) });
@@ -39,8 +40,8 @@ var HttpClientFactory = /** @class */ (function () {
     HttpClientFactory.getAccountClient = function (user) {
         return new api_1.AccountClient("", new Http(user));
     };
-    HttpClientFactory.getClient = function () {
-        return new api_1.Client("", new Http());
+    HttpClientFactory.getClient = function (user) {
+        return new api_1.Client("", new Http(user));
     };
     return HttpClientFactory;
 }());

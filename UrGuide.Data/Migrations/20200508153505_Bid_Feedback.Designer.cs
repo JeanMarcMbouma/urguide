@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using UrGuide.Data;
@@ -10,9 +11,10 @@ using UrGuide.Data;
 namespace UrGuide.Data.Migrations
 {
     [DbContext(typeof(UrGuideContext))]
-    partial class UrGuideContextModelSnapshot : ModelSnapshot
+    [Migration("20200508153505_Bid_Feedback")]
+    partial class Bid_Feedback
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -390,40 +392,6 @@ namespace UrGuide.Data.Migrations
                             b1.HasOne("UrGuide.Data.Entities.Users.User", "Author")
                                 .WithMany()
                                 .HasForeignKey("FK_Post_Bids_History_Users");
-
-                            b1.WithOwner()
-                                .HasForeignKey("PostId");
-                        });
-
-                    b.OwnsMany("UrGuide.Data.Entities.Posts.Itinerary", "Itineraries", b1 =>
-                        {
-                            b1.Property<string>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("nvarchar(450)")
-                                .HasDefaultValueSql("NEWID()");
-
-                            b1.Property<string>("Description")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(500)")
-                                .HasMaxLength(500);
-
-                            b1.Property<byte>("Ordinal")
-                                .HasColumnType("tinyint");
-
-                            b1.Property<string>("PostId")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(450)");
-
-                            b1.Property<string>("Title")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(100)")
-                                .HasMaxLength(100);
-
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("PostId");
-
-                            b1.ToTable("Post_Itineraries","ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("PostId");

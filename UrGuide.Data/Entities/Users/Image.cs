@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using UrGuide.Data.Entities.Attributes;
-
-namespace UrGuide.Data.Entities.Users
+﻿namespace UrGuide.Data.Entities.Users
 {
     public class Image
     {

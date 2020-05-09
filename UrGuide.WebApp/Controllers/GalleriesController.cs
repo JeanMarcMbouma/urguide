@@ -40,10 +40,9 @@ namespace UrGuide.WebApp.Controllers
         }
 
         // GET: api/Gallery
-        [HttpGet("all")]
+        [HttpGet("nearme")]
         [AllowAnonymous]
         [ProducesDefaultResponseType(typeof(IEnumerable<ImageCatalogModel>))]
-
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
             var result = await CatalogService.GetCatalogsAsync(cancellationToken);

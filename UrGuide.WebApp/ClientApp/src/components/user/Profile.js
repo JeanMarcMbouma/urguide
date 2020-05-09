@@ -23,6 +23,7 @@ import {
 } from "react-router-dom";
 import { CreateNewGallery } from "./CreateNewGallery";
 import UserContext from "./../UserContext";
+import AuthRoute from "../api-authorization/AuthRoute";
 
 
 function ProfileLayout() {
@@ -46,12 +47,12 @@ function ProfileLayout() {
                 <Route path={`${path}/galleries`}>
                     <Galleries />
                 </Route>
-                <Route path={`${path}/edit/profile`}>
+                <AuthRoute path={`${path}/edit/profile`}>
                     <EditProfile />
-                </Route>
-                <Route path={`${path}/edit/password`}>
+                </AuthRoute>
+                <AuthRoute path={`${path}/edit/password`}>
                     <ChangePassword />
-                </Route>
+                </AuthRoute>
                 <Route path={`${path}/gallery/new`}>
                     <CreateNewGallery />
                 </Route>

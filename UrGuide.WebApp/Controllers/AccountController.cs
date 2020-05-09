@@ -91,14 +91,14 @@ namespace UrGuide.WebApp.Controllers
 
         [Authorize]
         [HttpGet("/getdetails")]
-        [ProducesDefaultResponseType(typeof(IEnumerable<User>))]
-        public async Task<IActionResult> GetDetails()
+        [ProducesDefaultResponseType(typeof(User))]
+        public async Task<IActionResult> GetDetails(CancellationToken cancellationToken)
         {
-            var result = await UserService.GetDetailsAsync();
+            var result = await UserService.GetDetailsAsync(cancellationToken);
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
-        [AllowAnonymous]
+        [Authorize]
         [HttpPost("/updateguide")]
         public async Task<IActionResult> UpdateGuide([FromBody]UpdateGuideModel model, CancellationToken cancellationToken)
         {

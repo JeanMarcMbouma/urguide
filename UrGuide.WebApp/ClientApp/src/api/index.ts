@@ -147,6 +147,92 @@ export class Client {
     }
 
     /**
+     * @return Error
+     */
+    getdetails(): Promise<User> {
+        let url_ = this.baseUrl + "/getdetails";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetdetails(_response);
+        });
+    }
+
+    protected processGetdetails(response: Response): Promise<User> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = User.fromJS(resultDatadefault);
+            return resultdefault;
+            });
+        }
+    }
+
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    updateguide(body: UpdateGuideModel | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/updateguide";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUpdateguide(_response);
+        });
+    }
+
+    protected processUpdateguide(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(<any>null);
+    }
+
+    /**
      * @return Success
      */
     _configuration(clientId: string): Promise<void> {
@@ -405,6 +491,210 @@ export class AccountClient {
     }
 }
 
+export class BidClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl ? baseUrl : "";
+    }
+
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    newbid(postId: string, body: BidModel | undefined): Promise<PostModel> {
+        let url_ = this.baseUrl + "/bid/{postId}/newbid";
+        if (postId === undefined || postId === null)
+            throw new Error("The parameter 'postId' must be defined.");
+        url_ = url_.replace("{postId}", encodeURIComponent("" + postId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processNewbid(_response);
+        });
+    }
+
+    protected processNewbid(response: Response): Promise<PostModel> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PostModel.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PostModel>(<any>null);
+    }
+
+    /**
+     * @return Success
+     */
+    accept(postId: string): Promise<PostModel> {
+        let url_ = this.baseUrl + "/bid/{postId}/accept";
+        if (postId === undefined || postId === null)
+            throw new Error("The parameter 'postId' must be defined.");
+        url_ = url_.replace("{postId}", encodeURIComponent("" + postId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "POST",
+            headers: {
+                "Accept": "text/plain"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processAccept(_response);
+        });
+    }
+
+    protected processAccept(response: Response): Promise<PostModel> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PostModel.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PostModel>(<any>null);
+    }
+
+    /**
+     * @return Success
+     */
+    reject(postId: string): Promise<PostModel> {
+        let url_ = this.baseUrl + "/bid/{postId}/reject";
+        if (postId === undefined || postId === null)
+            throw new Error("The parameter 'postId' must be defined.");
+        url_ = url_.replace("{postId}", encodeURIComponent("" + postId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "POST",
+            headers: {
+                "Accept": "text/plain"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processReject(_response);
+        });
+    }
+
+    protected processReject(response: Response): Promise<PostModel> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PostModel.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PostModel>(<any>null);
+    }
+
+    /**
+     * @return Success
+     */
+    history(postId: string): Promise<BidHistoryModel[]> {
+        let url_ = this.baseUrl + "/bid/{postId}/history";
+        if (postId === undefined || postId === null)
+            throw new Error("The parameter 'postId' must be defined.");
+        url_ = url_.replace("{postId}", encodeURIComponent("" + postId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "POST",
+            headers: {
+                "Accept": "text/plain"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processHistory(_response);
+        });
+    }
+
+    protected processHistory(response: Response): Promise<BidHistoryModel[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(BidHistoryModel.fromJS(item));
+            }
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BidHistoryModel[]>(<any>null);
+    }
+}
+
 export class CatalogsClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -440,15 +730,43 @@ export class CatalogsClient {
     protected processAll(response: Response): Promise<ImageCatalogModel[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 401) {
+        {
             return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultDatadefault)) {
+                resultdefault = [] as any;
+                for (let item of resultDatadefault)
+                    resultdefault!.push(ImageCatalogModel.fromJS(item));
+            }
+            return resultdefault;
             });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else {
+        }
+    }
+
+    /**
+     * @return Error
+     */
+    nearme(): Promise<ImageCatalogModel[]> {
+        let url_ = this.baseUrl + "/catalogs/nearme";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processNearme(_response);
+        });
+    }
+
+    protected processNearme(response: Response): Promise<ImageCatalogModel[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        {
             return response.text().then((_responseText) => {
             let resultdefault: any = null;
             let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
@@ -487,15 +805,7 @@ export class CatalogsClient {
     protected processRetrieve(response: Response): Promise<ImageCatalogModel> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 401) {
-            return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
-            });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else {
+        {
             return response.text().then((_responseText) => {
             let resultdefault: any = null;
             let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
@@ -794,15 +1104,43 @@ export class PostsClient {
     protected processLast10(response: Response): Promise<PostModel[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 401) {
+        {
             return response.text().then((_responseText) => {
-            return throwException("Unauthorized", status, _responseText, _headers);
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultDatadefault)) {
+                resultdefault = [] as any;
+                for (let item of resultDatadefault)
+                    resultdefault!.push(PostModel.fromJS(item));
+            }
+            return resultdefault;
             });
-        } else if (status === 403) {
-            return response.text().then((_responseText) => {
-            return throwException("Forbidden", status, _responseText, _headers);
-            });
-        } else {
+        }
+    }
+
+    /**
+     * @return Error
+     */
+    last100(): Promise<PostModel[]> {
+        let url_ = this.baseUrl + "/posts/last100";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processLast100(_response);
+        });
+    }
+
+    protected processLast100(response: Response): Promise<PostModel[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        {
             return response.text().then((_responseText) => {
             let resultdefault: any = null;
             let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
@@ -952,6 +1290,45 @@ export class PostsClient {
             });
         }
         return Promise.resolve<void>(<any>null);
+    }
+
+    /**
+     * @return Error
+     */
+    itineraries(postId: string): Promise<ItineraryModel[]> {
+        let url_ = this.baseUrl + "/posts/{postId}/itineraries";
+        if (postId === undefined || postId === null)
+            throw new Error("The parameter 'postId' must be defined.");
+        url_ = url_.replace("{postId}", encodeURIComponent("" + postId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processItineraries(_response);
+        });
+    }
+
+    protected processItineraries(response: Response): Promise<ItineraryModel[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultDatadefault)) {
+                resultdefault = [] as any;
+                for (let item of resultDatadefault)
+                    resultdefault!.push(ItineraryModel.fromJS(item));
+            }
+            return resultdefault;
+            });
+        }
     }
 }
 
@@ -1222,8 +1599,8 @@ export class CreateGuideModel implements ICreateGuideModel {
     gender?: string | undefined;
     phone?: string | undefined;
     birthDay?: string | undefined;
-    profileImage?: string | undefined;
     description?: string | undefined;
+    profileImage?: string | undefined;
 
     constructor(data?: ICreateGuideModel) {
         if (data) {
@@ -1247,8 +1624,8 @@ export class CreateGuideModel implements ICreateGuideModel {
             this.gender = _data["gender"];
             this.phone = _data["phone"];
             this.birthDay = _data["birthDay"];
-            this.profileImage = _data["profileImage"];
             this.description = _data["description"];
+            this.profileImage = _data["profileImage"];
         }
     }
 
@@ -1272,8 +1649,8 @@ export class CreateGuideModel implements ICreateGuideModel {
         data["gender"] = this.gender;
         data["phone"] = this.phone;
         data["birthDay"] = this.birthDay;
-        data["profileImage"] = this.profileImage;
         data["description"] = this.description;
+        data["profileImage"] = this.profileImage;
         return data; 
     }
 }
@@ -1290,6 +1667,7 @@ export interface ICreateGuideModel {
     gender?: string | undefined;
     phone?: string | undefined;
     birthDay?: string | undefined;
+    description?: string | undefined;
     profileImage?: string | undefined;
 }
 
@@ -1389,6 +1767,230 @@ export interface IChangePasswordModel {
     currentPassword?: string | undefined;
 }
 
+export class User implements IUser {
+    profileImage?: string | undefined;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    birthDay?: string | undefined;
+    city?: string | undefined;
+    country?: string | undefined;
+    address?: string | undefined;
+    userName?: string | undefined;
+    fullName?: string | undefined;
+    phoneNumber?: string | undefined;
+    twitter?: string | undefined;
+    linkedIn?: string | undefined;
+    faceBook?: string | undefined;
+    google?: string | undefined;
+    rating?: string | undefined;
+    instagram?: string | undefined;
+    description?: string | undefined;
+    isGuide?: boolean;
+    isPremium?: boolean;
+    id?: string | undefined;
+
+    constructor(data?: IUser) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.profileImage = _data["profileImage"];
+            this.firstName = _data["firstName"];
+            this.lastName = _data["lastName"];
+            this.birthDay = _data["birthDay"];
+            this.city = _data["city"];
+            this.country = _data["country"];
+            this.address = _data["address"];
+            this.userName = _data["userName"];
+            this.fullName = _data["fullName"];
+            this.phoneNumber = _data["phoneNumber"];
+            this.twitter = _data["twitter"];
+            this.linkedIn = _data["linkedIn"];
+            this.faceBook = _data["faceBook"];
+            this.google = _data["google"];
+            this.rating = _data["rating"];
+            this.instagram = _data["instagram"];
+            this.description = _data["description"];
+            this.isGuide = _data["isGuide"];
+            this.isPremium = _data["isPremium"];
+            this.id = _data["id"];
+        }
+    }
+
+    static fromJS(data: any): User {
+        data = typeof data === 'object' ? data : {};
+        let result = new User();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["profileImage"] = this.profileImage;
+        data["firstName"] = this.firstName;
+        data["lastName"] = this.lastName;
+        data["birthDay"] = this.birthDay;
+        data["city"] = this.city;
+        data["country"] = this.country;
+        data["address"] = this.address;
+        data["userName"] = this.userName;
+        data["fullName"] = this.fullName;
+        data["phoneNumber"] = this.phoneNumber;
+        data["twitter"] = this.twitter;
+        data["linkedIn"] = this.linkedIn;
+        data["faceBook"] = this.faceBook;
+        data["google"] = this.google;
+        data["rating"] = this.rating;
+        data["instagram"] = this.instagram;
+        data["description"] = this.description;
+        data["isGuide"] = this.isGuide;
+        data["isPremium"] = this.isPremium;
+        data["id"] = this.id;
+        return data; 
+    }
+}
+
+export interface IUser {
+    profileImage?: string | undefined;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    birthDay?: string | undefined;
+    city?: string | undefined;
+    country?: string | undefined;
+    address?: string | undefined;
+    userName?: string | undefined;
+    fullName?: string | undefined;
+    phoneNumber?: string | undefined;
+    twitter?: string | undefined;
+    linkedIn?: string | undefined;
+    faceBook?: string | undefined;
+    google?: string | undefined;
+    rating?: string | undefined;
+    instagram?: string | undefined;
+    description?: string | undefined;
+    isGuide?: boolean;
+    isPremium?: boolean;
+    id?: string | undefined;
+}
+
+export class UpdateGuideModel implements IUpdateGuideModel {
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    address?: string | undefined;
+    country?: string | undefined;
+    city?: string | undefined;
+    gender?: string | undefined;
+    phone?: string | undefined;
+    birthDay?: string | undefined;
+    description?: string | undefined;
+    profileImage?: string | undefined;
+
+    constructor(data?: IUpdateGuideModel) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.firstName = _data["firstName"];
+            this.lastName = _data["lastName"];
+            this.address = _data["address"];
+            this.country = _data["country"];
+            this.city = _data["city"];
+            this.gender = _data["gender"];
+            this.phone = _data["phone"];
+            this.birthDay = _data["birthDay"];
+            this.description = _data["description"];
+            this.profileImage = _data["profileImage"];
+        }
+    }
+
+    static fromJS(data: any): UpdateGuideModel {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateGuideModel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["firstName"] = this.firstName;
+        data["lastName"] = this.lastName;
+        data["address"] = this.address;
+        data["country"] = this.country;
+        data["city"] = this.city;
+        data["gender"] = this.gender;
+        data["phone"] = this.phone;
+        data["birthDay"] = this.birthDay;
+        data["description"] = this.description;
+        data["profileImage"] = this.profileImage;
+        return data; 
+    }
+}
+
+export interface IUpdateGuideModel {
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    address?: string | undefined;
+    country?: string | undefined;
+    city?: string | undefined;
+    gender?: string | undefined;
+    phone?: string | undefined;
+    birthDay?: string | undefined;
+    description?: string | undefined;
+    profileImage?: string | undefined;
+}
+
+export class BidModel implements IBidModel {
+    postId?: string | undefined;
+    value?: string | undefined;
+
+    constructor(data?: IBidModel) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.postId = _data["postId"];
+            this.value = _data["value"];
+        }
+    }
+
+    static fromJS(data: any): BidModel {
+        data = typeof data === 'object' ? data : {};
+        let result = new BidModel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["postId"] = this.postId;
+        data["value"] = this.value;
+        return data; 
+    }
+}
+
+export interface IBidModel {
+    postId?: string | undefined;
+    value?: string | undefined;
+}
+
 export class ImageFileModel implements IImageFileModel {
     imageBase64?: string | undefined;
     name?: string | undefined;
@@ -1431,6 +2033,186 @@ export interface IImageFileModel {
     imageBase64?: string | undefined;
     name?: string | undefined;
     id?: string | undefined;
+}
+
+export class PostModel implements IPostModel {
+    id?: string | undefined;
+    text?: string | undefined;
+    description?: string | undefined;
+    price?: string | undefined;
+    rating?: string | undefined;
+    likes?: number;
+    dislikes?: number;
+    publicationDate?: string | undefined;
+    lastEditDate?: string | undefined;
+    startingBid?: string | undefined;
+    lastBid?: string | undefined;
+    status?: string | undefined;
+    seats?: number;
+    startDate?: string | undefined;
+    endDate?: string | undefined;
+    startTime?: string | undefined;
+    readonly categories?: string[] | undefined;
+    readonly images?: ImageFileModel[] | undefined;
+    authorId?: string | undefined;
+    author?: string | undefined;
+    authorAvatar?: string | undefined;
+
+    constructor(data?: IPostModel) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.text = _data["text"];
+            this.description = _data["description"];
+            this.price = _data["price"];
+            this.rating = _data["rating"];
+            this.likes = _data["likes"];
+            this.dislikes = _data["dislikes"];
+            this.publicationDate = _data["publicationDate"];
+            this.lastEditDate = _data["lastEditDate"];
+            this.startingBid = _data["startingBid"];
+            this.lastBid = _data["lastBid"];
+            this.status = _data["status"];
+            this.seats = _data["seats"];
+            this.startDate = _data["startDate"];
+            this.endDate = _data["endDate"];
+            this.startTime = _data["startTime"];
+            if (Array.isArray(_data["categories"])) {
+                (<any>this).categories = [] as any;
+                for (let item of _data["categories"])
+                    (<any>this).categories!.push(item);
+            }
+            if (Array.isArray(_data["images"])) {
+                (<any>this).images = [] as any;
+                for (let item of _data["images"])
+                    (<any>this).images!.push(ImageFileModel.fromJS(item));
+            }
+            this.authorId = _data["authorId"];
+            this.author = _data["author"];
+            this.authorAvatar = _data["authorAvatar"];
+        }
+    }
+
+    static fromJS(data: any): PostModel {
+        data = typeof data === 'object' ? data : {};
+        let result = new PostModel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["text"] = this.text;
+        data["description"] = this.description;
+        data["price"] = this.price;
+        data["rating"] = this.rating;
+        data["likes"] = this.likes;
+        data["dislikes"] = this.dislikes;
+        data["publicationDate"] = this.publicationDate;
+        data["lastEditDate"] = this.lastEditDate;
+        data["startingBid"] = this.startingBid;
+        data["lastBid"] = this.lastBid;
+        data["status"] = this.status;
+        data["seats"] = this.seats;
+        data["startDate"] = this.startDate;
+        data["endDate"] = this.endDate;
+        data["startTime"] = this.startTime;
+        if (Array.isArray(this.categories)) {
+            data["categories"] = [];
+            for (let item of this.categories)
+                data["categories"].push(item);
+        }
+        if (Array.isArray(this.images)) {
+            data["images"] = [];
+            for (let item of this.images)
+                data["images"].push(item.toJSON());
+        }
+        data["authorId"] = this.authorId;
+        data["author"] = this.author;
+        data["authorAvatar"] = this.authorAvatar;
+        return data; 
+    }
+}
+
+export interface IPostModel {
+    id?: string | undefined;
+    text?: string | undefined;
+    description?: string | undefined;
+    price?: string | undefined;
+    rating?: string | undefined;
+    likes?: number;
+    dislikes?: number;
+    publicationDate?: string | undefined;
+    lastEditDate?: string | undefined;
+    startingBid?: string | undefined;
+    lastBid?: string | undefined;
+    status?: string | undefined;
+    seats?: number;
+    startDate?: string | undefined;
+    endDate?: string | undefined;
+    startTime?: string | undefined;
+    categories?: string[] | undefined;
+    images?: ImageFileModel[] | undefined;
+    authorId?: string | undefined;
+    author?: string | undefined;
+    authorAvatar?: string | undefined;
+}
+
+export class BidHistoryModel implements IBidHistoryModel {
+    value?: string | undefined;
+    author?: string | undefined;
+    authorImage?: string | undefined;
+    created?: string | undefined;
+
+    constructor(data?: IBidHistoryModel) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.value = _data["value"];
+            this.author = _data["author"];
+            this.authorImage = _data["authorImage"];
+            this.created = _data["created"];
+        }
+    }
+
+    static fromJS(data: any): BidHistoryModel {
+        data = typeof data === 'object' ? data : {};
+        let result = new BidHistoryModel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["value"] = this.value;
+        data["author"] = this.author;
+        data["authorImage"] = this.authorImage;
+        data["created"] = this.created;
+        return data; 
+    }
+}
+
+export interface IBidHistoryModel {
+    value?: string | undefined;
+    author?: string | undefined;
+    authorImage?: string | undefined;
+    created?: string | undefined;
 }
 
 export class ImageCatalogModel implements IImageCatalogModel {
@@ -1637,30 +2419,12 @@ export interface ICreateImageCatalogModel {
     files?: ImageFileCreateModel[] | undefined;
 }
 
-export class PostModel implements IPostModel {
-    id?: string | undefined;
-    text?: string | undefined;
+export class ItineraryModel implements IItineraryModel {
+    title?: string | undefined;
     description?: string | undefined;
-    price?: string | undefined;
-    rating?: string | undefined;
-    likes?: number;
-    dislikes?: number;
-    publicationDate?: string | undefined;
-    lastEditDate?: string | undefined;
-    startingBid?: string | undefined;
-    lastBid?: string | undefined;
-    status?: string | undefined;
-    seats?: number;
-    startDate?: string | undefined;
-    endDate?: string | undefined;
-    startTime?: string | undefined;
-    readonly categories?: string[] | undefined;
-    readonly images?: ImageFileModel[] | undefined;
-    authorId?: string | undefined;
-    author?: string | undefined;
-    authorAvatar?: string | undefined;
+    ordinal?: number;
 
-    constructor(data?: IPostModel) {
+    constructor(data?: IItineraryModel) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -1671,102 +2435,32 @@ export class PostModel implements IPostModel {
 
     init(_data?: any) {
         if (_data) {
-            this.id = _data["id"];
-            this.text = _data["text"];
+            this.title = _data["title"];
             this.description = _data["description"];
-            this.price = _data["price"];
-            this.rating = _data["rating"];
-            this.likes = _data["likes"];
-            this.dislikes = _data["dislikes"];
-            this.publicationDate = _data["publicationDate"];
-            this.lastEditDate = _data["lastEditDate"];
-            this.startingBid = _data["startingBid"];
-            this.lastBid = _data["lastBid"];
-            this.status = _data["status"];
-            this.seats = _data["seats"];
-            this.startDate = _data["startDate"];
-            this.endDate = _data["endDate"];
-            this.startTime = _data["startTime"];
-            if (Array.isArray(_data["categories"])) {
-                (<any>this).categories = [] as any;
-                for (let item of _data["categories"])
-                    (<any>this).categories!.push(item);
-            }
-            if (Array.isArray(_data["images"])) {
-                (<any>this).images = [] as any;
-                for (let item of _data["images"])
-                    (<any>this).images!.push(ImageFileModel.fromJS(item));
-            }
-            this.authorId = _data["authorId"];
-            this.author = _data["author"];
-            this.authorAvatar = _data["authorAvatar"];
+            this.ordinal = _data["ordinal"];
         }
     }
 
-    static fromJS(data: any): PostModel {
+    static fromJS(data: any): ItineraryModel {
         data = typeof data === 'object' ? data : {};
-        let result = new PostModel();
+        let result = new ItineraryModel();
         result.init(data);
         return result;
     }
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
-        data["text"] = this.text;
+        data["title"] = this.title;
         data["description"] = this.description;
-        data["price"] = this.price;
-        data["rating"] = this.rating;
-        data["likes"] = this.likes;
-        data["dislikes"] = this.dislikes;
-        data["publicationDate"] = this.publicationDate;
-        data["lastEditDate"] = this.lastEditDate;
-        data["startingBid"] = this.startingBid;
-        data["lastBid"] = this.lastBid;
-        data["status"] = this.status;
-        data["seats"] = this.seats;
-        data["startDate"] = this.startDate;
-        data["endDate"] = this.endDate;
-        data["startTime"] = this.startTime;
-        if (Array.isArray(this.categories)) {
-            data["categories"] = [];
-            for (let item of this.categories)
-                data["categories"].push(item);
-        }
-        if (Array.isArray(this.images)) {
-            data["images"] = [];
-            for (let item of this.images)
-                data["images"].push(item.toJSON());
-        }
-        data["authorId"] = this.authorId;
-        data["author"] = this.author;
-        data["authorAvatar"] = this.authorAvatar;
+        data["ordinal"] = this.ordinal;
         return data; 
     }
 }
 
-export interface IPostModel {
-    id?: string | undefined;
-    text?: string | undefined;
+export interface IItineraryModel {
+    title?: string | undefined;
     description?: string | undefined;
-    price?: string | undefined;
-    rating?: string | undefined;
-    likes?: number;
-    dislikes?: number;
-    publicationDate?: string | undefined;
-    lastEditDate?: string | undefined;
-    startingBid?: string | undefined;
-    lastBid?: string | undefined;
-    status?: string | undefined;
-    seats?: number;
-    startDate?: string | undefined;
-    endDate?: string | undefined;
-    startTime?: string | undefined;
-    categories?: string[] | undefined;
-    images?: ImageFileModel[] | undefined;
-    authorId?: string | undefined;
-    author?: string | undefined;
-    authorAvatar?: string | undefined;
+    ordinal?: number;
 }
 
 export class PostCreationModel implements IPostCreationModel {
@@ -1780,6 +2474,8 @@ export class PostCreationModel implements IPostCreationModel {
     categories?: string[] | undefined;
     images?: ImageFileCreateModel[] | undefined;
     video?: ImageFileCreateModel | undefined;
+    itineraries?: ItineraryModel[] | undefined;
+    bidOptIn?: boolean;
 
     constructor(data?: IPostCreationModel) {
         if (data) {
@@ -1810,6 +2506,12 @@ export class PostCreationModel implements IPostCreationModel {
                     this.images!.push(ImageFileCreateModel.fromJS(item));
             }
             this.video = _data["video"] ? ImageFileCreateModel.fromJS(_data["video"]) : <any>undefined;
+            if (Array.isArray(_data["itineraries"])) {
+                this.itineraries = [] as any;
+                for (let item of _data["itineraries"])
+                    this.itineraries!.push(ItineraryModel.fromJS(item));
+            }
+            this.bidOptIn = _data["bidOptIn"];
         }
     }
 
@@ -1840,6 +2542,12 @@ export class PostCreationModel implements IPostCreationModel {
                 data["images"].push(item.toJSON());
         }
         data["video"] = this.video ? this.video.toJSON() : <any>undefined;
+        if (Array.isArray(this.itineraries)) {
+            data["itineraries"] = [];
+            for (let item of this.itineraries)
+                data["itineraries"].push(item.toJSON());
+        }
+        data["bidOptIn"] = this.bidOptIn;
         return data; 
     }
 }
@@ -1855,6 +2563,8 @@ export interface IPostCreationModel {
     categories?: string[] | undefined;
     images?: ImageFileCreateModel[] | undefined;
     video?: ImageFileCreateModel | undefined;
+    itineraries?: ItineraryModel[] | undefined;
+    bidOptIn?: boolean;
 }
 
 export class PostUpdateModel implements IPostUpdateModel {

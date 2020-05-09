@@ -12,7 +12,6 @@ using UrGuide.Services.Contracts;
 using UrGuide.Shared;
 using UrGuide.Shared.Contracts;
 using UrGuide.Services.Extensions;
-using System.Collections.Generic;
 
 namespace UrGuide.Services.Users
 {
@@ -178,21 +177,29 @@ namespace UrGuide.Services.Users
 
             cancellationToken.ThrowIfCancellationRequested();
             var user = await Context.Users.FindAsync(new { UserContext.UserId }, cancellationToken);
-            var attributes = user.Attributes;
-            var attr = attributes.FirstOrDefault(a => a.Name == attribute.Name);
-            if (attr == null)
-            {
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute
-                {
-                    Name = attribute.Name,
-                    Value = attribute.Value
-                });
-            }
-            else
-            {
-                attr.Value = attribute.Value;
-            }
+            SetAttributesInternal(new []{ attribute }, user);
             return Result.Of(true);
+        }
+
+        private static void SetAttributesInternal(SetAttribute[] attributes, Data.Entities.Users.User user)
+        {
+            var attrs = user.Attributes;
+            foreach (var attribute in attributes)
+            {
+                var attr = attrs.FirstOrDefault(a => a.Name.Equals(attribute.Name, System.StringComparison.OrdinalIgnoreCase));
+                if (attr == null)
+                {
+                    user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute
+                    {
+                        Name = attribute.Name,
+                        Value = attribute.Value
+                    });
+                }
+                else
+                {
+                    attr.Value = attribute.Value;
+                }
+            }
         }
 
         public async Task<Result<bool>> UpdateGuideAsync(UpdateGuideModel updateGuide, CancellationToken cancellationToken)
@@ -203,47 +210,36 @@ namespace UrGuide.Services.Users
             cancellationToken.ThrowIfCancellationRequested();
 
             var user = await Context.Users.FindAsync(new { UserContext.UserId }, cancellationToken);
-
-            if (user == null)
+            if (updateGuide.ProfileImage != null)
             {
-                return Result.Of(false).WithErrors("User not found.");
-            }
-            try
-            {
-              
-                if (updateGuide.ProfileImage != null)
-                {
-                    user.ProfileImage.ImageBase64 = updateGuide.ProfileImage;
-                }
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.FirstName), Value = updateGuide.FirstName });
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.LastName), Value = updateGuide.LastName });
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Phone), Value = updateGuide.Phone });
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Country), Value = updateGuide.Country });
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.City), Value = updateGuide.City });
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Address), Value = updateGuide.Address });
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Gender), Value = updateGuide.Gender });
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.BirthDay), Value = updateGuide.BirthDay });
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Description), Value = updateGuide.Description });
-                Context.Users.Update(user);
-
-                return Result.Of(true);
-            }
-            catch (System.Exception e)
-            {
-                Logger.LogError(e, "Failed to update the account: UserId: {0}", UserContext.UserId);
-                return Result.Of(false).WithErrors("Failed to update your informations.");
+                user.ProfileImage.ImageBase64 = updateGuide.ProfileImage;
             }
 
+            var attributes = new[]{ 
+                    new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.FirstName), Value = updateGuide.FirstName },
+                    new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.LastName), Value = updateGuide.LastName },
+                    new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Phone), Value = updateGuide.Phone },
+                    new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Country), Value = updateGuide.Country },
+                    new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.City), Value = updateGuide.City },
+                    new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Address), Value = updateGuide.Address },
+                    new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Gender), Value = updateGuide.Gender } ,
+                    new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.BirthDay), Value = updateGuide.BirthDay } ,
+                    new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Description), Value = updateGuide.Description }
+                };
+
+            SetAttributesInternal(attributes, user);
+
+            return Result.Of(true);
         }
 
-        public async Task<Result<User>> GetDetailsAsync()
+        public async Task<Result<User>> GetDetailsAsync(CancellationToken cancellationToken)
         { 
 
             if (!UserContext.IsAuthenticated)
                 return Result.Of<User>().WithErrors(ErrorMessages.NotAuthenticated);
 
-            var user = await Context.Users.FindAsync(new[] { UserContext.UserId });
-            //cancellationToken.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
+            var user = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
             if (user == null)
                 return Result.Of<User>().WithErrors("User not found.");
 
