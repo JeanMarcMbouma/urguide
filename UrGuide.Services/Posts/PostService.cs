@@ -327,7 +327,7 @@ Your bid: <em>{value}</em>",
 
         public Task<Result<IEnumerable<PostModel>>> GetTop10PostsAsync(CancellationToken cancellationToken)
         {
-            return GetTopPagedData(0, 100, cancellationToken);
+            return GetTopPagedData(0, 10, cancellationToken);
         }
 
         public Task<Result<IEnumerable<PostModel>>> GetTop100PostsAsync(CancellationToken cancellationToken)
