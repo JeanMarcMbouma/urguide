@@ -30,11 +30,12 @@ Make yourself a Tourism guide at your ease and pace.
 
 - [x]  A user could reject or accept a proposal
 
+- [x]  A user could see his/her tour / bid / agreement history
+
+- [x]  All actions are audited
+
 # TODO
 
-- [ ]  A user could see his/her tour / bid / agreement history
-
-- [ ]  All actions are audited
 
 - [ ]  A user could downlaod his/her data
 
