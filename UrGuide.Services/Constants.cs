@@ -5,6 +5,7 @@
         public const string Yes = "Yes";
         public const string No = "No";
         public const string Zero = "0";
+        public const string Five = "5";
         public const string Active =  "Active";
         public const string Unknown =  "Unknown";
         public static string EmptyGuid =  System.Guid.Empty.ToString("D");

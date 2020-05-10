@@ -43,6 +43,24 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
+        [HttpGet("top10")]
+        [AllowAnonymous]
+        [ProducesDefaultResponseType(typeof(IEnumerable<PostModel>))]
+        public async Task<IActionResult> Top10(CancellationToken cancellationToken)
+        {
+            var result = await _postService.GetTop10PostsAsync(cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
+
+        [HttpGet("top100")]
+        [AllowAnonymous]
+        [ProducesDefaultResponseType(typeof(IEnumerable<PostModel>))]
+        public async Task<IActionResult> Top100(CancellationToken cancellationToken)
+        {
+            var result = await _postService.GetTop100PostsAsync(cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
+
         [HttpPost("create")]
         [ProducesDefaultResponseType(typeof(PostModel))]
         public async Task<IActionResult> Create([FromBody]PostCreationModel model, CancellationToken cancellationToken)
