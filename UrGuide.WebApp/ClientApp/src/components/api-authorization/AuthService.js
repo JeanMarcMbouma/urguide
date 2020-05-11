@@ -1,6 +1,7 @@
 ﻿import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { UserManager, WebStorageStateStore } from 'oidc-client';
 import { ApplicationPaths, ApplicationName, QueryParameterNames } from './ApiAuthorizationConstants';
+import Loader from './loader';
 
 
 const onLoadUser = (dispatch) => (user) => dispatch({ type: 'login', user });
@@ -174,7 +175,7 @@ export const defaultState = {
     loading: false,
     loggingOut: false,
     manager: authService,
-    authenticating: (<div>Authenticating...</div>)
+    authenticating: (<Loader/>)
 }
 
 
@@ -184,18 +185,21 @@ export const useAuthContext = () => {
     return React.useContext(AuthContext);
 }
 
-export const useAuth = () => {
-    const state = useAuthContext();
-    const [reducer, dispatch] = React.useReducer(UserReducer, state);
+export const AuthContextProvider = (props) => {
+    const [reducer, dispatch] = React.useReducer(UserReducer, defaultState);
     reducer.manager._onLoading = useCallback(user => onLoading(dispatch)(user), []);
     reducer.manager._onLoadUser = useCallback(user => onLoadUser(dispatch)(user), []);
     reducer.manager._onUserUnloaded = useCallback(user => onUserUnloaded(dispatch)(user), []);
     reducer.manager._onLoggingOut = useCallback(() => onLoggingOut(dispatch)(), []);
-    return reducer;
+    reducer.manager.isAuthenticated();
+    return <AuthContext.Provider value={{...reducer}}>
+        {props.children}
+    </AuthContext.Provider>
 }
 
+
 export const useAuthUser = () => {
-    const { user, manager } = useAuth();
+    const { user, manager } = useAuthContext();
     const [authUser, setAuthUser] = useState(user);
 
     useEffect(() => {
@@ -218,7 +222,7 @@ export const useSecure = (component) => {
     const returnUrl = window.location.href;
    // const redirectUrl = `${ApplicationPaths.Login}?${QueryParameterNames.ReturnUrl}=${encodeURI(returnUrl)}`;
     const [allowed, setAllowed] = useState(false);
-    const { loading, manager, authenticating, user } = useAuth();
+    const { loading, manager, authenticating, user } = useAuthContext();
 
     useEffect(() => {
         if (!loading) {

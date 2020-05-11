@@ -18,7 +18,7 @@ import ChangePasswordContext from "./changepassword/ChangePasswordContext";
 import ChangePasswordReducer from "./changepassword/ChangePasswordReducer";
 import EditProfileNavigation from "./EditProfileNavigation";
 import { Visibility, VisibilityOff, AccountCircle } from "@material-ui/icons";
-import { useAuthContext, useAuth, useAuthUser } from '../api-authorization/AuthService';
+import { useAuthUser } from '../api-authorization/AuthService';
 import clsx from "clsx";
 import "./UserStyle.css";
 

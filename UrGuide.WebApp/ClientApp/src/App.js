@@ -18,8 +18,7 @@ import EmailConfirmation from './components/confirmation/EmailConfirmation';
 import RegistrationConfirmation
     from './components/confirmation/RegistrationConfirmation';
 import AuthRoute from './components/api-authorization/AuthRoute'
-import authService, { AuthContext, defaultState } from './components/api-authorization/AuthService'
-import Loader from './components/api-authorization/loader';
+import { AuthContextProvider } from './components/api-authorization/AuthService'
 import { ApplicationPaths } from './components/api-authorization/ApiAuthorizationConstants';
 import LoginCallback from './components/api-authorization/LoginCallback';
 import LogoutCallback from './components/api-authorization/LogoutCallback';
@@ -27,16 +26,13 @@ import LogoutCallback from './components/api-authorization/LogoutCallback';
 export default class App extends Component {
     constructor(props) {
         super(props);
-        this.state = defaultState;
-        this.state.manager = authService;
-        this.state.authenticating = <Loader />;
     }
     static displayName = App.name;
 
     render() {
 
         return (
-            <AuthContext.Provider value={this.state}>
+            <AuthContextProvider>
                 <Switch>
                     <Route exact path="/email-confirmed" component={EmailConfirmation} />
                     <Route
@@ -76,7 +72,7 @@ export default class App extends Component {
                     <Route exact path={ApplicationPaths.LoginCallback} component={LoginCallback} />
                     <Route exact path={ApplicationPaths.LogOutCallback} component={LogoutCallback} />
                 </Switch>
-            </AuthContext.Provider>
+            </AuthContextProvider>
         );
     }
 }
