@@ -182,10 +182,7 @@ New price: <em>{post.Bid.NewValue}</em>",
         {
             var geo = await IPStackService.GetLocationAsync(UserContext);
 
-            var posts = await Context.Posts.Include(x => x.Attributes)
-                            .Include(x => x.Catalog)
-                            .ThenInclude(x => x.Images)
-                            .ThenInclude(x => x.Attributes)
+            var posts = await Context.Posts
                             .Where(x => x.Location == null || geo == null || x.Location.Distance(geo) <= Constants.Distance)
                             .OrderByDescending(x => x.LastUpdated)
                             .Skip(offset)

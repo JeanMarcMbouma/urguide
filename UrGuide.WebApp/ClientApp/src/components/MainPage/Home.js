@@ -2,7 +2,6 @@ import React from 'react';
 import LeftBar from './LeftBar/LeftBar';
 import CentralBar from './CentralBar/CentralBar';
 import Popular from './Rightbar/Popular';
-import Skeleton from '@material-ui/lab/Skeleton';
 import './Home.css';
 
 export default function Home() {

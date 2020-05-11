@@ -415,7 +415,7 @@ export default function CentralBar() {
                         </Typography>
                     </div>
                     <div className="col-12 post-config-div">
-                        <textarea className='form-control post-textarea' placeholder="Here you can write a post !" id="new-post-description"  rows="5" ></textarea>
+                        <textarea className='form-control post-textarea' placeholder="Here you can write a post !" id="new-post-description"  rows="5" value="" ></textarea>
                         <br />
                         <hr />
                         <Grid container spacing={2}>
@@ -658,7 +658,7 @@ export default function CentralBar() {
                         <CardContent>
                             <div className='row'>
                                 <div className='col-12' >
-                                    {post.categories.map((category, i) => (<Link> <span className='category-tag'>{category}</span> </Link>))}
+                                    {post.categories.map((category, i) => (<Link key={i}> <span className='category-tag'>{category}</span> </Link>))}
                                     <br />
                                     <br />
                                 </div>
