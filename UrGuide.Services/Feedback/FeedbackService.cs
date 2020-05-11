@@ -43,7 +43,19 @@ namespace UrGuide.Services.Feedback
                 };
                 post.Attributes.Add(rating);
             }
+            var reviews = post.Attributes.FirstOrDefault(a => a.Name.Equals(Data.Entities.Posts.AttributeTypes.Reviews));
+            if(reviews == null)
+            {
+                reviews = new Data.Entities.Attributes.GenericAttribute
+                {
+                    Name = nameof(Data.Entities.Posts.AttributeTypes.Reviews),
+                    Value = Constants.Zero
+                };
+                post.Attributes.Add(reviews);
+            }
 
+            int reviewCount = reviews;
+            reviews.Value = (reviewCount + 1).ToString();
             int r = rating;
             int avg = (int)Math.Ceiling(new[] { r, feedback.Rating }.Average());
             rating.Value = r.ToString();
