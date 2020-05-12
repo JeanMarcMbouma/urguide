@@ -673,7 +673,7 @@ export default function CentralBar() {
                                     <br />
                                 </div>
                                 <div className='col-12'>
-                                    <span><PeopleOutlineOutlinedIcon /> Guests : <b>{20}</b></span>
+                                    <span><PeopleOutlineOutlinedIcon /> Seats : <b>{20}</b></span>
                                     <br />
                                     <br />
                                 </div>
