@@ -34,7 +34,7 @@ function Profile() {
     const [values, setValues] = React.useState({
         firstName: '',
         lastName: '',
-        gender: '',
+        gender: 'Male',
         birthday: '',
         country: '',
         city: '',

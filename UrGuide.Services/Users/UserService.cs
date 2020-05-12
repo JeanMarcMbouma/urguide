@@ -12,6 +12,7 @@ using UrGuide.Services.Contracts;
 using UrGuide.Shared;
 using UrGuide.Shared.Contracts;
 using UrGuide.Services.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace UrGuide.Services.Users
 {
@@ -247,6 +248,10 @@ namespace UrGuide.Services.Users
 
         }
 
-       
+        public async Task<Result<bool>> ExistsAsync(string userId, CancellationToken cancellationToken)
+        {
+            var result = await Context.Users.AnyAsync(u => u.Id == userId, cancellationToken);
+            return Result.Of(result);
+        }
     }
 }

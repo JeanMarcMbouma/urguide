@@ -9,6 +9,7 @@ namespace UrGuide.Services.Contracts
     public interface IUserService
     {
         Task<Result<User>> GetUserAsync(string userId, CancellationToken cancellationToken);
+        Task<Result<bool>> ExistsAsync(string userId, CancellationToken cancellationToken);
         Task<Result<bool>> SetUserAttributeAsync(SetAttribute attribute, CancellationToken cancellationToken);
         Task<Result<bool>> DeleteUserAccountAsync(CancellationToken cancellationToken);
         Task<Result<bool>> RegisterUserAsync(CreateUserModel createUser, CancellationToken cancellationToken);

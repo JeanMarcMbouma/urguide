@@ -1,4 +1,5 @@
 ﻿using IdentityModel;
+using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -62,6 +63,8 @@ namespace UrGuide.WebApp.Extensions
                 });
 
             });
+
+            services.AddScoped<IProfileService, ProfileService>();
             /*
              ,
           "UrGuide.WebAPI": {
