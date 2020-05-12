@@ -41,7 +41,8 @@ class Cards extends Component {
           
                 <div key={i} className={`col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 square-grid-item`} style={{ backgroundImage: `url(${img.href})` }} >
                 <Link to={`${'/discover'}/${img.id}`}>
-                <table className="inner-container">
+                    <table className="inner-container">
+                        <tbody>
                         <tr>
                             <td valign="top">
                                 <div className="inner-top">
@@ -77,6 +78,7 @@ class Cards extends Component {
                                 </div>
                             </td>
                         </tr>
+                        </tbody>
                     </table>
                 </Link>
               </div>

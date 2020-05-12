@@ -1,12 +1,12 @@
 ﻿import React, { Component, useState, useEffect } from 'react'
 import { Route } from 'react-router-dom'
-import { useAuth } from './AuthService'
+import { useAuthContext } from './AuthService'
 import { QueryParameterNames, ApplicationPaths } from './ApiAuthorizationConstants';
 import LogoutCallback from './LogoutCallback'
 
 export default function AuthRoute(props) {
     const [ready, setReady] = useState(false);
-    const { manager, isLoggedIn, user, authenticating } = useAuth(); 
+    const { manager, isLoggedIn, user, authenticating } = useAuthContext(); 
 
     useEffect(() => {
         manager.isAuthenticated();

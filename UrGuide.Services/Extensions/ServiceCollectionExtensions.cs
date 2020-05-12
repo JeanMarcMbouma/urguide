@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using UrGuide.Model;
 using UrGuide.Model.Shared;
 using UrGuide.Services.Catalogs;
+using UrGuide.Services.Feedback;
 using UrGuide.Services.Posts;
 using UrGuide.Services.Shared;
 using UrGuide.Services.Users;
@@ -20,6 +22,7 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<Contracts.ICatalogService, CatalogService>();
             services.AddTransient<Contracts.IPostService, PostService>();
             services.AddTransient<Contracts.IBidService, PostService>();
+            services.AddTransient<Contracts.IFeedbackService, FeedbackService>();
 
             // Validation
 
@@ -45,6 +48,9 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<IValidator<Model.Posts.PostCreationModel>, PostCreationModelValidation>();
             services.AddTransient<IValidator<Model.Posts.PostUpdateModel>, PostUpdateModelValidation>();
             services.AddTransient<IValidator<Model.Posts.BidModel>, BidModelValidation>();
+
+            // Feedback
+            services.AddTransient<IValidator<FeedbackModel>, FeedbackModelValidator>();
 
             services.AddAutoMapper(typeof(UserMap));
 

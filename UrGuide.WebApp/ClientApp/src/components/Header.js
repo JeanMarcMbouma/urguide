@@ -9,7 +9,7 @@ import {makeStyles} from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import { Link } from 'react-router-dom';
 import "./NavMenu.css";
-import { NavbarBrand, Container } from 'reactstrap';
+import { NavbarBrand } from 'reactstrap';
 import NotificationsBox from './NotificationsBox';
 import { Avatar } from '@material-ui/core';
 //import {AuthenticationContext, useReactOidc} from '@axa-fr/react-oidc-context';
@@ -75,7 +75,7 @@ function Header() {
                 <div className="container-fluid" >
                     <div className="row justify-content-between navbarRow">
                         <div className="col-6 col-sm-3 col-lg-3">
-                            <NavbarBrand tag={Link} to="/" className={(classes.font)}>UrGuide</NavbarBrand>
+                            <NavbarBrand href="/" className={(classes.font)}>UrGuide</NavbarBrand>
                         </div>
                         <div className="col-8 col-sm-6 col-md-6 col-lg-4 centered-div"  >
                             <div className='row justify-content-end'>

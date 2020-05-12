@@ -30,6 +30,7 @@
         PublicationDate,
         LastEdit,
         Status,
-        LastBid
+        LastBid,
+        Reviews
     }
 }

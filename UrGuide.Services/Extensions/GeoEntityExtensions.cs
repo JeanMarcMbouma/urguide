@@ -1,7 +1,5 @@
 ﻿using NetTopologySuite;
 using NetTopologySuite.Geometries;
-using ProjNet.CoordinateSystems;
-using ProjNet.CoordinateSystems.Transformations;
 using System;
 using System.Threading.Tasks;
 using UrGuide.Data.Entities.Contracts;

@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -131,6 +130,8 @@ New price: <em>{post.Bid.NewValue}</em>",
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Views), Value = Constants.Zero });
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.PublicationDate), Value = DateTimeHelper.GetDateTime(post.DateOfPublication) });
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Status), Value = Constants.Active });
+            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Rating), Value = Constants.Zero });
+            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Reviews), Value = Constants.Zero });
             
             if(model.BidOptIn)
             {
@@ -181,10 +182,7 @@ New price: <em>{post.Bid.NewValue}</em>",
         {
             var geo = await IPStackService.GetLocationAsync(UserContext);
 
-            var posts = await Context.Posts.Include(x => x.Attributes)
-                            .Include(x => x.Catalog)
-                            .ThenInclude(x => x.Images)
-                            .ThenInclude(x => x.Attributes)
+            var posts = await Context.Posts
                             .Where(x => x.Location == null || geo == null || x.Location.Distance(geo) <= Constants.Distance)
                             .OrderByDescending(x => x.LastUpdated)
                             .Skip(offset)
@@ -323,6 +321,28 @@ Your bid: <em>{value}</em>",
                 return Result.Of<IEnumerable<BidHistoryModel>>().WithErrors(ErrorMessages.NotFoundEntityForKey);
 
             return Result.Of(Mapper.Map<IEnumerable<BidHistoryModel>>(post.BidHistories.OrderByDescending(x => x.Created)));
+        }
+
+        public Task<Result<IEnumerable<PostModel>>> GetTop10PostsAsync(CancellationToken cancellationToken)
+        {
+            return GetTopPagedData(0, 10, cancellationToken);
+        }
+
+        public Task<Result<IEnumerable<PostModel>>> GetTop100PostsAsync(CancellationToken cancellationToken)
+        {
+            return GetTopPagedData(0, 100, cancellationToken);
+        }
+
+        private async Task<Result<IEnumerable<PostModel>>> GetTopPagedData(int offset, int size, CancellationToken cancellationToken)
+        {
+            var geo = await IPStackService.GetLocationAsync(UserContext);
+
+            var posts = await Context.Posts
+                            .Where(x => x.Location == null || geo == null || x.Location.Distance(geo) <= Constants.Distance)
+                            .OrderByDescending(x => x.Attributes.First(a => a.Name == nameof(AttributeTypes.Rating)).Value)
+                            .Skip(offset)
+                            .Take(size).AsNoTracking().ToListAsync(cancellationToken);
+            return Result.Of(Mapper.Map<IEnumerable<PostModel>>(posts));
         }
     }
 }

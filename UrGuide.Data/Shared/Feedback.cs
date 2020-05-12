@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using UrGuide.Data.Entities.Attributes;
 
 namespace UrGuide.Data.Shared
 {

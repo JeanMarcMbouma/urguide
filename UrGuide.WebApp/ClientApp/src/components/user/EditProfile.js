@@ -173,8 +173,8 @@ function Profile() {
         </Grid>
     );
 
-    const countriesList = Countries.map(country => (
-        <MenuItem value={country}>{country}</MenuItem>
+    const countriesList = Countries.map((country, index) => (
+        <MenuItem key={index} value={country}>{country}</MenuItem>
     ));
 
     const countryGrid = (
