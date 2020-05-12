@@ -1,5 +1,5 @@
 import React, {
-    useReducer, useContext, Component
+    useReducer, useContext, Component, useState
 } from "react";
 import {
     Grid,
@@ -25,9 +25,9 @@ import { Visibility, VisibilityOff, AccountCircle } from "@material-ui/icons";
 import LoginContext from "./LoginContext";
 import LoginReducer from "./LoginReducer";
 import "./LoginPage.css";
-
-import {  QueryParameterNames } from './../api-authorization/ApiAuthorizationConstants';
-import authService from "../api-authorization/AuthService";
+import { LoginModel } from './../../api'
+import { HttpClientFactory } from './../../httpclient'
+import authService from '../api-authorization/AuthService';
 
 function Copyright() {
     return (
@@ -61,8 +61,35 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-const LoginForm = () => {
-    const classes = useStyles();
+function LoginForm() {
+
+
+    const [LoginFailed, setLoginFailed] = useState('');
+
+
+    async function login(state) {
+
+        const client = HttpClientFactory.getClient();
+        //state.returnUrl = authService.getReturnUrl();
+        //console.log(state.returnUrl);
+        const loginModel = new LoginModel({
+            userName: state.email,
+            password: state.password,
+            persist: state.isRemembered
+        });
+
+        try
+        {
+            await client.login(state.returnUrl, loginModel);
+            await authService.completeSignIn(state.returnUrl);
+        }
+        catch (e)
+        {
+            setLoginFailed('Invalid login attempt.');
+        }
+    }
+
+        const classes = useStyles();
     const [values, setValues] = React.useState({
         amount: "",
         password: "",
@@ -87,8 +114,6 @@ const LoginForm = () => {
     const ctx = useContext(LoginContext);
     const [state, dispatch] = useReducer(LoginReducer, ctx);
 
-    
-    const LoginFailedWarning = (<span className='text-danger'>{state.LoginFailed}</span>);
 
     const emailTextField = state.emailError ? (
         <Grid item xs={12}>
@@ -207,7 +232,8 @@ const LoginForm = () => {
 
     return (
         <>
-            {LoginFailedWarning}
+           
+            <span className='text-danger'>{LoginFailed}</span>
             <br />
             <br/>
             {emailTextField}
@@ -234,6 +260,7 @@ const LoginForm = () => {
                                     password: values.password,
                                     isRemembered: document.getElementById("remember-me").checked,
                                     returnUrl: authService.getReturnUrl(),
+                                    callback:login,
                                 }
                             })
                         }

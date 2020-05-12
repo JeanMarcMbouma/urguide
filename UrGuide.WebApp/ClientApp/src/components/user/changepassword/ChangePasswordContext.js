@@ -8,12 +8,14 @@ const ChangePasswordContext = createContext({
     currentPassword: null,
     emailError: false,
     passwordError: false,
-    confirmPasswordError: false,
+    passwordsDontMatchError: false,
     currentPasswordError: false,
     emailErrorMessage:null,
     passwordErrorMessage: null,
-    passwordDontMatchError: null,
-    error:null,
+    passwordsDontMatchErrorMessage: null,
+    currentPasswordErrorMessage : null,
+    error: null,
+    status:0,
 });
 
 export default ChangePasswordContext;

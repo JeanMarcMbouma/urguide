@@ -19,6 +19,9 @@ import ChangePasswordReducer from "./changepassword/ChangePasswordReducer";
 import EditProfileNavigation from "./EditProfileNavigation";
 import { Visibility, VisibilityOff, AccountCircle } from "@material-ui/icons";
 import { useAuthContext, useAuth, useAuthUser } from '../api-authorization/AuthService';
+import Alert from '@material-ui/lab/Alert';
+import { ChangePasswordModel, ApiException } from './../../api';
+import { HttpClientFactory } from './../../httpclient';
 import clsx from "clsx";
 import "./UserStyle.css";
 
@@ -53,16 +56,15 @@ function ChangePasswordForm() {
     const ctx = useContext(ChangePasswordContext);
     const [state, dispatch] = useReducer(ChangePasswordReducer, ctx);
 
-    state.email = profile['name'];
     state.user = user;
 
+    const [status, setStatus] = useState(0);
+
     const [values, setValues] = useState({
-        email: state.email,
+        email: profile.name,
         password: '',
         confirmPassword: '',
-        currentPassword: '',
-        weight: "",
-        weightRange: "",
+        currentPassword:'',
         showPassword: false
     });
 
@@ -78,6 +80,32 @@ function ChangePasswordForm() {
         event.preventDefault();
     };
 
+    async function changePassword(state) {
+
+        const client = HttpClientFactory.getAccountClient(state.user);
+
+        const model = new ChangePasswordModel({
+            email: state.email,
+            password: state.password,
+            confirmPassword: state.confirmPassword,
+            currentPassword: state.currentPassword,
+        });
+
+        try {
+
+            await client.changepassword(model);
+            setStatus(200);
+            return 200;
+        }
+        catch (e) {
+
+            setStatus(400);
+            return 400;
+
+        }
+
+    }
+
 
     return (
         <div className='edit-profile-card' component="main">
@@ -85,10 +113,13 @@ function ChangePasswordForm() {
             >
             <h5 className='text-muted'>Change your login details</h5>
             <br />
-            <br />
-            <br />
+                <br />
+                {status == 200 ? <Alert severity="success">Your login details have been successfully changed!</Alert> : null}
+                {status == 400 ?  <Alert severity="error">Oops ! wrong login details provided !</Alert> : null }
+                <br />
+                <br />
             <Grid container spacing={4}>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6} >
                         <FormControl
                             fullWidth
                             className={clsx(classes.margin, classes.textField)}
@@ -108,24 +139,27 @@ function ChangePasswordForm() {
                                 }
                             />
                         </FormControl>
+                        {state.emailError ? <FormHelperText error>
+                            {state.emailErrorMessage}
+        </FormHelperText> : null }
                     </Grid>
                     <Grid item xs={12} sm={6}>
                         <FormControl
-                            emailTextField
+                        
                             fullWidth
-                            className={clsx(classes.margin, classes.textField)}
-                            variant="outlined"
+                           
                         >
                             <InputLabel htmlFor="standard-adornment-password">
                                 Current Password
           </InputLabel>
                             <Input
                                 id="current-password"
-                                type={values.showPassword ? "text" : "password"}
-                                onChange={handleChange("currentPassword")}
+                                className={clsx(classes.margin, classes.textField)}
                                 value={values.currentPassword}
+                                onChange={handleChange("currentPassword")}
+                                type={values.showPassword ? "text" : "password"}
                                 endAdornment={
-                                    <InputAdornment position="end">
+                                    < InputAdornment position="end" >
                                         <IconButton
                                             aria-label="toggle password visibility"
                                             onClick={handleClickShowPassword}
@@ -133,39 +167,49 @@ function ChangePasswordForm() {
                                         >
                                             {values.showPassword ? <Visibility /> : <VisibilityOff />}
                                         </IconButton>
-                                    </InputAdornment>
-                                }
+                                    </InputAdornment >}
+
+                               
+                                
                             />
                         </FormControl>
+                        {state.currentPasswordError ? <FormHelperText error>
+                            {state.currentPasswordErrorMessage}
+                        </FormHelperText> : null}
                     </Grid>
                 <Grid item xs={12} sm={6}>
                     <FormControl
-                        emailTextField
+                    
                         fullWidth
-                        className={clsx(classes.margin, classes.textField)}
+                            className={clsx(classes.margin, classes.textField)}
+
                         variant="outlined"
                     >
                         <InputLabel htmlFor="standard-adornment-password">
                             Password
           </InputLabel>
                         <Input
-                            id="guide-password"
-                            type={values.showPassword ? "text" : "password"}
-                            onChange={handleChange("password")}
-                            value={values.password}
-                            endAdornment={
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="toggle password visibility"
-                                        onClick={handleClickShowPassword}
-                                        onMouseDown={handleMouseDownPassword}
-                                    >
-                                        {values.showPassword ? <Visibility /> : <VisibilityOff />}
-                                    </IconButton>
-                                </InputAdornment>
-                            }
+                                id="guide-password"
+                                value={values.password}
+                                onChange={handleChange("password")}
+                                type={values.showPassword ? "text" : "password"}
+                                endAdornment={
+                                    < InputAdornment position="end" >
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={handleClickShowPassword}
+                                            onMouseDown={handleMouseDownPassword}
+                                        >
+                                            {values.showPassword ? <Visibility /> : <VisibilityOff />}
+                                        </IconButton>
+                                    </InputAdornment >}
+                           
+                           
                         />
-                    </FormControl>
+                        </FormControl>
+                        {state.passwordError ? <FormHelperText error>
+                            {state.passwordErrorMessage}
+                        </FormHelperText> : null}
                 </Grid>
                 <Grid item xs={12} sm={6} >
                     <FormControl
@@ -177,23 +221,26 @@ function ChangePasswordForm() {
                             Password Confirmation
           </InputLabel>
                         <Input
-                            id="confirm-password"
-                            type={values.showPassword ? "text" : "password"}
-                            onChange={handleChange("confirmPassword")}
-                            value={values.confirmPassword}
-                            endAdornment={
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="toggle password visibility"
-                                        onClick={handleClickShowPassword}
-                                        onMouseDown={handleMouseDownPassword}
-                                    >
-                                        {values.showPassword ? <Visibility /> : <VisibilityOff />}
-                                    </IconButton>
-                                </InputAdornment>
-                            }
+                                id="confirm-password"
+                                value={values.confirmPassword}
+                                onChange={handleChange("confirmPassword")}
+                                type={values.showPassword ? "text" : "password"}
+                                endAdornment={
+                                    < InputAdornment position="end" >
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={handleClickShowPassword}
+                                            onMouseDown={handleMouseDownPassword}
+                                        >
+                                            {values.showPassword ? <Visibility /> : <VisibilityOff />}
+                                        </IconButton>
+                                    </InputAdornment >}
+                  
                         />
-                    </FormControl>
+                        </FormControl>
+                        {state.passwordsDontMatchError ? <FormHelperText error>
+                            {state.passwordsDontMatchErrorMessage}
+                        </FormHelperText> : null}
                     </Grid>
                 </Grid>
             <br />        
@@ -206,11 +253,12 @@ function ChangePasswordForm() {
                         dispatch({
                             type: "changePassword",
                             data: {
-                                email: values.email,
+                                email:values.email,
                                 password: values.password,
                                 confirmPassword: values.confirmPassword,
                                 currentPassword: values.currentPassword,
                                 user: state.user,
+                                callback: changePassword,
                             }
                         })}
             >
@@ -252,3 +300,4 @@ export default class ChangePassword extends Component {
         )
     }
 }
+

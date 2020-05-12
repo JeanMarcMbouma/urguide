@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 //import { Container } from 'reactstrap';
 import Header from './Header';
+import SignOutHeader from './SignOutHeader';
 import './NavMenu.css';
 import { makeStyles } from '@material-ui/core/styles';
 import LinearProgress from '@material-ui/core/LinearProgress';
-
+import { useAuthContext } from './api-authorization/AuthService';
 
 
 const useStyles = makeStyles(theme => ({
@@ -27,6 +28,14 @@ function LinearIndeterminate() {
             <LinearProgress />
         </div>
     );
+}
+
+function Navbar() {
+
+    const { user } = useAuthContext();
+
+    return (user ? <Header /> : <SignOutHeader />);
+
 }
 
 export class Layout extends Component {
@@ -59,7 +68,7 @@ export class Layout extends Component {
        return (
            <>
                {loader}
-              <Header />
+              <Navbar />
               <div className="container-fluid content">
               
                   <div className='row mb-4' >

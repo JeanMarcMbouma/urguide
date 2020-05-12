@@ -1,5 +1,5 @@
-import { Client, LoginModel, ApiException } from './../../api'
-import { HttpClientFactory} from './../../httpclient'
+import { Client, LoginModel, ApiException } from './../../api';
+import { HttpClientFactory } from './../../httpclient'
 import authService from '../api-authorization/AuthService';
 const navigateToReturnUrl = (returnUrl: any) => {
 
@@ -41,11 +41,12 @@ export default function LoginReducer(state: any, action: any) {
             context.emailError = validEmail ? false : true;
             context.passwordError = validpassword ? false : true;
             context.passwordErrorMessage = context.passwordError ? "your password must contains minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character." : '';
-            if (validEmail && validpassword)
-            {
+            if (validEmail && validpassword) {
+
+               // action.data.callback(context);
                login(context);
             }
-            
+
             return context;
     }
 }

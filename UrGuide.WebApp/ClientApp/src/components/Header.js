@@ -11,8 +11,6 @@ import { Link } from 'react-router-dom';
 import "./NavMenu.css";
 import { NavbarBrand, Container } from 'reactstrap';
 import NotificationsBox from './NotificationsBox';
-//import ProfileContext from './Reducers/ProfileContext';
-//import ProfileReducer from './Reducers/ProfileReducer';
 import { Avatar } from '@material-ui/core';
 //import {AuthenticationContext, useReactOidc} from '@axa-fr/react-oidc-context';
 

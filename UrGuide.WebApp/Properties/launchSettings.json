@@ -11,17 +11,18 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+			"environmentVariables": {
+				"SENDGRID_URGUIDE_API_KEY": "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",
+				"ASPNETCORE_ENVIRONMENT": "Development"
+			}
     },
     "UrGuide.WebApp": {
       "commandName": "Project",
       "launchBrowser": true,
-      "environmentVariables": {
-        "SENDGRID_URGUIDE_API_KEY": "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",
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
+			"environmentVariables": {
+				"SENDGRID_URGUIDE_API_KEY": "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",
+				"ASPNETCORE_ENVIRONMENT": "Development"
+			},
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
     }
   }

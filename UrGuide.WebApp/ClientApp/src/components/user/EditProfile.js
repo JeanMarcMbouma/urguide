@@ -34,9 +34,9 @@ function Profile() {
     const [values, setValues] = React.useState({
         firstName: '',
         lastName: '',
-        gender: 'Female',
+        gender: '',
         birthday: '',
-        country: 'Afghanistan',
+        country: '',
         city: '',
         phone: '',
         address: '',
@@ -65,7 +65,24 @@ function Profile() {
 
     const profilePicGrid =  (
                 <Grid item xs={12}>
-                    <div className="edit-avatar-wrapper">
+            <div className="edit-avatar-wrapper">
+                {values.profileImage ?
+
+                    <>
+                        <div style={{ backgroundImage: `url(${values.profileImage})` }} className="edit-avatar" id="pic-previewer"></div>
+                        <div
+                            className="create-icon"
+                            onClick={e => document.getElementById("profile-pic-input").click()}
+                        >
+                            <span>
+                                <CreateIcon style={{ fontSize: 21 }} />
+                            </span>
+                        </div>  
+                    </>
+                    
+                    : 
+                    <>
+
                         <div className="edit-avatar" id="pic-previewer"></div>
                         <div
                             className="create-icon"
@@ -75,7 +92,10 @@ function Profile() {
                                 <CreateIcon style={{ fontSize: 21 }} />
                             </span>
                         </div>
-                    </div>
+                    </>
+                     
+                    }
+            </div>
                     <input
                         type="file"
                         className="input-file"
