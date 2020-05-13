@@ -28,13 +28,15 @@ namespace UrGuide.Services.Posts
                            IMapper mapper,
                            IIPStackService iPStackService,
                            ILogger<PostService> logger,
-                           IEmailService emailService) : base(context, userContext)
+                           IEmailService emailService,
+                           IImageService imageService) : base(context, userContext)
         {
             CatalogService = catalogService ?? throw new ArgumentNullException(nameof(catalogService));
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             IPStackService = iPStackService ?? throw new ArgumentNullException(nameof(iPStackService));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             EmailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
+            ImageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
         }
 
         public ICatalogService CatalogService { get; }
@@ -42,6 +44,7 @@ namespace UrGuide.Services.Posts
         public IIPStackService IPStackService { get; }
         public ILogger<PostService> Logger { get; }
         public IEmailService EmailService { get; }
+        public IImageService ImageService { get; }
 
         public async Task<Result<PostModel>> AcceptBidAsync(string postId, CancellationToken cancellationToken)
         {
@@ -149,7 +152,14 @@ New price: <em>{post.Bid.NewValue}</em>",
             }
 
             Context.Posts.Add(post);
-            await Context.SaveChangesAsync(cancellationToken); 
+            await Context.SaveChangesAsync(cancellationToken);
+
+            foreach (var image in post.Catalog.Images)
+            {
+                ImageService.SaveImage(image);
+            }
+            await Context.SaveChangesAsync(cancellationToken);
+
             return Result.Of(Mapper.Map<PostModel>(post));
         }
 
@@ -159,8 +169,10 @@ New price: <em>{post.Bid.NewValue}</em>",
                 .FirstOrDefaultAsync(cancellationToken);
             if (post == null)
                 return Result.Of(false).WithErrors(ErrorMessages.NotFoundEntityForKey);
+            var images = post.Catalog.Images;
             Context.Posts.Remove(post);
             await Context.SaveChangesAsync(cancellationToken);
+            ImageService.DeleteImages(images);
             return Result.Of(true);
         }
 

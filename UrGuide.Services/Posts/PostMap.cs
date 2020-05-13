@@ -24,7 +24,7 @@ namespace UrGuide.Services.Posts
                 .ForMember(x => x.Images, x => x.MapFrom(f => f.Catalog.Images.Select(i => new ImageFileModel
                 {
                     Id = i.Id, 
-                    ImageBase64 = i.ImageBase64,
+                    ImageBase64 = i.ImageUrl,
                     Name = i.Attributes.First(a => a.Name == nameof(Model.Catalogs.CreateImageCatalogModel.Name))
                 })))
                 .ForMember(x => x.LastEditDate, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.LastEdit))))
@@ -37,7 +37,7 @@ namespace UrGuide.Services.Posts
                 .ForMember(x => x.LastBid, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.LastBid))))
                 .ForMember(x => x.AuthorId, x => x.MapFrom(p => p.User != null ? p.User.Id : Constants.EmptyGuid))
                 .ForMember(x => x.Author, x => x.MapFrom(p => p.User != null ? p.User.FullName : Constants.Unknown))
-                .ForMember(x => x.AuthorAvatar, x => x.MapFrom(p => p.User != null && p.User.ProfileImage != null ? p.User.ProfileImage.ImageBase64 : Constants.UnknownImage));
+                .ForMember(x => x.AuthorAvatar, x => x.MapFrom(p => p.User != null && p.User.ProfileImage != null ? p.User.ProfileImage.ImageUrl : Constants.UnknownImage));
 
             CreateMap<Itinerary, ItineraryModel>()
                 .ReverseMap();

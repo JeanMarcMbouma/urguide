@@ -25,7 +25,8 @@ namespace UrGuide.Services.Users
             IMapper mapper,
             IEmailService emailService,
             IWebHelper webHelper,
-            IIPStackService iPStackService)
+            IIPStackService iPStackService,
+            IImageService imageService)
         {
             Context = context ?? throw new System.ArgumentNullException(nameof(context));
             UserContext = userContext ?? throw new System.ArgumentNullException(nameof(userContext));
@@ -35,6 +36,7 @@ namespace UrGuide.Services.Users
             EmailService = emailService ?? throw new System.ArgumentNullException(nameof(emailService));
             WebHelper = webHelper ?? throw new System.ArgumentNullException(nameof(webHelper));
             IPStackService = iPStackService ?? throw new System.ArgumentNullException(nameof(iPStackService));
+            ImageService = imageService ?? throw new System.ArgumentNullException(nameof(imageService));
         }
 
         public UrGuideContext Context { get; }
@@ -45,6 +47,7 @@ namespace UrGuide.Services.Users
         public IEmailService EmailService { get; }
         public IWebHelper WebHelper { get; }
         public IIPStackService IPStackService { get; }
+        public IImageService ImageService { get; }
 
         public async Task<Result<bool>> DeleteUserAccountAsync(CancellationToken cancellationToken)
         {
@@ -87,17 +90,23 @@ namespace UrGuide.Services.Users
         public async Task<Result<bool>> RegisterGuideAsync(CreateGuideModel createGuide, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            Result<(string userId, string confirmationToken)> userId = await AuthService.RegisterGuideAsync(createGuide, cancellationToken);
-            if (userId.HasError)
+            Result<(string userId, string confirmationToken)> result = await AuthService.RegisterGuideAsync(createGuide, cancellationToken);
+            if (result.HasError)
             {
-                return Result.Of(false).Combine(userId);
+                return Result.Of(false).Combine(result);
             }
+
+            var imageUrl = ImageService.SaveAvatar(result.Data.userId, new Model.Shared.ImageFileModel
+            {
+                ImageBase64 = createGuide.ProfileImage
+            });
+
             var user = new Data.Entities.Users.User
             {
-                Id = userId.Data.userId,
+                Id = result.Data.userId,
                 ProfileImage = new Data.Entities.Users.Image
                 {
-                    ImageBase64 = createGuide.ProfileImage
+                    ImageUrl = imageUrl
                 }
             };
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailOptIn), Value = Constants.Yes });
@@ -128,7 +137,7 @@ namespace UrGuide.Services.Users
                 Content = "Please confirm your account",
                 Subject = "Email Confirmation",
                 LinkText = "Activate your account",
-                Link = WebHelper.ResolveUrl(MessageTypes.Confirmation, new { userId.Data.confirmationToken, createGuide.Email })
+                Link = WebHelper.ResolveUrl(MessageTypes.Confirmation, new { result.Data.confirmationToken, createGuide.Email })
             });
             return Result.Of(true);
         }
@@ -136,15 +145,22 @@ namespace UrGuide.Services.Users
         public async Task<Result<bool>> RegisterUserAsync(CreateUserModel createUser, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            Result<(string userId, string confirmationToken)> userId = await AuthService.RegisterUserAsync(createUser, cancellationToken);
-            if (userId.HasError)
+            Result<(string userId, string confirmationToken)> result = await AuthService.RegisterUserAsync(createUser, cancellationToken);
+            if (result.HasError)
             {
-                return Result.Of(false).Combine(userId);
+                return Result.Of(false).Combine(result);
             }
+            var imageUrl = ImageService.SaveAvatar(result.Data.userId);
+
             var user = new Data.Entities.Users.User
             {
-                Id = userId.Data.userId
+                Id = result.Data.userId,
+                ProfileImage = new Data.Entities.Users.Image
+                {
+                    ImageUrl = imageUrl
+                }
             };
+
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailOptIn), Value = Constants.Yes });
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailAddress), Value = createUser.Email });
             user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.UserName), Value = createUser.Email });
@@ -166,7 +182,7 @@ namespace UrGuide.Services.Users
                 Content = "Please confirm your account",
                 Subject = "Email Confirmation",
                 LinkText = "Activate your account",
-                Link = WebHelper.ResolveUrl(MessageTypes.Confirmation, new { userId.Data.confirmationToken, createUser.Email })
+                Link = WebHelper.ResolveUrl(MessageTypes.Confirmation, new { result.Data.confirmationToken, createUser.Email })
             });
             return Result.Of(true);
         }
@@ -213,7 +229,12 @@ namespace UrGuide.Services.Users
             var user = await Context.Users.FindAsync(new { UserContext.UserId }, cancellationToken);
             if (updateGuide.ProfileImage != null)
             {
-                user.ProfileImage.ImageBase64 = updateGuide.ProfileImage;
+                var imageUrl = ImageService.SaveAvatar(UserContext.UserId, new Model.Shared.ImageFileModel
+                {
+                    ImageBase64 = updateGuide.ProfileImage
+                });
+
+                user.ProfileImage.ImageUrl = imageUrl;
             }
 
             var attributes = new[]{ 

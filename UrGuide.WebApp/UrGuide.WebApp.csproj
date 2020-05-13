@@ -55,6 +55,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="ClientApp\public\images\" />
+    <Folder Include="ClientApp\public\thumb\" />
     <Folder Include="Pages\Shared\" />
   </ItemGroup>
 

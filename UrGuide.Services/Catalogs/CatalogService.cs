@@ -25,14 +25,17 @@ namespace UrGuide.Services.Catalogs
             IUserContext userContext,
             UrGuideContext context,
             IMapper mapper,
-            IIPStackService iPStackService) : base(context, userContext)
+            IIPStackService iPStackService,
+            IImageService imageService) : base(context, userContext)
         {
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             IPStackService = iPStackService ?? throw new ArgumentNullException(nameof(iPStackService));
+            ImageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
         }
 
         public IMapper Mapper { get; }
         public IIPStackService IPStackService { get; }
+        public IImageService ImageService { get; }
 
         public async Task<Result<bool>> AddCatalogToPostAsync(Data.Entities.Posts.Post post, CreateImageCatalogModel catalogModel, CancellationToken cancellationToken)
         {
@@ -61,13 +64,20 @@ namespace UrGuide.Services.Catalogs
                 .FirstOrDefaultAsync(x => x.Id == catalogId, cancellationToken);
             if (catalog == null)
                 return Result.Of(false).WithErrors("Catalog doesn't exists");
-            catalog.Images.Add(new Image
+
+            var newImage = new Image
             {
-                ImageBase64 = imageFile.ImageBase64,
+                ImageUrl = imageFile.ImageBase64,
                 MimeType = FileExtensionHelper.GetImageMimeType(imageFile)
-            });
+            };
+
+            catalog.Images.Add(newImage);
 
             catalog.LastUpdated = DateTime.UtcNow;
+            await Context.SaveChangesAsync(cancellationToken);
+
+            ImageService.SaveImage(newImage);
+
             await Context.SaveChangesAsync(cancellationToken);
             return Result.Of(true);
         }
@@ -98,7 +108,7 @@ namespace UrGuide.Services.Catalogs
             {
                 var image = new Image
                 {
-                    ImageBase64 = file.ImageBase64,
+                    ImageUrl = file.ImageBase64,
                     MimeType = FileExtensionHelper.GetImageMimeType(file)
                 };
                 image.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(file.Name), Value = file.Name });
@@ -154,10 +164,13 @@ namespace UrGuide.Services.Catalogs
                     .Where(x => x.User.Id == UserContext.UserId && x.Id == catalogId).FirstOrDefaultAsync(cancellationToken);
             if (catalog == null)
                 return Result.Of(false).WithErrors("Catalog doesn't exists");
-
+            var images = catalog.Images;
             Context.ImageCatalogs.Remove(catalog);
 
             await Context.SaveChangesAsync(cancellationToken);
+
+            ImageService.DeleteImages(images);
+
             return Result.Of(true);
         }
 
@@ -175,7 +188,10 @@ namespace UrGuide.Services.Catalogs
             if (catalog == null)
                 return Result.Of(false).WithErrors("Catalog doesn't exists");
             var images = catalog.Images.Where(i => imageIds.Any(v => v.Equals(i.Id))).ToList();
-            images.ForEach(i => catalog.Images.Remove(i));
+            images.ForEach(i => {
+                catalog.Images.Remove(i);
+                ImageService.DeleteImage(i);
+            });
             catalog.LastUpdated = DateTime.UtcNow;
             await Context.SaveChangesAsync(cancellationToken);
             return Result.Of(true);
