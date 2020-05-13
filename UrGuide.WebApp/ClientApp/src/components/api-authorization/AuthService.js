@@ -8,11 +8,12 @@ const onLoadUser = (dispatch) => (user) => dispatch({ type: 'login', user });
 const onUserUnloaded = (dispatch) => () => dispatch({ type: 'logout' });
 const onLoggingOut = (dispatch) => () => dispatch({ type: 'token_expired' });
 const onLoading = (dispatch) => () => dispatch({ type: 'loading' });
+const onError = (dispatch) => (e) => dispatch({ type: 'error', error: e });
 
 
 
 export const UserReducer = (state, action) => {
-    let res = { ...state };
+    let res = { ...state, error: null };
     switch (action.type) {
         case 'login':
             res = { ...state, isLoggedIn: true, user: action.user, logginOut: false };
@@ -21,10 +22,13 @@ export const UserReducer = (state, action) => {
             res = { ...state, loading: true, logginOut: false };
             break;
         case 'logout':
-            res = { ...state, user: null, loggingOut: true };
+            res = { ...state, user: null, loggingOut: true, isLoggedIn: false };
             break;
         case 'token_expired':
-            res = { ...state, loggingOut: true };
+            res = { ...state, loggingOut: true, isLoggedIn: false };
+            break;
+        case 'error':
+            res.error = action.error;
             break;
         default:
             return { ...state, isLoggedIn: false, user: null, loading: true, logginOut: false };
@@ -40,7 +44,8 @@ class AuthService {
         this._onLoadUser = (u) => { };
         this._onLoading = () => { };
         this._onUserUnloaded = (u) => { };
-        this._onLoggingOut = () => {}
+        this._onLoggingOut = () => { };
+        this._onError = (e) => { };
     }
 
     async isAuthenticated() {
@@ -82,10 +87,13 @@ class AuthService {
         try {
             await this._initManager();
             const user = await this._mgr.signinCallback(returnUrl);
+            if (!user)
+                return;
             this._onLoadUser(user);
-            this.navigateToReturnUrl(this.getReturnUrl(user.state));
+            var state = user.state || null; 
+            this.navigateToReturnUrl(this.getReturnUrl(state));
         } catch (e) {
-            console.log(e);
+            this._onError(e);
         }
     }
 
@@ -98,13 +106,13 @@ class AuthService {
             this._onLoadUser(user);
             return;
         } catch (e) {
-            console.log(e);
+            this._onError(e);
             try {
                 const user = await this._mgr.signinPopup(this.createArguments());
                 this._onLoadUser(user);
                 return;
             } catch (e) {
-                console.log(e);
+                this._onError(e);
             }
         }
         
@@ -174,6 +182,7 @@ export const defaultState = {
     isLoggedIn: false,
     loading: false,
     loggingOut: false,
+    error: null,
     manager: authService,
     authenticating: (<Loader/>)
 }
@@ -191,6 +200,7 @@ export const AuthContextProvider = (props) => {
     reducer.manager._onLoadUser = useCallback(user => onLoadUser(dispatch)(user), []);
     reducer.manager._onUserUnloaded = useCallback(user => onUserUnloaded(dispatch)(user), []);
     reducer.manager._onLoggingOut = useCallback(() => onLoggingOut(dispatch)(), []);
+    reducer.manager._onError = useCallback(error => onError(dispatch)(error), []);
     reducer.manager.isAuthenticated();
     return <AuthContext.Provider value={{...reducer}}>
         {props.children}
