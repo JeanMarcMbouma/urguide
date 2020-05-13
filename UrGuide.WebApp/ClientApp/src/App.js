@@ -71,7 +71,7 @@ export default class App extends Component {
                         </Route>
                         <Route exact path="/" render={() => <Redirect to="/feed" />} />
                         <Route exact path={ApplicationPaths.LoginCallback} component={LoginCallback} />
-                        <Route exact path={ApplicationPaths.LogOutCallback} component={LogoutCallback} />
+                        <Route exact path={ApplicationPaths.LogOutCallback} render={() => <Redirect to="/feed" />} />
                     </Switch>
                 </React.StrictMode>
             </AuthContextProvider>
