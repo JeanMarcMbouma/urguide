@@ -26,14 +26,9 @@ namespace UrGuide.WebApp.Services
 
         public string ThumbImageDirectoryPath => Path.Combine(_environment.ContentRootPath, "ClientApp/public/thumb");
 
-        public string ResolveImageThumbUrl(string imageSeoName)
+        public string ResolveImageUrl(string imageFileName)
         {
-            return ResolveUrl($"/thumb/{imageSeoName}", new { });
-        }
-
-        public string ResolveImageUrl(string imageSeoName)
-        {
-            return ResolveUrl($"/images/{imageSeoName}", new { });
+            return $"images/{imageFileName}";
         }
 
         public string ResolveUrl(MessageTypes confirmation, object values)
