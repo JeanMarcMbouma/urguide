@@ -33,19 +33,29 @@ namespace UrGuide.WebApp.Services
             var claimPrincipal = await PrincipalFactory.CreateAsync(principal);
 
             context.IssuedClaims.AddRange(claimPrincipal.Claims);
-            var claims = new[]
-            {
-                new Claim(IdentityModel.JwtClaimTypes.BirthDate, result.Data.BirthDay),
-                new Claim(IdentityModel.JwtClaimTypes.Picture, result.Data.ProfileImage),
-                new Claim(IdentityModel.JwtClaimTypes.FamilyName, result.Data.LastName),
-                new Claim(IdentityModel.JwtClaimTypes.GivenName, result.Data.FirstName),
-                new Claim(IdentityModel.JwtClaimTypes.Gender, result.Data.Gender),
-                new Claim(IdentityModel.JwtClaimTypes.Name, result.Data.FullName),
-                new Claim(IdentityModel.JwtClaimTypes.Address, result.Data.Address),
-                new Claim("country", result.Data.Country),
-                new Claim(IdentityModel.JwtClaimTypes.Role, result.Data.IsGuide ? "guide" : "user")
-            };
-            context.IssuedClaims.AddRange(claims);
+            if(result.Data.IsGuide) {
+               context.IssuedClaims.AddRange(new[]
+                {
+                    new Claim(IdentityModel.JwtClaimTypes.BirthDate, result.Data.BirthDay),
+                    new Claim(IdentityModel.JwtClaimTypes.Picture, result.Data.ProfileImage),
+                    new Claim(IdentityModel.JwtClaimTypes.FamilyName, result.Data.LastName),
+                    new Claim(IdentityModel.JwtClaimTypes.GivenName, result.Data.FirstName),
+                    new Claim(IdentityModel.JwtClaimTypes.Gender, result.Data.Gender),
+                    new Claim(IdentityModel.JwtClaimTypes.Name, result.Data.FullName),
+                    new Claim(IdentityModel.JwtClaimTypes.Address, result.Data.Address),
+                    new Claim("country", result.Data.Country),
+                    new Claim(IdentityModel.JwtClaimTypes.Role, result.Data.IsGuide ? "guide" : "user")
+                });
+            } else {
+                context.IssuedClaims.AddRange(new[]
+                {
+                    new Claim(IdentityModel.JwtClaimTypes.FamilyName, result.Data.LastName),
+                    new Claim(IdentityModel.JwtClaimTypes.GivenName, result.Data.FirstName),
+                    new Claim(IdentityModel.JwtClaimTypes.Name, result.Data.FullName),
+                    new Claim(IdentityModel.JwtClaimTypes.Role, result.Data.IsGuide ? "guide" : "user")
+                });
+            }
+            
         }
 
         public async Task IsActiveAsync(IsActiveContext context)
