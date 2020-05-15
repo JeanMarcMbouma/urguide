@@ -12,7 +12,7 @@ import Posts from "./Posts";
 import Galleries from "./Galleries";
 import EditProfile from "./EditProfile";
 import ChangePassword from "./ChangePassword";
-import { UpperSection } from "./UpperSection";
+import UpperSection from "./UpperSection";
 import {
     BrowserRouter as Router,
     Switch,

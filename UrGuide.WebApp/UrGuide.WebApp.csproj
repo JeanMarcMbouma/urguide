@@ -46,7 +46,8 @@
     <None Remove="ClientApp\src\api\ClientFactory.ts" />
     <None Remove="ClientApp\src\components\api-authorization\AuthService.js" />
     <None Remove="ClientApp\src\components\login\LoginReducer.ts" />
-    <None Remove="ClientApp\src\components\user\changepassword\ChangePasswordReducer.ts" />
+    <None Remove="ClientApp\src\components\user\profile\ChangePasswordReducer.ts" />
+    <None Remove="ClientApp\src\components\user\profile\EditProfileReducer.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -59,7 +60,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Include="ClientApp\src\components\user\changepassword\ChangePasswordReducer.ts" />
+    <TypeScriptCompile Include="ClientApp\src\components\user\profile\ChangePasswordReducer.ts" />
+    <TypeScriptCompile Include="ClientApp\src\components\user\profile\EditProfileReducer.js" />
     <TypeScriptCompile Include="ClientApp\src\httpclient\index.ts" />
     <TypeScriptCompile Include="ClientApp\src\components\api-authorization\AuthService.js" />
     <TypeScriptCompile Include="ClientApp\src\components\login\LoginReducer.ts" />

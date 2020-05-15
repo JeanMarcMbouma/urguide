@@ -209,7 +209,7 @@ namespace UrGuide.Services.Users
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var user = await Context.Users.FindAsync(new { UserContext.UserId }, cancellationToken);
+            var user = await Context.Users.FindAsync(UserContext.UserId);
             if (updateGuide.ProfileImage != null)
             {
                 user.ProfileImage.ImageBase64 = updateGuide.ProfileImage;

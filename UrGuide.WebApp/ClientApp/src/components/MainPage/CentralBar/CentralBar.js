@@ -25,6 +25,9 @@ import {
     TextField,
     Chip,
     Paper,
+    Switch,
+    FormControlLabel,
+  
 } from '@material-ui/core';
 import Rating from '@material-ui/lab/Rating';
 import { red } from '@material-ui/core/colors';
@@ -55,14 +58,15 @@ import {
 import MomentUtils from "@date-io/moment";
 import clsx from "clsx";
 import { withStyles } from '@material-ui/core/styles';
-import { SdCard } from '@material-ui/icons';
-import AddPhoto, { PhotoX } from './../../AddPhoto/AddPhoto';
 import PhotoLibraryIcon from '@material-ui/icons/PhotoLibrary';
 import NewPostContext from './NewPostContext';
 import NewPostReducer from './NewPostReducer';
 import { useAuthUser } from '../../api-authorization/AuthService';
-import { PostsClient, PostUpdateModel } from '../../../api';
+import { useAuthContext } from '../../api-authorization/AuthService';
+import authService from '../../api-authorization/AuthService';
+//import { PostsClient, PostUpdateModel } from '../../../api';
 import { HttpClientFactory } from '../../../httpclient';
+import { PostsClient, PostCreationModel } from '../../../api';
 
 const styles = {
     root: {
@@ -154,54 +158,74 @@ const MockPosts = [
     },
 ]
 
+function CreateItinerary(props) {
+
+
+    return (
+       <div className='itinerary_wrapper'>
+            <section className="itinerary">
+                {props.itineraries.map((itinerary, i) => (<div key={itinerary.id} className="itinerary__block">
+                    <div className="itinerary__midpoint"></div>
+                    <div className="itinerary__content itinerary__content--left">
+                        <h3 className="itinerary__place">{itinerary.title}</h3>
+                        <p className="itinerary__text--left">
+                            {itinerary.description}
+                        </p>
+                    </div>
+                </div>))}
+            </section>
+        </div> 
+    );
+
+}
 
 function Itinerary(props) {
 
     return (
         props.show ? <div className='itinerary_wrapper'>
             <h5>Itinerary of this tour</h5>
-            <section class="itinerary">
-                <div class="itinerary__block">
-                    <div class="itinerary__midpoint"></div>
-                    <div class="itinerary__content itinerary__content--left">
-                        <h3 class="itinerary__place">Eiffel Tower</h3>
-                        <p class="itinerary__text--left">
+            <section className="itinerary">
+                <div className="itinerary__block">
+                    <div className="itinerary__midpoint"></div>
+                    <div className="itinerary__content itinerary__content--left">
+                        <h3 className="itinerary__place">Eiffel Tower</h3>
+                        <p className="itinerary__text--left">
                             Celebrated my birthday with my playmates in school. What a wonderful surprise to have the same birthday as my teacher!
                                  </p>
                     </div>
                 </div>
-                <div class="itinerary__block">
-                    <div class="itinerary__midpoint"></div>
-                    <div class="itinerary__content itinerary__content--left">
-                        <h3 class="itinerary__place">Musee du Louvre</h3>
-                        <p class="itinerary__text--left">
+                <div className="itinerary__block">
+                    <div className="itinerary__midpoint"></div>
+                    <div className="itinerary__content itinerary__content--left">
+                        <h3 className="itinerary__place">Musee du Louvre</h3>
+                        <p className="itinerary__text--left">
                             Celebrated my birthday with my playmates in school. What a wonderful surprise to have the same birthday as my teacher!
                                        </p>
                     </div>
                 </div>
-                <div class="itinerary__block">
-                    <div class="itinerary__midpoint"></div>
-                    <div class="itinerary__content itinerary__content--left">
-                        <h3 class="itinerary__place">Notre Dame</h3>
-                        <p class="itinerary__text--left">
+                <div className="itinerary__block">
+                    <div className="itinerary__midpoint"></div>
+                    <div className="itinerary__content itinerary__content--left">
+                        <h3 className="itinerary__place">Notre Dame</h3>
+                        <p className="itinerary__text--left">
                             Celebrated my birthday with my playmates in school. What a wonderful surprise to have the same birthday as my teacher!
                                        </p>
                     </div>
                 </div>
-                <div class="itinerary__block">
-                    <div class="itinerary__midpoint"></div>
-                    <div class="itinerary__content itinerary__content--left">
-                        <h3 class="itinerary__place">Champs-Elysees</h3>
-                        <p class="itinerary__text--left">
+                <div className="itinerary__block">
+                    <div className="itinerary__midpoint"></div>
+                    <div className="itinerary__content itinerary__content--left">
+                        <h3 className="itinerary__place">Champs-Elysees</h3>
+                        <p className="itinerary__text--left">
                             Celebrated my birthday with my playmates in school. What a wonderful surprise to have the same birthday as my teacher!
                                        </p>
                     </div>
                 </div>
-                <div class="itinerary__block">
-                    <div class="itinerary__midpoint"></div>
-                    <div class="itinerary__content itinerary__content--left">
-                        <h3 class="itinerary__place">Grand Palais</h3>
-                        <p class="itinerary__text--left">
+                <div className="itinerary__block">
+                    <div className="itinerary__midpoint"></div>
+                    <div className="itinerary__content itinerary__content--left">
+                        <h3 className="itinerary__place">Grand Palais</h3>
+                        <p className="itinerary__text--left">
                             Celebrated my birthday with my playmates in school. What a wonderful surprise to have the same birthday as my teacher!
                                        </p>
                     </div>
@@ -258,6 +282,10 @@ function Comments(props) {
         );
 }
 
+const navigateToReturnUrl = returnUrl => {
+
+    window.location.replace(returnUrl);
+}
 
 export default function CentralBar() {
 
@@ -279,40 +307,6 @@ export default function CentralBar() {
     const ctx = useContext(NewPostContext);
     const [state, dispatch] = useReducer(NewPostReducer, ctx);
 
-    const [values, setValues] = React.useState([]);
-
-    const [infos, setPostInfos] = React.useState({
-        email: '',
-        description:'',
-        location: '',
-        date: '',
-        startTime: '',
-        endTime: false,
-        seats: 0,
-        budget: 0,
-        categories:[],
-        files: values,
-    });
-
-    const handleChange = prop => event => {
-        setPostInfos({ ...infos, [prop]: event.target.value });
-    };
-
-    function handleChangedFile(event) {
-
-        var filePath = URL.createObjectURL(event.target.files[0]);
-
-        var file = {
-            id:values.length,
-            href:filePath
-        }
-       
-        values.push(file);
-
-        setValues(values);
-
-        document.getElementById('data-sender').click();
-    }
 
     const [posts, setPosts] = useState([]);
     const user = useAuthUser();
@@ -327,14 +321,6 @@ export default function CentralBar() {
     }, [user]);
 
 
-    const [Categories, setCategories] = React.useState([
-        { key: 0, label: 'Sport', checked: false },
-        { key: 1, label: 'Historical', checked: false },
-        { key: 2, label: 'Child', checked: false },
-        { key: 3, label: 'Nature', checked: false },
-        { key: 4, label: 'Other', checked: false },
-    ]);
-
     const [showComments, setShowComments] = React.useState(false);
     const [showItinerary, setShowItinerary] = React.useState(false);
 
@@ -346,23 +332,142 @@ export default function CentralBar() {
         setShowItinerary(!showItinerary);
     }
 
-    const [selectedDate, setSelectedDate] = React.useState(new Date());
-
-    const handleDateChange = date => {
-        setSelectedDate(date);
-
-    };
-
-    function setDescription() {
-       
-       document.getElementById('data-sender').click()
-    }
-
-
 
     function ViewPost() {
 
+ 
+
+        async function createNewPost(state) {
+
+            const client = HttpClientFactory.getPostClient(user);
+
+            const model = new PostCreationModel({
+                text: state.text,
+                description: state.description,
+                geoLocation: state.geoLocation,
+                startTime: state.startTime,
+                endTime: state.EndTime,
+                seats: state.seats,
+                unitPrice: state.priceRange,
+                categories: state.categories,
+                images: state.files,
+                itineraries: state.itineraries,
+                bidOptIn: state.bidOptIn,
+            });
+
+            try {
+
+                await client.create(model);
+                const returnUrl = authService.getReturnUrl();
+                navigateToReturnUrl(returnUrl);
+               
+            }
+            catch (e) {
+
+                return e;
+
+            }
+
+        }
+
         const [show, setShow] = useState(state.showPost);
+        const [Categories, setCategories] = React.useState([
+            { key: 0, label: 'Sport', checked: false },
+            { key: 1, label: 'Historical', checked: false },
+            { key: 2, label: 'Child', checked: false },
+            { key: 3, label: 'Nature', checked: false },
+            { key: 4, label: 'Other', checked: false },
+        ]);
+
+        
+        const [cats, setCats] = React.useState([]);
+        const [values, setValues] = React.useState([]);
+        const [itineraryError, setItineraryError] = React.useState(false);
+        const [btnEnabled, setBtnEnabled] = React.useState(false);
+        const [selectedDate, setSelectedDate] = React.useState(new Date());
+        const [selectedStartTime, setSelectedStartTime] = React.useState(new Date());
+        const [selectedEndTime, setSelectedEndTime] = React.useState(new Date());
+        const [infos, setPostInfos] = React.useState({
+
+            text: '',
+            description: '',
+            geoLocation: '',
+            date:selectedDate,
+            startTime: getDate(new Date(), true),
+            endTime: getDate(new Date(), true),
+            seats: 1,
+            unitPrice: [25, 70],
+            categories: cats,
+            files: values,
+            bidOptIn:true,
+        });
+
+        function getDate(time, isValid) {
+
+            if (!isValid) {
+                time = new Date();
+            }
+
+            var date = selectedDate;
+
+            var Time = new Date(date.getFullYear(), date.getMonth(), date.getDate(), time.getHours(), time.getMinutes(), time.getSeconds());
+            return Time;
+        }
+
+        function handleDescription(event) {
+            setPostInfos({ ...infos, ['description']: event.target.value });
+          
+            if (infos.description.length >= 10 && infos.geoLocation.length >= 4)
+            {
+                setBtnEnabled(true);
+            }
+       
+        }
+
+        function handleGeoLocation(event){
+            setPostInfos({ ...infos, ['geoLocation']: event.target.value });
+     
+            if (infos.description.length >= 10 && infos.geoLocation.length >= 4) {
+                setBtnEnabled(true);
+            }
+        
+        }
+
+        function addItinerary() {
+
+            var place = document.getElementById("itinerary-point").value;
+            var description = document.getElementById("itinerary-point-description").value;
+
+            if (place.length < 4 || description.length < 4) {
+                setItineraryError(true);
+                return false;
+            }
+            var itin = {
+                id: (state.itineraries.length + 1),
+                ordinal: (state.itineraries.length + 1),
+                title: place,
+                description: description
+            }
+
+            state.itineraries.push(itin);
+            document.getElementById('data-sender').click();
+        }
+
+        function handleChangedFile(event) {
+
+            var filePath = URL.createObjectURL(event.target.files[0]);
+
+            var file = {
+                id:(state.files.length + 1),
+                href: filePath,
+                name: filePath,
+                imageBase64: filePath,
+            }
+
+            state.files.push(file);
+            //setValues(values);
+            document.getElementById('data-sender').click();
+        }
 
         function togglePost()
         {
@@ -381,14 +486,49 @@ export default function CentralBar() {
             },
         ];
 
-        const [valueSlider, setValueSlider] = React.useState([25, 70]);
 
-        const handleChangeSlider = (event, newValue) => {
-            setValueSlider(newValue);
+        const [seats, setSeats] = React.useState(1);
+        const handleChangeSeats = (event, newValue) => {
+            setSeats(newValue);
+            setPostInfos({ ...infos, ['seats']: newValue });
+  
+        };
+        const [unitPrice, setUnitPrice] = React.useState([25, 70]);
+        const handleChangeUnitPrice = (event, newValue) => {
+            setUnitPrice(newValue);
+            setPostInfos({ ...infos, ['unitPrice']: newValue });
+            
+        };
+
+        const handleBidOptIn = (event) => {
+            setPostInfos({ ...infos, ['bidOptIn']: event.target.checked });
+        };
+       
+        const handleDateChange = date => {
+            setSelectedDate(date._d);
+            setPostInfos({ ...infos, ['date']: date._d });
+        };
+        const handleStartTimeChange = date => {
+            setSelectedStartTime(date);
+            setPostInfos({ ...infos, ['startTime']: getDate(date._d, date._isValid) });
+          
+        };
+       
+        const handleEndTimeChange = date => {
+            setSelectedEndTime(date);
+            setPostInfos({ ...infos, ['endTime']: getDate(date._d, date._isValid) });
         };
 
         function valuetext(value) {
             return `${value}`;
+        }
+
+        const { manager } = useAuthContext();
+
+        function signIn(e) {
+            e.preventDefault();
+            manager.signIn(window.location.href);
+            return false;
         }
 
         return (<>
@@ -398,12 +538,17 @@ export default function CentralBar() {
                 <br />
             </>
                  :
-                <div className={`col-lg-12 p-3 mb-3 bg-white rounded new-post-card`}>
-                <div className="new-post-btn" onClick={() => togglePost()}>
-                    <span>Want to write a new post ?</span>
+                 user ? <div className = {`col-lg-12 p-3 mb-3 bg-white rounded new-post-card`}>
+                  <div className="new-post-btn" onClick={() => togglePost()}>
+                <span>Want to write a new post ?</span>
+            </div>
+                </div> : <div className={`col-lg-12 p-3 mb-3 bg-white rounded new-post-card`}>
+                        <div className="new-post-btn" onClick={signIn} >
+                            <span>Want to write a new post ?</span>
+                        </div>
                     </div>
-                      </div>
-                }
+
+}
           
 
             {show ?
@@ -414,8 +559,126 @@ export default function CentralBar() {
                             {profile.name}
                         </Typography>
                     </div>
-                    <div className="col-12 post-config-div">
-                        <textarea className='form-control post-textarea' placeholder="Here you can write a post !" id="new-post-description"  rows="5" value="" ></textarea>
+
+                    <div className="col-lg-12 my-2 post-config-div">
+                        <br />
+                        <br />
+                        <Grid item xs={12} >
+                            <br />
+                            <br />
+                            <h6>1. Add places you'll be visiting on this tour.</h6>
+                            <br />
+                            <br />
+                            <FormControl fullWidth className={classes.margin}>
+                                <InputLabel htmlFor="itinerary-point">Place to visit</InputLabel>
+                                <Input
+                                    id="itinerary-point"
+                                    type="text"
+                                    endAdornment={<InputAdornment position="end">
+                                        <LocationOnIcon />
+                                    </InputAdornment>}
+
+                                />
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} >
+                            <FormControl fullWidth className={classes.margin}>
+                                <InputLabel htmlFor="itinerary-point-description">About the place</InputLabel>
+                                <Input
+                                    id="itinerary-point-description"
+                                    type="text"
+                                    multiline rows={6} rowsMax={6}
+
+
+                                />
+                            </FormControl>
+                            <br />
+                            {itineraryError ? <FormHelperText error>
+                                The place and description fields are required.
+                                </FormHelperText> : null}
+                        </Grid>
+                        <Grid item xs={12} sm={6} >
+                            <br />
+                            <Button
+
+                                variant="contained"
+                                color='primary'
+                                onClick={addItinerary}
+                            >
+                                Add
+                                    </Button>
+                        </Grid>
+                        <br />
+                        <br />
+                        <Grid item xs={12}>
+                            <CreateItinerary itineraries={state.itineraries} />
+                        </Grid>
+                       
+                        <h6>2. Add max 4 pictures of places you'll be visiting.</h6>
+                        <br />
+                        <br />
+                        <Grid item xs={12}>
+                            <input type="file" className='input-file' id='file-init' accept=".png,.jpg"
+                                onChange={handleChangedFile} />
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                color="default"
+                                onClick={e => document.getElementById('file-init').click()}
+                            >
+                                <PhotoLibraryIcon />
+                                <span>UPLOAD PICTURES</span>
+                            </Button>
+                            <button id='data-sender' className='input-file' onClick={() =>
+                                dispatch({
+                                    type: "update-details",
+                                    data: {
+                                        files: state.files,
+                                        showPost: show,
+                                        itineraries: state.itineraries,
+                                    }
+                                })
+                            } >
+                            </button>
+                        </Grid>
+                    </div>
+                    <br />
+                    <div className='container'>
+                        <div className="row uploaded-files">
+                            {state.files.map((path) => (<div className='col-12 col-lg-6' key={path.id}>
+                                <div className='card file-card' >
+                                    <div className='thumbnail' style={{ backgroundImage: `url(${path.href})` }}>
+                                        <div className='cancel-file'>
+                                            <IconButton onClick={() =>
+                                                dispatch({
+                                                    type: "remove-file",
+                                                    data: {
+                                                        idToRemove: path.id,
+                                                        files: state.files,
+                                                    }
+                                                })
+                                            }>
+                                                <RemoveCircleIcon />
+                                            </IconButton>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>))}
+                        </div>
+                    </div>
+                    <div className="col-12">
+                        <br />
+                        <br />
+                        <h6>3. Add some informations about the tour.</h6>
+                        <br />
+                        <br />
+                        <textarea className='form-control post-textarea' placeholder="Here you can write a post !" id="new-post-description"
+                            value={infos.description}
+                            onChange={(e) => handleDescription(e)}
+                            rows="5"
+
+                        >
+                        </textarea>
                         <br />
                         <hr />
                         <Grid container spacing={2}>
@@ -425,6 +688,9 @@ export default function CentralBar() {
                                     <Input
                                         id="new-post-location"
                                         type="text"
+                                        value={infos.geoLocation}
+                                        onChange={(e) => handleGeoLocation(e)}
+                                    
                                         endAdornment={<InputAdornment position="end">
                                             <LocationOnIcon />
                                         </InputAdornment>}
@@ -457,9 +723,9 @@ export default function CentralBar() {
                                     <KeyboardTimePicker
                                         margin="normal"
                                         id="start-time-picker"
-                                        label="Excursion Start Time"
-                                        value={selectedDate}
-                                        onChange={handleDateChange}
+                                        label="Tour Start Time"
+                                        value={selectedStartTime}
+                                        onChange={handleStartTimeChange}
                                         KeyboardButtonProps={{
                                             'aria-label': 'change time',
                                         }}
@@ -471,9 +737,9 @@ export default function CentralBar() {
                                     <KeyboardTimePicker
                                         margin="normal"
                                         id="end-time-picker"
-                                        label="Excursion End Time"
-                                        value={selectedDate}
-                                        onChange={handleDateChange}
+                                        label="Tour End Time"
+                                        value={selectedEndTime}
+                                        onChange={handleEndTimeChange}
                                         KeyboardButtonProps={{
                                             'aria-label': 'change time',
                                         }}
@@ -485,13 +751,15 @@ export default function CentralBar() {
                                     Seats
       </Typography>
                                 <Slider
-                                    defaultValue={1}
+                                    defaultValue={seats}
                                     getAriaValueText={valuetext}
                                     aria-labelledby="seats-slider"
                                     step={1}
                                     marks
                                     min={1}
                                     max={20}
+                                    value={seats}
+                                    onChange={handleChangeSeats}
                                     valueLabelDisplay="auto"
                                 />
                             </Grid>
@@ -500,8 +768,8 @@ export default function CentralBar() {
                                     Budget
       </Typography>
                                 <Slider
-                                    value={valueSlider}
-                                    onChange={handleChangeSlider}
+                                    value={unitPrice}
+                                    onChange={handleChangeUnitPrice}
                                     aria-labelledby="budget-slider"
                                     step={5}
                                     marks={marks}
@@ -511,82 +779,76 @@ export default function CentralBar() {
                                     getAriaValueText={valuetext}
                                 />
                             </Grid>
-                            <Grid item xs={12}>
-                                {
-                                    Categories.map((data) =>
-                                (
-                                    <Chip key={data.key}
-                                        color="primary"
-                                        variant={data.checked ? 'default' : 'outlined'}
-                                        label={data.label}
-                                        className="chip"
-                                        onClick={() => {
-                                            let category = [...Categories];
-                                            category[data.key].checked = !category[data.key]
-                                                .checked;
-                                            setCategories(category);
-                                        }}
-                                    />
-                                ))
-                                }
-                            </Grid>
+                            
+                        </Grid>
+                        <Grid item xs={12}>
+                            <br />
+                            
+                            <FormControlLabel control={<Switch
+                                checked={infos.bidOptIn}
+                                onChange={handleBidOptIn}
+                                color="primary"
+                                name="BidOptIn"
+                                inputProps={{ 'aria-label': 'primary checkbox' }}
+                            />} label="Is this post bidable ?" />
                         </Grid>
                     </div>
  
-                    <div className="col-lg-12 my-2">
-                        <Grid item xs={12}>
-                            <input type="file" className='input-file' id='file-init' accept=".png,.jpg"
-                                onChange={handleChangedFile} />
-                            <Button
-                                fullWidth
-                                variant="contained"
-                                color="default"
-                                onClick={e => document.getElementById('file-init').click()}
-                            >
-                                <PhotoLibraryIcon />
-                                <span>UPLOAD PHOTOS</span>
-                            </Button>
-                            <button id='data-sender' className='input-file' onClick={() =>
-                                dispatch({
-                                    type: "update-details",
-                                    data: {
-                                        files: values,
-                                        showPost: show,
-                                        description: document.getElementById("new-post-description").value,
-                                    }
-                                })
-                            } >
-                            </button>
-                        </Grid>
-                    </div>
-                    <br />
-                    <div className='container'>
-                        <div className="row uploaded-files">
-                            {state.files.map((path) => (<div className='col-12 col-lg-6' key={path.id}>
-                                <div className='card file-card' >
-                                    <div className='thumbnail' style={{ backgroundImage: `url(${path.href})` }}>
-                                        <div className='cancel-file'>
-                                            <IconButton onClick={() =>
-                                                dispatch({
-                                                    type: "remove-file",
-                                                    data: {
-                                                        idToRemove: path.id,
-                                                        files: state.files,
-                                                    }
-                                                })
-                                            }>
-                                                <RemoveCircleIcon />
-                                            </IconButton>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>))}
-                        </div>
-                    </div>
                     <br />
                     <br />
                     <div className="col-lg-12">
-                        {state.isButtonEnabled ? <Button fullWidth className='btn-publish' variant="contained" color="primary" type="button" >Publish</Button>
+                        <Grid item xs={12}>
+                            {
+                                Categories.map((data) =>
+                                    (
+                                        <Chip key={data.key}
+                                            color="primary"
+                                            variant={data.checked ? 'default' : 'outlined'}
+                                            label={data.label}
+                                            className="chip"
+                                            onClick={() => {
+                                                let category = [...Categories];
+                                                category[data.key].checked = !category[data.key]
+                                                    .checked;
+                                                setCategories(category);
+
+                                                if (category[data.key].checked == true) {
+                                                    cats.push(category[data.key].label);
+                                                    setCats(cats);
+                                                    setPostInfos({ ...infos, ['categories']: cats });
+                                            
+                                                }
+                                            }}
+                                        />
+                                    ))
+                            }
+                        </Grid>
+                        <br />
+                        <br />
+                        {btnEnabled ? <Button fullWidth className='btn-publish' variant="contained" color="primary" type="button"
+                            onClick={() =>
+                                dispatch({
+                                    type: "create-post",
+                                    data: {
+                                        description: infos.description,
+                                        geoLocation: infos.geoLocation,
+                                        date:infos.date,
+                                        startTime: infos.startTime,
+                                        endTime: infos.endTime,
+                                        seats: infos.seats,
+                                        unitPrice: infos.unitPrice,
+                                        itineraries: state.itineraries,
+                                        files: state.files,
+                                        categories: infos.categories,
+                                        bidOptIn: infos.bidOptIn,
+                                        callback: createNewPost,
+                                        showPost:true,
+                                    }
+                                })
+                            }
+                        >
+                            Publish
+                            </Button>
                             :
                             <Button fullWidth className='btn-disabled' variant="contained"  type="button" disabled >Publish</Button>
                         }

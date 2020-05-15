@@ -23,60 +23,6 @@ const buttonStyles = makeStyles(theme => ({
 }));
 
 
-function FollowingCard() {
-
-    
-    return (
-        <div className="container-fluid following-card">
-            <div>
-                <h6 className='text-muted'>Following (1200)</h6>
-                <br/>
-            </div>
-            <div className='row'>
-               
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-                <div className='col-4 follower-div'>
-                    <div className='follower-div-photo'>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-
-}
-
-
 function GalleryCard() {
 
     return (
@@ -136,7 +82,7 @@ function GalleryCard() {
 function Layout() {
 
     return (<div className='row justify-content-center'>
-        <div className="col-12 col-lg-8">
+        <div className="col-12">
             <GalleryCard />
             <GalleryCard />
             <GalleryCard />
