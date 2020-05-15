@@ -66,7 +66,7 @@ import { useAuthContext } from '../../api-authorization/AuthService';
 import authService from '../../api-authorization/AuthService';
 //import { PostsClient, PostUpdateModel } from '../../../api';
 import { HttpClientFactory } from '../../../httpclient';
-import { PostsClient, PostCreationModel } from '../../../api';
+import { PostsClient, PostCreationModel, ImageFileCreateModel, ItineraryModel } from '../../../api';
 
 const styles = {
     root: {
@@ -315,10 +315,10 @@ export default function CentralBar() {
     };
 
     useMemo(async () => {
-        const api = HttpClientFactory.getPostClient(user);
+        const api = HttpClientFactory.getPostClient();
         var result = await api.last10();
         setPosts(result);
-    }, [user]);
+    }, []);
 
 
     const [showComments, setShowComments] = React.useState(false);
@@ -350,8 +350,8 @@ export default function CentralBar() {
                 seats: state.seats,
                 unitPrice: state.priceRange,
                 categories: state.categories,
-                images: state.files,
-                itineraries: state.itineraries,
+                images: state.files.map(i => new ImageFileCreateModel({...i})),
+                itineraries: state.itineraries.map(i => new ItineraryModel({...i})),
                 bidOptIn: state.bidOptIn,
             });
 
@@ -363,9 +363,7 @@ export default function CentralBar() {
                
             }
             catch (e) {
-
-                return e;
-
+                console.log(e);
             }
 
         }
@@ -454,19 +452,25 @@ export default function CentralBar() {
         }
 
         function handleChangedFile(event) {
+            const blob = event.target.files[0];
+            var filePath = URL.createObjectURL(blob);
+            var reader = new window.FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = function () {
+                const base64data = reader.result;
+                console.log(base64data);
+                var file = {
+                    id: (state.files.length + 1),
+                    href: filePath,
+                    name: filePath,
+                    imageBase64: base64data,
+                }
 
-            var filePath = URL.createObjectURL(event.target.files[0]);
-
-            var file = {
-                id:(state.files.length + 1),
-                href: filePath,
-                name: filePath,
-                imageBase64: filePath,
+                state.files.push(file);
+                //setValues(values);
+                document.getElementById('data-sender').click();
             }
-
-            state.files.push(file);
-            //setValues(values);
-            document.getElementById('data-sender').click();
+            
         }
 
         function togglePost()
@@ -860,7 +864,6 @@ export default function CentralBar() {
 
     function PostImages(props)
     {
-
         if (props.images.length == 1)
         {
             return (<div className='row'>

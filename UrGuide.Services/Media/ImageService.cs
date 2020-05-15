@@ -37,51 +37,21 @@ namespace UrGuide.Services.Media
         {
             var base64String = imageFile.ImageUrl.Split(',')[1];
             var base64Image = Convert.FromBase64String(base64String);
-            var imageFormat = Image.DetectFormat(base64Image);
             using (var image = Image.Load(base64Image))
             {
                 var size = image.Size();
-                var imageEncoder = _formatManager.FindEncoder(imageFormat);
-                using var stream = new MemoryStream();
-                switch (imageEncoder)
-                {
-                    case JpegEncoder jpegEncoder:
-                        jpegEncoder.Subsample = JpegSubsample.Ratio444;
-                        jpegEncoder.Encode(image, stream);
-                        break;
-
-                    case PngEncoder pngEncoder:
-                        pngEncoder.ColorType = PngColorType.RgbWithAlpha;
-                        pngEncoder.Encode(image, stream);
-                        break;
-
-                    case BmpEncoder bmpEncoder:
-                        bmpEncoder.BitsPerPixel = BmpBitsPerPixel.Pixel32;
-                        bmpEncoder.Encode(image, stream);
-                        break;
-
-                    case GifEncoder gifEncoder:
-                        gifEncoder.Encode(image, stream);
-                        break;
-
-                    default:
-                        imageEncoder.Encode(image, stream);
-                        break;
-                }
-
-                using (var img = Image.Load(stream))
                 {
                     Image thumb;
                     Image imageToSave;
                     if (size.Width > size.Height) // image lanscape
                     {
-                        imageToSave = img.Clone(x => x.Resize(new Size(LandscapeImageWidth, LandscapeImageHeight)));
-                        thumb = img.Clone(x => x.Resize(new Size((LandscapeImageWidth / 3), (LandscapeImageHeight / 3))));
+                        imageToSave = image.Clone(x => x.Resize(new Size(LandscapeImageWidth, LandscapeImageHeight)));
+                        thumb = image.Clone(x => x.Resize(new Size((LandscapeImageWidth / 3), (LandscapeImageHeight / 3))));
                     }
                     else // portrait
                     {
-                        imageToSave = img.Clone(x => x.Resize(new Size(PortraitImageWidth, PortraitImageHeight)));
-                        thumb = img.Clone(x => x.Resize(new Size((PortraitImageWidth / 3), (PortraitImageHeight / 3))));
+                        imageToSave = image.Clone(x => x.Resize(new Size(PortraitImageWidth, PortraitImageHeight)));
+                        thumb = image.Clone(x => x.Resize(new Size((PortraitImageWidth / 3), (PortraitImageHeight / 3))));
                     }
 
                     string imageFileName = imageFile.Id + ".png";

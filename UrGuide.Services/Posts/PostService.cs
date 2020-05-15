@@ -52,12 +52,7 @@ namespace UrGuide.Services.Posts
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
 
             cancellationToken.ThrowIfCancellationRequested();
-            var post = await Context.Posts
-                .Include(x => x.Bid)
-                .ThenInclude(x => x.Author)
-                .Include(x => x.BidHistories)
-                .ThenInclude(x => x.Author)
-                .Include(x => x.Attributes).FirstOrDefaultAsync(x => x.Id == postId, cancellationToken);
+            var post = await Context.Posts.FirstOrDefaultAsync(x => x.Id == postId, cancellationToken);
             if (post == null)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
             try
@@ -214,12 +209,7 @@ New price: <em>{post.Bid.NewValue}</em>",
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
 
             cancellationToken.ThrowIfCancellationRequested();
-            var post = await Context.Posts
-                .Include(x => x.Bid)
-                .ThenInclude(x => x.Author)
-                .Include(x => x.BidHistories)
-                .ThenInclude(x => x.Author)
-                .Include(x => x.Attributes).FirstOrDefaultAsync(x => x.Id == model.PostId, cancellationToken);
+            var post = await Context.Posts.FirstOrDefaultAsync(x => x.Id == model.PostId, cancellationToken);
             if (post == null)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
 
@@ -269,12 +259,7 @@ New price: <em>{post.Bid.NewValue}</em>",
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
 
             cancellationToken.ThrowIfCancellationRequested();
-            var post = await Context.Posts
-                .Include(x => x.Bid)
-                .ThenInclude(x => x.Author)
-                .Include(x => x.BidHistories)
-                .ThenInclude(x => x.Author)
-                .Include(x => x.Attributes).FirstOrDefaultAsync(x => x.Id == postId, cancellationToken);
+            var post = await Context.Posts.FirstOrDefaultAsync(x => x.Id == postId, cancellationToken);
             if (post == null)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
             try
