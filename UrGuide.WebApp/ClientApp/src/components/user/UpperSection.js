@@ -1,9 +1,10 @@
-﻿import React from "react";
+﻿import React, { Component, useMemo } from "react";
 import {
     makeStyles,
     Button,
     IconButton,
-    Avatar
+    Avatar,
+    Grid
 } from "@material-ui/core";
 import { Link } from 'react-router-dom';
 import Rating from '@material-ui/lab/Rating';
@@ -12,8 +13,11 @@ import AddCircleIcon from '@material-ui/icons/AddCircle';
 import AppsIcon from '@material-ui/icons/Apps';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import NotesIcon from '@material-ui/icons/Notes';
-import { FaPlus } from 'react-icons/fa';
 import { FaRegCommentAlt } from 'react-icons/fa';
+import Skeleton from '@material-ui/lab/Skeleton';
+import { setTimeout } from 'timers';
+import { useAuthUser } from "../api-authorization/AuthService";
+import { HttpClientFactory } from './../../httpclient';
 import "./UserStyle.css";
 
 const useStyles = makeStyles((theme) => ({
@@ -28,50 +32,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const buttonStyles = makeStyles(theme => ({
-    root: {
-        '& > *': {
-            margin: theme.spacing(1),
-        },
-    },
-}));
 
-function ProfilePicture() {
-
-const classes = useStyles();
-
-    return (
-
-        <div>
-            <div className="row">
-
-                <div className="col-12">
-                    <div>
-                      
-                        <div className='row justify-content-center'>
-                            <div className='text-center col-12 col-sm-4 col-md-3 col-lg-2'>
-                                <h3 className='text-center'> <Avatar className='user-avatar' /></h3>
-                            </div>
-                            <div className='col-12 col-sm-6 col-md-5 col-lg-3'>
-                                <h2 className='user-name'>Jean Edgard Pilar</h2>
-                                <div>
-                                    <span className='user-profile-location'>Los Angeles, USA</span>
-                                </div>
-                                <h2 className='user-follow-button'>
-                                    <Button variant="contained" color="default" type="button">
-                                        <FaPlus /> <span className='btn-follow-title'> Follow</span>
-                                    </Button>
-                                </h2>
-                            </div>
-                        </div>
-                   </div>
-                </div>
-               
-          
-            </div>
-        </div>);
-
-}
 
 function ActivateLink(event) {
 
@@ -96,9 +57,7 @@ function ActivateLink(event) {
 
 }
 
-export function UpperSection() {
-
-    const classes = buttonStyles();
+function UpperSectionSkeleton() {
 
     return (
         <div>
@@ -106,36 +65,142 @@ export function UpperSection() {
                 <div className="col-12">
                     <div className='row' >
                         <div className='col-12'>
-                            <ProfilePicture />
+                            <div>
+                                <div className="row justify-content-center">
+
+                                    <div className="col-12 col-xl-3">
+                                        <div className='container'>
+                                            <Grid
+                                                container
+                                                spacing={0}
+                                                direction="column"
+                                                alignItems="center"
+                                                justify="center"
+
+                                            >
+                                                <Grid item xs={6}>
+                                                    <Skeleton animation="wave" variant="rect" style={{ width: `150px`, height: `150px`, borderRadius: `100px` }} />
+                                                </Grid>
+                                            </Grid>
+                                        </div>
+                                    </div>
+                                    <div className="col-12 col-xl-8" >
+                                        <br />
+                                        <br />
+                                        <h2 className='user-name'><Skeleton animation="wave" variant="rect" style={{ width: `250px`, height: `35px`, borderRadius: `0px` }} /></h2>
+                                        <span className='user-profile-location'><Skeleton animation="wave" variant="rect" style={{ width: `200px`, height: `20px`, borderRadius: `0px` }} /></span>
+                                        <br />
+                                        <br />
+                                        <p>
+                                            <Skeleton variant="text" style={{ width: `100%` }} />
+                                            <Skeleton variant="text" style={{ width: `100%` }} />
+                                            <Skeleton variant="text" style={{ width: `100%` }} />
+                    </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div className="nav-btn-div container">
                         <div className='row nav-btn-row justify-content-center' >
-                            <div className='col-12 col-lg-2 col-xl-2 nav-col text-center'>
+                            <Skeleton animation="wave" variant="rect" style={{ width: `100%`, height: `30px`, borderRadius: `0px`, marginBottom: `10px`, }} />
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    );
+}
+
+
+function RealUpperSection(props) {
+
+    console.log(props.profileImage);
+
+    return (
+        <div>
+            <div className="row upper-card">
+                <div className="col-12">
+                    <div className='row' >
+                        <div className='col-12'>
+                            <div>
+                                <div className="row justify-content-center">
+
+                                    <div className="col-12 col-xl-3">
+                                        <div className='container'>
+                                            <Grid
+                                                container
+                                                spacing={0}
+                                                direction="column"
+                                                alignItems="center"
+                                                justify="center"
+
+                                            >
+                                                <Grid item xs={6}>
+                                                    <Avatar className='user-avatar' alt={props.name} src={props.profileImage} />
+                                                </Grid>
+                                            </Grid>
+                                        </div>
+                                    </div>
+                                    <div className="col-12 col-xl-8" >
+                                        <br />
+                                        <br />
+                                        <h2 className='user-name'>{props.name}</h2>
+                                        <span className='user-profile-location' >{ props.isGuide ? props.location : null }</span>
+                                        <br />
+                                        <br />
+                                        <p>
+                                            { props.isGuide ? props.description : null }
+                                         </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="nav-btn-div container">
+                        <div className='row nav-btn-row justify-content-center' >
+                            <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
                                 <Link style={{ textDecoration: `none` }} tag={Link}  to="/user" color="primary" onClick={(e) => ActivateLink(e)} >
                                     <NotesIcon fontSize="small" /> <span className='btn-title'>Posts (104)</span>
                                 </Link>
                             </div>
-                            <div className='col-12 col-lg-2 col-xl-2 nav-col text-center'>
-                                <Link style={{ textDecoration: `none` }} tag={Link}  to="/user/galleries" color="primary" onClick={(e) => ActivateLink(e)} >
+                            { props.isGuide ? <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                <Link style={{ textDecoration: `none` }} tag={Link} to="/user/galleries" color="primary" onClick={(e) => ActivateLink(e)} >
                                     <AppsIcon fontSize="small" /> <span className='btn-title'>Galleries (7)</span>
                                 </Link>
                             </div>
-                            <div className='col-12 col-lg-2 col-xl-2 nav-col text-center'>
-                                <Link style={{ textDecoration: `none` }} tag={Link} to="/user" color="primary" onClick={(e) => ActivateLink(e)} >
-                                    <FaRegCommentAlt fontSize="large" /> <span className='btn-title'>Reviews (104)</span>
-                                </Link>
-                            </div>
-                            <div className='col-12 col-lg-2 col-xl-2 nav-col text-center'>
+                                :
+                                null
+                            }
+
+                            {
+                                props.isGuide    ?
+                                <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                    <Link style={{ textDecoration: `none` }} tag={Link} to="/user" color="primary" onClick={(e) => ActivateLink(e)} >
+                                        <FaRegCommentAlt fontSize="large" /> <span className='btn-title'>Reviews (104)</span>
+                                    </Link>
+                                </div>
+                                : 
+                            null
+                           }
+                            <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
                                 <Link style={{ textDecoration: `none` }} tag={Link}  to="/user/edit/profile" color="primary" onClick={(e) => ActivateLink(e)} >
                                     <EditIcon fontSize="small" /> <span className='btn-title'>Edit profile</span>
                                 </Link>
                             </div>
-                            <div className='col-12  col-lg-2 col-xl-2 nav-col text-center'>
-                                <Link style={{ textDecoration: `none` }} tag={Link}  to="/user/gallery/new" color="primary" onClick={(e) => ActivateLink(e)} >
-                                    <PhotoCameraIcon fontSize="small" /> <span className='btn-title'>New Gallery</span>
-                                </Link>
-                            </div>
+
+                            {
+                                props.isGuide ?
+                                    <div className='col-12 col-sm-6 col-md-2  col-lg-2 col-xl-2 nav-col text-center'>
+                                        <Link style={{ textDecoration: `none` }} tag={Link} to="/user/gallery/new" color="primary" onClick={(e) => ActivateLink(e)} >
+                                            <PhotoCameraIcon fontSize="small" /> <span className='btn-title'>New Gallery</span>
+                                        </Link>
+                                    </div>
+                                    :
+                                    null
+                            }
+                           
                         </div>
                     </div>
                   
@@ -143,4 +208,52 @@ export function UpperSection() {
             </div>
         </div>
     );
+}
+
+export default function UpperSection()
+{
+
+    const user = useAuthUser();
+
+    const [values, setValues] = React.useState({
+        userId: null,
+        profileImage: null,
+        username: null,
+        location: null,
+        description: null,
+        isGuide:false,
+        loading: true,
+    });
+
+    useMemo(async () => {
+        if (!user)
+            return;
+        var client = HttpClientFactory.getClient(user);
+        var data = await client.getdetails();
+        const timer = setTimeout(() => {
+            setValues({
+                userId: data.id,
+                profileImage: data.profileImage,
+                username: `${data.firstName} ${data.lastName}`,
+                location: `${data.city}, ${data.country}`,
+                description: data.description,
+                isGuide: data.isGuide,
+                loading: false
+            });
+
+        }, 4100);
+
+        return () => clearTimeout(timer);
+
+    }, [user]);
+
+    const content = <RealUpperSection userId={values.userId} profileImage={values.profileImage} name={values.username} location={values.location} description={values.description} isGuide={values.isGuide} />
+
+        return (
+              <>
+                {values.loading ? <UpperSectionSkeleton />
+                    : content}
+            </>
+        );
+
 }

@@ -1957,6 +1957,7 @@ export class User implements IUser {
     profileImage?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
+    gender?: string | undefined;
     birthDay?: string | undefined;
     city?: string | undefined;
     country?: string | undefined;
@@ -1989,6 +1990,7 @@ export class User implements IUser {
             this.profileImage = _data["profileImage"];
             this.firstName = _data["firstName"];
             this.lastName = _data["lastName"];
+            this.gender = _data["gender"];
             this.birthDay = _data["birthDay"];
             this.city = _data["city"];
             this.country = _data["country"];
@@ -2021,6 +2023,7 @@ export class User implements IUser {
         data["profileImage"] = this.profileImage;
         data["firstName"] = this.firstName;
         data["lastName"] = this.lastName;
+        data["gender"] = this.gender;
         data["birthDay"] = this.birthDay;
         data["city"] = this.city;
         data["country"] = this.country;
@@ -2046,6 +2049,7 @@ export interface IUser {
     profileImage?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
+    gender?: string | undefined;
     birthDay?: string | undefined;
     city?: string | undefined;
     country?: string | undefined;
@@ -2066,6 +2070,7 @@ export interface IUser {
 }
 
 export class UpdateGuideModel implements IUpdateGuideModel {
+    id?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
     address?: string | undefined;
@@ -2088,6 +2093,7 @@ export class UpdateGuideModel implements IUpdateGuideModel {
 
     init(_data?: any) {
         if (_data) {
+            this.id = _data["id"];
             this.firstName = _data["firstName"];
             this.lastName = _data["lastName"];
             this.address = _data["address"];
@@ -2110,6 +2116,7 @@ export class UpdateGuideModel implements IUpdateGuideModel {
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
         data["firstName"] = this.firstName;
         data["lastName"] = this.lastName;
         data["address"] = this.address;
@@ -2125,6 +2132,7 @@ export class UpdateGuideModel implements IUpdateGuideModel {
 }
 
 export interface IUpdateGuideModel {
+    id?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
     address?: string | undefined;

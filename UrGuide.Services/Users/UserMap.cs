@@ -11,6 +11,7 @@ namespace UrGuide.Services.Users
                 .ForMember(u => u.ProfileImage, x => x.MapFrom(f => f.ProfileImage.ImageUrl))
                 .ForMember(u => u.FullName, x => x.MapFrom(f => f.FullName))
                 .ForMember(u => u.UserName, x => x.MapFrom(f => f.Attributes.First(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.UserName))))
+                 .ForMember(u => u.Gender, x => x.MapFrom(f => f.Attributes.First(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Gender))))
                 .ForMember(u => u.PhoneNumber, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Phone))))
                 .ForMember(u => u.Twitter, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Twitter))))
                 .ForMember(u => u.LinkedIn, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.LinkedIn))))

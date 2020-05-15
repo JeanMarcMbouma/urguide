@@ -14,13 +14,13 @@ import {
     Button,
 
 } from "@material-ui/core";
-import ChangePasswordContext from "./changepassword/ChangePasswordContext";
-import ChangePasswordReducer from "./changepassword/ChangePasswordReducer";
+import ChangePasswordContext from "./profile/ChangePasswordContext";
+import ChangePasswordReducer from "./profile/ChangePasswordReducer";
 import EditProfileNavigation from "./EditProfileNavigation";
 import { Visibility, VisibilityOff, AccountCircle } from "@material-ui/icons";
-import { useAuthContext, useAuth, useAuthUser } from '../api-authorization/AuthService';
+import { useAuthUser } from '../api-authorization/AuthService';
 import Alert from '@material-ui/lab/Alert';
-import { ChangePasswordModel, ApiException } from './../../api';
+import { ChangePasswordModel } from './../../api';
 import { HttpClientFactory } from './../../httpclient';
 import clsx from "clsx";
 import "./UserStyle.css";

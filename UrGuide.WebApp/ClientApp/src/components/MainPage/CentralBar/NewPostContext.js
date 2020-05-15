@@ -2,18 +2,21 @@
 
 const NewPostContext = createContext({
     showPost:false,
-    email: null,
+    text: 'Some Dummy Text!',
     description: null,
-    location: null,
-    date: false,
+    geoLocation: null,
+    date: new Date(),
     startTime: false,
     endTime: null,
     seats: 0,
-    budget: 0,
-    categories: null,
+    unitPrice: 0,
+    categories:[],
     files: [],
     idToRemove: null,
-    isButtonEnabled:false,
+    itineraries: [],
+    priceRange: '',
+    bidOptIn:true,
+ 
 });
 
 export default NewPostContext;
