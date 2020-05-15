@@ -226,7 +226,7 @@ namespace UrGuide.Services.Users
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var user = await Context.Users.FindAsync(UserContext.UserId);
+            var user = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
             if (updateGuide.ProfileImage != null)
             {
                 var imageUrl = ImageService.SaveAvatar(UserContext.UserId, new Model.Shared.ImageFileModel
