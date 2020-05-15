@@ -4,6 +4,8 @@
     {
       
         public string Id { get; set; }
-        public string ImageBase64 { get; set; }
+        public string ImageUrl { get; set; }
+
+        public static implicit operator string(Image image) => image.ImageUrl;
     }
 }

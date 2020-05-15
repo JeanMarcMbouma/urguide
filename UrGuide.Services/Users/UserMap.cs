@@ -8,7 +8,7 @@ namespace UrGuide.Services.Users
         public UserMap()
         {
             CreateMap<Data.Entities.Users.User, Model.Users.User>()
-                .ForMember(u => u.ProfileImage, x => x.MapFrom(f => f.ProfileImage.ImageBase64))
+                .ForMember(u => u.ProfileImage, x => x.MapFrom(f => f.ProfileImage.ImageUrl))
                 .ForMember(u => u.FullName, x => x.MapFrom(f => f.FullName))
                 .ForMember(u => u.UserName, x => x.MapFrom(f => f.Attributes.First(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.UserName))))
                  .ForMember(u => u.Gender, x => x.MapFrom(f => f.Attributes.First(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Gender))))
@@ -26,6 +26,7 @@ namespace UrGuide.Services.Users
                 .ForMember(u => u.City, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.City))))
                 .ForMember(u => u.Country, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Country))))
                 .ForMember(u => u.Description, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Description))))
+                .ForMember(u => u.Gender, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Gender))))
                 .ForMember(u => u.IsGuide, x => x.MapFrom(f =>
                     f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.GuideOptIn)
                     && a.Value == Constants.Yes)))

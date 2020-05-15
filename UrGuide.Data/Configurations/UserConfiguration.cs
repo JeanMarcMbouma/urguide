@@ -20,7 +20,7 @@ namespace UrGuide.Data.Configurations
                 p.WithOwner().HasForeignKey("UserId");
                 p.HasKey(x => x.Id).HasName("PK_User_Images");
                 p.Property(x => x.Id).HasDefaultValueSql(Constants.GuidFn);
-                p.Property(x => x.ImageBase64).IsRequired();
+                p.Property(x => x.ImageUrl).HasColumnName("ImageBase64").IsRequired();
             });
             builder.OwnsMany(x => x.Attributes, a =>
             {

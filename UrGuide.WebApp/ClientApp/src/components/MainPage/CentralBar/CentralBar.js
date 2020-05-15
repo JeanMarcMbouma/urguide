@@ -556,7 +556,7 @@ export default function CentralBar() {
                     <div className="col-lg-12 d-flex justify-content-start my-4">
                         <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
                         <Typography className="m-0 px-4" variant="h6">
-                            {profile.name}
+                            {profile.given_name}
                         </Typography>
                     </div>
 

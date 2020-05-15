@@ -21,7 +21,7 @@ namespace UrGuide.Data.Configurations
                 i.WithOwner().HasForeignKey("Image_CatalogId");
                 i.HasKey(x => x.Id).HasName("PK_Image_Catalog_Files");
                 i.Property(x => x.Id).HasDefaultValueSql(Constants.GuidFn);
-                i.Property(x => x.ImageBase64).HasColumnName("FileBase64").IsRequired();
+                i.Property(x => x.ImageUrl).HasColumnName("FileBase64").IsRequired();
                 i.Property(x => x.MimeType).IsRequired();
                 i.OwnsMany(x => x.Attributes, a =>
                 {

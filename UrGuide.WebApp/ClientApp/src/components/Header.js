@@ -12,7 +12,8 @@ import "./NavMenu.css";
 import { NavbarBrand } from 'reactstrap';
 import NotificationsBox from './NotificationsBox';
 import { Avatar } from '@material-ui/core';
-//import {AuthenticationContext, useReactOidc} from '@axa-fr/react-oidc-context';
+import { useAuthContext } from './api-authorization/AuthService';
+import { FiLogOut } from 'react-icons/fi';
 
 const useStyles = makeStyles (() => ({
   header: {
@@ -64,8 +65,16 @@ function Header() {
 
     const [show, setShow] = useState(false);
 
+    const { manager, user } = useAuthContext();
+
     function ToggleNotifications() {
          setShow(!show);
+    }
+
+    async function signOut(e) {
+        e.preventDefault();
+        await manager.signOut();
+        return false;
     }
 
     const classes = useStyles();
@@ -118,12 +127,19 @@ function Header() {
                                 </Link>
 
                                 <div className='col-4 col-md-3 col-lg-4 username'>
-                                    <span>MrIhor</span>
+                                    <span>{ user.profile.given_name }</span>
                                 </div>
-                                <div className='col-1 col-sm-1' >
-                                    <IconButton onClick={ToggleNotifications}>
-                                        <NotificationsNoneOutlinedIcon />
-                                    </IconButton>
+                                <div className='col-1 col-sm-1 d-flex justify-content-between' >
+                                    <div>
+                                        <IconButton onClick={ToggleNotifications}>
+                                            <NotificationsNoneOutlinedIcon />
+                                        </IconButton>
+                                    </div>
+                                    <div>
+                                        <IconButton onClick={signOut}>
+                                            <FiLogOut />
+                                        </IconButton>
+                                    </div>
                                 </div>
                             </div>
                         </div>

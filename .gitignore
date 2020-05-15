@@ -16,3 +16,5 @@ OBJ
 Obj
 *.cache
 *.FileListAbsolute.txt
+**/public/images/*.*
+**/public/thumb/*.*

@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.WebUtilities;
 using System;
+using System.IO;
 using UrGuide.Shared;
 using UrGuide.Shared.Contracts;
 
@@ -10,12 +12,24 @@ namespace UrGuide.WebApp.Services
 {
     public class WebHelper : IWebHelper
     {
-        public WebHelper(IHttpContextAccessor httpContext)
+        private readonly IWebHostEnvironment _environment;
+
+        public WebHelper(IHttpContextAccessor httpContext, IWebHostEnvironment environment)
         {
             HC = httpContext ?? throw new ArgumentNullException(nameof(httpContext));
+            _environment = environment ?? throw new ArgumentNullException(nameof(environment));
         }
         
         public IHttpContextAccessor HC { get; }
+
+        public string ImageDirectoryPath => Path.Combine(_environment.ContentRootPath, "ClientApp/public/images");
+
+        public string ThumbImageDirectoryPath => Path.Combine(_environment.ContentRootPath, "ClientApp/public/thumb");
+
+        public string ResolveImageUrl(string imageFileName)
+        {
+            return $"images/{imageFileName}";
+        }
 
         public string ResolveUrl(MessageTypes confirmation, object values)
         {

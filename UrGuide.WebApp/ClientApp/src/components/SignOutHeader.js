@@ -45,7 +45,7 @@ function SignOutHeader() {
                 <div className="container-fluid" >
                     <div className="row justify-content-between navbarRow">
                         <div className="col-6 col-sm-3 col-lg-3">
-                            <NavbarBrand tag={Link} to="/" className={(classes.font)}>UrGuide</NavbarBrand>
+                            <NavbarBrand href="/" className={(classes.font)}>UrGuide</NavbarBrand>
                         </div>
                         <div className="col-6 col-sm-6 col-md-6 col-lg-4"  >
                             <div className='row justify-content-end signout-links-row'>
