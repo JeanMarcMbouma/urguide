@@ -67,6 +67,7 @@ import authService from '../../api-authorization/AuthService';
 //import { PostsClient, PostUpdateModel } from '../../../api';
 import { HttpClientFactory } from '../../../httpclient';
 import { PostsClient, PostCreationModel, ImageFileCreateModel, ItineraryModel } from '../../../api';
+import { BlobToBase64 } from '../../../helpers/fileHelpers';
 
 const styles = {
     root: {
@@ -453,24 +454,17 @@ export default function CentralBar() {
 
         function handleChangedFile(event) {
             const blob = event.target.files[0];
-            var filePath = URL.createObjectURL(blob);
-            var reader = new window.FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = function () {
-                const base64data = reader.result;
-                console.log(base64data);
+            BlobToBase64(blob, (fileName, base64Url, blobUrl) => {
                 var file = {
                     id: (state.files.length + 1),
-                    href: filePath,
-                    name: filePath,
-                    imageBase64: base64data,
+                    href: blobUrl,
+                    name: fileName,
+                    imageBase64: base64Url,
                 }
 
                 state.files.push(file);
-                //setValues(values);
                 document.getElementById('data-sender').click();
-            }
-            
+            });
         }
 
         function togglePost()

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UrGuide.Data.Entities.Posts;
+using UrGuide.Data.Entities.Shared;
 
 namespace UrGuide.Data.Configurations
 {

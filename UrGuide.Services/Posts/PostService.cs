@@ -190,6 +190,8 @@ New price: <em>{post.Bid.NewValue}</em>",
             var geo = await IPStackService.GetLocationAsync(UserContext);
 
             var posts = await Context.Posts
+                            .Include(x => x.Catalog)
+                            .Include(x => x.User)
                             .Where(x => x.Location == null || geo == null || x.Location.Distance(geo) <= Constants.Distance)
                             .OrderByDescending(x => x.LastUpdated)
                             .Skip(offset)
@@ -334,7 +336,10 @@ Your bid: <em>{value}</em>",
         {
             var geo = await IPStackService.GetLocationAsync(UserContext);
 
-            var posts = await Context.Posts
+            var posts = await Context
+                            .Posts
+                            .Include(x => x.Catalog)
+                            .Include(x => x.User)
                             .Where(x => x.Location == null || geo == null || x.Location.Distance(geo) <= Constants.Distance)
                             .OrderByDescending(x => x.Attributes.First(a => a.Name == nameof(AttributeTypes.Rating)).Value)
                             .Skip(offset)

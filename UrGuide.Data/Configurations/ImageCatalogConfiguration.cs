@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using UrGuide.Data.Entities.Posts;
 using UrGuide.Data.Entities.Shared;
 
 namespace UrGuide.Data.Configurations
@@ -15,6 +16,11 @@ namespace UrGuide.Data.Configurations
             builder.Property(x => x.LastUpdated);
             builder.HasOne(x => x.User)
                 .WithMany().HasForeignKey("UserId");
+
+            builder.HasOne(x => x.Post)
+                .WithOne(p => p.Catalog)
+                .HasForeignKey<Post>(x => x.CatalogRef);
+
             builder.Property(x => x.Location);
             builder.OwnsMany(x => x.Images, i => {
                 i.ToTable("Image_Catalog_Files", Constants.Schema);

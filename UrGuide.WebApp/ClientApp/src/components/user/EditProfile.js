@@ -25,6 +25,7 @@ import "./UserStyle.css";
 import { useAuthUser } from "../api-authorization/AuthService";
 import { UpdateGuideModel } from './../../api';
 import { HttpClientFactory } from './../../httpclient';
+import { BlobToBase64 } from "../../helpers/fileHelpers";
 
 function Profile() {
 
@@ -131,14 +132,12 @@ function Profile() {
     }
 
     function handleChange(event) {
-        var file = URL.createObjectURL(event.target.files[0]);
+        const blob = event.target.files[0];
+        BlobToBase64(blob, (fileName, base64Url, blobUrl) => {
+            document.getElementById("pic-previewer").src = blobUrl;
 
-        document.getElementById("pic-previewer").src = `${file}`;
-          //  "url('" + file + "')";
-
-        setValues({ ...values, ['profileImage']: file });
-
-        console.log(values.profileImage);
+            setValues({ ...values, ['profileImage']: base64Url });
+        });
     }
 
 

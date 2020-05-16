@@ -32,6 +32,7 @@ namespace UrGuide.Data.Entities.Posts
         public virtual ICollection<Feedback> Feedback { get; protected set; }
         public virtual ICollection<Itinerary> Itineraries { get; protected set; }
         public virtual Bid Bid { get; set; }
+        public string CatalogRef { get; protected set; }
         public virtual ImageCatalog Catalog { get; set; }
         public virtual User User { get; set; }
         public virtual Point Location { get; set; }
