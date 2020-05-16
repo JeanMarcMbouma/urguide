@@ -55,6 +55,15 @@ namespace UrGuide.Services.Media
                     }
 
                     string imageFileName = imageFile.Id + ".png";
+                    if (!Directory.Exists(WebHelper.ImageDirectoryPath))
+                    {
+                        Directory.CreateDirectory(WebHelper.ImageDirectoryPath);
+                    }
+
+                    if (!Directory.Exists(WebHelper.ThumbImageDirectoryPath))
+                    {
+                        Directory.CreateDirectory(WebHelper.ThumbImageDirectoryPath);
+                    }
                     var imagePath = System.IO.Path.Combine(WebHelper.ImageDirectoryPath, imageFileName);
                     var thumbPath = System.IO.Path.Combine(WebHelper.ThumbImageDirectoryPath, imageFileName);
                     imageToSave.Save(imagePath);

@@ -513,9 +513,6 @@ namespace UrGuide.Data.Migrations
                                 .HasColumnType("nvarchar(450)")
                                 .HasDefaultValueSql("NEWID()");
 
-                            b1.Property<string>("ImageCatalogId")
-                                .HasColumnType("nvarchar(450)");
-
                             b1.Property<string>("ImageUrl")
                                 .IsRequired()
                                 .HasColumnName("FileBase64")
@@ -532,15 +529,9 @@ namespace UrGuide.Data.Migrations
                             b1.HasKey("Id")
                                 .HasName("PK_Image_Catalog_Files");
 
-                            b1.HasIndex("ImageCatalogId");
-
                             b1.HasIndex("Image_CatalogId");
 
                             b1.ToTable("Image_Catalog_Files","ug");
-
-                            b1.HasOne("UrGuide.Data.Entities.Shared.ImageCatalog", "ImageCatalog")
-                                .WithMany()
-                                .HasForeignKey("ImageCatalogId");
 
                             b1.WithOwner()
                                 .HasForeignKey("Image_CatalogId");

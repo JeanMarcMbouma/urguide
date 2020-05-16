@@ -15,6 +15,7 @@ using AspNetCoreRateLimit;
 using System.Collections.Generic;
 using static IdentityModel.OidcConstants;
 using IdentityModel;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace UrGuide.WebApp
 {
@@ -100,6 +101,10 @@ namespace UrGuide.WebApp
             app.UseIpRateLimiting();
 
             app.UseHttpsRedirection();
+            app.UseForwardedHeaders(new ForwardedHeadersOptions { 
+                ForwardedHeaders = ForwardedHeaders.XForwardedProto
+            });
+
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 

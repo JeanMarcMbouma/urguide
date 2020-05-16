@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.SpaServices.StaticFiles;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using UrGuide.Shared;
@@ -14,17 +16,19 @@ namespace UrGuide.WebApp.Services
     {
         private readonly IWebHostEnvironment _environment;
 
-        public WebHelper(IHttpContextAccessor httpContext, IWebHostEnvironment environment)
+        public WebHelper(IHttpContextAccessor httpContext, IWebHostEnvironment environment, IOptions<SpaStaticFilesOptions> spaOptions)
         {
             HC = httpContext ?? throw new ArgumentNullException(nameof(httpContext));
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+            SpaOptions = spaOptions ?? throw new ArgumentNullException(nameof(spaOptions));
         }
         
         public IHttpContextAccessor HC { get; }
+        public IOptions<SpaStaticFilesOptions> SpaOptions { get; }
 
-        public string ImageDirectoryPath => Path.Combine(_environment.ContentRootPath, "ClientApp/public/images");
+        public string ImageDirectoryPath => Path.Combine(_environment.ContentRootPath, SpaOptions.Value.RootPath, "images");
 
-        public string ThumbImageDirectoryPath => Path.Combine(_environment.ContentRootPath, "ClientApp/public/thumb");
+        public string ThumbImageDirectoryPath => Path.Combine(_environment.ContentRootPath, SpaOptions.Value.RootPath, "thumb");
 
         public string ResolveImageUrl(string imageFileName)
         {
