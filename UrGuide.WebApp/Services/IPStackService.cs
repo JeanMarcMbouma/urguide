@@ -38,23 +38,23 @@ namespace UrGuide.WebApp.Services
 
         class ApiResponse
         {
-            public double Longitude { get; set; }
-            public double Latitude { get; set; }
+            public double? Longitude { get; set; }
+            public double? Latitude { get; set; }
             [JsonProperty("country_name")]
             public string Country { get; set; }
             public string City { get; set; }
             public string ZipCode { get; set; }
 
             public static implicit operator IPStackInfo(ApiResponse response)
-            {
-                return new IPStackInfo
+            { 
+                return response.Longitude.HasValue ? new IPStackInfo
                 {
                     City = response.City,
                     Country = response.Country,
-                    Latitude = response.Latitude,
-                    Longitude = response.Longitude,
+                    Latitude = response.Latitude.Value,
+                    Longitude = response.Longitude.Value,
                     ZipCode = response.ZipCode
-                };
+                } : null;
             }
         }
     }
