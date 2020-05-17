@@ -2481,8 +2481,10 @@ export class PostModel implements IPostModel {
     lastBid?: string | undefined;
     status?: string | undefined;
     seats?: number;
+    reservedSeats?: number;
     startDate?: string | undefined;
     endDate?: string | undefined;
+    endTime?: string | undefined;
     startTime?: string | undefined;
     readonly categories?: string[] | undefined;
     readonly images?: ImageFileModel[] | undefined;
@@ -2514,8 +2516,10 @@ export class PostModel implements IPostModel {
             this.lastBid = _data["lastBid"];
             this.status = _data["status"];
             this.seats = _data["seats"];
+            this.reservedSeats = _data["reservedSeats"];
             this.startDate = _data["startDate"];
             this.endDate = _data["endDate"];
+            this.endTime = _data["endTime"];
             this.startTime = _data["startTime"];
             if (Array.isArray(_data["categories"])) {
                 (<any>this).categories = [] as any;
@@ -2555,8 +2559,10 @@ export class PostModel implements IPostModel {
         data["lastBid"] = this.lastBid;
         data["status"] = this.status;
         data["seats"] = this.seats;
+        data["reservedSeats"] = this.reservedSeats;
         data["startDate"] = this.startDate;
         data["endDate"] = this.endDate;
+        data["endTime"] = this.endTime;
         data["startTime"] = this.startTime;
         if (Array.isArray(this.categories)) {
             data["categories"] = [];
@@ -2589,8 +2595,10 @@ export interface IPostModel {
     lastBid?: string | undefined;
     status?: string | undefined;
     seats?: number;
+    reservedSeats?: number;
     startDate?: string | undefined;
     endDate?: string | undefined;
+    endTime?: string | undefined;
     startTime?: string | undefined;
     categories?: string[] | undefined;
     images?: ImageFileModel[] | undefined;

@@ -23,8 +23,10 @@ namespace UrGuide.Model.Posts
         public string LastBid { get; set; }
         public string Status { get; set; }
         public int Seats { get; set; }
+        public int ReservedSeats { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
+        public string EndTime { get; set; }
         public string StartTime { get; set; }
 
         public ICollection<string> Categories { get; protected set; }
