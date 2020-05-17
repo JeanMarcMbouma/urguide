@@ -50,7 +50,7 @@ namespace UrGuide.Services.Posts
 
             CreateMap<BidHistory, BidHistoryModel>()
                 .ForMember(x => x.Value, x => x.MapFrom(y => y.Value))
-                .ForMember(x => x.Created, x => x.MapFrom(y => y.Created.ToString("dd-MMM-yyyy")))
+                .ForMember(x => x.Created, x => x.MapFrom(y => y.Created.ToString("dd-MMM-yyyy HH:mm")))
                 .ForMember(x => x.Author, x => x.MapFrom(y => y.Author.FullName))
                 .ForMember(x => x.AuthorImage, x => x.MapFrom(y => y.Author.ProfileImage));
         }
