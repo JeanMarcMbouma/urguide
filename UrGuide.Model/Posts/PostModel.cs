@@ -28,9 +28,9 @@ namespace UrGuide.Model.Posts
         public string EndDate { get; set; }
         public string EndTime { get; set; }
         public string StartTime { get; set; }
-
+        public bool HasReserved { get; set; }
+        public bool HasReacted { get; set; }
         public ICollection<string> Categories { get; protected set; }
-
         public ICollection<ImageFileModel> Images { get; protected set; }
         public string AuthorId { get; set; }
         public string Author { get; set; }

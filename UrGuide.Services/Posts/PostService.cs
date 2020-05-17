@@ -77,7 +77,7 @@ New price: <em>{post.Bid.NewValue}</em>",
                     To = authorEmail,
                     ToName = authorFirstName
                 });
-                return Result.Of(Mapper.Map<PostModel>(post));
+                return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
             }
             catch (Exception e)
             {
@@ -155,7 +155,7 @@ New price: <em>{post.Bid.NewValue}</em>",
             }
             await Context.SaveChangesAsync(cancellationToken);
 
-            return Result.Of(Mapper.Map<PostModel>(post));
+            return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
         }
 
         public async Task<Result<bool>> DeletePostAsync(string id, CancellationToken cancellationToken)
@@ -196,7 +196,7 @@ New price: <em>{post.Bid.NewValue}</em>",
                             .OrderByDescending(x => x.LastUpdated)
                             .Skip(offset)
                             .Take(size).AsNoTracking().ToListAsync(cancellationToken);
-            return Result.Of(Mapper.Map<IEnumerable<PostModel>>(posts));
+            return Result.Of(Mapper.Map<IEnumerable<PostModel>>(PostVisitor.Visit(posts, UserContext.UserId)));
         }
 
         public Task<Result<IEnumerable<PostModel>>> GetLast100PostsAsync(CancellationToken cancellationToken)
@@ -245,7 +245,7 @@ New price: <em>{post.Bid.NewValue}</em>",
                     ToName = authorFirstName
                 });
 
-                return Result.Of(Mapper.Map<PostModel>(post));
+                return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
             }
             catch (Exception e)
             {
@@ -284,7 +284,7 @@ Your bid: <em>{value}</em>",
                     To = authorEmail,
                     ToName = authorFirstName
                 });
-                return Result.Of(Mapper.Map<PostModel>(post));
+                return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
             }
             catch (Exception e)
             {
@@ -343,7 +343,7 @@ Your bid: <em>{value}</em>",
                             .OrderByDescending(x => x.Attributes.First(a => a.Name == nameof(AttributeTypes.Rating)).Value)
                             .Skip(offset)
                             .Take(size).AsNoTracking().ToListAsync(cancellationToken);
-            return Result.Of(Mapper.Map<IEnumerable<PostModel>>(posts));
+            return Result.Of(Mapper.Map<IEnumerable<PostModel>>(PostVisitor.Visit(posts, UserContext.UserId)));
         }
 
         public async Task<Result<bool>> ReserveSeatsAsync(SeatReservationModel seatReservation, CancellationToken cancellationToken)

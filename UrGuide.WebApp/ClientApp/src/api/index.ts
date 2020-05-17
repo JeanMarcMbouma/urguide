@@ -2486,6 +2486,8 @@ export class PostModel implements IPostModel {
     endDate?: string | undefined;
     endTime?: string | undefined;
     startTime?: string | undefined;
+    hasReserved?: boolean;
+    hasReacted?: boolean;
     readonly categories?: string[] | undefined;
     readonly images?: ImageFileModel[] | undefined;
     authorId?: string | undefined;
@@ -2521,6 +2523,8 @@ export class PostModel implements IPostModel {
             this.endDate = _data["endDate"];
             this.endTime = _data["endTime"];
             this.startTime = _data["startTime"];
+            this.hasReserved = _data["hasReserved"];
+            this.hasReacted = _data["hasReacted"];
             if (Array.isArray(_data["categories"])) {
                 (<any>this).categories = [] as any;
                 for (let item of _data["categories"])
@@ -2564,6 +2568,8 @@ export class PostModel implements IPostModel {
         data["endDate"] = this.endDate;
         data["endTime"] = this.endTime;
         data["startTime"] = this.startTime;
+        data["hasReserved"] = this.hasReserved;
+        data["hasReacted"] = this.hasReacted;
         if (Array.isArray(this.categories)) {
             data["categories"] = [];
             for (let item of this.categories)
@@ -2600,6 +2606,8 @@ export interface IPostModel {
     endDate?: string | undefined;
     endTime?: string | undefined;
     startTime?: string | undefined;
+    hasReserved?: boolean;
+    hasReacted?: boolean;
     categories?: string[] | undefined;
     images?: ImageFileModel[] | undefined;
     authorId?: string | undefined;
