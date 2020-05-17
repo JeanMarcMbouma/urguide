@@ -13,14 +13,4 @@ namespace UrGuide.Services.Posts
             RuleFor(x => x.Images).Must(f => f.Count <= Constants.MaxImageCountPerPost).WithMessage($"You cannot upload more than {Constants.MaxImageCountPerPost} images");
         }
     }
-
-    class ItineraryModelValidation : AbstractValidator<ItineraryModel>
-    {
-        public ItineraryModelValidation()
-        {
-            RuleFor(x => x.Title).NotEmpty();
-            RuleFor(x => x.Description).NotEmpty();
-            RuleFor(x => x.Ordinal).GreaterThan(0);
-        }
-    }
 }

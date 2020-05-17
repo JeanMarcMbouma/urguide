@@ -52,6 +52,8 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<IValidator<Model.Posts.PostCreationModel>, PostCreationModelValidation>();
             services.AddTransient<IValidator<Model.Posts.PostUpdateModel>, PostUpdateModelValidation>();
             services.AddTransient<IValidator<Model.Posts.BidModel>, BidModelValidation>();
+            services.AddTransient<IValidator<Model.Posts.UserReactionModel>, UserReactionModelValidator>();
+            services.AddTransient<IValidator<Model.Posts.SeatReservationModel>, SeatReservationModelValidator>();
 
             // Feedback
             services.AddTransient<IValidator<FeedbackModel>, FeedbackModelValidator>();

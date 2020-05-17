@@ -126,5 +126,39 @@ namespace UrGuide.WebApp.Controllers
             var result = await _postService.GetItinerariesAsync(postId, cancellationToken);
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
+
+        [HttpPost("{postId}/makereservation")]
+        public async Task<IActionResult> Reserve(string postId, SeatReservationModel seatReservation, CancellationToken cancellationToken)
+        {
+            if (seatReservation.PostId != postId)
+                return BadRequest();
+            var result = await _postService.ReserveSeatsAsync(seatReservation, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
+
+        [HttpPut("{postId}/editreservation")]
+        public async Task<IActionResult> EditReservation(string postId, SeatReservationModel seatReservation, CancellationToken cancellationToken)
+        {
+            if (seatReservation.PostId != postId)
+                return BadRequest();
+            var result = await _postService.ReserveSeatsAsync(seatReservation, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
+
+        [HttpPost("{postId}/cancelreservation")]
+        public async Task<IActionResult> CancelReservation(string postId, CancellationToken cancellationToken)
+        {
+            var result = await _postService.CancelReservationAsync(postId, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
+
+        [HttpPost("{postId}/reaction")]
+        public async Task<IActionResult> RecordUserReaction(string postId, UserReactionModel userReaction, CancellationToken cancellationToken)
+        {
+            if (userReaction.PostId != postId)
+                return BadRequest();
+            var result = await _postService.RecordUserReactionAsync(userReaction, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
     }
 }

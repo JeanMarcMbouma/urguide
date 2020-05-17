@@ -31,6 +31,7 @@
         LastEdit,
         Status,
         LastBid,
-        Reviews
+        Reviews,
+        ReservedSeats
     }
 }

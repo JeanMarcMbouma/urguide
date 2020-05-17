@@ -1,6 +1,7 @@
 ﻿using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using UrGuide.Data.Entities.Attributes;
 using UrGuide.Data.Entities.Contracts;
@@ -18,6 +19,8 @@ namespace UrGuide.Data.Entities.Posts
             BidHistories = new HashSet<BidHistory>();
             Feedback = new HashSet<Feedback>();
             Itineraries = new HashSet<Itinerary>();
+            Reservations = new HashSet<Reservation>();
+            UserReactions = new HashSet<UserReaction>();
         }
 
 
@@ -31,15 +34,24 @@ namespace UrGuide.Data.Entities.Posts
         public virtual ICollection<BidHistory> BidHistories { get; protected set; }
         public virtual ICollection<Feedback> Feedback { get; protected set; }
         public virtual ICollection<Itinerary> Itineraries { get; protected set; }
+        public virtual ICollection<Reservation> Reservations { get; protected set; }
+        public virtual ICollection<UserReaction> UserReactions { get; protected set; }
         public virtual Bid Bid { get; set; }
         public string CatalogRef { get; protected set; }
         public virtual ImageCatalog Catalog { get; set; }
         public virtual User User { get; set; }
         public virtual Point Location { get; set; }
 
+        public bool IsPastDue => !DateTime.TryParse($"{Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.DateEnd)))} {Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.DateEnd)))}",
+          CultureInfo.GetCultureInfo("en-US"), DateTimeStyles.AssumeUniversal, out DateTime date) || date < DateTime.UtcNow; 
 
         public void NewBid(string value, User user)
         {
+            if (IsPastDue)
+            {
+                throw new InvalidOperationException("This item has expired");
+            }
+
             if (string.IsNullOrEmpty(value))
             {
                 throw new ArgumentException("message", nameof(value));
@@ -79,6 +91,11 @@ namespace UrGuide.Data.Entities.Posts
 
         public void AcceptBid()
         {
+            if (IsPastDue)
+            {
+                throw new InvalidOperationException("This item has expired");
+            }
+
             if (Bid != null)
             {
                 var history = new BidHistory
@@ -115,6 +132,11 @@ namespace UrGuide.Data.Entities.Posts
 
         public void RejectBid()
         {
+            if (IsPastDue)
+            {
+                throw new InvalidOperationException("This item has expired");
+            }
+
             if (Bid != null)
             {
                 var history = new BidHistory
@@ -131,6 +153,179 @@ namespace UrGuide.Data.Entities.Posts
             {
                 throw new InvalidOperationException("You cannot reject an empty bid");
             }
+        }
+
+        public void MakeReservation(string userId, int seats)
+        {
+            if(IsPastDue)
+            {
+                throw new InvalidOperationException("This item has expired");
+            }
+
+            if(Reservations.Any(r => r.UserId == userId))
+            {
+                throw new InvalidOperationException("A reservation already exists for this user.");
+            }
+
+            if (userId is null)
+            {
+                throw new ArgumentNullException(nameof(userId));
+            }
+
+            if (seats == 0)
+            {
+                throw new ArgumentException("You cannot reserve 0 seats.");
+            }
+
+            int seatsAvailable = Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.AllocatedSeats)));
+            int reserved = Reservations.Sum(x => x.Seats);
+            if (seatsAvailable == reserved)
+            {
+                throw new InvalidOperationException("This item is sold out");
+            }
+
+            if (seatsAvailable <= reserved + seats)
+            {
+                throw new InvalidOperationException("We can't allocated this many seats.");
+            }
+
+            Reservations.Add(new Reservation
+            {
+                UserId = userId,
+                Seats = seats
+            });
+
+            var reservedSeats = Attributes.FirstOrDefault(a => a.Name.Equals(nameof(AttributeTypes.ReservedSeats)));
+            if(reservedSeats == null)
+            {
+                reservedSeats = new GenericAttribute
+                {
+                    Name = nameof(AttributeTypes.ReservedSeats)
+                };
+                Attributes.Add(reservedSeats);
+            }
+
+            reservedSeats.Value = (reserved + seats).ToString();
+        }
+
+        public void EditReservation(string userId, int seats)
+        {
+            if (IsPastDue)
+            {
+                throw new InvalidOperationException("This item has expired");
+            }
+
+            if (userId is null)
+            {
+                throw new ArgumentNullException(nameof(userId));
+            }
+
+            var reservation = Reservations.FirstOrDefault(r => r.UserId == userId);
+            if (reservation == null)
+            {
+                throw new InvalidOperationException("A reservation doesn't exist for this user.");
+            }
+
+            if(seats == 0)
+            {
+                throw new ArgumentException("You cannot reserve 0 seats, cancel your reservation instead");
+            }
+
+            int seatsAvailable = Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.AllocatedSeats)));
+            int reserved = Reservations.Sum(x => x.Seats) - reservation.Seats;
+
+            if (seatsAvailable == reserved)
+            {
+                throw new InvalidOperationException("This item is sold out");
+            }
+
+            if (seatsAvailable <= reserved + seats)
+            {
+                throw new InvalidOperationException("We can't allocated this many seats.");
+            }
+
+            reservation.Seats = seats;
+
+            var reservedSeats = Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.ReservedSeats)));
+            reservedSeats.Value = (reserved + seats).ToString();
+        }
+
+        public void CancelReservation(string userId)
+        {
+            if (IsPastDue)
+            {
+                throw new InvalidOperationException("This item has expired");
+            }
+
+            if (userId is null)
+            {
+                throw new ArgumentNullException(nameof(userId));
+            }
+
+            var reservation = Reservations.FirstOrDefault(r => r.UserId == userId);
+            if (reservation == null)
+            {
+                throw new InvalidOperationException("A reservation doesn't exist for this user.");
+            }
+
+            int reserved = Reservations.Sum(x => x.Seats) - reservation.Seats;
+            var reservedSeats = Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.ReservedSeats)));
+            reservedSeats.Value = reserved.ToString();
+
+            Reservations.Remove(reservation);
+        }
+
+        public void RecordUserReaction(string userId, UserReaction.ReactionType reactionType)
+        {
+            if (userId is null)
+            {
+                throw new ArgumentNullException(nameof(userId));
+            }
+
+            var userReaction = UserReactions.FirstOrDefault(u => u.UserId == userId);
+            if (userReaction != null && (userReaction.Type & reactionType) == reactionType)
+            {
+                // the user already like or dislike this post, so we exit
+                return;
+            }
+            UserReaction.ReactionType? previousReaction = null;
+            if(userReaction == null)
+            {
+                UserReactions.Add(new UserReaction
+                {
+                    Type = reactionType,
+                    UserId = userId
+                });
+            } 
+            else
+            {
+                previousReaction = userReaction.Type;
+                userReaction.Type = reactionType;
+            }
+
+            var likes = Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.Likes)));
+            var dislikes = Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.Dislikes)));
+
+            int allLikes = likes;
+            int disLikes = dislikes;
+
+            switch (reactionType)
+            {
+                case UserReaction.ReactionType.Like:
+                    allLikes++;
+                    if (previousReaction.HasValue)
+                        disLikes--;
+                    break;
+                case UserReaction.ReactionType.DisLike:
+                    disLikes++;
+                    if (previousReaction.HasValue)
+                        allLikes--;
+                    break;
+                default:
+                    break;
+            }
+            likes.Value = allLikes.ToString();
+            dislikes.Value = disLikes.ToString();
         }
     }
 }
