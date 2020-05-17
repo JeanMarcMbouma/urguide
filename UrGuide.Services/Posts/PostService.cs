@@ -225,8 +225,7 @@ New price: <em>{post.Bid.NewValue}</em>",
                 var user = await Context.Users.FindAsync(new { UserContext.UserId }, cancellationToken);
 
                 post.NewBid(model.Value, user);
-                var myUser = await Context.Users.FirstAsync(x => x.Id == UserContext.UserId, cancellationToken);
-                var author = myUser.Attributes;
+                var author = post.User.Attributes;
                 var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
                 var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
@@ -345,6 +344,154 @@ Your bid: <em>{value}</em>",
                             .Skip(offset)
                             .Take(size).AsNoTracking().ToListAsync(cancellationToken);
             return Result.Of(Mapper.Map<IEnumerable<PostModel>>(posts));
+        }
+
+        public async Task<Result<bool>> ReserveSeatsAsync(SeatReservationModel seatReservation, CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var post = await Context.Posts.FirstOrDefaultAsync(p => p.Id.Equals(seatReservation.PostId), cancellationToken);
+            if (post == null)
+                return Result.Of(false).WithErrors(ErrorMessages.NotFoundEntityForKey);
+            try
+            {
+                post.MakeReservation(UserContext.UserId, seatReservation.Seats);
+                await Context.SaveChangesAsync(cancellationToken);
+                var author = post.User.Attributes;
+                var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
+                var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = @$"
+Hi, {authorFirstName}
+A user has just made a reservation:
+Post: <strong>{post.Text}</strong>
+{post.Description}
+...................
+Seats: {seatReservation.Seats}",
+                    Subject = "Reservation",
+                    To = authorEmail,
+                    ToName = authorFirstName
+                });
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Error while making a reservation for PostID: {0}", seatReservation.PostId);
+                return Result.Of(false).WithErrors(e.Message);
+            }
+            return Result.Of(true);
+        }
+
+        public async Task<Result<bool>> UpdateSeatReservationAsync(SeatReservationModel seatReservation, CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var post = await Context.Posts.FirstOrDefaultAsync(p => p.Id.Equals(seatReservation.PostId), cancellationToken);
+            if (post == null)
+                return Result.Of(false).WithErrors(ErrorMessages.NotFoundEntityForKey);
+            try
+            {
+                post.EditReservation(UserContext.UserId, seatReservation.Seats);
+                await Context.SaveChangesAsync(cancellationToken);
+                var author = post.User.Attributes;
+                var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
+                var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = @$"
+Hi, {authorFirstName}
+A user has changed their reservation:
+Post: <strong>{post.Text}</strong>
+{post.Description}
+--------------------------
+Title: {post.Text}",
+                    Subject = "Reservation",
+                    To = authorEmail,
+                    ToName = authorFirstName
+                });
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Error while editing a reservation for PostID: {0}", seatReservation.PostId);
+                return Result.Of(false).WithErrors(e.Message);
+            }
+            return Result.Of(true);
+        }
+
+        public async Task<Result<bool>> CancelReservationAsync(string postId, CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var post = await Context.Posts.FirstOrDefaultAsync(p => p.Id.Equals(postId), cancellationToken);
+            if (post == null)
+                return Result.Of(false).WithErrors(ErrorMessages.NotFoundEntityForKey);
+            try
+            {
+                post.CancelReservation(UserContext.UserId);
+                await Context.SaveChangesAsync(cancellationToken);
+
+                var author = post.User.Attributes;
+                var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
+                var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = @$"
+Hi, {authorFirstName}
+A user has cancelled a reservation:
+Post: <strong>{post.Text}</strong>
+{post.Description}",
+                    Subject = "Reservation",
+                    To = authorEmail,
+                    ToName = authorFirstName
+                });
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Error while cancelling a reservation for PostID: {0}", postId);
+                return Result.Of(false).WithErrors(e.Message);
+            }
+            return Result.Of(true);
+        }
+
+        public async Task<Result<bool>> RecordUserReactionAsync(UserReactionModel userReaction, CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var post = await Context.Posts.FirstOrDefaultAsync(p => p.Id.Equals(userReaction.PostId), cancellationToken);
+            if (post == null)
+                return Result.Of(false).WithErrors(ErrorMessages.NotFoundEntityForKey);
+
+            post.RecordUserReaction(UserContext.UserId, userReaction.Like ? UserReaction.ReactionType.Like : UserReaction.ReactionType.DisLike);
+            
+            await Context.SaveChangesAsync(cancellationToken);
+
+            var author = post.User.Attributes;
+            var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
+            var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+            await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+            {
+                Content = @$"
+Hi, {authorFirstName}
+A user has {(userReaction.Like? "liked" : "reacted to")} your post:
+Post: <strong>{post.Text}</strong>
+{post.Description}",
+                Subject = "User's reaction",
+                To = authorEmail,
+                ToName = authorFirstName
+            });
+            return Result.Of(true);
         }
     }
 }

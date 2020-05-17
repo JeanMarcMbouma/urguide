@@ -18,5 +18,9 @@ namespace UrGuide.Services.Contracts
         Task<Result<IEnumerable<ItineraryModel>>> GetItinerariesAsync(string postId, CancellationToken cancellationToken);
         Task<Result<IEnumerable<PostModel>>> GetTop10PostsAsync(CancellationToken cancellationToken);
         Task<Result<IEnumerable<PostModel>>> GetTop100PostsAsync(CancellationToken cancellationToken);
+        Task<Result<bool>> ReserveSeatsAsync(SeatReservationModel seatReservation, CancellationToken cancellationToken);
+        Task<Result<bool>> UpdateSeatReservationAsync(SeatReservationModel seatReservation, CancellationToken cancellationToken);
+        Task<Result<bool>> CancelReservationAsync(string postId, CancellationToken cancellationToken);
+        Task<Result<bool>> RecordUserReactionAsync(UserReactionModel userReaction, CancellationToken cancellationToken);
     }
 }
