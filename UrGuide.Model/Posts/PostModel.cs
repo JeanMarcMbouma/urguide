@@ -30,6 +30,7 @@ namespace UrGuide.Model.Posts
         public string StartTime { get; set; }
         public bool HasReserved { get; set; }
         public bool HasReacted { get; set; }
+        public int BidCount { get; set; }
         public ICollection<string> Categories { get; protected set; }
         public ICollection<ImageFileModel> Images { get; protected set; }
         public string AuthorId { get; set; }

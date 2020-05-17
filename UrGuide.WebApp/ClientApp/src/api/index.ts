@@ -2488,6 +2488,7 @@ export class PostModel implements IPostModel {
     startTime?: string | undefined;
     hasReserved?: boolean;
     hasReacted?: boolean;
+    bidCount?: number;
     readonly categories?: string[] | undefined;
     readonly images?: ImageFileModel[] | undefined;
     authorId?: string | undefined;
@@ -2525,6 +2526,7 @@ export class PostModel implements IPostModel {
             this.startTime = _data["startTime"];
             this.hasReserved = _data["hasReserved"];
             this.hasReacted = _data["hasReacted"];
+            this.bidCount = _data["bidCount"];
             if (Array.isArray(_data["categories"])) {
                 (<any>this).categories = [] as any;
                 for (let item of _data["categories"])
@@ -2570,6 +2572,7 @@ export class PostModel implements IPostModel {
         data["startTime"] = this.startTime;
         data["hasReserved"] = this.hasReserved;
         data["hasReacted"] = this.hasReacted;
+        data["bidCount"] = this.bidCount;
         if (Array.isArray(this.categories)) {
             data["categories"] = [];
             for (let item of this.categories)
@@ -2608,6 +2611,7 @@ export interface IPostModel {
     startTime?: string | undefined;
     hasReserved?: boolean;
     hasReacted?: boolean;
+    bidCount?: number;
     categories?: string[] | undefined;
     images?: ImageFileModel[] | undefined;
     authorId?: string | undefined;

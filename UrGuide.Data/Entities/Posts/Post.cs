@@ -87,6 +87,9 @@ namespace UrGuide.Data.Entities.Posts
                 Bid.LastUpdated = DateTime.UtcNow;
                 BidHistories.Add(newHistory);
             }
+
+            var lastBid = Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.LastBid));
+            lastBid.Value = Bid.NewValue;
         }
 
         public void AcceptBid()
