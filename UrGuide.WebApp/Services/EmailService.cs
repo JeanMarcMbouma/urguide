@@ -23,7 +23,7 @@ namespace UrGuide.WebApp.Services
 
         public async Task SendAsync(SendDirectMessageCommand message)
         {
-            var apiKey = Environment.GetEnvironmentVariable("SENDGRID_URGUIDE_API_KEY");
+            var apiKey = Configuration.GetValue<string>("SENDGRID_URGUIDE_API_KEY");
 
             var client = new SendGrid.SendGridClient(apiKey);
             var mail = MailHelper.CreateSingleEmail(new EmailAddress("noreply@urguide.org", "UrGuide"), 

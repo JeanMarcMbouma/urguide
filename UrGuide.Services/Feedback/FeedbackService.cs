@@ -57,7 +57,7 @@ namespace UrGuide.Services.Feedback
             int reviewCount = reviews;
             reviews.Value = (reviewCount + 1).ToString();
             int r = rating;
-            int avg = (int)Math.Ceiling(new[] { r, feedback.Rating }.Average());
+            int avg = reviewCount == 0 ? feedback.Rating : (int)Math.Ceiling(new[] { r, feedback.Rating }.Average());
             rating.Value = r.ToString();
             var author = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
             string authorFirstName = author.Attributes.First(x => x.Name == nameof(Data.Entities.Users.AttributeTypes.FirstName));
@@ -101,8 +101,10 @@ Rating: {feedback.Rating} star(s).",
             }
 
             var rating = user.Attributes.FirstOrDefault(a => a.Name.Equals(Data.Entities.Users.AttributeTypes.Rating));
+            var firstRatingEver = false;
             if (rating == null)
             {
+                firstRatingEver = true;
                 rating = new Data.Entities.Attributes.GenericAttribute
                 {
                     Name = nameof(Data.Entities.Posts.AttributeTypes.Rating),
@@ -112,7 +114,7 @@ Rating: {feedback.Rating} star(s).",
             }
 
             int r = rating;
-            int avg = (int)Math.Ceiling(new[] { r, feedback.Rating }.Average());
+            int avg = firstRatingEver ? feedback.Rating : (int)Math.Ceiling(new[] { r, feedback.Rating }.Average());
             rating.Value = r.ToString();
             var author = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
             string authorFirstName = author.Attributes.First(x => x.Name == nameof(Data.Entities.Users.AttributeTypes.FirstName));

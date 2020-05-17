@@ -81,8 +81,10 @@ namespace UrGuide.Services.Users
             cancellationToken.ThrowIfCancellationRequested();
             var userId = await AuthService.LoginAsync(login, cancellationToken);
             if (userId.HasError)
-                return Result.Of<User>(null).Combine(userId);
+                return Result.Of<User>().Combine(userId);
             var user = await Context.Users.FindAsync(new[] { userId.Data }, cancellationToken);
+            if(user == null)
+                return Result.Of<User>().WithErrors("Invalid login attempt.");
             user.LastActivityDate = System.DateTime.UtcNow;
             return Result.Of(Mapper.Map<User>(user));
         }

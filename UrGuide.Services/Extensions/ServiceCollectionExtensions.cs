@@ -8,6 +8,7 @@ using UrGuide.Model;
 using UrGuide.Model.Shared;
 using UrGuide.Services.Catalogs;
 using UrGuide.Services.Feedback;
+using UrGuide.Services.Lookup;
 using UrGuide.Services.Media;
 using UrGuide.Services.Posts;
 using UrGuide.Services.Shared;
@@ -25,6 +26,7 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<Contracts.IBidService, PostService>();
             services.AddTransient<Contracts.IFeedbackService, FeedbackService>();
             services.AddTransient<Contracts.IImageService, ImageService>();
+            services.AddTransient<Contracts.ILookupService, LookupService>();
 
             // Validation
 
