@@ -26,9 +26,21 @@ namespace UrGuide.WebApp.Services
         public IHttpContextAccessor HC { get; }
         public IOptions<SpaStaticFilesOptions> SpaOptions { get; }
 
-        public string ImageDirectoryPath => Path.Combine(_environment.ContentRootPath, SpaOptions.Value.RootPath, "images");
+        public string ImageDirectoryPath => Path.Combine(_environment.ContentRootPath,
+#if !DEBUG
+            SpaOptions.Value.RootPath
+#else
+            SpaOptions.Value.RootPath.Replace("build", "public")
+#endif
+            , "images");
 
-        public string ThumbImageDirectoryPath => Path.Combine(_environment.ContentRootPath, SpaOptions.Value.RootPath, "thumb");
+        public string ThumbImageDirectoryPath => Path.Combine(_environment.ContentRootPath,
+#if !DEBUG
+            SpaOptions.Value.RootPath
+#else
+            SpaOptions.Value.RootPath.Replace("build", "public")
+#endif
+            , "thumb");
 
         public string ResolveImageUrl(string imageFileName)
         {
