@@ -45,6 +45,9 @@ var HttpClientFactory = /** @class */ (function () {
     HttpClientFactory.getLookupClient = function () {
         return new api_1.LookupClient();
     };
+    HttpClientFactory.get = function (type, user) {
+        return new type("", new Http(user));
+    };
     return HttpClientFactory;
 }());
 exports.HttpClientFactory = HttpClientFactory;

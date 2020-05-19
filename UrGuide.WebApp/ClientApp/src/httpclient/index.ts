@@ -24,6 +24,11 @@ class Http implements IHttp {
     }
 }
 
+interface BaseClient {
+    baseUrl: string,
+    http: IHttp
+}
+
 export class HttpClientFactory {
     static getPostClient(user?: User): PostsClient {
         return new PostsClient("", new Http(user));
@@ -43,5 +48,9 @@ export class HttpClientFactory {
 
     static getLookupClient(): LookupClient {
         return new LookupClient();
+    }
+
+    static get<T>(type: (new(baseUrl?: string, http?: IHttp) => T), user?: User) : T {
+        return new type("", new Http(user));
     }
 }
