@@ -2473,6 +2473,7 @@ export class PostModel implements IPostModel {
     description?: string | undefined;
     price?: string | undefined;
     rating?: string | undefined;
+    location?: string | undefined;
     likes?: number;
     dislikes?: number;
     publicationDate?: string | undefined;
@@ -2488,6 +2489,7 @@ export class PostModel implements IPostModel {
     startTime?: string | undefined;
     hasReserved?: boolean;
     hasReacted?: boolean;
+    reactionType?: number;
     bidCount?: number;
     itineraryCount?: number;
     readonly categories?: string[] | undefined;
@@ -2512,6 +2514,7 @@ export class PostModel implements IPostModel {
             this.description = _data["description"];
             this.price = _data["price"];
             this.rating = _data["rating"];
+            this.location = _data["location"];
             this.likes = _data["likes"];
             this.dislikes = _data["dislikes"];
             this.publicationDate = _data["publicationDate"];
@@ -2527,6 +2530,7 @@ export class PostModel implements IPostModel {
             this.startTime = _data["startTime"];
             this.hasReserved = _data["hasReserved"];
             this.hasReacted = _data["hasReacted"];
+            this.reactionType = _data["reactionType"];
             this.bidCount = _data["bidCount"];
             this.itineraryCount = _data["itineraryCount"];
             if (Array.isArray(_data["categories"])) {
@@ -2559,6 +2563,7 @@ export class PostModel implements IPostModel {
         data["description"] = this.description;
         data["price"] = this.price;
         data["rating"] = this.rating;
+        data["location"] = this.location;
         data["likes"] = this.likes;
         data["dislikes"] = this.dislikes;
         data["publicationDate"] = this.publicationDate;
@@ -2574,6 +2579,7 @@ export class PostModel implements IPostModel {
         data["startTime"] = this.startTime;
         data["hasReserved"] = this.hasReserved;
         data["hasReacted"] = this.hasReacted;
+        data["reactionType"] = this.reactionType;
         data["bidCount"] = this.bidCount;
         data["itineraryCount"] = this.itineraryCount;
         if (Array.isArray(this.categories)) {
@@ -2599,6 +2605,7 @@ export interface IPostModel {
     description?: string | undefined;
     price?: string | undefined;
     rating?: string | undefined;
+    location?: string | undefined;
     likes?: number;
     dislikes?: number;
     publicationDate?: string | undefined;
@@ -2614,6 +2621,7 @@ export interface IPostModel {
     startTime?: string | undefined;
     hasReserved?: boolean;
     hasReacted?: boolean;
+    reactionType?: number;
     bidCount?: number;
     itineraryCount?: number;
     categories?: string[] | undefined;

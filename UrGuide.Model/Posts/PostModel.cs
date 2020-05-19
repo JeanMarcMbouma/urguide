@@ -16,6 +16,7 @@ namespace UrGuide.Model.Posts
         public string Description { get; set; }
         public string Price { get; set; }
         public string Rating { get; set; }
+        public string Location { get; set; }
         public int Likes { get; set; }
         public int Dislikes { get; set; }
         public string PublicationDate { get; set; }
@@ -31,7 +32,7 @@ namespace UrGuide.Model.Posts
         public string StartTime { get; set; }
         public bool HasReserved { get; set; }
         public bool HasReacted { get; set; }
-        public UserReaction.ReactionType ReactionType { get; set; }
+        public short ReactionType { get; set; }
         public int BidCount { get; set; }
         public int ItineraryCount { get; set; }
         public ICollection<string> Categories { get; protected set; }
