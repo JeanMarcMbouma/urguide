@@ -178,18 +178,16 @@ function Itinerary(props) {
 
 function Comments(props) {
 
+    const { manager, user } = useAuthContext();
 
-    const user = useAuthUser();
     const { profile } = user || {
         profile: {}
     };
 
-
-    const { manager } = useAuthContext();
-
-    function signIn(e) {
+    async function signIn(e) {
         e.preventDefault();
-        manager.signIn(window.location.href);
+        if(!user)
+           await manager.signIn(window.location.href);
         return false;
     }
 
@@ -368,11 +366,6 @@ export default function CentralBar() {
 
     }
 
-    const user = useAuthUser();
-    const { profile } = user || {
-        profile: {}
-    };
-
     useMemo(async () => {
         const api = HttpClientFactory.getPostClient();
         var result = await api.last10();
@@ -382,14 +375,18 @@ export default function CentralBar() {
       
     }, []);
 
-    const { manager } = useAuthContext();
+    const { manager, user } = useAuthContext();
 
-    function signIn(e) {
+    const { profile } = user || {
+        profile: {}
+    };
+
+    async function signIn(e) {
         e.preventDefault();
-        manager.signIn(window.location.href);
+        if (!user)
+            await manager.signIn(window.location.href);
         return false;
     }
-
 
     const [showComments, setShowComments] = React.useState(false);
     const [showItinerary, setShowItinerary] = React.useState(false);

@@ -33,7 +33,6 @@ export const UserReducer = (state, action) => {
         default:
             return { ...state, isLoggedIn: false, user: null, loading: true, logginOut: false };
     }
-    console.log(res);
     return res;
 }
 class AuthService {
