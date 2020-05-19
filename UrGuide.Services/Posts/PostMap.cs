@@ -16,6 +16,7 @@ namespace UrGuide.Services.Posts
                 .ForMember(x => x.Text, x => x.MapFrom(y => y.Data.Text))
                 .ForMember(x => x.HasReserved, x => x.MapFrom(y => y.HasUserReserved))
                 .ForMember(x => x.HasReacted, x => x.MapFrom(y => y.HasReacted))
+                 .ForMember(x => x.ReactionType, x => x.MapFrom(y => y.ReactionType))
                 .ForMember(x => x.BidCount, x => x.MapFrom(y => y.BidCount))
                 .ForMember(x => x.ItineraryCount, x => x.MapFrom(y => y.ItineraryCount))
                 .ForMember(x => x.Description, x => x.MapFrom(y => y.Data.Description))

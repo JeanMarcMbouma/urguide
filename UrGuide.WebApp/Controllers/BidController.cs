@@ -39,7 +39,7 @@ namespace UrGuide.WebApp.Controllers
 
         [HttpPost("{postId}/accept")]
         [ProducesResponseType(200, Type = typeof(PostModel))]
-        public async Task<IActionResult> Accpet(string postId, CancellationToken cancellationToken)
+        public async Task<IActionResult> Accept(string postId, CancellationToken cancellationToken)
         {
             var result = await BidService.AcceptBidAsync(postId, cancellationToken);
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);

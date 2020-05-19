@@ -1,5 +1,5 @@
 ﻿import { User } from 'oidc-client'
-import { PostsClient, CatalogsClient, AccountClient, Client, LookupClient } from '../api';
+import { PostsClient, CatalogsClient, AccountClient, Client, LookupClient, BidClient } from '../api';
 
 
 const originalFetch = fetch;
@@ -43,5 +43,8 @@ export class HttpClientFactory {
 
     static getLookupClient(): LookupClient {
         return new LookupClient();
+    }
+    static getBidClient(user?: User): BidClient {
+        return new BidClient("", new Http(user));
     }
 }

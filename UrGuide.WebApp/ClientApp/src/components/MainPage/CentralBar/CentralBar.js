@@ -5,6 +5,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { FaRegComment } from 'react-icons/fa';
 import { AiOutlineDislike } from 'react-icons/ai';
 import { AiOutlineLike } from 'react-icons/ai';
+import { AiFillDislike } from 'react-icons/ai';
+import { AiFillLike } from 'react-icons/ai';
 import {
     Card,
     CardHeader,
@@ -61,12 +63,16 @@ import { withStyles } from '@material-ui/core/styles';
 import PhotoLibraryIcon from '@material-ui/icons/PhotoLibrary';
 import NewPostContext from './NewPostContext';
 import NewPostReducer from './NewPostReducer';
+import NewBidReducer from './NewBidReducer';
+import NewBidContext from './NewBidContext';
+import ActionsContext from './ActionsContext';
+import ActionsReducer from './ActionsReducer';
 import { useAuthUser } from '../../api-authorization/AuthService';
 import { useAuthContext } from '../../api-authorization/AuthService';
 import authService from '../../api-authorization/AuthService';
 //import { PostsClient, PostUpdateModel } from '../../../api';
 import { HttpClientFactory } from '../../../httpclient';
-import { PostsClient, PostCreationModel, ImageFileCreateModel, ItineraryModel } from '../../../api';
+import { PostsClient, PostCreationModel, ImageFileCreateModel, ItineraryModel, BidModel, UserReactionModel, BidClient } from '../../../api';
 import { BlobToBase64 } from '../../../helpers/fileHelpers';
 
 const styles = {
@@ -112,52 +118,7 @@ function ButtonInPosts(props) {
     return <Button className={classes.root} {...other} />;
 }
 
-//ButtonInPosts.propTypes = {
-//    classes: PropTypes.object.isRequired,
-//    color: PropTypes.oneOf(['blue', 'red']).isRequired,
-//};
 
-const ButtonP = withStyles(styles)(ButtonInPosts);
-
-
-const MockPosts = [
-    {
-        id: 0,
-        author: 'Jane Doe',
-        authorId: 0,
-        location:'Miami Beach, FL',
-        authorAvatar: "https://i.pinimg.com/originals/df/5f/5b/df5f5b1b174a2b4b6026cc6c8f9395c1.jpg",
-        description: 'I am looking for a simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s',
-        categories: ['sport', 'other'],
-        publicationDate:'11/08/2020',
-        Date: '11/11/2020',
-        EndTime: "05:00 PM",
-        StartTime: "03:30 AM",
-        seats: 1,
-        budget:60,
-        images: [{
-            imageBase6: "https://besttoppers.com/wp-content/uploads/2011/12/petra.jpg",
-            name: "mock1.png",
-            id: 0
-        },
-            {
-                imageBase6: "https://media.tacdn.com/media/attractions-splice-spp-674x446/07/3c/cb/03.jpg",
-                name: "mock2.png",
-                id: 1
-            },
-            {
-                imageBase6: "https://i2.wp.com/frenchmoments.eu/wp-content/uploads/2015/12/Eiffel-Tower-5-December-2015-01-%C2%A9-French-Moments.jpg?resize=702%2C471&ssl=1",
-                name: "mock3.png",
-                id: 2
-            },
-            {
-                imageBase6: "https://www.touropia.com/gfx/b/2013/02/sacre_coeur.jpg",
-                name: "mock1.png",
-                id: 0
-            },
-        ]
-    },
-]
 
 function CreateItinerary(props) {
 
@@ -182,55 +143,32 @@ function CreateItinerary(props) {
 
 function Itinerary(props) {
 
+
+    const [itineraries, setItineraries] = useState([]);
+   
+    useMemo(async () => {
+        const api = HttpClientFactory.getPostClient();
+        var result = await api.itineraries(props.postId);
+        setItineraries(result);
+
+    }, []);
+
+
     return (
         props.show ? <div className='itinerary_wrapper'>
-            <h5>Itinerary of this tour</h5>
+            {itineraries.length > 0 ? <h5>Itinerary of this tour</h5> : <h5>No itinerary found.</h5>}
             <section className="itinerary">
-                <div className="itinerary__block">
+            {itineraries.map((itinerary, i) => (
+                <div className="itinerary__block" key={itinerary.ordinal}  >
                     <div className="itinerary__midpoint"></div>
                     <div className="itinerary__content itinerary__content--left">
-                        <h3 className="itinerary__place">Eiffel Tower</h3>
+                        <h3 className="itinerary__place">{itinerary.title}</h3>
                         <p className="itinerary__text--left">
-                            Celebrated my birthday with my playmates in school. What a wonderful surprise to have the same birthday as my teacher!
-                                 </p>
+                            {itinerary.description}
+                        </p>
                     </div>
                 </div>
-                <div className="itinerary__block">
-                    <div className="itinerary__midpoint"></div>
-                    <div className="itinerary__content itinerary__content--left">
-                        <h3 className="itinerary__place">Musee du Louvre</h3>
-                        <p className="itinerary__text--left">
-                            Celebrated my birthday with my playmates in school. What a wonderful surprise to have the same birthday as my teacher!
-                                       </p>
-                    </div>
-                </div>
-                <div className="itinerary__block">
-                    <div className="itinerary__midpoint"></div>
-                    <div className="itinerary__content itinerary__content--left">
-                        <h3 className="itinerary__place">Notre Dame</h3>
-                        <p className="itinerary__text--left">
-                            Celebrated my birthday with my playmates in school. What a wonderful surprise to have the same birthday as my teacher!
-                                       </p>
-                    </div>
-                </div>
-                <div className="itinerary__block">
-                    <div className="itinerary__midpoint"></div>
-                    <div className="itinerary__content itinerary__content--left">
-                        <h3 className="itinerary__place">Champs-Elysees</h3>
-                        <p className="itinerary__text--left">
-                            Celebrated my birthday with my playmates in school. What a wonderful surprise to have the same birthday as my teacher!
-                                       </p>
-                    </div>
-                </div>
-                <div className="itinerary__block">
-                    <div className="itinerary__midpoint"></div>
-                    <div className="itinerary__content itinerary__content--left">
-                        <h3 className="itinerary__place">Grand Palais</h3>
-                        <p className="itinerary__text--left">
-                            Celebrated my birthday with my playmates in school. What a wonderful surprise to have the same birthday as my teacher!
-                                       </p>
-                    </div>
-                </div>
+            ))}
             </section>
         </div> : null
     );
@@ -241,44 +179,134 @@ function Itinerary(props) {
 function Comments(props) {
 
 
+    const user = useAuthUser();
+    const { profile } = user || {
+        profile: {}
+    };
+
+
+    const { manager } = useAuthContext();
+
+    function signIn(e) {
+        e.preventDefault();
+        manager.signIn(window.location.href);
+        return false;
+    }
+
+    const ctx = useContext(NewBidContext);
+    const [state, dispatch] = useReducer(NewBidReducer, ctx);
+
+    const marks = [
+        {
+            value: 5,
+            label: '$5',
+        },
+
+        {
+            value: 250,
+            label: '$250',
+        },
+    ];
+
+    const [bids, setBids] = useState([]);
+
+
+
+    useMemo(async () => {
+        const api = HttpClientFactory.getBidClient();
+        var result = await api.history(props.postId);
+        setBids(result);
+       
+    }, []);
+
+    const [bid, setBid] = React.useState(25);
+    const handleChangeBid = (event, newValue) => {
+        setBid(newValue);
+       
+    };
+
+    async function createNewBid(state) {
+
+        const client = HttpClientFactory.get(BidClient, user);
+
+        const model = new BidModel({
+            postId: state.postId,
+            value: state.value,
+        });
+
+        try {
+
+            await client.newbid(state.postId, model);
+            var result = await client.history(state.postId);
+            setBids(result);
+        }
+        catch (e) {
+            console.log(e);
+        }
+
+    }
+
+
+    function valuetext(value) {
+        return `${value}`;
+    }
+
         return (
             props.show ? <div className='comments' >
-                <form noValidate autoComplete="off" className='new-bid'>
-                    <TextField fullWidth multiline rows={6} rowsMax={6} id="outlined-basic" variant="outlined" placeholder="Make a bid on this post !" />
+                <div noValidate autoComplete="off" className='new-bid'>
+                    <Grid item xs={12} >
+                        <Typography id="seats-slider" gutterBottom>
+                            How much would you bid on this tour ?
+      </Typography>
+                        <Slider
+                            defaultValue={bid}
+                            getAriaValueText={valuetext}
+                            aria-labelledby="bid-slider"
+                            step={1}
+                            marks={marks}
+                            min={5}
+                            max={250}
+                            value={bid}
+                            onChange={handleChangeBid}
+                            valueLabelDisplay="auto"
+                        />
+                    </Grid>
                     <br />
-                    <br />
-                    <Button variant="contained" color="primary">Bid now</Button>
-                </form>
-                <div className='cmt-div'>
-                    <CardHeader
-                        avatar={<Avatar alt="profile photo" src={props.post.authorAvatar} />}
-                        title={
-                            <h6>
-                                {props.post.author}
-                            </h6>
+                    {user ?  <Button variant="contained" color="primary"
+                        onClick={() =>
+                            dispatch({
+                                type: "new-bid",
+                                data: {
+                                    postId:props.postId,
+                                    value:bid,
+                                    callback: createNewBid,
+                                }
+                            })
                         }
-                        subheader={props.post.publicationDate}
-                    />
-                    <div className='comment-text'>
-                        <p>
-                           simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.
-                                    </p>
-                    </div>
+                    >
+                        Bid now
+                    </Button> : <Button variant="contained" color="primary"
+                            onClick={signIn}
+                    >
+                        Bid now
+                    </Button> }
                 </div>
-                <div className='cmt-div'>
-                    <CardHeader
-                        avatar={<Avatar alt="profile photo" src={props.post.authorAvatar} />}
-                        title={
-                            <h6>
-                                {props.post.author} {<Rating name="half-rating-read" className='user-rating' defaultValue={4.5} precision={0.5} readOnly />}
-                            </h6>
-                        }
-                        subheader={props.post.publicationDate}
-                    />
-                    <div className='comment-text'>
-                        <p>I am happy to pay a fixed priced and my maximum budget is $30 USD.</p>
+                {bids.map((bid, i) => (
+                    <div className='cmt-div'>
+                        <CardHeader
+                            avatar={<Avatar alt={bid.author} src={bid.authorImage} />}
+                            title={
+                                <h6>
+                                    {bid.author}
+                                </h6>
+                            }
+                            subheader={bid.created}
+                        />
+                        <div className='comment-text'>
+                            <p>{bid.value}</p>
+                        </div>
                     </div>
-                </div>
+                    ))}
             </div> : null
         );
 }
@@ -293,8 +321,8 @@ export default function CentralBar() {
     const classes = useStyles();
 
 
-    const uploadButton = React.createRef();
-    const [ViewPostCreating, setViewPostCreating] = useState(false);
+    //const uploadButton = React.createRef();
+    //const [ViewPostCreating, setViewPostCreating] = useState(false);
 
     const [context, setContext] = React.useState({
         files: [],
@@ -307,9 +335,32 @@ export default function CentralBar() {
 
     const ctx = useContext(NewPostContext);
     const [state, dispatch] = useReducer(NewPostReducer, ctx);
-
-
     const [posts, setPosts] = useState([]);
+     const actionCtx = useContext(ActionsContext);
+    const [actionsState, dispatchAction] = useReducer(ActionsReducer, actionCtx );
+   
+
+
+    async function handleReaction(state) {
+
+        const client = HttpClientFactory.getPostClient(user);
+
+        const model = new UserReactionModel({
+            postId: state.post.id,
+            like: state.like,
+        });
+
+        try {
+
+            await client.reaction(state.post.id, model);
+
+        }
+        catch (e) {
+            console.log(e);
+        }
+
+    }
+
     const user = useAuthUser();
     const { profile } = user || {
         profile: {}
@@ -318,8 +369,19 @@ export default function CentralBar() {
     useMemo(async () => {
         const api = HttpClientFactory.getPostClient();
         var result = await api.last10();
+        console.log(result);
         setPosts(result);
+        actionsState.posts = result;
+      
     }, []);
+
+    const { manager } = useAuthContext();
+
+    function signIn(e) {
+        e.preventDefault();
+        manager.signIn(window.location.href);
+        return false;
+    }
 
 
     const [showComments, setShowComments] = React.useState(false);
@@ -521,13 +583,6 @@ export default function CentralBar() {
             return `${value}`;
         }
 
-        const { manager } = useAuthContext();
-
-        function signIn(e) {
-            e.preventDefault();
-            manager.signIn(window.location.href);
-            return false;
-        }
 
         return (<>
 
@@ -861,37 +916,37 @@ export default function CentralBar() {
         if (props.images.length == 1)
         {
             return (<div className='row'>
-                <div className='col-12 unique-img' style={{ backgroundImage: `url(${props.images[0].imageBase6})` }}>
+                <div className='col-12 unique-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
                 </div>
             </div>);
         }
         if (props.images.length == 2) {
             return (<div className='row'>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase6})` }}>
+                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
                 </div>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase6})` }}>
+                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
                 </div>
             </div>);
         }
         if (props.images.length == 3) {
             return (<div className='row'>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase6})` }}>
+                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
                 </div>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase6})` }}>
+                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
                 </div>
-                <div className='col-12 post-img' style={{ backgroundImage: `url(${props.images[2].imageBase6})` }}>
+                <div className='col-12 post-img' style={{ backgroundImage: `url(${props.images[2].imageBase64})` }}>
                 </div>
             </div>);
         }
         if (props.images.length == 4) {
             return (<div className='row'>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase6})` }}>
+                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
                 </div>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase6})` }}>
+                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
                 </div>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[2].imageBase6})` }}>
+                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[2].imageBase64})` }}>
                 </div>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[3].imageBase6})` }}>
+                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[3].imageBase64})` }}>
                 </div>
             </div>);
         }
@@ -903,10 +958,12 @@ export default function CentralBar() {
         <div className="col-12 col-sm-7 col-md-7 col-lg-6 col-xl-5 timeline">
             <div >
                 <ViewPost />
-                {MockPosts.map((post, i) => (
+                {
+
+                    actionsState.posts.map((post, i) => (
                     <div key={i} className="p-3 mb-3 bg-white rounded post-card">
                         <CardHeader
-                            avatar={<Avatar alt="profile photo" src={post.authorAvatar} />}
+                            avatar={<Avatar alt={post.author} src={post.authorAvatar} />}
                             title={
                                     <h6>
                                     {post.author}
@@ -927,17 +984,17 @@ export default function CentralBar() {
                                     <br />
                                 </div>
                                 <div className='col-12'>
-                                    <span><AttachMoneyOutlinedIcon /> Budget : <b>{'$20 - $120'}</b></span>
+                                    <span><AttachMoneyOutlinedIcon /> Budget : <b>{post.startingBid}</b></span>
                                     <br />
                                     <br />
                                 </div>
                                 <div className='col-12'>
-                                    <span><PeopleOutlineOutlinedIcon /> Seats : <b>{20}</b></span>
+                                    <span><PeopleOutlineOutlinedIcon /> Seats : <b>{post.seats}</b></span>
                                     <br />
                                     <br />
                                 </div>
                                 <div className='col-12'>
-                                    <span><AlarmOutlinedIcon /> Time : <b>{'11/15/2020, from 04PM to 08PM'}</b></span>
+                                    <span><AlarmOutlinedIcon /> Time : <b>{`${post.startDate}, from ${post.startTime} to ${post.endTime}`}</b></span>
                                     <br />
                                     <br />
                                 </div>
@@ -949,33 +1006,91 @@ export default function CentralBar() {
                         <PostImages images={post.images} />
                         <CardActions className="container-fluid"  >
                             <div className='row d-flex justify-content-center' style={{width:`100%`}}>
-                                <div className='col-3 col-lg-3 text-center'>
-                                    <IconButton>
-                                        <AiOutlineLike />
-                                    </IconButton>
-                                    <span className='text-center'>102</span>
-                                </div>
-                                <div className='col-3 col-lg-3 text-center'>
-                                    <IconButton>
-                                        <AiOutlineDislike />
-                                    </IconButton>
-                                    <span className='text-center' >17</span>
-                                </div>
+                                   
+                                    {user ?
+                                        <>  <div className='col-3 col-lg-3 text-center'>
+                                            {post.reactionType == 2 ? <IconButton className='like_div' onClick={() =>
+                                                dispatchAction({
+                                                    type: "like-action",
+                                                    data: {
+                                                        post: post,
+                                                        posts: actionsState.posts,
+                                                        callback: handleReaction
+                                                    }
+                                                })
+                                            } >
+                                                <AiFillLike className='liked_icon' />
+                                            </IconButton> :
+                                                <IconButton className='like_div' onClick={() =>
+                                                    dispatchAction({
+                                                        type: "like-action",
+                                                        data: {
+                                                            post: post,
+                                                            posts: actionsState.posts,
+                                                            callback: handleReaction
+                                                        }
+                                                    })
+                                                } >
+                                                    <AiOutlineLike />
+                                                </IconButton>}
+                                            <span id={`${post.id}_like`} className='text-center'>{post.likes}</span>
+                                        </div>
+                                            <div className='col-3 col-lg-3 text-center'>
+                                                {post.reactionType == 4 ? <IconButton className='dislike_div'>
+                                                    <AiFillDislike className='disliked_icon' onClick={() =>
+                                                        dispatchAction({
+                                                            type: "dislike-action",
+                                                            data: {
+                                                                post: post,
+                                                                posts: actionsState.posts,
+                                                                callback: handleReaction
+                                                            }
+                                                        })
+                                                    } />
+                                                </IconButton> : <IconButton className='dislike_div' onClick={() =>
+                                                    dispatchAction({
+                                                        type: "dislike-action",
+                                                        data: {
+                                                            post: post,
+                                                            posts: actionsState.posts,
+                                                            callback: handleReaction
+                                                        }
+                                                    })
+                                                } >
+                                                        <AiOutlineDislike />
+                                                    </IconButton>}
+                                                <span className='text-center' >{post.dislikes}</span>
+                                            </div></> :
+
+                                         <><div className='col-3 col-lg-3 text-center'>
+
+                                            <IconButton className='like_div' onClick={signIn} >
+                                                <AiOutlineLike />
+                                            </IconButton>
+                                            <span id={`${post.id}_like`} className='text-center'>{post.likes}</span>
+                                        </div>
+                                            <div className='col-3 col-lg-3 text-center'>
+                                                <IconButton className='dislike_div' onClick={signIn} >
+                                                    <AiOutlineDislike />
+                                                </IconButton>
+                                            <span className='text-center' >{post.dislikes}</span>
+                                            </div></>
+                                }
                                 <div className='col-3 col-lg-3 text-center'>
                                     <IconButton onClick={() => toggleComments() }>
                                         <FaRegComment />
                                     </IconButton>  
-                                    <span className='text-center' >56</span>
+                                    <span className='text-center' >{post.bidCount}</span>
                                 </div>
                                 <div className='col-3 col-lg-3 text-center'>
                                     <IconButton onClick={() => toggleItinerary() }>
                                         <LocationOnIcon />
                                     </IconButton>
-                                    <span className='text-center' >5</span>
+                                    <span className='text-center' >{post.itineraryCount}</span>
                                 </div>
                             </div>  
                         </CardActions>
-                        <Itinerary show={showItinerary} />
+                        <Itinerary show={showItinerary} postId={post.id} />
                         <Comments post={post} show={showComments} />
                     </div>
                 ))}

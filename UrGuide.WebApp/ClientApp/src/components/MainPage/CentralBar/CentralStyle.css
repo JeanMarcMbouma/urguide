@@ -255,3 +255,19 @@
 .itinerary__midpoint--highlight > .itinerary__place {
     display: none;
 }
+
+.liked_icon {
+    color: #1d32cf !important;
+}
+
+.like_div:hover {
+    color:#1d32cf !important;
+}
+
+.disliked_icon {
+    color: #cc0c0c !important;
+}
+
+    .dislike_div:hover {
+        color: #cc0c0c !important;
+    }

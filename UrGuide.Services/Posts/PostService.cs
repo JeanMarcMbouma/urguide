@@ -339,6 +339,7 @@ Your bid: <em>{value}</em>",
                             .Posts
                             .Include(x => x.Catalog)
                             .Include(x => x.User)
+                            .Include(x => x.UserReactions)
                             .Where(x => x.Location == null || geo == null || x.Location.Distance(geo) <= Constants.Distance)
                             .OrderByDescending(x => x.Attributes.First(a => a.Name == nameof(AttributeTypes.Rating)).Value)
                             .Skip(offset)

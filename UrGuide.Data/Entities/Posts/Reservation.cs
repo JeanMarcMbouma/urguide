@@ -23,8 +23,10 @@ namespace UrGuide.Data.Entities.Posts
         [Flags]
         public enum ReactionType
         {
+            Neutral = 0,
             Like = 2,
             DisLike = 4
+            
         }
     }
 }
