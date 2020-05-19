@@ -368,7 +368,10 @@ Your bid: <em>{value}</em>",
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var post = await Context.Posts.FirstOrDefaultAsync(p => p.Id.Equals(seatReservation.PostId), cancellationToken);
+            var post = await Context.Posts
+                .Include(x => x.User)
+                .ThenInclude(x => x.Attributes)
+                .FirstOrDefaultAsync(p => p.Id.Equals(seatReservation.PostId), cancellationToken);
             if (post == null)
                 return Result.Of(false).WithErrors(ErrorMessages.NotFoundEntityForKey);
             try
@@ -407,7 +410,10 @@ Seats: {seatReservation.Seats}",
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var post = await Context.Posts.FirstOrDefaultAsync(p => p.Id.Equals(seatReservation.PostId), cancellationToken);
+            var post = await Context.Posts
+                .Include(x => x.User)
+                .ThenInclude(x => x.Attributes)
+                .FirstOrDefaultAsync(p => p.Id.Equals(seatReservation.PostId), cancellationToken);
             if (post == null)
                 return Result.Of(false).WithErrors(ErrorMessages.NotFoundEntityForKey);
             try
@@ -446,7 +452,10 @@ Title: {post.Text}",
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var post = await Context.Posts.FirstOrDefaultAsync(p => p.Id.Equals(postId), cancellationToken);
+            var post = await Context.Posts
+                .Include(x => x.User)
+                .ThenInclude(x => x.Attributes)
+                .FirstOrDefaultAsync(p => p.Id.Equals(postId), cancellationToken);
             if (post == null)
                 return Result.Of(false).WithErrors(ErrorMessages.NotFoundEntityForKey);
             try
@@ -484,7 +493,10 @@ Post: <strong>{post.Text}</strong>
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var post = await Context.Posts.FirstOrDefaultAsync(p => p.Id.Equals(userReaction.PostId), cancellationToken);
+            var post = await Context.Posts
+                .Include(x => x.User)
+                .ThenInclude(x => x.Attributes)
+                .FirstOrDefaultAsync(p => p.Id.Equals(userReaction.PostId), cancellationToken);
             if (post == null)
                 return Result.Of(false).WithErrors(ErrorMessages.NotFoundEntityForKey);
 
