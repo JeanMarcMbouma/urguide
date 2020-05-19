@@ -10,7 +10,7 @@
 
             context.posts.forEach((post, index) => {
 
-                if (post.id === context.post.id && post.reactionType === 2) {
+                if(post.id === context.post.id && post.reactionType === 2) {
                     context.post.reactionType = 0;
                     context.post.likes = (context.post.likes - 1);
                     context.posts[index] = context.post;

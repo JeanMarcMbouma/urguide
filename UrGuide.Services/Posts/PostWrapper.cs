@@ -20,7 +20,7 @@ namespace UrGuide.Services.Posts
             HasReacted = !string.IsNullOrEmpty(userId) && data.UserReactions.Any(r => r.UserId == userId);
             BidCount = data.BidHistories.Count();
             ItineraryCount = data.Itineraries.Count();
-            ReactionType = data.UserReactions.Any(r => r.UserId == userId) ? data.UserReactions.FirstOrDefault(r => r.UserId == userId).Type : UserReaction.ReactionType.Neutral;
+            ReactionType =  data.UserReactions.FirstOrDefault(r => r.UserId == userId)?.Type ?? UserReaction.ReactionType.Neutral;
         }
     }
 }

@@ -213,11 +213,15 @@ function Comments(props) {
 
 
     useMemo(async () => {
-        const api = HttpClientFactory.getBidClient();
+
+        if (!props.postId) {
+            return;
+        }
+        const api = HttpClientFactory.get(BidClient);
         var result = await api.history(props.postId);
         setBids(result);
        
-    }, []);
+    }, [user]);
 
     const [bid, setBid] = React.useState(25);
     const handleChangeBid = (event, newValue) => {
@@ -227,6 +231,9 @@ function Comments(props) {
 
     async function createNewBid(state) {
 
+        if (!state.postId) {
+            return;
+        }
         const client = HttpClientFactory.get(BidClient, user);
 
         const model = new BidModel({
@@ -236,7 +243,7 @@ function Comments(props) {
 
         try {
 
-            await client.newbid(state.postId, model);
+            await client.newbid(state.postId,model);
             var result = await client.history(state.postId);
             setBids(result);
         }
