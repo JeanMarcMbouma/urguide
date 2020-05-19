@@ -83,6 +83,8 @@ namespace UrGuide.Data.Configurations
 
             builder.OwnsMany(x => x.Reservations, r => {
                 r.ToTable("Seat_Reservations", Constants.Schema);
+                r.HasKey(x => x.Id);
+                r.Property(x => x.Id).HasDefaultValueSql(Constants.GuidFn);
                 r.WithOwner().HasForeignKey("PostId");
                 r.Property(p => p.UserId).IsRequired();
                 r.Property(p => p.Seats).IsRequired();
@@ -96,11 +98,12 @@ namespace UrGuide.Data.Configurations
 
             builder.OwnsMany(x => x.UserReactions, r => {
                 r.ToTable("Post_UserReactions", Constants.Schema);
+                r.HasKey(x => x.Id);
+                r.Property(x => x.Id).HasDefaultValueSql(Constants.GuidFn);
                 r.WithOwner().HasForeignKey("PostId");
                 r.Property(p => p.UserId).IsRequired();
                 r.Property(p => p.Type).HasConversion(converter).IsRequired();
                 r.HasOne(typeof(User)).WithMany().HasForeignKey("UserId").OnDelete(DeleteBehavior.Cascade);
-                r.HasKey("Id");
             });
         }
     }
