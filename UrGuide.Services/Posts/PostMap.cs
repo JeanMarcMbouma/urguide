@@ -21,6 +21,7 @@ namespace UrGuide.Services.Posts
                 .ForMember(x => x.ItineraryCount, x => x.MapFrom(y => y.ItineraryCount))
                 .ForMember(x => x.Description, x => x.MapFrom(y => y.Data.Description))
                 .ForMember(x => x.Location, x => x.MapFrom(f => f.Data.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.GeoLocation))))
+                .ForMember(x => x.IsBidOptIn, x => x.MapFrom(f => f.Data.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.BidOptIn))))
                 .ForMember(x => x.Dislikes, x => x.MapFrom(f => f.Data.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.Dislikes))))
                 .ForMember(x => x.Likes, x => x.MapFrom(f => f.Data.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.Likes))))
                 .ForMember(x => x.Price, x => x.MapFrom(f => f.Data.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.Amount))))

@@ -2497,6 +2497,7 @@ export class PostModel implements IPostModel {
     authorId?: string | undefined;
     author?: string | undefined;
     authorAvatar?: string | undefined;
+    isBidOptIn?: boolean;
 
     constructor(data?: IPostModel) {
         if (data) {
@@ -2546,6 +2547,7 @@ export class PostModel implements IPostModel {
             this.authorId = _data["authorId"];
             this.author = _data["author"];
             this.authorAvatar = _data["authorAvatar"];
+            this.isBidOptIn = _data["isBidOptIn"];
         }
     }
 
@@ -2595,6 +2597,7 @@ export class PostModel implements IPostModel {
         data["authorId"] = this.authorId;
         data["author"] = this.author;
         data["authorAvatar"] = this.authorAvatar;
+        data["isBidOptIn"] = this.isBidOptIn;
         return data; 
     }
 }
@@ -2629,6 +2632,7 @@ export interface IPostModel {
     authorId?: string | undefined;
     author?: string | undefined;
     authorAvatar?: string | undefined;
+    isBidOptIn?: boolean;
 }
 
 export class BidHistoryModel implements IBidHistoryModel {

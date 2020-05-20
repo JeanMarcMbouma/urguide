@@ -52,15 +52,18 @@ namespace UrGuide.Services.Posts
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
 
             cancellationToken.ThrowIfCancellationRequested();
-            var post = await Context.Posts.FirstOrDefaultAsync(x => x.Id == postId, cancellationToken);
+            var post = await Context.Posts
+                .Include(x => x.Bid)
+                .ThenInclude(x => x.Author)
+                .Include(x => x.Attributes).FirstOrDefaultAsync(x => x.Id == postId, cancellationToken);
             if (post == null)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
             try
             {
                 post.AcceptBid();
                 var author = post.Bid.Author.Attributes;
-                var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
-                var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+                var authorFirstName = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.FirstName)));
+                var authorEmail = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.EmailAddress)));
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
                 {
                     Content = @$"
@@ -101,7 +104,7 @@ New price: <em>{post.Bid.NewValue}</em>",
             await post.SetLocationAsync(UserContext, IPStackService);
 
             var extFiles = new List<ImageFileCreateModel>();
-            if(model.Video != null)
+            if (model.Video != null)
             {
                 extFiles.Add(model.Video);
             }
@@ -130,8 +133,8 @@ New price: <em>{post.Bid.NewValue}</em>",
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Status), Value = Constants.Active });
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Rating), Value = Constants.Zero });
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Reviews), Value = Constants.Zero });
-            
-            if(model.BidOptIn)
+
+            if (model.BidOptIn)
             {
                 post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.BidOptIn), Value = Constants.Yes });
             }
@@ -201,9 +204,9 @@ New price: <em>{post.Bid.NewValue}</em>",
                 .Include(p => p.Catalog)
                 .ThenInclude(p => p.Images)
                 .Include(p => p.Attributes)
-                  .Include(p => p.UserReactions)
+                .Include(p => p.UserReactions)
                 .Where(p => postIds.Contains(p.Id)).AsNoTracking().ToListAsync(cancellationToken);
-                            
+
             return Result.Of(Mapper.Map<IEnumerable<PostModel>>(PostVisitor.Visit(posts, UserContext.UserId)));
         }
 
@@ -219,15 +222,16 @@ New price: <em>{post.Bid.NewValue}</em>",
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
 
             cancellationToken.ThrowIfCancellationRequested();
-            var post = await Context.Posts.
-                Include(x => x.Attributes).
-                Include(x => x.Bid).
-                Include(x => x.User).ThenInclude(x => x.Attributes).
-                FirstOrDefaultAsync(x => x.Id == model.PostId, cancellationToken);
+            var post = await Context.Posts
+                .Include(x => x.Attributes)
+                .Include(x => x.Bid)
+                .Include(x => x.User)
+                .ThenInclude(user => user.Attributes)
+                .FirstOrDefaultAsync(x => x.Id == model.PostId, cancellationToken);
             if (post == null)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
 
-            if(!post.Attributes.Any(a => a.Name == nameof(AttributeTypes.BidOptIn)))
+            if (!post.Attributes.Any(a => a.Name == nameof(AttributeTypes.BidOptIn)))
             {
                 return Result.Of<PostModel>().WithErrors("This post is not biddable.");
             }
@@ -272,7 +276,11 @@ New price: <em>{post.Bid.NewValue}</em>",
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
 
             cancellationToken.ThrowIfCancellationRequested();
-            var post = await Context.Posts.FirstOrDefaultAsync(x => x.Id == postId, cancellationToken);
+            var post = await Context.Posts
+                .Include(x => x.Bid)
+                .ThenInclude(bid => bid.Author)
+                .ThenInclude(author => author.Attributes)
+                .FirstOrDefaultAsync(x => x.Id == postId, cancellationToken);
             if (post == null)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
             try
@@ -280,8 +288,8 @@ New price: <em>{post.Bid.NewValue}</em>",
                 var author = post.Bid.Author.Attributes;
                 var value = post.Bid.NewValue;
                 post.RejectBid();
-                var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
-                var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+                var authorFirstName = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.FirstName)));
+                var authorEmail = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.EmailAddress)));
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
                 {
                     Content = @$"
@@ -349,8 +357,9 @@ Your bid: <em>{value}</em>",
 
             var postIds = await Context
                             .Posts
+                            .Include(x => x.Attributes.Where(a => a.Name == nameof(AttributeTypes.Rating)))
                             .Where(x => geo == null || x.Location == null || x.Location.Distance(geo) <= Constants.Distance)
-                            .OrderByDescending(x => x.Attributes.First(a => a.Name == nameof(AttributeTypes.Rating)).Value)
+                            .OrderByDescending(x => x.Attributes.First().Value)
                             .Select(p => p.Id)
                             .Skip(offset)
                             .Take(size).ToListAsync(cancellationToken);
@@ -506,7 +515,7 @@ Post: <strong>{post.Text}</strong>
                 return Result.Of(false).WithErrors(ErrorMessages.NotFoundEntityForKey);
 
             post.RecordUserReaction(UserContext.UserId, userReaction.Like ? UserReaction.ReactionType.Like : UserReaction.ReactionType.DisLike);
-            
+
             await Context.SaveChangesAsync(cancellationToken);
 
             var author = post.User.Attributes;
@@ -516,7 +525,7 @@ Post: <strong>{post.Text}</strong>
             {
                 Content = @$"
 Hi, {authorFirstName}
-A user has {(userReaction.Like? "liked" : "reacted to")} your post:
+A user has {(userReaction.Like ? "liked" : "reacted to")} your post:
 Post: <strong>{post.Text}</strong>
 {post.Description}",
                 Subject = "User's reaction",
