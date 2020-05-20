@@ -55,15 +55,7 @@ namespace UrGuide.Services.Media
                     }
 
                     string imageFileName = imageFile.Id + ".png";
-                    if (!Directory.Exists(WebHelper.ImageDirectoryPath))
-                    {
-                        Directory.CreateDirectory(WebHelper.ImageDirectoryPath);
-                    }
-
-                    if (!Directory.Exists(WebHelper.ThumbImageDirectoryPath))
-                    {
-                        Directory.CreateDirectory(WebHelper.ThumbImageDirectoryPath);
-                    }
+                    EnsureImagePathExists();
                     var imagePath = System.IO.Path.Combine(WebHelper.ImageDirectoryPath, imageFileName);
                     var thumbPath = System.IO.Path.Combine(WebHelper.ThumbImageDirectoryPath, imageFileName);
                     imageToSave.Save(imagePath);
@@ -73,6 +65,23 @@ namespace UrGuide.Services.Media
                     imageFile.ImageUrl = WebHelper.ResolveImageUrl(imageFileName);
                     var imageUrl = WebHelper.ResolveImageUrl(imageFileName);
                 }
+            }
+        }
+
+        private void EnsureImagePathExists()
+        {
+            if (!Directory.GetParent(WebHelper.ImageDirectoryPath).Exists)
+            {
+                Directory.CreateDirectory(Directory.GetParent(WebHelper.ImageDirectoryPath).FullName);
+            }
+            if (!Directory.Exists(WebHelper.ImageDirectoryPath))
+            {
+                Directory.CreateDirectory(WebHelper.ImageDirectoryPath);
+            }
+
+            if (!Directory.Exists(WebHelper.ThumbImageDirectoryPath))
+            {
+                Directory.CreateDirectory(WebHelper.ThumbImageDirectoryPath);
             }
         }
 
@@ -90,6 +99,8 @@ namespace UrGuide.Services.Media
             using var image = Image.Load(base64Image);
             using Image avatar = image.Clone(x => x.Resize(new Size(AvatarWidth, AvatarHeight), AvatarHeight/2));
             string imageFileName = $"{userId}.png";
+
+            EnsureImagePathExists();
             var imagePath = System.IO.Path.Combine(WebHelper.ImageDirectoryPath, imageFileName);
             avatar.Save(imagePath);
             return WebHelper.ResolveImageUrl(imageFileName);

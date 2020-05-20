@@ -17,7 +17,7 @@ const useStyles = makeStyles (theme => ({
 const Posts = props => {
   const classes = useStyles ();
   return (
-    <Card className="col-lg-12 bg-white rounded p-2 mb-2">
+    <Card style={{width:`350px`}} className="col-lg-12 bg-white rounded p-2 mb-2">
       <div className="media p-0">
         <Avatar className="mr-3" src={props.href} alt="profile photo" />
         <div className="media-body">

@@ -428,22 +428,26 @@ export default function CentralBar() {
 
     }
 
-    const [isLoading, setLoading] = React.useState(true);
-
-    useMemo(async () => {
-        const api = HttpClientFactory.get(PostsClient, user);
-        var result = await api.last10();
-        console.log(result);
-        setPosts(result);
-        actionsState.posts = result;
-        setLoading(false);
-    }, []);
 
     const { manager, user } = useAuthContext();
 
     const { profile } = user || {
         profile: {}
     };
+    
+    const [isLoading, setLoading] = React.useState(true);
+
+    useMemo(async () => {
+        const api = HttpClientFactory.getPostClient();
+        try {
+            var result = await api.last10();
+            setPosts(result);
+            actionsState.posts = result;
+        } catch (e){
+            console.log(e);
+        }
+       
+    }, [user]);
 
     async function signIn(e) {
         e.preventDefault();
