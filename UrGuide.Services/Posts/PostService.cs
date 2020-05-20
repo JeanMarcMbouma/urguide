@@ -219,7 +219,11 @@ New price: <em>{post.Bid.NewValue}</em>",
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
 
             cancellationToken.ThrowIfCancellationRequested();
-            var post = await Context.Posts.FirstOrDefaultAsync(x => x.Id == model.PostId, cancellationToken);
+            var post = await Context.Posts.
+                Include(x => x.Attributes).
+                Include(x => x.Bid).
+                Include(x => x.User).ThenInclude(x => x.Attributes).
+                FirstOrDefaultAsync(x => x.Id == model.PostId, cancellationToken);
             if (post == null)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
 
@@ -234,8 +238,8 @@ New price: <em>{post.Bid.NewValue}</em>",
 
                 post.NewBid(model.Value, user);
                 var author = post.User.Attributes;
-                var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
-                var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+                var authorFirstName = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.FirstName)));
+                var authorEmail = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.EmailAddress)));
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
                 {
                     Content = @$"

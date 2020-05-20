@@ -438,11 +438,12 @@ export default function CentralBar() {
     const [isLoading, setLoading] = React.useState(true);
 
     useMemo(async () => {
-        const api = HttpClientFactory.getPostClient();
+        const api = HttpClientFactory.get(PostsClient, user);
         try {
             var result = await api.last10();
             setPosts(result);
             actionsState.posts = result;
+            setLoading(false);
         } catch (e){
             console.log(e);
         }
