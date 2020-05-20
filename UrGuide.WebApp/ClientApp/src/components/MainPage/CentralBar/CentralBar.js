@@ -966,7 +966,9 @@ export default function CentralBar() {
 
                     actionsState.posts.map((post, i) => (
                     <div key={i} className="p-3 mb-3 bg-white rounded post-card">
-                        <CardHeader
+                        <div className="row">
+                            <CardHeader
+                            className="col-lg-8"
                             avatar={<Avatar alt={post.author} src={post.authorAvatar} />}
                             title={
                                     <h6>
@@ -974,7 +976,10 @@ export default function CentralBar() {
                                     </h6>
                             }
                             subheader={post.publicationDate}
-                        />
+                            />
+                            {console.log(post, post.hasReserved)}
+                            <Button className='my-4 mx-1 col-lg-3' variant="contained" color='primary'>Join</Button>
+                        </div>
                         <CardContent>
                             <div className='row'>
                                 <div className='col-12' >

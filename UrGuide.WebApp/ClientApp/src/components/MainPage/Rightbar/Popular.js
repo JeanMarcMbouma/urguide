@@ -67,7 +67,7 @@ render()  {
         <Friends key={i} href={f.href} name={f.name} email={f.email} />
     ));
     let postsElement = this.state.posts.map((p, i) => (
-        <Posts key={i} href={p.href} title={p.title} description={p.description} />
+        <Posts key={i} href={p.authorAvatar} title={p.author} description={p.description} />
     ));
 
 
@@ -81,9 +81,10 @@ render()  {
           <div className='font-weight-bold more'>
            {this.state.loading ? <></> : <span>MORE</span>}
         </div>
-              </div>
-              <div>{this.state.loading ? <PostsSkeleton /> : postsElement}
-              </div>
+        </div>
+        <div>
+            {this.state.loading ? <PostsSkeleton /> : postsElement}
+        </div>
 
       </div>
       <div className='copyright-div'>
@@ -97,21 +98,9 @@ render()  {
 
 async populateData() {
 
-
-    let posts = [
-        {
-            id: 1,
-            href: 'https://i.pinimg.com/originals/df/5f/5b/df5f5b1b174a2b4b6026cc6c8f9395c1.jpg',
-            title: 'Unexpected views of New York city',
-            description: 'Using a something makes food very tasty and find...',
-        },
-        {
-            id: 2,
-            href: 'https://img.favpng.com/21/10/23/computer-icons-avatar-social-media-blog-font-awesome-png-favpng-jKXEv9rWhum7VbNKDbcELd6Di.jpg',
-            title: 'Shannen Dohart shares updata on her...',
-            description: 'This some description about the post title',
-        },
-    ];
+    let gettingData = await fetch('https://localhost:5001/posts/top10')
+    let posts = await gettingData.json()
+    
     let friends = [
         {
             id: 1,
