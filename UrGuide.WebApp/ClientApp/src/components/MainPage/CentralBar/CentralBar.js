@@ -366,20 +366,24 @@ export default function CentralBar() {
 
     }
 
-    useMemo(async () => {
-        const api = HttpClientFactory.getPostClient();
-        var result = await api.last10();
-        console.log(result);
-        setPosts(result);
-        actionsState.posts = result;
-      
-    }, []);
 
     const { manager, user } = useAuthContext();
 
     const { profile } = user || {
         profile: {}
     };
+    
+    useMemo(async () => {
+        const api = HttpClientFactory.getPostClient();
+        try {
+            var result = await api.last10();
+            setPosts(result);
+            actionsState.posts = result;
+        } catch (e){
+            console.log(e);
+        }
+       
+    }, [user]);
 
     async function signIn(e) {
         e.preventDefault();
