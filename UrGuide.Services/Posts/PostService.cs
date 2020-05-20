@@ -201,6 +201,7 @@ New price: <em>{post.Bid.NewValue}</em>",
                 .Include(p => p.Catalog)
                 .ThenInclude(p => p.Images)
                 .Include(p => p.Attributes)
+                  .Include(p => p.UserReactions)
                 .Where(p => postIds.Contains(p.Id)).AsNoTracking().ToListAsync(cancellationToken);
                             
             return Result.Of(Mapper.Map<IEnumerable<PostModel>>(PostVisitor.Visit(posts, UserContext.UserId)));
@@ -214,7 +215,7 @@ New price: <em>{post.Bid.NewValue}</em>",
 
         public async Task<Result<PostModel>> OpenBidAsync(BidModel model, CancellationToken cancellationToken)
         {
-            if (UserContext.IsAuthenticated)
+            if (!UserContext.IsAuthenticated)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -229,7 +230,7 @@ New price: <em>{post.Bid.NewValue}</em>",
 
             try
             {
-                var user = await Context.Users.FindAsync(new { UserContext.UserId }, cancellationToken);
+                var user = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
 
                 post.NewBid(model.Value, user);
                 var author = post.User.Attributes;
@@ -263,7 +264,7 @@ New price: <em>{post.Bid.NewValue}</em>",
 
         public async Task<Result<PostModel>> RejectBidAsync(string postId, CancellationToken cancellationToken)
         {
-            if (UserContext.IsAuthenticated)
+            if (!UserContext.IsAuthenticated)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
 
             cancellationToken.ThrowIfCancellationRequested();

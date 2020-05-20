@@ -2,7 +2,8 @@
 
 const NewBidContext = createContext({
     postId:null,
-    value: 0,
+    value: null,
+    
 });
 
 export default NewBidContext;

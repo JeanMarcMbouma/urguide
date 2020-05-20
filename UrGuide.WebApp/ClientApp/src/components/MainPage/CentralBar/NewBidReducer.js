@@ -5,7 +5,8 @@
 
         case "new-bid":
             context.postId = action.data.postId;
-            context.value = action.data.value;
+            context.value = '$'+ String(action.data.value);
+            //console.log(context.value);
             action.data.callback(context);
             return context;
 
