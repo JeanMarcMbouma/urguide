@@ -357,9 +357,8 @@ Your bid: <em>{value}</em>",
 
             var postIds = await Context
                             .Posts
-                            .Include(x => x.Attributes.Where(a => a.Name == nameof(AttributeTypes.Rating)))
                             .Where(x => geo == null || x.Location == null || x.Location.Distance(geo) <= Constants.Distance)
-                            .OrderByDescending(x => x.Attributes.First().Value)
+                            .OrderByDescending(x => x.Attributes.First(a => a.Name == nameof(AttributeTypes.Rating)).Value)
                             .Select(p => p.Id)
                             .Skip(offset)
                             .Take(size).ToListAsync(cancellationToken);
