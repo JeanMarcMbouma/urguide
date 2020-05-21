@@ -358,22 +358,29 @@ function Comments(props) {
                         Bid now
                     </Button> }
                 </div>
-                {bids.map((bid, i) => (
-                    <div className='cmt-div' key={i}>
-                        <CardHeader
-                            avatar={<Avatar alt={bid.author} src={bid.authorImage} />}
-                            title={
-                                <h6>
-                                    {bid.author}
-                                </h6>
-                            }
-                            subheader={bid.created}
-                        />
-                        <div className='comment-text'>
-                            <p>{bid.author} made a proposal of {bid.value}.</p>
-                        </div>
-                    </div>
-                    ))}
+                {
+                    bids.length > 0 ? <>
+                        <h6>Bids History ({bids.length})</h6>
+                        <br/>
+                        { bids.map((bid, i) => (
+                        <div className='cmt-div' key={i} >
+                            <CardHeader
+                                avatar={<Avatar alt={bid.author} src={bid.authorImage} />}
+                                title={
+                                    <h6>
+                                        {bid.author}
+                                    </h6>
+                                }
+                                subheader={bid.created}
+                            />
+                            <div className='comment-text'>
+                                <p>{bid.author} made a proposal of {bid.value}.</p>
+                            </div>
+                        </div>)) } </> :  <h6>No bid yet.</h6>
+                      
+
+                
+                }
             </div> : null
         );
 }
@@ -1149,12 +1156,14 @@ export default function CentralBar() {
                                                     <span className='text-center' >{post.dislikes}</span>
                                                 </div></>
                                         }
-                                        <div className='col-3 col-lg-3 text-center'>
-                                            <IconButton onClick={() => toggleComments(post.id)}>
-                                                <FaRegComment />
-                                            </IconButton>
-                                            <span className='text-center' >{post.bidCount}</span>
-                                        </div>
+                                        {
+                                            post.isBidOptIn ? <div className='col-3 col-lg-3 text-center'>
+                                                <IconButton onClick={() => toggleComments(post.id)}>
+                                                    <FaRegComment />
+                                                </IconButton>
+                                                <span className='text-center' >{post.bidCount}</span>
+                                            </div> : null
+                                        }
                                         <div className='col-3 col-lg-3 text-center'>
                                             <IconButton onClick={() => toggleItinerary(post.id)}>
                                                 <LocationOnIcon />
