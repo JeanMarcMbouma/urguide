@@ -533,5 +533,18 @@ Post: <strong>{post.Text}</strong>
             });
             return Result.Of(true);
         }
+
+        public async Task<Result<PostModel>> GetByIdAsync(string postId, CancellationToken cancellationToken)
+        {
+            var post = await Context.Posts
+                .Include(x => x.Bid)
+                .ThenInclude(bid => bid.Author)
+                .ThenInclude(author => author.Attributes)
+                .FirstOrDefaultAsync(x => x.Id == postId, cancellationToken);
+
+            if (post == null)
+                return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
+            return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
+        }
     }
 }
