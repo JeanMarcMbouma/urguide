@@ -4,6 +4,8 @@ import Friends from './FriendsSuggestion/Friends';
 import { Card, Avatar, Typography } from '@material-ui/core';
 import Skeleton from '@material-ui/lab/Skeleton';
 import './RightStyle.css';
+import { PostsClient } from '../../../api';
+import { HttpClientFactory } from '../../../httpclient';
 
 
 
@@ -98,8 +100,12 @@ render()  {
 
 async populateData() {
 
-    let gettingData = await fetch('https://localhost:5001/posts/top10')
-    let posts = await gettingData.json()
+    // let gettingData = await fetch('https://localhost:5001/posts/top10')
+    // let posts = await gettingData.json()
+    let client = HttpClientFactory.get(PostsClient)
+    client.top10().then( (posts) => {
+        this.setState({ posts:posts, loading:false})
+    } )
     
     let friends = [
         {
@@ -116,6 +122,6 @@ async populateData() {
         },
     ];
 
-    this.setState({ posts: posts, suggestions:friends, loading: false });
+    // this.setState({ posts: posts, suggestions:friends, loading: false });
 }
 }

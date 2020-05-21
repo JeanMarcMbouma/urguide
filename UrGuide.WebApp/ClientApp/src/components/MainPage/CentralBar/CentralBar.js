@@ -968,7 +968,7 @@ export default function CentralBar() {
                     <div key={i} className="p-3 mb-3 bg-white rounded post-card">
                         <div className="row">
                             <CardHeader
-                            className="col-lg-8"
+                            className="col-lg-10"
                             avatar={<Avatar alt={post.author} src={post.authorAvatar} />}
                             title={
                                     <h6>
@@ -978,7 +978,7 @@ export default function CentralBar() {
                             subheader={post.publicationDate}
                             />
                             {console.log(post, post.hasReserved)}
-                            <Button className='my-4 mx-1 col-lg-3' variant="contained" color='primary'>Join</Button>
+                            <Button className='my-4 mx-1 col-lg-1' variant="contained" color='primary'>Join</Button>
                         </div>
                         <CardContent>
                             <div className='row'>
