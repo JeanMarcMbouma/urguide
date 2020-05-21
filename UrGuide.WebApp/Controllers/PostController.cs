@@ -52,6 +52,15 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
+        [HttpGet("{postId}")]
+        [AllowAnonymous]
+        [ProducesDefaultResponseType(typeof(PostModel))]
+        public async Task<IActionResult> GetOne(string postId, CancellationToken cancellationToken)
+        {
+            var result = await _postService.GetByIdAsync(postId, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
+
         [HttpGet("top100")]
         [AllowAnonymous]
         [ProducesDefaultResponseType(typeof(IEnumerable<PostModel>))]
