@@ -33,35 +33,28 @@ namespace UrGuide.WebApp.Services
             var claimPrincipal = await PrincipalFactory.CreateAsync(principal);
 
             context.IssuedClaims.AddRange(claimPrincipal.Claims);
-            if(result.Data.IsGuide) {
-               context.IssuedClaims.AddRange(new[]
-                {
-                    new Claim(IdentityModel.JwtClaimTypes.BirthDate, result.Data.BirthDay),
-                    new Claim(IdentityModel.JwtClaimTypes.Picture, result.Data.ProfileImage),
-                    new Claim(IdentityModel.JwtClaimTypes.FamilyName, result.Data.LastName),
-                    new Claim(IdentityModel.JwtClaimTypes.GivenName, result.Data.FirstName),
-                    new Claim(IdentityModel.JwtClaimTypes.Gender, result.Data.Gender),
-                    new Claim(IdentityModel.JwtClaimTypes.Name, result.Data.FullName),
-                    new Claim(IdentityModel.JwtClaimTypes.Address, result.Data.Address),
-                    new Claim("country", result.Data.Country),
-                    new Claim(IdentityModel.JwtClaimTypes.Role, result.Data.IsGuide ? "guide" : "user")
-                });
-            } else {
-                context.IssuedClaims.AddRange(new[]
-                {
-                    new Claim(IdentityModel.JwtClaimTypes.FamilyName, result.Data.LastName),
-                    new Claim(IdentityModel.JwtClaimTypes.GivenName, result.Data.FirstName),
-                    new Claim(IdentityModel.JwtClaimTypes.Name, result.Data.FullName),
-                    new Claim(IdentityModel.JwtClaimTypes.Role, result.Data.IsGuide ? "guide" : "user")
-                });
-            }
-            
+            SafeAddClaims(context, IdentityModel.JwtClaimTypes.BirthDate, result.Data.BirthDay)
+                .SafeAddClaims(context, IdentityModel.JwtClaimTypes.Picture, result.Data.ProfileImage)
+                .SafeAddClaims(context, IdentityModel.JwtClaimTypes.FamilyName, result.Data.LastName)
+                .SafeAddClaims(context, IdentityModel.JwtClaimTypes.GivenName, result.Data.FirstName)
+                .SafeAddClaims(context, IdentityModel.JwtClaimTypes.Gender, result.Data.Gender)
+                .SafeAddClaims(context, IdentityModel.JwtClaimTypes.Name, result.Data.FullName)
+                .SafeAddClaims(context, IdentityModel.JwtClaimTypes.Address, result.Data.Address)
+                .SafeAddClaims(context, "country", result.Data.Country)
+                .SafeAddClaims(context, IdentityModel.JwtClaimTypes.Role, result.Data.IsGuide ? "guide" : "user");
+
         }
 
         public async Task IsActiveAsync(IsActiveContext context)
         {
             var exists = await UserService.ExistsAsync(context.Subject.GetSubjectId(), CancellationToken.None);
             context.IsActive = exists.Data;
+        }
+
+        private ProfileService SafeAddClaims(ProfileDataRequestContext context, string name, string value) {
+            if(!string.IsNullOrEmpty(value))
+            context.IssuedClaims.Add(new Claim(name, value));
+            return this;
         }
     }
 }
