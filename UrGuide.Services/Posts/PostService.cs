@@ -192,20 +192,17 @@ New price: <em>{post.Bid.NewValue}</em>",
         {
             var geo = await IPStackService.GetLocationAsync(UserContext);
 
-            var postIds = await Context.Posts
-                            .Where(x => geo == null || x.Location == null || x.Location.Distance(geo) <= Constants.Distance)
-                            .OrderByDescending(x => x.LastUpdated)
-                            .Select(p => p.Id)
-                            .Skip(offset)
-                            .Take(size).ToListAsync(cancellationToken);
-
             var posts = await Context.Posts
-                .Include(p => p.User)
-                .Include(p => p.Catalog)
-                .ThenInclude(p => p.Images)
-                .Include(p => p.Attributes)
-                .Include(p => p.UserReactions)
-                .Where(p => postIds.Contains(p.Id)).AsNoTracking().ToListAsync(cancellationToken);
+                //.Include(p => p.User)
+                //.Include(p => p.Catalog)
+                //.ThenInclude(p => p.Images)
+                //.Include(p => p.Attributes)
+                //.Include(p => p.UserReactions)
+                .Where(x => geo == null || x.Location == null || x.Location.Distance(geo) <= Constants.Distance)
+                .OrderByDescending(x => x.LastUpdated)
+                .Skip(offset)
+                .Take(size)
+                .ToListAsync(cancellationToken);
 
             return Result.Of(Mapper.Map<IEnumerable<PostModel>>(PostVisitor.Visit(posts, UserContext.UserId)));
         }
@@ -355,21 +352,16 @@ Your bid: <em>{value}</em>",
         {
             var geo = await IPStackService.GetLocationAsync(UserContext);
 
-            var postIds = await Context
-                            .Posts
-                            .Where(x => geo == null || x.Location == null || x.Location.Distance(geo) <= Constants.Distance)
-                            .OrderByDescending(x => x.Attributes.First(a => a.Name == nameof(AttributeTypes.Rating)).Value)
-                            .Select(p => p.Id)
-                            .Skip(offset)
-                            .Take(size).ToListAsync(cancellationToken);
-
-
             var posts = await Context.Posts
-                .Include(p => p.User)
-                .Include(p => p.Catalog)
-                .ThenInclude(p => p.Images)
-                .Include(p => p.Attributes)
-                .Where(p => postIds.Contains(p.Id)).AsNoTracking().ToListAsync(cancellationToken);
+                //.Include(p => p.User)
+                //.Include(p => p.Catalog)
+                //.ThenInclude(p => p.Images)
+                //.Include(p => p.Attributes)
+                .Where(x => geo == null || x.Location == null || x.Location.Distance(geo) <= Constants.Distance)
+                .OrderByDescending(x => x.Attributes.First(a => a.Name == nameof(AttributeTypes.Rating)).Value)
+                .Skip(offset)
+                .Take(size)
+                .ToListAsync(cancellationToken);
 
             return Result.Of(Mapper.Map<IEnumerable<PostModel>>(PostVisitor.Visit(posts, UserContext.UserId)));
         }
