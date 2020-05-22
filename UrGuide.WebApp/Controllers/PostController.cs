@@ -52,7 +52,7 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
-        [HttpGet("{postId}")]
+        [HttpGet("{postId}/retrieve")]
         [AllowAnonymous]
         [ProducesDefaultResponseType(typeof(PostModel))]
         public async Task<IActionResult> GetOne(string postId, CancellationToken cancellationToken)

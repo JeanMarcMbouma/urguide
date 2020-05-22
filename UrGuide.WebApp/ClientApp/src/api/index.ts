@@ -267,41 +267,6 @@ export class Client {
         }
         return Promise.resolve<void>(<any>null);
     }
-
-    /**
-     * @return Error
-     */
-    posts(postId: string): Promise<PostModel> {
-        let url_ = this.baseUrl + "/posts/{postId}";
-        if (postId === undefined || postId === null)
-            throw new Error("The parameter 'postId' must be defined.");
-        url_ = url_.replace("{postId}", encodeURIComponent("" + postId));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <RequestInit>{
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processPosts(_response);
-        });
-    }
-
-    protected processPosts(response: Response): Promise<PostModel> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        {
-            return response.text().then((_responseText) => {
-            let resultdefault: any = null;
-            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            resultdefault = PostModel.fromJS(resultDatadefault);
-            return resultdefault;
-            });
-        }
-    }
 }
 
 export class AccountClient {
@@ -892,6 +857,41 @@ export class PostsClient {
                 for (let item of resultDatadefault)
                     resultdefault!.push(PostModel.fromJS(item));
             }
+            return resultdefault;
+            });
+        }
+    }
+
+    /**
+     * @return Error
+     */
+    retrieve(postId: string): Promise<PostModel> {
+        let url_ = this.baseUrl + "/posts/{postId}/retrieve";
+        if (postId === undefined || postId === null)
+            throw new Error("The parameter 'postId' must be defined.");
+        url_ = url_.replace("{postId}", encodeURIComponent("" + postId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRetrieve(_response);
+        });
+    }
+
+    protected processRetrieve(response: Response): Promise<PostModel> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = PostModel.fromJS(resultDatadefault);
             return resultdefault;
             });
         }
