@@ -188,7 +188,7 @@ export default function Discover() {
                     <div className='row justify-content-center'>
                         <div className='col-12 col-sm-8 col-md-8 col-lg-4'>
                             <div className="search-container">
-                                <input type="text" placeholder="Where do you want to go ?" className="searchbar" />
+                                <input type="text" placeholder="Where are you going ?" className="searchbar" />
                                 <img src="https://images-na.ssl-images-amazon.com/images/I/41gYkruZM2L.png" alt="Magnifying Glass" className="button-search" />
                             </div>
                         </div>
