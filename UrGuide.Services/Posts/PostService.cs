@@ -62,8 +62,8 @@ namespace UrGuide.Services.Posts
             {
                 post.AcceptBid();
                 var author = post.Bid.Author.Attributes;
-                var authorFirstName = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.FirstName)));
-                var authorEmail = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.EmailAddress)));
+                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
                 {
                     Content = @$"
@@ -240,8 +240,8 @@ New price: <em>{post.Bid.NewValue}</em>",
 
                 post.NewBid(model.Value, user);
                 var author = post.User.Attributes;
-                var authorFirstName = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.FirstName)));
-                var authorEmail = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.EmailAddress)));
+                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
                 {
                     Content = @$"
@@ -286,8 +286,8 @@ New price: <em>{post.Bid.NewValue}</em>",
                 var author = post.Bid.Author.Attributes;
                 var value = post.Bid.NewValue;
                 post.RejectBid();
-                var authorFirstName = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.FirstName)));
-                var authorEmail = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.EmailAddress)));
+                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
                 {
                     Content = @$"
@@ -387,8 +387,8 @@ Your bid: <em>{value}</em>",
                 post.MakeReservation(UserContext.UserId, seatReservation.Seats);
                 await Context.SaveChangesAsync(cancellationToken);
                 var author = post.User.Attributes;
-                var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
-                var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
                 {
                     Content = @$"
@@ -429,8 +429,8 @@ Seats: {seatReservation.Seats}",
                 post.EditReservation(UserContext.UserId, seatReservation.Seats);
                 await Context.SaveChangesAsync(cancellationToken);
                 var author = post.User.Attributes;
-                var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
-                var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
                 {
                     Content = @$"
@@ -472,8 +472,8 @@ Title: {post.Text}",
                 await Context.SaveChangesAsync(cancellationToken);
 
                 var author = post.User.Attributes;
-                var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
-                var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
                 {
                     Content = @$"
@@ -513,8 +513,8 @@ Post: <strong>{post.Text}</strong>
             await Context.SaveChangesAsync(cancellationToken);
 
             var author = post.User.Attributes;
-            var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
-            var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+            var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+            var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
             await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
             {
                 Content = @$"
