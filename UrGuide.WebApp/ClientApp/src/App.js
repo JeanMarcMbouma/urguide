@@ -5,6 +5,7 @@ import { LoginLayout } from './components/login/LoginLayout';
 import { LoginPage } from './components/login/LoginPage';
 import { RegisterLayout } from './components/RegisterLayout';
 import Discover from "./components/discover/Discover";
+import Post from "./components/post/Post";
 import Profile from "./components/user/Profile";
 import {
     ClientRegistration,
@@ -67,8 +68,10 @@ export default class App extends Component {
                                 <AuthRoute path="/user" component={Profile} />
                                 <Route path="/feed" component={Home} />
                                 <Route path="/discover" component={Discover} />
+                               
                             </Layout>
                         </Route>
+                        <Route path={`/post/:postId/shot/:imageId`} component={Post} />
                         <Route exact path="/" render={() => <Redirect to="/feed" />} />
                         <Route exact path={ApplicationPaths.LoginCallback} component={LoginCallback} />
                         <Route exact path={ApplicationPaths.LogOutCallback} render={() => <Redirect to="/feed" />} />

@@ -39,13 +39,7 @@ export default class LeftBar extends Component {
     }
 
     componentWillMount() {
-
-        const timer = setTimeout(() => {
             this.populateData();
-
-        }, 9100);
-
-        return () => clearTimeout(timer);
     }
    
 

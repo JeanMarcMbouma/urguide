@@ -7,6 +7,7 @@ import { AiOutlineDislike } from 'react-icons/ai';
 import { AiOutlineLike } from 'react-icons/ai';
 import { AiFillDislike } from 'react-icons/ai';
 import { AiFillLike } from 'react-icons/ai';
+import { Link } from 'react-router-dom';
 import {
     Card,
     CardHeader,
@@ -15,7 +16,6 @@ import {
     Avatar,
     IconButton,
     InputLabel,
-    Link,
     Input,
     FormControl,
     InputAdornment,
@@ -358,22 +358,29 @@ function Comments(props) {
                         Bid now
                     </Button> }
                 </div>
-                {bids.map((bid, i) => (
-                    <div className='cmt-div' key={i}>
-                        <CardHeader
-                            avatar={<Avatar alt={bid.author} src={bid.authorImage} />}
-                            title={
-                                <h6>
-                                    {bid.author}
-                                </h6>
-                            }
-                            subheader={bid.created}
-                        />
-                        <div className='comment-text'>
-                            <p>{bid.author} made a proposal of {bid.value}.</p>
-                        </div>
-                    </div>
-                    ))}
+                {
+                    bids.length > 0 ? <>
+                        <h6>Bids History ({bids.length})</h6>
+                        <br/>
+                        { bids.map((bid, i) => (
+                        <div className='cmt-div' key={i} >
+                            <CardHeader
+                                avatar={<Avatar alt={bid.author} src={bid.authorImage} />}
+                                title={
+                                    <h6>
+                                        {bid.author}
+                                    </h6>
+                                }
+                                subheader={bid.created}
+                            />
+                            <div className='comment-text'>
+                                <p>{bid.author} made a proposal of {bid.value}.</p>
+                            </div>
+                        </div>)) } </> :  <h6>No bid yet.</h6>
+                      
+
+                
+                }
             </div> : null
         );
 }
@@ -386,10 +393,6 @@ const navigateToReturnUrl = returnUrl => {
 export default function CentralBar() {
 
     const classes = useStyles();
-
-
-    //const uploadButton = React.createRef();
-    //const [ViewPostCreating, setViewPostCreating] = useState(false);
 
     const [context, setContext] = React.useState({
         files: [],
@@ -989,37 +992,78 @@ export default function CentralBar() {
         if (props.images.length == 1)
         {
             return (<div className='row'>
-                <div className='col-12 unique-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
-                </div>
+                    <div className='col-12 unique-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
+                        <Link to={`/post/${props.postId}/shot/${props.images[0].id}`} >
+                            <div style={{ height: `100%`, width: `100%` }}>
+                            </div>
+                        </Link>
+                    </div>
             </div>);
         }
         if (props.images.length == 2) {
             return (<div className='row'>
                 <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
+                    <Link to={`/post/${props.postId}/shot/${props.images[0].id}`} >
+                        <div style={{ height: `100%`, width: `100%` }}>
+                        </div>
+                    </Link>
                 </div>
                 <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
+                    <Link to={`/post/${props.postId}/shot/${props.images[1].id}`} >
+                        <div style={{ height: `100%`, width: `100%` }}>
+                        </div>
+                    </Link>
                 </div>
             </div>);
         }
         if (props.images.length == 3) {
             return (<div className='row'>
+                
                 <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
-                </div>
+                    <Link to={`/post/${props.postId}/shot/${props.images[0].id}`} >
+                        <div style={{height:`100%`, width:`100%`}}>
+                        </div>
+                    </Link>
+               </div>
                 <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
+                    <Link to={`/post/${props.postId}/shot/${props.images[1].id}`} >
+                        <div style={{ height: `100%`, width: `100%` }}>
+                        </div>
+                    </Link>
                 </div>
                 <div className='col-12 post-img' style={{ backgroundImage: `url(${props.images[2].imageBase64})` }}>
+                    <Link to={`/post/${props.postId}/shot/${props.images[2].id}`} >
+                        <div style={{ height: `100%`, width: `100%` }}>
+                        </div>
+                    </Link>
                 </div>
             </div>);
         }
         if (props.images.length == 4) {
             return (<div className='row'>
                 <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
+                    <Link to={`/post/${props.postId}/shot/${props.images[0].id}`} >
+                        <div style={{ height: `100%`, width: `100%` }}>
+                        </div>
+                    </Link>
                 </div>
                 <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
+                    <Link to={`/post/${props.postId}/shot/${props.images[1].id}`} >
+                        <div style={{ height: `100%`, width: `100%` }}>
+                        </div>
+                    </Link>
                 </div>
                 <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[2].imageBase64})` }}>
+                    <Link to={`/post/${props.postId}/shot/${props.images[2].id}`} >
+                        <div style={{ height: `100%`, width: `100%` }}>
+                        </div>
+                    </Link>
                 </div>
                 <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[3].imageBase64})` }}>
+                    <Link to={`/post/${props.postId}/shot/${props.images[3].id}`} >
+                        <div style={{ height: `100%`, width: `100%` }}>
+                        </div>
+                    </Link>
                 </div>
             </div>);
         }
@@ -1076,7 +1120,7 @@ export default function CentralBar() {
                                         {post.description}
                                     </Typography>
                                 </CardContent>
-                                <PostImages images={post.images} />
+                                <PostImages images={post.images} postId={post.id} />
                                 <CardActions className="container-fluid"  >
                                     <div className='row d-flex justify-content-center' style={{ width: `100%` }}>
 
@@ -1149,12 +1193,14 @@ export default function CentralBar() {
                                                     <span className='text-center' >{post.dislikes}</span>
                                                 </div></>
                                         }
-                                        <div className='col-3 col-lg-3 text-center'>
-                                            <IconButton onClick={() => toggleComments(post.id)}>
-                                                <FaRegComment />
-                                            </IconButton>
-                                            <span className='text-center' >{post.bidCount}</span>
-                                        </div>
+                                        {
+                                            post.isBidOptIn ? <div className='col-3 col-lg-3 text-center'>
+                                                <IconButton onClick={() => toggleComments(post.id)}>
+                                                    <FaRegComment />
+                                                </IconButton>
+                                                <span className='text-center' >{post.bidCount}</span>
+                                            </div> : null
+                                        }
                                         <div className='col-3 col-lg-3 text-center'>
                                             <IconButton onClick={() => toggleItinerary(post.id)}>
                                                 <LocationOnIcon />
