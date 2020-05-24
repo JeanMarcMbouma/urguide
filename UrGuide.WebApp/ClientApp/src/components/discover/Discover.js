@@ -179,8 +179,6 @@ class Cards extends Component {
 export default function Discover() {
 
     let { path, url } = useRouteMatch();
-
-    console.log(useRouteMatch());
         
         return (
             <>
@@ -198,11 +196,13 @@ export default function Discover() {
                     <Route exact path={path} >
                         <Cards />
                     </Route>
-                    <Route path={`${path}/:id`}>
-                        <Post />
-                    </Route>
                 </Switch>
                
             </>
         );
     }
+
+
+//<Route path={`${path}/post/:postId/shot/:imageId`}>
+//    <Post />
+//</Route>

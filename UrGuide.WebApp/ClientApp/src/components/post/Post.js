@@ -9,8 +9,10 @@ import {
     Button,
     Paper,
     TextField,
-    Box,
-    Grid
+    CardActions,
+    CardContent,
+    Grid,
+    CircularProgress
 
 } from '@material-ui/core';
 import { Link, useParams } from 'react-router-dom';
@@ -19,6 +21,8 @@ import { AiOutlineDislike } from 'react-icons/ai';
 import { AiOutlineLike } from 'react-icons/ai';
 import { AiFillDislike } from 'react-icons/ai';
 import { AiFillLike } from 'react-icons/ai';
+import { AiFillCloseCircle } from 'react-icons/ai';
+import EventIcon from '@material-ui/icons/Event';
 import ArrowForwardIosOutlinedIcon from '@material-ui/icons/ArrowForwardIosOutlined';
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 import LocationOnIcon from '@material-ui/icons/LocationOn';
@@ -53,48 +57,61 @@ function Header(props) {
 }
 
 
-const labels = {
-    0.5: 'Worst experience.',
-    1: 'Very poor experience.',
-    1.5: 'Bad experience.',
-    2: 'Not realistic.',
-    2.5: 'Not interesting.',
-    3: 'It was okay.',
-    3.5: 'It was good.',
-    4: 'It was excellent.',
-    4.5: 'It was almost perfect.',
-    5: 'It was perfect.',
-};
+//const labels = {
+//    0.5: 'Worst experience.',
+//    1: 'Very poor experience.',
+//    1.5: 'Bad experience.',
+//    2: 'Not realistic.',
+//    2.5: 'Not interesting.',
+//    3: 'It was okay.',
+//    3.5: 'It was good.',
+//    4: 'It was excellent.',
+//    4.5: 'It was almost perfect.',
+//    5: 'It was perfect.',
+//};
 
-function NewFeedBack() {
+//function NewFeedBack() {
 
-    const [value, setValue] = React.useState(2);
-    const [hover, setHover] = React.useState(-1);
+//    const [value, setValue] = React.useState(2);
+//    const [hover, setHover] = React.useState(-1);
 
-    return (<form noValidate autoComplete="off" className='new-feedback'>
-        <TextField fullWidth multiline rows={7} rowsMax={7} id="outlined-basic" label="Your review" variant="outlined" placeholder="Would you recommend this spot ? Write what's on your mind." />
-        <br />
-        <br />
-        <div>
-            <span>Your experience</span>
-            <br />
-            <Rating
-                name="hover-feedback"
-                value={value}
-                precision={0.5}
-                onChange={(event, newValue) => {
-                    setValue(newValue);
-                }}
-                onChangeActive={(event, newHover) => {
-                    setHover(newHover);
-                }}
-            />
-            {value !== null && <Box ml={0}>{labels[hover !== -1 ? hover : value]}</Box>}
+//    return (<form noValidate autoComplete="off" className='new-feedback'>
+//        <TextField fullWidth multiline rows={7} rowsMax={7} id="outlined-basic" label="Your review" variant="outlined" placeholder="Would you recommend this spot ? Write what's on your mind." />
+//        <br />
+//        <br />
+//        <div>
+//            <span>Your experience</span>
+//            <br />
+//            <Rating
+//                name="hover-feedback"
+//                value={value}
+//                precision={0.5}
+//                onChange={(event, newValue) => {
+//                    setValue(newValue);
+//                }}
+//                onChangeActive={(event, newHover) => {
+//                    setHover(newHover);
+//                }}
+//            />
+//            {value !== null && <Box ml={0}>{labels[hover !== -1 ? hover : value]}</Box>}
+//        </div>
+
+//        <br />
+//        <Button variant="contained" color="primary">submit review</Button>
+//    </form>);
+//}
+
+
+
+function PostLoading() {
+
+    return (
+        <div className="post-loading-container">
+            <div className="post-loading" >
+                <CircularProgress />
+            </div>
         </div>
-
-        <br />
-        <Button variant="contained" color="primary">submit review</Button>
-    </form>);
+        );
 }
 
 
@@ -285,59 +302,8 @@ function Comments(props) {
 
 export default function Post() {
 
-    let { id } = useParams();
-    const [post, setPost] = useState(
-        {
-            id: "097EE6C5-ED1F-4CD5-8862-62D90C3C69F8",
-            text: "string",
-            description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in",
-            price: "$10 - $50",
-            rating: "string",
-           location: "St-Louis, Louisiana",
-            likes: 0,
-            dislikes: 0,
-           publicationDate: "19-May-2020",
-            lastEditDate: "string",
-           startingBid: "string",
-            lastBid: "string",
-            status: "string",
-            seats: 0,
-           reservedSeats: 0,
-            startDate: "11/12/2020",
-            endDate: "11/12/2020",
-            endTime: "13:00",
-            startTime: "15:00",
-            hasReserved: true,
-            hasReacted: true,
-            reactionType: 0,
-            bidCount: 0,
-            itineraryCount: 0,
-            categories: [
-                "Amusement",
-                "Historical"
-            ],
-            images: [
-                {
-                    imageBase64: "https://www.visitcalifornia.com/sites/default/files/VC_California101_VeniceBeach_Stock_RF_638340372_1280x640.jpg",
-                    name: "venice.jpg",
-                    id:1
-                },
-                {
-                    imageBase64: "https://previews.123rf.com/images/crisograf/crisograf1610/crisograf161000065/63683101-new-york-etats-unis-manhattan-times-square-foules-et-de-la-circulation-dans-la-soir%C3%A9e-avec-des-th%C3%A9%C3%A2tres-.jpg",
-                    name: "venice.jpg",
-                    id: 2
-                },
-                {
-                    imageBase64: "https://media.timeout.com/images/105383118/630/472/image.jpg",
-                    name: "venice.jpg",
-                    id: 3
-                }
-            ],
-            authorId: "dfe470e0-d3bb-40bf-b119-64309098432c",
-            author: "John Doe",
-            authorAvatar: "string",
-            isBidOptIn: true
-        });
+    let { postId, imageId } = useParams();
+    const [post, setPost] = useState({});
     const actionCtx = useContext(ActionsContext);
     const [actionsState, dispatchAction] = useReducer(ActionsReducer, actionCtx);
 
@@ -351,14 +317,21 @@ export default function Post() {
 
     function Description(props) {
         return (<>
-            <div className="container-fluid">
+            <div className='container-fluid description'>
                 <div className='row'>
                     <div className='col-12' >
+                        <CardHeader
+                            avatar={<Avatar alt={props.post.author} src={props.post.authorAvatar} />}
+                            title={
+                                <h6>
+                                    {props.post.author}
+                                </h6>
+                            }
+                            subheader={props.post.publicationDate}
+                        />
                         <br />
                         <br />
-                        {props.post.categories.map((category, i) => (<Link key={i}> <span className='category-tag'>{category}</span> </Link>))}
-                        <br />
-                        <br />
+
                     </div>
                     <div className='col-12'>
                         <span><LocationOnIcon /> Place : <b>{props.post.location}</b></span>
@@ -376,7 +349,12 @@ export default function Post() {
                         <br />
                     </div>
                     <div className='col-12'>
-                        <span><AlarmOutlinedIcon /> Time : <b>{`${props.post.startDate}, from ${props.post.startTime} to ${props.post.endTime}`}</b></span>
+                        <span><EventIcon /> Date : <b>{props.post.startDate}</b></span>
+                        <br />
+                        <br />
+                    </div>
+                    <div className='col-12'>
+                        <span><AlarmOutlinedIcon /> Time : <b>{`from ${props.post.startTime} to ${props.post.endTime}`}</b></span>
                         <br />
                         <br />
                     </div>
@@ -385,16 +363,15 @@ export default function Post() {
                     {props.post.description}
                 </Typography>
                 <br />
-                <div className='row d-flex justify-content-center' style={{ width: `100%` }}>
+                <div className='row d-flex reactions-panel' >
 
                     {props.user ?
-                        <>  <div className='col-3 col-lg-3 text-center'>
+                        <>  <div className='col-3 col-sm-2 col-md-2 col-lg-3 col-xl-3 text-center'>
                             {props.post.reactionType == 2 ? <IconButton className='like_div' onClick={() =>
                                 dispatchAction({
-                                    type: "like-action",
+                                    type: "single-like-action",
                                     data: {
                                         post: props.post,
-                                        posts: actionsState.posts,
                                         callback: handleReaction
                                     }
                                 })
@@ -403,10 +380,9 @@ export default function Post() {
                             </IconButton> :
                                 <IconButton className='like_div' onClick={() =>
                                     dispatchAction({
-                                        type: "like-action",
+                                        type: "single-like-action",
                                         data: {
                                             post: props.post,
-                                            posts: actionsState.posts,
                                             callback: handleReaction
                                         }
                                     })
@@ -415,13 +391,12 @@ export default function Post() {
                                 </IconButton>}
                             <span className='text-center'>{props.post.likes}</span>
                         </div>
-                            <div className='col-3 col-lg-3 text-center'>
+                            <div className='col-3 col-sm-2 col-md-2 col-lg-3 col-xl-3 text-center'>
                                 {post.reactionType === 4 ? <IconButton className='dislike_div' onClick={() =>
                                     dispatchAction({
-                                        type: "dislike-action",
+                                        type: "single-dislike-action",
                                         data: {
                                             post: post,
-                                            posts: actionsState.posts,
                                             callback: handleReaction
                                         }
                                     })
@@ -429,10 +404,9 @@ export default function Post() {
                                     <AiFillDislike className='disliked_icon' />
                                 </IconButton> : <IconButton onClick={() =>
                                     dispatchAction({
-                                        type: "dislike-action",
+                                        type: "single-dislike-action",
                                         data: {
                                             post: props.post,
-                                            posts: actionsState.posts,
                                             callback: handleReaction
                                         }
                                     })
@@ -442,14 +416,14 @@ export default function Post() {
                                 <span className='text-center' >{props.post.dislikes}</span>
                             </div></> :
 
-                        <><div className='col-3 col-lg-3 text-center'>
+                        <><div className='col-3 col-sm-2 col-md-2 col-lg-3 col-xl-3 text-center'>
 
                             <IconButton className='like_div' onClick={signIn} >
                                 <AiOutlineLike />
                             </IconButton>
                             <span className='text-center'>{props.post.likes}</span>
                         </div>
-                            <div className='col-3 col-lg-3 text-center'>
+                            <div className='col-3 col-sm-2 col-md-2 col-lg-3 col-xl-3 text-center'>
                                 <IconButton className='dislike_div' onClick={signIn} >
                                     <AiOutlineDislike />
                                 </IconButton>
@@ -457,14 +431,14 @@ export default function Post() {
                             </div></>
                     }
                     {
-                        props.post.isBidOptIn ? <div className='col-3 col-lg-3 text-center'>
+                        props.post.isBidOptIn ? <div className='col-3 col-sm-2 col-md-2 col-lg-3 col-xl-3 text-center'>
                             <IconButton onClick={toggleComments}>
                                 <FaRegComment />
                             </IconButton>
                             <span className='text-center' >{props.post.bidCount}</span>
                         </div> : null
                     }
-                    <div className='col-3 col-lg-3 text-center'>
+                    <div className='col-3 col-sm-2 col-md-2 col-lg-3 col-xl-3 text-center'>
                         <IconButton onClick={toggleItinerary}>
                             <LocationOnIcon />
                         </IconButton>
@@ -500,11 +474,22 @@ export default function Post() {
 
     }
 
+    function setDefaultIndex(arr, fromIndex, toIndex) {
+        var element = arr[fromIndex];
+        arr.splice(fromIndex, 1);
+        arr.splice(toIndex, 0, element);
+    }
 
     useMemo(async () => {
         const api = HttpClientFactory.get(PostsClient, user);
         try {
-            var result = await api.posts(id);
+            var result = await api.retrieve(postId);
+            result.images.forEach((img, index) => {
+
+                if (img.id === imageId) {
+                    setDefaultIndex(result.images, index,0);
+                }
+            });
             setPost(result);
             actionsState.post = result;
             setLoading(false);
@@ -559,45 +544,49 @@ export default function Post() {
         }
     }
 
+    function goBack() {
+        window.history.back();
+    }
 
     return (
-        <div className="post-container">
-            <div >
+        isLoading ? <PostLoading /> : <div className="post-container">
+            <div>
                 <div className="row">
-                    <div className="col-12 card-header">
-                        <Header user={user} post={post} />
-                    </div>
-                    <div className="col-12 col-lg-8 card-photo">
-                        <div className="row">
-                            <div className="col-12 item-photo" style={{ backgroundImage: `url(${post.images[index].imageBase64})` }}>
+                    <div className="col-12 col-lg-8 col-xl-9 main-section">
+                        <div className="col-12 card-photo">
+                            <div className="row">
+                                
+                                <div className="col-12 item-photo" style={{ backgroundImage: `url(${post.images[index].imageBase64})` }}>
+                                    <div className='close-page-icon-div'>
+                                        <IconButton onClick={() => goBack()}>
+                                            <AiFillCloseCircle className='close-page-icon' />
+                                        </IconButton>
+                                </div>
+                                    {
+                                        post.images.length > 1 ? <div className="container-fluid nav-box">
+                                            <div className="row justify-content-between">
+                                                <div className="col-2 col-md-1 col-lg-1">
+                                                    <IconButton className='nav-btn-div' onClick={() => navigateBackGallery(index)}>
+                                                        <ArrowBackIosOutlinedIcon />
+                                                    </IconButton>
+                                                </div>
+                                                <div className="col-2 col-md-1 col-lg-1">
+                                                    <IconButton className='nav-btn-div' onClick={() => navigateForwardGallery(index)} >
+                                                        <ArrowForwardIosOutlinedIcon />
+                                                    </IconButton>
+                                                </div>
+                                            </div>
+                                        </div> : null
+                                    }
+                                </div>
                             </div>
-                            {
-                                post.images.length > 1 ? <div className="col-12 nav-box">
-                                    <div className="row justify-content-between">
-                                        <div className="col-2 col-md-1 col-lg-1">
-                                            <IconButton onClick={() => navigateBackGallery(index)}>
-                                                <ArrowBackIosOutlinedIcon />
-                                            </IconButton>
-                                        </div>
-                                        <div className="col-2 col-md-1 col-lg-1">
-                                            <IconButton onClick={() => navigateForwardGallery(index)} >
-                                                <ArrowForwardIosOutlinedIcon />
-                                            </IconButton>
-                                        </div>
-                                    </div>
-                                </div> : null
-                            }
                         </div>
                     </div>
-                    <div className="col-12 col-lg-4 reviews-card">
-                        <Description user={user} post={post} />
-                    </div>
-                    <div className="col-12 col-lg-8 feedbacks-card">
-                        
+                    <div className="col-12 col-lg-4 col-xl-3 description-section">
+                            <Description user={user} post={post} />
                     </div>
                 </div>
             </div>
         </div>
-    );
+        );
  }
-
