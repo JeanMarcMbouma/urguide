@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace UrGuide.Shared.Configuration
+﻿namespace UrGuide.Shared.Configuration
 {
     public class IPStackConfiguration
     {

@@ -1,11 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using SendGrid.Helpers.Mail;
 using UrGuide.Shared.Contracts;
 using UrGuide.Model.Messages;
-using UrGuide.Shared;
 using Microsoft.Extensions.Logging;
 
 namespace UrGuide.WebApp.Services

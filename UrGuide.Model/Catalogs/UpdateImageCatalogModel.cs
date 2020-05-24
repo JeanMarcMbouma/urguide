@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace UrGuide.Model.Catalogs
+﻿namespace UrGuide.Model.Catalogs
 {
     public class UpdateImageCatalogModel
     {

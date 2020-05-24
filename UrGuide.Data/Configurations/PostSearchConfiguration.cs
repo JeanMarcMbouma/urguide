@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
 using UrGuide.Data.Entities.Posts;
 
 namespace UrGuide.Data.Configurations

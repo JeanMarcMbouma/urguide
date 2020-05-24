@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace UrGuide.Model.Posts
+﻿namespace UrGuide.Model.Posts
 {
     public class BidModel
     {
