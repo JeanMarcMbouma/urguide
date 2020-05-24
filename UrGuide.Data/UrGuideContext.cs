@@ -28,6 +28,7 @@ namespace UrGuide.Data
             modelBuilder.ApplyConfiguration(new Configurations.PostConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.UserConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.NotificationConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.PostSearchConfiguration());
         }
     }
 }

@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Data;
+using UrGuide.Data.Entities.Attributes;
 using UrGuide.Data.Entities.Posts;
 using UrGuide.Model;
 using UrGuide.Model.Posts;
@@ -191,12 +193,18 @@ New price: <em>{post.Bid.NewValue}</em>",
         private async Task<Result<IEnumerable<PostModel>>> GetPagedData(int offset, int size, CancellationToken cancellationToken)
         {
             var geo = await IPStackService.GetLocationAsync(UserContext);
-
-            var posts = await Context.Posts
+            var p = await Context.Set<PostSearch>()
                 .Where(x => geo == null || x.Location == null || x.Location.Distance(geo) <= Constants.Distance)
-                .OrderByDescending(x => x.LastUpdated)
+                .Where(x => x.EndDate > DateTime.UtcNow)
+                .OrderByDescending(x => x.PostId)
+                .Select(p => p.PostId)
                 .Skip(offset)
                 .Take(size)
+                .ToListAsync(cancellationToken);
+
+
+            var posts = await Context.Posts
+                .Where(x => p.Contains(x.Id))
                 .ToListAsync(cancellationToken);
 
             return Result.Of(Mapper.Map<IEnumerable<PostModel>>(PostVisitor.Visit(posts, UserContext.UserId)));
@@ -346,12 +354,18 @@ Your bid: <em>{value}</em>",
         private async Task<Result<IEnumerable<PostModel>>> GetTopPagedData(int offset, int size, CancellationToken cancellationToken)
         {
             var geo = await IPStackService.GetLocationAsync(UserContext);
-
-            var posts = await Context.Posts
+            var p = await Context.Set<PostSearch>()
                 .Where(x => geo == null || x.Location == null || x.Location.Distance(geo) <= Constants.Distance)
-                .OrderByDescending(x => x.Attributes.First(a => a.Name == nameof(AttributeTypes.Rating)).Value)
+                .OrderByDescending(x => x.Rating)
+                .ThenBy(x => x.EndDate)
+                .Select(p => p.PostId)
                 .Skip(offset)
                 .Take(size)
+                .ToListAsync(cancellationToken);
+
+
+            var posts = await Context.Posts
+                .Where(x => p.Contains(x.Id))
                 .ToListAsync(cancellationToken);
 
             return Result.Of(Mapper.Map<IEnumerable<PostModel>>(PostVisitor.Visit(posts, UserContext.UserId)));
