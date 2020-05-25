@@ -10,6 +10,8 @@ using UrGuide.WebApp.Models;
 namespace UrGuide.WebApp.Controllers
 {
     [Authorize]
+    [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
+    [ProducesResponseType(500, Type = typeof(ErrorEnvelop<string>))]
     public class FeedbackController : Controller
     {
         public FeedbackController(IFeedbackService feedbackService)

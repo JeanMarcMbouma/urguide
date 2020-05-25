@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using UrGuide.Shared.Contracts;
+using UrGuide.WebApp.Models;
 
 namespace UrGuide.WebApp.Filters
 {
@@ -18,6 +21,13 @@ namespace UrGuide.WebApp.Filters
                 await dbContext.SaveChangesAsync();
                 dbContext = context.HttpContext.RequestServices.GetService<UrGuide.Data.UrGuideContext>();
                 await dbContext.SaveChangesAsync();
+            } 
+            else
+            {
+                var response = context.HttpContext.Response;
+                response.StatusCode = StatusCodes.Status500InternalServerError;
+                response.ContentType = "application/json";
+                context.Result = new JsonResult(ErrorEnvelop.Create(new[] { "An unexpected error has occured." }));
             }
         }
     }

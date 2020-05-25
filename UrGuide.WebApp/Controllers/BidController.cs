@@ -14,6 +14,8 @@ namespace UrGuide.WebApp.Controllers
     [Route("bid")]
     [ApiController]
     [Authorize]
+    [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
+    [ProducesResponseType(500, Type = typeof(ErrorEnvelop<string>))]
     public class BidController : ControllerBase
     {
         public BidController(IBidService bidService)
