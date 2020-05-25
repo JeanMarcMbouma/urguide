@@ -23,5 +23,6 @@ namespace UrGuide.Services.Contracts
         Task<Result<bool>> CancelReservationAsync(string postId, CancellationToken cancellationToken);
         Task<Result<bool>> RecordUserReactionAsync(UserReactionModel userReaction, CancellationToken cancellationToken);
         Task<Result<PostModel>> GetByIdAsync(string postId, CancellationToken cancellationToken);
+        Task<Result<PagedList<PostModel>>> GetOwnPostsAsync(PostPagination pagination, CancellationToken cancellationToken);
     }
 }

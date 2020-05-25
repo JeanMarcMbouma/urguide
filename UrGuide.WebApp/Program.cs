@@ -37,7 +37,7 @@ namespace UrGuide.WebApp
                 })
               .ConfigureLogging(logging =>
               {
-                  logging.ClearProviders();
+                  //logging.ClearProviders();
                   logging.SetMinimumLevel(LogLevel.Trace);
               })
               .UseNLog();

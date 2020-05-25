@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
 using UrGuide.Shared.Contracts;
-using Microsoft.AspNetCore.Identity;
-using UrGuide.WebApp.Entities;
 using Microsoft.AspNetCore.Authentication;
 using System.Threading.Tasks;
 using System.Net;
 using System.Security.Claims;
-using System.Linq;
 
 namespace UrGuide.WebApp.Services
 {

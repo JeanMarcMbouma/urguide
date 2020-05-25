@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace UrGuide.Model.Shared
+﻿namespace UrGuide.Model.Shared
 {
     public class FeedbackModel
     {

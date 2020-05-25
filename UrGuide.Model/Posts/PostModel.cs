@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using UrGuide.Data.Entities.Posts;
 using UrGuide.Model.Shared;
 
 namespace UrGuide.Model.Posts

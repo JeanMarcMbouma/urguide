@@ -53,12 +53,7 @@ export default class Popular extends Component {
 
     componentWillMount() {
 
-        const timer = setTimeout(() => {
-            this.populateData();
-
-        }, 9000);
-
-        return () => clearTimeout(timer);
+      this.populateData();
     }
 
 
@@ -69,7 +64,7 @@ export default class Popular extends Component {
             <Friends key={i} href={f.href} name={f.name} email={f.email} />
         ));
         let postsElement = this.state.posts.map((p, i) => (
-            <Posts key={i} href={p.authorAvatar} title={p.author} description={p.description} />
+            <Posts key={i} href={p.authorAvatar} title={p.author} description={p.description} images={p.images} postId={p.id} />
         ));
 
 
@@ -80,9 +75,6 @@ export default class Popular extends Component {
                         <div className='font-weight-bold title'>
                             Popular posts
         </div>
-                        <div className='font-weight-bold more'>
-                            {this.state.loading ? <></> : <span>MORE</span>}
-                        </div>
                     </div>
                     <div>
                         {this.state.loading ? <PostsSkeleton /> : postsElement}

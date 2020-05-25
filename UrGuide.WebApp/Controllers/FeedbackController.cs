@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Model.Shared;
@@ -12,6 +10,8 @@ using UrGuide.WebApp.Models;
 namespace UrGuide.WebApp.Controllers
 {
     [Authorize]
+    [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
+    [ProducesResponseType(500, Type = typeof(ErrorEnvelop<string>))]
     public class FeedbackController : Controller
     {
         public FeedbackController(IFeedbackService feedbackService)

@@ -1,85 +1,318 @@
 ﻿
 
 .post-container {
-    background-color: white;
-    padding-top: 5px;
-    margin-top: 45px;
+    background-color:white;
+    margin-top:0;
     margin-left: -14px;
     margin-right: -14px;
     overflow-x: hidden !important;
-}
-.card-photo{
-    margin-top:40px;
+    height: 100%;
 
+}
+.card-photo {
+    margin-top: 0;
+    height: 100vh;
+}
+
+.main-section{
+    position:fixed;
 }
 .card-header {
     padding-top: 15px;
     height: 70px;
-    background-color:white;
-    border:none;
+    border: none;
 }
 
-.new-feedback{
-    margin-left:20px;
+.close-page-icon-div{
+    position:fixed;
+}
+
+.close-page-icon {
+    color: #141212;
+    height: 40px;
+    width: 40px;
+}
+
+.description {
+    height: 100%;
+    padding-top: 35px;
+    padding-left: 0px;
+    width: 100%;
+    margin-bottom: 50px;
+    margin-top:-20px;
+}
+.reactions-panel{
+    width:100%;
+
+}
+.description-section {
+    position: fixed;
+    right: 0;
+    height: 100%;
+    overflow-y: scroll !important;
 }
 
 .item-photo {
-    height: 420px !important;
-    /*background-color: red !important;*/
+    height:100vh;
+    width:100%;
     background-size: cover;
     background-position: center center;
-    background-image: url('https://www.maitaiko.co.uk/wp-content/uploads/2017/10/aflo_axha020368.jpg');
 }
-
 .nav-box {
     height: 40px;
-    padding:5px 5px 0px 5px;
+    /*padding: 5px 5px 0px 15px;*/
+    position: relative;
+    top: 50%;
+    left:50%;
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 }
 
-.rating-number{
-   font-size:50px;
-   font-weight:200;
+.nav-btn-div{
+    background-color:ghostwhite !important;
 }
 
-.description-div{
-  font-size:15px;
-  color:#141212;
-}
-
-.feedbacks-card{
-    margin-top:30px;
-    padding:10px 5px 20px 5px;
-  
-
-}
-.comments{
-
-    margin:80px 0px 10px 15px;
-}
-
-.cmt {
-    margin: 10px 0px 10px 0px;
-}
-
-.likes{
-    margin-left:9px;
-    font-size:14px;
-    font-weight:600;
-}
-.likes-row{
-    margin-top:-18px;
-}
-.cmt-name {
+.description-div {
     font-size: 15px;
-    font-weight: 700;
- 
+    color: #141212;
 }
-.cmt-time {
-    font-size: 12px;
-    margin-top: -4px;
+
+
+.post-loading-container{
+    background-color:white;
 }
-.comment-div{
-    font-size:15px;
-    padding:5px;
-    border-radius:10px;
+
+.post-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+@media only screen and (max-width: 992px) {
+    .card-photo {
+        margin-top: 0;
+        height: 80vh;
+    }
+
+    .main-section {
+        position: relative;
+    }
+
+    .card-header {
+        padding-top: 15px;
+        height: 70px;
+        background-color: white;
+        border: none;
+    }
+
+    .close-page-icon-div {
+        position: relative;
+    }
+
+    .close-page-icon {
+        color: #141212;
+        height: 40px;
+        width: 40px;
+    }
+
+    .description {
+        height: 100%;
+        padding-top: 35px;
+        padding-left:10px;
+        margin-bottom: 40px;
+        margin-left:30px;
+    }
+
+    .description-section {
+        position: relative;
+        height: 100%;
+        overflow-y: hidden !important;
+    }
+
+    .item-photo {
+        height: 80vh;
+        width: 100%;
+        background-size: cover;
+        background-position: center center;
+    }
+
+    .post-container {
+        margin-top: 0;
+        overflow-x: hidden !important;
+        height: 100%;
+
+    }
+    .reactions-panel {
+        width: 100%;
+        margin-top: 50px;
+    }
+}
+
+
+.category-tag {
+    margin-left: 8px;
+    padding: 5px 5px 5px 5px;
+    background-color: #bdede6;
+    color: black;
+    font-size: 13px;
+    min-width: 80px;
+    font-weight: 400;
+    text-transform: uppercase;
+    margin-bottom:5px;
+}
+
+    .category-tag:hover {
+        opacity: 0.8;
+    }
+
+.cancel-file {
+    margin-left: -22px;
+    margin-top: -22px;
+}
+
+.post-card {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+}
+
+.comments {
+    margin: 30px 5px 5px 5px;
+}
+
+.cmt-div {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    background-color: #f7f8fa;
+    border-radius: 10px;
+}
+
+.accept, .reject {
+    color: #6c757d;
+}
+
+    .accept:hover {
+        cursor: pointer;
+        color: #1dc76f;
+    }
+
+    .reject:hover {
+        cursor: pointer;
+        color: #d4144f;
+    }
+
+.comment-text {
+    color: black;
+    padding: 8px 10px 1px 10px;
+    border-radius: 20px;
+}
+
+.user-rating {
+    margin-top: 10px !important;
+    font-size: 12px !important;
+}
+
+.new-bid {
+    margin: 0;
+    margin-bottom: 30px;
+}
+
+/* Itinerary */
+
+.itinerary_wrapper {
+    margin-top: 20px;
+}
+
+.itinerary {
+    position: relative;
+    margin-top: 20px;
+    margin-left: 15px;
+}
+
+    .itinerary:before {
+        content: '';
+        position: absolute;
+        top: 10px;
+        left: 7px;
+        width: 2px;
+        height: 97%;
+        background-color: #cad2d6;
+    }
+
+.itinerary__block {
+    position: relative;
+    margin-top: 42px;
+    margin-bottom: 42px;
+    padding-left: 15px;
+}
+
+    .itinerary__block:last-child {
+        margin-bottom: 3em;
+    }
+
+    .itinerary__block:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+
+.itinerary__midpoint {
+    position: absolute;
+    top: 6px;
+    left: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: cadetblue;
+}
+
+    .itinerary__midpoint:before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 16px;
+        width: 15px;
+        border-top: 1px solid #c5e1ec;
+    }
+
+.itinerary__content {
+    position: relative;
+    margin-left: 20px;
+}
+
+    .itinerary__content p + p {
+        padding-top: 0;
+    }
+
+    .itinerary__content:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+
+.itinerary__place {
+    font-size: 16px;
+}
+
+.itinerary__midpoint--highlight > .itinerary__place {
+    display: none;
+}
+
+.liked_icon {
+    color: #1d32cf !important;
+}
+
+.like_div:hover {
+    color: #1d32cf !important;
+}
+
+.disliked_icon {
+    color: #cc0c0c !important;
+}
+
+.dislike_div:hover {
+    color: #cc0c0c !important;
 }

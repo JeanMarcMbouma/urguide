@@ -8,6 +8,7 @@ using UrGuide.Model.Results;
 using UrGuide.Model.Shared;
 using UrGuide.Services.Abstraction;
 using UrGuide.Services.Contracts;
+using UrGuide.Services.Extensions;
 using UrGuide.Shared.Contracts;
 
 namespace UrGuide.Services.Feedback
@@ -33,7 +34,7 @@ namespace UrGuide.Services.Feedback
                 return Result.Of(false).WithErrors("You cannot write a review against your own post");
             }
 
-            var rating = post.Attributes.FirstOrDefault(a => a.Name.Equals(Data.Entities.Posts.AttributeTypes.Rating));
+            var rating = post.Attributes.GetItem(Data.Entities.Posts.AttributeTypes.Rating);
             if(rating == null)
             {
                 rating = new Data.Entities.Attributes.GenericAttribute
@@ -43,7 +44,7 @@ namespace UrGuide.Services.Feedback
                 };
                 post.Attributes.Add(rating);
             }
-            var reviews = post.Attributes.FirstOrDefault(a => a.Name.Equals(Data.Entities.Posts.AttributeTypes.Reviews));
+            var reviews = post.Attributes.GetItem(Data.Entities.Posts.AttributeTypes.Reviews);
             if(reviews == null)
             {
                 reviews = new Data.Entities.Attributes.GenericAttribute
@@ -60,10 +61,10 @@ namespace UrGuide.Services.Feedback
             int avg = reviewCount == 0 ? feedback.Rating : (int)Math.Ceiling(new[] { r, feedback.Rating }.Average());
             rating.Value = r.ToString();
             var author = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
-            string authorFirstName = author.Attributes.First(x => x.Name == nameof(Data.Entities.Users.AttributeTypes.FirstName));
+            string authorFirstName = author.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
 
-            string postAuthorFirstName = post.User.Attributes.First(x => x.Name == nameof(Data.Entities.Users.AttributeTypes.FirstName));
-            string postAuthorEmail = post.User.Attributes.First(x => x.Name == nameof(Data.Entities.Users.AttributeTypes.EmailAddress));
+            string postAuthorFirstName = post.User.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+            string postAuthorEmail = post.User.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
             
             post.Feedback.Add(new Data.Shared.Feedback
             {
@@ -100,7 +101,7 @@ Rating: {feedback.Rating} star(s).",
                 return Result.Of(false).WithErrors("You cannot write a review against your own post");
             }
 
-            var rating = user.Attributes.FirstOrDefault(a => a.Name.Equals(Data.Entities.Users.AttributeTypes.Rating));
+            var rating = user.Attributes.GetItem(Data.Entities.Users.AttributeTypes.Rating);
             var firstRatingEver = false;
             if (rating == null)
             {
@@ -117,10 +118,10 @@ Rating: {feedback.Rating} star(s).",
             int avg = firstRatingEver ? feedback.Rating : (int)Math.Ceiling(new[] { r, feedback.Rating }.Average());
             rating.Value = r.ToString();
             var author = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
-            string authorFirstName = author.Attributes.First(x => x.Name == nameof(Data.Entities.Users.AttributeTypes.FirstName));
+            string authorFirstName = author.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
 
-            string userFirstName = user.Attributes.First(x => x.Name == nameof(Data.Entities.Users.AttributeTypes.FirstName));
-            string userEmail = user.Attributes.First(x => x.Name == nameof(Data.Entities.Users.AttributeTypes.EmailAddress));
+            string userFirstName = user.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+            string userEmail = user.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
 
             user.Feedback.Add(new Data.Shared.Feedback
             {

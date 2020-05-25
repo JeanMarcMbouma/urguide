@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Model.Users;
@@ -15,6 +13,7 @@ using UrGuide.WebApp.Models;
 namespace UrGuide.WebApp.Controllers
 {
     [ApiController]
+    [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
     [Route("[controller]")]
     public class AccountController : Controller
     {

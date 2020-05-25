@@ -6,7 +6,7 @@ import { makeStyles } from '@material-ui/core/styles';
 const useStyles = makeStyles(theme => ({
     positionLoader: {
         top: '45%',
-        left: '45%',
+        left: '50%',
         position: 'absolute',
     },
 }));

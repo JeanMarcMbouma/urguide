@@ -38,8 +38,6 @@
                 }
             });
 
-            return context;
-
         case "dislike-action":
             context.post = action.data.post;
             context.posts = action.data.posts;
@@ -70,8 +68,60 @@
                     return context;
                 }
             });
+        case "single-like-action":
+            context.post = action.data.post;
+           
+                if (context.post.reactionType === 2) {
+                    context.post.reactionType = 0;
+                    context.post.likes = (context.post.likes - 1);
+                    context.like = false;
+                    action.data.callback(context);
+                    return context;
+                }
 
-            action.data.callback(context);
+            if (context.post.reactionType === 4) {
+                    context.post.reactionType = 2;
+                    context.post.dislikes = (context.post.dislikes - 1);
+                    context.post.likes = (context.post.likes + 1);
+                    context.like = true;
+                    action.data.callback(context);
+                    return context;
+                }
+               if (context.post.reactionType === 0) {
+                    context.post.reactionType = 2;
+                    context.post.likes = (context.post.likes + 1);
+                    context.like = true;
+                    action.data.callback(context);
+                    return context;
+            }
+
+        case "single-dislike-action":
+            context.post = action.data.post;
+
+            if (context.post.reactionType === 2) {
+                context.post.reactionType = 0;
+                context.post.dislikes = (context.post.dislikes - 1);
+                context.like = true;
+                action.data.callback(context);
+                return context;
+            }
+
+            if (context.post.reactionType === 4) {
+                context.post.reactionType = 4;
+                context.post.likes = (context.post.likes - 1);
+                context.post.dislikes = (context.post.dislikes + 1);
+                context.like = false;
+                action.data.callback(context);
+                return context;
+            }
+            if (context.post.reactionType === 0) {
+                context.post.reactionType = 4;
+                context.post.dislikes = (context.post.dislikes + 1);
+                context.like = false;
+                action.data.callback(context);
+                return context;
+            }
+
             return context;
 
     }

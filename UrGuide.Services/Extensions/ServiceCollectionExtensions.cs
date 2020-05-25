@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using UrGuide.Model;
@@ -54,6 +53,7 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<IValidator<Model.Posts.BidModel>, BidModelValidation>();
             services.AddTransient<IValidator<Model.Posts.UserReactionModel>, UserReactionModelValidator>();
             services.AddTransient<IValidator<Model.Posts.SeatReservationModel>, SeatReservationModelValidator>();
+            services.AddTransient<IValidator<Model.Posts.PostPagination>, PostPaginationValidator>();
 
             // Feedback
             services.AddTransient<IValidator<FeedbackModel>, FeedbackModelValidator>();

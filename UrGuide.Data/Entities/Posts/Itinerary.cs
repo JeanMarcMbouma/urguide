@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace UrGuide.Data.Entities.Posts
+﻿namespace UrGuide.Data.Entities.Posts
 {
     public class Itinerary
     {

@@ -294,18 +294,18 @@ namespace UrGuide.Data.Entities.Posts
             var dislikes = Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.Dislikes)));
 
             var userReaction = UserReactions.FirstOrDefault(u => u.UserId == userId);
-            if (userReaction != null && (userReaction.Type & reactionType) == reactionType)
+            if (userReaction != null && (userReaction.Type == reactionType))
             {
                 // the user already like or dislike this post, so we exit
                 UserReactions.Remove(userReaction);
                
                 if(reactionType == UserReaction.ReactionType.Like)
                 {
-                    likes.Value = (((int)likes) - 1).ToString();
+                    likes.Value = (likes - 1).ToString();
                 }
                 else
                 {
-                    dislikes.Value = (((int)dislikes) - 1).ToString();
+                    dislikes.Value = (dislikes - 1).ToString();
                 }
                 return;
             }

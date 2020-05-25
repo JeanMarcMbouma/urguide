@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Data;
@@ -48,7 +49,7 @@ namespace UrGuide.Services.Posts
 
         public async Task<Result<PostModel>> AcceptBidAsync(string postId, CancellationToken cancellationToken)
         {
-            if (UserContext.IsAuthenticated)
+            if (!UserContext.IsAuthenticated)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -62,19 +63,19 @@ namespace UrGuide.Services.Posts
             {
                 post.AcceptBid();
                 var author = post.Bid.Author.Attributes;
-                var authorFirstName = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.FirstName)));
-                var authorEmail = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.EmailAddress)));
+                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
                 {
                     Content = @$"
-Congratulation, {authorFirstName}
-Your bid was accepted:
-Post: <strong>{post.Text}</strong>
-{post.Description}
-...
+Congratulation, {authorFirstName}</br>
+Your bid was accepted:</br>
+Post: <strong>{post.Text}</strong></br>
+{post.Description}</br>
+...</br>
 
-Old price: <em>{post.Bid.OldValue}</em>
----------------------------------------
+Old price: <em>{post.Bid.OldValue}</em></br>
+---------------------------------------</br>
 New price: <em>{post.Bid.NewValue}</em>",
                     Subject = "Your bid was accepted",
                     To = authorEmail,
@@ -191,21 +192,19 @@ New price: <em>{post.Bid.NewValue}</em>",
         private async Task<Result<IEnumerable<PostModel>>> GetPagedData(int offset, int size, CancellationToken cancellationToken)
         {
             var geo = await IPStackService.GetLocationAsync(UserContext);
+            var p = await Context.Set<PostSearch>()
+                .Where(x => geo == null || x.Location == null || x.Location.Distance(geo) <= Constants.Distance)
+                .Where(x => x.EndDate > DateTime.UtcNow)
+                .OrderByDescending(x => x.PostId)
+                .Select(p => p.PostId)
+                .Skip(offset)
+                .Take(size)
+                .ToListAsync(cancellationToken);
 
-            var postIds = await Context.Posts
-                            .Where(x => geo == null || x.Location == null || x.Location.Distance(geo) <= Constants.Distance)
-                            .OrderByDescending(x => x.LastUpdated)
-                            .Select(p => p.Id)
-                            .Skip(offset)
-                            .Take(size).ToListAsync(cancellationToken);
 
             var posts = await Context.Posts
-                .Include(p => p.User)
-                .Include(p => p.Catalog)
-                .ThenInclude(p => p.Images)
-                .Include(p => p.Attributes)
-                .Include(p => p.UserReactions)
-                .Where(p => postIds.Contains(p.Id)).AsNoTracking().ToListAsync(cancellationToken);
+                .Where(x => p.Contains(x.Id))
+                .ToListAsync(cancellationToken);
 
             return Result.Of(Mapper.Map<IEnumerable<PostModel>>(PostVisitor.Visit(posts, UserContext.UserId)));
         }
@@ -242,19 +241,19 @@ New price: <em>{post.Bid.NewValue}</em>",
 
                 post.NewBid(model.Value, user);
                 var author = post.User.Attributes;
-                var authorFirstName = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.FirstName)));
-                var authorEmail = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.EmailAddress)));
+                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
                 {
                     Content = @$"
-Hi, {authorFirstName}
-You received a new proposal:
-Post: <strong>{post.Text}</strong>
-{post.Description}
-...
+Hi, {authorFirstName}</br>
+You received a new proposal:</br>
+Post: <strong>{post.Text}</strong></br>
+{post.Description}</br>
+...</br>
 
-Old price: <em>{post.Bid.OldValue}</em>
----------------------------------------
+Old price: <em>{post.Bid.OldValue}</em></br>
+---------------------------------------</br>
 New price: <em>{post.Bid.NewValue}</em>",
                     Subject = "New proposal",
                     To = authorEmail,
@@ -288,16 +287,16 @@ New price: <em>{post.Bid.NewValue}</em>",
                 var author = post.Bid.Author.Attributes;
                 var value = post.Bid.NewValue;
                 post.RejectBid();
-                var authorFirstName = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.FirstName)));
-                var authorEmail = author.First(x => x.Name.Equals(nameof(Data.Entities.Users.AttributeTypes.EmailAddress)));
+                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
                 {
                     Content = @$"
-Hi, {authorFirstName}
-Your bid was rejected by the owner:
-Post: <strong>{post.Text}</strong>
-{post.Description}
-...
+Hi, {authorFirstName}</br>
+Your bid was rejected by the owner:</br>
+Post: <strong>{post.Text}</strong></br>
+{post.Description}</br>
+...</br>
 
 Your bid: <em>{value}</em>",
                     Subject = "Your bid was rejected",
@@ -354,22 +353,19 @@ Your bid: <em>{value}</em>",
         private async Task<Result<IEnumerable<PostModel>>> GetTopPagedData(int offset, int size, CancellationToken cancellationToken)
         {
             var geo = await IPStackService.GetLocationAsync(UserContext);
-
-            var postIds = await Context
-                            .Posts
-                            .Where(x => geo == null || x.Location == null || x.Location.Distance(geo) <= Constants.Distance)
-                            .OrderByDescending(x => x.Attributes.First(a => a.Name == nameof(AttributeTypes.Rating)).Value)
-                            .Select(p => p.Id)
-                            .Skip(offset)
-                            .Take(size).ToListAsync(cancellationToken);
+            var p = await Context.Set<PostSearch>()
+                .Where(x => geo == null || x.Location == null || x.Location.Distance(geo) <= Constants.Distance)
+                .OrderByDescending(x => x.Rating)
+                .ThenBy(x => x.EndDate)
+                .Select(p => p.PostId)
+                .Skip(offset)
+                .Take(size)
+                .ToListAsync(cancellationToken);
 
 
             var posts = await Context.Posts
-                .Include(p => p.User)
-                .Include(p => p.Catalog)
-                .ThenInclude(p => p.Images)
-                .Include(p => p.Attributes)
-                .Where(p => postIds.Contains(p.Id)).AsNoTracking().ToListAsync(cancellationToken);
+                .Where(x => p.Contains(x.Id))
+                .ToListAsync(cancellationToken);
 
             return Result.Of(Mapper.Map<IEnumerable<PostModel>>(PostVisitor.Visit(posts, UserContext.UserId)));
         }
@@ -392,16 +388,16 @@ Your bid: <em>{value}</em>",
                 post.MakeReservation(UserContext.UserId, seatReservation.Seats);
                 await Context.SaveChangesAsync(cancellationToken);
                 var author = post.User.Attributes;
-                var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
-                var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
                 {
                     Content = @$"
-Hi, {authorFirstName}
-A user has just made a reservation:
-Post: <strong>{post.Text}</strong>
-{post.Description}
-...................
+Hi, {authorFirstName}</br>
+A user has just made a reservation:</br>
+Post: <strong>{post.Text}</strong></br>
+{post.Description}</br>
+...................</br>
 Seats: {seatReservation.Seats}",
                     Subject = "Reservation",
                     To = authorEmail,
@@ -434,16 +430,16 @@ Seats: {seatReservation.Seats}",
                 post.EditReservation(UserContext.UserId, seatReservation.Seats);
                 await Context.SaveChangesAsync(cancellationToken);
                 var author = post.User.Attributes;
-                var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
-                var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
                 {
                     Content = @$"
-Hi, {authorFirstName}
-A user has changed their reservation:
-Post: <strong>{post.Text}</strong>
-{post.Description}
---------------------------
+Hi, {authorFirstName}</br>
+A user has changed their reservation:</br>
+Post: <strong>{post.Text}</strong></br>
+{post.Description}</br>
+--------------------------</br>
 Title: {post.Text}",
                     Subject = "Reservation",
                     To = authorEmail,
@@ -477,14 +473,14 @@ Title: {post.Text}",
                 await Context.SaveChangesAsync(cancellationToken);
 
                 var author = post.User.Attributes;
-                var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
-                var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
                 await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
                 {
                     Content = @$"
-Hi, {authorFirstName}
-A user has cancelled a reservation:
-Post: <strong>{post.Text}</strong>
+Hi, {authorFirstName}</br>
+A user has cancelled a reservation:</br>
+Post: <strong>{post.Text}</strong></br>
 {post.Description}",
                     Subject = "Reservation",
                     To = authorEmail,
@@ -518,14 +514,14 @@ Post: <strong>{post.Text}</strong>
             await Context.SaveChangesAsync(cancellationToken);
 
             var author = post.User.Attributes;
-            var authorFirstName = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.FirstName));
-            var authorEmail = author.First(x => x.Name.Equals(Data.Entities.Users.AttributeTypes.EmailAddress));
+            var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+            var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
             await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
             {
                 Content = @$"
-Hi, {authorFirstName}
-A user has {(userReaction.Like ? "liked" : "reacted to")} your post:
-Post: <strong>{post.Text}</strong>
+Hi, {authorFirstName}</br>
+A user has {(userReaction.Like ? "liked" : "reacted to")} your post:</br>
+Post: <strong>{post.Text}</strong></br>
 {post.Description}",
                 Subject = "User's reaction",
                 To = authorEmail,
@@ -545,6 +541,18 @@ Post: <strong>{post.Text}</strong>
             if (post == null)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
             return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
+        }
+
+        public async Task<Result<PagedList<PostModel>>> GetOwnPostsAsync(PostPagination pagination, CancellationToken cancellationToken)
+        {
+            var post = Context.Posts
+                .Include(x => x.Bid)
+                .ThenInclude(bid => bid.Author)
+                .ThenInclude(author => author.Attributes)
+                .Where(x => x.User.Id == UserContext.UserId);
+
+            var pagedResult = await PagedList.Of(post, pagination.PageNumber, p => Mapper.Map<PostModel>(PostVisitor.Visit(p, UserContext.UserId)), cancellationToken);
+            return Result.Of(pagedResult);
         }
     }
 }

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using UrGuide.Model.Posts;
 using UrGuide.Model.Results;
@@ -16,6 +14,8 @@ namespace UrGuide.WebApp.Controllers
     [Route("bid")]
     [ApiController]
     [Authorize]
+    [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
+    [ProducesResponseType(500, Type = typeof(ErrorEnvelop<string>))]
     public class BidController : ControllerBase
     {
         public BidController(IBidService bidService)

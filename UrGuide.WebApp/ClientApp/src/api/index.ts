@@ -17,11 +17,6 @@ export class Client {
         this.baseUrl = baseUrl ? baseUrl : "";
     }
 
-    /**
-     * @param returnUrl (optional) 
-     * @param body (optional) 
-     * @return Success
-     */
     login(returnUrl: string | undefined, body: LoginModel | undefined): Promise<void> {
         let url_ = this.baseUrl + "/login?";
         if (returnUrl === null)
@@ -48,9 +43,12 @@ export class Client {
     protected processLogin(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
@@ -60,11 +58,6 @@ export class Client {
         return Promise.resolve<void>(<any>null);
     }
 
-    /**
-     * @param returnUrl (optional) 
-     * @param body (optional) 
-     * @return Success
-     */
     register(returnUrl: string | undefined, body: CreateUserModel | undefined): Promise<void> {
         let url_ = this.baseUrl + "/register?";
         if (returnUrl === null)
@@ -91,9 +84,12 @@ export class Client {
     protected processRegister(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
@@ -103,11 +99,6 @@ export class Client {
         return Promise.resolve<void>(<any>null);
     }
 
-    /**
-     * @param returnUrl (optional) 
-     * @param body (optional) 
-     * @return Success
-     */
     newguide(returnUrl: string | undefined, body: CreateGuideModel | undefined): Promise<void> {
         let url_ = this.baseUrl + "/newguide?";
         if (returnUrl === null)
@@ -134,9 +125,12 @@ export class Client {
     protected processNewguide(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
@@ -168,7 +162,14 @@ export class Client {
     protected processGetdetails(response: Response): Promise<User> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 401) {
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
             return response.text().then((_responseText) => {
             return throwException("Unauthorized", status, _responseText, _headers);
             });
@@ -186,10 +187,6 @@ export class Client {
         }
     }
 
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
     updateguide(body: UpdateGuideModel | undefined): Promise<void> {
         let url_ = this.baseUrl + "/updateguide";
         url_ = url_.replace(/[?&]$/, "");
@@ -212,9 +209,12 @@ export class Client {
     protected processUpdateguide(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -267,41 +267,6 @@ export class Client {
         }
         return Promise.resolve<void>(<any>null);
     }
-
-    /**
-     * @return Error
-     */
-    posts(postId: string): Promise<PostModel> {
-        let url_ = this.baseUrl + "/posts/{postId}";
-        if (postId === undefined || postId === null)
-            throw new Error("The parameter 'postId' must be defined.");
-        url_ = url_.replace("{postId}", encodeURIComponent("" + postId));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <RequestInit>{
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processPosts(_response);
-        });
-    }
-
-    protected processPosts(response: Response): Promise<PostModel> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        {
-            return response.text().then((_responseText) => {
-            let resultdefault: any = null;
-            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            resultdefault = PostModel.fromJS(resultDatadefault);
-            return resultdefault;
-            });
-        }
-    }
 }
 
 export class AccountClient {
@@ -314,11 +279,6 @@ export class AccountClient {
         this.baseUrl = baseUrl ? baseUrl : "";
     }
 
-    /**
-     * @param email (optional) 
-     * @param confirmationToken (optional) 
-     * @return Success
-     */
     confirmEmail(email: string | undefined, confirmationToken: string | undefined): Promise<void> {
         let url_ = this.baseUrl + "/Account/confirmEmail?";
         if (email === null)
@@ -345,9 +305,12 @@ export class AccountClient {
     protected processConfirmEmail(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
@@ -357,10 +320,6 @@ export class AccountClient {
         return Promise.resolve<void>(<any>null);
     }
 
-    /**
-     * @param email (optional) 
-     * @return Success
-     */
     forgetpassword(email: string | undefined): Promise<void> {
         let url_ = this.baseUrl + "/Account/forgetpassword?";
         if (email === null)
@@ -383,9 +342,12 @@ export class AccountClient {
     protected processForgetpassword(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
@@ -395,10 +357,6 @@ export class AccountClient {
         return Promise.resolve<void>(<any>null);
     }
 
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
     resetpassword(body: ResetPasswordModel | undefined): Promise<void> {
         let url_ = this.baseUrl + "/Account/resetpassword";
         url_ = url_.replace(/[?&]$/, "");
@@ -421,9 +379,12 @@ export class AccountClient {
     protected processResetpassword(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
@@ -433,10 +394,6 @@ export class AccountClient {
         return Promise.resolve<void>(<any>null);
     }
 
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
     changepassword(body: ChangePasswordModel | undefined): Promise<void> {
         let url_ = this.baseUrl + "/Account/changepassword";
         url_ = url_.replace(/[?&]$/, "");
@@ -459,9 +416,12 @@ export class AccountClient {
     protected processChangepassword(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -479,10 +439,6 @@ export class AccountClient {
         return Promise.resolve<void>(<any>null);
     }
 
-    /**
-     * @param returnUrl (optional) 
-     * @return Success
-     */
     logout(returnUrl: string | undefined): Promise<void> {
         let url_ = this.baseUrl + "/Account/logout?";
         if (returnUrl === null)
@@ -505,9 +461,12 @@ export class AccountClient {
     protected processLogout(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -566,7 +525,21 @@ export class BidClient {
     protected processNewbid(response: Response): Promise<PostModel> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
@@ -614,7 +587,21 @@ export class BidClient {
     protected processAccept(response: Response): Promise<PostModel> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
@@ -662,7 +649,21 @@ export class BidClient {
     protected processReject(response: Response): Promise<PostModel> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
@@ -710,7 +711,21 @@ export class BidClient {
     protected processHistory(response: Response): Promise<BidHistoryModel[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
@@ -740,10 +755,6 @@ export class PostsClient {
         this.baseUrl = baseUrl ? baseUrl : "";
     }
 
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
     feedback(postId: string, body: FeedbackModel | undefined): Promise<void> {
         let url_ = this.baseUrl + "/posts/{postId}/feedback";
         if (postId === undefined || postId === null)
@@ -769,9 +780,19 @@ export class PostsClient {
     protected processFeedback(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -787,6 +808,65 @@ export class PostsClient {
             });
         }
         return Promise.resolve<void>(<any>null);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return Error
+     */
+    owned(body: PostPagination | undefined): Promise<PostModelPagedList> {
+        let url_ = this.baseUrl + "/posts/owned";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processOwned(_response);
+        });
+    }
+
+    protected processOwned(response: Response): Promise<PostModelPagedList> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = PostModelPagedList.fromJS(resultDatadefault);
+            return resultdefault;
+            });
+        }
     }
 
     /**
@@ -811,7 +891,21 @@ export class PostsClient {
     protected processLast10(response: Response): Promise<PostModel[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        {
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
             return response.text().then((_responseText) => {
             let resultdefault: any = null;
             let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
@@ -847,7 +941,21 @@ export class PostsClient {
     protected processLast100(response: Response): Promise<PostModel[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        {
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
             return response.text().then((_responseText) => {
             let resultdefault: any = null;
             let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
@@ -883,7 +991,21 @@ export class PostsClient {
     protected processTop10(response: Response): Promise<PostModel[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        {
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
             return response.text().then((_responseText) => {
             let resultdefault: any = null;
             let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
@@ -892,6 +1014,55 @@ export class PostsClient {
                 for (let item of resultDatadefault)
                     resultdefault!.push(PostModel.fromJS(item));
             }
+            return resultdefault;
+            });
+        }
+    }
+
+    /**
+     * @return Error
+     */
+    retrieve(postId: string): Promise<PostModel> {
+        let url_ = this.baseUrl + "/posts/{postId}/retrieve";
+        if (postId === undefined || postId === null)
+            throw new Error("The parameter 'postId' must be defined.");
+        url_ = url_.replace("{postId}", encodeURIComponent("" + postId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRetrieve(_response);
+        });
+    }
+
+    protected processRetrieve(response: Response): Promise<PostModel> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = PostModel.fromJS(resultDatadefault);
             return resultdefault;
             });
         }
@@ -919,7 +1090,21 @@ export class PostsClient {
     protected processTop100(response: Response): Promise<PostModel[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        {
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
             return response.text().then((_responseText) => {
             let resultdefault: any = null;
             let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
@@ -960,7 +1145,21 @@ export class PostsClient {
     protected processCreate(response: Response): Promise<PostModel> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 401) {
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status === 401) {
             return response.text().then((_responseText) => {
             return throwException("Unauthorized", status, _responseText, _headers);
             });
@@ -978,10 +1177,6 @@ export class PostsClient {
         }
     }
 
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
     update(postId: string, body: PostUpdateModel | undefined): Promise<void> {
         let url_ = this.baseUrl + "/posts/{postId}/update";
         if (postId === undefined || postId === null)
@@ -1007,9 +1202,19 @@ export class PostsClient {
     protected processUpdate(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -1027,9 +1232,6 @@ export class PostsClient {
         return Promise.resolve<void>(<any>null);
     }
 
-    /**
-     * @return Success
-     */
     remove(postId: string): Promise<void> {
         let url_ = this.baseUrl + "/posts/{postId}/remove";
         if (postId === undefined || postId === null)
@@ -1051,9 +1253,19 @@ export class PostsClient {
     protected processRemove(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -1096,7 +1308,21 @@ export class PostsClient {
     protected processItineraries(response: Response): Promise<ItineraryModel[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        {
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
             return response.text().then((_responseText) => {
             let resultdefault: any = null;
             let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
@@ -1110,10 +1336,6 @@ export class PostsClient {
         }
     }
 
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
     makereservation(postId: string, body: SeatReservationModel | undefined): Promise<void> {
         let url_ = this.baseUrl + "/posts/{postId}/makereservation";
         if (postId === undefined || postId === null)
@@ -1139,9 +1361,19 @@ export class PostsClient {
     protected processMakereservation(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -1159,10 +1391,6 @@ export class PostsClient {
         return Promise.resolve<void>(<any>null);
     }
 
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
     editreservation(postId: string, body: SeatReservationModel | undefined): Promise<void> {
         let url_ = this.baseUrl + "/posts/{postId}/editreservation";
         if (postId === undefined || postId === null)
@@ -1188,9 +1416,19 @@ export class PostsClient {
     protected processEditreservation(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -1208,9 +1446,6 @@ export class PostsClient {
         return Promise.resolve<void>(<any>null);
     }
 
-    /**
-     * @return Success
-     */
     cancelreservation(postId: string): Promise<void> {
         let url_ = this.baseUrl + "/posts/{postId}/cancelreservation";
         if (postId === undefined || postId === null)
@@ -1232,9 +1467,19 @@ export class PostsClient {
     protected processCancelreservation(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -1252,10 +1497,6 @@ export class PostsClient {
         return Promise.resolve<void>(<any>null);
     }
 
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
     reaction(postId: string, body: UserReactionModel | undefined): Promise<void> {
         let url_ = this.baseUrl + "/posts/{postId}/reaction";
         if (postId === undefined || postId === null)
@@ -1281,9 +1522,19 @@ export class PostsClient {
     protected processReaction(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -1312,11 +1563,6 @@ export class UsersClient {
         this.baseUrl = baseUrl ? baseUrl : "";
     }
 
-    /**
-     * @param postId (optional) 
-     * @param body (optional) 
-     * @return Success
-     */
     feedback(postId: string | undefined, userId: string, body: FeedbackModel | undefined): Promise<void> {
         let url_ = this.baseUrl + "/users/{userId}/feedback?";
         if (userId === undefined || userId === null)
@@ -1346,9 +1592,19 @@ export class UsersClient {
     protected processFeedback(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -1402,7 +1658,21 @@ export class CatalogsClient {
     protected processAll(response: Response): Promise<ImageCatalogModel[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        {
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
             return response.text().then((_responseText) => {
             let resultdefault: any = null;
             let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
@@ -1438,7 +1708,21 @@ export class CatalogsClient {
     protected processNearme(response: Response): Promise<ImageCatalogModel[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        {
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
             return response.text().then((_responseText) => {
             let resultdefault: any = null;
             let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
@@ -1477,7 +1761,21 @@ export class CatalogsClient {
     protected processRetrieve(response: Response): Promise<ImageCatalogModel> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        {
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
             return response.text().then((_responseText) => {
             let resultdefault: any = null;
             let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
@@ -1487,10 +1785,6 @@ export class CatalogsClient {
         }
     }
 
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
     update(catalogId: string, body: UpdateImageCatalogModel | undefined): Promise<void> {
         let url_ = this.baseUrl + "/catalogs/{catalogId}/update";
         if (catalogId === undefined || catalogId === null)
@@ -1516,9 +1810,19 @@ export class CatalogsClient {
     protected processUpdate(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -1563,7 +1867,21 @@ export class CatalogsClient {
     protected processCreate(response: Response): Promise<ImageCatalogModel> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 401) {
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status === 401) {
             return response.text().then((_responseText) => {
             return throwException("Unauthorized", status, _responseText, _headers);
             });
@@ -1581,9 +1899,6 @@ export class CatalogsClient {
         }
     }
 
-    /**
-     * @return Success
-     */
     remove(catalogId: string): Promise<void> {
         let url_ = this.baseUrl + "/catalogs/{catalogId}/remove";
         if (catalogId === undefined || catalogId === null)
@@ -1605,9 +1920,19 @@ export class CatalogsClient {
     protected processRemove(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -1636,9 +1961,6 @@ export class ImagesClient {
         this.baseUrl = baseUrl ? baseUrl : "";
     }
 
-    /**
-     * @return Success
-     */
     remove(catalogId: string, imageId: string): Promise<void> {
         let url_ = this.baseUrl + "/catalogs/update/{catalogId}/images/{imageId}/remove";
         if (catalogId === undefined || catalogId === null)
@@ -1663,9 +1985,19 @@ export class ImagesClient {
     protected processRemove(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -1694,10 +2026,6 @@ export class UpdateClient {
         this.baseUrl = baseUrl ? baseUrl : "";
     }
 
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
     addimage(catalogId: string, body: ImageFileCreateModel | undefined): Promise<void> {
         let url_ = this.baseUrl + "/catalogs/update/{catalogId}/addimage";
         if (catalogId === undefined || catalogId === null)
@@ -1723,9 +2051,19 @@ export class UpdateClient {
     protected processAddimage(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -1776,7 +2114,14 @@ export class LookupClient {
     protected processCategories(response: Response): Promise<CategoryModel[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        {
+        if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
             return response.text().then((_responseText) => {
             let resultdefault: any = null;
             let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
@@ -1801,10 +2146,6 @@ export class AttributesClient {
         this.baseUrl = baseUrl ? baseUrl : "";
     }
 
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
     update(postId: string, name: string, body: SetAttribute | undefined): Promise<void> {
         let url_ = this.baseUrl + "/posts/{postId}/attributes/{name}/update";
         if (postId === undefined || postId === null)
@@ -1833,9 +2174,19 @@ export class AttributesClient {
     protected processUpdate(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -1853,10 +2204,6 @@ export class AttributesClient {
         return Promise.resolve<void>(<any>null);
     }
 
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
     batchupdate(postId: string, body: SetAttribute[] | undefined): Promise<void> {
         let url_ = this.baseUrl + "/posts/{postId}/attributes/batchupdate";
         if (postId === undefined || postId === null)
@@ -1882,9 +2229,19 @@ export class AttributesClient {
     protected processBatchupdate(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -1902,9 +2259,6 @@ export class AttributesClient {
         return Promise.resolve<void>(<any>null);
     }
 
-    /**
-     * @return Success
-     */
     remove(postId: string, name: string): Promise<void> {
         let url_ = this.baseUrl + "/posts/{postId}/attributes/{name}/remove";
         if (postId === undefined || postId === null)
@@ -1929,9 +2283,19 @@ export class AttributesClient {
     protected processRemove(response: Response): Promise<void> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 400) {
             return response.text().then((_responseText) => {
-            return;
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -1992,6 +2356,50 @@ export interface ILoginModel {
     userName?: string | undefined;
     password?: string | undefined;
     persist?: boolean;
+}
+
+export class StringErrorEnvelop implements IStringErrorEnvelop {
+    readonly errors?: string[] | undefined;
+
+    constructor(data?: IStringErrorEnvelop) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["errors"])) {
+                (<any>this).errors = [] as any;
+                for (let item of _data["errors"])
+                    (<any>this).errors!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): StringErrorEnvelop {
+        data = typeof data === 'object' ? data : {};
+        let result = new StringErrorEnvelop();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        return data; 
+    }
+}
+
+export interface IStringErrorEnvelop {
+    errors?: string[] | undefined;
 }
 
 export class CreateUserModel implements ICreateUserModel {
@@ -3004,6 +3412,94 @@ export interface ICategoryModel {
     name?: string | undefined;
     imageUrl?: string | undefined;
     stats?: number;
+}
+
+export class PostPagination implements IPostPagination {
+    pageNumber?: number;
+
+    constructor(data?: IPostPagination) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.pageNumber = _data["pageNumber"];
+        }
+    }
+
+    static fromJS(data: any): PostPagination {
+        data = typeof data === 'object' ? data : {};
+        let result = new PostPagination();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["pageNumber"] = this.pageNumber;
+        return data; 
+    }
+}
+
+export interface IPostPagination {
+    pageNumber?: number;
+}
+
+export class PostModelPagedList implements IPostModelPagedList {
+    pageNumber?: number;
+    readonly itemsCount?: number;
+    readonly items?: PostModel[] | undefined;
+
+    constructor(data?: IPostModelPagedList) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.pageNumber = _data["pageNumber"];
+            (<any>this).itemsCount = _data["itemsCount"];
+            if (Array.isArray(_data["items"])) {
+                (<any>this).items = [] as any;
+                for (let item of _data["items"])
+                    (<any>this).items!.push(PostModel.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): PostModelPagedList {
+        data = typeof data === 'object' ? data : {};
+        let result = new PostModelPagedList();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["pageNumber"] = this.pageNumber;
+        data["itemsCount"] = this.itemsCount;
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IPostModelPagedList {
+    pageNumber?: number;
+    itemsCount?: number;
+    items?: PostModel[] | undefined;
 }
 
 export class ItineraryModel implements IItineraryModel {

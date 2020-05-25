@@ -153,17 +153,30 @@
     margin:30px 5px 5px 5px;
 }
 
-.cmt-div{
-    margin-top:5px;
-    margin-bottom:10px;
-    background-color:#eef3fa;
-    border-radius:10px;
+.cmt-div {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    background-color: #f7f8fa;
+    border-radius: 10px;
+}
+
+.accept, .reject {
+    color:#6c757d;
+}
+
+.accept:hover{
+    cursor:pointer;
+    color:#1dc76f;
+}
+
+.reject:hover {
+    cursor: pointer;
+    color:#d4144f;
 }
 
 .comment-text {
-
     color: black;
-    padding: 8px 10px 1px 10px ;
+    padding: 8px 10px 10px 10px;
     border-radius: 20px;
 }
 .user-rating{

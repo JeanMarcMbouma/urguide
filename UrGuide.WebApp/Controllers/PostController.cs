@@ -16,6 +16,8 @@ namespace UrGuide.WebApp.Controllers
     [ApiController]
     [Route("posts")]
     [Authorize]
+    [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
+    [ProducesResponseType(500, Type = typeof(ErrorEnvelop<string>))]
     public class PostController : ControllerBase
     {
         private readonly IPostService _postService;
@@ -24,7 +26,14 @@ namespace UrGuide.WebApp.Controllers
         {
             _postService = postService ?? throw new ArgumentNullException(nameof(postService));
         }
-
+        
+        [HttpPost("owned")]
+        [ProducesDefaultResponseType(typeof(PagedList<PostModel>))]
+        public async Task<IActionResult> GetOwn(PostPagination pagination, CancellationToken cancellationToken)
+        {
+            var result = await _postService.GetOwnPostsAsync(pagination, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
         [HttpGet("last10")]
         [AllowAnonymous]
         [ProducesDefaultResponseType(typeof(IEnumerable<PostModel>))]
@@ -52,7 +61,7 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
-        [HttpGet("{postId}")]
+        [HttpGet("{postId}/retrieve")]
         [AllowAnonymous]
         [ProducesDefaultResponseType(typeof(PostModel))]
         public async Task<IActionResult> GetOne(string postId, CancellationToken cancellationToken)

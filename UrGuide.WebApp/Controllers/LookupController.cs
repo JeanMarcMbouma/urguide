@@ -1,16 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Model.Lookup;
 using UrGuide.Services.Contracts;
+using UrGuide.WebApp.Models;
 
 namespace UrGuide.WebApp.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [ProducesResponseType(500, Type = typeof(ErrorEnvelop<string>))]
     public class LookupController : Controller
     {
         public LookupController(ILookupService lookupService)

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace UrGuide.Model.Users
+﻿namespace UrGuide.Model.Users
 {
     public class UpdateGuideModel
     {
