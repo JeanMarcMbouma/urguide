@@ -24,9 +24,6 @@ namespace UrGuide.WebApp.Filters
             } 
             else
             {
-                var response = context.HttpContext.Response;
-                response.StatusCode = StatusCodes.Status500InternalServerError;
-                response.ContentType = "application/json";
                 context.Result = new JsonResult(ErrorEnvelop.Create(new[] { "An unexpected error has occured." }));
             }
         }
