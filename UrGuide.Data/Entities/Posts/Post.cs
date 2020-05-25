@@ -42,7 +42,7 @@ namespace UrGuide.Data.Entities.Posts
         public virtual User User { get; set; }
         public virtual Point Location { get; set; }
 
-        public bool IsPastDue => !DateTime.TryParse($"{Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.DateEnd)))} {Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.DateEnd)))}",
+        public bool IsPastDue => !DateTime.TryParse($"{Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.DateEnd)))} {Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.TimeEnd)))}",
           CultureInfo.GetCultureInfo("en-US"), DateTimeStyles.AssumeUniversal, out DateTime date) || date < DateTime.UtcNow; 
 
         public void NewBid(string value, User user)
@@ -89,6 +89,11 @@ namespace UrGuide.Data.Entities.Posts
             }
 
             var lastBid = Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.LastBid));
+            if(lastBid == null)
+            {
+                lastBid = new GenericAttribute { Name = nameof(AttributeTypes.LastBid) };
+                Attributes.Add(lastBid);
+            }
             lastBid.Value = Bid.NewValue;
         }
 

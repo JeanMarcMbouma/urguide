@@ -267,6 +267,41 @@ export class Client {
         }
         return Promise.resolve<void>(<any>null);
     }
+
+    /**
+     * @return Error
+     */
+    posts(postId: string): Promise<PostModel> {
+        let url_ = this.baseUrl + "/posts/{postId}";
+        if (postId === undefined || postId === null)
+            throw new Error("The parameter 'postId' must be defined.");
+        url_ = url_.replace("{postId}", encodeURIComponent("" + postId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPosts(_response);
+        });
+    }
+
+    protected processPosts(response: Response): Promise<PostModel> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = PostModel.fromJS(resultDatadefault);
+            return resultdefault;
+            });
+        }
+    }
 }
 
 export class AccountClient {
@@ -2497,6 +2532,7 @@ export class PostModel implements IPostModel {
     authorId?: string | undefined;
     author?: string | undefined;
     authorAvatar?: string | undefined;
+    isBidOptIn?: boolean;
 
     constructor(data?: IPostModel) {
         if (data) {
@@ -2546,6 +2582,7 @@ export class PostModel implements IPostModel {
             this.authorId = _data["authorId"];
             this.author = _data["author"];
             this.authorAvatar = _data["authorAvatar"];
+            this.isBidOptIn = _data["isBidOptIn"];
         }
     }
 
@@ -2595,6 +2632,7 @@ export class PostModel implements IPostModel {
         data["authorId"] = this.authorId;
         data["author"] = this.author;
         data["authorAvatar"] = this.authorAvatar;
+        data["isBidOptIn"] = this.isBidOptIn;
         return data; 
     }
 }
@@ -2629,6 +2667,7 @@ export interface IPostModel {
     authorId?: string | undefined;
     author?: string | undefined;
     authorAvatar?: string | undefined;
+    isBidOptIn?: boolean;
 }
 
 export class BidHistoryModel implements IBidHistoryModel {
