@@ -190,6 +190,20 @@
     border-radius: 10px;
 }
 
+.accept, .reject {
+    color: #6c757d;
+}
+
+    .accept:hover {
+        cursor: pointer;
+        color: #1dc76f;
+    }
+
+    .reject:hover {
+        cursor: pointer;
+        color: #d4144f;
+    }
+
 .comment-text {
     color: black;
     padding: 8px 10px 1px 10px;

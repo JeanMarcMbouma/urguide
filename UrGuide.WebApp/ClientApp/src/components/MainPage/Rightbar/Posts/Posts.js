@@ -2,7 +2,7 @@ import React from 'react';
 import {Avatar, Card} from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import {makeStyles} from '@material-ui/core/styles';
-
+import { Link } from 'react-router-dom';
 const useStyles = makeStyles (theme => ({
   text: {
     fontSize: '15px',
@@ -36,20 +36,14 @@ const Posts = props => {
           component="p">
           {props.description}
         </Typography>
-        <div className={`font-weight-bold text-right ${classes.btn}`}>Read</div>
+              <div className={`text-right`}>
+                  <Link to={`/post/${props.postId}/shot/${props.images[0].id}`} >
+                      <span className={`font-weight-bold ${classes.btn}`} > Read</span>
+                 </Link>
+                  </div>
       </div>
       </Card>
   );
 };
 
 export default Posts;
-
-{
-  /* <div className={(classes.title)}>
-            <Avatar className={(classes.img)} src={props.href}/>
-            <div className={(classes.text)}><b>{props.title}</b></div>
-          </div> */
-}
-{
-  /* <div className={(classes.description)}>{props.description}</div> */
-}

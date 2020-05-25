@@ -22,6 +22,8 @@ import { AiOutlineLike } from 'react-icons/ai';
 import { AiFillDislike } from 'react-icons/ai';
 import { AiFillLike } from 'react-icons/ai';
 import { AiFillCloseCircle } from 'react-icons/ai';
+import { AiOutlineStop } from 'react-icons/ai';
+import { AiOutlineCheck } from 'react-icons/ai';
 import EventIcon from '@material-ui/icons/Event';
 import ArrowForwardIosOutlinedIcon from '@material-ui/icons/ArrowForwardIosOutlined';
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
@@ -226,6 +228,48 @@ function Comments(props) {
 
     }
 
+    async function acceptBid(event) {
+
+
+        if (!props.postId) {
+            return;
+        }
+        const client = HttpClientFactory.get(BidClient, user);
+        try {
+
+            var target = event.target;
+            target.style.color = '#1dc76f';
+            target.style.fontWeight = '600';
+            target.innerHTML = '<b>Accepted</b>';
+            await client.accept(props.postId);
+
+        }
+        catch (e) {
+            console.log(e);
+        }
+
+    }
+    async function rejectBid(event) {
+
+        if (!props.postId) {
+            return;
+        }
+        const client = HttpClientFactory.get(BidClient, user);
+        try {
+
+            var target = event.target;
+            target.style.color = '#d4144f';
+            target.style.fontWeight = '600';
+            target.innerHTML = '<b>Rejected</b>';
+            await client.reject(props.postId);
+
+        }
+        catch (e) {
+            console.log(e);
+        }
+
+    }
+
 
     function valuetext(value) {
         return `${value}`;
@@ -287,6 +331,21 @@ function Comments(props) {
                             />
                             <div className='comment-text'>
                                 <p>{bid.author} made a proposal of {bid.value}.</p>
+
+
+                                {user && profile.sub === props.post.authorId ?
+                                    <div className='row'>
+                                        <div className='col-5 col-md-5'>
+                                            <span onClick={(e) => acceptBid(e)} className='accept'>Accept  <AiOutlineCheck /></span>
+                                        </div>
+                                        <div className='col-5 col-md-5'>
+                                            <span className='reject' onClick={(e) => rejectBid(e)} >Reject   <AiOutlineStop /></span>
+
+                                        </div>
+                                    </div>
+                                    : null
+
+                                }
                             </div>
                         </div>))} </> : <h6>No bid yet.</h6>
 
