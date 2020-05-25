@@ -9,6 +9,11 @@
             action.data.callback(context);
             return context;
 
+        case "reject-bid":
+            context.postId = action.data.postId;
+            action.data.callback(context);
+            return context;
+
     }
 }
 

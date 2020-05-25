@@ -48,7 +48,7 @@ namespace UrGuide.Services.Posts
 
         public async Task<Result<PostModel>> AcceptBidAsync(string postId, CancellationToken cancellationToken)
         {
-            if (UserContext.IsAuthenticated)
+            if (!UserContext.IsAuthenticated)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
 
             cancellationToken.ThrowIfCancellationRequested();
