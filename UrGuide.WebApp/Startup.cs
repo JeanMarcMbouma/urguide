@@ -46,6 +46,7 @@ namespace UrGuide.WebApp
             services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
 
             services.AddControllersWithViews(options => {
+                options.Filters.Add(typeof(Filters.EnvelopResultFilter));
                 options.Filters.Add(typeof(Filters.SaveChangeActionFilter));
             }).AddFluentValidation();
             services.AddRazorPages();
