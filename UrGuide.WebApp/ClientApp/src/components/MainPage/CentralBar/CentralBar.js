@@ -448,9 +448,11 @@ const navigateToReturnUrl = returnUrl => {
     window.location.replace(returnUrl);
 }
 
+
+
 export default function CentralBar() {
 
-    const classes = useStyles();
+    const classes = useStyles({});
 
     const [context, setContext] = React.useState({
         files: [],
@@ -1129,148 +1131,196 @@ export default function CentralBar() {
         return null;
     }
 
+    const SinglePost = ({ post }) => {
+
+        const [hasReserved, setHasReserved] = useState(post.hasReserved);
+
+
+        async function makeReservation(post) {
+            try {
+                let api = HttpClientFactory.get(PostsClient, user);
+                if (post.hasReserved) { // already reserved
+                    await api.cancelreservation(post.id);
+                    post.hasReserved = false;
+                    post.reservedSeats--;
+                    setHasReserved(false);
+                }
+                else {
+                    await api.makereservation(post.id, {
+                        postId: post.id,
+                        seats: 1
+                    });
+                    post.hasReserved = true;
+                    post.reservedSeats++;
+                    setHasReserved(true);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
+
+
+        const Reservation = ({ post, reserved }) => {
+
+            if (post.reservedSeats === post.seats) {
+                return (<Button className="col-2" variant="contained" color="success" onlick={() => { }}>
+                        Sold out
+                    </Button>)
+            } else if (user && user.profile.sub !== post.authorId) {
+                return (<Button className="col-2 reservation" variant="contained" color="primary" onClick={() => makeReservation(post)}>
+                    {reserved ? 'Leave' : 'Join'}
+                    </Button>)
+            }
+            return (<></>);
+        }
+
+        return <div className="p-3 mb-3 bg-white rounded post-card">
+            <div className="col-12 row">
+                <CardHeader className="col-10 p-0 m-0"
+                    avatar={<Avatar alt={post.author} src={post.authorAvatar} />}
+                    title={
+                        <h6>
+                            {post.author}
+                        </h6>
+                    }
+                    subheader={post.publicationDate}
+                />
+                <Reservation post={post} reserved={hasReserved}/>
+            </div>
+            <CardContent>
+                <div className='row'>
+                    <div className='col-12' >
+                        {post.categories.map((category, i) => (<Link key={i}> <span className='category-tag'>{category}</span> </Link>))}
+                        <br />
+                        <br />
+                    </div>
+                    <div className='col-12'>
+                        <span><LocationOnIcon /> Place : <b>{post.location}</b></span>
+                        <br />
+                        <br />
+                    </div>
+                    <div className='col-12'>
+                        <span><AttachMoneyOutlinedIcon /> Budget : <b>{post.startingBid}</b></span>
+                        <br />
+                        <br />
+                    </div>
+                    <div className='col-12'>
+                        <span><PeopleOutlineOutlinedIcon /> Seats : <b>{(post.reservedSeats ? 
+                            post.reservedSeats + '/':'') + post.seats}</b></span>
+                        <br />
+                        <br />
+                    </div>
+                    <div className='col-12'>
+                        <span><AlarmOutlinedIcon /> Time : <b>{`${post.startDate}, from ${post.startTime} to ${post.endTime}`}</b></span>
+                        <br />
+                        <br />
+                    </div>
+                </div>
+                <Typography variant="subtitle1" component="p">
+                    {post.description}
+                </Typography>
+            </CardContent>
+            <PostImages images={post.images} postId={post.id} />
+            <CardActions className="container-fluid"  >
+                <div className='row d-flex justify-content-center' style={{ width: `100%` }}>
+
+                    {user ?
+                        <>  <div className='col-3 col-lg-3 text-center'>
+                            {post.reactionType == 2 ? <IconButton className='like_div' onClick={() =>
+                                dispatchAction({
+                                    type: "like-action",
+                                    data: {
+                                        post: post,
+                                        posts: actionsState.posts,
+                                        callback: handleReaction
+                                    }
+                                })
+                            } >
+                                <AiFillLike className='liked_icon' />
+                            </IconButton> :
+                                <IconButton className='like_div' onClick={() =>
+                                    dispatchAction({
+                                        type: "like-action",
+                                        data: {
+                                            post: post,
+                                            posts: actionsState.posts,
+                                            callback: handleReaction
+                                        }
+                                    })
+                                } >
+                                    <AiOutlineLike />
+                                </IconButton>}
+                            <span className='text-center'>{post.likes}</span>
+                        </div>
+                            <div className='col-3 col-lg-3 text-center'>
+                                {post.reactionType === 4 ? <IconButton className='dislike_div' onClick={() =>
+                                    dispatchAction({
+                                        type: "dislike-action",
+                                        data: {
+                                            post: post,
+                                            posts: actionsState.posts,
+                                            callback: handleReaction
+                                        }
+                                    })
+                                }>
+                                    <AiFillDislike className='disliked_icon' />
+                                </IconButton> : <IconButton onClick={() =>
+                                    dispatchAction({
+                                        type: "dislike-action",
+                                        data: {
+                                            post: post,
+                                            posts: actionsState.posts,
+                                            callback: handleReaction
+                                        }
+                                    })
+                                } >
+                                        <AiOutlineDislike />
+                                    </IconButton>}
+                                <span className='text-center' >{post.dislikes}</span>
+                            </div></> :
+
+                        <><div className='col-3 col-lg-3 text-center'>
+
+                            <IconButton className='like_div' onClick={signIn} >
+                                <AiOutlineLike />
+                            </IconButton>
+                            <span className='text-center'>{post.likes}</span>
+                        </div>
+                            <div className='col-3 col-lg-3 text-center'>
+                                <IconButton className='dislike_div' onClick={signIn} >
+                                    <AiOutlineDislike />
+                                </IconButton>
+                                <span className='text-center' >{post.dislikes}</span>
+                            </div></>
+                    }
+                    {
+                        post.isBidOptIn ? <div className='col-3 col-lg-3 text-center'>
+                            <IconButton onClick={() => toggleComments(post.id)}>
+                                <FaRegComment />
+                            </IconButton>
+                            <span className='text-center' >{post.bidCount}</span>
+                        </div> : null
+                    }
+                    <div className='col-3 col-lg-3 text-center'>
+                        <IconButton onClick={() => toggleItinerary(post.id)}>
+                            <LocationOnIcon />
+                        </IconButton>
+                        <span className='text-center' >{post.itineraryCount}</span>
+                    </div>
+                </div>
+            </CardActions>
+            <Itinerary show={showItinerary.show} showId={showItinerary.id} postId={post.id} />
+            <Comments post={post} show={showComments.show} showId={showComments.id} postId={post.id} />
+        </div>
+    }
+
     return (
         <div className="col-12 col-sm-7 col-md-7 col-lg-6 col-xl-5 timeline">
             <div >
                 <ViewPost />
                 {
                     isLoading ? <><SkeletonCard /><SkeletonCard /></> :
-                        actionsState.posts.map((post, i) => (
-                            <div key={i} className="p-3 mb-3 bg-white rounded post-card">
-                                <CardHeader
-                                    avatar={<Avatar alt={post.author} src={post.authorAvatar} />}
-                                    title={
-                                        <h6>
-                                            {post.author}
-                                        </h6>
-                                    }
-                                    subheader={post.publicationDate}
-                                />
-                                <CardContent>
-                                    <div className='row'>
-                                        <div className='col-12' >
-                                            {post.categories.map((category, i) => (<Link key={i}> <span className='category-tag'>{category}</span> </Link>))}
-                                            <br />
-                                            <br />
-                                        </div>
-                                        <div className='col-12'>
-                                            <span><LocationOnIcon /> Place : <b>{post.location}</b></span>
-                                            <br />
-                                            <br />
-                                        </div>
-                                        <div className='col-12'>
-                                            <span><AttachMoneyOutlinedIcon /> Budget : <b>{post.startingBid}</b></span>
-                                            <br />
-                                            <br />
-                                        </div>
-                                        <div className='col-12'>
-                                            <span><PeopleOutlineOutlinedIcon /> Seats : <b>{post.seats}</b></span>
-                                            <br />
-                                            <br />
-                                        </div>
-                                        <div className='col-12'>
-                                            <span><AlarmOutlinedIcon /> Time : <b>{`${post.startDate}, from ${post.startTime} to ${post.endTime}`}</b></span>
-                                            <br />
-                                            <br />
-                                        </div>
-                                    </div>
-                                    <Typography variant="subtitle1" component="p">
-                                        {post.description}
-                                    </Typography>
-                                </CardContent>
-                                <PostImages images={post.images} postId={post.id} />
-                                <CardActions className="container-fluid"  >
-                                    <div className='row d-flex justify-content-center' style={{ width: `100%` }}>
-
-                                        {user ?
-                                            <>  <div className='col-3 col-lg-3 text-center'>
-                                                {post.reactionType == 2 ? <IconButton className='like_div' onClick={() =>
-                                                    dispatchAction({
-                                                        type: "like-action",
-                                                        data: {
-                                                            post: post,
-                                                            posts: actionsState.posts,
-                                                            callback: handleReaction
-                                                        }
-                                                    })
-                                                } >
-                                                    <AiFillLike className='liked_icon' />
-                                                </IconButton> :
-                                                    <IconButton className='like_div' onClick={() =>
-                                                        dispatchAction({
-                                                            type: "like-action",
-                                                            data: {
-                                                                post: post,
-                                                                posts: actionsState.posts,
-                                                                callback: handleReaction
-                                                            }
-                                                        })
-                                                    } >
-                                                        <AiOutlineLike />
-                                                    </IconButton>}
-                                                <span className='text-center'>{post.likes}</span>
-                                            </div>
-                                                <div className='col-3 col-lg-3 text-center'>
-                                                    {post.reactionType === 4 ? <IconButton className='dislike_div' onClick={() =>
-                                                        dispatchAction({
-                                                            type: "dislike-action",
-                                                            data: {
-                                                                post: post,
-                                                                posts: actionsState.posts,
-                                                                callback: handleReaction
-                                                            }
-                                                        })
-                                                    }>
-                                                        <AiFillDislike className='disliked_icon' />
-                                                    </IconButton> : <IconButton onClick={() =>
-                                                        dispatchAction({
-                                                            type: "dislike-action",
-                                                            data: {
-                                                                post: post,
-                                                                posts: actionsState.posts,
-                                                                callback: handleReaction
-                                                            }
-                                                        })
-                                                    } >
-                                                            <AiOutlineDislike />
-                                                        </IconButton>}
-                                                    <span className='text-center' >{post.dislikes}</span>
-                                                </div></> :
-
-                                            <><div className='col-3 col-lg-3 text-center'>
-
-                                                <IconButton className='like_div' onClick={signIn} >
-                                                    <AiOutlineLike />
-                                                </IconButton>
-                                                <span className='text-center'>{post.likes}</span>
-                                            </div>
-                                                <div className='col-3 col-lg-3 text-center'>
-                                                    <IconButton className='dislike_div' onClick={signIn} >
-                                                        <AiOutlineDislike />
-                                                    </IconButton>
-                                                    <span className='text-center' >{post.dislikes}</span>
-                                                </div></>
-                                        }
-                                        {
-                                            post.isBidOptIn ? <div className='col-3 col-lg-3 text-center'>
-                                                <IconButton onClick={() => toggleComments(post.id)}>
-                                                    <FaRegComment />
-                                                </IconButton>
-                                                <span className='text-center' >{post.bidCount}</span>
-                                            </div> : null
-                                        }
-                                        <div className='col-3 col-lg-3 text-center'>
-                                            <IconButton onClick={() => toggleItinerary(post.id)}>
-                                                <LocationOnIcon />
-                                            </IconButton>
-                                            <span className='text-center' >{post.itineraryCount}</span>
-                                        </div>
-                                    </div>
-                                </CardActions>
-                                <Itinerary show={showItinerary.show} showId={showItinerary.id} postId={post.id} />
-                                <Comments post={post} show={showComments.show} showId={showComments.id} postId={post.id} />
-                            </div>
-                        )) 
+                        actionsState.posts.map((post, i) => <SinglePost key={i} post={post}/>) 
                 }
             </div>
         </div>
