@@ -14,6 +14,7 @@ namespace UrGuide.WebApp.Controllers
 {
     [ApiController]
     [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
+    [ProducesResponseType(500, Type = typeof(ErrorEnvelop<string>))]
     [Route("[controller]")]
     public class AccountController : Controller
     {

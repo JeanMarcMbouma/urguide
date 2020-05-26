@@ -50,6 +50,13 @@ export class Client {
             result400 = StringErrorEnvelop.fromJS(resultData400);
             return throwException("Bad Request", status, _responseText, _headers, result400);
             });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -90,6 +97,13 @@ export class Client {
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = StringErrorEnvelop.fromJS(resultData400);
             return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
@@ -132,6 +146,13 @@ export class Client {
             result400 = StringErrorEnvelop.fromJS(resultData400);
             return throwException("Bad Request", status, _responseText, _headers, result400);
             });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -168,6 +189,13 @@ export class Client {
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = StringErrorEnvelop.fromJS(resultData400);
             return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -215,6 +243,13 @@ export class Client {
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = StringErrorEnvelop.fromJS(resultData400);
             return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -312,6 +347,13 @@ export class AccountClient {
             result400 = StringErrorEnvelop.fromJS(resultData400);
             return throwException("Bad Request", status, _responseText, _headers, result400);
             });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -348,6 +390,13 @@ export class AccountClient {
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = StringErrorEnvelop.fromJS(resultData400);
             return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
@@ -386,6 +435,13 @@ export class AccountClient {
             result400 = StringErrorEnvelop.fromJS(resultData400);
             return throwException("Bad Request", status, _responseText, _headers, result400);
             });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -422,6 +478,13 @@ export class AccountClient {
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = StringErrorEnvelop.fromJS(resultData400);
             return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
@@ -467,6 +530,13 @@ export class AccountClient {
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = StringErrorEnvelop.fromJS(resultData400);
             return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
             });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
