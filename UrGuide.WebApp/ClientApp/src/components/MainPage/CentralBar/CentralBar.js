@@ -1144,7 +1144,8 @@ export default function CentralBar() {
                     post.hasReserved = false;
                     post.reservedSeats--;
                     setHasReserved(false);
-                } else {
+                }
+                else {
                     await api.makereservation(post.id, {
                         postId: post.id,
                         seats: 1
@@ -1158,6 +1159,21 @@ export default function CentralBar() {
             }
         }
 
+
+        const Reservation = ({ post, reserved }) => {
+
+            if (post.reservedSeats === post.seats) {
+                return (<Button className="col-2" variant="contained" color="success" onlick={() => { }}>
+                        Sold out
+                    </Button>)
+            } else if (user && user.profile.sub !== post.authorId) {
+                return (<Button className="col-2 reservation" variant="contained" color="primary" onClick={() => makeReservation(post)}>
+                    {reserved ? 'Leave' : 'Join'}
+                    </Button>)
+            }
+            return (<></>);
+        }
+
         return <div className="p-3 mb-3 bg-white rounded post-card">
             <div className="col-12 row">
                 <CardHeader className="col-10 p-0 m-0"
@@ -1169,19 +1185,7 @@ export default function CentralBar() {
                     }
                     subheader={post.publicationDate}
                 />
-
-                {
-                    user /*&& user.profile.sub !== post.authorId*/ && !hasReserved ?
-                        <Button className="col-2 reservation" variant="contained" color="primary" onClick={() => makeReservation(post)}>
-                            Join
-                        </Button> : <></>
-                }
-                {
-                    user /*&& user.profile.sub !== post.authorId*/ && hasReserved ?
-                        <Button className="col-2 reservation btn-danger" variant="contained" color="primary" onClick={() => makeReservation(post)}>
-                            Leave
-                        </Button> : <></>
-                }
+                <Reservation post={post} reserved={hasReserved}/>
             </div>
             <CardContent>
                 <div className='row'>
