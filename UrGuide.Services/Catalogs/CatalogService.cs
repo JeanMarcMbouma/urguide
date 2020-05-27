@@ -70,6 +70,7 @@ namespace UrGuide.Services.Catalogs
                 ImageUrl = imageFile.ImageBase64,
                 MimeType = FileExtensionHelper.GetImageMimeType(imageFile)
             };
+            newImage.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(imageFile.Name), Value = imageFile.Name });
 
             catalog.Images.Add(newImage);
 
