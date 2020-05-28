@@ -276,5 +276,13 @@ namespace UrGuide.Services.Users
             var result = await Context.Users.AnyAsync(u => u.Id == userId, cancellationToken);
             return Result.Of(result);
         }
+
+        public async Task<Result<UserInfo>> GetUserInfo(string userId, CancellationToken cancellationToken)
+        {
+            var result = await Context.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+            if (result == null)
+                return Result.Of<UserInfo>().WithErrors(ErrorMessages.NotFoundEntityForKey);
+            return Result.Of(Mapper.Map<UserInfo>(result));
+        }
     }
 }

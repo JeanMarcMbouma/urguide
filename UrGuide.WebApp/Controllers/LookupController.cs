@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Model.Lookup;
+using UrGuide.Model.Users;
 using UrGuide.Services.Contracts;
 using UrGuide.WebApp.Models;
 
@@ -14,12 +15,14 @@ namespace UrGuide.WebApp.Controllers
     [ProducesResponseType(500, Type = typeof(ErrorEnvelop<string>))]
     public class LookupController : Controller
     {
-        public LookupController(ILookupService lookupService)
+        public LookupController(ILookupService lookupService, IUserService userService)
         {
             LookupService = lookupService ?? throw new ArgumentNullException(nameof(lookupService));
+            UserService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
         public ILookupService LookupService { get; }
+        public IUserService UserService { get; }
 
         [HttpGet("categories")]
         [ProducesDefaultResponseType(typeof(IEnumerable<CategoryModel>))]
@@ -27,6 +30,14 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await LookupService.GetCategoriesAsync(cancellationToken);
             return Ok(result.Data);
+        }
+
+        [HttpGet("/users/{id}/info")]
+        [ProducesDefaultResponseType(typeof(UserInfo))]
+        public async Task<IActionResult> GetOne(string id, CancellationToken cancellationToken)
+        {
+            var result = await UserService.GetUserInfo(id, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
     }
 }

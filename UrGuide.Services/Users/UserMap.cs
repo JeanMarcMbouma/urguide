@@ -34,6 +34,15 @@ namespace UrGuide.Services.Users
                     f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Subscription)
                     && a.Value == nameof(Subscriptions.Premium))));
 
+            CreateMap<Data.Entities.Users.User, Model.Users.UserInfo>()
+                .ForMember(u => u.ProfileImage, x => x.MapFrom(f => f.ProfileImage.ImageUrl))
+                .ForMember(u => u.FullName, x => x.MapFrom(f => f.FullName))
+                .ForMember(u => u.Rating, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Rating))))
+                .ForMember(u => u.FirstName, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.FirstName))))
+                .ForMember(u => u.LastName, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.LastName))))
+                .ForMember(u => u.City, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.City))))
+                .ForMember(u => u.Country, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Country))))
+                .ForMember(u => u.Description, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Description))));     
 
         }
     }

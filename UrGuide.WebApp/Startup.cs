@@ -16,6 +16,11 @@ using System.Collections.Generic;
 using static IdentityModel.OidcConstants;
 using IdentityModel;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using UrGuide.WebApp.Models;
+using Newtonsoft.Json;
 
 namespace UrGuide.WebApp
 {
@@ -84,15 +89,31 @@ namespace UrGuide.WebApp
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
-            if (env.IsDevelopment())
+
+            app.UseExceptionHandler(options =>
             {
-                app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                options.Run(async (request) =>
+                {
+                    var exceptionHandler = request.Features.Get<IExceptionHandlerFeature>();
+                    if(exceptionHandler != null)
+                    {
+                        request.Response.StatusCode = (int)StatusCodes.Status500InternalServerError;
+                        var errors = new List<string>();
+                        if(env.IsDevelopment())
+                        {
+                            errors.AddRange(new[] { exceptionHandler.Error.Message, exceptionHandler.Error.StackTrace });
+                        } else
+                        {
+                            errors.Add("An unexpected error has occured.");
+                        }
+                        var result = ErrorEnvelop.Create(errors);
+                        await request.Response.WriteJsonAsync(result);
+                    }
+                });
+            });
+
+            if (!env.IsDevelopment())
+            { 
                 app.UseHsts();
             }
 
