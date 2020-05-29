@@ -9,27 +9,40 @@ import { GalleryDetails } from "../../components/user/gallery/GalleryDetails";
 import GalleryContext from "../../components/user/gallery/GalleryContext";
 import GalleryReducer from "../../components/user/gallery/GalleryReducer";
 import "../user/gallery/Gallery.css";
+import { useAuthUser } from '../api-authorization/AuthService';
+import authService from '../api-authorization/AuthService';
+import { HttpClientFactory } from '../../httpclient';
+import { CatalogsClient, CreateImageCatalogModel, ImageFileCreateModel } from '../../api';
+import { BlobToBase64 } from '../../helpers/fileHelpers';
 
 function Gallery() {
 
-    const [values, setValues] = React.useState({
-        gallery1: '',
-        gallery2: '',
-        gallery3: '',
-        gallery4: '',
-        gallery5: '',
-        gallery6: '',
-        gallery7: '',
-        gallery8: '',
-        gallery9: '',
-        gallery10: '',
-    });
+    const user = useAuthUser();
 
-    const handleChangeValue = prop => event => {
-        setValues({ ...values, [prop]: event.target.value });
+    async function createGallery(state) {
 
-        document.getElementById(`${prop}`).value = event.target.value;
-    };
+        if (!user) {
+            return;
+        }
+        const client = HttpClientFactory.get(CatalogsClient, user);
+
+        const model = new CreateImageCatalogModel({
+            name: state.title,
+            description: state.description,
+            files: state.files.map(i => new ImageFileCreateModel({ ...i })),
+        });
+
+        try {
+
+            await client.create(model);
+            window.location.replace(`${window.location.origin}/user/galleries`);
+
+        }
+        catch (e) {
+            console.log(e);
+        }
+    }
+
 
     const ctx = useContext(GalleryContext);
     const [state, dispatch] = useReducer(GalleryReducer, ctx);
@@ -39,31 +52,36 @@ function Gallery() {
 
    
     function handleChange(event) {
-        var file = URL.createObjectURL(event.target.files[0]);
-
-        currentFile = {
-            id: data.length,
-            href: file,
-            description: '',
-            name:`gallery${data.length}`
-        };
-
-        document.getElementById('data-sender').click();
-
+       
+        const blob = event.target.files[0];
+        BlobToBase64(blob, (fileName, base64Url, blobUrl) => {
+            var newFile = {
+                index: data.length,
+                href: blobUrl,
+                name: fileName,
+                description:'',
+                imageBase64: base64Url,
+                prop: `gallery${data.length}`
+            }
+            state.files.push(newFile);
+            document.getElementById('data-sender').click();
+        });
+       
     }
 
-    function handledescription(index, name) {
+
+    function handledescription(index, prop) {
 
         if (state.files.length > 0) {
 
-            state.files[index].description = document.getElementById(`${name}`).value;
+            state.files[index].description = document.getElementById(`${prop}`).value;
         }
 
     }
     
 
     let Cards = data.map((f, i) => (
-        <div className='col-12 col-sm-6 col-md-12 col-lg-6 col-xl-4' key={f.id}>
+        <div className='col-12 col-sm-6 col-md-12 col-lg-6' key={i}>
            
             <div className='card file-card' >
                 <div className='thumbnail' style={{ backgroundImage: `url(${f.href})` }}>
@@ -72,7 +90,7 @@ function Gallery() {
                             dispatch({
                                 type: "remove-file",
                                 data: {
-                                    idToRemove:f.id,
+                                    idToRemove:f.index,
                                     files: state.files,
                                 }
                             })
@@ -82,7 +100,7 @@ function Gallery() {
                     </div>
                 </div>
                 <div className="card-body">
-                    <TextField id={f.name} onChange={e => handledescription(f.id, f.name)}  fullWidth label="Description (optional)"  variant="outlined"  multiline rows={4} rowsMax={4} />
+                    <TextField id={f.prop} onChange={e => handledescription(f.index, f.prop)}  fullWidth label="Description (optional)"  variant="outlined"  multiline rows={4} rowsMax={4} />
                 </div>
             </div>
         </div>
@@ -134,17 +152,17 @@ function Gallery() {
                                 color="primary"
                                 onClick={() =>
                                     dispatch({
-                                        type: "validate-gallery",
+                                        type: "create-gallery",
                                         data: {
                                             title: document.getElementById("title").value,
-                                            location: document.getElementById("location").value,
                                             description: document.getElementById("description").value,
                                             files: state.files,
+                                            callback: createGallery
                                         }
                                     })
                                 }
                             >
-                                SUBMIT
+                                CREATE GALLERY
                    </Button>
                         </div>
                     </Grid>

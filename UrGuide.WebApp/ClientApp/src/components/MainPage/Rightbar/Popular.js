@@ -97,5 +97,7 @@ export default class Popular extends Component {
         client.top10().then(posts => {
             this.setState({ posts: posts, loading: false });
         });
+
+      
     }
 }

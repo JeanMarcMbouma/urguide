@@ -24,20 +24,21 @@ import {
 import { CreateNewGallery } from "./CreateNewGallery";
 import UserContext from "./../UserContext";
 import AuthRoute from "../api-authorization/AuthRoute";
+import { useAuthUser } from "../api-authorization/AuthService";
 
 
 function ProfileLayout() {
 
-    let { path, url } = useRouteMatch();
-
-    console.log(useRouteMatch());
+    let { path } = useRouteMatch();
+    let { userId } = useParams();
+    const user = useAuthUser();
 
     return (
     
             <div className="container-fluid user-page-container">
                 <div className="row">
-                    <div className="col-12">
-                        <UpperSection />
+                <div className="col-12">
+                    <UpperSection user={user} userId={userId}   />
                     </div>
                 </div>
             <Switch>
@@ -47,15 +48,15 @@ function ProfileLayout() {
                 <Route path={`${path}/galleries`}>
                     <Galleries />
                 </Route>
-                <AuthRoute path={`${path}/edit/profile`}>
+                <AuthRoute path={`${path}/edit`}>
                     <EditProfile />
                 </AuthRoute>
-                <AuthRoute path={`${path}/edit/password`}>
+                <AuthRoute path={`${path}/changepassword`}>
                     <ChangePassword />
                 </AuthRoute>
-                <Route path={`${path}/gallery/new`}>
+                <AuthRoute path={`${path}/creategallery`}>
                     <CreateNewGallery />
-                </Route>
+                </AuthRoute>
             </Switch>
 
             </div>

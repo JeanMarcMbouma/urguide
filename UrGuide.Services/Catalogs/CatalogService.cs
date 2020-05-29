@@ -133,11 +133,10 @@ namespace UrGuide.Services.Catalogs
         public async Task<Result<IEnumerable<ImageCatalogModel>>> GetCatalogsAsync(string userId, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var catalogs = await Context.ImageCatalogs.Include(c => c.User).Where(x => x.User.Id == userId)
-                .Select(catalog => Mapper.Map<ImageCatalogModel>(catalog))
-                .AsNoTracking()
+            var catalogIds = await Context.ImageCatalogs.FromSqlInterpolated($"SELECT Image_CatalogId FROM ug.Image_Catalogs WHERE UserId = {userId}").Select( x => x.Id)
                 .ToListAsync(cancellationToken);
-            return Result.Of(catalogs.AsEnumerable());
+            var catalogs = await Context.ImageCatalogs.Where(x => catalogIds.Contains(x.Id)).ToListAsync(cancellationToken);
+            return Result.Of(catalogs.Select(catalog => Mapper.Map<ImageCatalogModel>(catalog)).AsEnumerable());
         }
 
         public async Task<Result<IEnumerable<ImageCatalogModel>>> GetCatalogsAsync(CancellationToken cancellationToken)
@@ -145,12 +144,10 @@ namespace UrGuide.Services.Catalogs
             var geo = await IPStackService.GetLocationAsync(UserContext);
 
             cancellationToken.ThrowIfCancellationRequested();
-            var catalogs = await Context.ImageCatalogs.Include(c => c.User)
+            var catalogs = await Context.ImageCatalogs
                 .Where(x => x.Location == null || geo == null || x.Location.Distance(geo) <= Constants.Distance)
-                .Select(catalog => Mapper.Map<ImageCatalogModel>(catalog))
-                .AsNoTracking()
                 .ToListAsync(cancellationToken);
-            return Result.Of(catalogs.AsEnumerable());
+            return Result.Of(catalogs.Select(catalog => Mapper.Map<ImageCatalogModel>(catalog)).AsEnumerable());
         }
 
         public async Task<Result<bool>> RemoveCatalogAsync(string catalogId, CancellationToken cancellationToken)

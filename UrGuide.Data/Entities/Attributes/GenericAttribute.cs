@@ -10,7 +10,7 @@ namespace UrGuide.Data.Entities.Attributes
 
         public static implicit operator string (GenericAttribute attribute)
         {
-            return attribute.Value;
+            return attribute?.Value;
         }
 
         public static implicit operator int(GenericAttribute attribute)

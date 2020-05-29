@@ -211,11 +211,14 @@ function Itinerary(props) {
     const [itineraries, setItineraries] = useState([]);
    
     useMemo(async () => {
+
+        if (!props.show)
+            return;
         const api = HttpClientFactory.getPostClient();
         var result = await api.itineraries(props.postId);
         setItineraries(result);
 
-    }, []);
+    }, [props.show]);
 
 
     return (
@@ -274,14 +277,14 @@ function Comments(props) {
 
     useMemo(async () => {
 
-        if (!props.postId) {
+        if (!props.postId || !props.show) {
             return;
         }
         const api = HttpClientFactory.get(BidClient);
         var result = await api.history(props.postId);
         setBids(result);
        
-    }, [user]);
+    }, [user, props.show]);
 
     const [bid, setBid] = React.useState(25);
     const handleChangeBid = (event, newValue) => {
@@ -291,7 +294,7 @@ function Comments(props) {
 
     async function createNewBid(state) {
 
-        console.log(user);
+        //console.log(user);
         if (!state.postId) {
             return;
         }
@@ -1177,11 +1180,13 @@ export default function CentralBar() {
         return <div className="p-3 mb-3 bg-white rounded post-card">
             <div className="col-12 row">
                 <CardHeader className="col-10 p-0 m-0"
-                    avatar={<Avatar alt={post.author} src={post.authorAvatar} />}
+                    avatar={<Link to={`/profile/${post.authorId}`} ><Avatar alt={post.author} src={post.authorAvatar} /></Link>}
                     title={
+                        <Link to={`/profile/${post.authorId}`} >
                         <h6>
                             {post.author}
-                        </h6>
+                            </h6>
+                    </Link>
                     }
                     subheader={post.publicationDate}
                 />

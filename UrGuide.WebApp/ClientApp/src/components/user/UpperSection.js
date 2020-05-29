@@ -116,7 +116,6 @@ function UpperSectionSkeleton() {
 
 function RealUpperSection(props) {
 
-    console.log(props.profileImage);
 
     return (
         <div>
@@ -147,11 +146,14 @@ function RealUpperSection(props) {
                                         <br />
                                         <br />
                                         <h2 className='user-name'>{props.name}</h2>
-                                        <span className='user-profile-location' >{ props.isGuide ? props.location : null }</span>
+                                        <span className='user-profile-location' >{props.location}</span>
+                                        <br />
+                                        <br />
+                                        <Rating name="read-only" value={props.rating} readOnly />
                                         <br />
                                         <br />
                                         <p>
-                                            { props.isGuide ? props.description : null }
+                                            {props.description}
                                          </p>
                                     </div>
                                 </div>
@@ -165,42 +167,29 @@ function RealUpperSection(props) {
                                     <NotesIcon fontSize="small" /> <span className='btn-title'>Posts (104)</span>
                                 </Link>
                             </div>
-                            { props.isGuide ? <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                   <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
                                 <Link style={{ textDecoration: `none` }} tag={Link} to="/user/galleries" color="primary" onClick={(e) => ActivateLink(e)} >
                                     <AppsIcon fontSize="small" /> <span className='btn-title'>Galleries (7)</span>
                                 </Link>
                             </div>
-                                :
-                                null
-                            }
-
-                            {
-                                props.isGuide    ?
+                            
                                 <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
                                     <Link style={{ textDecoration: `none` }} tag={Link} to="/user" color="primary" onClick={(e) => ActivateLink(e)} >
                                         <FaRegCommentAlt fontSize="large" /> <span className='btn-title'>Reviews (104)</span>
                                     </Link>
                                 </div>
-                                : 
-                            null
-                           }
+                               
                             <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
-                                <Link style={{ textDecoration: `none` }} tag={Link}  to="/user/edit/profile" color="primary" onClick={(e) => ActivateLink(e)} >
+                                <Link style={{ textDecoration: `none` }} tag={Link}  to="/user/edit" color="primary" onClick={(e) => ActivateLink(e)} >
                                     <EditIcon fontSize="small" /> <span className='btn-title'>Edit profile</span>
                                 </Link>
                             </div>
-
-                            {
-                                props.isGuide ?
                                     <div className='col-12 col-sm-6 col-md-2  col-lg-2 col-xl-2 nav-col text-center'>
                                         <Link style={{ textDecoration: `none` }} tag={Link} to="/user/gallery/new" color="primary" onClick={(e) => ActivateLink(e)} >
                                             <PhotoCameraIcon fontSize="small" /> <span className='btn-title'>New Gallery</span>
                                         </Link>
-                                    </div>
-                                    :
-                                    null
-                            }
-                           
+                             </div>
+                                   
                         </div>
                     </div>
                   
@@ -210,10 +199,11 @@ function RealUpperSection(props) {
     );
 }
 
-export default function UpperSection()
+export default function UpperSection(props)
 {
 
-    const user = useAuthUser();
+    const user = props.user;
+    const userId = props.userId;
 
     const [values, setValues] = React.useState({
         userId: null,

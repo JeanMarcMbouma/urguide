@@ -1,4 +1,19 @@
 ﻿
+.item-photo-gallery {
+    height: 100vh;
+
+}
+
+.post-container-gallery {
+    margin-top: 0;
+    right: 0;
+    overflow-x: hidden !important;
+    height: 100vh;
+    background-size: cover;
+    background-position: center center;
+}
+
+
 
 .post-container {
     background-color:white;
@@ -139,6 +154,7 @@
         background-size: cover;
         background-position: center center;
     }
+
 
     .post-container {
         margin-top: 0;

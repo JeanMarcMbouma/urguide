@@ -32,7 +32,7 @@ namespace UrGuide.Services.Posts
                 {
                     Id = i.Id, 
                     ImageBase64 = i.ImageUrl,
-                    Name = i.Attributes.First(a => a.Name == nameof(Model.Catalogs.CreateImageCatalogModel.Name))
+                    Name = i.Attributes.FirstOrDefault(a => a.Name == nameof(Model.Catalogs.CreateImageCatalogModel.Name))
                 })))
                 .ForMember(x => x.LastEditDate, x => x.MapFrom(f => f.Data.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.LastEdit))))
                 .ForMember(x => x.Seats, x => x.MapFrom(f => f.Data.Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.AllocatedSeats))))

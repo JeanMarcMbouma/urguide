@@ -10,6 +10,7 @@
     "@material-ui/lab": "4.0.0-alpha.48",
     "@material-ui/pickers": "^3.2.10",
     "bootstrap": "^4.4.1",
+    "cities.json": "^1.1.5",
     "date-fns": "2.11.0",
     "jquery": "^3.4.1",
     "material-ui-icons": "1.0.0-alpha.19",

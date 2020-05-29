@@ -1,47 +1,6 @@
-﻿import { string } from "prop-types";
-
-async function sendGallery(state) {
-
-    const response = await fetch('/galleries', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-            title: state.title,
-            location: state.location,
-            description: state.description,
-            files: state.files,
-            userId: null,
-        })
-    });
-    if (response.status == 200 || response.status == 304 || response.status == 204) {
-
-
-        window.location.replace(`${window.location.origin}/user`);
-
-        console.log(response);
-    }
-    else
-    {
-        // we got an error
-        if (response.status == 400) // BadRequest
-        {
-            //console.log(response);
-
-            return response;
-
-        }
-
-
-    }
-}
-
-export default function GuideReducer(state, action) {
+﻿export default function GalleryReducer(state, action) {
     let context = { ...state };
     context.title = action.data.title;
-    context.location = action.data.location;
     context.description = action.data.description;
     context.currentFile = action.data.currentFile;
     context.files = action.data.files;
@@ -54,14 +13,13 @@ export default function GuideReducer(state, action) {
    
 
     switch (action.type) {
-        case "validate-gallery":
+        case "create-gallery":
             context.emptyGalleryMessage = hasNoFiles ? "Please upload some pictures or videos to this gallery." : "";
             context.titleError = context.title.length > 0 ? false : true;
-            context.locationError = context.location.length > 0 ? false : true;
             context.descriptionError =
                 isDescriptionGotProperLength ? false : true;
 
-            if (context.titleError || context.locationError || context.descriptionError || hasNoFiles)
+            if (context.titleError ||  context.descriptionError || hasNoFiles)
             {
                 
                 return context;
@@ -69,15 +27,8 @@ export default function GuideReducer(state, action) {
             else
             {
 
-                const response = sendGallery(context);
 
-                if (response.status === 400)
-                {
-                    context.emptyGalleryMessage = "Sorry , something went wrong !";
-
-                    console.log(response);
-
-                }
+                action.data.callback(context);
 
                 return context;
             }
@@ -97,8 +48,6 @@ export default function GuideReducer(state, action) {
             {
                 context.emptyGalleryMessage = '';
             }
-
-            console.log(context.files);
 
             return context;
 

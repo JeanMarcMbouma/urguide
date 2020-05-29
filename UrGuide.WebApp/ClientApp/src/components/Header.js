@@ -67,6 +67,10 @@ function Header() {
 
     const { manager, user } = useAuthContext();
 
+    const { profile } = user || {
+        profile: {}
+    };
+
     function ToggleNotifications() {
          setShow(!show);
     }
@@ -103,7 +107,7 @@ function Header() {
                                     </Link>
                                 </div>
                                 <div className='col-3 col-md-3 col-lg-3 mid-3 text-center'>
-                                    <Link to="/user"  >
+                                    <Link to={`/profile/${profile.sub}`}  >
                                         <IconButton onClick={(e) => ActivateLink(e)} >
                                             <PersonIcon fontSize="large" />
                                         </IconButton>
@@ -118,7 +122,7 @@ function Header() {
                         </div>
                         <div className="col-6 col-sm-3 col-md-3 right-div">
                             <div className='row justify-content-start'>
-                                <Link to="/user">
+                                <Link to={`/profile/${user.profile.sub}`}>
                                     <div className='col-2 col-sm-6 col-md-3'>
                                         <IconButton className={classes.avatarButton}>
                                             <Avatar className={(classes.avatar)} src='https://img.favpng.com/20/5/24/social-media-computer-icons-avatar-user-internet-png-favpng-DwdFSAXdR58nGmLe4y67jEej0.jpg' />

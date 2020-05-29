@@ -13,7 +13,6 @@ export function GalleryDetails(props) {
 
     const [values, setValues] = React.useState({
         title: '',
-        location: '',
         description: '',
     });
 
@@ -43,28 +42,7 @@ export function GalleryDetails(props) {
                 </FormControl>
             </Grid>
         );
-    const galleryLocationGrid =
-        props.locationError ? (
-            <Grid item xs={12} >
-                <FormControl fullWidth variant="outlined">
-                    <InputLabel error htmlFor="input-with-icon-adornment">
-                        Location
-          </InputLabel>
-                    <Input error id="location" value={values.location}
-                        onChange={handleChangedValue("location")} />
-                </FormControl>
-                <FormHelperText error>Please add a location to this gallery.</FormHelperText>
-            </Grid>
-        ) : (
-                <Grid item xs={12} >
-                    <FormControl fullWidth variant="outlined">
-                        <InputLabel htmlFor="input-with-icon-adornment"> Location</InputLabel>
-                        <Input id="location" value={values.location}
-                            onChange={handleChangedValue("location")} />
-                    </FormControl>
-                </Grid>
-            );
-
+   
     const gallerydDescriptionGrid =
         props.descriptionError ? (
             <Grid item xs={12}>
@@ -95,7 +73,6 @@ export function GalleryDetails(props) {
     return ( <Container component="main">
         <Grid container spacing={2}>
             {galleryTitleGrid}
-            {galleryLocationGrid}
             {gallerydDescriptionGrid}
         </Grid>
         </Container>)

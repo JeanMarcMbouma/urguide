@@ -4,7 +4,6 @@ var data = new Array();
 
 const GalleryContext = createContext({
     title: null,
-    location: null,
     description: null,
     titleError: false,
     locationError: false,

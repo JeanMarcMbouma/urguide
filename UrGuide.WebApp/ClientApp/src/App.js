@@ -7,6 +7,7 @@ import { RegisterLayout } from './components/RegisterLayout';
 import Discover from "./components/discover/Discover";
 import Post from "./components/post/Post";
 import Profile from "./components/user/Profile";
+import Gallery from "./components/user/gallery/Gallery";
 import {
     ClientRegistration,
 } from './components/client-registration/ClientRegistration';
@@ -18,7 +19,7 @@ import Home from './components/MainPage/Home';
 import EmailConfirmation from './components/confirmation/EmailConfirmation';
 import RegistrationConfirmation
     from './components/confirmation/RegistrationConfirmation';
-import AuthRoute from './components/api-authorization/AuthRoute'
+import AuthRoute from './components/api-authorization/AuthRoute';
 import { AuthContextProvider } from './components/api-authorization/AuthService'
 import { ApplicationPaths } from './components/api-authorization/ApiAuthorizationConstants';
 import LoginCallback from './components/api-authorization/LoginCallback';
@@ -63,15 +64,19 @@ export default class App extends Component {
                                 />
                             </RegisterLayout>
                         </Route>
-                        <Route path="/(user|feed|discover)">
+                        <Route path="/(feed|discover)">
                             <Layout>
-                                <AuthRoute path="/user" component={Profile} />
                                 <Route path="/feed" component={Home} />
                                 <Route path="/discover" component={Discover} />
-                               
+                            </Layout>
+                        </Route>
+                        <Route path="/profile/:userId">
+                            <Layout>
+                                <Route path={`/profile/:userId`} component={Profile} />
                             </Layout>
                         </Route>
                         <Route path={`/post/:postId/shot/:imageId`} component={Post} />
+                        <Route path={`/gallery/:catalogId/shot/:imageId`} component={Gallery} />
                         <Route exact path="/" render={() => <Redirect to="/feed" />} />
                         <Route exact path={ApplicationPaths.LoginCallback} component={LoginCallback} />
                         <Route exact path={ApplicationPaths.LogOutCallback} render={() => <Redirect to="/feed" />} />
@@ -81,3 +86,5 @@ export default class App extends Component {
         );
     }
 }
+
+//<AuthRoute path="/user" component={Profile} />

@@ -12,6 +12,51 @@
     z-index:4;
 }
 
+.search-suggestions {
+    height: auto;
+    background-color: white;
+    -webkit-box-shadow: 4px 16px 32px -12px rgba(0,0,0,0.75);
+    -moz-box-shadow: 4px 16px 32px -12px rgba(0,0,0,0.75);
+    box-shadow: 4px 16px 32px -12px rgba(0,0,0,0.75);
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 4px;
+    padding:5px 5px 15px 0px;
+
+}
+
+.suggestion-line{
+    margin-top:15px;
+    margin-left:4px;
+}
+
+.suggestion-line:hover {
+  cursor:pointer;
+}
+
+    .suggestion-icon {
+        font-size: 18px !important;
+        color: #787878;
+    }
+.suggestion-text {
+    color: black;
+    font-size: 18px;
+    font-weight: 400;
+    margin-left: 10px;
+    margin-top:8px !important;
+}
+.suggestion-text:hover {
+    color: black;
+    opacity:0.8;
+}
+.suggestion-text-not-found {
+    color: black;
+    font-size: 17px;
+    font-weight: 600;
+    font-style:italic;
+    margin-left:6px;
+}
+
 .search-container {
     width: 100%;
     height: 50px;
@@ -19,7 +64,7 @@
 }
 
 .searchbar {
-    font-size: 16px;
+    font-size: 20px;
     width: 100%;
     height: 50px;
     border: none;
@@ -48,12 +93,18 @@
         cursor: pointer;
     }
 
+.guideName {
+    color: white;
+    font-size:18px;
+    font-weight:500;
+}
+
 
 .main {
     background-color: white;
     margin-left: -14px;
     margin-right: -14px;
-    margin-top: 40px;
+    margin-top: 50px;
 }
 
 .tags-div {
@@ -95,7 +146,7 @@
 }
 
 .square-grid-item {
-    height: 340px;
+    height: 400px;
     padding: 0px !important;
     background-size: cover;
     background-position: center center;
@@ -121,9 +172,6 @@
     visibility: visible;
 }
 
-.user-name{
-    color:white;
-}
 .spot-location {
     color:white;
 }

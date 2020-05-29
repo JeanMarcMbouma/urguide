@@ -19,7 +19,7 @@ namespace UrGuide.Services.Catalogs
                 {
                     Id = i.Id,
                     ImageBase64 = i.ImageUrl,
-                    Name = i.Attributes.First(a => a.Name == nameof(Model.Catalogs.CreateImageCatalogModel.Name))
+                    Name = i.Attributes.FirstOrDefault(a => a.Name == nameof(Model.Catalogs.CreateImageCatalogModel.Name))
                 })));
         }
     }
