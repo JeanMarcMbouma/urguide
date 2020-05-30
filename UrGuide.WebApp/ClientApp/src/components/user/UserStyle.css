@@ -4,6 +4,12 @@
 
 }
 
+.new-feedback{
+    margin-top:50px;
+    margin-bottom:20px;
+}
+
+
 .avatar-wrapper {
     width: 100%;
     display: flex;
@@ -67,7 +73,7 @@
     margin-right: 5px;
 }
 .nav-btn-row {
-    /*background-color:red;*/
+    background-color:white;
     padding-top: 10px;
 }
 

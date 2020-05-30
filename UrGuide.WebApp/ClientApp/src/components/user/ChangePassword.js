@@ -61,7 +61,7 @@ function ChangePasswordForm() {
     const [status, setStatus] = useState(0);
 
     const [values, setValues] = useState({
-        email: profile.name,
+        email: profile.email,
         password: '',
         confirmPassword: '',
         currentPassword:'',
@@ -273,31 +273,22 @@ function ChangePasswordForm() {
 
 
 
-function Layout() {
-
+export default function ChangePassword(props) {
+   
     return (
-        <div className='row justify-content-center'>
-            <div className="col-12 col-lg-4 about">
-                <EditProfileNavigation />
-            </div>
-            <div className="col-12 col-lg-7">
-                <ChangePasswordForm />
-            </div>
-        </div>
- );
-}
 
-
-export default class ChangePassword extends Component {
-    render() {
-        return (
-          
-                <div className="row">
-                    <div className="col-12 lower-section">
-                        <Layout />
+        <div className="row">
+            <div className="col-12 lower-section">
+                <div className='row justify-content-center'>
+                    <div className="col-12 col-lg-4 about">
+                        <EditProfileNavigation isGuide={props.isGuide} />
+                    </div>
+                    <div className="col-12 col-lg-7">
+                        <ChangePasswordForm />
                     </div>
                 </div>
-        )
-    }
+            </div>
+        </div>
+    );
 }
 

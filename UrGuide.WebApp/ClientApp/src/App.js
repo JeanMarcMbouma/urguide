@@ -7,6 +7,7 @@ import { RegisterLayout } from './components/RegisterLayout';
 import Discover from "./components/discover/Discover";
 import Post from "./components/post/Post";
 import Profile from "./components/user/Profile";
+import Guide from "./components/user/Guide";
 import Gallery from "./components/user/gallery/Gallery";
 import {
     ClientRegistration,
@@ -24,6 +25,7 @@ import { AuthContextProvider } from './components/api-authorization/AuthService'
 import { ApplicationPaths } from './components/api-authorization/ApiAuthorizationConstants';
 import LoginCallback from './components/api-authorization/LoginCallback';
 import LogoutCallback from './components/api-authorization/LogoutCallback';
+import ClientDetails from './components/user/ClientDetails';
 
 export default class App extends Component {
     constructor(props) {
@@ -64,15 +66,17 @@ export default class App extends Component {
                                 />
                             </RegisterLayout>
                         </Route>
-                        <Route path="/(feed|discover)">
+                        <Route path="/(feed|discover|profile|account)">
                             <Layout>
                                 <Route path="/feed" component={Home} />
                                 <Route path="/discover" component={Discover} />
+                                <AuthRoute path="/profile" component={Profile} />
+                                <AuthRoute path="/account" component={ClientDetails} />
                             </Layout>
                         </Route>
-                        <Route path="/profile/:userId">
+                        <Route path="/g/:userId">
                             <Layout>
-                                <Route path={`/profile/:userId`} component={Profile} />
+                                <Route path={`/g/:userId`} component={Guide} />
                             </Layout>
                         </Route>
                         <Route path={`/post/:postId/shot/:imageId`} component={Post} />
@@ -86,5 +90,3 @@ export default class App extends Component {
         );
     }
 }
-
-//<AuthRoute path="/user" component={Profile} />

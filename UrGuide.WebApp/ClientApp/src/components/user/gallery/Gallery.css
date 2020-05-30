@@ -14,12 +14,27 @@
 
 }
 
+.author-avatar{
+    border:4px solid white !important;
+}
+
 .gallery-content {
     height: auto;
 }
 
 .submit-gallery-btn-div {
     margin-top: 40px;
+}
+
+
+.author-div {
+    margin-left:50px;
+    position: fixed;
+    
+}
+
+.authorName {
+    color: white !important;
 }
 
 .input-file {
@@ -44,4 +59,18 @@
 .cancel-file {
     margin-left: -22px;
     margin-top: -22px;
+}
+
+
+@media only screen and (max-width: 994px) {
+
+    .author-div {
+        margin-left: -5px;
+        position: fixed;
+    }
+
+    .authorName {
+        color: white !important;
+        font-size:18px;
+    }
 }

@@ -52,14 +52,14 @@ function SignOutHeader() {
                                 <div className='col-4 col-sm-2 text-center'>
                                     <Link to="/feed"  >
                                         <IconButton>
-                                            <HomeOutlinedIcon fontSize="inherit" />
+                                            <HomeOutlinedIcon fontSize="large" />
                                         </IconButton>
                                     </Link>
                                 </div>
                                 <div className='col-4 col-sm-2 text-center'>
                                     <Link to="/discover"  >
                                         <IconButton>
-                                            <SearchIcon fontSize="inherit" />
+                                            <SearchIcon fontSize="large" />
                                         </IconButton>
                                     </Link>
                                 </div>

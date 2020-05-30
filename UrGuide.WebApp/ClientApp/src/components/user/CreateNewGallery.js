@@ -1,16 +1,14 @@
 ﻿import React, { Component, useContext, useReducer } from 'react';
 import {
-    Grid, Button, IconButton, Box, TextField, Link
+    Grid, Button, IconButton, Box, Avatar, Typography
 } from "@material-ui/core";
 import PhotoLibraryIcon from '@material-ui/icons/PhotoLibrary';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
-import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
 import { GalleryDetails } from "../../components/user/gallery/GalleryDetails";
 import GalleryContext from "../../components/user/gallery/GalleryContext";
 import GalleryReducer from "../../components/user/gallery/GalleryReducer";
 import "../user/gallery/Gallery.css";
 import { useAuthUser } from '../api-authorization/AuthService';
-import authService from '../api-authorization/AuthService';
 import { HttpClientFactory } from '../../httpclient';
 import { CatalogsClient, CreateImageCatalogModel, ImageFileCreateModel } from '../../api';
 import { BlobToBase64 } from '../../helpers/fileHelpers';
@@ -28,14 +26,13 @@ function Gallery() {
 
         const model = new CreateImageCatalogModel({
             name: state.title,
-            description: state.description,
             files: state.files.map(i => new ImageFileCreateModel({ ...i })),
         });
 
         try {
 
             await client.create(model);
-            window.location.replace(`${window.location.origin}/user/galleries`);
+            window.location.replace(`${window.location.origin}/profile/galleries`);
 
         }
         catch (e) {
@@ -59,7 +56,6 @@ function Gallery() {
                 index: data.length,
                 href: blobUrl,
                 name: fileName,
-                description:'',
                 imageBase64: base64Url,
                 prop: `gallery${data.length}`
             }
@@ -68,17 +64,6 @@ function Gallery() {
         });
        
     }
-
-
-    function handledescription(index, prop) {
-
-        if (state.files.length > 0) {
-
-            state.files[index].description = document.getElementById(`${prop}`).value;
-        }
-
-    }
-    
 
     let Cards = data.map((f, i) => (
         <div className='col-12 col-sm-6 col-md-12 col-lg-6' key={i}>
@@ -99,9 +84,6 @@ function Gallery() {
                         </IconButton>
                     </div>
                 </div>
-                <div className="card-body">
-                    <TextField id={f.prop} onChange={e => handledescription(f.index, f.prop)}  fullWidth label="Description (optional)"  variant="outlined"  multiline rows={4} rowsMax={4} />
-                </div>
             </div>
         </div>
     ));
@@ -110,6 +92,14 @@ function Gallery() {
         <div className="row justify-content-between">
             <div className="col-12 col-md-6 col-lg-5 col-xl-4">
                 <div className='details-card'>
+                    <Grid item xs={12}>
+                    <div className="col-lg-12 d-flex justify-content-start my-4">
+                        <Avatar alt={user.profile.given_name} src={user.profile.picture} />
+                        <Typography className="m-0 px-4" variant="h6">
+                            {user.profile.given_name}
+                        </Typography>
+                        </div>
+                    </Grid>
                     <Grid item xs={12}>
                         <Box mb={5} mt={3}>
                             <div>

@@ -5,7 +5,8 @@ import {
   InputLabel,
   FormControl,
   Input,
-  Container
+  Container,
+
 } from "@material-ui/core";
 import "./Gallery.css";
 

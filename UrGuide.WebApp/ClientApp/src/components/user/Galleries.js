@@ -11,7 +11,7 @@ import { MdVisibility } from 'react-icons/md';
 import { MdAddAPhoto } from 'react-icons/md';
 import { MdDelete } from 'react-icons/md';
 import { MdModeEdit } from 'react-icons/md';
-import { Link } from 'react-router-dom';
+import { Link, useParams  } from 'react-router-dom';
 import { useAuthUser } from "../api-authorization/AuthService";
 import { HttpClientFactory } from './../../httpclient';
 import "./UserStyle.css";
@@ -49,7 +49,7 @@ function GalleryCard(props) {
         try {
 
             await client.remove(props.gallery.catalogId);
-            window.location.replace(`${window.location.origin}/user/galleries`);
+            window.location.replace(`${window.location.origin}/profile/galleries`);
 
         }
         catch (e) {
@@ -128,7 +128,7 @@ function GalleryCard(props) {
                 <button id='data-sender' className='input-file'  >
                 </button>
                 <div className='row justify-content-end'>
-                    <div className='col-3 col-lg-1'>
+                    {  !props.visitor ? <div className='col-3 col-lg-1'>
                         <Dropdown>
                             <Dropdown.Toggle className='dropdown-button' >
                                 <AiOutlineSetting className='cog-icon' />
@@ -136,12 +136,13 @@ function GalleryCard(props) {
 
                             <Dropdown.Menu>
                                 <Dropdown.Item onClick={e => document.getElementById('file-init').click()} ><span className='md-icon' ><MdAddAPhoto /></span> Add photo</Dropdown.Item>
-                                <Dropdown.Item><span  className='md-icon'><MdModeEdit /></span>  Edit details</Dropdown.Item>
+                                <Dropdown.Item><span className='md-icon'><MdModeEdit /></span>  Edit details</Dropdown.Item>
                                 <Dropdown.Item onClick={deleteGallery}><span className='md-icon' ><MdDelete /></span>  Delete gallery</Dropdown.Item>
                                 <Dropdown.Item><Link to={`/gallery/${gallery.catalogId}/shot/${gallery.files[0].id}`} ><span className='md-icon'><MdVisibility /></span>  See details</Link></Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
-                    </div>
+                    </div> : null }
+                   
                 </div>
                 <br />
                 <div className='row justify-content-start'>
@@ -200,6 +201,7 @@ function GallerySkeleton() {
 
 export default function Galleries() {
 
+    let { userId } = useParams();
 
     const user = useAuthUser();
 
@@ -210,12 +212,23 @@ export default function Galleries() {
     const [model, setModel] = useState({ galleries: [], loading: true });
 
     useMemo(async () => {
-        let client = HttpClientFactory.get(CatalogsClient);
 
-        client.all(profile.sub).then(catalogs => {
-            setModel({ galleries: catalogs, loading: false });
-        });
+        if (userId != null) {
+            let client = HttpClientFactory.get(CatalogsClient);
 
+            client.all(userId).then(catalogs => {
+                setModel({ galleries: catalogs, loading: false });
+            });
+        }
+        else
+        {
+            let client = HttpClientFactory.get(CatalogsClient);
+
+            client.all(profile.sub).then(catalogs => {
+                setModel({ galleries: catalogs, loading: false });
+            });
+        }
+     
 
     }, [user]);
 
@@ -224,9 +237,11 @@ export default function Galleries() {
         <div className="row">
             <div className="col-12 lower-section">
                 <div className='row justify-content-center'>
-                    <div className="col-12 col-lg-8">
-                        {model.loading ? <GallerySkeleton /> : model.galleries.map((gallery, i) => (<GalleryCard key={i} gallery={gallery} user={user} />))}
-                    </div>
+                    {userId != null ? <div className="col-12 col-lg-10">
+                        {model.loading ? <GallerySkeleton /> : model.galleries.map((gallery, i) => (<GalleryCard key={i} gallery={gallery} userId={userId} visitor={true} user={null}  />))}
+                    </div> : <div className="col-12 col-lg-10">
+                            {model.loading ? <GallerySkeleton /> : model.galleries.map((gallery, i) => (<GalleryCard key={i} gallery={gallery} userId={profile.sub} visitor={false} user={user} />))}
+                        </div> }
                 </div>
             </div>
         </div>

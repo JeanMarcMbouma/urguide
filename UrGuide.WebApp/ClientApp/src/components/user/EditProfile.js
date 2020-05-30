@@ -27,6 +27,189 @@ import { UpdateGuideModel } from './../../api';
 import { HttpClientFactory } from './../../httpclient';
 import { BlobToBase64 } from "../../helpers/fileHelpers";
 
+
+function ClientProfile() {
+    const user = useAuthUser();
+
+    const [values, setValues] = React.useState({
+        id: null,
+        firstName: '',
+        lastName: '',
+        profileImage: '',
+    });
+
+    const [status, setStatus] = useState(0);
+
+    async function editProfile(state) {
+
+        const client = HttpClientFactory.getClient(user);
+
+        const model = new UpdateGuideModel({
+            id: state.id,
+            firstName: state.firstName,
+            lastName: state.lastName,
+            profileImage: state.profileImage
+        });
+
+        try {
+
+            await client.updateguide(model);
+            setStatus(200);
+            return 200;
+        }
+        catch (e) {
+
+            setStatus(400);
+            return 400;
+
+        }
+
+    }
+
+    const ctx = useContext(EditProfileContext);
+    const [state, dispatch] = useReducer(EditProfileReducer, ctx);
+
+    useMemo(async () => {
+        if (!user)
+            return;
+        var client = HttpClientFactory.getClient(user);
+        var data = await client.getdetails();
+
+        setValues({
+            id: data.id,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            profileImage: data.profileImage
+        });
+    }, [user]);
+
+    const handleChangedValue = prop => event => {
+        setValues({ ...values, [prop]: event.target.value });
+    };
+
+    const handleDateChange = date => {
+        setValues({ ...values, ['birthDay']: date });
+    };
+
+    function handleChange(event) {
+        const blob = event.target.files[0];
+        BlobToBase64(blob, (fileName, base64Url, blobUrl) => {
+            document.getElementById("pic-previewer").src = blobUrl;
+
+            setValues({ ...values, ['profileImage']: base64Url });
+        });
+    }
+
+
+    const profilePicGrid = (
+        <Grid item xs={12}>
+            <div className="edit-avatar-wrapper">
+                {values.profileImage ?
+
+                    <>
+                        <Avatar id="pic-previewer" className='user-avatar' alt={values.firstName} src={values.profileImage} />
+                        <div
+                            className="create-icon"
+                            onClick={e => document.getElementById("profile-pic-input").click()}
+                        >
+                            <span>
+                                <CreateIcon style={{ fontSize: 21, marginTop: `-6px`, }} />
+                            </span>
+                        </div>
+                    </>
+
+                    :
+                    <>
+
+                        <Avatar id="pic-previewer" className='user-avatar' alt={values.firstName} src={values.profileImage} />
+                        <div
+                            className="create-icon"
+                            onClick={e => document.getElementById("profile-pic-input").click()}
+                        >
+                            <span>
+                                <CreateIcon style={{ fontSize: 21, marginTop: `-6px`, }} />
+                            </span>
+                        </div>
+                        <br />
+                        <br />
+                        {state.profileImageError ? <FormHelperText error>
+                            {state.requiredErrorMessage}
+                        </FormHelperText> : null}
+                    </>
+
+                }
+            </div>
+            <input
+                type="file"
+                className="input-file"
+                id="profile-pic-input"
+                accept=".png,.jpg"
+                onChange={handleChange}
+            />
+        </Grid>
+    );
+
+    return (
+        <div className='edit-profile-card' component="main">
+
+            <h5 className='text-muted'>Change your informations.</h5>
+            <br />
+            <br />
+            {status == 200 ? <Alert severity="success">Your informations have been successfully changed!</Alert> : null}
+            {status == 400 ? <Alert severity="error">Oops sorry ! something went wrong. Please try again.</Alert> : null}
+            <br />
+            <br />
+            <form >
+                <Grid container spacing={2}>
+                    {profilePicGrid}
+                    <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth variant="outlined">
+                            <InputLabel htmlFor="input-with-icon-adornment">
+                                First Name
+          </InputLabel>
+                            <Input id="firstName" value={values.firstName}
+                                onChange={handleChangedValue("firstName")} />
+                        </FormControl>
+                        {state.fnameError ? <FormHelperText error>
+                            {state.requiredNameErrorMessage}
+                        </FormHelperText> : null}
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth variant="outlined">
+                            <InputLabel htmlFor="input-with-icon-adornment">Last Name</InputLabel>
+                            <Input id="lastName" value={values.lastName}
+                                onChange={handleChangedValue("lastName")} />
+                        </FormControl>
+                        {state.lnameError ? <FormHelperText error>
+                            {state.requiredNameErrorMessage}
+                        </FormHelperText> : null}
+                    </Grid>
+                </Grid>
+                <br />
+                <br />
+                <Button
+                    variant="contained"
+                    color="primary"
+                    type="button"
+                    onClick={() =>
+                        dispatch({
+                            type: "client-editProfile",
+                            data: {
+                                id: values.id,
+                                profileImage: values.profileImage,
+                                firstName: values.firstName,
+                                lastName: values.lastName,
+                                callback: editProfile,
+                            }
+                        })}
+                >
+                    Save Changes
+              </Button>
+            </form>
+        </div>
+
+    );
+}
 function Profile() {
 
     const user = useAuthUser();
@@ -346,31 +529,21 @@ function Profile() {
 }
 
 
-
-function Layout(){
-
-        return (
-            <div className='row justify-content-center'>
-                <div className="col-12 col-lg-4 about">
-                    <EditProfileNavigation />
-                </div>
-                <div className="col-12 col-lg-7">
-                    <Profile />
-                </div>
-            </div>
-        );
-
-
-}
-
-export default class EditProfile extends Component {
-    render() {
-        return (
-            <div className="row">
-                <div className="col-12 lower-section">
-                    <Layout />
+export default function EditProfile(props) {
+ 
+    return (
+        <div className="row">
+            <div className="col-12 lower-section">
+                <div className='row justify-content-center'>
+                    <div className="col-12 col-lg-4 about">
+                        <EditProfileNavigation isGuide={props.isGuide} />
+                    </div>
+                    <div className="col-12 col-lg-7">
+                        {props.isGuide ? <Profile /> : <ClientProfile />}
+                    </div>
                 </div>
             </div>
-        )
-    }
+        </div>
+    );
+   
 }

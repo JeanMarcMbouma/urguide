@@ -7,7 +7,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 
 
-export default function EditProfileNavigation() {
+export default function EditProfileNavigation(props) {
 
     return (
         <div className="container-fluid edit-panel-card" >
@@ -16,18 +16,39 @@ export default function EditProfileNavigation() {
                     <h5 className='text-muted'>Account Settings</h5>
                     <br />
                 </div>
-                <div className='col-11 edit-panel-link'>
-                    <Link to='/user/edit/profile' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><PersonIcon fontSize="small" /> <span className='btn-title'>Personal Information</span></Link>
-                </div>
-                <div className='col-11 edit-panel-link'>
-                    <Link to='/user/edit/password' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><VisibilityIcon fontSize="small" /> <span className='btn-title'>Change Password</span></Link>
-                </div>
-                <div className='col-11 edit-panel-link'>
-                    <Link to='/Home' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><PaymentIcon fontSize="small" /> <span className='btn-title'>Credit Card Details</span></Link>
-                </div>
-                <div className='col-11 edit-panel-link'>
-                    <Link to='/Home' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><HighlightOffIcon fontSize="small" /> <span className='btn-title'>Delete My Account</span></Link>
-                </div>
+                {props.isGuide ? <>
+                    <div className='col-11 edit-panel-link'>
+                        <Link to='/profile/details' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><PersonIcon fontSize="small" /> <span className='btn-title'>Personal Information</span></Link>
+                    </div>
+                    <div className='col-11 edit-panel-link'>
+                        <Link to='/profile/password' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><VisibilityIcon fontSize="small" /> <span className='btn-title'>Change Password</span></Link>
+                    </div>
+                    <div className='col-11 edit-panel-link'>
+                        <Link to='/' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><PaymentIcon fontSize="small" /> <span className='btn-title'>Credit Card Details</span></Link>
+                    </div>
+                    <div className='col-11 edit-panel-link'>
+                        <Link to='/' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><HighlightOffIcon fontSize="small" /> <span className='btn-title'>Delete My Account</span></Link>
+                    </div>
+                </>
+                      :
+
+                    <>
+                        <div className='col-11 edit-panel-link'>
+                            <Link to='/account/details' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><PersonIcon fontSize="small" /> <span className='btn-title'>Personal Information</span></Link>
+                        </div>
+                        <div className='col-11 edit-panel-link'>
+                            <Link to='/account/password' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><VisibilityIcon fontSize="small" /> <span className='btn-title'>Change Password</span></Link>
+                        </div>
+                        <div className='col-11 edit-panel-link'>
+                            <Link to='/' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><PaymentIcon fontSize="small" /> <span className='btn-title'>Credit Card Details</span></Link>
+                        </div>
+                        <div className='col-11 edit-panel-link'>
+                            <Link to='/' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><HighlightOffIcon fontSize="small" /> <span className='btn-title'>Delete My Account</span></Link>
+                        </div>
+                    </>
+                     
+                    }
+              
             </div>
         </div>
 

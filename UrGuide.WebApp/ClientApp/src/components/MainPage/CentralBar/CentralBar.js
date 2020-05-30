@@ -746,7 +746,7 @@ export default function CentralBar() {
             {show ?
                 <Card className='new-post-form' >
                     <div className="col-lg-12 d-flex justify-content-start my-4">
-                        <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
+                        <Avatar alt={profile.given_name} src={profile.picture} />
                         <Typography className="m-0 px-4" variant="h6">
                             {profile.given_name}
                         </Typography>
@@ -1178,11 +1178,11 @@ export default function CentralBar() {
         }
 
         return <div className="p-3 mb-3 bg-white rounded post-card">
-            <div className="col-12 row">
-                <CardHeader className="col-10 p-0 m-0"
-                    avatar={<Link to={`/profile/${post.authorId}`} ><Avatar alt={post.author} src={post.authorAvatar} /></Link>}
+            <div className="col-12 mt-3 row">
+                <CardHeader className="col-10 p-2 m-0"
+                    avatar={<Link to={`/g/${post.authorId}`} ><Avatar alt={post.author} src={post.authorAvatar} /></Link>}
                     title={
-                        <Link to={`/profile/${post.authorId}`} >
+                        <Link to={`/g/${post.authorId}`} >
                         <h6>
                             {post.author}
                             </h6>
@@ -1322,7 +1322,7 @@ export default function CentralBar() {
     return (
         <div className="col-12 col-sm-7 col-md-7 col-lg-6 col-xl-5 timeline">
             <div >
-                <ViewPost />
+                {profile.role === "guide" ? <ViewPost /> : null}
                 {
                     isLoading ? <><SkeletonCard /><SkeletonCard /></> :
                         actionsState.posts.map((post, i) => <SinglePost key={i} post={post}/>) 

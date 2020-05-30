@@ -59,52 +59,6 @@ function Header(props) {
 }
 
 
-//const labels = {
-//    0.5: 'Worst experience.',
-//    1: 'Very poor experience.',
-//    1.5: 'Bad experience.',
-//    2: 'Not realistic.',
-//    2.5: 'Not interesting.',
-//    3: 'It was okay.',
-//    3.5: 'It was good.',
-//    4: 'It was excellent.',
-//    4.5: 'It was almost perfect.',
-//    5: 'It was perfect.',
-//};
-
-//function NewFeedBack() {
-
-//    const [value, setValue] = React.useState(2);
-//    const [hover, setHover] = React.useState(-1);
-
-//    return (<form noValidate autoComplete="off" className='new-feedback'>
-//        <TextField fullWidth multiline rows={7} rowsMax={7} id="outlined-basic" label="Your review" variant="outlined" placeholder="Would you recommend this spot ? Write what's on your mind." />
-//        <br />
-//        <br />
-//        <div>
-//            <span>Your experience</span>
-//            <br />
-//            <Rating
-//                name="hover-feedback"
-//                value={value}
-//                precision={0.5}
-//                onChange={(event, newValue) => {
-//                    setValue(newValue);
-//                }}
-//                onChangeActive={(event, newHover) => {
-//                    setHover(newHover);
-//                }}
-//            />
-//            {value !== null && <Box ml={0}>{labels[hover !== -1 ? hover : value]}</Box>}
-//        </div>
-
-//        <br />
-//        <Button variant="contained" color="primary">submit review</Button>
-//    </form>);
-//}
-
-
-
 function PostLoading() {
 
     return (
@@ -380,10 +334,10 @@ export default function Post() {
                 <div className='row'>
                     <div className='col-12' >
                         <CardHeader
-                            avatar={<Avatar alt={props.post.author} src={props.post.authorAvatar} />}
+                            avatar={<Link to={`/g/${post.authorId}`} ><Avatar alt={props.post.author} src={props.post.authorAvatar} /> </Link>}
                             title={
                                 <h6>
-                                    {props.post.author}
+                                    <Link to={`/g/${post.authorId}`} >{props.post.author}</Link>
                                 </h6>
                             }
                             subheader={props.post.publicationDate}

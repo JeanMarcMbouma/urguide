@@ -4,7 +4,9 @@
 import {
 
     IconButton,
-    CircularProgress
+    CircularProgress,
+    Avatar,
+    CardHeader
 
 } from '@material-ui/core';
 import { Link, useParams } from 'react-router-dom';
@@ -104,12 +106,23 @@ export default function Gallery() {
                 <div className="row">
                     <div className="col-12">
                      
-                                <div className="item-photo-gallery" >
-                                    <div className='close-page-icon-div'>
+                       <div className="item-photo-gallery" >
+                               <div className='close-page-icon-div'>
                                         <IconButton onClick={() => goBack()}>
                                             <AiFillCloseCircle className='close-page-icon' />
-                                        </IconButton>
-                                    </div>
+                            </IconButton>
+                        </div>
+                        <div className="author-div">
+                            <CardHeader
+                                avatar={<Link to={`/g/${catalog.authorId}`} ><Avatar className='author-avatar' alt={catalog.author} src={catalog.authorAvatar} /> </Link>}
+                                title={
+                                    <h5>
+                                        <Link className='authorName' to={`/g/${catalog.authorId}`} >{catalog.author}</Link>
+                                    </h5>
+                                }
+
+                            />
+                        </div>
                                     {
                                         catalog.files.length > 1 ? <div className="container-fluid nav-box">
                                             <div className="row justify-content-between">

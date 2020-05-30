@@ -18,15 +18,19 @@ const Posts = ({post}) => {
   const classes = useStyles ();
   return (
     <Card style={{width:`350px`}} className="col-lg-12 bg-white rounded p-2 mb-2">
-      <div className="media p-0">
-              <Avatar className="mr-3" src={post.authorImage} alt="profile photo" />
-        <div className="media-body">
+          <div className="media p-0">
+              <Link to={`/g/${post.authorId}`} >
+                  <Avatar className="mr-3" src={post.authorAvatar} alt={post.author} />
+              </Link>
+              <div className="media-body">
+                  <Link to={`/g/${post.authorId}`} >
           <Typography
             className={`mt-0 font-weight-bold ${classes.text}`}
             component="h4">
             {post.author}
-          </Typography>
-        </div>
+                  </Typography>
+                  </Link>
+              </div>
       </div>
       <div className="col-12 p-0">
         <Typography

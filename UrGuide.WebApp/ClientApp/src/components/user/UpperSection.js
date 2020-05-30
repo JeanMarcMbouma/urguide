@@ -6,7 +6,7 @@ import {
     Avatar,
     Grid
 } from "@material-ui/core";
-import { Link } from 'react-router-dom';
+import { Link, useRouteMatch } from 'react-router-dom';
 import Rating from '@material-ui/lab/Rating';
 import EditIcon from '@material-ui/icons/Edit';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
@@ -19,6 +19,7 @@ import { setTimeout } from 'timers';
 import { useAuthUser } from "../api-authorization/AuthService";
 import { HttpClientFactory } from './../../httpclient';
 import "./UserStyle.css";
+import { LookupClient } from "../../api";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -87,8 +88,8 @@ function UpperSectionSkeleton() {
                                     <div className="col-12 col-xl-8" >
                                         <br />
                                         <br />
-                                        <h2 className='user-name'><Skeleton animation="wave" variant="rect" style={{ width: `250px`, height: `35px`, borderRadius: `0px` }} /></h2>
-                                        <span className='user-profile-location'><Skeleton animation="wave" variant="rect" style={{ width: `200px`, height: `20px`, borderRadius: `0px` }} /></span>
+                                        <h2 className='user-name'><Skeleton animation="wave" variant="rect" style={{ width: `250px`, height: `20px`, borderRadius: `8px` }} /></h2>
+                                        <span className='user-profile-location'><Skeleton animation="wave" variant="rect" style={{ width: `200px`, height: `20px`, borderRadius: `8px` }} /></span>
                                         <br />
                                         <br />
                                         <p>
@@ -103,7 +104,21 @@ function UpperSectionSkeleton() {
                     </div>
                     <div className="nav-btn-div container">
                         <div className='row nav-btn-row justify-content-center' >
-                            <Skeleton animation="wave" variant="rect" style={{ width: `100%`, height: `30px`, borderRadius: `0px`, marginBottom: `10px`, }} />
+                        <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                <Skeleton animation="wave" variant="rect" style={{ width: `100%`, height: `20px`, borderRadius: `8px`, marginBottom: `10px`, }} />
+                            </div>
+                            <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                <Skeleton animation="wave" variant="rect" style={{ width: `100%`, height: `20px`, borderRadius: `8px`, marginBottom: `10px`, }} />
+                            </div>
+                            <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                <Skeleton animation="wave" variant="rect" style={{ width: `100%`, height: `20px`, borderRadius: `8px`, marginBottom: `10px`, }} />
+                            </div>
+                            <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                <Skeleton animation="wave" variant="rect" style={{ width: `100%`, height: `20px`, borderRadius: `8px`, marginBottom: `10px`, }} />
+                            </div>
+                            <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                <Skeleton animation="wave" variant="rect" style={{ width: `100%`, height: `20px`, borderRadius: `8px`, marginBottom: `10px`, }} />
+                            </div>
                         </div>
                     </div>
 
@@ -116,6 +131,8 @@ function UpperSectionSkeleton() {
 
 function RealUpperSection(props) {
 
+
+    let { path } = useRouteMatch();
 
     return (
         <div>
@@ -162,34 +179,58 @@ function RealUpperSection(props) {
                     </div>
                     <div className="nav-btn-div container">
                         <div className='row nav-btn-row justify-content-center' >
-                            <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
-                                <Link style={{ textDecoration: `none` }} tag={Link}  to="/user" color="primary" onClick={(e) => ActivateLink(e)} >
-                                    <NotesIcon fontSize="small" /> <span className='btn-title'>Posts (104)</span>
-                                </Link>
-                            </div>
-                   <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
-                                <Link style={{ textDecoration: `none` }} tag={Link} to="/user/galleries" color="primary" onClick={(e) => ActivateLink(e)} >
-                                    <AppsIcon fontSize="small" /> <span className='btn-title'>Galleries (7)</span>
-                                </Link>
-                            </div>
-                            
-                                <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
-                                    <Link style={{ textDecoration: `none` }} tag={Link} to="/user" color="primary" onClick={(e) => ActivateLink(e)} >
-                                        <FaRegCommentAlt fontSize="large" /> <span className='btn-title'>Reviews (104)</span>
-                                    </Link>
-                                </div>
-                               
-                            <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
-                                <Link style={{ textDecoration: `none` }} tag={Link}  to="/user/edit" color="primary" onClick={(e) => ActivateLink(e)} >
-                                    <EditIcon fontSize="small" /> <span className='btn-title'>Edit profile</span>
-                                </Link>
-                            </div>
-                                    <div className='col-12 col-sm-6 col-md-2  col-lg-2 col-xl-2 nav-col text-center'>
-                                        <Link style={{ textDecoration: `none` }} tag={Link} to="/user/gallery/new" color="primary" onClick={(e) => ActivateLink(e)} >
-                                            <PhotoCameraIcon fontSize="small" /> <span className='btn-title'>New Gallery</span>
-                                        </Link>
-                             </div>
-                                   
+                           
+                            {
+                                !props.visitor ?
+
+                                    <>
+                                        <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile`} color="primary" onClick={(e) => ActivateLink(e)} >
+                                                <FaRegCommentAlt fontSize="large" /> <span className='btn-title'>Reviews (104)</span>
+                                            </Link>
+                                        </div>
+                                        <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile/posts`} color="primary" onClick={(e) => ActivateLink(e)} >
+                                                <NotesIcon fontSize="small" /> <span className='btn-title'>Posts (104)</span>
+                                            </Link>
+                                        </div>
+                                        <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile/galleries`} color="primary" onClick={(e) => ActivateLink(e)} >
+                                                <AppsIcon fontSize="small" /> <span className='btn-title'>Galleries (7)</span>
+                                            </Link>
+                                        </div>
+                                        <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile/details`} color="primary" onClick={(e) => ActivateLink(e)} >
+                                                <EditIcon fontSize="small" /> <span className='btn-title'>Edit profile</span>
+                                            </Link>
+                                        </div>
+                                        <div className='col-12 col-sm-6 col-md-2  col-lg-2 col-xl-2 nav-col text-center'>
+                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile/creategallery`} color="primary" onClick={(e) => ActivateLink(e)} >
+                                                <PhotoCameraIcon fontSize="small" /> <span className='btn-title'>New Gallery</span>
+                                            </Link>
+                                        </div>
+                                    </>
+
+                                    : 
+
+                                    <>
+                                        <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}`} color="primary" onClick={(e) => ActivateLink(e)} >
+                                                <FaRegCommentAlt fontSize="large" /> <span className='btn-title'>Reviews (104)</span>
+                                            </Link>
+                                        </div>
+                                        <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}/posts`} color="primary" onClick={(e) => ActivateLink(e)} >
+                                                <NotesIcon fontSize="small" /> <span className='btn-title'>Posts (104)</span>
+                                            </Link>
+                                        </div>
+                                        <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}/galleries`} color="primary" onClick={(e) => ActivateLink(e)} >
+                                                <AppsIcon fontSize="small" /> <span className='btn-title'>Galleries (7)</span>
+                                            </Link>
+                                        </div>
+                                 </>
+                            }
                         </div>
                     </div>
                   
@@ -202,46 +243,11 @@ function RealUpperSection(props) {
 export default function UpperSection(props)
 {
 
-    const user = props.user;
-    const userId = props.userId;
-
-    const [values, setValues] = React.useState({
-        userId: null,
-        profileImage: null,
-        username: null,
-        location: null,
-        description: null,
-        isGuide:false,
-        loading: true,
-    });
-
-    useMemo(async () => {
-        if (!user)
-            return;
-        var client = HttpClientFactory.getClient(user);
-        var data = await client.getdetails();
-        const timer = setTimeout(() => {
-            setValues({
-                userId: data.id,
-                profileImage: data.profileImage,
-                username: `${data.firstName} ${data.lastName}`,
-                location: `${data.city}, ${data.country}`,
-                description: data.description,
-                isGuide: data.isGuide,
-                loading: false
-            });
-
-        }, 4100);
-
-        return () => clearTimeout(timer);
-
-    }, [user]);
-
-    const content = <RealUpperSection userId={values.userId} profileImage={values.profileImage} name={values.username} location={values.location} description={values.description} isGuide={values.isGuide} />
+    const content = <RealUpperSection visitor={props.visitor} rating={props.values.rating} userId={props.values.userId} profileImage={props.values.profileImage} name={props.values.username} location={props.values.location} description={props.values.description} />;
 
         return (
-              <>
-                {values.loading ? <UpperSectionSkeleton />
+            <>
+                {props.values.loading ? <UpperSectionSkeleton />
                     : content}
             </>
         );
