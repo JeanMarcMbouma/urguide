@@ -64,7 +64,7 @@ export default class Popular extends Component {
             <Friends key={i} href={f.href} name={f.name} email={f.email} />
         ));
         let postsElement = this.state.posts.map((p, i) => (
-            <Posts key={i} href={p.authorAvatar} title={p.author} description={p.description} images={p.images} postId={p.id} />
+            <Posts key={i} post={p} />
         ));
 
 

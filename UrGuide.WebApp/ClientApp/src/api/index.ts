@@ -1691,6 +1691,48 @@ export class UsersClient {
         }
         return Promise.resolve<void>(<any>null);
     }
+
+    /**
+     * @return Error
+     */
+    info(id: string): Promise<UserInfo> {
+        let url_ = this.baseUrl + "/users/{id}/info";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processInfo(_response);
+        });
+    }
+
+    protected processInfo(response: Response): Promise<UserInfo> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = UserInfo.fromJS(resultDatadefault);
+            return resultdefault;
+            });
+        }
+    }
 }
 
 export class CatalogsClient {
@@ -3482,6 +3524,74 @@ export interface ICategoryModel {
     name?: string | undefined;
     imageUrl?: string | undefined;
     stats?: number;
+}
+
+export class UserInfo implements IUserInfo {
+    fullName?: string | undefined;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    country?: string | undefined;
+    city?: string | undefined;
+    description?: string | undefined;
+    rating?: number;
+    profileImage?: string | undefined;
+    id?: string | undefined;
+
+    constructor(data?: IUserInfo) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.fullName = _data["fullName"];
+            this.firstName = _data["firstName"];
+            this.lastName = _data["lastName"];
+            this.country = _data["country"];
+            this.city = _data["city"];
+            this.description = _data["description"];
+            this.rating = _data["rating"];
+            this.profileImage = _data["profileImage"];
+            this.id = _data["id"];
+        }
+    }
+
+    static fromJS(data: any): UserInfo {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserInfo();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["fullName"] = this.fullName;
+        data["firstName"] = this.firstName;
+        data["lastName"] = this.lastName;
+        data["country"] = this.country;
+        data["city"] = this.city;
+        data["description"] = this.description;
+        data["rating"] = this.rating;
+        data["profileImage"] = this.profileImage;
+        data["id"] = this.id;
+        return data; 
+    }
+}
+
+export interface IUserInfo {
+    fullName?: string | undefined;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    country?: string | undefined;
+    city?: string | undefined;
+    description?: string | undefined;
+    rating?: number;
+    profileImage?: string | undefined;
+    id?: string | undefined;
 }
 
 export class PostPagination implements IPostPagination {
