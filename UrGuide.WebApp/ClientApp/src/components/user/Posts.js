@@ -204,7 +204,7 @@ function FeedBacks(props) {
         if (!props)
             return;
 
-        const client = HttpClientFactory.get(UsersClient);
+        const client = HttpClientFactory.get(PostsClient, user);  
         var model = new FeedbackModel({
             text: review.review,
             rating: review.rating,
