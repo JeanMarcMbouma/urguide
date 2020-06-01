@@ -38,7 +38,7 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
-        [HttpGet("users/{userId}")]
+        [HttpGet("feedback/users/{userId}")]
         [ProducesDefaultResponseType(typeof(PagedList<AuthoredFeedback>))]
         [AllowAnonymous]
         public async Task<IActionResult> GetUserFeedback(string userId, [FromQuery][Bind(nameof(PaginationParameters.PageNumber))]PaginationParameters pagination, CancellationToken cancellationToken)
@@ -48,7 +48,7 @@ namespace UrGuide.WebApp.Controllers
         }
 
 
-        [HttpGet("posts/{postId}")]
+        [HttpGet("feedback/posts/{postId}")]
         [ProducesDefaultResponseType(typeof(PagedList<AuthoredFeedback>))]
         [AllowAnonymous]
         public async Task<IActionResult> GetPostFeedback(string postId, [FromQuery][Bind(nameof(PaginationParameters.PageNumber))]PaginationParameters pagination, CancellationToken cancellationToken)
