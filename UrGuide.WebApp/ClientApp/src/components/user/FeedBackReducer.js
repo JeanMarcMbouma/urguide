@@ -21,6 +21,17 @@
 
             break;
 
+        case "post-feedback":
+            console.log(context.userFeedback);
+            if (isTextValid) {
+                context.feedbacks.push(context.userFeedback);
+                action.data.callback(context.userFeedback);
+            }
+
+            return context;
+
+            break;
+
     }
 
     return context;
