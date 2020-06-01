@@ -1,4 +1,11 @@
-﻿export default function FeedBackReducer(state, action) {
+﻿
+function getTime() {
+    var date = new Date();
+    time = `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
+    return time;
+}
+
+export default function FeedBackReducer(state, action) {
     let context = { ...state };
     context.postId = action.data.postId;
     context.userFeedback = action.data.userFeedback;
@@ -24,7 +31,8 @@
         case "post-feedback":
             console.log(context.userFeedback);
             if (isTextValid) {
-                context.feedbacks.push(context.userFeedback);
+
+                context.feedbacks.push({ text: context.userFeedback.review, authorImage: action.data.user.profile.picture, authorFullName:action.data.user.profile.name[1], rating: context.userFeedback.rating });
                 action.data.callback(context.userFeedback);
             }
 
