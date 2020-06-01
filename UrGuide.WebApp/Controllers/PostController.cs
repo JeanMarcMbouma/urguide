@@ -34,6 +34,16 @@ namespace UrGuide.WebApp.Controllers
             var result = await _postService.GetOwnPostsAsync(pagination, cancellationToken);
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
+
+        [HttpPost("{userId}/all")]
+        [ProducesDefaultResponseType(typeof(PagedList<PostModel>))]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetUsersPosts(string userId, SearchParameters pagination, CancellationToken cancellationToken)
+        {
+            var result = await _postService.GetPostsByUserId(userId, pagination, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
+
         [HttpGet("last10")]
         [AllowAnonymous]
         [ProducesDefaultResponseType(typeof(IEnumerable<PostModel>))]

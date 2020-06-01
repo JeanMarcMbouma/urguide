@@ -543,13 +543,18 @@ Post: <strong>{post.Text}</strong></br>
             return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
         }
 
-        public async Task<Result<PagedList<PostModel>>> GetOwnPostsAsync(SearchParameters pagination, CancellationToken cancellationToken)
+        public Task<Result<PagedList<PostModel>>> GetOwnPostsAsync(SearchParameters pagination, CancellationToken cancellationToken)
+        {
+            return GetPostsByUserId(UserContext.UserId, pagination, cancellationToken);
+        }
+
+        public async Task<Result<PagedList<PostModel>>> GetPostsByUserId(string userId, SearchParameters pagination, CancellationToken cancellationToken)
         {
             var post = Context.Posts
                 .Include(x => x.Bid)
                 .ThenInclude(bid => bid.Author)
                 .ThenInclude(author => author.Attributes)
-                .Where(x => x.User.Id == UserContext.UserId);
+                .Where(x => x.User.Id == userId);
 
             var pagedResult = await PagedList.Of(post, pagination.PageNumber, p => Mapper.Map<PostModel>(PostVisitor.Visit(p, UserContext.UserId)), cancellationToken);
             return Result.Of(pagedResult);
