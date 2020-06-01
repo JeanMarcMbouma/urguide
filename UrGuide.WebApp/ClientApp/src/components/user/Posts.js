@@ -49,7 +49,7 @@ import { HttpClientFactory } from '../../httpclient';
 import "./UserStyle.css";
 import FeedBackContext from './FeedbackContext';
 import FeedBackReducer from './FeedBackReducer';
-import { UsersClient, FeedbackModel } from '../../api';
+import { UsersClient, FeedbackModel, FeedbackClient, PostsClient } from '../../api';
 
 
 function SkeletonCard() {
@@ -175,19 +175,18 @@ function FeedBacks(props) {
             await manager.signIn(window.location.href);
         return false;
     }
-    const [reviews, setReviews] = useState(MocksReviews);
+    const [data, setData] = useState({ items: [], itemsCount: 0, pageNumber: 1 });
     const ctx = useContext(FeedBackContext);
     const [state, dispatch] = useReducer(FeedBackReducer, ctx);
 
-    const [values, setValues] = useState({ review: '', rating: 1, postId:props.postId });
+    const [values, setValues] = useState({ review: '', rating: 1, postId: props.postId });
 
     useMemo(async () => {
         if (!user)
             return;
-        var client = HttpClientFactory.getClient(user);
-        var data = await client.getdetails();
-        //setFeedBacks(data);
-
+        var client = HttpClientFactory.get(FeedbackClient);
+        var result = await client.posts(props.postId, 1);
+        setData(result);
     }, [user]);
 
     //state.feedbacks = reviews;
@@ -212,7 +211,7 @@ function FeedBacks(props) {
         });
         try {
 
-            await client.feedback(review.postId, user.profile.sub, model);
+            await client.feedback(review.postId, model);
         }
         catch (e) {
             console.log(e);
@@ -266,29 +265,27 @@ function FeedBacks(props) {
             :
             null
         }
-        <br/>
-        <br/>
-        {reviews.length > 0 ? <h5> Reviews ({reviews.length})</h5> : <h5>No review</h5>}
+        {data.itemsCount > 0 ? <h5> Reviews ({data.itemsCount})</h5> : <h5>No review</h5>}
         <br />
         {
 
-            reviews.map((rev, i) => (
+            data.items.map((rev, i) => (
                 <div className='cmt-div' key={i} >
                     <CardHeader
-                        avatar={<Avatar alt={rev.author} src={rev.profilePic} />}
+                        avatar={<Avatar alt={rev.authorFullName} src={rev.authorImage} />}
                         title={
                             <h6>
-                                {rev.author}
+                                {rev.authorFullName}
                             </h6>
                         }
-                        subheader={rev.date}
+                        subheader={'18-May-2020'}
                     />
                     <Rating
                         value={rev.rating}
                         readOnly
                     />
                     <div className='comment-text'>
-                        <p>{rev.review}.</p>
+                        <p>{rev.text}.</p>
                     </div>
                 </div>))
         }
@@ -296,7 +293,7 @@ function FeedBacks(props) {
 }
 
 const MocksData = [{
-        id: "string",
+    id: "5E460866-C4EC-4822-A076-B38D37394865",
         text: "string",
     description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
         price: "$33",
