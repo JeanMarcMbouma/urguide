@@ -42,5 +42,30 @@ namespace UrGuide.Model
             result.Items = items.Select(i => map(i)).ToList();
             return result;
         }
+
+        public static PagedList<TResult> Of<T, TResult>(IEnumerable<T> queryable, int pageNumber, Func<T, TResult> map)
+        {
+            var result = new PagedList<TResult>
+            {
+                ItemsCount = queryable.Count(),
+                PageNumber = pageNumber
+            };
+            queryable = queryable.Skip((result.PageNumber - 1) * PageSize).Take(PageSize);
+            var items = queryable.ToList();
+            result.Items = items.Select(i => map(i)).ToList();
+            return result;
+        }
+
+        public static PagedList<T> Of<T>(IEnumerable<T> queryable, int pageNumber)
+        {
+            var result = new PagedList<T>
+            {
+                ItemsCount = queryable.Count(),
+                PageNumber = pageNumber
+            };
+            queryable = queryable.Skip((result.PageNumber - 1) * PageSize).Take(PageSize);
+            result.Items = queryable.ToList();
+            return result;
+        }
     }
 }

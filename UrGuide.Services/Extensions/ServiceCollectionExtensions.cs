@@ -53,7 +53,8 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<IValidator<Model.Posts.BidModel>, BidModelValidation>();
             services.AddTransient<IValidator<Model.Posts.UserReactionModel>, UserReactionModelValidator>();
             services.AddTransient<IValidator<Model.Posts.SeatReservationModel>, SeatReservationModelValidator>();
-            services.AddTransient<IValidator<Model.Posts.PostPagination>, PostPaginationValidator>();
+            services.AddTransient<IValidator<SearchParameters>, SearchParametersValidator>();
+            services.AddTransient<IValidator<PaginationParameters>, PaginationParameterValidator>();
 
             // Feedback
             services.AddTransient<IValidator<FeedbackModel>, FeedbackModelValidator>();

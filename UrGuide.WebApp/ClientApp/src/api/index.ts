@@ -825,7 +825,11 @@ export class PostsClient {
         this.baseUrl = baseUrl ? baseUrl : "";
     }
 
-    feedback(postId: string, body: FeedbackModel | undefined): Promise<void> {
+    /**
+     * @param body (optional) 
+     * @return Error
+     */
+    feedback(postId: string, body: FeedbackModel | undefined): Promise<boolean> {
         let url_ = this.baseUrl + "/posts/{postId}/feedback";
         if (postId === undefined || postId === null)
             throw new Error("The parameter 'postId' must be defined.");
@@ -839,6 +843,7 @@ export class PostsClient {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             }
         };
 
@@ -847,7 +852,7 @@ export class PostsClient {
         });
     }
 
-    protected processFeedback(response: Response): Promise<void> {
+    protected processFeedback(response: Response): Promise<boolean> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 400) {
@@ -872,19 +877,21 @@ export class PostsClient {
             return response.text().then((_responseText) => {
             return throwException("Forbidden", status, _responseText, _headers);
             });
-        } else if (status !== 200 && status !== 204) {
+        } else {
             return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = resultDatadefault !== undefined ? resultDatadefault : <any>null;
+            return resultdefault;
             });
         }
-        return Promise.resolve<void>(<any>null);
     }
 
     /**
      * @param body (optional) 
      * @return Error
      */
-    owned(body: PostPagination | undefined): Promise<PostModelPagedList> {
+    owned(body: SearchParameters | undefined): Promise<PostModelPagedList> {
         let url_ = this.baseUrl + "/posts/owned";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -1633,15 +1640,15 @@ export class UsersClient {
         this.baseUrl = baseUrl ? baseUrl : "";
     }
 
-    feedback(postId: string | undefined, userId: string, body: FeedbackModel | undefined): Promise<void> {
-        let url_ = this.baseUrl + "/users/{userId}/feedback?";
+    /**
+     * @param body (optional) 
+     * @return Error
+     */
+    feedback(userId: string, body: FeedbackModel | undefined): Promise<boolean> {
+        let url_ = this.baseUrl + "/users/{userId}/feedback";
         if (userId === undefined || userId === null)
             throw new Error("The parameter 'userId' must be defined.");
         url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
-        if (postId === null)
-            throw new Error("The parameter 'postId' cannot be null.");
-        else if (postId !== undefined)
-            url_ += "postId=" + encodeURIComponent("" + postId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -1651,6 +1658,7 @@ export class UsersClient {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             }
         };
 
@@ -1659,7 +1667,7 @@ export class UsersClient {
         });
     }
 
-    protected processFeedback(response: Response): Promise<void> {
+    protected processFeedback(response: Response): Promise<boolean> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 400) {
@@ -1684,12 +1692,14 @@ export class UsersClient {
             return response.text().then((_responseText) => {
             return throwException("Forbidden", status, _responseText, _headers);
             });
-        } else if (status !== 200 && status !== 204) {
+        } else {
             return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = resultDatadefault !== undefined ? resultDatadefault : <any>null;
+            return resultdefault;
             });
         }
-        return Promise.resolve<void>(<any>null);
     }
 
     /**
@@ -1729,6 +1739,125 @@ export class UsersClient {
             let resultdefault: any = null;
             let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             resultdefault = UserInfo.fromJS(resultDatadefault);
+            return resultdefault;
+            });
+        }
+    }
+}
+
+export class FeedbackClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl ? baseUrl : "";
+    }
+
+    /**
+     * @param pageNumber (optional) 
+     * @return Error
+     */
+    users(userId: string, pageNumber: number | undefined): Promise<AuthoredFeedbackPagedList> {
+        let url_ = this.baseUrl + "/feedback/users/{userId}?";
+        if (userId === undefined || userId === null)
+            throw new Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        if (pageNumber === null)
+            throw new Error("The parameter 'pageNumber' cannot be null.");
+        else if (pageNumber !== undefined)
+            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUsers(_response);
+        });
+    }
+
+    protected processUsers(response: Response): Promise<AuthoredFeedbackPagedList> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = AuthoredFeedbackPagedList.fromJS(resultDatadefault);
+            return resultdefault;
+            });
+        }
+    }
+
+    /**
+     * @param pageNumber (optional) 
+     * @return Error
+     */
+    posts(postId: string, pageNumber: number | undefined): Promise<AuthoredFeedbackPagedList> {
+        let url_ = this.baseUrl + "/feedback/posts/{postId}?";
+        if (postId === undefined || postId === null)
+            throw new Error("The parameter 'postId' must be defined.");
+        url_ = url_.replace("{postId}", encodeURIComponent("" + postId));
+        if (pageNumber === null)
+            throw new Error("The parameter 'pageNumber' cannot be null.");
+        else if (pageNumber !== undefined)
+            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPosts(_response);
+        });
+    }
+
+    protected processPosts(response: Response): Promise<AuthoredFeedbackPagedList> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = AuthoredFeedbackPagedList.fromJS(resultDatadefault);
             return resultdefault;
             });
         }
@@ -3278,6 +3407,110 @@ export interface IFeedbackModel {
     rating?: number;
 }
 
+export class AuthoredFeedback implements IAuthoredFeedback {
+    text?: string | undefined;
+    rating?: number;
+    authorId?: string | undefined;
+    authorImage?: string | undefined;
+    authorFullName?: string | undefined;
+
+    constructor(data?: IAuthoredFeedback) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.text = _data["text"];
+            this.rating = _data["rating"];
+            this.authorId = _data["authorId"];
+            this.authorImage = _data["authorImage"];
+            this.authorFullName = _data["authorFullName"];
+        }
+    }
+
+    static fromJS(data: any): AuthoredFeedback {
+        data = typeof data === 'object' ? data : {};
+        let result = new AuthoredFeedback();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["text"] = this.text;
+        data["rating"] = this.rating;
+        data["authorId"] = this.authorId;
+        data["authorImage"] = this.authorImage;
+        data["authorFullName"] = this.authorFullName;
+        return data; 
+    }
+}
+
+export interface IAuthoredFeedback {
+    text?: string | undefined;
+    rating?: number;
+    authorId?: string | undefined;
+    authorImage?: string | undefined;
+    authorFullName?: string | undefined;
+}
+
+export class AuthoredFeedbackPagedList implements IAuthoredFeedbackPagedList {
+    pageNumber?: number;
+    readonly itemsCount?: number;
+    readonly items?: AuthoredFeedback[] | undefined;
+
+    constructor(data?: IAuthoredFeedbackPagedList) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.pageNumber = _data["pageNumber"];
+            (<any>this).itemsCount = _data["itemsCount"];
+            if (Array.isArray(_data["items"])) {
+                (<any>this).items = [] as any;
+                for (let item of _data["items"])
+                    (<any>this).items!.push(AuthoredFeedback.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): AuthoredFeedbackPagedList {
+        data = typeof data === 'object' ? data : {};
+        let result = new AuthoredFeedbackPagedList();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["pageNumber"] = this.pageNumber;
+        data["itemsCount"] = this.itemsCount;
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IAuthoredFeedbackPagedList {
+    pageNumber?: number;
+    itemsCount?: number;
+    items?: AuthoredFeedback[] | undefined;
+}
+
 export class ImageCatalogModel implements IImageCatalogModel {
     catalogId?: string | undefined;
     name?: string | undefined;
@@ -3594,10 +3827,11 @@ export interface IUserInfo {
     id?: string | undefined;
 }
 
-export class PostPagination implements IPostPagination {
+export class SearchParameters implements ISearchParameters {
+    term?: string | undefined;
     pageNumber?: number;
 
-    constructor(data?: IPostPagination) {
+    constructor(data?: ISearchParameters) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -3608,25 +3842,28 @@ export class PostPagination implements IPostPagination {
 
     init(_data?: any) {
         if (_data) {
+            this.term = _data["term"];
             this.pageNumber = _data["pageNumber"];
         }
     }
 
-    static fromJS(data: any): PostPagination {
+    static fromJS(data: any): SearchParameters {
         data = typeof data === 'object' ? data : {};
-        let result = new PostPagination();
+        let result = new SearchParameters();
         result.init(data);
         return result;
     }
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
+        data["term"] = this.term;
         data["pageNumber"] = this.pageNumber;
         return data; 
     }
 }
 
-export interface IPostPagination {
+export interface ISearchParameters {
+    term?: string | undefined;
     pageNumber?: number;
 }
 

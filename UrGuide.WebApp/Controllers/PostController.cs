@@ -29,7 +29,7 @@ namespace UrGuide.WebApp.Controllers
         
         [HttpPost("owned")]
         [ProducesDefaultResponseType(typeof(PagedList<PostModel>))]
-        public async Task<IActionResult> GetOwn(PostPagination pagination, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetOwn(SearchParameters pagination, CancellationToken cancellationToken)
         {
             var result = await _postService.GetOwnPostsAsync(pagination, cancellationToken);
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
