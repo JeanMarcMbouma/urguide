@@ -1,6 +1,6 @@
-﻿namespace UrGuide.Model.Posts
+﻿namespace UrGuide.Model
 {
-    public class PostPagination
+    public class PaginationParameters
     {
         public int PageNumber { get; set; } = 1;
     }

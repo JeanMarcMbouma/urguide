@@ -543,7 +543,7 @@ Post: <strong>{post.Text}</strong></br>
             return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
         }
 
-        public async Task<Result<PagedList<PostModel>>> GetOwnPostsAsync(PostPagination pagination, CancellationToken cancellationToken)
+        public async Task<Result<PagedList<PostModel>>> GetOwnPostsAsync(SearchParameters pagination, CancellationToken cancellationToken)
         {
             var post = Context.Posts
                 .Include(x => x.Bid)

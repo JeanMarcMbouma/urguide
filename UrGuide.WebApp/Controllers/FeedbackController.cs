@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using UrGuide.Model;
 using UrGuide.Model.Shared;
 using UrGuide.Services.Contracts;
 using UrGuide.WebApp.Models;
@@ -22,6 +23,7 @@ namespace UrGuide.WebApp.Controllers
         public IFeedbackService FeedbackService { get; }
 
         [HttpPost("posts/{postId}/feedback")]
+        [ProducesDefaultResponseType(typeof(bool))]
         public async Task<IActionResult> PostFeedback(string postId, [FromBody]FeedbackModel feedback, CancellationToken cancellationToken)
         {
             var result = await FeedbackService.AddPostFeedbackAsync(postId, feedback, cancellationToken);
@@ -29,9 +31,29 @@ namespace UrGuide.WebApp.Controllers
         }
 
         [HttpPost("users/{userId}/feedback")]
-        public async Task<IActionResult> UserFeedback(string postId, [FromBody]FeedbackModel feedback, CancellationToken cancellationToken)
+        [ProducesDefaultResponseType(typeof(bool))]
+        public async Task<IActionResult> UserFeedback(string userId, [FromBody]FeedbackModel feedback, CancellationToken cancellationToken)
         {
-            var result = await FeedbackService.AddUserFeedbackAsync(postId, feedback, cancellationToken);
+            var result = await FeedbackService.AddUserFeedbackAsync(userId, feedback, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
+
+        [HttpGet("users/{userId}")]
+        [ProducesDefaultResponseType(typeof(PagedList<AuthoredFeedback>))]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetUserFeedback(string userId, [FromQuery][Bind(nameof(PaginationParameters.PageNumber))]PaginationParameters pagination, CancellationToken cancellationToken)
+        {
+            var result = await FeedbackService.GetUserFeedback(userId, pagination, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
+
+
+        [HttpGet("posts/{postId}")]
+        [ProducesDefaultResponseType(typeof(PagedList<AuthoredFeedback>))]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPostFeedback(string postId, [FromQuery][Bind(nameof(PaginationParameters.PageNumber))]PaginationParameters pagination, CancellationToken cancellationToken)
+        {
+            var result = await FeedbackService.GetPostFeedback(postId, pagination, cancellationToken);
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
     }
