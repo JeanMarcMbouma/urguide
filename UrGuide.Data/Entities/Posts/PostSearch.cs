@@ -9,5 +9,8 @@ namespace UrGuide.Data.Entities.Posts
         public int Rating { get; set; }
         public DateTime EndDate { get; set; }
         public Point Location { get; set; }
+        public string UserId { get; set; }
+        public string GeoLocation { get; set; }
+        public string Categories { get; set; }
     }
 }

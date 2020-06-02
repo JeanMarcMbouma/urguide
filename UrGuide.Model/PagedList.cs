@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using UrGuide.Data.Entities.Contracts;
 
 namespace UrGuide.Model
 {
@@ -66,6 +67,32 @@ namespace UrGuide.Model
             queryable = queryable.Skip((result.PageNumber - 1) * PageSize).Take(PageSize);
             result.Items = queryable.ToList();
             return result;
+        }
+
+        
+    }
+
+    public static class PagedListExtensions
+    {
+        public static PagedList<TResult> FromIdCollection<TResult>(this PagedList<string> pagedList, IQueryable<TResult> results) where TResult : IEntity
+        {
+            var ids = pagedList.Items;
+            return new PagedList<TResult>
+            {
+                Items = results.Where(f => ids.Contains(f.Id)).ToList(),
+                ItemsCount = pagedList.ItemsCount,
+                PageNumber = pagedList.PageNumber
+            };
+        }
+
+        public static PagedList<TResult> To<T, TResult>(this PagedList<T> pagedList, Func<T, TResult> map)
+        {
+            return new PagedList<TResult>
+            {
+                Items = pagedList.Items.Select(x => map(x)).ToList(),
+                ItemsCount = pagedList.ItemsCount,
+                PageNumber = pagedList.PageNumber
+            };
         }
     }
 }

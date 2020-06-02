@@ -14,6 +14,9 @@ namespace UrGuide.Data.Configurations
             builder.Property(x => x.EndDate);
             builder.Property(x => x.Location);
             builder.Property(x => x.Rating);
+            builder.Property(x => x.GeoLocation);
+            builder.Property(x => x.UserId);
+            builder.Property(x => x.Categories);
         }
     }
 }

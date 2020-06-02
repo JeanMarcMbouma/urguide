@@ -25,5 +25,6 @@ namespace UrGuide.Services.Contracts
         Task<Result<PagedList<PostModel>>> GetPostsByUserId(string userId, SearchParameters pagination, CancellationToken cancellationToken);
         Task<Result<PostModel>> GetByIdAsync(string postId, CancellationToken cancellationToken);
         Task<Result<PagedList<PostModel>>> GetOwnPostsAsync(SearchParameters pagination, CancellationToken cancellationToken);
+        Task<Result<PagedList<PostModel>>> GetPostsAsync(SearchParameters pagination, CancellationToken cancellationToken);
     }
 }
