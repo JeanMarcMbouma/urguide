@@ -3515,6 +3515,7 @@ export interface IFeedbackModel {
 export class AuthoredFeedback implements IAuthoredFeedback {
     text?: string | undefined;
     rating?: number;
+    publicationDate?: string | undefined;
     authorId?: string | undefined;
     authorImage?: string | undefined;
     authorFullName?: string | undefined;
@@ -3532,6 +3533,7 @@ export class AuthoredFeedback implements IAuthoredFeedback {
         if (_data) {
             this.text = _data["text"];
             this.rating = _data["rating"];
+            this.publicationDate = _data["publicationDate"];
             this.authorId = _data["authorId"];
             this.authorImage = _data["authorImage"];
             this.authorFullName = _data["authorFullName"];
@@ -3549,6 +3551,7 @@ export class AuthoredFeedback implements IAuthoredFeedback {
         data = typeof data === 'object' ? data : {};
         data["text"] = this.text;
         data["rating"] = this.rating;
+        data["publicationDate"] = this.publicationDate;
         data["authorId"] = this.authorId;
         data["authorImage"] = this.authorImage;
         data["authorFullName"] = this.authorFullName;
@@ -3559,6 +3562,7 @@ export class AuthoredFeedback implements IAuthoredFeedback {
 export interface IAuthoredFeedback {
     text?: string | undefined;
     rating?: number;
+    publicationDate?: string | undefined;
     authorId?: string | undefined;
     authorImage?: string | undefined;
     authorFullName?: string | undefined;
