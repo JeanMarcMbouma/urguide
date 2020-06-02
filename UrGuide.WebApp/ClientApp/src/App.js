@@ -26,6 +26,7 @@ import { ApplicationPaths } from './components/api-authorization/ApiAuthorizatio
 import LoginCallback from './components/api-authorization/LoginCallback';
 import LogoutCallback from './components/api-authorization/LogoutCallback';
 import ClientDetails from './components/user/ClientDetails';
+import { DataContextProvider } from './data/GlobalDataContext';
 
 export default class App extends Component {
     constructor(props) {
@@ -36,57 +37,60 @@ export default class App extends Component {
     render() {
 
         return (
-            <AuthContextProvider>
-                <React.StrictMode>
-                    <Switch>
-                        <Route exact path="/email-confirmed" component={EmailConfirmation} />
-                        <Route
-                            exact
-                            path="/sign-up-confirm"
-                            component={RegistrationConfirmation}
-                        />
+            <DataContextProvider>
+                <AuthContextProvider>
+                    <React.StrictMode>
+                        <Switch>
+                            <Route exact path="/email-confirmed" component={EmailConfirmation} />
+                            <Route
+                                exact
+                                path="/sign-up-confirm"
+                                component={RegistrationConfirmation}
+                            />
 
-                        <Route path="/sign-in">
-                            <LoginLayout>
-                                <Route exact path="/sign-in" component={LoginPage} />
-                            </LoginLayout>
-                        </Route>
-                        <Route path="/(sign-up|guide/sign-up|authentication/register)">
-                            <RegisterLayout>
-                                <Route exact path="/sign-up" component={ClientRegistration} />
-                                <Route
-                                    exact
-                                    path="/authentication/register"
-                                    component={ClientRegistration}
-                                />
-                                <Route
-                                    exact
-                                    path="/guide/sign-up"
-                                    component={GuideRegistration}
-                                />
-                            </RegisterLayout>
-                        </Route>
-                        <Route path="/(feed|discover|profile|account)">
-                            <Layout>
-                                <Route path="/feed" component={Home} />
-                                <Route path="/discover" component={Discover} />
-                                <AuthRoute path="/profile" component={Profile} />
-                                <AuthRoute path="/account" component={ClientDetails} />
-                            </Layout>
-                        </Route>
-                        <Route path="/g/:userId">
-                            <Layout>
-                                <Route path={`/g/:userId`} component={Guide} />
-                            </Layout>
-                        </Route>
-                        <Route path={`/post/:postId/shot/:imageId`} component={Post} />
-                        <Route path={`/gallery/:catalogId/shot/:imageId`} component={Gallery} />
-                        <Route exact path="/" render={() => <Redirect to="/feed" />} />
-                        <Route exact path={ApplicationPaths.LoginCallback} component={LoginCallback} />
-                        <Route exact path={ApplicationPaths.LogOutCallback} render={() => <Redirect to="/feed" />} />
-                    </Switch>
-                </React.StrictMode>
-            </AuthContextProvider>
+                            <Route path="/sign-in">
+                                <LoginLayout>
+                                    <Route exact path="/sign-in" component={LoginPage} />
+                                </LoginLayout>
+                            </Route>
+                            <Route path="/(sign-up|guide/sign-up|authentication/register)">
+                                <RegisterLayout>
+                                    <Route exact path="/sign-up" component={ClientRegistration} />
+                                    <Route
+                                        exact
+                                        path="/authentication/register"
+                                        component={ClientRegistration}
+                                    />
+                                    <Route
+                                        exact
+                                        path="/guide/sign-up"
+                                        component={GuideRegistration}
+                                    />
+                                </RegisterLayout>
+                            </Route>
+
+                            <Route path="/(feed|discover|profile|account)">
+                                <Layout>
+                                    <Route path="/feed" component={Home} />
+                                    <Route path="/discover" component={Discover} />
+                                    <AuthRoute path="/profile" component={Profile} />
+                                    <AuthRoute path="/account" component={ClientDetails} />
+                                </Layout>
+                            </Route>
+                            <Route path="/g/:userId">
+                                <Layout>
+                                    <Route path={`/g/:userId`} component={Guide} />
+                                </Layout>
+                            </Route>
+                            <Route path={`/post/:postId/shot/:imageId`} component={Post} />
+                            <Route path={`/gallery/:catalogId/shot/:imageId`} component={Gallery} />
+                            <Route exact path="/" render={() => <Redirect to="/feed" />} />
+                            <Route exact path={ApplicationPaths.LoginCallback} component={LoginCallback} />
+                            <Route exact path={ApplicationPaths.LogOutCallback} render={() => <Redirect to="/feed" />} />
+                        </Switch>
+                    </React.StrictMode>
+                </AuthContextProvider>
+            </DataContextProvider>
         );
     }
 }

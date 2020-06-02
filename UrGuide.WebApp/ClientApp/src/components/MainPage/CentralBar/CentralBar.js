@@ -1,5 +1,5 @@
 import React, {
-    useState, useContext, useMemo, useReducer, Component
+    useState, useContext, useMemo, useReducer, Component, useEffect
 } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { FaRegComment } from 'react-icons/fa';
@@ -77,6 +77,7 @@ import authService from '../../api-authorization/AuthService';
 import { HttpClientFactory } from '../../../httpclient';
 import { PostsClient, PostCreationModel, ImageFileCreateModel, ItineraryModel, BidModel, UserReactionModel, BidClient } from '../../../api';
 import { BlobToBase64 } from '../../../helpers/fileHelpers';
+import { useDataContext, ActionTypes } from '../../../data/GlobalDataContext';
 
 const styles = {
     root: {
@@ -468,11 +469,10 @@ export default function CentralBar() {
 
     const ctx = useContext(NewPostContext);
     const [state, dispatch] = useReducer(NewPostReducer, ctx);
-    const [posts, setPosts] = useState([]);
      const actionCtx = useContext(ActionsContext);
     const [actionsState, dispatchAction] = useReducer(ActionsReducer, actionCtx );
-   
 
+    
 
     async function handleReaction(state) {
 
@@ -502,18 +502,28 @@ export default function CentralBar() {
     };
     
     const [isLoading, setLoading] = React.useState(true);
+    const { dataContext, dcReducer, resetCallback } = useDataContext();
+    useEffect(() => {
+        var fetch = async () => {
 
-    useMemo(async () => {
-        const api = HttpClientFactory.get(PostsClient, user);
-        try {
-            var result = await api.last10();
-            setPosts(result);
-            actionsState.posts = result;
-            setLoading(false);
-        } catch (e){
-            console.log(e);
-        }
-       
+            resetCallback(user);
+
+            if (dataContext && dataContext.posts && dataContext.posts.length) {
+                actionsState.posts = dataContext.posts;
+                setLoading(false);
+                return;
+            }
+            const api = HttpClientFactory.get(PostsClient, user);
+            api.last10().then(result => {
+                actionsState.posts = result;
+                dcReducer({ type: ActionTypes.POSTS, data: result });
+            }).then(() => {
+                setLoading(false);
+            });
+
+        };
+        fetch();
+        return () => { };
     }, [user]);
 
     async function signIn(e) {

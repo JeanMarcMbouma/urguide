@@ -1,6 +1,0 @@
-F:\WORK\MboumaBiz\UrGuide\UrGuide.Auth\obj\Debug\netcoreapp3.1\UrGuide.Auth.csprojAssemblyReference.cache
-F:\WORK\MboumaBiz\UrGuide\UrGuide.Auth\obj\Debug\netcoreapp3.1\UrGuide.Auth.csproj.CoreCompileInputs.cache
-F:\WORK\MboumaBiz\UrGuide\UrGuide.Auth\obj\Debug\netcoreapp3.1\UrGuide.Auth.MvcApplicationPartsAssemblyInfo.cs
-F:\WORK\MboumaBiz\UrGuide\UrGuide.Auth\obj\Debug\netcoreapp3.1\UrGuide.Auth.MvcApplicationPartsAssemblyInfo.cache
-F:\WORK\MboumaBiz\UrGuide\UrGuide.Auth\obj\Debug\netcoreapp3.1\UrGuide.Auth.AssemblyInfoInputs.cache
-F:\WORK\MboumaBiz\UrGuide\UrGuide.Auth\obj\Debug\netcoreapp3.1\UrGuide.Auth.AssemblyInfo.cs

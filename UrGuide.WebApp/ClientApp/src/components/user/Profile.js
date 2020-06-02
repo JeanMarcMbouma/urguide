@@ -16,6 +16,7 @@ import UserContext from "./../UserContext";
 import AuthRoute from "../api-authorization/AuthRoute";
 import { useAuthUser } from "../api-authorization/AuthService";
 import { HttpClientFactory } from "../../httpclient";
+import { DataContextProvider } from "../../data/GlobalDataContext";
 
 
 
@@ -40,48 +41,48 @@ function ProfileLayout() {
             return;
         var client = HttpClientFactory.getClient(user);
         var data = await client.getdetails();
-            setValues({
-                userId: data.id,
-                profileImage: data.profileImage,
-                username: `${data.firstName} ${data.lastName}`,
-                location: `${data.city}, ${data.country}`,
-                description: data.description,
-                loading: false,
-                rating: data.rating
-            });     
-        
+        setValues({
+            userId: data.id,
+            profileImage: data.profileImage,
+            username: `${data.firstName} ${data.lastName}`,
+            location: `${data.city}, ${data.country}`,
+            description: data.description,
+            loading: false,
+            rating: data.rating
+        });
+
     }, [user]);
 
     return (
-    
-        <div className="container-fluid user-page-container">
-           <div className="row">
-                <div className="col-12">
-                    <UpperSection values={values} visitor={false} />
+        <DataContextProvider>
+            <div className="container-fluid user-page-container">
+                <div className="row">
+                    <div className="col-12">
+                        <UpperSection values={values} visitor={false} />
+                    </div>
                 </div>
+                <Switch>
+                    <Route exact path={path} >
+                        <Reviews />
+                    </Route>
+                    <Route path={`${path}/posts`}>
+                        <Posts />
+                    </Route>
+                    <Route path={`${path}/galleries`}>
+                        <Galleries />
+                    </Route>
+                    <AuthRoute path={`${path}/details`}>
+                        <EditProfile isGuide={true} />
+                    </AuthRoute>
+                    <AuthRoute path={`${path}/password`}>
+                        <ChangePassword isGuide={true} />
+                    </AuthRoute>
+                    <AuthRoute path={`${path}/creategallery`}>
+                        <CreateNewGallery />
+                    </AuthRoute>
+                </Switch>
             </div>
-            <Switch>
-                <Route exact path={path} >
-                    <Reviews />
-                </Route>
-                <Route path={`${path}/posts`}>
-                   <Posts />
-                </Route>
-                <Route path={`${path}/galleries`}>
-                    <Galleries />
-                </Route>
-                <AuthRoute path={`${path}/details`}>
-                    <EditProfile isGuide={true} />
-                </AuthRoute>
-                <AuthRoute path={`${path}/password`}>
-                    <ChangePassword isGuide={true} />
-                </AuthRoute>
-                <AuthRoute path={`${path}/creategallery`}>
-                    <CreateNewGallery />
-                </AuthRoute>
-            </Switch>
-
-            </div>
+        </DataContextProvider>
     );
 }
 
@@ -93,7 +94,7 @@ export default class Profile extends Component {
             error: null,
             isLoaded: false,
         };
-    
+
     }
 
 
