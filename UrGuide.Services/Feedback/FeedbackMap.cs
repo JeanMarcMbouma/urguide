@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using UrGuide.Model.Shared;
+using UrGuide.Services.Helpers;
 
 namespace UrGuide.Services.Feedback
 {
@@ -12,7 +13,8 @@ namespace UrGuide.Services.Feedback
                 .ForMember(x => x.AuthorId, y => y.MapFrom(x => x.Author.Id))
                 .ForMember(x => x.AuthorImage, y => y.MapFrom(x => x.Author.ProfileImage))
                 .ForMember(x => x.Text, y => y.MapFrom(x => x.Text))
-                .ForMember(x => x.Rating, y => y.MapFrom(x => x.Rating));
+                .ForMember(x => x.Rating, y => y.MapFrom(x => x.Rating))
+                .ForMember(x => x.PublicationDate, y => y.MapFrom(x => DateTimeHelper.GetDateTime(x.Created)));
         }
     }
 }

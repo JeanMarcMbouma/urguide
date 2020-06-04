@@ -1,4 +1,4 @@
-﻿import React, { Component, useMemo, useState, useContext, useReducer } from "react";
+﻿import React, { Component, useMemo, useState, useContext, useReducer, useEffect } from "react";
 import {
     Grid,
     InputLabel,
@@ -26,6 +26,7 @@ import { useAuthUser } from "../api-authorization/AuthService";
 import { UpdateGuideModel } from './../../api';
 import { HttpClientFactory } from './../../httpclient';
 import { BlobToBase64 } from "../../helpers/fileHelpers";
+import { useDataContext, ActionTypes } from "../../data/GlobalDataContext";
 
 
 function ClientProfile() {
@@ -68,19 +69,23 @@ function ClientProfile() {
 
     const ctx = useContext(EditProfileContext);
     const [state, dispatch] = useReducer(EditProfileReducer, ctx);
+    const { dataContext, dcReducer } = useDataContext();
+    useEffect(() => {
+        var fetch = async () => {
+            if (!user)
+                return;
 
-    useMemo(async () => {
-        if (!user)
-            return;
-        var client = HttpClientFactory.getClient(user);
-        var data = await client.getdetails();
-
-        setValues({
-            id: data.id,
-            firstName: data.firstName,
-            lastName: data.lastName,
-            profileImage: data.profileImage
-        });
+            if (dataContext && dataContext.profile) {
+                setValues(dataContext.profile);
+                return;
+            }
+            var client = HttpClientFactory.getClient(user);
+            var data = await client.getdetails();
+            dcReducer({ type: ActionTypes.PROFILE, data: data })
+            setValues(data);
+        };
+        fetch();
+        return () => { };
     }, [user]);
 
     const handleChangedValue = prop => event => {
@@ -229,6 +234,7 @@ function Profile() {
     });
 
     const [status, setStatus] = useState(0);
+    const { dataContext, dcReducer } = useDataContext();
 
     async function editProfile(state) {
 
@@ -252,6 +258,7 @@ function Profile() {
 
             await client.updateguide(model);
             setStatus(200);
+            dcReducer({ type: ActionTypes.PROFILE, data: null });
             return 200;
         }
         catch (e) {
@@ -266,25 +273,22 @@ function Profile() {
     const ctx = useContext(EditProfileContext);
     const [state, dispatch] = useReducer(EditProfileReducer, ctx);
 
-    useMemo(async () => {
-        if (!user)
-            return;
-        var client = HttpClientFactory.getClient(user);
-        var data = await client.getdetails();
-        // console.log(data);
-        setValues({
-            id: data.id,
-            firstName: data.firstName,
-            lastName: data.lastName,
-            birthDay: data.birthDay,
-            gender: data.gender,
-            country: data.country,
-            city: data.city,
-            phoneNumber: data.phoneNumber,
-            address: data.address,
-            description: data.description,
-            profileImage: data.profileImage
-        });
+    useEffect(() => {
+        var fetch = async () => {
+            if (!user)
+                return;
+
+            if (dataContext && dataContext.profile) {
+                setValues(dataContext.profile);
+                return;
+            }
+            var client = HttpClientFactory.getClient(user);
+            var data = await client.getdetails();
+            dcReducer({ type: ActionTypes.PROFILE, data: data });
+            setValues(data);
+        };
+        fetch();
+        return () => { };
     }, [user]);
 
     const handleChangedValue = prop => event => {
@@ -530,7 +534,6 @@ function Profile() {
 
 
 export default function EditProfile(props) {
- 
     return (
         <div className="row">
             <div className="col-12 lower-section">

@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Data;
@@ -194,7 +193,6 @@ New price: <em>{post.Bid.NewValue}</em>",
             var geo = await IPStackService.GetLocationAsync(UserContext);
             var p = await Context.Set<PostSearch>()
                 .Where(x => geo == null || x.Location == null || x.Location.Distance(geo) <= Constants.Distance)
-                .Where(x => x.EndDate > DateTime.UtcNow)
                 .OrderByDescending(x => x.PostId)
                 .Select(p => p.PostId)
                 .Skip(offset)
@@ -548,16 +546,34 @@ Post: <strong>{post.Text}</strong></br>
             return GetPostsByUserId(UserContext.UserId, pagination, cancellationToken);
         }
 
-        public async Task<Result<PagedList<PostModel>>> GetPostsByUserId(string userId, SearchParameters pagination, CancellationToken cancellationToken)
+        public Task<Result<PagedList<PostModel>>> GetPostsByUserId(string userId, SearchParameters pagination, CancellationToken cancellationToken)
         {
-            var post = Context.Posts
+            return InternalSearch(userId, pagination, cancellationToken);
+        }
+
+        private async Task<Result<PagedList<PostModel>>> InternalSearch(string userId, SearchParameters pagination, CancellationToken cancellationToken)
+        {
+            var geo = pagination.Nearby ? await IPStackService.GetLocationAsync(UserContext) : null; 
+            var postIds = await PagedList.Of(Context.Set<PostSearch>()
+                            .Where(x => pagination.Term == null || EF.Functions.Like(x.GeoLocation, $"%{pagination.Term}%"))
+                            .Where(x => pagination.Term == null || EF.Functions.Like(x.Categories, $"%{pagination.Term}%"))
+                            .Where(x => userId == null || x.UserId == userId)
+                            .Where(x => geo == null || x.Location.Distance(geo) <= Constants.Distance)
+                            .OrderByDescending(x => x.PostId)
+                            .Select(p => p.PostId), pagination.PageNumber, cancellationToken);
+
+            var pagedResult = postIds.FromIdCollection(Context.Posts
                 .Include(x => x.Bid)
                 .ThenInclude(bid => bid.Author)
-                .ThenInclude(author => author.Attributes)
-                .Where(x => x.User.Id == userId);
+                .ThenInclude(author => author.Attributes))
+                .To(p => Mapper.Map<PostModel>(PostVisitor.Visit(p, UserContext.UserId)));
 
-            var pagedResult = await PagedList.Of(post, pagination.PageNumber, p => Mapper.Map<PostModel>(PostVisitor.Visit(p, UserContext.UserId)), cancellationToken);
             return Result.Of(pagedResult);
+        }
+
+        public Task<Result<PagedList<PostModel>>> GetPostsAsync(SearchParameters pagination, CancellationToken cancellationToken)
+        {
+            return InternalSearch(null, pagination, cancellationToken);
         }
     }
 }

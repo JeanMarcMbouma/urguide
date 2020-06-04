@@ -1001,6 +1001,57 @@ export class PostsClient {
     }
 
     /**
+     * @param body (optional) 
+     * @return Error
+     */
+    search(body: SearchParameters | undefined): Promise<PostModelPagedList> {
+        let url_ = this.baseUrl + "/posts/search";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSearch(_response);
+        });
+    }
+
+    protected processSearch(response: Response): Promise<PostModelPagedList> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = PostModelPagedList.fromJS(resultDatadefault);
+            return resultdefault;
+            });
+        }
+    }
+
+    /**
      * @return Error
      */
     last10(): Promise<PostModel[]> {
@@ -3464,6 +3515,7 @@ export interface IFeedbackModel {
 export class AuthoredFeedback implements IAuthoredFeedback {
     text?: string | undefined;
     rating?: number;
+    publicationDate?: string | undefined;
     authorId?: string | undefined;
     authorImage?: string | undefined;
     authorFullName?: string | undefined;
@@ -3481,6 +3533,7 @@ export class AuthoredFeedback implements IAuthoredFeedback {
         if (_data) {
             this.text = _data["text"];
             this.rating = _data["rating"];
+            this.publicationDate = _data["publicationDate"];
             this.authorId = _data["authorId"];
             this.authorImage = _data["authorImage"];
             this.authorFullName = _data["authorFullName"];
@@ -3498,6 +3551,7 @@ export class AuthoredFeedback implements IAuthoredFeedback {
         data = typeof data === 'object' ? data : {};
         data["text"] = this.text;
         data["rating"] = this.rating;
+        data["publicationDate"] = this.publicationDate;
         data["authorId"] = this.authorId;
         data["authorImage"] = this.authorImage;
         data["authorFullName"] = this.authorFullName;
@@ -3508,6 +3562,7 @@ export class AuthoredFeedback implements IAuthoredFeedback {
 export interface IAuthoredFeedback {
     text?: string | undefined;
     rating?: number;
+    publicationDate?: string | undefined;
     authorId?: string | undefined;
     authorImage?: string | undefined;
     authorFullName?: string | undefined;
@@ -3883,6 +3938,7 @@ export interface IUserInfo {
 
 export class SearchParameters implements ISearchParameters {
     term?: string | undefined;
+    nearby?: boolean;
     pageNumber?: number;
 
     constructor(data?: ISearchParameters) {
@@ -3897,6 +3953,7 @@ export class SearchParameters implements ISearchParameters {
     init(_data?: any) {
         if (_data) {
             this.term = _data["term"];
+            this.nearby = _data["nearby"];
             this.pageNumber = _data["pageNumber"];
         }
     }
@@ -3911,6 +3968,7 @@ export class SearchParameters implements ISearchParameters {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["term"] = this.term;
+        data["nearby"] = this.nearby;
         data["pageNumber"] = this.pageNumber;
         return data; 
     }
@@ -3918,6 +3976,7 @@ export class SearchParameters implements ISearchParameters {
 
 export interface ISearchParameters {
     term?: string | undefined;
+    nearby?: boolean;
     pageNumber?: number;
 }
 
