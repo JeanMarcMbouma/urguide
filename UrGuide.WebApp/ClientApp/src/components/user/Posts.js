@@ -9,7 +9,7 @@ import { AiFillDislike } from 'react-icons/ai';
 import { AiFillLike } from 'react-icons/ai';
 import { AiOutlineStop } from 'react-icons/ai';
 import { AiOutlineCheck } from 'react-icons/ai';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import {
     Card,
     CardHeader,
@@ -49,7 +49,7 @@ import { HttpClientFactory } from '../../httpclient';
 import "./UserStyle.css";
 import FeedBackContext from './FeedbackContext';
 import FeedBackReducer from './FeedBackReducer';
-import { UsersClient, FeedbackModel, FeedbackClient, PostsClient } from '../../api';
+import { UsersClient, FeedbackModel, FeedbackClient, PostsClient, PostModelPagedList, SearchParameters } from '../../api';
 
 
 function SkeletonCard() {
@@ -75,37 +75,11 @@ function SkeletonCard() {
                             </div>
                         </div>
                     </div>
-                    <div className='col-12'>
-                        <br />
-                        <Skeleton variant="text" style={{ marginLeft: `5px`, width: `180px` }} />
-                        <br />
-                    </div>
-                    <div className='col-12'>
-                        <Skeleton variant="text" style={{ marginLeft: `5px`, width: `180px` }} />
-                        <br />
-                    </div>
-                    <div className='col-12'>
-                        <Skeleton variant="text" style={{ marginLeft: `5px`, width: `180px` }} />
-                        <br />
-                    </div>
-                    <div className='col-12'>
-                        <Skeleton variant="text" style={{ marginLeft: `5px`, width: `180px` }} />
-                        <br />
-                    </div>
                 </div>
             </CardContent>
             <CardActions className="container-fluid"  >
-                <div className='row d-flex justify-content-center' style={{ width: `100%` }}>
-                    <div className='col-3 col-lg-3 text-center'>
-                        <Skeleton variant="text" style={{ width: `100%` }} />
-                    </div>
-                    <div className='col-3 col-lg-3 text-center'>
-                        <Skeleton variant="text" style={{ width: `100%` }} />
-                    </div>
-                    <div className='col-3 col-lg-3 text-center'>
-                        <Skeleton variant="text" style={{ width: `100%` }} />
-                    </div>
-                    <div className='col-3 col-lg-3 text-center'>
+                <div className='row justify-content-center' style={{ width: `100%` }}>
+                    <div className='col-10'>
                         <Skeleton variant="text" style={{ width: `100%` }} />
                     </div>
                 </div>
@@ -170,20 +144,25 @@ function FeedBacks(props) {
             await manager.signIn(window.location.href);
         return false;
     }
-    const [data, setData] = useState({ items: [], itemsCount: 0, pageNumber: 1 });
+   // const [data, setData] = useState({ items: [], itemsCount: 0, pageNumber: 1 });
     const ctx = useContext(FeedBackContext);
     const [state, dispatch] = useReducer(FeedBackReducer, ctx);
 
     const [values, setValues] = useState({ review: '', rating: 1, postId: props.postId });
 
     useMemo(async () => {
-        if (!user)
+        if (!user || !props.show)
             return;
-        var client = HttpClientFactory.get(FeedbackClient);
-        var result = await client.posts(props.postId, 1);
-        setData(result);
-        state.feedbacks = data.items;
-        console.log(user);
+        try {
+            var client = HttpClientFactory.get(FeedbackClient);
+            var result = await client.posts(props.postId, 1);
+            //setData(result);
+            state.feedbacks = result.items;
+        }
+        catch (e) {
+            console.log(e);
+        }
+
     }, [user]);
 
 
@@ -220,12 +199,13 @@ function FeedBacks(props) {
 
 
     return (props.show && props.postId === props.showId ? <>
-
+        <br />
         {user  ? <div className='col-12 col-lg-12 new-feedback'>
             <TextField fullWidth value={values.review} multiline rows={7} onChange={handleChange("review")} rowsMax={7} id="outlined-basic" label="Your review on this tour" variant="outlined" placeholder="Did you participate to this tour ? Tell people how it was." />
             <br />
             {state.textError ? <><br /><span className='text-danger'>This field is required.</span><br /><br /></> : null}
             <div>
+                <br />
                 <span>Your experience</span>
                 <br />
                 <Rating
@@ -240,7 +220,6 @@ function FeedBacks(props) {
                 />
                 {values.rating !== null && <Box ml={0}>{labels[hover !== -1 ? hover : values.rating]}</Box>}
             </div>
-
             <br />
             {user ? <Button variant="contained" color="primary" onClick={() =>
                 dispatch({
@@ -295,20 +274,29 @@ function FeedBacks(props) {
 
 export default function Posts() {
 
+    const { userId } = useParams();
+    const { user } = useAuthContext();
+    if (userId === null && user !== null )
+    {
+        userId = user.profile.sub;
+    }
 
-    //const [data, setData] = useState({ items: [], itemsCount: 0, pageNumber: 1 });
-    //const ctx = useContext(FeedBackContext);
-    //const [state, dispatch] = useReducer(FeedBackReducer, ctx);
-
-    //const [values, setValues] = useState({ review: '', rating: 1, postId: props.postId });
-
-    //useMemo(async () => {
-    //    var client = HttpClientFactory.get(FeedbackClient);
-    //    var result = await client.posts(props.postId, 1);
-    //    setData(result);
-    //    state.feedbacks = data.items;
-    
-    //}, []);
+    const [isLoading, setLoading] = useState(true);
+    const [data, setData] = useState({});
+   
+    useMemo(async () => {
+        var client = HttpClientFactory.get(PostsClient);
+        var model = new SearchParameters({ term: "", pageNumber: 1 });
+        try {
+            var result = await client.all(userId, model);
+            setData(result);
+            setLoading(false);
+        }
+        catch (e) {
+            console.log(e);
+        }
+       
+    }, []);
 
     function PostImages(props) {
         if (props.images.length == 1) {
@@ -403,7 +391,7 @@ export default function Posts() {
 
     function SinglePost(props) {
 
-      const post = props.post;
+        const post = props.post;
 
     return (<div className="p-3 mb-3 bg-white rounded post-card">
         <div className="col-12 mt-3 row">
@@ -442,7 +430,7 @@ export default function Posts() {
         <CardActions  >
             <div className='row' style={{ width: `100%`, marginLeft:`2px` }} >
                 <div className='col-12'>
-                    <Button onClick={() => toggleReviews(post.id)} fullWidth className="btn-reviews" >Read Reviews (23)</Button>
+                    <Button onClick={() => toggleReviews(post.id)} fullWidth className="btn-reviews" >Write a review</Button>
                 </div> 
             </div>
         </CardActions>
@@ -454,14 +442,9 @@ export default function Posts() {
         <div className="row">
             <div className="col-12 lower-section">
                 <div className="col-12 col-md-6 col-lg-5 col-xl-5 timeline">
-                    {MocksData.map((post, i) => <SinglePost key={i} post={post} />)}
+                    {isLoading ? <><SkeletonCard /><SkeletonCard /></> : data.items.map((post, i) => <SinglePost key={i} post={post} />) }
                 </div>
             </div>
         </div>
     );
 }
-
-//{
-//    isLoading ? <><SkeletonCard /><SkeletonCard /></> :
-//        MocksData.map((post, i) => <SinglePost key={i} post={post} />)
-//}

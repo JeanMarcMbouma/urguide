@@ -1,7 +1,7 @@
 ﻿
 function getTime() {
     var date = new Date();
-    time = `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
+    var time = `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
     return time;
 }
 
