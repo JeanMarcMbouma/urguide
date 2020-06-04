@@ -4,6 +4,7 @@ import {
     IconButton,
     Button,
 } from "@material-ui/core";
+import { useAuthContext } from '../api-authorization/AuthService';
 import Alert from '@material-ui/lab/Alert';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { AiOutlineSetting } from 'react-icons/ai';
@@ -15,9 +16,10 @@ import { Link, useParams  } from 'react-router-dom';
 import { useAuthUser } from "../api-authorization/AuthService";
 import { HttpClientFactory } from './../../httpclient';
 import "./UserStyle.css";
-import { CatalogsClient, CreateImageCatalogModel, ImageFileCreateModel, ImagesClient, UpdateClient } from "../../api";
+import { CatalogsClient, UpdateImageCatalogModel, ImageFileCreateModel, ImagesClient, UpdateClient } from "../../api";
 import { Dropdown } from "react-bootstrap";
 import { BlobToBase64 } from "../../helpers/fileHelpers";
+import TextField from '@material-ui/core/TextField';
 
 
 const buttonStyles = makeStyles(theme => ({
@@ -102,8 +104,12 @@ function GalleryCard(props) {
             console.log(e);
         }
     }
-
+    
     const [photo, setPhoto] = useState({});
+    const [galleryInfo, setGalleryInfo] = useState({...gallery, isEditing: false});
+
+    const {user} = useAuthContext();
+    let api = HttpClientFactory.get(CatalogsClient, user);
 
     function handleChange(event) {
 
@@ -119,7 +125,25 @@ function GalleryCard(props) {
 
     }
 
+    function saveChanges() {
+        api.update(gallery.catalogId, new UpdateImageCatalogModel({
+            catalogId: gallery.catalogId,
+            name: galleryInfo.name,
+            description: galleryInfo.description
+        })).then(() => {
+            setGalleryInfo({...galleryInfo, isEditing: false});
+            setGallery({ ...gallery, name: galleryInfo.name, description: galleryInfo.description});
+            setStatus({ message: 'Saved successfully', code: 200 });
+            window.location.reload()
+        }).catch((e) => {
+            console.log(arguments);
+            setStatus({ message: 'Oops ! something went wrong.', code: 400 });
+        });
+    }
 
+    const infoChange = (prop) => (event) => {
+        setGalleryInfo({ ...galleryInfo, [prop]: event.target.value });
+      };
 
     return !gallery ? <></> : (
         <>
@@ -129,16 +153,17 @@ function GalleryCard(props) {
                 <button id='data-sender' className='input-file'  >
                 </button>
                 <div className='row justify-content-end'>
-                    {  !props.visitor  ? <div className='col-3 col-lg-1'>
+                    {  !props.visitor  ? 
+                    <div className='col-3 col-lg-1'>
                         <Dropdown>
                             <Dropdown.Toggle className='dropdown-button' >
                                 <AiOutlineSetting className='cog-icon' />
                             </Dropdown.Toggle>
 
                             <Dropdown.Menu>
-                                <Dropdown.Item onClick={e => document.getElementById('file-init').click()} ><span className='md-icon' ><MdAddAPhoto /></span> Add photo</Dropdown.Item>
-                                <Dropdown.Item><span className='md-icon'><MdModeEdit /></span>  Edit details</Dropdown.Item>
-                                <Dropdown.Item onClick={deleteGallery}><span className='md-icon' ><MdDelete /></span>  Delete gallery</Dropdown.Item>
+                                <Dropdown.Item onClick={e => document.getElementById('file-init').click()} ><span className='md-icon' ><MdAddAPhoto /></span> Add photo </Dropdown.Item>
+                                <Dropdown.Item onClick={() => {if (galleryInfo.isEditing === false) setGalleryInfo({ ...galleryInfo, isEditing: true })}} ><span className='md-icon'><MdModeEdit /></span>  Edit details </Dropdown.Item>
+                                <Dropdown.Item onClick={deleteGallery}><span className='md-icon' ><MdDelete /></span>  Delete gallery </Dropdown.Item>
                                 { gallery.files.length ? <Dropdown.Item><Link to={`/gallery/${gallery.catalogId}/shot/${gallery.files[0].id}`} ><span className='md-icon'><MdVisibility /></span>  See details</Link></Dropdown.Item> : <></>}
                                 
                             </Dropdown.Menu>
@@ -153,10 +178,20 @@ function GalleryCard(props) {
                         {status.code == 400 ? <Alert severity="error">{status.message}</Alert> : null}
                         <br />
                         <br />
-                        <h4>{props.gallery.name}</h4>
-                        <p>{props.gallery.description}</p>
+                        {galleryInfo.isEditing 
+                        ?   <form noValidate autoComplete="off">
+                                <TextField onChange={infoChange('name')} className="col-lg-7 m-3" label="Name" variant="outlined" defaultValue={props.gallery.name}/>
+                                <TextField onChange={infoChange('description')} className="col-lg-7 m-3" label="Description" variant="outlined" defaultValue={props.gallery.description}/>
+                                <Button className="col-lg-7 m-3" onClick={saveChanges} variant="contained" color="primary" type="button">Save changes</Button>
+                            </form>
+                        :   <>
+                                <h4>{props.gallery.name}</h4>
+                                <p>{props.gallery.description}</p>
+                            </>}
                     </div>
-                    {gallery.files.map((img, i) => (<div key={i} className='col-12 col-sm-6 col-md-4 col-xl-3 photo-div'>
+                    {gallery.files.map((img, i) => (
+                    <div key={i} className='col-12 col-sm-6 col-md-4 col-xl-3 photo-div'>
+                        {setGalleryInfo({...galleryInfo, catalogId: gallery.catalogId})}
                         <Link to={`/gallery/${gallery.catalogId}/shot/${img.id}`} >  <div className='photo' style={{ backgroundImage: `url(${img.imageBase64})` }}></div></Link>
                     </div>))}
                 </div>
@@ -240,7 +275,7 @@ export default function Galleries() {
             <div className="col-12 lower-section">
                 <div className='row justify-content-center'>
                     {userId != null ? <div className="col-12 col-lg-10">
-                        {model.loading ? <GallerySkeleton /> : model.galleries.map((gallery, i) => (<GalleryCard key={i} gallery={gallery} userId={userId} visitor={true} user={null}  />))}
+                        {model.loading ? <GallerySkeleton /> : model.galleries.map((gallery, i) => (<GalleryCard key={i} gallery={gallery} userId={userId} visitor={true} user={null}/>))}
                     </div> : <div className="col-12 col-lg-10">
                             {model.loading ? <GallerySkeleton /> : model.galleries.map((gallery, i) => (<GalleryCard key={i} gallery={gallery} userId={profile.sub} visitor={false} user={user} />))}
                         </div> }
