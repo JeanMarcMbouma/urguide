@@ -186,17 +186,17 @@ function RealUpperSection(props) {
                                     <>
                                         <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
                                             <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile`} color="primary" onClick={(e) => ActivateLink(e)} >
-                                                <FaRegCommentAlt fontSize="large" /> <span className='btn-title'>Reviews (104)</span>
+                                                <FaRegCommentAlt fontSize="large" /> <span className='btn-title'>Reviews</span>
                                             </Link>
                                         </div>
                                         <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
                                             <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile/posts`} color="primary" onClick={(e) => ActivateLink(e)} >
-                                                <NotesIcon fontSize="small" /> <span className='btn-title'>Posts (104)</span>
+                                                <NotesIcon fontSize="small" /> <span className='btn-title'>Posts</span>
                                             </Link>
                                         </div>
                                         <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
                                             <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile/galleries`} color="primary" onClick={(e) => ActivateLink(e)} >
-                                                <AppsIcon fontSize="small" /> <span className='btn-title'>Galleries (7)</span>
+                                                <AppsIcon fontSize="small" /> <span className='btn-title'>Galleries</span>
                                             </Link>
                                         </div>
                                         <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
@@ -216,17 +216,17 @@ function RealUpperSection(props) {
                                     <>
                                         <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
                                             <Link style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}`} color="primary" onClick={(e) => ActivateLink(e)} >
-                                                <FaRegCommentAlt fontSize="large" /> <span className='btn-title'>Reviews (104)</span>
+                                                <FaRegCommentAlt fontSize="large" /> <span className='btn-title'>Reviews</span>
                                             </Link>
                                         </div>
                                         <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
                                             <Link style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}/posts`} color="primary" onClick={(e) => ActivateLink(e)} >
-                                                <NotesIcon fontSize="small" /> <span className='btn-title'>Posts (104)</span>
+                                                <NotesIcon fontSize="small" /> <span className='btn-title'>Posts</span>
                                             </Link>
                                         </div>
                                         <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
                                             <Link style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}/galleries`} color="primary" onClick={(e) => ActivateLink(e)} >
-                                                <AppsIcon fontSize="small" /> <span className='btn-title'>Galleries (7)</span>
+                                                <AppsIcon fontSize="small" /> <span className='btn-title'>Galleries</span>
                                             </Link>
                                         </div>
                                  </>

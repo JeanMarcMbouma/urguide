@@ -69,12 +69,16 @@ export default class App extends Component {
                                 </RegisterLayout>
                             </Route>
 
-                            <Route path="/(feed|discover|profile|account)">
+                            <Route path="/(feed|profile|account)">
                                 <Layout>
                                     <Route path="/feed" component={Home} />
-                                    <Route path="/discover" component={Discover} />
                                     <AuthRoute path="/profile" component={Profile} />
                                     <AuthRoute path="/account" component={ClientDetails} />
+                                </Layout>
+                            </Route>
+                            <Route path="/discover/:cat">
+                                <Layout>
+                                    <Route path={`/discover/:cat`} component={Discover} />
                                 </Layout>
                             </Route>
                             <Route path="/g/:userId">

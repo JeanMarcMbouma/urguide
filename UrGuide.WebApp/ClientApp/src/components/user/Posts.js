@@ -290,19 +290,23 @@ export default function Posts() {
 
     const { userId } = useParams();
     const { user } = useAuthContext();
-    if (userId === null && user !== null )
-    {
-        userId = user.profile.sub;
-    }
-
+    
     const [isLoading, setLoading] = useState(true);
     const [data, setData] = useState({});
    
     useMemo(async () => {
+
+        var id = userId;
+
+        if (user != null) {
+            id = user.profile.sub;
+        }
+
+
         var client = HttpClientFactory.get(PostsClient);
-        var model = new SearchParameters({ term: "", pageNumber: 1 });
+        var model = new SearchParameters({ term: null, pageNumber: 1 });
         try {
-            var result = await client.all(userId, model);
+            var result = await client.all(id, model);
             setData(result);
             setLoading(false);
         }
@@ -431,7 +435,7 @@ export default function Posts() {
             </div>
             <div className='row'>
                 <div className='col-12' >
-                    {post.categories.map((category, i) => (<Link key={i}> <span className='category-tag'>{category}</span> </Link>))}
+                    {post.categories.map((category, i) => (<Link key={i} to={`/discover/${category}`}> <span className='category-tag'>{category}</span> </Link>))}
                     <br />
                     <br />
                 </div>

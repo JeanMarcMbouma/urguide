@@ -7,6 +7,7 @@ import {
     Typography,
     Avatar,
     CardHeader,
+    CircularProgress,
 } from "@material-ui/core";
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import ChatBubbleOutlineOutlinedIcon from '@material-ui/icons/ChatBubbleOutlineOutlined';
@@ -98,10 +99,12 @@ const mockData = [
 
 export default function Discover() {
 
+    const { cat } = useParams();
     const ctx = useContext(SearchContext);
     const [state, dispatch] = useReducer(SearchReducer, ctx);
 
     const [show, setShow] = useState(false);
+    const [isLoading, setLoading] = useState(true);
     const [suggestions, setSuggestions] = useState([]);
 
     function handleChange() {
@@ -116,33 +119,62 @@ export default function Discover() {
     useMemo(async () => {
 
         const api = HttpClientFactory.getPostClient();
-        var model = new SearchParameters({ terms: null, nearby: true, pageNumber: 1 });
-        var result = await api.search(model);
-        //console.log(result);
-        //state.data = result;
+        if (cat === "nearme") {
+
+            var model = new SearchParameters({ term: null, nearby: true, pageNumber: 1 });
+            var result = await api.search(model);
+            var items = result.items.filter(i => i.images.length > 0);
+            dispatch({
+                type: "near-me",
+                data: {
+                    itemsCount: result.itemsCount,
+                    pageNumber: result.pageNumber,
+                    items: items,
+                }
+            });
+            
+
+        }
+        else
+        {
+            var model = new SearchParameters({ term:cat, nearby: false, pageNumber: 1 });
+            var result = await api.search(model);
+            var items = result.items.filter(i => i.images.length > 0);
+            dispatch({
+                type: "search",
+                data: {
+                    itemsCount: result.itemsCount,
+                    pageNumber: result.pageNumber,
+                    items: items,
+                }
+            });
+           
+        }
+
+        setLoading(false);
+        
     }, []);
 
     
 
     async function performSearch()
     {
+        setLoading(true);
         setShow(false);
         var location = document.getElementById("search-location").value;
-
         const api = HttpClientFactory.getPostClient();
-        var model = new SearchParameters({ terms: location, nearby: false, pageNumber: 1 });
+        var model = new SearchParameters({ term: location, nearby: false, pageNumber: 1 });
         var result = await api.search(model);
-        console.log(result);
-
-       // var result = mockData.filter(rs => rs.location.match(`${location}`));
-        //result = result.slice(0, 100);
-        //console.log(location);
-        //dispatch({
-        //    type: "search",
-        //    data: {
-        //        data: result,
-        //    }
-        //});
+        var items = result.items.filter(i => i.images.length > 0);
+        dispatch({
+            type: "search",
+            data: {
+                itemsCount: result.itemsCount,
+                pageNumber: result.pageNumber,
+                items: items,
+            }
+        });
+        setLoading(false);
 
     }
 
@@ -180,29 +212,37 @@ export default function Discover() {
                 </div>
                         <div className='main'>
                             <div className='container-fluid'>
-                                <div className='row square-grid'>
-                                    {state.data.map((img, i) =>
+                        <div className='row square-grid'>
+                            {isLoading ? <div className="col-12 loading-icon"><h4 className="text-center"><CircularProgress /></h4></div> :
 
-                                        (<div key={i} className={`col-12 col-sm-6 col-md-6 col-lg-6 col-xl-4 square-grid-item`} style={{ backgroundImage: `url(${img.href})` }} >
-                                            <Link to={`${'/discover'}/${img.id}`}>
-                                                <table className="inner-container">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td valign="top">
-                                                                <div className="inner-top">
-                                                                    <CardHeader
-                                                                        avatar={<Avatar className='user-profile' alt={img.username} src={img.href} />}
-                                                                        title={<span className='guideName' >{img.username}</span>}
-                                                                        subheader={<span className='spot-location'>{img.location}</span>}
-                                                                    />
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </Link>
-                                        </div>))
-                                        }
+                             state.items.length > 0 ? 
+
+                                        state.items.map((post, i) =>
+
+                                            (<div key={i} className={`col-12 col-sm-6 col-md-6 col-lg-6 col-xl-4 square-grid-item`} style={{ backgroundImage: `url(${post.images[0].imageBase64})` }} >
+                                                <Link to={`/post/${post.id}/shot/${post.images[0].id}`}>
+                                                    <table className="inner-container">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td valign="top">
+                                                                    <div className="inner-top">
+                                                                        <Link to={`/g/${post.authorId}`}>
+                                                                            <CardHeader
+                                                                                avatar={<Avatar className='user-profile' alt={post.author} src={post.authorAvatar} />}
+                                                                                title={<span className='guideName' >{post.author}</span>}
+                                                                                subheader={<span className='spot-location'>{post.location}</span>}
+                                                                            />
+                                                                        </Link>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </Link>
+                                            </div>))
+                                        
+                                        : <div className="col-12 loading-icon"><h4 className="text-center">No content found.</h4></div>               
+                            }
                                 </div>
                             </div>
                         </div>

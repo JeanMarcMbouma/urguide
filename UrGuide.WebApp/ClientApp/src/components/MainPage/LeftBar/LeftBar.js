@@ -4,6 +4,7 @@ import Typography from '@material-ui/core/Typography';
 import Skeleton from '@material-ui/lab/Skeleton';
 import './LeftStyle.css';
 import { HttpClientFactory } from '../../../httpclient';
+import { Link } from "react-router-dom";
 import { ActionTypes, useDataContext } from '../../../data/GlobalDataContext';
 import { LookupClient } from '../../../api';
  
@@ -57,6 +58,7 @@ const LeftBar = () => {
     }, []);
 
     const content = categories.slice(0, 4).map((category, i) =>
+        <Link key={i} to={`/discover/${category.name}`}>
         <div key={i} className="col-lg-12 row w-auto p-2 mx-2 my-2 mb-4">
             <div className="col-lg-6">
                 <Avatar style={{ width: `100%`, height: `80px`, }} src={category.imageUrl} variant="rounded" />
@@ -64,8 +66,9 @@ const LeftBar = () => {
             <div className="col-lg-6">
                 <Typography variant="h6" component="p">{category.name}</Typography>
                 <Typography variant="subtitle1" color="textSecondary" component="p">{category.stats} excursions</Typography>
+                </div>
             </div>
-        </div>
+        </Link>
     );
 
     return (

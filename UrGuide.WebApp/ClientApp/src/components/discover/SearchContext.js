@@ -1,9 +1,9 @@
 ﻿import React, { createContext } from "react";
 
-var sample = new Array();
-
 const SearchContext = createContext({
-    data: sample,
+    pageNumber: 1,
+    itemsCount:0,
+    items: [],
 });
 
 export default SearchContext;

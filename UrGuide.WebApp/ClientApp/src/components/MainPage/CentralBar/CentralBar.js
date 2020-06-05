@@ -1205,7 +1205,7 @@ export default function CentralBar() {
             <CardContent>
                 <div className='row'>
                     <div className='col-12' >
-                        {post.categories.map((category, i) => (<Link key={i}> <span className='category-tag'>{category}</span> </Link>))}
+                        {post.categories.map((category, i) => (<Link key={i} to={`/discover/${category}`}> <span className='category-tag'>{category}</span> </Link>))}
                         <br />
                         <br />
                     </div>
