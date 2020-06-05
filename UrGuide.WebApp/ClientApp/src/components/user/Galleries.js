@@ -1,8 +1,6 @@
-﻿import React, {  useState, useMemo, useEffect,  } from "react";
+﻿import React, {  useState, useEffect,  } from "react";
 import {
-    makeStyles,
-    IconButton,
-    Button,
+    makeStyles
 } from "@material-ui/core";
 import Alert from '@material-ui/lab/Alert';
 import Skeleton from '@material-ui/lab/Skeleton';
@@ -15,7 +13,7 @@ import { Link, useParams  } from 'react-router-dom';
 import { useAuthUser } from "../api-authorization/AuthService";
 import { HttpClientFactory } from './../../httpclient';
 import "./UserStyle.css";
-import { CatalogsClient, CreateImageCatalogModel, ImageFileCreateModel, ImagesClient, UpdateClient } from "../../api";
+import { CatalogsClient, ImageFileCreateModel, ImagesClient, UpdateClient } from "../../api";
 import { Dropdown } from "react-bootstrap";
 import { BlobToBase64 } from "../../helpers/fileHelpers";
 
@@ -89,9 +87,11 @@ function GalleryCard(props) {
             const client = HttpClientFactory.get(UpdateClient, props.user);
 
             const model = new ImageFileCreateModel(newFile);
-            client.addimage(gallery.catalogId, model).then(function () {
-                gallery.files.push(model);
-                setStatus({ message: 'Photo succesfully added to this gallery !', code: 200 });
+            client.addimage(gallery.catalogId, model).then(function (image) {
+                let images = gallery.files.slice();
+                images.push(image);
+                setGallery({ ...gallery, files: images });
+                setStatus({ message: 'Save successfully!', code: 200 });
             }).catch(() => {
                 setStatus({ message: 'Oops ! something went wrong.', code: 400 });
             });
