@@ -1,12 +1,16 @@
 ﻿export default function SearchReducer(state, action) {
     let context = { ...state };
-   
-    context.data = action.data.data;
+
+    context.itemsCount = action.data.itemsCount;
+    context.pageNumber = action.data.pageNumber;
+    context.items = action.data.items;
     
     switch (action.type) {
         case "search":
-            console.log(context);
             return context;
+            break;
+        case "near-me":
+          return context;
             break;
     }
 

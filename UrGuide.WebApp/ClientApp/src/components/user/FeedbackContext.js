@@ -1,11 +1,9 @@
 ﻿import React, { createContext } from "react";
 
-var data = new Array();
-
 const FeedBackContext = createContext({
     postId: null,
     userFeedback:null,
-    feedbacks: data, 
+    feedbacks: [], 
     textError: false,
 });
 

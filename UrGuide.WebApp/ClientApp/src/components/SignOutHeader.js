@@ -57,7 +57,7 @@ function SignOutHeader() {
                                     </Link>
                                 </div>
                                 <div className='col-4 col-sm-2 text-center'>
-                                    <Link to="/discover"  >
+                                    <Link to="/discover/nearme"  >
                                         <IconButton>
                                             <SearchIcon fontSize="large" />
                                         </IconButton>
