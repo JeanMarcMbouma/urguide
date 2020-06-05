@@ -31,7 +31,7 @@ namespace UrGuide.Services.Media
         private readonly ImageFormatManager _formatManager = new ImageFormatManager();
         public void SaveImage(Data.Entities.Shared.Image imageFile)
         {
-            var base64String = imageFile.ImageUrl.Split(',')[1];
+            ValidateImage(imageFile, out string base64String, Constants.UnknownPostImage);
             var base64Image = Convert.FromBase64String(base64String);
             using (var image = Image.Load(base64Image))
             {
@@ -83,23 +83,34 @@ namespace UrGuide.Services.Media
 
         public string SaveAvatar(string userId, ImageFileModel imageFile = null)
         {
-            if(imageFile == null)
-            {
-                imageFile = new ImageFileModel
-                {
-                    ImageBase64 = Constants.UnknownImage
-                };
-            }
-            var base64String = imageFile.ImageBase64.Split(',')[1];
+            ValidateImage(imageFile?.ImageBase64, out string base64String);
             var base64Image = Convert.FromBase64String(base64String);
             using var image = Image.Load(base64Image);
-            using Image avatar = image.Clone(x => x.Resize(new Size(AvatarWidth, AvatarHeight), AvatarHeight/2));
+            using Image avatar = image.Clone(x => x.Resize(new Size(AvatarWidth, AvatarHeight), AvatarHeight / 2));
             string imageFileName = $"{userId}.png";
 
             EnsureImagePathExists();
             var imagePath = System.IO.Path.Combine(WebHelper.ImageDirectoryPath, imageFileName);
             avatar.Save(imagePath);
             return WebHelper.ResolveImageUrl(imageFileName);
+        }
+
+        private static void ValidateImage(string imageBase64, out string image, string defaultImage = Constants.UnknownImage)
+        {
+            var img = (imageBase64 ?? string.Empty).Split(',');
+            image = defaultImage;
+            if (img.Length > 1)
+            {
+                var b64string = img[1];
+                byte[] buffer = new byte[((b64string.Length * 3) + 3) / 4 -
+                    (b64string.Length > 0 && b64string[b64string.Length - 1] == '=' ?
+                        b64string.Length > 1 && b64string[b64string.Length - 2] == '=' ?
+                            2 : 1 : 0)];
+                if (Convert.TryFromBase64String(b64string, buffer, out int _))
+                {
+                    image = b64string;
+                }
+            }
         }
 
         public void DeleteImage(Data.Entities.Shared.Image image)
