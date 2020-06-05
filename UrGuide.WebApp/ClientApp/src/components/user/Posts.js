@@ -297,8 +297,8 @@ export default function Posts() {
     useMemo(async () => {
 
         var id = userId;
-
-        if (user != null) {
+ 
+        if (user != null && id == undefined ) {
             id = user.profile.sub;
         }
 
