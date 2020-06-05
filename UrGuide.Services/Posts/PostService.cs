@@ -555,8 +555,11 @@ Post: <strong>{post.Text}</strong></br>
         {
             var geo = pagination.Nearby ? await IPStackService.GetLocationAsync(UserContext) : null; 
             var postIds = await PagedList.Of(Context.Set<PostSearch>()
-                            .Where(x => pagination.Term == null || EF.Functions.Like(x.GeoLocation, $"%{pagination.Term}%"))
-                            .Where(x => pagination.Term == null || EF.Functions.Like(x.Categories, $"%{pagination.Term}%"))
+                            .Where(x => pagination.Term == null || 
+                            ( 
+                                EF.Functions.Like(x.GeoLocation, $"%{pagination.Term}%") || 
+                                EF.Functions.Like(x.Categories, $"%{pagination.Term}%"))
+                            )
                             .Where(x => userId == null || x.UserId == userId)
                             .Where(x => geo == null || x.Location.Distance(geo) <= Constants.Distance)
                             .OrderByDescending(x => x.PostId)
