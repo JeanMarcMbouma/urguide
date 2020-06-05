@@ -1,8 +1,6 @@
-﻿import React, {  useState, useMemo,  } from "react";
+﻿import React, {  useState, useEffect,  } from "react";
 import {
-    makeStyles,
-    IconButton,
-    Button,
+    makeStyles
 } from "@material-ui/core";
 import { useAuthContext } from '../api-authorization/AuthService';
 import Alert from '@material-ui/lab/Alert';
@@ -60,33 +58,7 @@ function GalleryCard(props) {
     }
 
     const [gallery, setGallery] = useState(props.gallery);
-
-    //async function addPhotoToGallery(state) {
-
-    //    if (!props.user) {
-    //        return;
-    //    }
-    //    const client = HttpClientFactory.get(UpdateClient, props.user);
-    //    const api = HttpClientFactory.get(CatalogsClient);
-
-    //    const model = new ImageFileCreateModel({
-    //        imageBase64: state.imageBase64,
-    //        name: state.name,
-    //    });
-
-    //    try {
-
-    //        await client.addimage(gallery.catalogId, model);
-    //        var result = await api.retrieve(gallery.catalogId);
-    //        setGallery(result);
-    //        setStatus({ message: 'photo succesfully added to this gallery !', code: 200 });
-    //    }
-    //    catch (e) {
-    //        console.log(e);
-    //        setStatus({ message: 'Oops ! something went wrong.', code: 400 });
-    //    }
-    //}
-
+    const [galleryInfo, setGalleryInfo] = useState({...gallery, isEditing: false});
 
     async function removePhotoToGallery(state) {
 
@@ -104,12 +76,8 @@ function GalleryCard(props) {
             console.log(e);
         }
     }
-    
-    const [photo, setPhoto] = useState({});
-    const [galleryInfo, setGalleryInfo] = useState({...gallery, isEditing: false});
 
-    const {user} = useAuthContext();
-    let api = HttpClientFactory.get(CatalogsClient, user);
+    const client = HttpClientFactory.get(UpdateClient, props.user);
 
     function handleChange(event) {
 
@@ -119,14 +87,23 @@ function GalleryCard(props) {
                 name: fileName,
                 imageBase64: base64Url,
             };
-            setPhoto(newFile);
-            document.getElementById('data-sender').click();
+            
+            const model = new ImageFileCreateModel(newFile);
+            client.addimage(gallery.catalogId, model).then(function (image) {
+                let images = gallery.files.slice();
+                images.push(image);
+                setGallery({ ...gallery, files: images });
+                setStatus({ message: 'Save successfully!', code: 200 });
+            }).catch(() => {
+                setStatus({ message: 'Oops ! something went wrong.', code: 400 });
+            });
         });
-
+        event.preventDefault();
+        return false;
     }
 
     function saveChanges() {
-        api.update(gallery.catalogId, new UpdateImageCatalogModel({
+        client.update(gallery.catalogId, new UpdateImageCatalogModel({
             catalogId: gallery.catalogId,
             name: galleryInfo.name,
             description: galleryInfo.description
@@ -140,6 +117,13 @@ function GalleryCard(props) {
             setStatus({ message: 'Oops ! something went wrong.', code: 400 });
         });
     }
+    const fileInit = React.createRef();
+
+    function handleAddImage(e) {
+        fileInit.current.click();
+        e.preventDefault();
+        return false;
+    }
 
     const infoChange = (prop) => (event) => {
         setGalleryInfo({ ...galleryInfo, [prop]: event.target.value });
@@ -148,7 +132,7 @@ function GalleryCard(props) {
     return !gallery ? <></> : (
         <>
             <div className="container gallery-card">
-                <input type="file" className='input-file' id='file-init' accept=".png,.jpg"
+                <input type="file" className='input-file' ref={fileInit} accept=".png,.jpg"
                     onChange={handleChange} />
                 <button id='data-sender' className='input-file'  >
                 </button>
@@ -159,13 +143,12 @@ function GalleryCard(props) {
                             <Dropdown.Toggle className='dropdown-button' >
                                 <AiOutlineSetting className='cog-icon' />
                             </Dropdown.Toggle>
-
+                            
                             <Dropdown.Menu>
-                                <Dropdown.Item onClick={e => document.getElementById('file-init').click()} ><span className='md-icon' ><MdAddAPhoto /></span> Add photo </Dropdown.Item>
+                                <Dropdown.Item onClick={handleAddImage} ><span className='md-icon' ><MdAddAPhoto /></span>Add photo</Dropdown.Item>
                                 <Dropdown.Item onClick={() => {if (galleryInfo.isEditing === false) setGalleryInfo({ ...galleryInfo, isEditing: true })}} ><span className='md-icon'><MdModeEdit /></span>  Edit details </Dropdown.Item>
-                                <Dropdown.Item onClick={deleteGallery}><span className='md-icon' ><MdDelete /></span>  Delete gallery </Dropdown.Item>
+                                <Dropdown.Item onClick={deleteGallery}><span className='md-icon' ><MdDelete /></span>  Delete gallery</Dropdown.Item>
                                 { gallery.files.length ? <Dropdown.Item><Link to={`/gallery/${gallery.catalogId}/shot/${gallery.files[0].id}`} ><span className='md-icon'><MdVisibility /></span>  See details</Link></Dropdown.Item> : <></>}
-                                
                             </Dropdown.Menu>
                         </Dropdown>
                     </div> : null }
@@ -248,25 +231,26 @@ export default function Galleries() {
 
     const [model, setModel] = useState({ galleries: [], loading: true });
 
-    useMemo(async () => {
+    useEffect(() => {
+        let fetch = async () => {
 
-        if (userId != null) {
-            let client = HttpClientFactory.get(CatalogsClient);
+            if (userId != null) {
+                let client = HttpClientFactory.get(CatalogsClient);
 
-            client.all(userId).then(catalogs => {
-                setModel({ galleries: catalogs, loading: false });
-            });
-        }
-        else
-        {
-            let client = HttpClientFactory.get(CatalogsClient);
+                client.all(userId).then(catalogs => {
+                    setModel({ galleries: catalogs, loading: false });
+                });
+            }
+            else {
+                let client = HttpClientFactory.get(CatalogsClient);
 
-            client.all(profile.sub).then(catalogs => {
-                setModel({ galleries: catalogs, loading: false });
-            });
-        }
-     
-
+                client.all(profile.sub).then(catalogs => {
+                    setModel({ galleries: catalogs, loading: false });
+                });
+            }
+        };
+        fetch();
+        return () => { };
     }, [user]);
 
 

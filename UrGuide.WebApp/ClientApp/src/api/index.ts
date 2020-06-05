@@ -2372,7 +2372,11 @@ export class UpdateClient {
         this.baseUrl = baseUrl ? baseUrl : "";
     }
 
-    addimage(catalogId: string, body: ImageFileCreateModel | undefined): Promise<void> {
+    /**
+     * @param body (optional) 
+     * @return Error
+     */
+    addimage(catalogId: string, body: ImageFileCreateModel | undefined): Promise<ImageFileModel> {
         let url_ = this.baseUrl + "/catalogs/update/{catalogId}/addimage";
         if (catalogId === undefined || catalogId === null)
             throw new Error("The parameter 'catalogId' must be defined.");
@@ -2386,6 +2390,7 @@ export class UpdateClient {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             }
         };
 
@@ -2394,7 +2399,7 @@ export class UpdateClient {
         });
     }
 
-    protected processAddimage(response: Response): Promise<void> {
+    protected processAddimage(response: Response): Promise<ImageFileModel> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 400) {
@@ -2419,12 +2424,14 @@ export class UpdateClient {
             return response.text().then((_responseText) => {
             return throwException("Forbidden", status, _responseText, _headers);
             });
-        } else if (status !== 200 && status !== 204) {
+        } else {
             return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = ImageFileModel.fromJS(resultDatadefault);
+            return resultdefault;
             });
         }
-        return Promise.resolve<void>(<any>null);
     }
 }
 
