@@ -98,7 +98,7 @@ namespace UrGuide.Services.Media
         private static void ValidateImage(string imageBase64, out string image, string defaultImage = Constants.UnknownImage)
         {
             var img = (imageBase64 ?? string.Empty).Split(',');
-            image = defaultImage;
+            image = defaultImage.Split(',')[1];
             if (img.Length > 1)
             {
                 var b64string = img[1];
