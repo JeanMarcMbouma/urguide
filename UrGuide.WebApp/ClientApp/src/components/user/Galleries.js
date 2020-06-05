@@ -1,7 +1,13 @@
-﻿import React, {  useState, useEffect,  } from "react";
+﻿import React, {  useState, useEffect, useReducer,  } from "react";
 import {
+    Grid,
+    FormHelperText,
+    InputLabel,
+    FormControl,
+    Input,
+    Container,
     makeStyles
-} from "@material-ui/core";
+  } from "@material-ui/core";
 import { useAuthContext } from '../api-authorization/AuthService';
 import Alert from '@material-ui/lab/Alert';
 import Skeleton from '@material-ui/lab/Skeleton';
@@ -14,10 +20,13 @@ import { Link, useParams  } from 'react-router-dom';
 import { useAuthUser } from "../api-authorization/AuthService";
 import { HttpClientFactory } from './../../httpclient';
 import "./UserStyle.css";
+import Button from '@material-ui/core/Button';
 import { CatalogsClient, UpdateImageCatalogModel, ImageFileCreateModel, ImagesClient, UpdateClient } from "../../api";
 import { Dropdown } from "react-bootstrap";
 import { BlobToBase64 } from "../../helpers/fileHelpers";
 import TextField from '@material-ui/core/TextField';
+import { GalleryDetails } from "./gallery/GalleryDetails";
+import GalleryReducer from "./gallery/GalleryReducer";
 
 
 const buttonStyles = makeStyles(theme => ({
@@ -58,7 +67,7 @@ function GalleryCard(props) {
     }
 
     const [gallery, setGallery] = useState(props.gallery);
-    const [galleryInfo, setGalleryInfo] = useState({...gallery, isEditing: false});
+    const [editing, setEditing] = useState(false);
 
     async function removePhotoToGallery(state) {
 
@@ -78,6 +87,7 @@ function GalleryCard(props) {
     }
 
     const client = HttpClientFactory.get(UpdateClient, props.user);
+    const galleryAPI = HttpClientFactory.get(CatalogsClient, props.user)
 
     function handleChange(event) {
 
@@ -102,32 +112,36 @@ function GalleryCard(props) {
         return false;
     }
 
-    function saveChanges() {
-        client.update(gallery.catalogId, new UpdateImageCatalogModel({
+    function saveChanges(model) {
+        galleryAPI.update(gallery.catalogId, new UpdateImageCatalogModel({
             catalogId: gallery.catalogId,
-            name: galleryInfo.name,
-            description: galleryInfo.description
+            name: model.title,
+            description: model.description
         })).then(() => {
-            setGalleryInfo({...galleryInfo, isEditing: false});
-            setGallery({ ...gallery, name: galleryInfo.name, description: galleryInfo.description});
+            setEditing(false);
+            setGallery({ ...gallery, name: model.title, description: model.description});
             setStatus({ message: 'Saved successfully', code: 200 });
-            window.location.reload()
         }).catch((e) => {
-            console.log(arguments);
             setStatus({ message: 'Oops ! something went wrong.', code: 400 });
         });
     }
     const fileInit = React.createRef();
+
+    const [state, dispatch] = useReducer(GalleryReducer, {...gallery});
+
+    function revertChanges() {
+        dispatch({
+            type: 'revert-changes',
+            data: gallery
+        });
+        setEditing(false);
+    }
 
     function handleAddImage(e) {
         fileInit.current.click();
         e.preventDefault();
         return false;
     }
-
-    const infoChange = (prop) => (event) => {
-        setGalleryInfo({ ...galleryInfo, [prop]: event.target.value });
-      };
 
     return !gallery ? <></> : (
         <>
@@ -146,7 +160,7 @@ function GalleryCard(props) {
                             
                             <Dropdown.Menu>
                                 <Dropdown.Item onClick={handleAddImage} ><span className='md-icon' ><MdAddAPhoto /></span>Add photo</Dropdown.Item>
-                                <Dropdown.Item onClick={() => {if (galleryInfo.isEditing === false) setGalleryInfo({ ...galleryInfo, isEditing: true })}} ><span className='md-icon'><MdModeEdit /></span>  Edit details </Dropdown.Item>
+                                <Dropdown.Item onClick={() => setEditing(!editing)} ><span className='md-icon'><MdModeEdit /></span>  Edit details </Dropdown.Item>
                                 <Dropdown.Item onClick={deleteGallery}><span className='md-icon' ><MdDelete /></span>  Delete gallery</Dropdown.Item>
                                 { gallery.files.length ? <Dropdown.Item><Link to={`/gallery/${gallery.catalogId}/shot/${gallery.files[0].id}`} ><span className='md-icon'><MdVisibility /></span>  See details</Link></Dropdown.Item> : <></>}
                             </Dropdown.Menu>
@@ -161,20 +175,33 @@ function GalleryCard(props) {
                         {status.code == 400 ? <Alert severity="error">{status.message}</Alert> : null}
                         <br />
                         <br />
-                        {galleryInfo.isEditing 
+                        {editing 
                         ?   <form noValidate autoComplete="off">
-                                <TextField onChange={infoChange('name')} className="col-lg-7 m-3" label="Name" variant="outlined" defaultValue={props.gallery.name}/>
-                                <TextField onChange={infoChange('description')} className="col-lg-7 m-3" label="Description" variant="outlined" defaultValue={props.gallery.description}/>
-                                <Button className="col-lg-7 m-3" onClick={saveChanges} variant="contained" color="primary" type="button">Save changes</Button>
+                                <GalleryDetails title={state.name}
+                                 description={state.description}
+                                 titleError={state.titleError}
+                                 descriptionError={state.descriptionError}
+                                 />
+                                <Button className="col-lg-2 m-3" onClick={() => dispatch({
+                                    type: 'update-gallery',
+                                    data: {
+                                        title: document.getElementById("title").value,
+                                        name: document.getElementById("title").value,
+                                        description: document.getElementById("description").value,
+                                        files: [],
+                                        callback: saveChanges
+                                    }
+                                })} variant="contained" color="primary" type="button">Save changes</Button>
+                                <Button className="col-lg-2 m-3" onClick={revertChanges} variant="contained" color="primary" type="button">Cancel</Button>
                             </form>
                         :   <>
-                                <h4>{props.gallery.name}</h4>
-                                <p>{props.gallery.description}</p>
+                                <h4>{gallery.name}</h4>
+                                <p>{gallery.description}</p>
                             </>}
                     </div>
                     {gallery.files.map((img, i) => (
                     <div key={i} className='col-12 col-sm-6 col-md-4 col-xl-3 photo-div'>
-                        {setGalleryInfo({...galleryInfo, catalogId: gallery.catalogId})}
+                        {setEditing(false)}
                         <Link to={`/gallery/${gallery.catalogId}/shot/${img.id}`} >  <div className='photo' style={{ backgroundImage: `url(${img.imageBase64})` }}></div></Link>
                     </div>))}
                 </div>
