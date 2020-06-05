@@ -51,10 +51,10 @@ namespace UrGuide.Services.Catalogs
             return Result.Of(true);
         }
 
-        public async Task<Result<bool>> AddImageToCatalogAsync(string catalogId, ImageFileCreateModel imageFile, CancellationToken cancellationToken)
+        public async Task<Result<ImageFileModel>> AddImageToCatalogAsync(string catalogId, ImageFileCreateModel imageFile, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
-                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
+                return Result.Of<ImageFileModel>().WithErrors(ErrorMessages.NotAuthenticated);
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -63,7 +63,7 @@ namespace UrGuide.Services.Catalogs
                 .Where(x => x.User.Id == UserContext.UserId)
                 .FirstOrDefaultAsync(x => x.Id == catalogId, cancellationToken);
             if (catalog == null)
-                return Result.Of(false).WithErrors("Catalog doesn't exists");
+                return Result.Of<ImageFileModel>().WithErrors("Catalog doesn't exists");
 
             var newImage = new Image
             {
@@ -80,7 +80,7 @@ namespace UrGuide.Services.Catalogs
             ImageService.SaveImage(newImage);
 
             await Context.SaveChangesAsync(cancellationToken);
-            return Result.Of(true);
+            return Result.Of(Mapper.Map<ImageFileModel>(newImage));
         }
 
         public async Task<Result<ImageCatalogModel>> CreateCatalogAsync(CreateImageCatalogModel catalogModel, CancellationToken cancellationToken)
