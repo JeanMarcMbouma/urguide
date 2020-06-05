@@ -120,7 +120,8 @@ function GalleryCard(props) {
     }
 
 
-    return (
+
+    return !gallery ? <></> : (
         <>
             <div className="container gallery-card">
                 <input type="file" className='input-file' id='file-init' accept=".png,.jpg"
@@ -128,7 +129,7 @@ function GalleryCard(props) {
                 <button id='data-sender' className='input-file'  >
                 </button>
                 <div className='row justify-content-end'>
-                    {  !props.visitor ? <div className='col-3 col-lg-1'>
+                    {  !props.visitor  ? <div className='col-3 col-lg-1'>
                         <Dropdown>
                             <Dropdown.Toggle className='dropdown-button' >
                                 <AiOutlineSetting className='cog-icon' />
@@ -138,7 +139,8 @@ function GalleryCard(props) {
                                 <Dropdown.Item onClick={e => document.getElementById('file-init').click()} ><span className='md-icon' ><MdAddAPhoto /></span> Add photo</Dropdown.Item>
                                 <Dropdown.Item><span className='md-icon'><MdModeEdit /></span>  Edit details</Dropdown.Item>
                                 <Dropdown.Item onClick={deleteGallery}><span className='md-icon' ><MdDelete /></span>  Delete gallery</Dropdown.Item>
-                                <Dropdown.Item><Link to={`/gallery/${gallery.catalogId}/shot/${gallery.files[0].id}`} ><span className='md-icon'><MdVisibility /></span>  See details</Link></Dropdown.Item>
+                                { gallery.files.length ? <Dropdown.Item><Link to={`/gallery/${gallery.catalogId}/shot/${gallery.files[0].id}`} ><span className='md-icon'><MdVisibility /></span>  See details</Link></Dropdown.Item> : <></>}
+                                
                             </Dropdown.Menu>
                         </Dropdown>
                     </div> : null }
