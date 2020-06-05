@@ -10,7 +10,7 @@
     let hasNoFiles = context.files.length === 0 ? true : false;
     let isDescriptionGotProperLength =
         description.length > 100 && description.length < 500 ? true : false;
-   
+
 
     switch (action.type) {
         case "create-gallery":
@@ -19,17 +19,11 @@
             context.descriptionError =
                 isDescriptionGotProperLength ? false : true;
 
-            if (context.titleError ||  context.descriptionError || hasNoFiles)
-            {
-                
+            if (context.titleError || context.descriptionError || hasNoFiles) {
                 return context;
             }
-            else
-            {
-
-
+            else {
                 action.data.callback(context);
-
                 return context;
             }
 
@@ -37,15 +31,14 @@
 
         case "validate-files":
 
-            if (context.currentFile != null && context.files.length < 9 ) {
+            if (context.currentFile != null && context.files.length < 9) {
 
                 context.files.push(context.currentFile);
             }
             if (context.files.length === 9) {
                 context.emptyGalleryMessage = "You can only upload up to 9 photos or videos !";
             }
-            else
-            {
+            else {
                 context.emptyGalleryMessage = '';
             }
 
@@ -55,20 +48,32 @@
 
         case "remove-file":
 
-            
+
             if (context.files.length === 1) {
                 context.files.splice(0, 1);
             }
 
-            else
-            {
+            else {
                 context.files.splice(context.idToRemove, 1);
-            } 
+            }
 
             return context;
 
             break;
+        case "update-gallery":
+            context.titleError = context.name.length > 0 ? false : true;
+            context.descriptionError = isDescriptionGotProperLength ? false : true;
+            context.name = context.title;
+            if (context.titleError || context.descriptionError) {
 
+                return context;
+            }
+            else {
+                action.data.callback(context);
+                return context;
+            }
+        case 'revert-changes':
+            return action.data;
     }
 
     return context;

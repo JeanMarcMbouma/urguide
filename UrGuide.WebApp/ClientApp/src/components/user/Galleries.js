@@ -1,7 +1,14 @@
-﻿import React, {  useState, useEffect,  } from "react";
+﻿import React, {  useState, useEffect, useReducer,  } from "react";
 import {
+    Grid,
+    FormHelperText,
+    InputLabel,
+    FormControl,
+    Input,
+    Container,
     makeStyles
-} from "@material-ui/core";
+  } from "@material-ui/core";
+import { useAuthContext } from '../api-authorization/AuthService';
 import Alert from '@material-ui/lab/Alert';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { AiOutlineSetting } from 'react-icons/ai';
@@ -13,9 +20,13 @@ import { Link, useParams  } from 'react-router-dom';
 import { useAuthUser } from "../api-authorization/AuthService";
 import { HttpClientFactory } from './../../httpclient';
 import "./UserStyle.css";
-import { CatalogsClient, ImageFileCreateModel, ImagesClient, UpdateClient } from "../../api";
+import Button from '@material-ui/core/Button';
+import { CatalogsClient, UpdateImageCatalogModel, ImageFileCreateModel, ImagesClient, UpdateClient } from "../../api";
 import { Dropdown } from "react-bootstrap";
 import { BlobToBase64 } from "../../helpers/fileHelpers";
+import TextField from '@material-ui/core/TextField';
+import { GalleryDetails } from "./gallery/GalleryDetails";
+import GalleryReducer from "./gallery/GalleryReducer";
 
 
 const buttonStyles = makeStyles(theme => ({
@@ -56,7 +67,7 @@ function GalleryCard(props) {
     }
 
     const [gallery, setGallery] = useState(props.gallery);
-
+    const [editing, setEditing] = useState(false);
 
     async function removePhotoToGallery(state) {
 
@@ -75,6 +86,9 @@ function GalleryCard(props) {
         }
     }
 
+    const client = HttpClientFactory.get(UpdateClient, props.user);
+    const galleryAPI = HttpClientFactory.get(CatalogsClient, props.user)
+
     function handleChange(event) {
 
         const blob = event.target.files[0];
@@ -84,8 +98,6 @@ function GalleryCard(props) {
                 imageBase64: base64Url,
             };
             
-            const client = HttpClientFactory.get(UpdateClient, props.user);
-
             const model = new ImageFileCreateModel(newFile);
             client.addimage(gallery.catalogId, model).then(function (image) {
                 let images = gallery.files.slice();
@@ -100,14 +112,36 @@ function GalleryCard(props) {
         return false;
     }
 
+    function saveChanges(model) {
+        galleryAPI.update(gallery.catalogId, new UpdateImageCatalogModel({
+            catalogId: gallery.catalogId,
+            name: model.title,
+            description: model.description
+        })).then(() => {
+            setEditing(false);
+            setGallery({ ...gallery, name: model.title, description: model.description});
+            setStatus({ message: 'Saved successfully', code: 200 });
+        }).catch((e) => {
+            setStatus({ message: 'Oops ! something went wrong.', code: 400 });
+        });
+    }
     const fileInit = React.createRef();
+
+    const [state, dispatch] = useReducer(GalleryReducer, {...gallery});
+
+    function revertChanges() {
+        dispatch({
+            type: 'revert-changes',
+            data: gallery
+        });
+        setEditing(false);
+    }
 
     function handleAddImage(e) {
         fileInit.current.click();
         e.preventDefault();
         return false;
     }
-
 
     return !gallery ? <></> : (
         <>
@@ -117,7 +151,8 @@ function GalleryCard(props) {
                 <button id='data-sender' className='input-file'  >
                 </button>
                 <div className='row justify-content-end'>
-                    {  !props.visitor  ? <div className='col-3 col-lg-1'>
+                    {  !props.visitor  ? 
+                    <div className='col-3 col-lg-1'>
                         <Dropdown>
                             <Dropdown.Toggle className='dropdown-button' >
                                 <AiOutlineSetting className='cog-icon' />
@@ -125,10 +160,9 @@ function GalleryCard(props) {
                             
                             <Dropdown.Menu>
                                 <Dropdown.Item onClick={handleAddImage} ><span className='md-icon' ><MdAddAPhoto /></span>Add photo</Dropdown.Item>
-                                <Dropdown.Item><span className='md-icon'><MdModeEdit /></span>  Edit details</Dropdown.Item>
+                                <Dropdown.Item onClick={() => setEditing(!editing)} ><span className='md-icon'><MdModeEdit /></span>  Edit details </Dropdown.Item>
                                 <Dropdown.Item onClick={deleteGallery}><span className='md-icon' ><MdDelete /></span>  Delete gallery</Dropdown.Item>
                                 { gallery.files.length ? <Dropdown.Item><Link to={`/gallery/${gallery.catalogId}/shot/${gallery.files[0].id}`} ><span className='md-icon'><MdVisibility /></span>  See details</Link></Dropdown.Item> : <></>}
-                                
                             </Dropdown.Menu>
                         </Dropdown>
                     </div> : null }
@@ -141,10 +175,33 @@ function GalleryCard(props) {
                         {status.code == 400 ? <Alert severity="error">{status.message}</Alert> : null}
                         <br />
                         <br />
-                        <h4>{props.gallery.name}</h4>
-                        <p>{props.gallery.description}</p>
+                        {editing 
+                        ?   <form noValidate autoComplete="off">
+                                <GalleryDetails title={state.name}
+                                 description={state.description}
+                                 titleError={state.titleError}
+                                 descriptionError={state.descriptionError}
+                                 />
+                                <Button className="col-lg-2 m-3" onClick={() => dispatch({
+                                    type: 'update-gallery',
+                                    data: {
+                                        title: document.getElementById("title").value,
+                                        name: document.getElementById("title").value,
+                                        description: document.getElementById("description").value,
+                                        files: [],
+                                        callback: saveChanges
+                                    }
+                                })} variant="contained" color="primary" type="button">Save changes</Button>
+                                <Button className="col-lg-2 m-3" onClick={revertChanges} variant="contained" color="primary" type="button">Cancel</Button>
+                            </form>
+                        :   <>
+                                <h4>{gallery.name}</h4>
+                                <p>{gallery.description}</p>
+                            </>}
                     </div>
-                    {gallery.files.map((img, i) => (<div key={i} className='col-12 col-sm-6 col-md-4 col-xl-3 photo-div'>
+                    {gallery.files.map((img, i) => (
+                    <div key={i} className='col-12 col-sm-6 col-md-4 col-xl-3 photo-div'>
+                        {setEditing(false)}
                         <Link to={`/gallery/${gallery.catalogId}/shot/${img.id}`} >  <div className='photo' style={{ backgroundImage: `url(${img.imageBase64})` }}></div></Link>
                     </div>))}
                 </div>
@@ -229,7 +286,7 @@ export default function Galleries() {
             <div className="col-12 lower-section">
                 <div className='row justify-content-center'>
                     {userId != null ? <div className="col-12 col-lg-10">
-                        {model.loading ? <GallerySkeleton /> : model.galleries.map((gallery, i) => (<GalleryCard key={i} gallery={gallery} userId={userId} visitor={true} user={null}  />))}
+                        {model.loading ? <GallerySkeleton /> : model.galleries.map((gallery, i) => (<GalleryCard key={i} gallery={gallery} userId={userId} visitor={true} user={null}/>))}
                     </div> : <div className="col-12 col-lg-10">
                             {model.loading ? <GallerySkeleton /> : model.galleries.map((gallery, i) => (<GalleryCard key={i} gallery={gallery} userId={profile.sub} visitor={false} user={user} />))}
                         </div> }
