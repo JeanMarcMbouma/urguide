@@ -1,8 +1,6 @@
-﻿import React, {  useState, useMemo,  } from "react";
+﻿import React, {  useState, useEffect,  } from "react";
 import {
-    makeStyles,
-    IconButton,
-    Button,
+    makeStyles
 } from "@material-ui/core";
 import Alert from '@material-ui/lab/Alert';
 import Skeleton from '@material-ui/lab/Skeleton';
@@ -15,7 +13,7 @@ import { Link, useParams  } from 'react-router-dom';
 import { useAuthUser } from "../api-authorization/AuthService";
 import { HttpClientFactory } from './../../httpclient';
 import "./UserStyle.css";
-import { CatalogsClient, CreateImageCatalogModel, ImageFileCreateModel, ImagesClient, UpdateClient } from "../../api";
+import { CatalogsClient, ImageFileCreateModel, ImagesClient, UpdateClient } from "../../api";
 import { Dropdown } from "react-bootstrap";
 import { BlobToBase64 } from "../../helpers/fileHelpers";
 
@@ -59,32 +57,6 @@ function GalleryCard(props) {
 
     const [gallery, setGallery] = useState(props.gallery);
 
-    //async function addPhotoToGallery(state) {
-
-    //    if (!props.user) {
-    //        return;
-    //    }
-    //    const client = HttpClientFactory.get(UpdateClient, props.user);
-    //    const api = HttpClientFactory.get(CatalogsClient);
-
-    //    const model = new ImageFileCreateModel({
-    //        imageBase64: state.imageBase64,
-    //        name: state.name,
-    //    });
-
-    //    try {
-
-    //        await client.addimage(gallery.catalogId, model);
-    //        var result = await api.retrieve(gallery.catalogId);
-    //        setGallery(result);
-    //        setStatus({ message: 'photo succesfully added to this gallery !', code: 200 });
-    //    }
-    //    catch (e) {
-    //        console.log(e);
-    //        setStatus({ message: 'Oops ! something went wrong.', code: 400 });
-    //    }
-    //}
-
 
     async function removePhotoToGallery(state) {
 
@@ -103,8 +75,6 @@ function GalleryCard(props) {
         }
     }
 
-    const [photo, setPhoto] = useState({});
-
     function handleChange(event) {
 
         const blob = event.target.files[0];
@@ -113,18 +83,36 @@ function GalleryCard(props) {
                 name: fileName,
                 imageBase64: base64Url,
             };
-            setPhoto(newFile);
-            document.getElementById('data-sender').click();
-        });
+            
+            const client = HttpClientFactory.get(UpdateClient, props.user);
 
+            const model = new ImageFileCreateModel(newFile);
+            client.addimage(gallery.catalogId, model).then(function (image) {
+                let images = gallery.files.slice();
+                images.push(image);
+                setGallery({ ...gallery, files: images });
+                setStatus({ message: 'Save successfully!', code: 200 });
+            }).catch(() => {
+                setStatus({ message: 'Oops ! something went wrong.', code: 400 });
+            });
+        });
+        event.preventDefault();
+        return false;
     }
 
+    const fileInit = React.createRef();
+
+    function handleAddImage(e) {
+        fileInit.current.click();
+        e.preventDefault();
+        return false;
+    }
 
 
     return !gallery ? <></> : (
         <>
             <div className="container gallery-card">
-                <input type="file" className='input-file' id='file-init' accept=".png,.jpg"
+                <input type="file" className='input-file' ref={fileInit} accept=".png,.jpg"
                     onChange={handleChange} />
                 <button id='data-sender' className='input-file'  >
                 </button>
@@ -134,9 +122,9 @@ function GalleryCard(props) {
                             <Dropdown.Toggle className='dropdown-button' >
                                 <AiOutlineSetting className='cog-icon' />
                             </Dropdown.Toggle>
-
+                            
                             <Dropdown.Menu>
-                                <Dropdown.Item onClick={e => document.getElementById('file-init').click()} ><span className='md-icon' ><MdAddAPhoto /></span> Add photo</Dropdown.Item>
+                                <Dropdown.Item onClick={handleAddImage} ><span className='md-icon' ><MdAddAPhoto /></span>Add photo</Dropdown.Item>
                                 <Dropdown.Item><span className='md-icon'><MdModeEdit /></span>  Edit details</Dropdown.Item>
                                 <Dropdown.Item onClick={deleteGallery}><span className='md-icon' ><MdDelete /></span>  Delete gallery</Dropdown.Item>
                                 { gallery.files.length ? <Dropdown.Item><Link to={`/gallery/${gallery.catalogId}/shot/${gallery.files[0].id}`} ><span className='md-icon'><MdVisibility /></span>  See details</Link></Dropdown.Item> : <></>}
@@ -213,25 +201,26 @@ export default function Galleries() {
 
     const [model, setModel] = useState({ galleries: [], loading: true });
 
-    useMemo(async () => {
+    useEffect(() => {
+        let fetch = async () => {
 
-        if (userId != null) {
-            let client = HttpClientFactory.get(CatalogsClient);
+            if (userId != null) {
+                let client = HttpClientFactory.get(CatalogsClient);
 
-            client.all(userId).then(catalogs => {
-                setModel({ galleries: catalogs, loading: false });
-            });
-        }
-        else
-        {
-            let client = HttpClientFactory.get(CatalogsClient);
+                client.all(userId).then(catalogs => {
+                    setModel({ galleries: catalogs, loading: false });
+                });
+            }
+            else {
+                let client = HttpClientFactory.get(CatalogsClient);
 
-            client.all(profile.sub).then(catalogs => {
-                setModel({ galleries: catalogs, loading: false });
-            });
-        }
-     
-
+                client.all(profile.sub).then(catalogs => {
+                    setModel({ galleries: catalogs, loading: false });
+                });
+            }
+        };
+        fetch();
+        return () => { };
     }, [user]);
 
 

@@ -86,12 +86,13 @@ namespace UrGuide.WebApp.Controllers
         }
 
         [HttpPut("update/{catalogId}/addimage")]
+        [ProducesDefaultResponseType(typeof(ImageFileModel))]
         public async Task<IActionResult> AddImage(string catalogId, [FromBody]ImageFileCreateModel imageFile, CancellationToken cancellationToken)
         {
             var result = await CatalogService.AddImageToCatalogAsync(catalogId, imageFile, cancellationToken);
             if (result.HasError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
-            return await GetById(catalogId, cancellationToken);
+            return Ok(result.Data);
         }
 
         // POST: api/Galleries
