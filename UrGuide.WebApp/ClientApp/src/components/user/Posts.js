@@ -10,6 +10,7 @@ import { AiFillLike } from 'react-icons/ai';
 import { AiOutlineStop } from 'react-icons/ai';
 import { AiOutlineCheck } from 'react-icons/ai';
 import { Link, useParams } from 'react-router-dom';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import {
     Card,
     CardHeader,
@@ -18,6 +19,7 @@ import {
     Avatar,
     IconButton,
     InputLabel,
+    CircularProgress,
     Input,
     FormControl,
     InputAdornment,
@@ -144,26 +146,23 @@ function FeedBacks(props) {
             await manager.signIn(window.location.href);
         return false;
     }
-   // const [data, setData] = useState({ items: [], itemsCount: 0, pageNumber: 1 });
+    const [isLoading, setLoading] = useState(true);
+    const [pageNumber, setPageNumber] = useState(1);
     const ctx = useContext(FeedBackContext);
     const [state, dispatch] = useReducer(FeedBackReducer, ctx);
 
     const [values, setValues] = useState({ review: '', rating: 1, postId: props.postId });
 
     useMemo(async () => {
-        if (!user || !props.show)
-            return;
-        try {
-            var client = HttpClientFactory.get(FeedbackClient);
-            var result = await client.posts(props.postId, 1);
-            //setData(result);
-            state.feedbacks = result.items;
+        if (props.show === true) {
+                var client = HttpClientFactory.get(FeedbackClient);
+            var result = await client.posts(props.showId, 1);
+            setPageNumber(result.pageNumber);
+                setLoading(false);
+                state.feedbacks = result.items;
         }
-        catch (e) {
-            console.log(e);
-        }
-
-    }, [user]);
+  
+    },[]);
 
 
     const handleChange = prop => event => {
@@ -200,72 +199,87 @@ function FeedBacks(props) {
 
     return (props.show && props.postId === props.showId ? <>
         <br />
-        {user  ? <div className='col-12 col-lg-12 new-feedback'>
-            <TextField fullWidth value={values.review} multiline rows={7} onChange={handleChange("review")} rowsMax={7} id="outlined-basic" label="Your review on this tour" variant="outlined" placeholder="Did you participate to this tour ? Tell people how it was." />
-            <br />
-            {state.textError ? <><br /><span className='text-danger'>This field is required.</span><br /><br /></> : null}
-            <div>
+        {isLoading ? <h4 className='text-center'><CircularProgress /></h4> : <>
+            {user && user.profile.sub === props.authorId ? null : <div className='col-12 col-lg-12 new-feedback'>
+                <TextField fullWidth value={values.review} multiline rows={7} onChange={handleChange("review")} rowsMax={7} id="outlined-basic" label="Your review on this tour" variant="outlined" placeholder="Did you participate to this tour ? Tell people how it was." />
                 <br />
-                <span>Your experience</span>
-                <br />
-                <Rating
-                    name="hover-feedback"
-                    value={values.rating}
-                    onChange={(event, newValue) => {
-                        handleRating(newValue);
-                    }}
-                    onChangeActive={(event, newHover) => {
-                        setHover(newHover);
-                    }}
-                />
-                {values.rating !== null && <Box ml={0}>{labels[hover !== -1 ? hover : values.rating]}</Box>}
-            </div>
-            <br />
-            {user ? <Button variant="contained" color="primary" onClick={() =>
-                dispatch({
-                    type: "post-feedback",
-                    data: {
-                        userFeedback: values,
-                        feedbacks: state.feedbacks,
-                        callback: createReview,
-                        user:user,
-                    }
-                })
-            }>submit review</Button>
-
-                : <Button variant="contained" color="primary" onClick={signIn}>submit review</Button>
-            }
-            <br />
-            <br />
-        </div>
-
-            :
-            null
-        }
-        {state.feedbacks.length > 0 ? <h5> Reviews ({state.feedbacks.length})</h5> : <h5>No review</h5>}
-        <br />
-        {
-
-            state.feedbacks.map((rev, i) => (
-                <div className='cmt-div' key={i} >
-                    <CardHeader
-                        avatar={<Avatar alt={rev.authorFullName} src={rev.authorImage} />}
-                        title={
-                            <h6>
-                                {rev.authorFullName}
-                            </h6>
-                        }
-                        subheader={'18-May-2020'}
-                    />
+                {state.textError ? <><br /><span className='text-danger'>This field is required.</span><br /><br /></> : null}
+                <div>
+                    <br />
+                    <span>Your experience</span>
+                    <br />
                     <Rating
-                        value={rev.rating}
-                        readOnly
+                        name="hover-feedback"
+                        value={values.rating}
+                        onChange={(event, newValue) => {
+                            handleRating(newValue);
+                        }}
+                        onChangeActive={(event, newHover) => {
+                            setHover(newHover);
+                        }}
                     />
-                    <div className='comment-text'>
-                        <p>{rev.text}</p>
-                    </div>
-                </div>))
-        }
+                    {values.rating !== null && <Box ml={0}>{labels[hover !== -1 ? hover : values.rating]}</Box>}
+                </div>
+                <br />
+                {user ? <Button variant="contained" color="primary" onClick={() =>
+                    dispatch({
+                        type: "post-feedback",
+                        data: {
+                            userFeedback: values,
+                            feedbacks: state.feedbacks,
+                            callback: createReview,
+                            user: user,
+                        }
+                    })
+                }>submit review</Button>
+
+                    : <Button variant="contained" color="primary" onClick={signIn}>submit review</Button>
+                }
+                <br />
+                <br />
+            </div>}
+
+            {state.feedbacks.length > 0 ? <h5> Reviews ({state.feedbacks.length})</h5> : <h5>No review yet.</h5> }
+<br />
+            {
+                state.feedbacks.map((rev, i) => (
+        <div className='cmt-div' key={i} >
+            <CardHeader
+                avatar={<Avatar alt={rev.authorFullName} src={rev.authorImage} />}
+                title={
+                    <h6>
+                        {rev.authorFullName}
+                    </h6>
+                }
+               subheader={rev.publicationDate}
+            />
+            <Rating
+                value={rev.rating}
+                readOnly
+            />
+            <div className='comment-text'>
+                <p>{rev.text}</p>
+            </div>
+                    </div>))
+            }<br /> <h4 className='text-center'><IconButton onClick={ async () => {
+
+                if(props.show === true) {
+                    var client = HttpClientFactory.get(FeedbackClient);
+                    var page = pageNumber + 1;
+                    var result = await client.posts(props.showId, page);
+                    //console.log(result.pageNumber);
+                setPageNumber(result.pageNumber);
+                setLoading(false);
+                    result.items.forEach((item, index) => { state.feedbacks.push(item) });
+            dispatch({
+                    type: "more-feedbacks",
+                data: {
+                    userFeedback:values,
+                    feedbacks: state.feedbacks,
+            }
+        });
+    }
+    }} ><AddCircleOutlineIcon fontSize="large" /></IconButton></h4></>}
     </> : null);
 }
 
@@ -430,11 +444,11 @@ export default function Posts() {
         <CardActions  >
             <div className='row' style={{ width: `100%`, marginLeft:`2px` }} >
                 <div className='col-12'>
-                    <Button onClick={() => toggleReviews(post.id)} fullWidth className="btn-reviews" >Write a review</Button>
+                    <Button onClick={() => toggleReviews(post.id)} fullWidth className="btn-reviews" >Reviews</Button>
                 </div> 
             </div>
         </CardActions>
-        <FeedBacks show={showReviews.show} showId={showReviews.id} postId={post.id} />
+        <FeedBacks show={showReviews.show} showId={showReviews.id} postId={post.id} authorId={post.authorId} />
     </div>);
     }
 

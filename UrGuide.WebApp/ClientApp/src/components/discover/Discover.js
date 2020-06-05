@@ -1,4 +1,4 @@
-﻿import React, { Component, useState, useContext, useReducer } from "react";
+﻿import React, { Component, useState, useContext, useReducer, useMemo } from "react";
 import {
     makeStyles,
     IconButton,
@@ -27,6 +27,9 @@ import Post from "../post/Post";
 import "./DiscoverStyle.css";
 import SearchContext from "./SearchContext";
 import SearchReducer from "./SearchReducer";
+import { HttpClientFactory } from "../../httpclient";
+import { URLSearchParams } from "url";
+import { SearchParameters } from "../../api";
 
 
 const mockData = [
@@ -109,19 +112,37 @@ export default function Discover() {
         setSuggestions(result);
     }
 
-    function performSearch()
+
+    useMemo(async () => {
+
+        const api = HttpClientFactory.getPostClient();
+        var model = new SearchParameters({ terms: null, nearby: true, pageNumber: 1 });
+        var result = await api.search(model);
+        //console.log(result);
+        //state.data = result;
+    }, []);
+
+    
+
+    async function performSearch()
     {
         setShow(false);
         var location = document.getElementById("search-location").value;
-        var result = mockData.filter(rs => rs.location.match(`${location}`));
-        result = result.slice(0, 100);
-        console.log(location);
-        dispatch({
-            type: "search",
-            data: {
-                data: result,
-            }
-        });
+
+        const api = HttpClientFactory.getPostClient();
+        var model = new SearchParameters({ terms: location, nearby: false, pageNumber: 1 });
+        var result = await api.search(model);
+        console.log(result);
+
+       // var result = mockData.filter(rs => rs.location.match(`${location}`));
+        //result = result.slice(0, 100);
+        //console.log(location);
+        //dispatch({
+        //    type: "search",
+        //    data: {
+        //        data: result,
+        //    }
+        //});
 
     }
 
@@ -137,7 +158,7 @@ export default function Discover() {
                     <div className='row justify-content-center'>
                         <div className='col-12 col-sm-8 col-md-8 col-lg-4'>
                             <div className="search-container">
-                                <input type="text" placeholder="Where are you going ?" id="search-location" onChange={handleChange} onBlur={() => setShow(false)} className="searchbar" />
+                                <input type="text" placeholder="Where are you going ?" autoComplete="off" id="search-location" onChange={handleChange} onBlur={() => setShow(false)} className="searchbar" />
                                 <img src="https://images-na.ssl-images-amazon.com/images/I/41gYkruZM2L.png" onClick={() => performSearch()} alt="Magnifying Glass" className="button-search" />
                             </div>
                             {show ? <div className="search-suggestions">

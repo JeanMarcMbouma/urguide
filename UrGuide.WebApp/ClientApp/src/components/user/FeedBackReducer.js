@@ -1,7 +1,7 @@
 ﻿
 function getTime() {
     var date = new Date();
-    var time = `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
+    var time = `${date.getDate()}-${date.getMonth()}-${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
     return time;
 }
 
@@ -11,15 +11,21 @@ export default function FeedBackReducer(state, action) {
     context.userFeedback = action.data.userFeedback;
     context.feedbacks = action.data.feedbacks;
     var text = String(context.userFeedback.review);
-    let isTextValid  =
-        text.length > 4 && text.length < 500 ? true : false;
-    context.textError = isTextValid ? false : true;
 
     switch (action.type) {
 
+        case "more-feedbacks":
+
+            return context;
+
+            break;
+
         case "user-feedback":
-            console.log(context.userFeedback);
-            if (isTextValid) {
+            let isTextValidUser =
+                text.length > 4 && text.length < 500 ? true : false;
+            context.textError = isTextValidUser ? false : true;
+            //console.log(context.userFeedback);
+            if (isTextValidUser) {
                 context.feedbacks.push(context.userFeedback);
                 action.data.callback(context.userFeedback);
             }
@@ -29,16 +35,20 @@ export default function FeedBackReducer(state, action) {
             break;
 
         case "post-feedback":
-            console.log(context.userFeedback);
-            if (isTextValid) {
+            let isTextValidPost =
+                text.length > 4 && text.length < 500 ? true : false;
+            context.textError = isTextValidPost ? false : true;
+            //console.log(context.userFeedback);
+            if (isTextValidPost) {
 
-                context.feedbacks.push({ text: context.userFeedback.review, authorImage: action.data.user.profile.picture, authorFullName:action.data.user.profile.name[1], rating: context.userFeedback.rating });
+                context.feedbacks.unshift({ text: context.userFeedback.review, authorImage: action.data.user.profile.picture, authorFullName: action.data.user.profile.name[1], rating: context.userFeedback.rating, publicationDate:"Just now." });
                 action.data.callback(context.userFeedback);
             }
 
             return context;
 
             break;
+      
 
     }
 
