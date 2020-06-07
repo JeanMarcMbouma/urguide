@@ -23,7 +23,7 @@
             break;
 
         case "create-post":
-            context.text = "Some Dummy Text !";
+            context.text = action.data.text;
             context.description = action.data.description;
             context.geoLocation = action.data.geoLocation;
             context.date = action.data.date;
@@ -38,8 +38,8 @@
             context.bidOptIn = action.data.bidOptIn;
             context.priceRange = `$${context.unitPrice[0]} - $${context.unitPrice[1]}`;
 
-            console.log(context);
-            if (context.description.length >= 10 && context.geoLocation.length >= 4)
+            //console.log(context);
+            if (context.text.length > 4 && context.description.length >= 10 && context.geoLocation.length >= 4)
             {
                 action.data.callback(context);
             }

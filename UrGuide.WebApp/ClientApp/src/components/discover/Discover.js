@@ -33,69 +33,6 @@ import { URLSearchParams } from "url";
 import { SearchParameters } from "../../api";
 
 
-const mockData = [
-
-    {
-        id: 4,
-        username: "Nadia Maya",
-        href: "https://r-cf.bstatic.com/images/hotel/max1024x768/221/221741543.jpg",
-        location: "Saint-Marthe Beach, French Polinesia",
-        galleryId: 1000
-    },
-    {
-        id: 5,
-        username: "Kim Xinhuan",
-        href: "https://i.pinimg.com/originals/29/81/94/29819463f7826507d015c57846d8a3f6.jpg",
-        location: "Pekin, China",
-        galleryId: 1001,
-    },
-    {
-        id: 6,
-        username: "Ipeleng Zuma",
-        href: "https://www.travelanddestinations.com/wp-content/uploads/2019/06/Cape-Town-South-Africa.jpg",
-        location: "Cape Town Marina,South Africa",
-        galleryId: 1002,
-    },
-    {
-        id: 2,
-        username: "Stacy Riley",
-        href: "https://www.intrepidtravel.com/adventures/wp-content/uploads/2017/05/FU8A0260-88x450.jpg",
-        location: "Lyon, France",
-        galleryId: 1003,
-    },
-    {
-        id: 7,
-        username: "Guillaume Leroux",
-        href: "https://www.lelongweekend.com/wp-content/uploads/2018/07/N75_4248-1024x684.jpg",
-        location: "Lyon, France",
-        galleryId: 1004,
-    },
-    {
-        id: 8,
-        username: "Rodigro Suarez",
-        href: "https://holeinthedonut.smugmug.com/DailyPhotos/HITD-Daily-Photos/i-DJm4q39/0/L/Spain-Sevilla-Street-Scene-Night-L.jpg",
-        location: "Sevilla Streets, Spain",
-        galleryId: 1005,
-    },
-    {
-        id: 3,
-        username: "J. Samira",
-        href: "https://assets.simpleviewcms.com/simpleview/image/upload/c_limit,h_1200,q_75,w_1200/v1/clients/norway/3e0981da_3280_49d6_b879_353fe2d8c8f9_d707ed6d-2954-49db-9755-f0fbd5e08144.jpg",
-        location: "Fjords Islands, Norway",
-        galleryId: 1006,
-    },
-    {
-        id: 1,
-        username: "John Doe",
-        href: "https://ca-times.brightspotcdn.com/dims4/default/3ebc245/2147483647/strip/true/crop/5767x3708+0+0/resize/1486x955!/quality/90/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2Fed%2F60%2F4ae8532445e3aaea0a3cc73c2729%2Fgettyimages-1209052296.jpg",
-        location: "Lyon, France",
-        galleryId: 1007,
-    },
-
-
-]
-
-
 
 export default function Discover() {
 

@@ -9,7 +9,9 @@ import { AiFillDislike } from 'react-icons/ai';
 import { AiFillLike } from 'react-icons/ai';
 import { AiOutlineStop } from 'react-icons/ai';
 import { AiOutlineCheck } from 'react-icons/ai';
+import { BsSearch } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
+import cities from "../../discover/Cities";
 import {
     Card,
     CardHeader,
@@ -96,6 +98,12 @@ const styles = {
         padding: '0 30px',
     },
 };
+
+
+
+function sendString(value) {
+    document.getElementById("search-location").value = value;
+}
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -547,7 +555,7 @@ export default function CentralBar() {
 
     function ViewPost() {
 
- 
+       
 
         async function createNewPost(state) {
 
@@ -624,22 +632,49 @@ export default function CentralBar() {
             return Time;
         }
 
+        function handleTitle(event) {
+            setPostInfos({ ...infos, ['text']: event.target.value });
+
+            if (infos.text.length > 4 && infos.description.length >= 10 && infos.geoLocation.length >= 4) {
+                setBtnEnabled(true);
+            }
+
+        }
+
         function handleDescription(event) {
             setPostInfos({ ...infos, ['description']: event.target.value });
           
-            if (infos.description.length >= 10 && infos.geoLocation.length >= 4)
+            if (infos.text.length > 4 && infos.description.length >= 10 && infos.geoLocation.length >= 4)
             {
                 setBtnEnabled(true);
             }
        
         }
 
-        function handleGeoLocation(event){
-            setPostInfos({ ...infos, ['geoLocation']: event.target.value });
-     
-            if (infos.description.length >= 10 && infos.geoLocation.length >= 4) {
+
+        const [showSuggestions, setShowSuggestions] = useState(false);
+        const [suggestions, setSuggestions] = useState([]);
+        function sendString(value) {
+            setPostInfos({ ...infos, ['geoLocation']: value });
+            if (infos.text.length > 4 && infos.description.length >= 10 && infos.geoLocation.length >= 4) {
                 setBtnEnabled(true);
             }
+        }
+
+
+        function handleGeoLocation(event){
+            setPostInfos({ ...infos, ['geoLocation']: event.target.value });
+
+            setShowSuggestions(true);
+            var search = document.getElementById("new-post-location").value;
+            var result = cities.filter(city => city.match(`${search}`));
+            result = result.slice(0, 5);
+            setSuggestions(result);
+           
+            if (infos.text.length > 4 && infos.description.length >= 10 && infos.geoLocation.length >= 4) {
+                setBtnEnabled(true);
+            }
+          
         
         }
 
@@ -763,12 +798,10 @@ export default function CentralBar() {
                     </div>
 
                     <div className="col-lg-12 my-2 post-config-div">
-                        <br />
-                        <br />
                         <Grid item xs={12} >
                             <br />
                             <br />
-                            <h6>1. Add places you'll be visiting on this tour.</h6>
+                            <h6>1. Add places you will be visiting on this tour to your itinerary.</h6>
                             <br />
                             <br />
                             <FormControl fullWidth className={classes.margin}>
@@ -816,7 +849,7 @@ export default function CentralBar() {
                             <CreateItinerary itineraries={state.itineraries} />
                         </Grid>
                        
-                        <h6>2. Add max 4 pictures of places you'll be visiting.</h6>
+                        <h6>2. Add max 4 pictures of places you will be visiting.</h6>
                         <br />
                         <br />
                         <Grid item xs={12}>
@@ -871,7 +904,20 @@ export default function CentralBar() {
                     <div className="col-12">
                         <br />
                         <br />
-                        <h6>3. Add some informations about the tour.</h6>
+                        <h6>3. Add some informations about this tour.</h6>
+                        <br />
+                        <br />
+                        <FormControl fullWidth className={classes.margin}>
+                            <InputLabel htmlFor="title">Title</InputLabel>
+                            <Input
+                                id="title"
+                                type="text"
+                                value={infos.text}
+                                onChange={(e) => handleTitle(e)}
+
+
+                            />
+                        </FormControl>
                         <br />
                         <br />
                         <textarea className='form-control post-textarea' placeholder="Here you can write a post !" id="new-post-description"
@@ -892,13 +938,28 @@ export default function CentralBar() {
                                         type="text"
                                         value={infos.geoLocation}
                                         onChange={(e) => handleGeoLocation(e)}
-                                    
+                                        autoComplete="off"
+                                        onBlur={() => setShowSuggestions(false)}
                                         endAdornment={<InputAdornment position="end">
                                             <LocationOnIcon />
                                         </InputAdornment>}
 
                                     />
                                 </FormControl>
+                                {showSuggestions ? <div className="search-suggestions">
+                                    <div className="container-fluid">
+                                        <div className="row">
+                                            {suggestions.length > 0 ?
+                                                suggestions.map((suggestion, i) => (
+                                                    <div className="col-12 suggestion-line" onMouseOver={() => sendString(suggestion)} key={i}>
+                                                        <BsSearch className="suggestion-icon" /> <span className="suggestion-text">{suggestion}</span>
+                                                    </div>))
+                                                : <div className="col-12 suggestion-line" >
+                                                    <AiOutlineStop className="suggestion-icon" />  <span className="suggestion-text-not-found">No location found.</span>
+                                                </div>}
+                                        </div>
+                                    </div>
+                                </div> : null}
                             </Grid>
                             <Grid item xs={12} sm={6} >
                                 <MuiPickersUtilsProvider utils={MomentUtils}>
@@ -1032,6 +1093,7 @@ export default function CentralBar() {
                                 dispatch({
                                     type: "create-post",
                                     data: {
+                                        text:infos.text,
                                         description: infos.description,
                                         geoLocation: infos.geoLocation,
                                         date:infos.date,

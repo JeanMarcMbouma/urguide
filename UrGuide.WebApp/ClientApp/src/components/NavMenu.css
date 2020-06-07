@@ -47,7 +47,7 @@ button:focus {
     position: fixed;
     top: 0;
     width: 100%;
-    z-index:6;
+    z-index:80;
 }
 
 .navbarRow {
