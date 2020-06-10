@@ -16,6 +16,9 @@ import { Step1 } from "./Step1";
 import { Step2 } from "./Step2";
 import { Step3 } from "./Step3";
 import "./GuideRegistration.css";
+import { HttpClientFactory } from "../../httpclient";
+import { CreateGuideModel, Client } from "../../api";
+import { BlobToBase64 } from "../../helpers/fileHelpers";
 
 function Copyright() {
   return (
@@ -184,47 +187,29 @@ const navigateToReturnUrl = (returnUrl) => {
 
 
 const createGuide = async function (state) {
-
     const date = state.birthday;
     const birthday = date.toString();
-    const returnUrl = getReturnUrl() + "sign-in";
-    const response = await fetch(`/newguide?returnUrl=${returnUrl}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
+    const returnUrl = getReturnUrl();
+    const api = HttpClientFactory.get(Client);
+    BlobToBase64(state.picture, (filename, base64Url, blobUrl) => {
+        api.newguide(returnUrl, new CreateGuideModel({
             email: state.email,
-            password: state.password,
-            confirmPassword: state.confirmPassword,
-            firstName: state.firstName,
-            lastName: state.lastName,
-            birthday: birthday,
-            profile: URL.createObjectURL(state.picture),
-            gender: state.gender,
-            country: state.country,
-            city: state.city,
             address: state.address,
-            phone: state.phone,
+            birthDay: birthday,
+            city: sate.city,
+            confirmPassword: state.confirmPassword,
+            country: state.country,
             description: state.description,
-            isguide:true,
-
-        })
+            firstName: state.firstName,
+            gender: state.gender,
+            lastName: state.lastName,
+            password: state.password,
+            phone: state.phone,
+            profileImage: base64Url
+        })).then(() => {
+            navigateToReturnUrl(`${window.location.origin}/sign-up-confirm`);
+        });
     });
-
-    if (response.status == 200 || response.status == 304) {
-        navigateToReturnUrl(`${ window.location.origin }/sign-up-confirm`);
-    } else {
-        // we got an error
-        if (response.status == 400) // BadRequest
-        {
-            var errors = await response.json();
-            console.log(errors);
-        } else {
-            // Account has certainly been locked-out
-        }
-    }
 }
 
 
