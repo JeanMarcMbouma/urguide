@@ -12,7 +12,6 @@ var __assign = (this && this.__assign) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var api_1 = require("../api");
-var signalR = require("@microsoft/signalr");
 var originalFetch = fetch;
 var Http = /** @class */ (function () {
     function Http(user) {
@@ -52,17 +51,4 @@ var HttpClientFactory = /** @class */ (function () {
     return HttpClientFactory;
 }());
 exports.HttpClientFactory = HttpClientFactory;
-var SignalRClient = /** @class */ (function () {
-    function SignalRClient() {
-    }
-    SignalRClient.get = function (callback) {
-        var connection = new signalR.HubConnectionBuilder().withUrl("/notify").build();
-        connection.on("notify", function (userId, message) {
-            callback === null || callback === void 0 ? void 0 : callback.call(userId, message);
-        });
-        return connection.start();
-    };
-    return SignalRClient;
-}());
-exports.SignalRClient = SignalRClient;
 //# sourceMappingURL=index.js.map

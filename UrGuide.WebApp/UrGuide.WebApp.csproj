@@ -51,6 +51,7 @@
     <None Remove="ClientApp\src\components\user\profile\ChangePasswordReducer.ts" />
     <None Remove="ClientApp\src\components\user\profile\EditProfileReducer.js" />
     <None Remove="ClientApp\src\helpers\fileHelpers.ts" />
+    <None Remove="ClientApp\src\hub\index.ts" />
   </ItemGroup>
 
   <ItemGroup>
@@ -71,6 +72,7 @@
     <TypeScriptCompile Include="ClientApp\src\httpclient\index.ts" />
     <TypeScriptCompile Include="ClientApp\src\components\api-authorization\AuthService.js" />
     <TypeScriptCompile Include="ClientApp\src\components\login\LoginReducer.ts" />
+    <TypeScriptCompile Include="ClientApp\src\hub\index.ts" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

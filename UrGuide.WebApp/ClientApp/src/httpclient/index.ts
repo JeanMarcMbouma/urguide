@@ -1,6 +1,5 @@
 ﻿import { User } from 'oidc-client'
 import { PostsClient, CatalogsClient, AccountClient, Client, LookupClient, Notification } from '../api';
-import * as signalR from "@microsoft/signalr";
 
 const originalFetch = fetch;
 
@@ -52,17 +51,5 @@ export class HttpClientFactory {
 
     static get<T>(type: (new(baseUrl?: string, http?: IHttp) => T), user?: User) : T {
         return new type("", new Http(user));
-    }
-}
-
-export class SignalRClient {
-    static get(callback: (userId: string, message: Notification) => any): Promise<void> {
-        var connection = new signalR.HubConnectionBuilder().withUrl("/notify").build();
-
-        connection.on("notify", (userId: string, message: Notification) => {
-            callback?.call(userId, message);
-        });
-
-        return connection.start();
     }
 }

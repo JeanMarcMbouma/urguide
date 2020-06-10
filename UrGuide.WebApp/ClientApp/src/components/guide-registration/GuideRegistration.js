@@ -196,7 +196,7 @@ const createGuide = async function (state) {
             email: state.email,
             address: state.address,
             birthDay: birthday,
-            city: sate.city,
+            city: state.city,
             confirmPassword: state.confirmPassword,
             country: state.country,
             description: state.description,
