@@ -43,7 +43,7 @@ namespace UrGuide.Services.Users
             if (!UserContext.IsAuthenticated)
                 return Result.Of<PagedList<Model.Users.Notification>>().WithErrors(ErrorMessages.NotAuthenticated);
             var user = await Context.Users.FirstAsync(x => x.Id == UserContext.UserId, cancellationToken);
-            var items = await PagedList.Of(user.Notifications.OrderByDescending(x => x.Created).AsQueryable(), pagination.PageNumber, n => Mapper.Map<Model.Users.Notification>(n), cancellationToken);
+            var items = PagedList.Of(user.Notifications.OrderByDescending(x => x.Created), pagination.PageNumber, n => Mapper.Map<Model.Users.Notification>(n));
             return Result.Of(items);
         }
 
@@ -52,7 +52,7 @@ namespace UrGuide.Services.Users
             if (!UserContext.IsAuthenticated)
                 return Result.Of<PagedList<Model.Users.Notification>>().WithErrors(ErrorMessages.NotAuthenticated);
             var user = await Context.Users.FirstAsync(x => x.Id == UserContext.UserId, cancellationToken);
-            var items = await PagedList.Of(user.Notifications.Where(m => !m.Read).OrderByDescending(x => x.Created).AsQueryable(), pagination.PageNumber, n => Mapper.Map<Model.Users.Notification>(n), cancellationToken);
+            var items = PagedList.Of(user.Notifications.Where(m => !m.Read).OrderByDescending(x => x.Created), pagination.PageNumber, n => Mapper.Map<Model.Users.Notification>(n));
             return Result.Of(items);
         }
 

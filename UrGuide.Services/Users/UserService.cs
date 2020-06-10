@@ -13,6 +13,8 @@ using UrGuide.Shared;
 using UrGuide.Shared.Contracts;
 using UrGuide.Services.Extensions;
 using Microsoft.EntityFrameworkCore;
+using MediatR;
+using UrGuide.Services.Auditing.Command;
 
 namespace UrGuide.Services.Users
 {
@@ -26,7 +28,8 @@ namespace UrGuide.Services.Users
             IEmailService emailService,
             IWebHelper webHelper,
             IIPStackService iPStackService,
-            IImageService imageService)
+            IImageService imageService,
+            IMediator mediator)
         {
             Context = context ?? throw new System.ArgumentNullException(nameof(context));
             UserContext = userContext ?? throw new System.ArgumentNullException(nameof(userContext));
@@ -37,6 +40,7 @@ namespace UrGuide.Services.Users
             WebHelper = webHelper ?? throw new System.ArgumentNullException(nameof(webHelper));
             IPStackService = iPStackService ?? throw new System.ArgumentNullException(nameof(iPStackService));
             ImageService = imageService ?? throw new System.ArgumentNullException(nameof(imageService));
+            Mediator = mediator ?? throw new System.ArgumentNullException(nameof(mediator));
         }
 
         public UrGuideContext Context { get; }
@@ -48,6 +52,7 @@ namespace UrGuide.Services.Users
         public IWebHelper WebHelper { get; }
         public IIPStackService IPStackService { get; }
         public IImageService ImageService { get; }
+        public IMediator Mediator { get; }
 
         public async Task<Result<bool>> DeleteUserAccountAsync(CancellationToken cancellationToken)
         {
@@ -60,6 +65,7 @@ namespace UrGuide.Services.Users
             {
                 var user = await Context.Users.FindAsync(new { UserContext.UserId }, cancellationToken);
                 Context.Users.Remove(user);
+                await Mediator.Send(new UserDeleteAccountCommand(UserContext.UserId));
                 return Result.Of(true);
             }
             catch (System.Exception e)
@@ -86,6 +92,7 @@ namespace UrGuide.Services.Users
             if(user == null)
                 return Result.Of<User>().WithErrors("Invalid login attempt.");
             user.LastActivityDate = System.DateTime.UtcNow;
+            await Mediator.Send(new UserLoggedInCommand(user.Id));
             return Result.Of(Mapper.Map<User>(user));
         }
 
