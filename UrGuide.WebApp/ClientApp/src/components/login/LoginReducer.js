@@ -48,6 +48,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var api_1 = require("./../../api");
+var httpclient_1 = require("./../../httpclient");
+var AuthService_1 = require("../api-authorization/AuthService");
 var navigateToReturnUrl = function (returnUrl) {
     window.location.replace(returnUrl);
 };
@@ -58,7 +60,7 @@ function login(state) {
             switch (_a.label) {
                 case 0:
                     returnUrl = state.returnUrl;
-                    client = new api_1.Client();
+                    client = httpclient_1.HttpClientFactory.getClient();
                     loginModel = new api_1.LoginModel({
                         userName: state.email,
                         password: state.password,
@@ -66,17 +68,19 @@ function login(state) {
                     });
                     _a.label = 1;
                 case 1:
-                    _a.trys.push([1, 3, , 4]);
+                    _a.trys.push([1, 4, , 5]);
                     return [4 /*yield*/, client.login(returnUrl, loginModel)];
                 case 2:
                     _a.sent();
-                    navigateToReturnUrl(returnUrl);
-                    return [2 /*return*/, null];
+                    return [4 /*yield*/, AuthService_1.default.completeSignIn(returnUrl)];
                 case 3:
+                    _a.sent();
+                    return [3 /*break*/, 5];
+                case 4:
                     e_1 = _a.sent();
                     state.LoginFailed = e_1.message;
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
+                    return [3 /*break*/, 5];
+                case 5: return [2 /*return*/];
             }
         });
     });
@@ -97,6 +101,7 @@ function LoginReducer(state, action) {
             context.passwordError = validpassword ? false : true;
             context.passwordErrorMessage = context.passwordError ? "your password must contains minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character." : '';
             if (validEmail && validpassword) {
+                // action.data.callback(context);
                 login(context);
             }
             return context;
