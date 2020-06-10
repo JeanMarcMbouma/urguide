@@ -22,15 +22,18 @@ namespace UrGuide.Services.Feedback
         public FeedbackService(UrGuideContext context,
                                IEmailService emailService,
                                IUserContext userContext,
-                               IMapper mapper)
+                               IMapper mapper,
+                               IUserNotificationService notificationService)
             : base(context, userContext)
         {
             EmailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            NotificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
         }
 
         public IEmailService EmailService { get; }
         public IMapper Mapper { get; }
+        public IUserNotificationService NotificationService { get; }
 
         public async Task<Result<bool>> AddPostFeedbackAsync(string postId, FeedbackModel feedback, CancellationToken cancellationToken)
         {
@@ -82,19 +85,21 @@ namespace UrGuide.Services.Feedback
                 Text = feedback.Text
             });
 
-            await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
-            {
-                Content = $@"
+            string content = $@"
 Hi, {postAuthorFirstName}!
 You've got a new feedback from {authorFirstName}
 
 {feedback.Text}
 ...
-Rating: {feedback.Rating} star(s).",
+Rating: {feedback.Rating} star(s).";
+            await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+            {
+                Content = content,
                 Subject = $"{post.Text} - New feedback",
                 ToName = postAuthorFirstName,
                 To = postAuthorEmail
             }) ;
+            await NotificationService.SystemNotifyAsync(author.Id, content, null);
             await Context.SaveChangesAsync(cancellationToken);
             return Result.Of(true);
         }
@@ -139,19 +144,21 @@ Rating: {feedback.Rating} star(s).",
                 Text = feedback.Text
             });
 
-            await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
-            {
-                Content = $@"
+            string content = $@"
 Hi, {userFirstName}!
 You've got a new feedback from {authorFirstName}
 
 {feedback.Text}
 ...
-Rating: {feedback.Rating} star(s).",
+Rating: {feedback.Rating} star(s).";
+            await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+            {
+                Content = content,
                 Subject = "New feedback",
                 ToName = userFirstName,
                 To = userEmail
             });
+            await NotificationService.SystemNotifyAsync(user.Id, content, null);
             await Context.SaveChangesAsync(cancellationToken);
             return Result.Of(true);
         }
