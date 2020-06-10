@@ -2616,6 +2616,58 @@ export class NotificationsClient {
             });
         }
     }
+
+    chat(body: ChatMessage | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/notifications/chat";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processChat(_response);
+        });
+    }
+
+    protected processChat(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(<any>null);
+    }
 }
 
 export class AttributesClient {
@@ -4182,6 +4234,50 @@ export interface INotificationPagedList {
     pageNumber?: number;
     itemsCount?: number;
     items?: Notification[] | undefined;
+}
+
+export class ChatMessage implements IChatMessage {
+    to?: string | undefined;
+    content?: string | undefined;
+    referenceLink?: string | undefined;
+
+    constructor(data?: IChatMessage) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.to = _data["to"];
+            this.content = _data["content"];
+            this.referenceLink = _data["referenceLink"];
+        }
+    }
+
+    static fromJS(data: any): ChatMessage {
+        data = typeof data === 'object' ? data : {};
+        let result = new ChatMessage();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["to"] = this.to;
+        data["content"] = this.content;
+        data["referenceLink"] = this.referenceLink;
+        return data; 
+    }
+}
+
+export interface IChatMessage {
+    to?: string | undefined;
+    content?: string | undefined;
+    referenceLink?: string | undefined;
 }
 
 export class SearchParameters implements ISearchParameters {

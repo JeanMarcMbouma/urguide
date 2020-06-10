@@ -23,13 +23,15 @@ namespace UrGuide.Services.Users
                                    IValidator<CreateNotification> validator,
                                    ILogger<NotificationService> logger,
                                    IUserContext userContext,
-                                   IMapper mapper)
+                                   IMapper mapper,
+                                   IInstantMessagingService instantMessaging)
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
             Validator = validator ?? throw new ArgumentNullException(nameof(validator));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             UserContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            InstantMessaging = instantMessaging ?? throw new ArgumentNullException(nameof(instantMessaging));
         }
 
         public UrGuideContext Context { get; }
@@ -37,6 +39,7 @@ namespace UrGuide.Services.Users
         public ILogger<NotificationService> Logger { get; }
         public IUserContext UserContext { get; }
         public IMapper Mapper { get; }
+        public IInstantMessagingService InstantMessaging { get; }
 
         public async Task<Result<PagedList<Model.Users.Notification>>> GetAllAsync(PaginationParameters pagination, CancellationToken cancellationToken)
         {
@@ -73,6 +76,7 @@ namespace UrGuide.Services.Users
                     Read = false
                 };
                 user.Notifications.Add(notification);
+                _ = InstantMessaging.Send(user.Id, Mapper.Map<Model.Users.Notification>(notification)).ConfigureAwait(false);
                 return;
             }
             Logger.LogWarning("Notification failed", string.Join(Environment.NewLine, result.Errors.Select(x => x.ErrorMessage)));

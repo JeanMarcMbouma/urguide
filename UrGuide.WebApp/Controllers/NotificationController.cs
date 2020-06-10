@@ -4,8 +4,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Model;
+using UrGuide.Model.Messages;
 using UrGuide.Model.Users;
 using UrGuide.Services.Contracts;
+using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Models;
 
 namespace UrGuide.WebApp.Controllers
@@ -38,6 +40,21 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await NotificationService.GetAllAsync(pagination, cancellationToken);
             return result.HasError ? (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors)) : Ok(result.Data);
+        }
+
+        [HttpPost("chat")]
+        [Authorize]
+        public async Task<IActionResult> NewMessage([FromBody]ChatMessage message, [FromServices]IUserContext userContext)
+        {
+            await NotificationService.NotifyAsync(new CreateNotification
+            {
+                AuthorId = userContext.UserId,
+                UserId = message.To,
+                Content = message.Content,
+                IsSystem = false,
+                ReferenceLink = message.ReferenceLink
+            });
+            return NoContent();
         }
     }
 }
