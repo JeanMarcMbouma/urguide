@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,7 +30,8 @@ namespace UrGuide.Services.Posts
                            IIPStackService iPStackService,
                            ILogger<PostService> logger,
                            IEmailService emailService,
-                           IImageService imageService) : base(context, userContext)
+                           IImageService imageService,
+                           IUserNotificationService notificationService) : base(context, userContext)
         {
             CatalogService = catalogService ?? throw new ArgumentNullException(nameof(catalogService));
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
@@ -37,6 +39,7 @@ namespace UrGuide.Services.Posts
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             EmailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
             ImageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
+            NotificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
         }
 
         public ICatalogService CatalogService { get; }
@@ -45,6 +48,7 @@ namespace UrGuide.Services.Posts
         public ILogger<PostService> Logger { get; }
         public IEmailService EmailService { get; }
         public IImageService ImageService { get; }
+        public IUserNotificationService NotificationService { get; }
 
         public async Task<Result<PostModel>> AcceptBidAsync(string postId, CancellationToken cancellationToken)
         {
@@ -64,9 +68,7 @@ namespace UrGuide.Services.Posts
                 var author = post.Bid.Author.Attributes;
                 var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
                 var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
-                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
-                {
-                    Content = @$"
+                string content = @$"
 Congratulation, {authorFirstName}</br>
 Your bid was accepted:</br>
 Post: <strong>{post.Text}</strong></br>
@@ -75,7 +77,12 @@ Post: <strong>{post.Text}</strong></br>
 
 Old price: <em>{post.Bid.OldValue}</em></br>
 ---------------------------------------</br>
-New price: <em>{post.Bid.NewValue}</em>",
+New price: <em>{post.Bid.NewValue}</em>";
+
+                await CreateNotification(post, post.Bid.Author.Id, content);
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = content,
                     Subject = "Your bid was accepted",
                     To = authorEmail,
                     ToName = authorFirstName
@@ -87,6 +94,13 @@ New price: <em>{post.Bid.NewValue}</em>",
                 Logger.LogError(e, "Cannot accept the current bid. State corrupted: {0}", postId);
                 return Result.Of<PostModel>().WithErrors(e.Message);
             }
+        }
+
+        private async Task CreateNotification(Post post, string authorId, string content)
+        {
+            if (!post.Catalog.Images.Any())
+                return;
+            await NotificationService.SystemNotifyAsync(authorId, content, $"/post/{post.Id}/shot/{post.Catalog.Images.FirstOrDefault()?.Id}");
         }
 
         public async Task<Result<PostModel>> CreatePostAsync(PostCreationModel model, CancellationToken cancellationToken)
@@ -156,8 +170,8 @@ New price: <em>{post.Bid.NewValue}</em>",
             {
                 ImageService.SaveImage(image);
             }
+            
             await Context.SaveChangesAsync(cancellationToken);
-
             return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
         }
 
@@ -236,14 +250,13 @@ New price: <em>{post.Bid.NewValue}</em>",
             try
             {
                 var user = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
+                var oldBid = post.Bid?.Author.Id;
 
                 post.NewBid(model.Value, user);
                 var author = post.User.Attributes;
                 var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
                 var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
-                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
-                {
-                    Content = @$"
+                string content = @$"
 Hi, {authorFirstName}</br>
 You received a new proposal:</br>
 Post: <strong>{post.Text}</strong></br>
@@ -252,12 +265,25 @@ Post: <strong>{post.Text}</strong></br>
 
 Old price: <em>{post.Bid.OldValue}</em></br>
 ---------------------------------------</br>
-New price: <em>{post.Bid.NewValue}</em>",
+New price: <em>{post.Bid.NewValue}</em>";
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = content,
                     Subject = "New proposal",
                     To = authorEmail,
                     ToName = authorFirstName
                 });
+                await CreateNotification(post, post.User.Id, content);
+                if (!string.IsNullOrEmpty(oldBid))
+                    await CreateNotification(post, oldBid, @$"
+Your bid is no longer active:</br>
+Post: <strong>{post.Text}</strong></br>
+{post.Description}</br>
+...</br>
 
+Old price: <em>{post.Bid.OldValue}</em></br>
+---------------------------------------</br>
+New price: <em>{post.Bid.NewValue}</em>");
                 return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
             }
             catch (Exception e)
@@ -287,20 +313,22 @@ New price: <em>{post.Bid.NewValue}</em>",
                 post.RejectBid();
                 var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
                 var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
-                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
-                {
-                    Content = @$"
+                string content = @$"
 Hi, {authorFirstName}</br>
 Your bid was rejected by the owner:</br>
 Post: <strong>{post.Text}</strong></br>
 {post.Description}</br>
 ...</br>
 
-Your bid: <em>{value}</em>",
+Your bid: <em>{value}</em>";
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = content,
                     Subject = "Your bid was rejected",
                     To = authorEmail,
                     ToName = authorFirstName
                 });
+                await CreateNotification(post, post.Bid.Author.Id, content);
                 return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
             }
             catch (Exception e)
@@ -388,19 +416,21 @@ Your bid: <em>{value}</em>",
                 var author = post.User.Attributes;
                 var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
                 var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
-                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
-                {
-                    Content = @$"
+                string content = @$"
 Hi, {authorFirstName}</br>
 A user has just made a reservation:</br>
 Post: <strong>{post.Text}</strong></br>
 {post.Description}</br>
 ...................</br>
-Seats: {seatReservation.Seats}",
+Seats: {seatReservation.Seats}";
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = content,
                     Subject = "Reservation",
                     To = authorEmail,
                     ToName = authorFirstName
                 });
+                await CreateNotification(post, post.User.Id, content);
             }
             catch (Exception e)
             {
@@ -430,19 +460,21 @@ Seats: {seatReservation.Seats}",
                 var author = post.User.Attributes;
                 var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
                 var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
-                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
-                {
-                    Content = @$"
+                string content = @$"
 Hi, {authorFirstName}</br>
 A user has changed their reservation:</br>
 Post: <strong>{post.Text}</strong></br>
 {post.Description}</br>
 --------------------------</br>
-Title: {post.Text}",
+Title: {post.Text}";
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = content,
                     Subject = "Reservation",
                     To = authorEmail,
                     ToName = authorFirstName
                 });
+                await CreateNotification(post, post.User.Id, content);
             }
             catch (Exception e)
             {
@@ -473,17 +505,19 @@ Title: {post.Text}",
                 var author = post.User.Attributes;
                 var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
                 var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
-                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
-                {
-                    Content = @$"
+                string content = @$"
 Hi, {authorFirstName}</br>
 A user has cancelled a reservation:</br>
 Post: <strong>{post.Text}</strong></br>
-{post.Description}",
+{post.Description}";
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = content,
                     Subject = "Reservation",
                     To = authorEmail,
                     ToName = authorFirstName
                 });
+                await CreateNotification(post, post.User.Id, content);
             }
             catch (Exception e)
             {
@@ -514,17 +548,19 @@ Post: <strong>{post.Text}</strong></br>
             var author = post.User.Attributes;
             var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
             var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
-            await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
-            {
-                Content = @$"
+            string content = @$"
 Hi, {authorFirstName}</br>
 A user has {(userReaction.Like ? "liked" : "reacted to")} your post:</br>
 Post: <strong>{post.Text}</strong></br>
-{post.Description}",
+{post.Description}";
+            await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+            {
+                Content = content,
                 Subject = "User's reaction",
                 To = authorEmail,
                 ToName = authorFirstName
             });
+            await CreateNotification(post, post.User.Id, content);
             return Result.Of(true);
         }
 

@@ -1,0 +1,93 @@
+﻿using AutoMapper;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using UrGuide.Data;
+using UrGuide.Data.Entities.Users;
+using UrGuide.Model;
+using UrGuide.Model.Results;
+using UrGuide.Model.Users;
+using UrGuide.Services.Contracts;
+using UrGuide.Shared.Contracts;
+
+namespace UrGuide.Services.Users
+{
+    class NotificationService : IUserNotificationService
+    {
+        public NotificationService(UrGuideContext context,
+                                   IValidator<CreateNotification> validator,
+                                   ILogger<NotificationService> logger,
+                                   IUserContext userContext,
+                                   IMapper mapper)
+        {
+            Context = context ?? throw new ArgumentNullException(nameof(context));
+            Validator = validator ?? throw new ArgumentNullException(nameof(validator));
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            UserContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
+            Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        }
+
+        public UrGuideContext Context { get; }
+        public IValidator<CreateNotification> Validator { get; }
+        public ILogger<NotificationService> Logger { get; }
+        public IUserContext UserContext { get; }
+        public IMapper Mapper { get; }
+
+        public async Task<Result<PagedList<Model.Users.Notification>>> GetAllAsync(PaginationParameters pagination, CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of<PagedList<Model.Users.Notification>>().WithErrors(ErrorMessages.NotAuthenticated);
+            var user = await Context.Users.FirstAsync(x => x.Id == UserContext.UserId, cancellationToken);
+            var items = await PagedList.Of(user.Notifications.OrderByDescending(x => x.Created).AsQueryable(), pagination.PageNumber, n => Mapper.Map<Model.Users.Notification>(n), cancellationToken);
+            return Result.Of(items);
+        }
+
+        public async Task<Result<PagedList<Model.Users.Notification>>> GetUnreadAsync(PaginationParameters pagination, CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of<PagedList<Model.Users.Notification>>().WithErrors(ErrorMessages.NotAuthenticated);
+            var user = await Context.Users.FirstAsync(x => x.Id == UserContext.UserId, cancellationToken);
+            var items = await PagedList.Of(user.Notifications.Where(m => !m.Read).OrderByDescending(x => x.Created).AsQueryable(), pagination.PageNumber, n => Mapper.Map<Model.Users.Notification>(n), cancellationToken);
+            return Result.Of(items);
+        }
+
+        public async Task NotifyAsync(CreateNotification createNotification)
+        {
+            var result = Validator.Validate(createNotification);
+            if(result.IsValid)
+            {
+                var user = await Context.Users.FindAsync(new[] { createNotification.UserId });
+                var sender = await Context.Users.FindAsync(new[] { createNotification.AuthorId });
+                var notification = new Data.Entities.Users.Notification
+                {
+                    Content = createNotification.Content,
+                    ReferenceLink = createNotification.ReferenceLink,
+                    IsSystem = createNotification.IsSystem,
+                    Created = DateTime.UtcNow,
+                    Sender = sender,
+                    Read = false
+                };
+                user.Notifications.Add(notification);
+                return;
+            }
+            Logger.LogWarning("Notification failed", string.Join(Environment.NewLine, result.Errors.Select(x => x.ErrorMessage)));
+        }
+
+        public Task SystemNotifyAsync(string userId, string content, string referenceLink)
+        {
+            return NotifyAsync(new CreateNotification
+            {
+                AuthorId = Constants.SystemUserId,
+                Content = content,
+                ReferenceLink = referenceLink,
+                IsSystem = true,
+                UserId = userId
+            });
+        }
+    }
+}

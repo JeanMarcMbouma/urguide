@@ -26,6 +26,7 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<Contracts.IFeedbackService, FeedbackService>();
             services.AddTransient<Contracts.IImageService, ImageService>();
             services.AddTransient<Contracts.ILookupService, LookupService>();
+            services.AddTransient<Contracts.IUserNotificationService, NotificationService>();
 
             // Validation
 
@@ -41,6 +42,7 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<IValidator<Model.Users.ResetPasswordModel>, ResetPasswordValidation>();
             services.AddTransient<IValidator<Model.Users.EmailConfirmationModel>, EmailConfirmationValidation>();
             services.AddTransient<IValidator<Model.Users.PasswordResetRequestModel>, PasswordResetValidation>();
+            services.AddTransient<IValidator<Model.Users.CreateNotification>, CreateNotificationValidator>();
 
             // Catalog (Image gallery)
             services.AddTransient<IValidator<Model.Catalogs.CreateImageCatalogModel>, CreateImageCatalogModelValidation>();

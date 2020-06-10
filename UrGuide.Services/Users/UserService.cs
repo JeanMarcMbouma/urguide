@@ -97,51 +97,62 @@ namespace UrGuide.Services.Users
             {
                 return Result.Of(false).Combine(result);
             }
-
-            var imageUrl = ImageService.SaveAvatar(result.Data.userId, new Model.Shared.ImageFileModel
+            try
             {
-                ImageBase64 = createGuide.ProfileImage
-            });
 
-            var user = new Data.Entities.Users.User
-            {
-                Id = result.Data.userId,
-                ProfileImage = new Data.Entities.Users.Image
+                var imageUrl = ImageService.SaveAvatar(result.Data.userId, new Model.Shared.ImageFileModel
                 {
-                    ImageUrl = imageUrl
-                }
-            };
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailOptIn), Value = Constants.Yes });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailAddress), Value = createGuide.Email });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.UserName), Value = createGuide.Email });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.NickName), Value = createGuide.Email });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.FirstName), Value = createGuide.FirstName });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.LastName), Value = createGuide.LastName });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.NickName), Value = createGuide.Email });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Consent), Value = Constants.Yes });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.GuideOptIn), Value = Constants.Yes });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Phone), Value = createGuide.Phone });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Country), Value = createGuide.Country });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.City), Value = createGuide.City });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Address), Value = createGuide.Address });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Gender), Value = createGuide.Gender });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.BirthDay), Value = createGuide.BirthDay });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Description), Value = createGuide.Description });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Subscription), Value = nameof(Subscriptions.Premium) });
+                    ImageBase64 = createGuide.ProfileImage
+                });
 
-            await user.SetLocationAsync(UserContext, IPStackService);
+                var user = new Data.Entities.Users.User
+                {
+                    Id = result.Data.userId,
+                    ProfileImage = new Data.Entities.Users.Image
+                    {
+                        ImageUrl = imageUrl
+                    }
+                };
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailOptIn), Value = Constants.Yes });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailAddress), Value = createGuide.Email });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.UserName), Value = createGuide.Email });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.NickName), Value = createGuide.Email });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.FirstName), Value = createGuide.FirstName });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.LastName), Value = createGuide.LastName });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.NickName), Value = createGuide.Email });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Consent), Value = Constants.Yes });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.GuideOptIn), Value = Constants.Yes });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Phone), Value = createGuide.Phone });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Country), Value = createGuide.Country });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.City), Value = createGuide.City });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Address), Value = createGuide.Address });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Gender), Value = createGuide.Gender });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.BirthDay), Value = createGuide.BirthDay });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Description), Value = createGuide.Description });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Subscription), Value = nameof(Subscriptions.Premium) });
 
-            Context.Users.Add(user);
-            await EmailService.SendAsync(new SendDirectMessageCommand
+                await user.SetLocationAsync(UserContext, IPStackService);
+
+                Context.Users.Add(user);
+                await EmailService.SendAsync(new SendDirectMessageCommand
+                {
+                    To = createGuide.Email,
+                    ToName = createGuide.FirstName,
+                    Content = "Please confirm your account",
+                    Subject = "Email Confirmation",
+                    LinkText = "Activate your account",
+                    Link = WebHelper.ResolveUrl(MessageTypes.Confirmation, new { result.Data.confirmationToken, createGuide.Email })
+                });
+                return Result.Of(true);
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (System.Exception e)
             {
-                To = createGuide.Email,
-                ToName = createGuide.FirstName,
-                Content = "Please confirm your account",
-                Subject = "Email Confirmation",
-                LinkText = "Activate your account",
-                Link = WebHelper.ResolveUrl(MessageTypes.Confirmation, new { result.Data.confirmationToken, createGuide.Email })
-            });
-            return Result.Of(true);
+                Logger.LogError(e, "Error occured during registration");
+                await AuthService.DeleteAccountAsync(result.Data.userId);
+                return Result.Of(false).WithErrors("An error has occured during user's registration.", e.Message);
+            }
+#pragma warning restore CA1031 // Do not catch general exception types
         }
 
         public async Task<Result<bool>> RegisterUserAsync(CreateUserModel createUser, CancellationToken cancellationToken)
@@ -152,41 +163,52 @@ namespace UrGuide.Services.Users
             {
                 return Result.Of(false).Combine(result);
             }
-            var imageUrl = ImageService.SaveAvatar(result.Data.userId);
-
-            var user = new Data.Entities.Users.User
+            try
             {
-                Id = result.Data.userId,
-                ProfileImage = new Data.Entities.Users.Image
+                var imageUrl = ImageService.SaveAvatar(result.Data.userId);
+
+                var user = new Data.Entities.Users.User
                 {
-                    ImageUrl = imageUrl
-                }
-            };
+                    Id = result.Data.userId,
+                    ProfileImage = new Data.Entities.Users.Image
+                    {
+                        ImageUrl = imageUrl
+                    }
+                };
 
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailOptIn), Value = Constants.Yes });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailAddress), Value = createUser.Email });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.UserName), Value = createUser.Email });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.NickName), Value = createUser.Email });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Consent), Value = Constants.Yes });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.GuideOptIn), Value = Constants.No });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Subscription), Value = nameof(Subscriptions.None) });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.FirstName), Value = createUser.FirstName });
-            user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.LastName), Value = createUser.LastName });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailOptIn), Value = Constants.Yes });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailAddress), Value = createUser.Email });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.UserName), Value = createUser.Email });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.NickName), Value = createUser.Email });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Consent), Value = Constants.Yes });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.GuideOptIn), Value = Constants.No });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Subscription), Value = nameof(Subscriptions.None) });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.FirstName), Value = createUser.FirstName });
+                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.LastName), Value = createUser.LastName });
 
-            await user.SetLocationAsync(UserContext, IPStackService);
+                await user.SetLocationAsync(UserContext, IPStackService);
 
-            Context.Users.Add(user);
+                Context.Users.Add(user);
 
-            await EmailService.SendAsync(new SendDirectMessageCommand
+                await EmailService.SendAsync(new SendDirectMessageCommand
+                {
+                    To = createUser.Email,
+                    ToName = createUser.FirstName,
+                    Content = "Please confirm your account",
+                    Subject = "Email Confirmation",
+                    LinkText = "Activate your account",
+                    Link = WebHelper.ResolveUrl(MessageTypes.Confirmation, new { result.Data.confirmationToken, createUser.Email })
+                });
+                return Result.Of(true);
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (System.Exception e)
             {
-                To = createUser.Email,
-                ToName = createUser.FirstName,
-                Content = "Please confirm your account",
-                Subject = "Email Confirmation",
-                LinkText = "Activate your account",
-                Link = WebHelper.ResolveUrl(MessageTypes.Confirmation, new { result.Data.confirmationToken, createUser.Email })
-            });
-            return Result.Of(true);
+                Logger.LogError(e, "Error occured during registration");
+                await AuthService.DeleteAccountAsync(result.Data.userId);
+                return Result.Of(false).WithErrors("An error has occured during registration.", e.Message);
+            }
+#pragma warning restore CA1031 // Do not catch general exception types
         }
 
         public async Task<Result<bool>> SetUserAttributeAsync(SetAttribute attribute, CancellationToken cancellationToken)

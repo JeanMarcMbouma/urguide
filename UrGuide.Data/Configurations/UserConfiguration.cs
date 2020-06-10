@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 using UrGuide.Data.Entities.Users;
 
 namespace UrGuide.Data.Configurations
@@ -31,6 +32,20 @@ namespace UrGuide.Data.Configurations
                 a.HasKey("Id");
             });
 
+            builder.OwnsMany(x => x.Notifications, a =>
+            {
+                a.ToTable("User_Notifications", Constants.Schema);
+                a.WithOwner().HasForeignKey("UserId");
+                a.Property(x => x.Id).HasDefaultValueSql(Constants.GuidFn);
+                a.Property(x => x.Content).IsRequired().HasMaxLength(500);
+                a.Property(x => x.Created).HasColumnType("datetime2");
+                a.Property(x => x.ReferenceLink).HasMaxLength(1000);
+                a.Property(x => x.Read);
+                a.Property(x => x.IsSystem);
+                a.HasOne(x => x.Sender).WithMany().HasForeignKey("FK_User_Notification_Users");
+                a.HasKey(x => x.Id);
+            });
+
             builder.OwnsMany(x => x.Feedback, b =>
             {
                 b.ToTable("User_Feedback", Constants.Schema);
@@ -42,6 +57,14 @@ namespace UrGuide.Data.Configurations
                 b.Property(x => x.Rating).IsRequired();
                 b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_User_Feedback_Users");
             });
+
+            string systemUserId = "00000000-0000-0000-0000-000000000000";
+            var system = new User
+            {
+                Id = systemUserId,
+                LastActivityDate = new DateTime(2020, 1, 1, 12, 0, 0)
+            };
+            builder.HasData(system);
         }
     }
 }

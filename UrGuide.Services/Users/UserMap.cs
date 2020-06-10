@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using System.Linq;
+using UrGuide.Services.Helpers;
 
 namespace UrGuide.Services.Users
 {
@@ -42,8 +43,16 @@ namespace UrGuide.Services.Users
                 .ForMember(u => u.LastName, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.LastName))))
                 .ForMember(u => u.City, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.City))))
                 .ForMember(u => u.Country, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Country))))
-                .ForMember(u => u.Description, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Description))));     
+                .ForMember(u => u.Description, x => x.MapFrom(f => f.Attributes.FirstOrDefault(a => a.Name == nameof(Data.Entities.Users.AttributeTypes.Description))));
 
+            CreateMap<Data.Entities.Users.Notification, Model.Users.Notification>()
+                .ForMember(x => x.AuthorImage, u => u.MapFrom(x => x.Sender.Id == Constants.SystemUserId ? $"thumbs/{Constants.SystemUserId}.png" : x.Sender.ProfileImage.ImageUrl))
+                .ForMember(x => x.AuthorId, u => u.MapFrom(x => x.Sender.Id))
+                .ForMember(x => x.Content, u => u.MapFrom(x => x.Content))
+                .ForMember(x => x.ReferenceLink, u => u.MapFrom(x => x.ReferenceLink))
+                .ForMember(x => x.Read, u => u.MapFrom(x => x.Read))
+                .ForMember(x => x.Created, u => u.MapFrom(x => DateTimeHelper.GetDateTime(x.Created)))
+                .ForMember(x => x.IsSystem, u => u.MapFrom(x => x.IsSystem));
         }
     }
 }

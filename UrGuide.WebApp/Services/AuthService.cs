@@ -70,6 +70,13 @@ namespace UrGuide.WebApp.Services
             return Result.Of(false).WithErrors("Email confirmation failed");
         }
 
+        public async Task DeleteAccountAsync(string userId)
+        {
+            var userManager = SignInManager.UserManager;
+            var user = await userManager.FindByIdAsync(userId);
+            await userManager.DeleteAsync(user);
+        }
+
         public async Task<Result<string>> LoginAsync(LoginModel login, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
