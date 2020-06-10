@@ -15,6 +15,7 @@ import { Avatar } from '@material-ui/core';
 import { useAuthContext } from './api-authorization/AuthService';
 import { FiLogOut } from 'react-icons/fi';
 
+
 const useStyles = makeStyles (() => ({
   header: {
     display: 'grid',
@@ -63,6 +64,7 @@ function ActivateLink(event) {
 
 function Header() {
 
+   
     const [show, setShow] = useState(false);
 
     const { manager, user } = useAuthContext();
@@ -74,7 +76,8 @@ function Header() {
     //console.log(user);
 
     function ToggleNotifications() {
-         setShow(!show);
+
+        setShow(!show);
     }
 
     async function signOut(e) {
@@ -120,9 +123,11 @@ function Header() {
                                         </Link>}
                                 </div>
                                 <div className='col-3 col-md-3 col-lg-3 mid-3 text-center'  >
-                                    <IconButton onClick={(e) => ActivateLink(e)}>
-                                        <MailOutlineIcon fontSize="large" />
-                                    </IconButton>
+                                    <Link to="/messages">
+                                        <IconButton onClick={(e) => ActivateLink(e)}>
+                                            <MailOutlineIcon fontSize="large" />
+                                        </IconButton>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -168,7 +173,7 @@ function Header() {
                     </div>
                     <div className='row justify-content-end'>
                         {show ? <div className='col-12'>
-                            <NotificationsBox />
+                            <NotificationsBox show={show} user={user} />
                         </div> : null }
                         
                     </div>

@@ -1,8 +1,14 @@
-﻿import React, { Component } from 'react';
-import { Avatar, CardHeader } from '@material-ui/core';
+﻿import React, { useState, useEffect, useContext } from 'react';
+import { Avatar, CardHeader, CircularProgress } from '@material-ui/core';
+import { HttpClientFactory } from '../httpclient';
+import { NotificationsClient } from '../api';
 import "./NavMenu.css";
+import NotificationsReducer from './NotificationsReducer';
+import { useReducer } from 'react';
+import NotificationsContext from './NotifcationsContext';
 
-function Notification() {
+
+function Notification(props) {
 
     return (<li className="notification_li">
                 <CardHeader
@@ -13,29 +19,56 @@ function Notification() {
           </li>);
 }
 
-export default class NotificationsBox extends Component
+function Loading() {
+    return (<div className="loading-icon"><h6 className="text-center"><CircularProgress ></CircularProgress></h6></div>);
+}
+
+export default function NotificationsBox(props)
 {
 
-    render() {
+    const ctx = useContext(NotificationsContext);
+    const [state, dispatch] = useReducer(NotificationsReducer, ctx);
 
-      
+    const[isLoading, setLoading] = useState(true);
+    
+    useEffect(() => {
+        var fetch = async () => {
+
+            if (props.show === false || props.user === null)
+                return;
+            const client = HttpClientFactory.get(NotificationsClient, props.user);
+            try {
+
+                var result = await client.all(1);
+                console.log(result);
+                dispatch({
+                    type: "all",
+                    data: {
+                        itemsCount: result.itemsCount,
+                        pageNumber: result.pageNumber,
+                        items: result.items,
+                    }
+                });
+                setLoading(false);
+            }
+            catch (e) {
+                console.log(e);
+            }
+        };
+        fetch();
+        return () => { };
+    }, [props.user]);
+
         return (<div class="notification_dd">
             <div className='notification_label'>
                 <h5>Notifications</h5>
             </div>
             <ul class="notification_ul">
-                    <Notification />
-                    <Notification />
-                    <Notification />
-                <Notification />
-                <Notification />
-                <Notification />
-                <Notification />
+                {isLoading ? <Loading /> : state.items.count > 0 ? state.items.map((notif, i) => (<Notification notification={notif} />)) : <h4>No notifications yet.</h4>}
             </ul>
         </div>);
 
     }
-}
 
 
 

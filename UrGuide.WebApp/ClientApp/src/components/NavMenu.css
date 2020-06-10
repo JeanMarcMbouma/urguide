@@ -29,7 +29,8 @@ button:focus {
 
 .content {
     /*background-color:white;*/
-    height: auto;
+    height: 100%;
+    margin: 0;
     bottom: 0;
     background-color: #f7f8fa;
     padding-top: 80px;
@@ -48,6 +49,11 @@ button:focus {
     top: 0;
     width: 100%;
     z-index:80;
+}
+
+.loading-icon {
+    margin-top: 170px;
+    margin-left:-40px;
 }
 
 .navbarRow {
