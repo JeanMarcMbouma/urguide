@@ -48,7 +48,7 @@ export default function NotificationsBox(props)
                     type: "all",
                     data: {
                       
-                        itemsCount: 1,  //result.itemsCount
+                        itemsCount: 1,  //result.itemsCountk
                         pageNumber: result.pageNumber,
                         items: [{ content: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.', created: '12-May-2020', read: false, isSystem: true }],//result.items,
                     }
