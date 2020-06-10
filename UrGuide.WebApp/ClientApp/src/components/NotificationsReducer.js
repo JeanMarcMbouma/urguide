@@ -7,6 +7,7 @@
 
     switch (action.type) {
         case "all":
+            console.log(context);
             return context;
             break;
         case "unread":

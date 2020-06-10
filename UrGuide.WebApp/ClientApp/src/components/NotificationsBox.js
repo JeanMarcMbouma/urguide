@@ -2,20 +2,23 @@
 import { Avatar, CardHeader, CircularProgress } from '@material-ui/core';
 import { HttpClientFactory } from '../httpclient';
 import { NotificationsClient } from '../api';
+import { Link } from "react-router-dom";
 import "./NavMenu.css";
 import NotificationsReducer from './NotificationsReducer';
 import { useReducer } from 'react';
-import NotificationsContext from './NotifcationsContext';
+import NotificationsContext from './NotificationsContext';
 
 
 function Notification(props) {
 
     return (<li className="notification_li">
+        <Link to={props.notification.referenceLink}>
                 <CardHeader
-                    avatar={<Avatar alt={'A'} src='...' />}
-                    title={<span >{'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'}</span>}
-                    subheader={<span className='text-muted'>{'1 minute ago.'}</span>}
-                />
+                avatar={<Avatar alt={'P'} src={props.notification.authorImage} />}
+                title={props.notification.read ? <span className="text-muted" >{props.notification.content}</span> : <b>{props.notification.content}</b>}
+                subheader={props.notification.read ? <span>{props.notification.created}</span> : <span style={{ color:`#2c6ef2`}}>{props.notification.created}</span>}
+            />
+            </Link>
           </li>);
 }
 
@@ -40,13 +43,14 @@ export default function NotificationsBox(props)
             try {
 
                 var result = await client.all(1);
-                console.log(result);
+               // console.log(result);
                 dispatch({
                     type: "all",
                     data: {
-                        itemsCount: result.itemsCount,
+                      
+                        itemsCount: 1,  //result.itemsCount
                         pageNumber: result.pageNumber,
-                        items: result.items,
+                        items: [{ content: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.', created: '12-May-2020', read: false, isSystem: true }],//result.items,
                     }
                 });
                 setLoading(false);
@@ -59,12 +63,12 @@ export default function NotificationsBox(props)
         return () => { };
     }, [props.user]);
 
-        return (<div class="notification_dd">
+        return (<div className="notification_dd">
             <div className='notification_label'>
                 <h5>Notifications</h5>
             </div>
-            <ul class="notification_ul">
-                {isLoading ? <Loading /> : state.items.count > 0 ? state.items.map((notif, i) => (<Notification notification={notif} />)) : <h4>No notifications yet.</h4>}
+            <ul className="notification_ul">
+                {isLoading ? <Loading /> : state.itemsCount > 0 ? state.items.map((notif, i) => (<Notification notification={notif} />)) : <div style={{ marginLeft: `-20px` }}><br /><h5 className='text-center text-muted'>No notifications yet.</h5></div>}
             </ul>
         </div>);
 

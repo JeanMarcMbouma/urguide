@@ -7,6 +7,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import {makeStyles} from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
+import Badge from '@material-ui/core/Badge';
 import { Link } from 'react-router-dom';
 import "./NavMenu.css";
 import { NavbarBrand } from 'reactstrap';
@@ -159,7 +160,9 @@ function Header() {
                                 <div className='col-1 col-sm-1 d-flex justify-content-between' >
                                     <div>
                                         <IconButton onClick={ToggleNotifications}>
-                                            <NotificationsNoneOutlinedIcon />
+                                            <Badge badgeContent={0} max={9} color="error">
+                                                <NotificationsNoneOutlinedIcon />
+                                            </Badge>
                                         </IconButton>
                                     </div>
                                     <div>
