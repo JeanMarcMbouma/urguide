@@ -64,6 +64,7 @@ namespace UrGuide.WebApp.Extensions
             });
 
             services.AddScoped<IProfileService, ProfileService>();
+            services.AddScoped<IInstantMessagingService, InstantMessagingService>();
             /*
              ,
           "UrGuide.WebAPI": {
@@ -76,7 +77,7 @@ namespace UrGuide.WebApp.Extensions
              */
             services.AddAuthentication()
                 .AddIdentityServerJwt();
-
+            services.AddSignalR();
             return services;
         }
     }

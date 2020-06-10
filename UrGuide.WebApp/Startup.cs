@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using UrGuide.WebApp.Models;
 using Newtonsoft.Json;
+using UrGuide.WebApp.Hubs;
 
 namespace UrGuide.WebApp
 {
@@ -147,6 +148,7 @@ namespace UrGuide.WebApp
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
+                endpoints.MapHub<NotificationHub>("/notify");
             });
 
             app.UseSpa(spa =>

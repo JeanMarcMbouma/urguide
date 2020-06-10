@@ -60,6 +60,7 @@
 
   <ItemGroup>
     <Folder Include="ClientApp\public\images\" />
+    <Folder Include="ClientApp\public\js\" />
     <Folder Include="Pages\Shared\" />
   </ItemGroup>
 
