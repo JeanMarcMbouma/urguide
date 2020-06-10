@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using MediatR;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Model.Results;
 using UrGuide.Model.Users;
+using UrGuide.Services.Auditing.Command;
 using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Entities;
 
@@ -15,18 +17,21 @@ namespace UrGuide.WebApp.Services
         public AuthService(SignInManager<UrGuideUser> signInManager, 
             IUserContext userContext, 
             IEmailService emailService,
-            IWebHelper webHelper)
+            IWebHelper webHelper,
+            IMediator mediator)
         {
             SignInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
             UserContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             EmailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
             WebHelper = webHelper ?? throw new ArgumentNullException(nameof(webHelper));
+            Mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         public SignInManager<UrGuideUser> SignInManager { get; }
         public IUserContext UserContext { get; }
         public IEmailService EmailService { get; }
         public IWebHelper WebHelper { get; }
+        public IMediator Mediator { get; }
 
         public async Task<Result<bool>> ChangePasswordAsync(ChangePasswordModel model, CancellationToken cancellationToken)
         {
@@ -209,6 +214,11 @@ namespace UrGuide.WebApp.Services
                 }
             }
             return Result.Of(false).WithErrors("Failed to reset your password");
+        }
+
+        public async Task SignOutAsync()
+        {
+            await Mediator.Send(new UserLoggedOutCommand(UserContext.UserId));
         }
     }
 }

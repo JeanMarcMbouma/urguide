@@ -15,5 +15,6 @@ namespace UrGuide.Shared.Contracts
         Task<Result<bool>> ResetPasswordAsync(ResetPasswordModel resetPasswordModel, CancellationToken cancellationToken);
         Task<Result<bool>> ChangePasswordAsync(ChangePasswordModel model, CancellationToken cancellationToken);
         Task DeleteAccountAsync(string userId);
+        Task SignOutAsync();
     }
 }

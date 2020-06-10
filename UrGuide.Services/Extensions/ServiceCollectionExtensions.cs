@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using UrGuide.Model;
 using UrGuide.Model.Shared;
+using UrGuide.Services.Auditing.Command;
 using UrGuide.Services.Catalogs;
 using UrGuide.Services.Feedback;
 using UrGuide.Services.Lookup;
@@ -62,6 +64,8 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<IValidator<FeedbackModel>, FeedbackModelValidator>();
 
             services.AddAutoMapper(typeof(UserMap));
+
+            services.AddMediatR(typeof(UserDeleteAccountCommand).Assembly);
 
             services.AddDbContext<Data.UrGuideContext>(options =>
                 options.UseSqlServer(
