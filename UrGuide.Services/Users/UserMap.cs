@@ -51,7 +51,7 @@ namespace UrGuide.Services.Users
                 .ForMember(x => x.Content, u => u.MapFrom(x => x.Content))
                 .ForMember(x => x.ReferenceLink, u => u.MapFrom(x => x.ReferenceLink))
                 .ForMember(x => x.Read, u => u.MapFrom(x => x.Read))
-                .ForMember(x => x.Created, u => u.MapFrom(x => DateTimeHelper.GetDateTime(x.Created)))
+                .ForMember(x => x.Created, u => u.MapFrom(x => DateTimeHelper.GetDateTime(x.Created, System.DateTimeKind.Utc)))
                 .ForMember(x => x.IsSystem, u => u.MapFrom(x => x.IsSystem));
         }
     }
