@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -77,7 +78,10 @@ namespace UrGuide.WebApp.Extensions
              */
             services.AddAuthentication()
                 .AddIdentityServerJwt();
+            
             services.AddSignalR();
+
+            services.AddSingleton<IUserIdProvider, UserIdProvider>();
             return services;
         }
     }
