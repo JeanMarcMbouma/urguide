@@ -1,5 +1,5 @@
 ﻿import React, {
-    useState, useContext, useMemo, useReducer, Component
+    useState, useContext, useMemo, useReducer, Component, useEffect
 } from 'react';
 import {
     CardHeader,
@@ -17,7 +17,7 @@ import AttachMoneyOutlinedIcon from '@material-ui/icons/AttachMoneyOutlined';
 import PeopleOutlineOutlinedIcon from '@material-ui/icons/PeopleOutlineOutlined';
 import { withStyles } from '@material-ui/core/styles';
 import { HttpClientFactory } from '../../httpclient';
-import {  UsersClient, FeedbackModel } from '../../api';
+import {  UsersClient, FeedbackModel, FeedbackClient } from '../../api';
 import "./UserStyle.css"
 import FeedBackContext from './FeedbackContext';
 import FeedBackReducer from './FeedBackReducer';
@@ -33,35 +33,29 @@ const labels = {
     5: 'It was perfect.',
 };
 
-const MocksReviews = [
-    { author: "Helen Gordon", rating:4, review: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrystandard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.', date: '11-may-2020 12:22:54', profilePic: null, id: null, },
-    { author: "Stephen Hawlys", rating:3, review:'Contrary to popular belief, Lorem Ipsum is not simply random text.', date: '04-april-2020 09:17:20', profilePic: null, id: null,},
-    { author: "Rick Ross", rating: 4,review: 'There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don look even slightly believable.', date: '19-december-2019 05:42:08', profilePic: null, id: null, },
-]
-function FeedBacks(props) {
+function FeedBacks({ reviews }) {
     return (
         <>
-            {props.reviews.length > 0 ? <h5> Reviews ({props.reviews.length})</h5> : <h5>No review</h5>}
+            {reviews.length > 0 ? <h5> Reviews ({reviews.length})</h5> : <h5>No review</h5>}
             <br/>
             {
-                
-                props.reviews.map((rev, i) => (
+                reviews.map((rev, i) => (
                     <div className='cmt-div' key={i} >
                         <CardHeader
-                            avatar={<Avatar alt={rev.author} src={rev.profilePic} />}
+                            avatar={<Avatar alt={rev.authorFullName} src={rev.authorImage} />}
                             title={
                                 <h6>
-                                    {rev.author}
+                                    {rev.authorFullName}
                                 </h6>
                             }
-                            subheader={rev.date}
+                            subheader={rev.publicationDate}
                         />
                         <Rating
                             value={rev.rating}
                             readOnly
                         />
                         <div className='comment-text'>
-                            <p>{rev.review}.</p>
+                            <p>{rev.text}.</p>
                         </div>
                     </div>))
             }
@@ -69,26 +63,32 @@ function FeedBacks(props) {
     );
 }
 
-
 export default function Reviews(props) {
 
-    const { manager, user } = useAuthContext();
-    const [feedbacks, setFeedBacks] = useState(MocksReviews);
+    const { user } = useAuthContext();
     const ctx = useContext(FeedBackContext);
     const [state, dispatch] = useReducer(FeedBackReducer, ctx);
-    
+    console.log(state)
+    const [pageNumber, setPageNumber] = useState(1);
     const [values, setValues] = useState({review:'', rating:1 });
-   
-    useMemo(async () => {
-        if (!user)
-            return;
-        var client = HttpClientFactory.getClient(user);
-        var data = await client.getdetails();
-        //setFeedBacks(data);
 
-    }, [user]);
 
-    state.feedbacks = feedbacks;
+    const client = HttpClientFactory.get(FeedbackClient, user);
+    useEffect(() => {
+
+        client.users(props.userId, pageNumber)
+            .then(r => {
+                dispatch({
+                    type: "loading",
+                    data: {
+                        feedbacks: r.items
+                    }
+                })
+            });
+
+        return () => { };
+    }, [pageNumber]);
+        
 
     const handleChange = prop => event => {
         setValues({ ...values, [prop]: event.target.value });
@@ -103,7 +103,7 @@ export default function Reviews(props) {
         if (!props)
             return;
 
-        const client = HttpClientFactory.get(UsersClient);
+        const client = HttpClientFactory.get(UsersClient, user);
         var model = new FeedbackModel({
             text: review.review,
             rating: review.rating,
@@ -148,7 +148,7 @@ export default function Reviews(props) {
                 </div>
 
                 <br />
-                <Button variant="contained" color="primary" onClick={() =>
+                <Button variant="contained" color="primary" onClick={() =>{
                         dispatch({
                             type: "user-feedback",
                             data: {
@@ -157,6 +157,8 @@ export default function Reviews(props) {
                                 callback: createReview,
                             }
                         })
+                        setValues({review:'', rating:1 })
+                        window.location.reload();} 
                     }>submit review</Button> 
                 <br />
                 <br />

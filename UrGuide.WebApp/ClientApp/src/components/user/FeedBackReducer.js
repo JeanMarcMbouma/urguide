@@ -6,11 +6,8 @@ function getTime() {
 }
 
 export default function FeedBackReducer(state, action) {
-    let context = { ...state };
-    context.postId = action.data.postId;
-    context.userFeedback = action.data.userFeedback;
-    context.feedbacks = action.data.feedbacks;
-    var text = String(context.userFeedback.review);
+    let context = { ...state, ...action.data };
+    
 
     switch (action.type) {
 
@@ -21,6 +18,8 @@ export default function FeedBackReducer(state, action) {
             break;
 
         case "user-feedback":
+
+            var text = String(context.userFeedback.review);
             let isTextValidUser =
                 text.length > 4 && text.length < 500 ? true : false;
             context.textError = isTextValidUser ? false : true;
@@ -35,6 +34,8 @@ export default function FeedBackReducer(state, action) {
             break;
 
         case "post-feedback":
+
+            var text = String(context.userFeedback.review);
             let isTextValidPost =
                 text.length > 4 && text.length < 500 ? true : false;
             context.textError = isTextValidPost ? false : true;
