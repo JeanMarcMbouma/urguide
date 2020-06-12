@@ -45,6 +45,7 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<IValidator<Model.Users.EmailConfirmationModel>, EmailConfirmationValidation>();
             services.AddTransient<IValidator<Model.Users.PasswordResetRequestModel>, PasswordResetValidation>();
             services.AddTransient<IValidator<Model.Users.CreateNotification>, CreateNotificationValidator>();
+            services.AddTransient<IValidator<Model.Messages.ChatMessage>, ChatMessageValidator>();
 
             // Catalog (Image gallery)
             services.AddTransient<IValidator<Model.Catalogs.CreateImageCatalogModel>, CreateImageCatalogModelValidation>();

@@ -1,119 +1,114 @@
 import { string } from "prop-types";
 
 export default function GuideReducer(state, action) {
-  let context = { ...state };
-  context.step = action.data.step;
-  let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-  let nameRegex = /^[^-\s][\w\s-]+$/;
-  //step1
-  context.email = action.data.email;
-  context.password = action.data.password;
-  context.confirmPassword = action.data.confirmPassword;
-  //step2
-  context.firstName = action.data.firstName;
-  context.lastName = action.data.lastName;
-  context.profilePic = action.data.profilePic;
-  context.picture = action.data.picture;
-  context.gender = action.data.gender;
-  context.birthday = action.data.birthday;
-  context.country = action.data.country;
-  context.city = action.data.city;
-  context.address = action.data.address;
-  context.phone = action.data.phone;
-  context.description = action.data.description;
-  //step3
-  context.isChecked = action.data.isChecked;
-  var description = String(context.description);
+    let context = { ...state };
+    context.step = action.data.step;
+    let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    let nameRegex = /^[^-\s][\w\s-]+$/;
+    //step1
+    context.email = action.data.email;
+    context.password = action.data.password;
+    context.confirmPassword = action.data.confirmPassword;
+    //step2
+    context.firstName = action.data.firstName;
+    context.lastName = action.data.lastName;
+    context.profilePic = action.data.profilePic;
+    context.picture = action.data.picture;
+    context.gender = action.data.gender;
+    context.birthday = action.data.birthday;
+    context.country = action.data.country;
+    context.city = action.data.city;
+    context.address = action.data.address;
+    context.phone = action.data.phone;
+    context.description = action.data.description;
+    //step3
+    context.isChecked = action.data.isChecked;
 
-  //checking
-  let validEmail = regexEmail.test(context.email);
-  let validpassword = passwordRegex.test(context.password);
-  let validfname = nameRegex.test(context.firstName);
-  let validlname = nameRegex.test(context.lastName);
-  let isDescriptionGotProperLength =
-   description.length > 100 && description.length < 500 ? true : false;
-  let validgender = context.gender === "null" ? false : true;
-  let validcountry = nameRegex.test(context.country);
-  let validcity = nameRegex.test(context.city);
-  let validaddress = nameRegex.test(context.address);
-  let validdescription = nameRegex.test(description);
+    //checking
+    let validEmail = regexEmail.test(context.email);
+    let validpassword = passwordRegex.test(context.password);
+    let validfname = nameRegex.test(context.firstName);
+    let validlname = nameRegex.test(context.lastName);
+    let isDescriptionGotProperLength = 100 <= (context.description || '').length <= 500;
+    let validgender = context.gender === "null" ? false : true;
+    let validcountry = nameRegex.test(context.country);
+    let validcity = nameRegex.test(context.city);
+    let validaddress = nameRegex.test(context.address);
 
-  //errors
-  //step1
-  context.emailError = validEmail ? false : true;
-  context.passwordError = validpassword ? false : true;
-  context.passwordsDontMatch =
-    context.confirmPassword === context.password ? false : true;
+    //errors
+    //step1
+    context.emailError = !validEmail;
+    context.passwordError = !validpassword;
+    context.passwordsDontMatch = context.confirmPassword !== context.password;
 
-  //step2
-  context.profilePicError = context.profilePic != 0 ? false : true;
-  context.fnameError = validfname ? false : true;
-  context.lnameError = validlname ? false : true;
-  context.genderError = validgender ? false : true;
-  context.countryError = validcountry ? false : true;
-  context.cityError = validcity ? false : true;
-  context.phoneError = context.phone != "" ? false : true;
-  context.addressError = validaddress ? false : true;
-  context.descriptionError =
-    isDescriptionGotProperLength && validdescription ? false : true;
+    //step2
+    context.profilePicError = context.profilePic != 0 ? false : true;
+    context.fnameError = !validfname;
+    context.lnameError = !validlname;
+    context.genderError = !validgender;
+    context.countryError = !validcountry;
+    context.cityError = !validcity;
+    context.phoneError = !(context.phone || '').length;
+    context.addressError = !validaddress;
+    context.descriptionError = !isDescriptionGotProperLength;
 
-  //step3
-  context.isChecked = action.data.isChecked ? false : true;
+    //step3
+    context.isChecked = action.data.isChecked ? false : true;
 
-  switch (action.type) {
-    case "validate-guide":
-      //step1
-      if (context.step === 0) {
-        context.step =
-          !context.emailError &&
-          !context.passwordError &&
-          !context.passwordsDontMatch
-            ? context.step + 1
-            : context.step;
+    switch (action.type) {
+        case "validate-guide":
+            //step1
+            if (context.step === 0) {
+                context.step =
+                    !context.emailError &&
+                        !context.passwordError &&
+                        !context.passwordsDontMatch
+                        ? context.step + 1
+                        : context.step;
 
-        context.newly = context.step === 1 ? true : false;
+                context.newly = context.step === 1 ? true : false;
 
-        return context;
-      }
-      if (context.step === 1) {
-        context.step =
-          !context.profilePicError &&
-          !context.fnameError &&
-          !context.lnameError &&
-          !context.genderError &&
-          !context.countryError &&
-          !context.cityError &&
-          !context.addressError &&
-          !context.descriptionError
-            ? context.step + 1
-            : context.step;
+                return context;
+            }
+            if (context.step === 1) {
+                context.step =
+                    !context.profilePicError &&
+                        !context.fnameError &&
+                        !context.lnameError &&
+                        !context.genderError &&
+                        !context.countryError &&
+                        !context.cityError &&
+                        !context.addressError &&
+                        !context.descriptionError
+                        ? context.step + 1
+                        : context.step;
 
-        context.newly = context.step === 2 ? true : false;
+                context.newly = context.step === 2 ? true : false;
 
-        return context;
-      }
+                return context;
+            }
 
-    case "go-back":
-      context.step = context.step > 0 ? context.step - 1 : context.step;
+        case "go-back":
+            context.step = context.step > 0 ? context.step - 1 : context.step;
 
-      context.newly = true;
+            context.newly = true;
 
-      return context;
+            return context;
 
-    case "submit":
-      context.newly =
-        context.step === 2 &&
-        !context.isChecked
-          ? true
-          : false;
-          if (context.newly) {
-              action.data.sendData(state);
+        case "submit":
+            context.newly =
+                context.step === 2 &&
+                    !context.isChecked
+                    ? true
+                    : false;
+            if (context.newly) {
+                action.data.sendData(state);
 
-              return context;
+                return context;
 
-      } else {
-        return context;
-      }
-  }
+            } else {
+                return context;
+            }
+    }
 }
