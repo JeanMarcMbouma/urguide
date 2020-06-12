@@ -67,20 +67,6 @@ function ActivateLink(event) {
  
 }
 
-
-function NotificationsBox(props) {
-
-    return (<div className="notification_dd">
-        <div className='notification_label'>
-            <h5>Notifications</h5>
-        </div>
-        <ul className="notification_ul">
-            {props.itemsCount > 0 ? props.items.map((notif, i) => (<Notification notification={notif} />)) : <div style={{ marginLeft: `-20px` }}><br /><h5 className='text-center text-muted'>No notifications yet.</h5></div>}
-        </ul>
-    </div>);
-
-}
-
 function Notification(props) {
 
     return (<li className="notification_li">
@@ -93,7 +79,7 @@ function Notification(props) {
                     <div className="col-10">
                         <div className="row">
                             <div className="col-12">
-                                {props.notification.read ? <><p className="block-with-text" >{props.notification.content}</p><div className="notification_time" >{props.notification.created}</div></> : <><p className="block-with-text_unread">{props.notification.content}</p><div className="notification_time_unread" >{props.notification.created}</div></>}
+                                {props.notification.read ? <><p dangerouslySetInnerHTML={{ __html: props.notification.content }} className="block-with-text" /><div className="notification_time" >{props.notification.created}</div></> : <><p className="block-with-text_unread" dangerouslySetInnerHTML={{ __html: props.notification.content }} /><div className="notification_time_unread" >{props.notification.created}</div></>}
                             </div>
                         </div>
                     </div>
@@ -110,6 +96,7 @@ export default function Header() {
    
     const [show, setShow] = useState(false);
     const [unread, setUnread] = useState(0);
+    const [pageNumber, setpageNumber] = useState(2);
     const ctx = useContext(NotificationsContext);
     const [state, dispatch] = useReducer(NotificationsReducer, ctx);
 
@@ -119,7 +106,44 @@ export default function Header() {
         profile: {}
     };
 
-    function getNotifications(userId, notification) {
+    async function loadMoreNotifications(e) {
+        var obj = e.target;
+        if (obj.scrollTop === (obj.scrollHeight - obj.offsetHeight)) {
+
+            if (user === null)
+                return;
+            const client = HttpClientFactory.get(NotificationsClient, user);
+            try {
+
+                var result = await client.all(pageNumber);
+                if (result.items.length > 0)
+                {
+                    dispatch({
+                        type: "more",
+                        data: {
+
+                            itemsCount: result.itemsCount,
+                            pageNumber: result.pageNumber,
+                            items: result.items,
+                        }
+                    });
+
+                    setpageNumber(result.pageNumber + 1);
+                    console.log(pageNumber);
+
+                }
+               
+            }
+            catch (e) {
+                console.log(e);
+            }
+
+            
+        }
+    }
+
+
+    SignalRClient.get((userId, notification) => {
 
         state.items.unshift(notification);
 
@@ -133,9 +157,9 @@ export default function Header() {
             }
         });
         setUnread(unread + 1);
-    }
+        console.log(notification);
 
-    SignalRClient.get(getNotifications);
+    }, user);
 
     useEffect(() => {
         var fetch = async () => {
@@ -157,7 +181,7 @@ export default function Header() {
                     }
                 });
 
-                setUnread(result.itemsCount);
+                //setUnread(result.itemsCount);
 
             }
             catch (e) {
@@ -271,7 +295,14 @@ export default function Header() {
                     </div>
                     <div className='row justify-content-end'>
                         {show ? <div className='col-12'>
-                            <NotificationsBox show={show} user={user} items={state.items} itemsCount={state.itemsCount} />
+                            <div className="notification_dd">
+                                <div className='notification_label'>
+                                    <h5>Notifications</h5>
+                                </div>
+                                <ul className="notification_ul" onScroll={(e) => loadMoreNotifications(e)}>
+                                    {state.itemsCount > 0 ? state.items.map((notif, i) => (<Notification key={i} notification={notif} />)) : <div style={{ marginLeft: `-20px` }}><br /><h5 className='text-center text-muted'>No notifications yet.</h5></div>}
+                                </ul>
+                            </div>
                         </div> : null }
                         
                     </div>

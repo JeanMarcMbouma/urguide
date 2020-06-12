@@ -3,11 +3,17 @@
 
     context.itemsCount = action.data.itemsCount;
     context.pageNumber = action.data.pageNumber;
-    context.items = action.data.items;
+    
 
     switch (action.type) {
         case "all":
-            console.log(context);
+            context.items = action.data.items;
+            return context;
+            break;
+        case "more":
+            action.data.items.forEach((item, index) => {
+                context.items.push(item);
+            });
             return context;
             break;
         case "unread":

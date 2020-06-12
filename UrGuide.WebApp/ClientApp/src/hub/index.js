@@ -10,7 +10,6 @@ var SignalRClient = /** @class */ (function () {
         }).build();
         connection.on("notify", function (userId, message) {
             callback(userId, message);
-            console.log(message);
         });
         return connection.start();
     };
