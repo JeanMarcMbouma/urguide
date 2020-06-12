@@ -85,7 +85,7 @@ namespace UrGuide.WebApp.Extensions
             services.AddSignalR();
 
             services.AddSingleton<IUserIdProvider, UserIdProvider>();
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<JwtBearerOptions>, SignalRAuthPostConfigureOptions>()); 
+            //services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<JwtBearerOptions>, SignalRAuthPostConfigureOptions>()); 
             return services;
         }
     }
