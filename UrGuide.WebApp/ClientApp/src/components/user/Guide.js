@@ -1,4 +1,4 @@
-﻿import React, { Component, useState, useMemo } from "react";
+﻿import React, { Component, useState, useMemo, useEffect } from "react";
 import Posts from "./Posts";
 import Galleries from "./Galleries";
 import UpperSection from "./UpperSection";
@@ -32,20 +32,24 @@ function ProfileLayout() {
         rating: 0,
     });
 
-    useMemo(async () => {
+    useEffect(() => {
+        let doWork = async () => {
+            var api = HttpClientFactory.get(UsersClient);
+            var data = await api.info(userId);
 
-       var api = HttpClientFactory.get(UsersClient);
-        var data = await api.info(userId);
+            setValues({
+                userId: data.id,
+                profileImage: data.profileImage,
+                username: `${data.firstName} ${data.lastName}`,
+                location: `${data.city}, ${data.country}`,
+                description: data.description,
+                loading: false,
+                rating: data.rating
+            });
+        }
 
-        setValues({
-            userId: data.id,
-            profileImage: data.profileImage,
-            username: `${data.firstName} ${data.lastName}`,
-            location: `${data.city}, ${data.country}`,
-            description: data.description,
-            loading:false,
-            rating: data.rating
-        });
+        doWork();
+        return () => { };
 
     }, [user]);
 

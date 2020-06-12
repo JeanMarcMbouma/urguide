@@ -135,19 +135,25 @@ function FeedBacks(props) {
     const ctx = useContext(FeedBackContext);
     const [state, dispatch] = useReducer(FeedBackReducer, ctx);
 
-    const [values, setValues] = useState({ review: '', rating: 1, postId: props.postId });
+    const initialValues = { review: '', rating: 1, postId: props.postId };
+    const [values, setValues] = useState(initialValues);
 
     useEffect(() => {
-        if (props.show === true) {
+        if (props.show === true && props.showId === props.postId) {
             var client = HttpClientFactory.get(FeedbackClient);
             client.posts(props.showId, 1).then(result => {
                 setPageNumber(result.pageNumber);
                 setLoading(false);
-                state.feedbacks = result.items;
+                dispatch({
+                    type: "loading",
+                    data: {
+                        feedbacks: result.items
+                    }
+                });
             });
         }
         return () => { };
-    }, [props.show]);
+    }, [props.show, props.showId]);
 
 
     const handleChange = prop => event => {
@@ -164,14 +170,22 @@ function FeedBacks(props) {
             return;
 
         const client = HttpClientFactory.get(PostsClient, user);
-        var model = new FeedbackModel({
+        const config = {
             text: review.review,
-            rating: review.rating,
-        });
+            rating: review.rating
+        };
+        var model = new FeedbackModel(config);
         try {
 
             await client.feedback(review.postId, model);
-
+            setValues(initialValues);
+            dispatch({
+                type: "new-item",
+                data: {
+                    review: config,
+                    user: user
+                }
+            });
         }
         catch (e) {
             console.log(e);
@@ -411,7 +425,7 @@ export default function Posts() {
             <CardContent>
                 <div className='row'>
                     <div className='col-12' >
-                        <Rating value={post.rating} readOnly />
+                        <Rating value={+post.rating} readOnly />
                         <br />
                         <br />
                     </div>
