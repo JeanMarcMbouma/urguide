@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -14,6 +15,7 @@ using UrGuide.Model.Posts;
 using UrGuide.Model.Results;
 using UrGuide.Model.Shared;
 using UrGuide.Services.Abstraction;
+using UrGuide.Services.Auditing.Command;
 using UrGuide.Services.Contracts;
 using UrGuide.Services.Extensions;
 using UrGuide.Services.Helpers;
@@ -31,7 +33,8 @@ namespace UrGuide.Services.Posts
                            ILogger<PostService> logger,
                            IEmailService emailService,
                            IImageService imageService,
-                           IUserNotificationService notificationService) : base(context, userContext)
+                           IUserNotificationService notificationService,
+                           IMediator mediator) : base(context, userContext)
         {
             CatalogService = catalogService ?? throw new ArgumentNullException(nameof(catalogService));
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
@@ -40,6 +43,7 @@ namespace UrGuide.Services.Posts
             EmailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
             ImageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
             NotificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+            Mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         public ICatalogService CatalogService { get; }
@@ -49,6 +53,7 @@ namespace UrGuide.Services.Posts
         public IEmailService EmailService { get; }
         public IImageService ImageService { get; }
         public IUserNotificationService NotificationService { get; }
+        public IMediator Mediator { get; }
 
         public async Task<Result<PostModel>> AcceptBidAsync(string postId, CancellationToken cancellationToken)
         {
@@ -165,7 +170,7 @@ New price: <em>{post.Bid.NewValue}</em>";
 
             Context.Posts.Add(post);
             await Context.SaveChangesAsync(cancellationToken);
-
+            await Mediator.Send(new PostCreatedCommand(UserContext.UserId, post.Id));
             foreach (var image in post.Catalog.Images)
             {
                 ImageService.SaveImage(image);
@@ -185,6 +190,7 @@ New price: <em>{post.Bid.NewValue}</em>";
             Context.Posts.Remove(post);
             await Context.SaveChangesAsync(cancellationToken);
             ImageService.DeleteImages(images);
+            await Mediator.Send(new PostDeletedCommand(UserContext.UserId, id));
             return Result.Of(true);
         }
 
@@ -347,13 +353,15 @@ Your bid: <em>{value}</em>";
             post.Text = model.Text;
             post.Description = model.Description;
             post.LastUpdated = DateTime.UtcNow;
+            await Mediator.Send(new PostEditedCommand(UserContext.UserId, model.Id));
             await Context.SaveChangesAsync(cancellationToken);
             return Result.Of(true);
         }
 
-        public Task<Result<bool>> UpdatePostAttributesAsync(string id, SetAttribute[] attributes, CancellationToken cancellationToken)
+        public async Task<Result<bool>> UpdatePostAttributesAsync(string id, SetAttribute[] attributes, CancellationToken cancellationToken)
         {
-            return SetAttributesRestrictedToUserAsync<Post>(id, attributes, cancellationToken);
+            await Mediator.Send(new PostEditedCommand(UserContext.UserId, id));
+            return await SetAttributesRestrictedToUserAsync<Post>(id, attributes, cancellationToken);
         }
 
         public async Task<Result<IEnumerable<BidHistoryModel>>> GetBidHistoryAsync(string postId, CancellationToken cancellationToken)

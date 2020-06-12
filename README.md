@@ -28,23 +28,22 @@ Make yourself a Tourism guide at your ease and pace.
 
 - [x]  A user could join a tour
 
+- [x]  All actions are audited
+
 # Work in progress
 
 - [x]  A user can leave a positive/negative feedback about the tour via **5 Stars rating** and user comments
 
 # TODO
 
-- [ ]  All actions are audited
-
-- [ ]  A user could see his/her tour / bid / agreement history
-
-- [ ]  A user could downlaod his/her data
-
 - [ ]  A user could delete his/her account
 
 
 ## NICE TO HAVE
 
+- [ ]  A user could download his/her data
+
+- [ ]  A user could see his/her tour / bid / agreement history
 
 - [ ] A user could either agree to pay the tour guide via the platform or at an agreed location/time
 

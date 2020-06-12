@@ -1,39 +1,24 @@
-﻿using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System;
 using UrGuide.Data;
+using UrGuide.Data.Entities.Event;
+using UrGuide.Services.Auditing.Abstraction;
 
 namespace UrGuide.Services.Auditing.Command
 {
-    class UserDeleteAccountCommand : IRequest
+    class UserDeleteAccountCommand : BaseAuditCommand
     {
         public UserDeleteAccountCommand(string userId)
         {
             UserId = userId ?? throw new ArgumentNullException(nameof(userId));
         }
-        public string UserId { get; }
+
+        public override EventCodes EventCode => EventCodes.DeleteAccount;
     }
 
-    class UserDeleteAccountCommandHandler : IRequestHandler<UserDeleteAccountCommand>
+    class UserDeleteAccountCommandHandler : BaseAuditEventCommandHandler<UserDeleteAccountCommand>
     {
-        public UserDeleteAccountCommandHandler(UrGuideContext context)
+        public UserDeleteAccountCommandHandler(UrGuideContext context) : base(context)
         {
-            Context = context ?? throw new ArgumentNullException(nameof(context));
-        }
-
-        public UrGuideContext Context { get; }
-
-        public Task<Unit> Handle(UserDeleteAccountCommand request, CancellationToken cancellationToken)
-        {
-            Context.AuditEvents.Add(new Data.Entities.Event.AuditEvent
-            {
-                UserId = request.UserId,
-                EventCode = Data.Entities.Event.EventCodes.DeleteAccount
-            });
-            return Unit.Task;
         }
     }
 }

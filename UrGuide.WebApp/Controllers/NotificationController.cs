@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Model;
 using UrGuide.Model.Messages;
+using UrGuide.Model.Results;
 using UrGuide.Model.Users;
 using UrGuide.Services.Contracts;
 using UrGuide.Shared.Contracts;
@@ -55,6 +56,14 @@ namespace UrGuide.WebApp.Controllers
                 ReferenceLink = message.ReferenceLink
             });
             return NoContent();
+        }
+
+        [HttpPut("{id}/mark_as_read")]
+        [ProducesDefaultResponseType(typeof(bool))]
+        public async Task<IActionResult> MarkAsRead(string id, CancellationToken cancellationToken)
+        {
+            var result = await NotificationService.MarkAsReadAsync(id, cancellationToken);
+            return result.HasError ? (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors)) : Ok(result.Data);
         }
     }
 }

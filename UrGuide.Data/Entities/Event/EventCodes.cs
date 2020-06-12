@@ -11,7 +11,7 @@
         EditCatalog = 3002,
         DeleteCatalog = 3003,
         DeletePost = 3004,
-
+        CreateCalalog = 3005,
         Maintenance = 10000
     }
 }
