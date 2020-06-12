@@ -4,8 +4,10 @@ var signalr_1 = require("@microsoft/signalr");
 var SignalRClient = /** @class */ (function () {
     function SignalRClient() {
     }
-    SignalRClient.get = function (callback) {
-        var connection = new signalr_1.HubConnectionBuilder().withUrl("/notify").build();
+    SignalRClient.get = function (callback, user) {
+        var connection = new signalr_1.HubConnectionBuilder().withUrl("/notify", {
+            accessTokenFactory: function () { return user.access_token; }
+        }).build();
         connection.on("notify", function (userId, message) {
             callback(userId, message);
         });

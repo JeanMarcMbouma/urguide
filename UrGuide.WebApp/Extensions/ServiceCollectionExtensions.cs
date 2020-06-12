@@ -1,6 +1,7 @@
 ﻿using IdentityModel;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -8,6 +9,8 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using UrGuide.Shared.Configuration;
 using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Data;
@@ -82,6 +85,7 @@ namespace UrGuide.WebApp.Extensions
             services.AddSignalR();
 
             services.AddSingleton<IUserIdProvider, UserIdProvider>();
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<JwtBearerOptions>, SignalRAuthPostConfigureOptions>()); 
             return services;
         }
     }
