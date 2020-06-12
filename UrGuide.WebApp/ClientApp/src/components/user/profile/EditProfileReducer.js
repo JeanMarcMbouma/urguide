@@ -2,6 +2,9 @@
 
     let context = { ...state };
 
+    let nameRegex = /^[^-\s][\w\s-]+$/;
+    let validfname;
+    let validlname;
     switch (action.type) {
         case "editProfile":
             context.id = action.data.id;
@@ -16,13 +19,11 @@
             context.phoneNumber = action.data.phoneNumber;
             context.description = action.data.description;
 
-            let nameRegex = /^[^-\s][\w\s-]+$/;
-
             var description = String(context.description);
 
             //checking
-            let validfname = nameRegex.test(context.firstName);
-            let validlname = nameRegex.test(context.lastName);
+            validfname = nameRegex.test(context.firstName);
+            validlname = nameRegex.test(context.lastName);
             let isDescriptionGotProperLength =
                 description.length > 100 && description.length < 500 ? true : false;
             let validcity = nameRegex.test(context.city);
@@ -46,6 +47,23 @@
 
 
             return context;
+        case "client-editProfile":
+            context.id = action.data.id;
+            context.firstName = action.data.firstName;
+            context.lastName = action.data.lastName;
+            context.profileImage = action.data.profileImage;
 
+            //checking
+            validfname = nameRegex.test(context.firstName);
+            validlname = nameRegex.test(context.lastName);
+
+            //messages
+            context.fnameError = !validfname;
+            context.lnameError = !validlname;
+            if (validfname && validlname) {
+
+                action.data.callback(context);
+            }
+            return context;
     }
 }
