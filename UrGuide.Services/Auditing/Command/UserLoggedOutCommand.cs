@@ -3,37 +3,27 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Data;
+using UrGuide.Data.Entities.Event;
+using UrGuide.Services.Auditing.Abstraction;
 
 namespace UrGuide.Services.Auditing.Command
 {
-    public class UserLoggedOutCommand : IRequest
+    public class UserLoggedOutCommand : BaseAuditCommand
     {
         public UserLoggedOutCommand(string userId)
         {
             UserId = userId ?? throw new ArgumentNullException(nameof(userId));
         }
-        public string UserId { get; }
+
+        public override EventCodes EventCode => EventCodes.Logout;
     }
 
 
 
-    class UserLoggedOutCommandHandler : IRequestHandler<UserLoggedOutCommand>
+    class UserLoggedOutCommandHandler : BaseAuditEventCommandHandler<UserLoggedOutCommand>
     {
-        public UserLoggedOutCommandHandler(UrGuideContext context)
+        public UserLoggedOutCommandHandler(UrGuideContext context) : base(context)
         {
-            Context = context ?? throw new ArgumentNullException(nameof(context));
-        }
-
-        public UrGuideContext Context { get; }
-
-        public Task<Unit> Handle(UserLoggedOutCommand request, CancellationToken cancellationToken)
-        {
-            Context.AuditEvents.Add(new Data.Entities.Event.AuditEvent
-            {
-                UserId = request.UserId,
-                EventCode = Data.Entities.Event.EventCodes.Logout
-            });
-            return Unit.Task;
         }
     }
 }

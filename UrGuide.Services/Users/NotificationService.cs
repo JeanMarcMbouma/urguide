@@ -61,7 +61,7 @@ namespace UrGuide.Services.Users
 
         public async Task<Result<bool>> MarkAsReadAsync(string notificationId, CancellationToken cancellationToken)
         {
-            if (UserContext.IsAuthenticated)
+            if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
             var user = await Context.Users.Include(x => x.Notifications.Where(n => n.Id == notificationId)).FirstOrDefaultAsync(cancellationToken);
             if (user == null || !user.Notifications.Any())

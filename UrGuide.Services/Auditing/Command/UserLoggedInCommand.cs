@@ -1,37 +1,24 @@
-﻿using MediatR;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System;
 using UrGuide.Data;
+using UrGuide.Data.Entities.Event;
+using UrGuide.Services.Auditing.Abstraction;
 
 namespace UrGuide.Services.Auditing.Command
 {
-    class UserLoggedInCommand : IRequest
+    class UserLoggedInCommand : BaseAuditCommand
     {
         public UserLoggedInCommand(string userId)
         {
             UserId = userId ?? throw new ArgumentNullException(nameof(userId));
         }
-        public string UserId { get; }
+
+        public override EventCodes EventCode => EventCodes.Login;
     }
 
-    class UserLoggedInCommandHandler : IRequestHandler<UserLoggedInCommand>
+    class UserLoggedInCommandHandler : BaseAuditEventCommandHandler<UserLoggedInCommand>
     {
-        public UserLoggedInCommandHandler(UrGuideContext context)
+        public UserLoggedInCommandHandler(UrGuideContext context) : base(context)
         {
-            Context = context ?? throw new ArgumentNullException(nameof(context));
-        }
-
-        public UrGuideContext Context { get; }
-
-        public Task<Unit> Handle(UserLoggedInCommand request, CancellationToken cancellationToken)
-        {
-            Context.AuditEvents.Add(new Data.Entities.Event.AuditEvent
-            {
-                UserId = request.UserId,
-                EventCode = Data.Entities.Event.EventCodes.Login
-            });
-            return Unit.Task;
         }
     }
 }
