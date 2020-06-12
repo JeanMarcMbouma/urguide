@@ -97,7 +97,12 @@ button:focus {
 .notification_li {
     display: flex;
     margin-left: -48px;
+    padding-top:10px;
 }
+
+    .notification_li:hover {
+        background-color: #d9d9d9;
+    }
 
 
 .notification_dd {
@@ -116,11 +121,47 @@ button:focus {
     box-shadow: 0px 4px 26px -4px rgba(0,0,0,0.75);
 }
 
-.notification_label{
-    height:40px;
-    margin-bottom:10px;
-    padding-top:15px;
-    padding-left:10px;
+.notification_row {
+    margin-bottom: 20px;
+    font-size: 15px;
+}
+
+.notification_time{
+    margin-top:-14px;
+    font-size:14px;
+    color:#808080;
+}
+.block-with-text_unread {
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    color:black;
+    font-weight:500;
+}
+.notification_time_unread {
+    margin-top: -14px;
+    font-size: 13px;
+    color: #1265d7;
+    font-weight: 500;
+}
+
+.block-with-text {
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    color: red;
+}
+
+
+.notification_label {
+    height: 40px;
+    margin-bottom: 10px;
+    padding-top: 15px;
+    padding-left: 10px;
 }
 
 .notification_ul {

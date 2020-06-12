@@ -1,4 +1,7 @@
-import React, { Component, useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { Avatar, CardHeader, CircularProgress } from '@material-ui/core';
+import { HttpClientFactory } from '../httpclient';
+import { NotificationsClient } from '../api';
 import HomeOutlinedIcon from '@material-ui/icons/HomeOutlined';
 import SearchIcon from '@material-ui/icons/Search';
 import NotificationsNoneOutlinedIcon
@@ -11,10 +14,12 @@ import Badge from '@material-ui/core/Badge';
 import { Link } from 'react-router-dom';
 import "./NavMenu.css";
 import { NavbarBrand } from 'reactstrap';
-import NotificationsBox from './NotificationsBox';
-import { Avatar } from '@material-ui/core';
+import NotificationsReducer from './NotificationsReducer';
+import { useReducer } from 'react';
+import NotificationsContext from './NotificationsContext';
 import { useAuthContext } from './api-authorization/AuthService';
 import { FiLogOut } from 'react-icons/fi';
+import { SignalRClient } from '../hub';
 
 
 const useStyles = makeStyles (() => ({
@@ -63,10 +68,50 @@ function ActivateLink(event) {
 }
 
 
-function Header() {
+function NotificationsBox(props) {
+
+    return (<div className="notification_dd">
+        <div className='notification_label'>
+            <h5>Notifications</h5>
+        </div>
+        <ul className="notification_ul">
+            {props.itemsCount > 0 ? props.items.map((notif, i) => (<Notification notification={notif} />)) : <div style={{ marginLeft: `-20px` }}><br /><h5 className='text-center text-muted'>No notifications yet.</h5></div>}
+        </ul>
+    </div>);
+
+}
+
+function Notification(props) {
+
+    return (<li className="notification_li">
+        <Link to={props.notification.referenceLink}>
+            <div className="container">
+                <div className="row notification_row">
+                    <div className="col-2">
+                        <Avatar alt={'P'} src={props.notification.authorImage} />
+                    </div>
+                    <div className="col-10">
+                        <div className="row">
+                            <div className="col-12">
+                                {props.notification.read ? <><p className="block-with-text" >{props.notification.content}</p><div className="notification_time" >{props.notification.created}</div></> : <><p className="block-with-text_unread">{props.notification.content}</p><div className="notification_time_unread" >{props.notification.created}</div></>}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Link>
+    </li>);
+}
+
+
+
+export default function Header() {
 
    
     const [show, setShow] = useState(false);
+    const [unread, setUnread] = useState(0);
+    const ctx = useContext(NotificationsContext);
+    const [state, dispatch] = useReducer(NotificationsReducer, ctx);
 
     const { manager, user } = useAuthContext();
 
@@ -74,10 +119,58 @@ function Header() {
         profile: {}
     };
 
-    //console.log(user);
+    function getNotifications(userId, notification) {
+
+        state.items.unshift(notification);
+
+        dispatch({
+            type: "unread",
+            data: {
+
+                itemsCount: state.itemsCount,
+                pageNumber: state.pageNumber,
+                items: state.items,
+            }
+        });
+        setUnread(unread + 1);
+    }
+
+    SignalRClient.get(getNotifications);
+
+    useEffect(() => {
+        var fetch = async () => {
+
+            if (user === null)
+                return;
+            const client = HttpClientFactory.get(NotificationsClient, user);
+            try {
+
+                var result = await client.all(1);
+                console.log(result);
+                dispatch({
+                    type: "all",
+                    data: {
+
+                        itemsCount: result.itemsCount,
+                        pageNumber: result.pageNumber,
+                        items: result.items,
+                    }
+                });
+
+                setUnread(result.itemsCount);
+
+            }
+            catch (e) {
+                console.log(e);
+            }
+        };
+        fetch();
+        return () => { };
+    }, [user]);
 
     function ToggleNotifications() {
 
+        setUnread(0);
         setShow(!show);
     }
 
@@ -88,6 +181,8 @@ function Header() {
     }
 
     const classes = useStyles();
+
+
     return (
         <>
             <nav className='navigation-bar' >
@@ -160,7 +255,7 @@ function Header() {
                                 <div className='col-1 col-sm-1 d-flex justify-content-between' >
                                     <div>
                                         <IconButton onClick={ToggleNotifications}>
-                                            <Badge badgeContent={0} max={9} color="error">
+                                            <Badge badgeContent={unread} max={9} color="error">
                                                 <NotificationsNoneOutlinedIcon />
                                             </Badge>
                                         </IconButton>
@@ -176,7 +271,7 @@ function Header() {
                     </div>
                     <div className='row justify-content-end'>
                         {show ? <div className='col-12'>
-                            <NotificationsBox show={show} user={user} />
+                            <NotificationsBox show={show} user={user} items={state.items} itemsCount={state.itemsCount} />
                         </div> : null }
                         
                     </div>
@@ -187,4 +282,7 @@ function Header() {
     )
 }
 
-export default Header;
+
+//function Loading() {
+//    return (<div className="loading-icon"><h6 className="text-center"><CircularProgress ></CircularProgress></h6></div>);
+//}

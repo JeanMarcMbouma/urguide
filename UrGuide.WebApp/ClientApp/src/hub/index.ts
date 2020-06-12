@@ -6,6 +6,7 @@ export class SignalRClient {
 
         connection.on("notify", (userId: string, message: Notification) => {
             callback(userId, message);
+            console.log(message);
         });
 
         return connection.start();

@@ -327,4 +327,4 @@ export class LoginPage extends Component  {
             </div>
         );
     }
-}
+} 

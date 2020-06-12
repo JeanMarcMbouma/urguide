@@ -8,6 +8,7 @@ var SignalRClient = /** @class */ (function () {
         var connection = new signalr_1.HubConnectionBuilder().withUrl("/notify").build();
         connection.on("notify", function (userId, message) {
             callback(userId, message);
+            console.log(message);
         });
         return connection.start();
     };
