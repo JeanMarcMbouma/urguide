@@ -68,6 +68,7 @@ namespace UrGuide.WebApp.Services
             var baseUrl = $"{request.Scheme}://{request.Host}{request.PathBase}";
             foreach (var key in p.Keys)
             {
+                if (p[key] == null) continue;
                 uri = QueryHelpers.AddQueryString(uri, key, p[key].ToString());
             }
             return $"{baseUrl}{uri}";
