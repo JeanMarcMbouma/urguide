@@ -59,6 +59,18 @@ namespace UrGuide.Services.Users
             return Result.Of(items);
         }
 
+        public async Task<Result<bool>> MarkAsReadAsync(string notificationId, CancellationToken cancellationToken)
+        {
+            if (UserContext.IsAuthenticated)
+                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
+            var user = await Context.Users.Include(x => x.Notifications.Where(n => n.Id == notificationId)).FirstOrDefaultAsync(cancellationToken);
+            if (user == null || !user.Notifications.Any())
+                return Result.Of(false).WithErrors(ErrorMessages.NotFoundEntityForKey);
+            var notification = user.Notifications.First();
+            notification.Read = true;
+            return Result.Of(true);
+        }
+
         public async Task NotifyAsync(CreateNotification createNotification)
         {
             var result = Validator.Validate(createNotification);
