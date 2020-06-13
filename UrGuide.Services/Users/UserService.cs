@@ -313,5 +313,33 @@ namespace UrGuide.Services.Users
                 return Result.Of<UserInfo>().WithErrors(ErrorMessages.NotFoundEntityForKey);
             return Result.Of(Mapper.Map<UserInfo>(result));
         }
+
+        public async Task<Result<bool>> UpdateUserAsync(UpdateUserModel updateUser, CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var user = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
+            if (updateUser.ProfileImage != null)
+            {
+                var imageUrl = ImageService.SaveAvatar(UserContext.UserId, new Model.Shared.ImageFileModel
+                {
+                    ImageBase64 = updateUser.ProfileImage
+                });
+
+                user.ProfileImage.ImageUrl = imageUrl;
+            }
+
+            var attributes = new[]{
+                    new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.FirstName), Value = updateUser.FirstName },
+                    new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.LastName), Value = updateUser.LastName }
+                };
+
+            SetAttributesInternal(attributes, user);
+
+            return Result.Of(true);
+        }
     }
 }
