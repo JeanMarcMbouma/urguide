@@ -7,8 +7,8 @@ export class SignalRClient {
             accessTokenFactory: () => user.access_token
         }).build();
 
-        connection.on("notify", (userId: string, message: Notification) => {
-            callback(userId, message);
+        connection.on("notify", (message: Notification, userInfo: any) => {
+            callback(userInfo, message);
         });
 
         return connection.start();

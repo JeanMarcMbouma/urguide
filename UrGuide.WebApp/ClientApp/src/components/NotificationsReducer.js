@@ -17,6 +17,15 @@
             return context;
             break;
         case "unread":
+           
+            context.items = action.data.items;
+            context.items.unshift(action.data.notification);
+
+            return context;
+            break;
+        case "clicked":
+            context.items = action.data.items;
+            action.data.markasread(action.data.notificationId, action.data.redirectUrl);
             return context;
             break;
     }

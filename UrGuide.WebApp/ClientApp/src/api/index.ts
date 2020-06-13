@@ -4319,6 +4319,7 @@ export interface IUserInfo {
 }
 
 export class Notification implements INotification {
+    id?: string | undefined;
     content?: string | undefined;
     authorId?: string | undefined;
     authorImage?: string | undefined;
@@ -4338,6 +4339,7 @@ export class Notification implements INotification {
 
     init(_data?: any) {
         if (_data) {
+            this.id = _data["id"];
             this.content = _data["content"];
             this.authorId = _data["authorId"];
             this.authorImage = _data["authorImage"];
@@ -4357,6 +4359,7 @@ export class Notification implements INotification {
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
         data["content"] = this.content;
         data["authorId"] = this.authorId;
         data["authorImage"] = this.authorImage;
@@ -4369,6 +4372,7 @@ export class Notification implements INotification {
 }
 
 export interface INotification {
+    id?: string | undefined;
     content?: string | undefined;
     authorId?: string | undefined;
     authorImage?: string | undefined;

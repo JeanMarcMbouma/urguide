@@ -101,7 +101,8 @@ button:focus {
 }
 
     .notification_li:hover {
-        background-color: #d9d9d9;
+        background-color: #e8e8e8;
+        cursor:pointer;
     }
 
 
@@ -153,7 +154,7 @@ button:focus {
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    color: red;
+    color: rgba(0,0,0,0.54);
 }
 
 

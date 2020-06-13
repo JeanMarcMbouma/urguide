@@ -67,27 +67,6 @@ function ActivateLink(event) {
  
 }
 
-function Notification(props) {
-
-    return (<li className="notification_li">
-        <Link to={props.notification.referenceLink}>
-            <div className="container">
-                <div className="row notification_row">
-                    <div className="col-2">
-                        <Avatar alt={'P'} src={props.notification.authorImage} />
-                    </div>
-                    <div className="col-10">
-                        <div className="row">
-                            <div className="col-12">
-                                {props.notification.read ? <><p dangerouslySetInnerHTML={{ __html: props.notification.content }} className="block-with-text" /><div className="notification_time" >{props.notification.created}</div></> : <><p className="block-with-text_unread" dangerouslySetInnerHTML={{ __html: props.notification.content }} /><div className="notification_time_unread" >{props.notification.created}</div></>}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </Link>
-    </li>);
-}
 
 
 
@@ -105,6 +84,8 @@ export default function Header() {
     const { profile } = user || {
         profile: {}
     };
+
+
 
     async function loadMoreNotifications(e) {
         var obj = e.target;
@@ -142,23 +123,44 @@ export default function Header() {
         }
     }
 
+    async function clickedNotification(notificationId, redirectUrl) {
+        if (user === null)
+            return;
+
+        console.log(user);
+        const client = HttpClientFactory.get(NotificationsClient, user);
+        await client.mark_as_read(notificationId).then((status) => {
+            alert(status);
+            if (unread > 0 && status) {
+
+                setUnread(unread - 1);
+
+            }
+
+            window.location.replace(redirectUrl);
+
+          });
+       
+    }
 
     SignalRClient.get((userId, notification) => {
 
-        state.items.unshift(notification);
+        if (!profile)
+            return;
 
-        dispatch({
-            type: "unread",
-            data: {
-
-                itemsCount: state.itemsCount,
-                pageNumber: state.pageNumber,
-                items: state.items,
-            }
-        });
-        setUnread(unread + 1);
-        console.log(notification);
-
+        if (userId === profile.sub) {
+            setUnread(unread + 1);
+            dispatch({
+                type: "unread",
+                data: {
+                    notification: notification,
+                    itemsCount: state.itemsCount,
+                    pageNumber: state.pageNumber,
+                    items: state.items,
+                }
+            });
+        }
+        
     }, user);
 
     useEffect(() => {
@@ -166,11 +168,12 @@ export default function Header() {
 
             if (user === null)
                 return;
+
+            console.log(user);
             const client = HttpClientFactory.get(NotificationsClient, user);
             try {
 
                 var result = await client.all(1);
-                console.log(result);
                 dispatch({
                     type: "all",
                     data: {
@@ -205,7 +208,6 @@ export default function Header() {
     }
 
     const classes = useStyles();
-
 
     return (
         <>
@@ -300,7 +302,41 @@ export default function Header() {
                                     <h5>Notifications</h5>
                                 </div>
                                 <ul className="notification_ul" onScroll={(e) => loadMoreNotifications(e)}>
-                                    {state.itemsCount > 0 ? state.items.map((notif, i) => (<Notification key={i} notification={notif} />)) : <div style={{ marginLeft: `-20px` }}><br /><h5 className='text-center text-muted'>No notifications yet.</h5></div>}
+                                    {state.itemsCount > 0 ? state.items.map((notification, i) => (<li key={i} className="notification_li" onClick={() => {
+
+                                        if (!state.items[i].read) {
+
+                                            state.items[i].read = true;
+                                            dispatch({
+                                                type: "clicked",
+                                                data: {
+                                                    itemsCount: state.itemsCount,
+                                                    pageNumber: state.pageNumber,
+                                                    items: state.items,
+                                                    notificationId: notification.id,
+                                                    markasread: clickedNotification,
+                                                    redirectUrl: notification.referenceLink,
+                                                }
+                                            });
+
+                                        }
+                                 }}>
+                              
+                                            <div className="container">
+                                                <div className="row notification_row">
+                                                    <div className="col-2">
+                                                        <Avatar alt={'P'} src={notification.authorImage} />
+                                                    </div>
+                                                    <div className="col-10">
+                                                        <div className="row">
+                                                            <div className="col-12">
+                                                                {notification.read ? <><p dangerouslySetInnerHTML={{ __html: notification.content }} className="block-with-text" /><div className="notification_time" >{notification.created}</div></> : <><p className="block-with-text_unread" dangerouslySetInnerHTML={{ __html: notification.content }} /><div className="notification_time_unread" >{notification.created}</div></>}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                    </li>)) : <div style={{ marginLeft: `-20px` }}><br /><h5 className='text-center text-muted'>No notifications yet.</h5></div>}
                                 </ul>
                             </div>
                         </div> : null }
