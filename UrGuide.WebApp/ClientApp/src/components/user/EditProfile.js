@@ -23,7 +23,7 @@ import Alert from '@material-ui/lab/Alert';
 import EditProfileNavigation from "./EditProfileNavigation";
 import "./UserStyle.css";
 import { useAuthUser } from "../api-authorization/AuthService";
-import { UpdateGuideModel } from './../../api';
+import { UpdateGuideModel, UpdateUserModel, Client } from './../../api';
 import { HttpClientFactory } from './../../httpclient';
 import { BlobToBase64 } from "../../helpers/fileHelpers";
 import { useDataContext, ActionTypes } from "../../data/GlobalDataContext";
@@ -43,10 +43,10 @@ function ClientProfile() {
 
     async function editProfile(state) {
 
-        const client = HttpClientFactory.getClient(user);
+        const client = HttpClientFactory.get(Client, user);
 
-        const model = new UpdateGuideModel({
-            id: state.id,
+        const model = new UpdateUserModel({
+            id: user.profile.sub,
             firstName: state.firstName,
             lastName: state.lastName,
             profileImage: state.profileImage
@@ -54,7 +54,7 @@ function ClientProfile() {
 
         try {
 
-            await client.updateguide(model);
+            await client.updateuser(model);
             setStatus(200);
             return 200;
         }
@@ -238,10 +238,10 @@ function Profile() {
 
     async function editProfile(state) {
 
-        const client = HttpClientFactory.getClient(user);
+        const client = HttpClientFactory.get(Client, user);
 
         const model = new UpdateGuideModel({
-            id: state.id,
+            id: user.profile.sub,
             firstName: state.firstName,
             lastName: state.lastName,
             birthDay: state.birthDay,

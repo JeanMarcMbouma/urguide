@@ -28,6 +28,8 @@ import LogoutCallback from './components/api-authorization/LogoutCallback';
 import ClientDetails from './components/user/ClientDetails';
 import { DataContextProvider } from './data/GlobalDataContext';
 import Messages from './components/messages/messages';
+import ForgetPassword from './components/confirmation/ForgetPassword';
+import ResetPassword from './components/confirmation/ResetPassword';
 
 export default class App extends Component {
     constructor(props) {
@@ -48,6 +50,8 @@ export default class App extends Component {
                                 path="/sign-up-confirm"
                                 component={RegistrationConfirmation}
                             />
+                            <Route exact path="/reset-password" component={ForgetPassword} />
+                            <Route exeact path="/pforget" component={ResetPassword} />
 
                             <Route path="/sign-in">
                                 <LoginLayout>
