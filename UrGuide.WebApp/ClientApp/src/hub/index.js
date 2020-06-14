@@ -8,8 +8,8 @@ var SignalRClient = /** @class */ (function () {
         var connection = new signalr_1.HubConnectionBuilder().withUrl("/notify", {
             accessTokenFactory: function () { return user.access_token; }
         }).build();
-        connection.on("notify", function (userId, message) {
-            callback(userId, message);
+        connection.on("notify", function (message, userInfo) {
+            callback(userInfo, message);
         });
         return connection.start();
     };

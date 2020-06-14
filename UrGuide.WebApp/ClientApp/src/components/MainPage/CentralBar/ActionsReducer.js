@@ -7,7 +7,7 @@
         case "like-action":
             context.post = action.data.post;
             context.posts = action.data.posts;
-
+           // console.log(context.posts);
             context.posts.forEach((post, index) => {
 
                 if(post.id === context.post.id && post.reactionType === 2) {

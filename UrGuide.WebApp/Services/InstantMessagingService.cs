@@ -19,7 +19,7 @@ namespace UrGuide.WebApp.Services
 
         public Task Send<T>(string userId, T message)
         {
-            return HubContext.Clients.User(userId).SendAsync("notify", message);
+            return HubContext.Clients.All./*User(userId).*/SendAsync("notify", message, userId);
         }
 
         public Task Send<T, TUserInfo>(string userId, T message, TUserInfo userInfo)

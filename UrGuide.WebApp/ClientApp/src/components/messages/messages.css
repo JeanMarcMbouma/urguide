@@ -1,0 +1,17 @@
+﻿.messages-layout-div{
+   padding-top:0;
+}
+
+.contacts-panel {
+    height: 80vh;
+    background-color: white;
+    overflow-y: scroll;
+    width:100%;
+    overflow-x:hidden;
+}
+
+.conversation-panel {
+    height: 80vh;
+    background-color: blue;
+    overflow-y: scroll;
+}

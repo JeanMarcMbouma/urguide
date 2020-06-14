@@ -27,9 +27,9 @@ import LoginCallback from './components/api-authorization/LoginCallback';
 import LogoutCallback from './components/api-authorization/LogoutCallback';
 import ClientDetails from './components/user/ClientDetails';
 import { DataContextProvider } from './data/GlobalDataContext';
+import Messages from './components/messages/messages';
 import ForgetPassword from './components/confirmation/ForgetPassword';
 import ResetPassword from './components/confirmation/ResetPassword';
-
 
 export default class App extends Component {
     constructor(props) {
@@ -74,10 +74,11 @@ export default class App extends Component {
                                 </RegisterLayout>
                             </Route>
 
-                            <Route path="/(feed|profile|account)">
+                            <Route path="/(feed|profile|account|messages)">
                                 <Layout>
                                     <Route path="/feed" component={Home} />
                                     <AuthRoute path="/profile" component={Profile} />
+                                    <AuthRoute path="/messages" component={Messages} />
                                     <AuthRoute path="/account" component={ClientDetails} />
                                 </Layout>
                             </Route>

@@ -63,10 +63,10 @@ namespace UrGuide.Services.Users
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
-            var user = await Context.Users.Include(x => x.Notifications.Where(n => n.Id == notificationId)).FirstOrDefaultAsync(cancellationToken);
-            if (user == null || !user.Notifications.Any())
+            var user = await Context.Users.FirstOrDefaultAsync(u =>  u.Id == UserContext.UserId, cancellationToken);
+            var notification = user?.Notifications.SingleOrDefault(n => n.Id == notificationId);
+            if (notification == null)
                 return Result.Of(false).WithErrors(ErrorMessages.NotFoundEntityForKey);
-            var notification = user.Notifications.First();
             notification.Read = true;
             return Result.Of(true);
         }
@@ -88,6 +88,7 @@ namespace UrGuide.Services.Users
                     Read = false
                 };
                 user.Notifications.Add(notification);
+                await Context.SaveChangesAsync();
                 _ = InstantMessaging.Send(user.Id, Mapper.Map<Model.Users.Notification>(notification)).ConfigureAwait(false);
                 return;
             }
