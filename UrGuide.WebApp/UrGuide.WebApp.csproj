@@ -48,6 +48,7 @@
     <None Remove="ClientApp\src\api\ClientFactory.ts" />
     <None Remove="ClientApp\src\components\api-authorization\AuthService.js" />
     <None Remove="ClientApp\src\components\login\LoginReducer.ts" />
+    <None Remove="ClientApp\src\components\user\ModalTest.js" />
     <None Remove="ClientApp\src\components\user\profile\ChangePasswordReducer.ts" />
     <None Remove="ClientApp\src\components\user\profile\EditProfileReducer.js" />
     <None Remove="ClientApp\src\helpers\fileHelpers.ts" />

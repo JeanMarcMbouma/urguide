@@ -58,8 +58,9 @@ namespace UrGuide.Services.Users
 
             try
             {
-                var user = await Context.Users.FindAsync(new { UserContext.UserId }, cancellationToken);
+                var user = await Context.Users.FindAsync(new []{ UserContext.UserId }, cancellationToken);
                 Context.Users.Remove(user);
+                await AuthService.DeleteAccount();
                 return Result.Of(true);
             }
             catch (System.Exception e)

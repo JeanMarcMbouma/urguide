@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Linq;
 using System.Threading;
@@ -15,18 +17,21 @@ namespace UrGuide.WebApp.Services
         public AuthService(SignInManager<UrGuideUser> signInManager, 
             IUserContext userContext, 
             IEmailService emailService,
-            IWebHelper webHelper)
+            IWebHelper webHelper,
+            IHttpContextAccessor httpContext)
         {
             SignInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
             UserContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             EmailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
             WebHelper = webHelper ?? throw new ArgumentNullException(nameof(webHelper));
+            HttpContext = httpContext?.HttpContext ?? throw new ArgumentNullException(nameof(httpContext));
         }
 
         public SignInManager<UrGuideUser> SignInManager { get; }
         public IUserContext UserContext { get; }
         public IEmailService EmailService { get; }
         public IWebHelper WebHelper { get; }
+        public HttpContext HttpContext { get; }
 
         public async Task<Result<bool>> ChangePasswordAsync(ChangePasswordModel model, CancellationToken cancellationToken)
         {
@@ -202,6 +207,17 @@ namespace UrGuide.WebApp.Services
                 }
             }
             return Result.Of(false).WithErrors("Failed to reset your password");
+        }
+
+        public async Task DeleteAccount()
+        {
+            var userManager = SignInManager.UserManager;
+            var user = await userManager.GetUserAsync(HttpContext.User);
+            if(user != null)
+            {
+                await userManager.DeleteAsync(user);
+                await HttpContext.SignOutAsync();
+            }
         }
     }
 }

@@ -118,5 +118,15 @@ namespace UrGuide.WebApp.Controllers
                 return Redirect(returnUrl);
             return Ok();
         }
+
+        [Authorize]
+        [HttpGet("delete")]
+        public async Task<IActionResult> Delete(string returnUrl = null)
+        {
+            await AuthService.DeleteAccount();
+            if (Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
+            return Ok();
+        }
     }
 }
