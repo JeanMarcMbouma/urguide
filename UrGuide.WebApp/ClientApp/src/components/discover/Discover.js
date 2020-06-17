@@ -1,4 +1,4 @@
-﻿import React, { Component, useState, useContext, useReducer, useMemo } from "react";
+﻿import React, { Component, useState, useContext, useReducer, useMemo, useEffect } from "react";
 import {
     makeStyles,
     IconButton,
@@ -53,10 +53,12 @@ export default function Discover() {
     }
 
 
-    useMemo(async () => {
+    useEffect(() => {
 
-        const api = HttpClientFactory.getPostClient();
-        if (cat === "nearme") {
+        let doWork = async () => {
+
+            const api = HttpClientFactory.getPostClient();
+            if(cat === "nearme") {
 
             var model = new SearchParameters({ term: null, nearby: true, pageNumber: 1 });
             var result = await api.search(model);
@@ -69,12 +71,10 @@ export default function Discover() {
                     items: items,
                 }
             });
-            
-
         }
         else
         {
-            var model = new SearchParameters({ term:cat, nearby: false, pageNumber: 1 });
+            var model = new SearchParameters({ term: cat, nearby: false, pageNumber: 1 });
             var result = await api.search(model);
             var items = result.items.filter(i => i.images.length > 0);
             dispatch({
@@ -85,11 +85,13 @@ export default function Discover() {
                     items: items,
                 }
             });
-           
         }
 
-        setLoading(false);
-        
+            setLoading(false);
+        }
+        doWork();
+
+        return () => { };
     }, []);
 
     

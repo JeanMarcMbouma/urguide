@@ -1,14 +1,6 @@
 ﻿import React, {
-    useState, useContext, useMemo, useReducer, Component
+    useState, useContext, useReducer, Component, useEffect
 } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import { FaRegComment } from 'react-icons/fa';
-import { AiOutlineDislike } from 'react-icons/ai';
-import { AiOutlineLike } from 'react-icons/ai';
-import { AiFillDislike } from 'react-icons/ai';
-import { AiFillLike } from 'react-icons/ai';
-import { AiOutlineStop } from 'react-icons/ai';
-import { AiOutlineCheck } from 'react-icons/ai';
 import { Link, useParams } from 'react-router-dom';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import {
@@ -18,12 +10,7 @@ import {
     CardActions,
     Avatar,
     IconButton,
-    InputLabel,
     CircularProgress,
-    Input,
-    FormControl,
-    InputAdornment,
-    FormHelperText,
     Typography,
     ButtonGroup,
     Button,
@@ -38,15 +25,7 @@ import LocationOnIcon from '@material-ui/icons/LocationOn';
 import PropTypes from 'prop-types';
 import '../MainPage/CentralBar/CentralStyle.css';
 import 'date-fns';
-import Grid from '@material-ui/core/Grid';
-import Slider from '@material-ui/core/Slider';
-import AttachMoneyOutlinedIcon from '@material-ui/icons/AttachMoneyOutlined';
-import AlarmOutlinedIcon from '@material-ui/icons/AlarmOutlined';
-import clsx from "clsx";
-import { withStyles } from '@material-ui/core/styles';
-import { useAuthUser } from '../../components/api-authorization/AuthService';
 import { useAuthContext } from '../../components/api-authorization/AuthService';
-import authService from '../../components/api-authorization/AuthService';
 import { HttpClientFactory } from '../../httpclient';
 import "./UserStyle.css";
 import FeedBackContext from './FeedbackContext';
@@ -95,14 +74,19 @@ function Itinerary(props) {
 
     const [itineraries, setItineraries] = useState([]);
 
-    useMemo(async () => {
+    useEffect(() => {
 
         if (!props.show)
             return;
-        const api = HttpClientFactory.getPostClient();
-        var result = await api.itineraries(props.postId);
-        setItineraries(result);
+        let load = async () => {
+            const api = HttpClientFactory.getPostClient();
+            var result = await api.itineraries(props.postId);
+            setItineraries(result);
+        };
 
+        load();
+
+        return () => { };
     }, [props.show]);
 
 
@@ -151,18 +135,25 @@ function FeedBacks(props) {
     const ctx = useContext(FeedBackContext);
     const [state, dispatch] = useReducer(FeedBackReducer, ctx);
 
-    const [values, setValues] = useState({ review: '', rating: 1, postId: props.postId });
+    const initialValues = { review: '', rating: 1, postId: props.postId };
+    const [values, setValues] = useState(initialValues);
 
-    useMemo(async () => {
-        if (props.show === true) {
-                var client = HttpClientFactory.get(FeedbackClient);
-            var result = await client.posts(props.showId, 1);
-            setPageNumber(result.pageNumber);
+    useEffect(() => {
+        if (props.show === true && props.showId === props.postId) {
+            var client = HttpClientFactory.get(FeedbackClient);
+            client.posts(props.showId, 1).then(result => {
+                setPageNumber(result.pageNumber);
                 setLoading(false);
-                state.feedbacks = result.items;
+                dispatch({
+                    type: "loading",
+                    data: {
+                        feedbacks: result.items
+                    }
+                });
+            });
         }
-  
-    },[]);
+        return () => { };
+    }, [props.show, props.showId]);
 
 
     const handleChange = prop => event => {
@@ -178,15 +169,23 @@ function FeedBacks(props) {
         if (!props)
             return;
 
-        const client = HttpClientFactory.get(PostsClient, user);  
-        var model = new FeedbackModel({
+        const client = HttpClientFactory.get(PostsClient, user);
+        const config = {
             text: review.review,
-            rating: review.rating,
-        });
+            rating: review.rating
+        };
+        var model = new FeedbackModel(config);
         try {
 
             await client.feedback(review.postId, model);
-       
+            setValues(initialValues);
+            dispatch({
+                type: "new-item",
+                data: {
+                    review: config,
+                    user: user
+                }
+            });
         }
         catch (e) {
             console.log(e);
@@ -239,47 +238,47 @@ function FeedBacks(props) {
                 <br />
             </div>}
 
-            {state.feedbacks.length > 0 ? <h5> Reviews ({state.feedbacks.length})</h5> : <h5>No review yet.</h5> }
-<br />
+            {state.feedbacks.length > 0 ? <h5> Reviews ({state.feedbacks.length})</h5> : <h5>No review yet.</h5>}
+            <br />
             {
                 state.feedbacks.map((rev, i) => (
-        <div className='cmt-div' key={i} >
-            <CardHeader
-                avatar={<Avatar alt={rev.authorFullName} src={rev.authorImage} />}
-                title={
-                    <h6>
-                        {rev.authorFullName}
-                    </h6>
-                }
-               subheader={rev.publicationDate}
-            />
-            <Rating
-                value={rev.rating}
-                readOnly
-            />
-            <div className='comment-text'>
-                <p>{rev.text}</p>
-            </div>
+                    <div className='cmt-div' key={i} >
+                        <CardHeader
+                            avatar={<Avatar alt={rev.authorFullName} src={rev.authorImage} />}
+                            title={
+                                <h6>
+                                    {rev.authorFullName}
+                                </h6>
+                            }
+                            subheader={rev.publicationDate}
+                        />
+                        <Rating
+                            value={rev.rating}
+                            readOnly
+                        />
+                        <div className='comment-text'>
+                            <p>{rev.text}</p>
+                        </div>
                     </div>))
-            }<br /> <h4 className='text-center'><IconButton onClick={ async () => {
+            }<br /> <h4 className='text-center'><IconButton onClick={async () => {
 
-                if(props.show === true) {
+                if (props.show === true) {
                     var client = HttpClientFactory.get(FeedbackClient);
                     var page = pageNumber + 1;
                     var result = await client.posts(props.showId, page);
                     //console.log(result.pageNumber);
-                setPageNumber(result.pageNumber);
-                setLoading(false);
+                    setPageNumber(result.pageNumber);
+                    setLoading(false);
                     result.items.forEach((item, index) => { state.feedbacks.push(item) });
-            dispatch({
-                    type: "more-feedbacks",
-                data: {
-                    userFeedback:values,
-                    feedbacks: state.feedbacks,
-            }
-        });
-    }
-    }} ><AddCircleOutlineIcon fontSize="large" /></IconButton></h4></>}
+                    dispatch({
+                        type: "more-feedbacks",
+                        data: {
+                            userFeedback: values,
+                            feedbacks: state.feedbacks,
+                        }
+                    });
+                }
+            }} ><AddCircleOutlineIcon fontSize="large" /></IconButton></h4></>}
     </> : null);
 }
 
@@ -290,31 +289,29 @@ export default function Posts() {
 
     const { userId } = useParams();
     const { user } = useAuthContext();
-    
+
     const [isLoading, setLoading] = useState(true);
     const [data, setData] = useState({});
-   
-    useMemo(async () => {
+
+    useEffect(() => {
 
         var id = userId;
- 
-        if (user != null && id == undefined ) {
+
+        if (user != null && id == undefined) {
             id = user.profile.sub;
         }
 
-
-        var client = HttpClientFactory.get(PostsClient);
-        var model = new SearchParameters({ term: null, pageNumber: 1 });
-        try {
+        let load = async () => {
+            var client = HttpClientFactory.get(PostsClient, user);
+            var model = new SearchParameters({ term: null, pageNumber: 1 });
             var result = await client.all(id, model);
             setData(result);
             setLoading(false);
         }
-        catch (e) {
-            console.log(e);
-        }
-       
-    }, []);
+
+        load();
+        return () => { };
+    }, [user]);
 
     function PostImages(props) {
         if (props.images.length == 1) {
@@ -411,56 +408,56 @@ export default function Posts() {
 
         const post = props.post;
 
-    return (<div className="p-3 mb-3 bg-white rounded post-card">
-        <div className="col-12 mt-3 row">
-            <CardHeader className="col-10 p-2 m-0"
-                avatar={<Link to={`/g/${post.authorId}`} ><Avatar alt={post.author} src={post.authorAvatar} /></Link>}
-                title={
-                    <Link to={`/g/${post.authorId}`} >
-                        <h6>
-                            {post.author}
-                        </h6>
-                    </Link>
-                }
-                subheader={post.publicationDate}
-            />
-        </div>
-        <CardContent>
-            <div className='row'>
-                <div className='col-12' >
-                    <Rating value={post.rating} readOnly />
-                    <br />
-                    <br />
+        return (<div className="p-3 mb-3 bg-white rounded post-card">
+            <div className="col-12 mt-3 row">
+                <CardHeader className="col-10 p-2 m-0"
+                    avatar={<Link to={`/g/${post.authorId}`} ><Avatar alt={post.author} src={post.authorAvatar} /></Link>}
+                    title={
+                        <Link to={`/g/${post.authorId}`} >
+                            <h6>
+                                {post.author}
+                            </h6>
+                        </Link>
+                    }
+                    subheader={post.publicationDate}
+                />
+            </div>
+            <CardContent>
+                <div className='row'>
+                    <div className='col-12' >
+                        <Rating value={+post.rating} readOnly />
+                        <br />
+                        <br />
+                    </div>
                 </div>
-            </div>
-            <div className='row'>
-                <div className='col-12' >
-                    {post.categories.map((category, i) => (<Link key={i} to={`/discover/${category}`}> <span className='category-tag'>{category}</span> </Link>))}
-                    <br />
-                    <br />
+                <div className='row'>
+                    <div className='col-12' >
+                        {post.categories.map((category, i) => (<Link key={i} to={`/discover/${category}`}> <span className='category-tag'>{category}</span> </Link>))}
+                        <br />
+                        <br />
+                    </div>
                 </div>
-            </div>
-            <Typography variant="subtitle1" component="p">
-                {post.description}
-            </Typography>
-        </CardContent>
-        <PostImages images={post.images} postId={post.id} />
-        <CardActions  >
-            <div className='row' style={{ width: `100%`, marginLeft:`2px` }} >
-                <div className='col-12'>
-                    <Button onClick={() => toggleReviews(post.id)} fullWidth className="btn-reviews" >Reviews</Button>
-                </div> 
-            </div>
-        </CardActions>
-        <FeedBacks show={showReviews.show} showId={showReviews.id} postId={post.id} authorId={post.authorId} />
-    </div>);
+                <Typography variant="subtitle1" component="p">
+                    {post.description}
+                </Typography>
+            </CardContent>
+            <PostImages images={post.images} postId={post.id} />
+            <CardActions  >
+                <div className='row' style={{ width: `100%`, marginLeft: `2px` }} >
+                    <div className='col-12'>
+                        <Button onClick={() => toggleReviews(post.id)} fullWidth className="btn-reviews" >Reviews</Button>
+                    </div>
+                </div>
+            </CardActions>
+            <FeedBacks show={showReviews.show} showId={showReviews.id} postId={post.id} authorId={post.authorId} />
+        </div>);
     }
 
     return (
         <div className="row">
             <div className="col-12 lower-section">
                 <div className="col-12 col-md-6 col-lg-5 col-xl-5 timeline">
-                    {isLoading ? <><SkeletonCard /><SkeletonCard /></> : data.items.map((post, i) => <SinglePost key={i} post={post} />) }
+                    {isLoading ? <><SkeletonCard /><SkeletonCard /></> : data.items.map((post, i) => <SinglePost key={i} post={post} />)}
                 </div>
             </div>
         </div>

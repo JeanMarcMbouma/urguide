@@ -68,15 +68,15 @@ export default function Reviews(props) {
     const { user } = useAuthContext();
     const ctx = useContext(FeedBackContext);
     const [state, dispatch] = useReducer(FeedBackReducer, ctx);
-    console.log(state)
     const [pageNumber, setPageNumber] = useState(1);
-    const [values, setValues] = useState({review:'', rating:1 });
+    const initialValues = { review: '', rating: 1 };
+    const [values, setValues] = useState(initialValues);
 
 
     const client = HttpClientFactory.get(FeedbackClient, user);
     useEffect(() => {
 
-        client.users(props.userId, pageNumber)
+        client.users(props.userId || user.profile.sub, pageNumber)
             .then(r => {
                 dispatch({
                     type: "loading",
@@ -87,7 +87,7 @@ export default function Reviews(props) {
             });
 
         return () => { };
-    }, [pageNumber]);
+    }, [user, pageNumber]);
         
 
     const handleChange = prop => event => {
@@ -104,13 +104,22 @@ export default function Reviews(props) {
             return;
 
         const client = HttpClientFactory.get(UsersClient, user);
-        var model = new FeedbackModel({
+        const config = {
             text: review.review,
             rating: review.rating,
-        });
+        };
+        var model = new FeedbackModel(config);
         try {
 
             await client.feedback(props.userId, model);
+            setValues(initialValues);
+            dispatch({
+                type: "new-item",
+                data: {
+                    review: config,
+                    user: user
+                }
+            });
         }
         catch (e) {
             console.log(e);
@@ -148,7 +157,7 @@ export default function Reviews(props) {
                 </div>
 
                 <br />
-                <Button variant="contained" color="primary" onClick={() =>{
+                <Button variant="contained" color="primary" onClick={() =>
                         dispatch({
                             type: "user-feedback",
                             data: {
@@ -156,9 +165,7 @@ export default function Reviews(props) {
                                 feedbacks: state.feedbacks,
                                 callback: createReview,
                             }
-                        })
-                        setValues({review:'', rating:1 })
-                        window.location.reload();} 
+                        }) 
                     }>submit review</Button> 
                 <br />
                 <br />

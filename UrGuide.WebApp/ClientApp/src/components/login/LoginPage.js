@@ -35,7 +35,7 @@ function Copyright() {
             {"Copyright © "}
             <Link color="inherit" href="https://material-ui.com/">
                 UrGuide
-      </Link>{" "}
+            </Link>{" "}
             {new Date().getFullYear()}
             {"."}
         </Typography>
@@ -89,7 +89,7 @@ function LoginForm() {
         }
     }
 
-        const classes = useStyles();
+    const classes = useStyles();
     const [values, setValues] = React.useState({
         amount: "",
         password: "",
@@ -124,7 +124,7 @@ function LoginForm() {
             >
                 <InputLabel error htmlFor="adornment-text">
                     Email address
-        </InputLabel>
+                </InputLabel>
                 <Input
                     id="EmailInput"
                     type="text"
@@ -173,7 +173,7 @@ function LoginForm() {
             >
                 <InputLabel error htmlFor="adornment-password">
                     Password
-        </InputLabel>
+                </InputLabel>
                 <Input
                     error
                     id="PasswordInput"
@@ -272,6 +272,7 @@ function LoginForm() {
         </>
     );
 };
+
 export class LoginPage extends Component  {
 
 
@@ -305,9 +306,9 @@ export class LoginPage extends Component  {
                                         <LoginForm />
                                         <Grid item xs={12} className="bottom-form" container>
                                             <Grid item xs>
-                                                <Link href="#" variant="body2">
+                                                <Link href="/reset-password" variant="body2">
                                                     Forgot password?
-                      </Link>
+                                                </Link>
                                             </Grid>
                                             <Grid item>
                                                 <Link href="/sign-up" variant="body2">
@@ -327,4 +328,4 @@ export class LoginPage extends Component  {
             </div>
         );
     }
-}
+} 

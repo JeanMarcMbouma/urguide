@@ -16,16 +16,19 @@ export default function FeedBackReducer(state, action) {
             return context;
 
             break;
+        case "new-item":
+            let feedbacks = context.feedbacks.slice();
+            feedbacks.unshift({ ...action.data.review, authorImage: action.data.user.profile.picture, authorFullName: action.data.user.profile.name[1], publicationDate: "Just now." });
+            return { ...context, feedbacks: feedbacks };
 
         case "user-feedback":
 
             var text = String(context.userFeedback.review);
             let isTextValidUser =
-                text.length > 4 && text.length < 500 ? true : false;
+                text.length > 50 && text.length < 500 ? true : false;
             context.textError = isTextValidUser ? false : true;
             //console.log(context.userFeedback);
             if (isTextValidUser) {
-                context.feedbacks.push(context.userFeedback);
                 action.data.callback(context.userFeedback);
             }
             
@@ -37,12 +40,10 @@ export default function FeedBackReducer(state, action) {
 
             var text = String(context.userFeedback.review);
             let isTextValidPost =
-                text.length > 4 && text.length < 500 ? true : false;
+                text.length > 50 && text.length < 500 ? true : false;
             context.textError = isTextValidPost ? false : true;
-            //console.log(context.userFeedback);
             if (isTextValidPost) {
 
-                context.feedbacks.unshift({ text: context.userFeedback.review, authorImage: action.data.user.profile.picture, authorFullName: action.data.user.profile.name[1], rating: context.userFeedback.rating, publicationDate:"Just now." });
                 action.data.callback(context.userFeedback);
             }
 

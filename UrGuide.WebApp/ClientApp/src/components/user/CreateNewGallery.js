@@ -26,6 +26,7 @@ function Gallery() {
 
         const model = new CreateImageCatalogModel({
             name: state.title,
+            description: state.description,
             files: state.files.map(i => new ImageFileCreateModel({ ...i })),
         });
 
