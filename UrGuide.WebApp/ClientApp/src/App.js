@@ -27,6 +27,7 @@ import LoginCallback from './components/api-authorization/LoginCallback';
 import LogoutCallback from './components/api-authorization/LogoutCallback';
 import ClientDetails from './components/user/ClientDetails';
 import { DataContextProvider } from './data/GlobalDataContext';
+import { Helmet } from "react-helmet";
 
 export default class App extends Component {
     constructor(props) {
@@ -35,7 +36,6 @@ export default class App extends Component {
     static displayName = App.name;
 
     render() {
-
         return (
             <DataContextProvider>
                 <AuthContextProvider>
