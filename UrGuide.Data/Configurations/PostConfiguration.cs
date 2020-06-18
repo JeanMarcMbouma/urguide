@@ -34,7 +34,7 @@ namespace UrGuide.Data.Configurations
                 b.Property(x => x.NewValue).IsRequired().HasMaxLength(200);
                 b.Property(x => x.OldValue).HasMaxLength(200);
                 b.Property(x => x.LastUpdated).IsRequired();
-                b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_Post_Bids_Users");
+                b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_Post_Bids_Users").OnDelete(DeleteBehavior.Cascade);
             });
 
             builder.OwnsMany(x => x.BidHistories, b =>
@@ -45,7 +45,7 @@ namespace UrGuide.Data.Configurations
                 b.Property(x => x.Id).HasDefaultValueSql(Constants.GuidFn);
                 b.Property(x => x.Value).IsRequired().HasMaxLength(200);
                 b.Property(x => x.Created).IsRequired();
-                b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_Post_Bids_History_Users");
+                b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_Post_Bids_History_Users").OnDelete(DeleteBehavior.Cascade);
             });
 
             builder.OwnsMany(x => x.Itineraries, b =>
@@ -68,7 +68,7 @@ namespace UrGuide.Data.Configurations
                 b.Property(x => x.Text).IsRequired().HasMaxLength(2000);
                 b.Property(x => x.Created).IsRequired();
                 b.Property(x => x.Rating).IsRequired();
-                b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_Post_Feedback_Users");
+                b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_Post_Feedback_Users").OnDelete(DeleteBehavior.Cascade);
             });
 
             builder.OwnsMany(x => x.Attributes, a =>

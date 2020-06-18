@@ -209,15 +209,16 @@ namespace UrGuide.WebApp.Services
             return Result.Of(false).WithErrors("Failed to reset your password");
         }
 
-        public async Task DeleteAccount()
+        public async Task<Result<bool>> DeleteAccount()
         {
             var userManager = SignInManager.UserManager;
-            var user = await userManager.GetUserAsync(HttpContext.User);
+            var user = await userManager.FindByIdAsync(UserContext.UserId);
             if(user != null)
             {
-                await userManager.DeleteAsync(user);
-                await HttpContext.SignOutAsync();
+                var r = await userManager.DeleteAsync(user);
+                return Result.Of(r.Succeeded);
             }
+            return Result.Of(false).WithErrors("Failed to delete this account");
         }
     }
 }

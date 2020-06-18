@@ -9,20 +9,41 @@ import PersonIcon from '@material-ui/icons/Person';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { HttpClientFactory } from "../../httpclient";
 import { AccountClient, Client } from '../../api';
-import LogoutCallback from "../api-authorization/LogoutCallback";
 import { useAuthContext } from "../api-authorization/AuthService";
 
 function Example() {
     const [show, setShow] = useState(false);
+    const [hasError, setHasError] = useState(false);
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
     const { manager, user} = useAuthContext();
 
-    const deleteAccount = async () => {
+    const deleteAccount = () => {
+        setShow(false);
         const api = HttpClientFactory.get(AccountClient, user);
-        await api.delete(window.location.origin);
-        await manager.signOut();
+        api.delete(window.location.origin).then(r => {
+            manager.signOut();
+        }).catch(() => {
+            setHasError(false);
+        });
+    }
+    if (hasError) {
+        return <>
+            <Modal show={hasError} onHide={() => setHasError(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title error>Attention</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>Sorry, we couldn't delete your account.</Modal.Body>
+                <Modal.Footer >
+                    <div className="align-items-center">
+                        <Button color='secondary' variant='outlined' onClick={() => setHasError(false)}>
+                            Ok
+                        </Button>
+                    </div>
+                </Modal.Footer>
+            </Modal>
+        </>
     }
 
     return (
