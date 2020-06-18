@@ -30,13 +30,17 @@ Make yourself a Tourism guide at your ease and pace.
 
 - [x]  All actions are audited
 
+- [x]  A user can leave a positive/negative feedback about the tour via **5 Stars rating** and user comments
+
+- [x]  A user could delete his/her account
+
 # Work in progress
 
-- [x]  A user can leave a positive/negative feedback about the tour via **5 Stars rating** and user comments
+N/A
 
 # TODO
 
-- [ ]  A user could delete his/her account
+N/A
 
 
 ## NICE TO HAVE
