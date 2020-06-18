@@ -19,6 +19,7 @@ import { useReducer } from 'react';
 import NotificationsContext from './NotificationsContext';
 import { useAuthContext } from './api-authorization/AuthService';
 import { FiLogOut } from 'react-icons/fi';
+import Logo from '../Logo.png'
 import { SignalRClient } from '../hub';
 
 
@@ -42,6 +43,10 @@ const useStyles = makeStyles (() => ({
   },
   avatarButton: {
     marginTop: '-5px',
+  },
+  logo: {
+      width: '155px',
+      height: '55px',
   },
 }));
 
@@ -215,7 +220,7 @@ export default function Header() {
                 <div className="container-fluid" >
                     <div className="row justify-content-between navbarRow">
                         <div className="col-6 col-sm-3 col-lg-3">
-                            <NavbarBrand href="/" className={(classes.font)}>UrGuide</NavbarBrand>
+                            <NavbarBrand className={classes.font} href="/"><img className={classes.logo} src={ Logo } alt='Logo' /></NavbarBrand>
                         </div>
                         <div className="col-8 col-sm-6 col-md-6 col-lg-4 centered-div"  >
                             <div className='row justify-content-end'>

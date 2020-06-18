@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import "./NavMenu.css";
 import { NavbarBrand, Container } from 'reactstrap';
 import { useAuthContext } from './api-authorization/AuthService';
+import Logo from '../Logo.png'
 
 const useStyles = makeStyles(() => ({
     header: {
@@ -23,6 +24,10 @@ const useStyles = makeStyles(() => ({
         fontWeight: 'bold',
         margin: '0px',
         padding: '0px',
+    },
+    logo: {
+        width: '155px',
+        height: '55px',
     },
 }));
 
@@ -45,7 +50,7 @@ function SignOutHeader() {
                 <div className="container-fluid" >
                     <div className="row justify-content-between navbarRow">
                         <div className="col-6 col-sm-3 col-lg-3">
-                            <NavbarBrand href="/" className={(classes.font)}>UrGuide</NavbarBrand>
+                            <NavbarBrand className={classes.font} href="/"><img className={classes.logo} src={ Logo } alt='Logo' /></NavbarBrand>
                         </div>
                         <div className="col-6 col-sm-6 col-md-6 col-lg-4"  >
                             <div className='row justify-content-end signout-links-row'>
