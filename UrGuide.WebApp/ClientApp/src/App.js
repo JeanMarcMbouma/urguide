@@ -24,16 +24,11 @@ import AuthRoute from './components/api-authorization/AuthRoute';
 import { AuthContextProvider } from './components/api-authorization/AuthService'
 import { ApplicationPaths } from './components/api-authorization/ApiAuthorizationConstants';
 import LoginCallback from './components/api-authorization/LoginCallback';
-import LogoutCallback from './components/api-authorization/LogoutCallback';
 import ClientDetails from './components/user/ClientDetails';
 import { DataContextProvider } from './data/GlobalDataContext';
-<<<<<<< HEAD
-import { Helmet } from "react-helmet";
-=======
 import Messages from './components/messages/messages';
 import ForgetPassword from './components/confirmation/ForgetPassword';
 import ResetPassword from './components/confirmation/ResetPassword';
->>>>>>> 0d3b79811f73bae42632d56ca442aeb433e918a7
 
 export default class App extends Component {
     constructor(props) {
