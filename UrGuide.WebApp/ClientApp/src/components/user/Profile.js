@@ -1,4 +1,4 @@
-﻿import React, { Component, useState, useMemo } from "react";
+﻿import React, { Component, useState, useMemo, useEffect } from "react";
 import Posts from "./Posts";
 import Galleries from "./Galleries";
 import EditProfile from "./EditProfile";
@@ -19,7 +19,6 @@ import { HttpClientFactory } from "../../httpclient";
 import { DataContextProvider } from "../../data/GlobalDataContext";
 
 
-
 function ProfileLayout() {
 
     let { path } = useRouteMatch();
@@ -35,22 +34,27 @@ function ProfileLayout() {
         rating: 0,
     });
 
-    useMemo(async () => {
+    useEffect(() => {
 
-        if (!user)
-            return;
-        var client = HttpClientFactory.getClient(user);
-        var data = await client.getdetails();
-        setValues({
-            userId: data.id,
-            profileImage: data.profileImage,
-            username: `${data.firstName} ${data.lastName}`,
-            location: `${data.city}, ${data.country}`,
-            description: data.description,
-            loading: false,
-            rating: data.rating
-        });
+        let f = async () => {
+            if (!user)
+                return;
 
+            var client = HttpClientFactory.getClient(user);
+            var data = await client.getdetails();
+            setValues({
+                userId: data.id,
+                profileImage: data.profileImage,
+                username: `${data.firstName} ${data.lastName}`,
+                location: `${data.city}, ${data.country}`,
+                description: data.description,
+                loading: false,
+                rating: data.rating
+            });
+        };
+        
+        f();
+        return () => { };
     }, [user]);
 
     return (
