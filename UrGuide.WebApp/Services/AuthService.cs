@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Model.Results;
 using UrGuide.Model.Users;
+using UrGuide.Services.Auditing.Command;
 using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Entities;
 
@@ -18,12 +20,14 @@ namespace UrGuide.WebApp.Services
             IUserContext userContext, 
             IEmailService emailService,
             IWebHelper webHelper,
-            IHttpContextAccessor httpContext)
+            IHttpContextAccessor httpContext,
+            IMediator mediator)
         {
             SignInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
             UserContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             EmailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
             WebHelper = webHelper ?? throw new ArgumentNullException(nameof(webHelper));
+            Mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             HttpContext = httpContext?.HttpContext ?? throw new ArgumentNullException(nameof(httpContext));
         }
 
@@ -32,6 +36,7 @@ namespace UrGuide.WebApp.Services
         public IEmailService EmailService { get; }
         public IWebHelper WebHelper { get; }
         public HttpContext HttpContext { get; }
+        public IMediator Mediator { get; }
 
         public async Task<Result<bool>> ChangePasswordAsync(ChangePasswordModel model, CancellationToken cancellationToken)
         {
@@ -73,6 +78,13 @@ namespace UrGuide.WebApp.Services
             if (result.Succeeded)
                 return Result.Of(true);
             return Result.Of(false).WithErrors("Email confirmation failed");
+        }
+
+        public async Task DeleteAccountAsync(string userId)
+        {
+            var userManager = SignInManager.UserManager;
+            var user = await userManager.FindByIdAsync(userId);
+            await userManager.DeleteAsync(user);
         }
 
         public async Task<Result<string>> LoginAsync(LoginModel login, CancellationToken cancellationToken)
@@ -219,6 +231,11 @@ namespace UrGuide.WebApp.Services
                 return Result.Of(r.Succeeded);
             }
             return Result.Of(false).WithErrors("Failed to delete this account");
+        }
+
+        public async Task SignOutAsync()
+        {
+            await Mediator.Send(new UserLoggedOutCommand(UserContext.UserId));
         }
     }
 }

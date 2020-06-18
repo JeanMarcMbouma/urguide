@@ -71,7 +71,7 @@ export class Layout extends Component {
               <Navbar />
               <div className="container-fluid content">
               
-                  <div className='row mb-4' >
+                  <div className='row' >
                       <div className='col-12'>
                           {this.props.children}
                 </div>

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ using UrGuide.Model.Catalogs;
 using UrGuide.Model.Results;
 using UrGuide.Model.Shared;
 using UrGuide.Services.Abstraction;
+using UrGuide.Services.Auditing.Command;
 using UrGuide.Services.Contracts;
 using UrGuide.Services.Extensions;
 using UrGuide.Services.Helpers;
@@ -26,16 +28,19 @@ namespace UrGuide.Services.Catalogs
             UrGuideContext context,
             IMapper mapper,
             IIPStackService iPStackService,
-            IImageService imageService) : base(context, userContext)
+            IImageService imageService,
+            IMediator mediator) : base(context, userContext)
         {
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             IPStackService = iPStackService ?? throw new ArgumentNullException(nameof(iPStackService));
             ImageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
+            Mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         public IMapper Mapper { get; }
         public IIPStackService IPStackService { get; }
         public IImageService ImageService { get; }
+        public IMediator Mediator { get; }
 
         public async Task<Result<bool>> AddCatalogToPostAsync(Data.Entities.Posts.Post post, CreateImageCatalogModel catalogModel, CancellationToken cancellationToken)
         {
@@ -51,10 +56,10 @@ namespace UrGuide.Services.Catalogs
             return Result.Of(true);
         }
 
-        public async Task<Result<bool>> AddImageToCatalogAsync(string catalogId, ImageFileCreateModel imageFile, CancellationToken cancellationToken)
+        public async Task<Result<ImageFileModel>> AddImageToCatalogAsync(string catalogId, ImageFileCreateModel imageFile, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
-                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
+                return Result.Of<ImageFileModel>().WithErrors(ErrorMessages.NotAuthenticated);
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -63,7 +68,7 @@ namespace UrGuide.Services.Catalogs
                 .Where(x => x.User.Id == UserContext.UserId)
                 .FirstOrDefaultAsync(x => x.Id == catalogId, cancellationToken);
             if (catalog == null)
-                return Result.Of(false).WithErrors("Catalog doesn't exists");
+                return Result.Of<ImageFileModel>().WithErrors("Catalog doesn't exists");
 
             var newImage = new Image
             {
@@ -80,7 +85,7 @@ namespace UrGuide.Services.Catalogs
             ImageService.SaveImage(newImage);
 
             await Context.SaveChangesAsync(cancellationToken);
-            return Result.Of(true);
+            return Result.Of(Mapper.Map<ImageFileModel>(newImage));
         }
 
         public async Task<Result<ImageCatalogModel>> CreateCatalogAsync(CreateImageCatalogModel catalogModel, CancellationToken cancellationToken)
@@ -90,6 +95,7 @@ namespace UrGuide.Services.Catalogs
             cancellationToken.ThrowIfCancellationRequested();
             var catalog = await CreateCatalogInternal(catalogModel, cancellationToken);
             await Context.SaveChangesAsync(cancellationToken);
+            await Mediator.Send(new CatalogCreatedCommand(UserContext.UserId, catalog.Data.Id));
             return Result.Of(Mapper.Map<ImageCatalogModel>(catalog.Data));
         }
 
@@ -166,7 +172,7 @@ namespace UrGuide.Services.Catalogs
             Context.ImageCatalogs.Remove(catalog);
 
             await Context.SaveChangesAsync(cancellationToken);
-
+            await Mediator.Send(new CatalogDeletedCommand(UserContext.UserId, catalogId));
             ImageService.DeleteImages(images);
 
             return Result.Of(true);
@@ -192,13 +198,16 @@ namespace UrGuide.Services.Catalogs
             });
             catalog.LastUpdated = DateTime.UtcNow;
             await Context.SaveChangesAsync(cancellationToken);
+            await Mediator.Send(new CatalogEditedCommand(UserContext.UserId, catalog.Id));
             return Result.Of(true);
         }
 
 
-        public Task<Result<bool>> SetCataglogAttributesAsync(string catalogId, SetAttribute[] attributes, CancellationToken cancellationToken)
+        public async Task<Result<bool>> SetCataglogAttributesAsync(string catalogId, SetAttribute[] attributes, CancellationToken cancellationToken)
         {
-            return SetAttributesRestrictedToUserAsync<ImageCatalog>(catalogId, attributes, cancellationToken);
+
+            await Mediator.Send(new CatalogEditedCommand(UserContext.UserId, catalogId));
+            return await SetAttributesRestrictedToUserAsync<ImageCatalog>(catalogId, attributes, cancellationToken);
         }
     }
 }

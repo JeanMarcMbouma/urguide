@@ -2,7 +2,7 @@
 
 const NewPostContext = createContext({
     showPost:false,
-    text: 'Some Dummy Text!',
+    text: null,
     description: null,
     geoLocation: null,
     date: new Date(),
@@ -15,7 +15,7 @@ const NewPostContext = createContext({
     idToRemove: null,
     itineraries: [],
     priceRange: '',
-    bidOptIn:true,
+    bidOptIn: true,
  
 });
 

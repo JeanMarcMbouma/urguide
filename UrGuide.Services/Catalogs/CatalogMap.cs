@@ -21,6 +21,11 @@ namespace UrGuide.Services.Catalogs
                     ImageBase64 = i.ImageUrl,
                     Name = i.Attributes.FirstOrDefault(a => a.Name == nameof(Model.Catalogs.CreateImageCatalogModel.Name))
                 })));
+
+            CreateMap<Data.Entities.Shared.Image, Model.Shared.ImageFileModel>()
+                .ForMember(x => x.Id, y => y.MapFrom(x => x.Id))
+                .ForMember(x => x.ImageBase64, y => y.MapFrom(x => x.ImageUrl))
+                .ForMember(x => x.Name, y => y.MapFrom(x => x.Attributes.FirstOrDefault(a => a.Name == nameof(Model.Catalogs.CreateImageCatalogModel.Name))));
         }
     }
 }

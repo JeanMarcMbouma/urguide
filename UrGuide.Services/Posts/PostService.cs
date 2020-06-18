@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +15,7 @@ using UrGuide.Model.Posts;
 using UrGuide.Model.Results;
 using UrGuide.Model.Shared;
 using UrGuide.Services.Abstraction;
+using UrGuide.Services.Auditing.Command;
 using UrGuide.Services.Contracts;
 using UrGuide.Services.Extensions;
 using UrGuide.Services.Helpers;
@@ -29,7 +32,9 @@ namespace UrGuide.Services.Posts
                            IIPStackService iPStackService,
                            ILogger<PostService> logger,
                            IEmailService emailService,
-                           IImageService imageService) : base(context, userContext)
+                           IImageService imageService,
+                           IUserNotificationService notificationService,
+                           IMediator mediator) : base(context, userContext)
         {
             CatalogService = catalogService ?? throw new ArgumentNullException(nameof(catalogService));
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
@@ -37,6 +42,8 @@ namespace UrGuide.Services.Posts
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             EmailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
             ImageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
+            NotificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+            Mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         public ICatalogService CatalogService { get; }
@@ -45,6 +52,8 @@ namespace UrGuide.Services.Posts
         public ILogger<PostService> Logger { get; }
         public IEmailService EmailService { get; }
         public IImageService ImageService { get; }
+        public IUserNotificationService NotificationService { get; }
+        public IMediator Mediator { get; }
 
         public async Task<Result<PostModel>> AcceptBidAsync(string postId, CancellationToken cancellationToken)
         {
@@ -64,9 +73,7 @@ namespace UrGuide.Services.Posts
                 var author = post.Bid.Author.Attributes;
                 var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
                 var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
-                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
-                {
-                    Content = @$"
+                string content = @$"
 Congratulation, {authorFirstName}</br>
 Your bid was accepted:</br>
 Post: <strong>{post.Text}</strong></br>
@@ -75,7 +82,12 @@ Post: <strong>{post.Text}</strong></br>
 
 Old price: <em>{post.Bid.OldValue}</em></br>
 ---------------------------------------</br>
-New price: <em>{post.Bid.NewValue}</em>",
+New price: <em>{post.Bid.NewValue}</em>";
+
+                await CreateNotification(post, post.Bid.Author.Id, content);
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = content,
                     Subject = "Your bid was accepted",
                     To = authorEmail,
                     ToName = authorFirstName
@@ -87,6 +99,13 @@ New price: <em>{post.Bid.NewValue}</em>",
                 Logger.LogError(e, "Cannot accept the current bid. State corrupted: {0}", postId);
                 return Result.Of<PostModel>().WithErrors(e.Message);
             }
+        }
+
+        private async Task CreateNotification(Post post, string authorId, string content)
+        {
+            if (!post.Catalog.Images.Any())
+                return;
+            await NotificationService.SystemNotifyAsync(authorId, content, $"/post/{post.Id}/shot/{post.Catalog.Images.FirstOrDefault()?.Id}");
         }
 
         public async Task<Result<PostModel>> CreatePostAsync(PostCreationModel model, CancellationToken cancellationToken)
@@ -124,12 +143,12 @@ New price: <em>{post.Bid.NewValue}</em>",
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Categories), Value = string.Join(",", model.Categories) });
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Amount), Value = model.UnitPrice });
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.DateStart), Value = DateTimeHelper.GetDate(model.StartDate) });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.TimeStart), Value = DateTimeHelper.GetTime(model.StartDate) });
+            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.TimeStart), Value = DateTimeHelper.GetTime(model.StartDate, DateTimeKind.Local) });
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.DateEnd), Value = DateTimeHelper.GetDate(model.EndDate) });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.TimeEnd), Value = DateTimeHelper.GetTime(model.EndDate) });
+            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.TimeEnd), Value = DateTimeHelper.GetTime(model.EndDate, DateTimeKind.Local) });
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.GeoLocation), Value = model.GeoLocation });
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Views), Value = Constants.Zero });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.PublicationDate), Value = DateTimeHelper.GetDateTime(post.DateOfPublication) });
+            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.PublicationDate), Value = DateTimeHelper.GetDateTime(post.DateOfPublication, DateTimeKind.Local) });
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Status), Value = Constants.Active });
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Rating), Value = Constants.Zero });
             post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Reviews), Value = Constants.Zero });
@@ -151,13 +170,13 @@ New price: <em>{post.Bid.NewValue}</em>",
 
             Context.Posts.Add(post);
             await Context.SaveChangesAsync(cancellationToken);
-
+            await Mediator.Send(new PostCreatedCommand(UserContext.UserId, post.Id));
             foreach (var image in post.Catalog.Images)
             {
                 ImageService.SaveImage(image);
             }
+            
             await Context.SaveChangesAsync(cancellationToken);
-
             return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
         }
 
@@ -171,6 +190,7 @@ New price: <em>{post.Bid.NewValue}</em>",
             Context.Posts.Remove(post);
             await Context.SaveChangesAsync(cancellationToken);
             ImageService.DeleteImages(images);
+            await Mediator.Send(new PostDeletedCommand(UserContext.UserId, id));
             return Result.Of(true);
         }
 
@@ -236,14 +256,13 @@ New price: <em>{post.Bid.NewValue}</em>",
             try
             {
                 var user = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
+                var oldBid = post.Bid?.Author.Id;
 
                 post.NewBid(model.Value, user);
                 var author = post.User.Attributes;
                 var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
                 var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
-                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
-                {
-                    Content = @$"
+                string content = @$"
 Hi, {authorFirstName}</br>
 You received a new proposal:</br>
 Post: <strong>{post.Text}</strong></br>
@@ -252,12 +271,25 @@ Post: <strong>{post.Text}</strong></br>
 
 Old price: <em>{post.Bid.OldValue}</em></br>
 ---------------------------------------</br>
-New price: <em>{post.Bid.NewValue}</em>",
+New price: <em>{post.Bid.NewValue}</em>";
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = content,
                     Subject = "New proposal",
                     To = authorEmail,
                     ToName = authorFirstName
                 });
+                await CreateNotification(post, post.User.Id, content);
+                if (!string.IsNullOrEmpty(oldBid))
+                    await CreateNotification(post, oldBid, @$"
+Your bid is no longer active:</br>
+Post: <strong>{post.Text}</strong></br>
+{post.Description}</br>
+...</br>
 
+Old price: <em>{post.Bid.OldValue}</em></br>
+---------------------------------------</br>
+New price: <em>{post.Bid.NewValue}</em>");
                 return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
             }
             catch (Exception e)
@@ -287,20 +319,22 @@ New price: <em>{post.Bid.NewValue}</em>",
                 post.RejectBid();
                 var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
                 var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
-                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
-                {
-                    Content = @$"
+                string content = @$"
 Hi, {authorFirstName}</br>
 Your bid was rejected by the owner:</br>
 Post: <strong>{post.Text}</strong></br>
 {post.Description}</br>
 ...</br>
 
-Your bid: <em>{value}</em>",
+Your bid: <em>{value}</em>";
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = content,
                     Subject = "Your bid was rejected",
                     To = authorEmail,
                     ToName = authorFirstName
                 });
+                await CreateNotification(post, post.Bid.Author.Id, content);
                 return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
             }
             catch (Exception e)
@@ -319,13 +353,15 @@ Your bid: <em>{value}</em>",
             post.Text = model.Text;
             post.Description = model.Description;
             post.LastUpdated = DateTime.UtcNow;
+            await Mediator.Send(new PostEditedCommand(UserContext.UserId, model.Id));
             await Context.SaveChangesAsync(cancellationToken);
             return Result.Of(true);
         }
 
-        public Task<Result<bool>> UpdatePostAttributesAsync(string id, SetAttribute[] attributes, CancellationToken cancellationToken)
+        public async Task<Result<bool>> UpdatePostAttributesAsync(string id, SetAttribute[] attributes, CancellationToken cancellationToken)
         {
-            return SetAttributesRestrictedToUserAsync<Post>(id, attributes, cancellationToken);
+            await Mediator.Send(new PostEditedCommand(UserContext.UserId, id));
+            return await SetAttributesRestrictedToUserAsync<Post>(id, attributes, cancellationToken);
         }
 
         public async Task<Result<IEnumerable<BidHistoryModel>>> GetBidHistoryAsync(string postId, CancellationToken cancellationToken)
@@ -388,19 +424,21 @@ Your bid: <em>{value}</em>",
                 var author = post.User.Attributes;
                 var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
                 var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
-                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
-                {
-                    Content = @$"
+                string content = @$"
 Hi, {authorFirstName}</br>
 A user has just made a reservation:</br>
 Post: <strong>{post.Text}</strong></br>
 {post.Description}</br>
 ...................</br>
-Seats: {seatReservation.Seats}",
+Seats: {seatReservation.Seats}";
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = content,
                     Subject = "Reservation",
                     To = authorEmail,
                     ToName = authorFirstName
                 });
+                await CreateNotification(post, post.User.Id, content);
             }
             catch (Exception e)
             {
@@ -430,19 +468,21 @@ Seats: {seatReservation.Seats}",
                 var author = post.User.Attributes;
                 var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
                 var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
-                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
-                {
-                    Content = @$"
+                string content = @$"
 Hi, {authorFirstName}</br>
 A user has changed their reservation:</br>
 Post: <strong>{post.Text}</strong></br>
 {post.Description}</br>
 --------------------------</br>
-Title: {post.Text}",
+Title: {post.Text}";
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = content,
                     Subject = "Reservation",
                     To = authorEmail,
                     ToName = authorFirstName
                 });
+                await CreateNotification(post, post.User.Id, content);
             }
             catch (Exception e)
             {
@@ -473,17 +513,19 @@ Title: {post.Text}",
                 var author = post.User.Attributes;
                 var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
                 var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
-                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
-                {
-                    Content = @$"
+                string content = @$"
 Hi, {authorFirstName}</br>
 A user has cancelled a reservation:</br>
 Post: <strong>{post.Text}</strong></br>
-{post.Description}",
+{post.Description}";
+                await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+                {
+                    Content = content,
                     Subject = "Reservation",
                     To = authorEmail,
                     ToName = authorFirstName
                 });
+                await CreateNotification(post, post.User.Id, content);
             }
             catch (Exception e)
             {
@@ -514,17 +556,19 @@ Post: <strong>{post.Text}</strong></br>
             var author = post.User.Attributes;
             var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
             var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
-            await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
-            {
-                Content = @$"
+            string content = @$"
 Hi, {authorFirstName}</br>
 A user has {(userReaction.Like ? "liked" : "reacted to")} your post:</br>
 Post: <strong>{post.Text}</strong></br>
-{post.Description}",
+{post.Description}";
+            await EmailService.SendAsync(new Model.Messages.SendDirectMessageCommand
+            {
+                Content = content,
                 Subject = "User's reaction",
                 To = authorEmail,
                 ToName = authorFirstName
             });
+            await CreateNotification(post, post.User.Id, content);
             return Result.Of(true);
         }
 
@@ -555,8 +599,11 @@ Post: <strong>{post.Text}</strong></br>
         {
             var geo = pagination.Nearby ? await IPStackService.GetLocationAsync(UserContext) : null; 
             var postIds = await PagedList.Of(Context.Set<PostSearch>()
-                            .Where(x => pagination.Term == null || EF.Functions.Like(x.GeoLocation, $"%{pagination.Term}%"))
-                            .Where(x => pagination.Term == null || EF.Functions.Like(x.Categories, $"%{pagination.Term}%"))
+                            .Where(x => pagination.Term == null || 
+                            ( 
+                                EF.Functions.Like(x.GeoLocation, $"%{pagination.Term}%") || 
+                                EF.Functions.Like(x.Categories, $"%{pagination.Term}%"))
+                            )
                             .Where(x => userId == null || x.UserId == userId)
                             .Where(x => geo == null || x.Location.Distance(geo) <= Constants.Distance)
                             .OrderByDescending(x => x.PostId)

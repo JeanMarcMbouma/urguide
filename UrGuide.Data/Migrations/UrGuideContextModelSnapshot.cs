@@ -20,46 +20,31 @@ namespace UrGuide.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("UrGuide.Data.Entities.Messages.Notification", b =>
+            modelBuilder.Entity("UrGuide.Data.Entities.Event.AuditEvent", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnName("MessageId")
                         .HasColumnType("nvarchar(450)")
                         .HasDefaultValueSql("NEWID()");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(1000)")
-                        .HasMaxLength(1000);
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("HasError")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
+                    b.Property<int>("EventCode")
+                        .HasColumnType("int");
 
-                    b.Property<bool>("Sent")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
+                    b.Property<string>("ReferenceId")
+                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(500);
 
-                    b.Property<string>("Subject")
+                    b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(200)")
-                        .HasMaxLength(200);
+                        .HasColumnType("nvarchar(600)")
+                        .HasMaxLength(600);
 
-                    b.Property<string>("To")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(200)")
-                        .HasMaxLength(200);
+                    b.HasKey("Id");
 
-                    b.HasKey("Id")
-                        .HasName("PK_Messages");
-
-                    b.ToTable("Notifications","ug");
+                    b.ToTable("Audit_Events","ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Posts.Category", b =>
@@ -240,39 +225,12 @@ namespace UrGuide.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users","ug");
-                });
 
-            modelBuilder.Entity("UrGuide.Data.Entities.Messages.Notification", b =>
-                {
-                    b.OwnsMany("UrGuide.Data.Entities.Messages.Link", "Links", b1 =>
+                    b.HasData(
+                        new
                         {
-                            b1.Property<string>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("nvarchar(450)")
-                                .HasDefaultValueSql("NEWID()");
-
-                            b1.Property<string>("MessageId")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(450)");
-
-                            b1.Property<string>("Token")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(100)")
-                                .HasMaxLength(100);
-
-                            b1.Property<string>("Url")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(2000)")
-                                .HasMaxLength(2000);
-
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("MessageId");
-
-                            b1.ToTable("Message_Links","ug");
-
-                            b1.WithOwner()
-                                .HasForeignKey("MessageId");
+                            Id = "00000000-0000-0000-0000-000000000000",
+                            LastActivityDate = new DateTime(2020, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
@@ -697,6 +655,54 @@ namespace UrGuide.Data.Migrations
                                 .IsUnique();
 
                             b1.ToTable("User_Images","ug");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
+                    b.OwnsMany("UrGuide.Data.Entities.Users.Notification", "Notifications", b1 =>
+                        {
+                            b1.Property<string>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("nvarchar(450)")
+                                .HasDefaultValueSql("NEWID()");
+
+                            b1.Property<string>("Content")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(500)")
+                                .HasMaxLength(500);
+
+                            b1.Property<DateTime>("Created")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<string>("FK_User_Notification_Users")
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<bool>("IsSystem")
+                                .HasColumnType("bit");
+
+                            b1.Property<bool>("Read")
+                                .HasColumnType("bit");
+
+                            b1.Property<string>("ReferenceLink")
+                                .HasColumnType("nvarchar(1000)")
+                                .HasMaxLength(1000);
+
+                            b1.Property<string>("UserId")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("FK_User_Notification_Users");
+
+                            b1.HasIndex("UserId");
+
+                            b1.ToTable("User_Notifications","ug");
+
+                            b1.HasOne("UrGuide.Data.Entities.Users.User", "Sender")
+                                .WithMany()
+                                .HasForeignKey("FK_User_Notification_Users");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");

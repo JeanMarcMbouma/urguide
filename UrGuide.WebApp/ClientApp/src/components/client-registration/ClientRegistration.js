@@ -23,6 +23,8 @@ import clsx from "clsx";
 import ClientContext from "./ClientContext";
 import ClientReducer from "./ClientReducer";
 import "./ClientRegistration.css";
+import { HttpClientFactory } from "../../httpclient";
+import { Client, CreateUserModel } from "../../api";
 
 
 function Navigation() {
@@ -115,35 +117,14 @@ const navigateToReturnUrl = (returnUrl) => {
 
 const createUser = async function (state) {
     const returnUrl = getReturnUrl();
-    const response = await fetch(`/register?returnUrl=${returnUrl}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-            email: state.email,
-            password: state.password,
-            confirmPassword: state.confirmPassword,
-            firstName: state.firstName,
-            lastName: state.lastName,
-
-        
-        })
-    });
-
-    if (response.status == 200 || response.status == 304) {
-        navigateToReturnUrl(`${window.location.origin}/sign-up-confirm`);
-    } else {
-        // we got an error
-        if (response.status == 400) // BadRequest
-        {
-            var errors = await response.json();
-            console.log(errors);
-        } else {
-            // Account has certainly been locked-out
-        }
-    }
+    const api = HttpClientFactory.get(Client);
+    api.register(returnUrl, new CreateUserModel({
+        confirmPassword: state.confirmPassword,
+        email: state.email,
+        firstName: state.firstName,
+        lastName: state.lastName,
+        password: state.password
+    })).then(() => navigateToReturnUrl(`${window.location.origin}/sign-up-confirm`));
 }
 
 

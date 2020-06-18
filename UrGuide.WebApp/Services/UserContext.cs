@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using System.Threading.Tasks;
 using System.Net;
 using System.Security.Claims;
+using System.Linq;
 
 namespace UrGuide.WebApp.Services
 {

@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using UrGuide.Model;
 using UrGuide.Model.Shared;
+using UrGuide.Services.Auditing.Command;
 using UrGuide.Services.Catalogs;
 using UrGuide.Services.Feedback;
 using UrGuide.Services.Lookup;
@@ -26,6 +28,7 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<Contracts.IFeedbackService, FeedbackService>();
             services.AddTransient<Contracts.IImageService, ImageService>();
             services.AddTransient<Contracts.ILookupService, LookupService>();
+            services.AddTransient<Contracts.IUserNotificationService, NotificationService>();
 
             // Validation
 
@@ -41,6 +44,10 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<IValidator<Model.Users.ResetPasswordModel>, ResetPasswordValidation>();
             services.AddTransient<IValidator<Model.Users.EmailConfirmationModel>, EmailConfirmationValidation>();
             services.AddTransient<IValidator<Model.Users.PasswordResetRequestModel>, PasswordResetValidation>();
+            services.AddTransient<IValidator<Model.Users.CreateNotification>, CreateNotificationValidator>();
+            services.AddTransient<IValidator<Model.Messages.ChatMessage>, ChatMessageValidator>();
+            services.AddTransient<IValidator<Model.Users.UpdateUserModel>, UpdateUserValidation>();
+            services.AddTransient<IValidator<Model.Users.UpdateGuideModel>, UpdateGuideValidation>();
 
             // Catalog (Image gallery)
             services.AddTransient<IValidator<Model.Catalogs.CreateImageCatalogModel>, CreateImageCatalogModelValidation>();
@@ -60,6 +67,8 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<IValidator<FeedbackModel>, FeedbackModelValidator>();
 
             services.AddAutoMapper(typeof(UserMap));
+
+            services.AddMediatR(typeof(UserDeleteAccountCommand).Assembly);
 
             services.AddDbContext<Data.UrGuideContext>(options =>
                 options.UseSqlServer(

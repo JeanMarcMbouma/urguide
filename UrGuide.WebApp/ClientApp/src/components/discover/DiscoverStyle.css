@@ -12,6 +12,10 @@
     z-index:4;
 }
 
+.loading-icon{
+    margin-top:200px;
+}
+
 .search-suggestions {
     height: auto;
     background-color: white;
@@ -21,8 +25,7 @@
     width: 100%;
     margin-top: 10px;
     border-radius: 4px;
-    padding:5px 5px 15px 0px;
-
+    padding: 5px 5px 15px 0px;
 }
 
 .suggestion-line{
@@ -107,7 +110,7 @@
     margin-top: 50px;
 }
 
-.tags-div {
+/*.tags-div {
 
     height:auto;
     margin-top:50px;
@@ -137,7 +140,7 @@
 .clicked-tag {
     background-color: #587acc !important;
     color: white !important;
-}
+}*/
 
 
 .square-grid {

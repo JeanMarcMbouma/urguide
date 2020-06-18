@@ -1,6 +1,5 @@
 ﻿import { User } from 'oidc-client'
-import { PostsClient, CatalogsClient, AccountClient, Client, LookupClient } from '../api';
-
+import { PostsClient, CatalogsClient, AccountClient, Client, LookupClient, Notification } from '../api';
 
 const originalFetch = fetch;
 

@@ -4,9 +4,21 @@
 
 }
 
-.new-feedback{
-    margin-top:50px;
-    margin-bottom:20px;
+.btn-reviews{
+    background-color:#238935 !important;
+    color:white !important;
+    margin-top:10px !important;
+}
+
+
+.btn-reviews:hover {
+    background-color: #238935 !important;
+    opacity: 0.8;
+}
+
+.new-feedback {
+    margin-top: 10px;
+    margin-bottom: 20px;
 }
 
 

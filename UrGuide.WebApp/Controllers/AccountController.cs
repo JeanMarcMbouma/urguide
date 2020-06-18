@@ -102,17 +102,29 @@ namespace UrGuide.WebApp.Controllers
 
         [Authorize]
         [HttpPost("/updateguide")]
+        [ProducesDefaultResponseType(typeof(bool))]
         public async Task<IActionResult> UpdateGuide([FromBody]UpdateGuideModel model, CancellationToken cancellationToken)
         {
             var result = await UserService.UpdateGuideAsync(model, cancellationToken);
 
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok();
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
+
+        [Authorize]
+        [HttpPost("/updateuser")]
+        [ProducesDefaultResponseType(typeof(bool))]
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateUserModel model, CancellationToken cancellationToken)
+        {
+            var result = await UserService.UpdateUserAsync(model, cancellationToken);
+
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
         [Authorize]
         [HttpGet("logout")]
         public async Task<IActionResult> Signout(string returnUrl = null)
         {
+            await AuthService.SignOutAsync();
             await HttpContext.SignOutAsync();
             if (Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
