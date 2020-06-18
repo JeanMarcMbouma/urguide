@@ -1,4 +1,6 @@
-﻿using MediatR;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Linq;
@@ -18,6 +20,7 @@ namespace UrGuide.WebApp.Services
             IUserContext userContext, 
             IEmailService emailService,
             IWebHelper webHelper,
+            IHttpContextAccessor httpContext,
             IMediator mediator)
         {
             SignInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
@@ -25,12 +28,14 @@ namespace UrGuide.WebApp.Services
             EmailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
             WebHelper = webHelper ?? throw new ArgumentNullException(nameof(webHelper));
             Mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+            HttpContext = httpContext?.HttpContext ?? throw new ArgumentNullException(nameof(httpContext));
         }
 
         public SignInManager<UrGuideUser> SignInManager { get; }
         public IUserContext UserContext { get; }
         public IEmailService EmailService { get; }
         public IWebHelper WebHelper { get; }
+        public HttpContext HttpContext { get; }
         public IMediator Mediator { get; }
 
         public async Task<Result<bool>> ChangePasswordAsync(ChangePasswordModel model, CancellationToken cancellationToken)
@@ -214,6 +219,18 @@ namespace UrGuide.WebApp.Services
                 }
             }
             return Result.Of(false).WithErrors("Failed to reset your password");
+        }
+
+        public async Task<Result<bool>> DeleteAccount()
+        {
+            var userManager = SignInManager.UserManager;
+            var user = await userManager.FindByIdAsync(UserContext.UserId);
+            if(user != null)
+            {
+                var r = await userManager.DeleteAsync(user);
+                return Result.Of(r.Succeeded);
+            }
+            return Result.Of(false).WithErrors("Failed to delete this account");
         }
 
         public async Task SignOutAsync()

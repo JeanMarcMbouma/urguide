@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using UrGuide.Data;
@@ -10,9 +11,10 @@ using UrGuide.Data;
 namespace UrGuide.Data.Migrations
 {
     [DbContext(typeof(UrGuideContext))]
-    partial class UrGuideContextModelSnapshot : ModelSnapshot
+    [Migration("20200618120106_Cascade_Delete_On_Sub_Entities")]
+    partial class Cascade_Delete_On_Sub_Entities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -20,31 +22,46 @@ namespace UrGuide.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("UrGuide.Data.Entities.Event.AuditEvent", b =>
+            modelBuilder.Entity("UrGuide.Data.Entities.Messages.Notification", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnName("MessageId")
                         .HasColumnType("nvarchar(450)")
                         .HasDefaultValueSql("NEWID()");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(1000)")
+                        .HasMaxLength(1000);
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("EventCode")
-                        .HasColumnType("int");
+                    b.Property<bool>("HasError")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
-                    b.Property<string>("ReferenceId")
-                        .HasColumnType("nvarchar(500)")
-                        .HasMaxLength(500);
+                    b.Property<bool>("Sent")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("Subject")
                         .IsRequired()
-                        .HasColumnType("nvarchar(600)")
-                        .HasMaxLength(600);
+                        .HasColumnType("nvarchar(200)")
+                        .HasMaxLength(200);
 
-                    b.HasKey("Id");
+                    b.Property<string>("To")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(200)")
+                        .HasMaxLength(200);
 
-                    b.ToTable("Audit_Events","ug");
+                    b.HasKey("Id")
+                        .HasName("PK_Messages");
+
+                    b.ToTable("Notifications","ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Posts.Category", b =>
@@ -225,12 +242,39 @@ namespace UrGuide.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users","ug");
+                });
 
-                    b.HasData(
-                        new
+            modelBuilder.Entity("UrGuide.Data.Entities.Messages.Notification", b =>
+                {
+                    b.OwnsMany("UrGuide.Data.Entities.Messages.Link", "Links", b1 =>
                         {
-                            Id = "00000000-0000-0000-0000-000000000000",
-                            LastActivityDate = new DateTime(2020, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified)
+                            b1.Property<string>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("nvarchar(450)")
+                                .HasDefaultValueSql("NEWID()");
+
+                            b1.Property<string>("MessageId")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<string>("Token")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(100)")
+                                .HasMaxLength(100);
+
+                            b1.Property<string>("Url")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(2000)")
+                                .HasMaxLength(2000);
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("MessageId");
+
+                            b1.ToTable("Message_Links","ug");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MessageId");
                         });
                 });
 
@@ -655,54 +699,6 @@ namespace UrGuide.Data.Migrations
                                 .IsUnique();
 
                             b1.ToTable("User_Images","ug");
-
-                            b1.WithOwner()
-                                .HasForeignKey("UserId");
-                        });
-
-                    b.OwnsMany("UrGuide.Data.Entities.Users.Notification", "Notifications", b1 =>
-                        {
-                            b1.Property<string>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("nvarchar(450)")
-                                .HasDefaultValueSql("NEWID()");
-
-                            b1.Property<string>("Content")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(500)")
-                                .HasMaxLength(500);
-
-                            b1.Property<DateTime>("Created")
-                                .HasColumnType("datetime2");
-
-                            b1.Property<string>("FK_User_Notification_Users")
-                                .HasColumnType("nvarchar(450)");
-
-                            b1.Property<bool>("IsSystem")
-                                .HasColumnType("bit");
-
-                            b1.Property<bool>("Read")
-                                .HasColumnType("bit");
-
-                            b1.Property<string>("ReferenceLink")
-                                .HasColumnType("nvarchar(1000)")
-                                .HasMaxLength(1000);
-
-                            b1.Property<string>("UserId")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(450)");
-
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("FK_User_Notification_Users");
-
-                            b1.HasIndex("UserId");
-
-                            b1.ToTable("User_Notifications","ug");
-
-                            b1.HasOne("UrGuide.Data.Entities.Users.User", "Sender")
-                                .WithMany()
-                                .HasForeignKey("FK_User_Notification_Users");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");

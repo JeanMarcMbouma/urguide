@@ -130,5 +130,19 @@ namespace UrGuide.WebApp.Controllers
                 return Redirect(returnUrl);
             return Ok();
         }
+
+        [Authorize]
+        [HttpGet("delete")]
+        public async Task<IActionResult> Delete(CancellationToken cancellationToken, string returnUrl = null)
+        {
+            var r = await UserService.DeleteUserAccountAsync(cancellationToken);
+            if (!r.HasError)
+                await HttpContext.SignOutAsync();
+            else
+                return BadRequest(ErrorEnvelop.Create(r.Errors));
+            if (Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
+            return Ok();
+        }
     }
 }

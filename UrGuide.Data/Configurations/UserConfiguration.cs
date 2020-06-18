@@ -55,7 +55,7 @@ namespace UrGuide.Data.Configurations
                 b.Property(x => x.Text).IsRequired().HasMaxLength(2000);
                 b.Property(x => x.Created).IsRequired();
                 b.Property(x => x.Rating).IsRequired();
-                b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_User_Feedback_Users");
+                b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_User_Feedback_Users").OnDelete(DeleteBehavior.Cascade);
             });
 
             string systemUserId = "00000000-0000-0000-0000-000000000000";
