@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using UrGuide.Data;
@@ -10,9 +11,10 @@ using UrGuide.Data;
 namespace UrGuide.Data.Migrations
 {
     [DbContext(typeof(UrGuideContext))]
-    partial class UrGuideContextModelSnapshot : ModelSnapshot
+    [Migration("20200620135759_Post_Flat_Structure_Dropping_Attributes")]
+    partial class Post_Flat_Structure_Dropping_Attributes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

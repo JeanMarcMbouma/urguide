@@ -19,6 +19,21 @@ namespace UrGuide.Data.Configurations
             builder.Property(x => x.DateOfPublication).IsRequired();
             builder.Property(x => x.LastUpdated);
             builder.Property(x => x.Location);
+            builder.Property(x => x.GeoLocation).HasMaxLength(400);
+            builder.Property(x => x.EndDate).IsRequired();
+            builder.Property(x => x.StartDate).IsRequired();
+            builder.Property(x => x.Likes);
+            builder.Property(x => x.Dislikes);
+            builder.Property(x => x.Cost).HasMaxLength(100);
+            builder.Property(x => x.BidCount).IsRequired().HasDefaultValue(0);
+            builder.Property(x => x.Rating).IsRequired().HasDefaultValue(5);
+            builder.Property(x => x.ReservedSeats).IsRequired().HasDefaultValue(0);
+            builder.Property(x => x.AllocatedSeats).IsRequired().HasDefaultValue(1);
+            builder.Property(x => x.BidCount).IsRequired().HasDefaultValue(0);
+            builder.Property(x => x.Reviews).IsRequired().HasDefaultValue(0);
+            builder.Property(x => x.Tags).IsRequired().HasMaxLength(500);
+            builder.Property(x => x.ItineraryCount).IsRequired().HasDefaultValue(0);
+            builder.Property(x => x.LastBid).HasMaxLength(100);
 
             builder.Ignore(x => x.IsPastDue);
 
@@ -69,15 +84,6 @@ namespace UrGuide.Data.Configurations
                 b.Property(x => x.Created).IsRequired();
                 b.Property(x => x.Rating).IsRequired();
                 b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_Post_Feedback_Users").OnDelete(DeleteBehavior.Cascade);
-            });
-
-            builder.OwnsMany(x => x.Attributes, a =>
-            {
-                a.ToTable("Post_Attributes", Constants.Schema);
-                a.WithOwner().HasForeignKey("PostId");
-                a.Property(x => x.Name).IsRequired().HasMaxLength(200);
-                a.Property(x => x.Value).IsRequired();
-                a.HasKey("Id");
             });
 
             builder.OwnsMany(x => x.Reservations, r => {

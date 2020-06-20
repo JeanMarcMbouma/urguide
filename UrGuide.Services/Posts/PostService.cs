@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,7 +17,6 @@ using UrGuide.Services.Abstraction;
 using UrGuide.Services.Auditing.Command;
 using UrGuide.Services.Contracts;
 using UrGuide.Services.Extensions;
-using UrGuide.Services.Helpers;
 using UrGuide.Shared.Contracts;
 
 namespace UrGuide.Services.Posts
@@ -63,8 +61,7 @@ namespace UrGuide.Services.Posts
             cancellationToken.ThrowIfCancellationRequested();
             var post = await Context.Posts
                 .Include(x => x.Bid)
-                .ThenInclude(x => x.Author)
-                .Include(x => x.Attributes).FirstOrDefaultAsync(x => x.Id == postId, cancellationToken);
+                .ThenInclude(x => x.Author).FirstOrDefaultAsync(x => x.Id == postId, cancellationToken);
             if (post == null)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
             try
@@ -137,26 +134,15 @@ New price: <em>{post.Bid.NewValue}</em>";
             if (result.HasError)
                 return Result.Of<PostModel>().WithErrors("Failed to create a post").Combine(result);
 
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Dislikes), Value = Constants.Zero });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Likes), Value = Constants.Zero });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.AllocatedSeats), Value = model.Seats.ToString() });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Categories), Value = string.Join(",", model.Categories) });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Amount), Value = model.UnitPrice });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.DateStart), Value = DateTimeHelper.GetDate(model.StartDate) });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.TimeStart), Value = DateTimeHelper.GetTime(model.StartDate, DateTimeKind.Local) });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.DateEnd), Value = DateTimeHelper.GetDate(model.EndDate) });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.TimeEnd), Value = DateTimeHelper.GetTime(model.EndDate, DateTimeKind.Local) });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.GeoLocation), Value = model.GeoLocation });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Views), Value = Constants.Zero });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.PublicationDate), Value = DateTimeHelper.GetDateTime(post.DateOfPublication, DateTimeKind.Local) });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Status), Value = Constants.Active });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Rating), Value = Constants.Zero });
-            post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.Reviews), Value = Constants.Zero });
-
-            if (model.BidOptIn)
-            {
-                post.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(AttributeTypes.BidOptIn), Value = Constants.Yes });
-            }
+            post.Tags = string.Join(",",model.Categories);
+            post.AllocatedSeats = model.Seats;
+            post.ReservedSeats = 0;
+            post.StartDate = model.StartDate;
+            post.EndDate = model.EndDate;
+            post.BidEnabled = model.BidOptIn;
+            post.Cost = model.UnitPrice;
+            post.GeoLocation = model.GeoLocation;
+            post.ItineraryCount = model.Itineraries.Count();
 
             foreach (var it in model.Itineraries)
             {
@@ -211,17 +197,11 @@ New price: <em>{post.Bid.NewValue}</em>";
         private async Task<Result<IEnumerable<PostModel>>> GetPagedData(int offset, int size, CancellationToken cancellationToken)
         {
             var geo = await IPStackService.GetLocationAsync(UserContext);
-            var p = await Context.Set<PostSearch>()
+            var posts = await Context.Posts
                 .Where(x => geo == null || x.Location == null || x.Location.Distance(geo) <= Constants.Distance)
-                .OrderByDescending(x => x.PostId)
-                .Select(p => p.PostId)
+                .OrderByDescending(x => x.Id)
                 .Skip(offset)
                 .Take(size)
-                .ToListAsync(cancellationToken);
-
-
-            var posts = await Context.Posts
-                .Where(x => p.Contains(x.Id))
                 .ToListAsync(cancellationToken);
 
             return Result.Of(Mapper.Map<IEnumerable<PostModel>>(PostVisitor.Visit(posts, UserContext.UserId)));
@@ -240,7 +220,6 @@ New price: <em>{post.Bid.NewValue}</em>";
 
             cancellationToken.ThrowIfCancellationRequested();
             var post = await Context.Posts
-                .Include(x => x.Attributes)
                 .Include(x => x.Bid)
                 .Include(x => x.User)
                 .ThenInclude(user => user.Attributes)
@@ -248,7 +227,7 @@ New price: <em>{post.Bid.NewValue}</em>";
             if (post == null)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
 
-            if (!post.Attributes.Any(a => a.Name == nameof(AttributeTypes.BidOptIn)))
+            if (!post.BidEnabled)
             {
                 return Result.Of<PostModel>().WithErrors("This post is not biddable.");
             }
@@ -358,12 +337,6 @@ Your bid: <em>{value}</em>";
             return Result.Of(true);
         }
 
-        public async Task<Result<bool>> UpdatePostAttributesAsync(string id, SetAttribute[] attributes, CancellationToken cancellationToken)
-        {
-            await Mediator.Send(new PostEditedCommand(UserContext.UserId, id));
-            return await SetAttributesRestrictedToUserAsync<Post>(id, attributes, cancellationToken);
-        }
-
         public async Task<Result<IEnumerable<BidHistoryModel>>> GetBidHistoryAsync(string postId, CancellationToken cancellationToken)
         {
             var post = await Context.Posts.Include(p => p.BidHistories).Where(x => x.Id == postId)
@@ -387,18 +360,12 @@ Your bid: <em>{value}</em>";
         private async Task<Result<IEnumerable<PostModel>>> GetTopPagedData(int offset, int size, CancellationToken cancellationToken)
         {
             var geo = await IPStackService.GetLocationAsync(UserContext);
-            var p = await Context.Set<PostSearch>()
+            var posts = await Context.Posts
                 .Where(x => geo == null || x.Location == null || x.Location.Distance(geo) <= Constants.Distance)
                 .OrderByDescending(x => x.Rating)
                 .ThenBy(x => x.EndDate)
-                .Select(p => p.PostId)
                 .Skip(offset)
                 .Take(size)
-                .ToListAsync(cancellationToken);
-
-
-            var posts = await Context.Posts
-                .Where(x => p.Contains(x.Id))
                 .ToListAsync(cancellationToken);
 
             return Result.Of(Mapper.Map<IEnumerable<PostModel>>(PostVisitor.Visit(posts, UserContext.UserId)));
@@ -598,22 +565,17 @@ Post: <strong>{post.Text}</strong></br>
         private async Task<Result<PagedList<PostModel>>> InternalSearch(string userId, SearchParameters pagination, CancellationToken cancellationToken)
         {
             var geo = pagination.Nearby ? await IPStackService.GetLocationAsync(UserContext) : null; 
-            var postIds = await PagedList.Of(Context.Set<PostSearch>()
+            var posts = await PagedList.Of(Context.Posts
                             .Where(x => pagination.Term == null || 
                             ( 
                                 EF.Functions.Like(x.GeoLocation, $"%{pagination.Term}%") || 
-                                EF.Functions.Like(x.Categories, $"%{pagination.Term}%"))
+                                EF.Functions.Like(x.Tags, $"%{pagination.Term}%"))
                             )
-                            .Where(x => userId == null || x.UserId == userId)
+                            .Where(x => userId == null || x.User == null || x.User.Id == userId)
                             .Where(x => geo == null || x.Location.Distance(geo) <= Constants.Distance)
-                            .OrderByDescending(x => x.PostId)
-                            .Select(p => p.PostId), pagination.PageNumber, cancellationToken);
+                            .OrderByDescending(x => x.Id), pagination.PageNumber, cancellationToken);
 
-            var pagedResult = postIds.FromIdCollection(Context.Posts
-                .Include(x => x.Bid)
-                .ThenInclude(bid => bid.Author)
-                .ThenInclude(author => author.Attributes))
-                .To(p => Mapper.Map<PostModel>(PostVisitor.Visit(p, UserContext.UserId)));
+            var pagedResult = posts.To(p => Mapper.Map<PostModel>(PostVisitor.Visit(p, UserContext.UserId)));
 
             return Result.Of(pagedResult);
         }

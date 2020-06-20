@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using UrGuide.Data;
@@ -10,9 +11,10 @@ using UrGuide.Data;
 namespace UrGuide.Data.Migrations
 {
     [DbContext(typeof(UrGuideContext))]
-    partial class UrGuideContextModelSnapshot : ModelSnapshot
+    [Migration("20200620130616_Post_Flat_Structure")]
+    partial class Post_Flat_Structure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -307,6 +309,36 @@ namespace UrGuide.Data.Migrations
                     b.HasOne("UrGuide.Data.Entities.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
+
+                    b.OwnsMany("UrGuide.Data.Entities.Attributes.GenericAttribute", "Attributes", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int")
+                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(200)")
+                                .HasMaxLength(200);
+
+                            b1.Property<string>("PostId")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("PostId");
+
+                            b1.ToTable("Post_Attributes","ug");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PostId");
+                        });
 
                     b.OwnsOne("UrGuide.Data.Entities.Posts.Bid", "Bid", b1 =>
                         {
@@ -781,7 +813,8 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasOne("UrGuide.Data.Entities.Users.User", "Author")
                                 .WithMany()
-                                .HasForeignKey("FK_User_Feedback_Users");
+                                .HasForeignKey("FK_User_Feedback_Users")
+                                .OnDelete(DeleteBehavior.Cascade);
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");
