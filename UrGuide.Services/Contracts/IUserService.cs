@@ -19,5 +19,6 @@ namespace UrGuide.Services.Contracts
         Task<Result<bool>> UpdateUserAsync(UpdateUserModel updateUser, CancellationToken cancellationToken);
         Task<Result<UserInfo>> GetUserInfo(string userId, CancellationToken cancellationToken);
         Task<Result<User>> GetDetailsAsync(CancellationToken cancellationToken);
+        Task<Result<PagedList<UserInfo>>> GetUsersAsync(SearchParameters searchParameters, CancellationToken cancellationToken);
     }
 }

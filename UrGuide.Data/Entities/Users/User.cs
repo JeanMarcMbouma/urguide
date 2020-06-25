@@ -23,6 +23,9 @@ namespace UrGuide.Data.Entities.Users
         public DateTime LastActivityDate { get; set; }
         public virtual Image ProfileImage { get; set; }
         public virtual Point Location { get; set; }
-        public object FullName => $"{Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.FirstName))} {Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.LastName))}";
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public object FullName => $"{FirstName} {LastName}";
     }
 }

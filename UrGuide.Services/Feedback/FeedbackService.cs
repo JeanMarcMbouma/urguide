@@ -50,10 +50,10 @@ namespace UrGuide.Services.Feedback
             post.Reviews++;
             post.Rating = (int)Math.Ceiling(new[] { post.Rating, feedback.Rating }.Average());
             var author = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
-            string authorFirstName = author.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+            string authorFirstName = author.FirstName;
 
-            string postAuthorFirstName = post.User.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
-            string postAuthorEmail = post.User.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
+            string postAuthorFirstName = post.User.FirstName;
+            string postAuthorEmail = post.User.Email;
             
             post.Feedback.Add(new Data.Shared.Feedback
             {
@@ -109,10 +109,10 @@ Rating: {feedback.Rating} star(s).";
             int avg = firstRatingEver ? feedback.Rating : (int)Math.Ceiling(new[] { r, feedback.Rating }.Average());
             rating.Value = avg.ToString();
             var author = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
-            string authorFirstName = author.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+            string authorFirstName = author.FirstName;
 
-            string userFirstName = user.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
-            string userEmail = user.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
+            string userFirstName = user.FirstName;
+            string userEmail = user.Email;
 
             user.Feedback.Add(new Data.Shared.Feedback
             {

@@ -35,6 +35,14 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors)) : Ok(result.Data);
         }
 
+        [HttpGet("{id}")]
+        [ProducesDefaultResponseType(typeof(Notification))]
+        public async Task<IActionResult> Get(string id, CancellationToken cancellationToken)
+        {
+            var result = await NotificationService.GetNotificationAsync(id, cancellationToken);
+            return result.HasError ? (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors)) : Ok(result.Data);
+        }
+
         [HttpGet("all")]
         [ProducesDefaultResponseType(typeof(PagedList<Notification>))]
         public async Task<IActionResult> GetAll([FromQuery]PaginationParameters pagination, CancellationToken cancellationToken)

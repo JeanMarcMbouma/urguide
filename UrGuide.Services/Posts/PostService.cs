@@ -67,9 +67,9 @@ namespace UrGuide.Services.Posts
             try
             {
                 post.AcceptBid();
-                var author = post.Bid.Author.Attributes;
-                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
-                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
+                var author = post.Bid.Author;
+                var authorFirstName = author.FirstName;
+                var authorEmail = author.Email;
                 string content = @$"
 Congratulation, {authorFirstName}</br>
 Your bid was accepted:</br>
@@ -238,9 +238,9 @@ New price: <em>{post.Bid.NewValue}</em>";
                 var oldBid = post.Bid?.Author.Id;
 
                 post.NewBid(model.Value, user);
-                var author = post.User.Attributes;
-                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
-                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
+                var author = post.User;
+                var authorFirstName = author.FirstName;
+                var authorEmail = author.Email;
                 string content = @$"
 Hi, {authorFirstName}</br>
 You received a new proposal:</br>
@@ -293,11 +293,11 @@ New price: <em>{post.Bid.NewValue}</em>");
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
             try
             {
-                var author = post.Bid.Author.Attributes;
+                var author = post.Bid.Author;
                 var value = post.Bid.NewValue;
                 post.RejectBid();
-                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
-                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
+                var authorFirstName = author.FirstName;
+                var authorEmail = author.LastName;
                 string content = @$"
 Hi, {authorFirstName}</br>
 Your bid was rejected by the owner:</br>
@@ -388,9 +388,9 @@ Your bid: <em>{value}</em>";
             {
                 post.MakeReservation(UserContext.UserId, seatReservation.Seats);
                 await Context.SaveChangesAsync(cancellationToken);
-                var author = post.User.Attributes;
-                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
-                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
+                var author = post.User;
+                var authorFirstName = author.FirstName;
+                var authorEmail = author.Email;
                 string content = @$"
 Hi, {authorFirstName}</br>
 A user has just made a reservation:</br>
@@ -432,9 +432,9 @@ Seats: {seatReservation.Seats}";
             {
                 post.EditReservation(UserContext.UserId, seatReservation.Seats);
                 await Context.SaveChangesAsync(cancellationToken);
-                var author = post.User.Attributes;
-                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
-                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
+                var author = post.User;
+                var authorFirstName = author.FirstName;
+                var authorEmail = author.Email;
                 string content = @$"
 Hi, {authorFirstName}</br>
 A user has changed their reservation:</br>
@@ -477,9 +477,9 @@ Title: {post.Text}";
                 post.CancelReservation(UserContext.UserId);
                 await Context.SaveChangesAsync(cancellationToken);
 
-                var author = post.User.Attributes;
-                var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
-                var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
+                var author = post.User;
+                var authorFirstName = author.FirstName;
+                var authorEmail = author.Email;
                 string content = @$"
 Hi, {authorFirstName}</br>
 A user has cancelled a reservation:</br>
@@ -520,9 +520,9 @@ Post: <strong>{post.Text}</strong></br>
 
             await Context.SaveChangesAsync(cancellationToken);
 
-            var author = post.User.Attributes;
-            var authorFirstName = author.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
-            var authorEmail = author.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
+            var author = post.User;
+            var authorFirstName = author.FirstName;
+            var authorEmail = author.Email;
             string content = @$"
 Hi, {authorFirstName}</br>
 A user has {(userReaction.Like ? "liked" : "reacted to")} your post:</br>

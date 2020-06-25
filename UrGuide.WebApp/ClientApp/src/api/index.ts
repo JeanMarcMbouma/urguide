@@ -387,6 +387,63 @@ export class Client {
     }
 
     /**
+     * @return Error
+     */
+    notifications(id: string | null): Promise<Notification> {
+        let url_ = this.baseUrl + "/notifications/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processNotifications(_response);
+        });
+    }
+
+    protected processNotifications(response: Response): Promise<Notification> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = Notification.fromJS(resultDatadefault);
+            return resultdefault;
+            });
+        }
+    }
+
+    /**
      * @return Success
      */
     _configuration(clientId: string | null): Promise<void> {
@@ -2005,6 +2062,58 @@ export class UsersClient {
             let resultdefault: any = null;
             let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             resultdefault = UserInfo.fromJS(resultDatadefault);
+            return resultdefault;
+            });
+        }
+    }
+
+    /**
+     * @param term (optional) 
+     * @param nearby (optional) 
+     * @param pageNumber (optional) 
+     * @return Error
+     */
+    search(term: string | null | undefined, nearby: boolean | undefined, pageNumber: number | undefined): Promise<UserInfoPagedList> {
+        let url_ = this.baseUrl + "/users/search?";
+        if (term !== undefined && term !== null)
+            url_ += "Term=" + encodeURIComponent("" + term) + "&";
+        if (nearby === null)
+            throw new Error("The parameter 'nearby' cannot be null.");
+        else if (nearby !== undefined)
+            url_ += "Nearby=" + encodeURIComponent("" + nearby) + "&";
+        if (pageNumber === null)
+            throw new Error("The parameter 'pageNumber' cannot be null.");
+        else if (pageNumber !== undefined)
+            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSearch(_response);
+        });
+    }
+
+    protected processSearch(response: Response): Promise<UserInfoPagedList> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            resultdefault = UserInfoPagedList.fromJS(resultDatadefault);
             return resultdefault;
             });
         }
@@ -4302,6 +4411,58 @@ export interface IUserInfo {
     rating?: number;
     profileImage?: string | undefined;
     id?: string | undefined;
+}
+
+export class UserInfoPagedList implements IUserInfoPagedList {
+    pageNumber?: number;
+    readonly itemsCount?: number;
+    readonly items?: UserInfo[] | undefined;
+
+    constructor(data?: IUserInfoPagedList) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.pageNumber = _data["pageNumber"];
+            (<any>this).itemsCount = _data["itemsCount"];
+            if (Array.isArray(_data["items"])) {
+                (<any>this).items = [] as any;
+                for (let item of _data["items"])
+                    (<any>this).items!.push(UserInfo.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): UserInfoPagedList {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserInfoPagedList();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["pageNumber"] = this.pageNumber;
+        data["itemsCount"] = this.itemsCount;
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IUserInfoPagedList {
+    pageNumber?: number;
+    itemsCount?: number;
+    items?: UserInfo[] | undefined;
 }
 
 export class Notification implements INotification {
