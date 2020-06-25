@@ -100,8 +100,6 @@
     background-color: white;
     padding: 20px 35px 20px 35px;
     border-radius: 8px;
-    /*margin-bottom: 20px;*/
-    margin: 5px;
     margin-bottom:30px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
     transition: all 0.3s cubic-bezier(.25,.8,.25,1);
@@ -379,4 +377,8 @@
 }
 .dropdown-button:after {
     display: none !important;
+}
+
+.text-wrap{
+    word-wrap: break-word;
 }

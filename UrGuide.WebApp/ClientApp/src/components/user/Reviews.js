@@ -8,6 +8,8 @@ import {
     TextField,
     CircularProgress,
     Box,
+    Typography,
+    CardContent,
 
 } from '@material-ui/core';
 import { Link, useParams } from 'react-router-dom';
@@ -19,6 +21,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { HttpClientFactory } from '../../httpclient';
 import {  UsersClient, FeedbackModel, FeedbackClient } from '../../api';
 import "./UserStyle.css"
+import '../MainPage/CentralBar/CentralStyle.css';
 import FeedBackContext from './FeedbackContext';
 import FeedBackReducer from './FeedBackReducer';
 import { useAuthContext } from '../api-authorization/AuthService';
@@ -40,7 +43,7 @@ function FeedBacks({ reviews }) {
             <br/>
             {
                 reviews.map((rev, i) => (
-                    <div className='cmt-div' key={i} >
+                    <div className='cmt-div col-lg-12' key={i} >
                         <CardHeader
                             avatar={<Avatar alt={rev.authorFullName} src={rev.authorImage} />}
                             title={
@@ -54,8 +57,8 @@ function FeedBacks({ reviews }) {
                             value={rev.rating}
                             readOnly
                         />
-                        <div className='comment-text'>
-                            <p>{rev.text}.</p>
+                        <div className='text-wrap'>
+                            <Typography variant="subtitle1" component="p">{rev.text}</Typography>
                         </div>
                     </div>))
             }
@@ -174,7 +177,7 @@ export default function Reviews(props) {
                 : 
                 null
             }
-            <div className='col-12 col-lg-8'>
+            <div className='col-12 col-lg-8 timeline'>
                 <FeedBacks reviews={state.feedbacks} />
             </div>
         </div>

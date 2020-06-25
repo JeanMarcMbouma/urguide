@@ -17,7 +17,7 @@ const useStyles = makeStyles (theme => ({
 const Posts = ({post}) => {
   const classes = useStyles ();
   return (
-    <Card style={{width:`350px`}} className="col-lg-12 bg-white rounded p-2 mb-2">
+    <Card className="col-lg-12 bg-white rounded p-2 mb-2">
           <div className="media p-0">
               <Link to={`/g/${post.authorId}`} >
                   <Avatar className="mr-3" src={post.authorAvatar} alt={post.author} />

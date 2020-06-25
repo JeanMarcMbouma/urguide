@@ -456,7 +456,7 @@ export default function Posts() {
     return (
         <div className="row">
             <div className="col-12 lower-section">
-                <div className="col-12 col-md-6 col-lg-5 col-xl-5 timeline">
+                <div className="col-12 col-lg-9 col-xl-7 timeline">
                     {isLoading ? <><SkeletonCard /><SkeletonCard /></> : data.items.map((post, i) => <SinglePost key={i} post={post} />)}
                 </div>
             </div>
