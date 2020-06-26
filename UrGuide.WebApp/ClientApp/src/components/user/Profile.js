@@ -58,35 +58,33 @@ function ProfileLayout() {
     }, [user]);
 
     return (
-        <DataContextProvider>
-            <div className="container-fluid user-page-container">
-                <div className="row">
-                    <div className="col-12">
-                        <UpperSection values={values} visitor={false} />
-                    </div>
+        <div className="container-fluid user-page-container">
+            <div className="row">
+                <div className="col-12">
+                    <UpperSection values={values} visitor={false} />
                 </div>
-                <Switch>
-                    <Route exact path={path} >
-                        <Reviews />
-                    </Route>
-                    <Route path={`${path}/posts`}>
-                        <Posts />
-                    </Route>
-                    <Route path={`${path}/galleries`}>
-                        <Galleries />
-                    </Route>
-                    <AuthRoute path={`${path}/details`}>
-                        <EditProfile isGuide={true} />
-                    </AuthRoute>
-                    <AuthRoute path={`${path}/password`}>
-                        <ChangePassword isGuide={true} />
-                    </AuthRoute>
-                    <AuthRoute path={`${path}/creategallery`}>
-                        <CreateNewGallery />
-                    </AuthRoute>
-                </Switch>
             </div>
-        </DataContextProvider>
+            <Switch>
+                <Route exact path={path} >
+                    <Reviews />
+                </Route>
+                <Route path={`${path}/posts`}>
+                    <Posts />
+                </Route>
+                <Route path={`${path}/galleries`}>
+                    <Galleries />
+                </Route>
+                <AuthRoute path={`${path}/details`}>
+                    <EditProfile isGuide={true} />
+                </AuthRoute>
+                <AuthRoute path={`${path}/password`}>
+                    <ChangePassword isGuide={true} />
+                </AuthRoute>
+                <AuthRoute path={`${path}/creategallery`}>
+                    <CreateNewGallery />
+                </AuthRoute>
+            </Switch>
+        </div>
     );
 }
 
