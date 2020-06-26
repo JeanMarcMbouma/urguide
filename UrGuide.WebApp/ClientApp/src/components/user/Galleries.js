@@ -209,7 +209,7 @@ export default function Galleries() {
 
     const { user } = useAuthContext();
 
-    const { profile } = user;
+    const { profile } = user || { profile: null };
 
     const [model, setModel] = useState({ galleries: [], loading: true });
 
