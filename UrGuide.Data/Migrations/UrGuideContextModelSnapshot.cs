@@ -16,7 +16,7 @@ namespace UrGuide.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.4")
+                .HasAnnotation("ProductVersion", "3.1.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -144,8 +144,25 @@ namespace UrGuide.Data.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasDefaultValueSql("NEWID()");
 
+                    b.Property<int>("AllocatedSeats")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<int>("BidCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<bool>("BidEnabled")
+                        .HasColumnType("bit");
+
                     b.Property<string>("CatalogRef")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Cost")
+                        .HasColumnType("nvarchar(100)")
+                        .HasMaxLength(100);
 
                     b.Property<DateTime>("DateOfPublication")
                         .HasColumnType("datetime2");
@@ -155,11 +172,58 @@ namespace UrGuide.Data.Migrations
                         .HasColumnType("nvarchar(2000)")
                         .HasMaxLength(2000);
 
+                    b.Property<int>("Dislikes")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("EndDate")
+                        .IsRequired()
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("GeoLocation")
+                        .HasColumnType("nvarchar(400)")
+                        .HasMaxLength(400);
+
+                    b.Property<int>("ItineraryCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<string>("LastBid")
+                        .HasColumnType("nvarchar(100)")
+                        .HasMaxLength(100);
+
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Likes")
+                        .HasColumnType("int");
+
                     b.Property<Point>("Location")
                         .HasColumnType("geography");
+
+                    b.Property<int>("Rating")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(5);
+
+                    b.Property<int>("ReservedSeats")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("Reviews")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime?>("StartDate")
+                        .IsRequired()
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Tags")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(500);
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -216,8 +280,29 @@ namespace UrGuide.Data.Migrations
                         .HasColumnName("UserId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(255)
+                        .HasDefaultValue("N/A");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(200)")
+                        .HasMaxLength(200)
+                        .HasDefaultValue("N/A");
+
                     b.Property<DateTime>("LastActivityDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(200)")
+                        .HasMaxLength(200)
+                        .HasDefaultValue("N/A");
 
                     b.Property<Point>("Location")
                         .HasColumnType("geography");
@@ -243,36 +328,6 @@ namespace UrGuide.Data.Migrations
                     b.HasOne("UrGuide.Data.Entities.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
-
-                    b.OwnsMany("UrGuide.Data.Entities.Attributes.GenericAttribute", "Attributes", b1 =>
-                        {
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int")
-                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(200)")
-                                .HasMaxLength(200);
-
-                            b1.Property<string>("PostId")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(450)");
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("PostId");
-
-                            b1.ToTable("Post_Attributes","ug");
-
-                            b1.WithOwner()
-                                .HasForeignKey("PostId");
-                        });
 
                     b.OwnsOne("UrGuide.Data.Entities.Posts.Bid", "Bid", b1 =>
                         {
@@ -311,7 +366,8 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasOne("UrGuide.Data.Entities.Users.User", "Author")
                                 .WithMany()
-                                .HasForeignKey("FK_Post_Bids_Users");
+                                .HasForeignKey("FK_Post_Bids_Users")
+                                .OnDelete(DeleteBehavior.Cascade);
 
                             b1.WithOwner()
                                 .HasForeignKey("PostId");
@@ -349,7 +405,8 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasOne("UrGuide.Data.Entities.Users.User", "Author")
                                 .WithMany()
-                                .HasForeignKey("FK_Post_Bids_History_Users");
+                                .HasForeignKey("FK_Post_Bids_History_Users")
+                                .OnDelete(DeleteBehavior.Cascade);
 
                             b1.WithOwner()
                                 .HasForeignKey("PostId");
@@ -499,7 +556,8 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasOne("UrGuide.Data.Entities.Users.User", "Author")
                                 .WithMany()
-                                .HasForeignKey("FK_Post_Feedback_Users");
+                                .HasForeignKey("FK_Post_Feedback_Users")
+                                .OnDelete(DeleteBehavior.Cascade);
 
                             b1.WithOwner()
                                 .HasForeignKey("PostId");

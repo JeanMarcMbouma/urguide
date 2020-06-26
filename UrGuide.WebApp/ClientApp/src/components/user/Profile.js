@@ -16,15 +16,14 @@ import UserContext from "./../UserContext";
 import AuthRoute from "../api-authorization/AuthRoute";
 import { useAuthUser } from "../api-authorization/AuthService";
 import { HttpClientFactory } from "../../httpclient";
-import { DataContextProvider, useDataContext, ActionTypes } from "../../data/GlobalDataContext";
-
+import { DataContextProvider } from "../../data/GlobalDataContext";
 
 
 function ProfileLayout() {
 
     let { path } = useRouteMatch();
     const user = useAuthUser();
-    const { dcReducer } = useDataContext();
+
     const [values, setValues] = useState({
         userId: null,
         profileImage: null,
@@ -37,64 +36,55 @@ function ProfileLayout() {
 
     useEffect(() => {
 
-      
+        let f = async () => {
+            if (!user)
+                return;
 
-        let doWork = async () => {
-
-
-            dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/profile", profileUrl: "/Reviews" } });
-
-        if (!user)
-            return;
-        var client = HttpClientFactory.getClient(user);
-        var data = await client.getdetails();
-        setValues({
-            userId: data.id,
-            profileImage: data.profileImage,
-            username: `${data.firstName} ${data.lastName}`,
-            location: `${data.city}, ${data.country}`,
-            description: data.description,
-            loading: false,
-            rating: data.rating
-        });
-
-        }
-
-        doWork();
+            var client = HttpClientFactory.getClient(user);
+            var data = await client.getdetails();
+            setValues({
+                userId: data.id,
+                profileImage: data.profileImage,
+                username: `${data.firstName} ${data.lastName}`,
+                location: `${data.city}, ${data.country}`,
+                description: data.description,
+                loading: false,
+                rating: data.rating
+            });
+        };
+        
+        f();
         return () => { };
-
     }, [user]);
 
     return (
-        <DataContextProvider>
-            <div className="container-fluid user-page-container">
-                <div className="row">
-                    <div className="col-12">
-                        <UpperSection values={values} visitor={false} />
-                    </div>
+        <div className="container-fluid user-page-container">
+            <div className="row">
+                <div className="col-12">
+                    <UpperSection values={values} visitor={false} />
                 </div>
-                <Switch>
-                    <Route exact path={path} >
-                        <Reviews />
-                    </Route>
-                    <Route path={`${path}/posts`}>
-                        <Posts />
-                    </Route>
-                    <Route path={`${path}/galleries`}>
-                        <Galleries />
-                    </Route>
-                    <AuthRoute path={`${path}/details`}>
-                        <EditProfile isGuide={true} />
-                    </AuthRoute>
-                    <AuthRoute path={`${path}/password`}>
-                        <ChangePassword isGuide={true} />
-                    </AuthRoute>
-                    <AuthRoute path={`${path}/creategallery`}>
-                        <CreateNewGallery />
-                    </AuthRoute>
-                </Switch>
             </div>
-        </DataContextProvider>
+            <Switch>
+                <Route exact path={path} >
+                    <Reviews />
+                </Route>
+                <Route path={`${path}/posts`}>
+                    <Posts />
+                </Route>
+                <Route path={`${path}/galleries`}>
+                    <Galleries />
+                </Route>
+                <AuthRoute path={`${path}/details`}>
+                    <EditProfile isGuide={true} />
+                </AuthRoute>
+                <AuthRoute path={`${path}/password`}>
+                    <ChangePassword isGuide={true} />
+                </AuthRoute>
+                <AuthRoute path={`${path}/creategallery`}>
+                    <CreateNewGallery />
+                </AuthRoute>
+            </Switch>
+        </div>
     );
 }
 

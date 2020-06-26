@@ -1286,7 +1286,7 @@ export default function CentralBar() {
                         Sold out
                     </Button>)
             } else if (user && user.profile.sub !== post.authorId) {
-                return (<Button className="col-2 reservation" variant="contained" color="primary" onClick={() => makeReservation(post)}>
+                return (<Button className="col-2 reservation reservation-small-screen" variant="contained" color="primary" onClick={() => makeReservation(post)}>
                     {reserved ? 'Leave' : 'Join'}
                     </Button>)
             }
@@ -1294,7 +1294,7 @@ export default function CentralBar() {
         }
 
         return <div className="p-3 mb-3 bg-white rounded post-card">
-            <div className="col-12 mt-3 row">
+            <div className="col-12 mt-3 mx-0 row">
                 <CardHeader className="col-10 p-2 m-0"
                     avatar={<Link to={`/g/${post.authorId}`} ><Avatar alt={post.author} src={post.authorAvatar} /></Link>}
                     title={
@@ -1436,7 +1436,7 @@ export default function CentralBar() {
     }
 
     return (
-        <div className="col-12 col-sm-7 col-md-7 col-lg-6 col-xl-5 timeline">
+        <div className="col-xs-12 col-sm-7 col-md-7 col-lg-6 col-xl-5 timeline">
             <div >
                 {profile.role === "guide" ? <ViewPost /> : null}
                 {

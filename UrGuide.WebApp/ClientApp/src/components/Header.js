@@ -18,6 +18,7 @@ import NotificationsReducer from './NotificationsReducer';
 import NotificationsContext from './NotificationsContext';
 import { useAuthContext } from './api-authorization/AuthService';
 import { FiLogOut } from 'react-icons/fi';
+import Logo from '../Logo.png'
 import { SignalRClient } from '../hub';
 import { useDataContext } from '../data/GlobalDataContext';
 
@@ -42,6 +43,10 @@ const useStyles = makeStyles (() => ({
   },
   avatarButton: {
     marginTop: '-5px',
+  },
+  logo: {
+      width: '155px',
+      height: '55px',
   },
 }));
 
@@ -146,7 +151,6 @@ export default function Header() {
             if (user === null)
                 return;
 
-            console.log(user);
             const client = HttpClientFactory.get(NotificationsClient, user);
             try {
 
@@ -191,10 +195,10 @@ export default function Header() {
             <nav className='navigation-bar' >
                 <div className="container-fluid" >
                     <div className="row justify-content-between navbarRow">
-                        <div className="col-6 col-sm-3 col-lg-3">
-                            <NavbarBrand href="/" className={(classes.font)}>UrGuide</NavbarBrand>
+                        <div className="col-4 col-md-2 col-sm-3 col-lg-3 logo">
+                            <NavbarBrand className={classes.font} href="/"><img className={classes.logo} src={ Logo } alt='Logo' /></NavbarBrand>
                         </div>
-                        <div className="col-8 col-sm-6 col-md-6 col-lg-4 centered-div"  >
+                        <div className="col-8 col-sm-6 col-md-4 col-lg-4 centered-div"  >
                             <div className='row justify-content-end'>
                                 {dataContext.url === "/feed" ? <div className='col-3 col-md-3 col-lg-3 mid-2 text-center active-div'>
                                     <Link to="/feed"  >
@@ -278,11 +282,11 @@ export default function Header() {
                             }
                             </div>
                         </div>
-                        <div className="col-6 col-sm-3 col-md-3 right-div">
-                            <div className='row justify-content-start'>
+                        <div className="col-6 col-sm-6 col-md-4 d-flex justify-content-end mr-5 right-div">
+                            <div className='row'>
                                 {
                                     profile.role === "guide" ? <Link to="/profile">
-                                        <div className='col-2 col-sm-6 col-md-3'>
+                                        <div className='col-2 col-sm-6 col-md-3 userImage'>
                                             <IconButton className={classes.avatarButton}>
                                                 <Avatar className={(classes.avatar)} src={profile.picture} />
                                             </IconButton>
@@ -292,7 +296,7 @@ export default function Header() {
                                         :
 
                                         <Link to="/account/details">
-                                            <div className='col-2 col-sm-6 col-md-3'>
+                                            <div className='col-2 col-sm-6 col-md-3 userImage'>
                                                 <IconButton className={classes.avatarButton}>
                                                     <Avatar className={(classes.avatar)} src={profile.picture} />
                                                 </IconButton>

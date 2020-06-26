@@ -31,7 +31,6 @@ import "./UserStyle.css";
 import FeedBackContext from './FeedbackContext';
 import FeedBackReducer from './FeedBackReducer';
 import { UsersClient, FeedbackModel, FeedbackClient, PostsClient, PostModelPagedList, SearchParameters } from '../../api';
-import { useDataContext, ActionTypes } from '../../data/GlobalDataContext';
 
 
 function SkeletonCard() {
@@ -132,7 +131,7 @@ function FeedBacks(props) {
         return false;
     }
     const [isLoading, setLoading] = useState(true);
-    const [pageNumber, setPageNumber] = useState(2);
+    const [pageNumber, setPageNumber] = useState(1);
     const ctx = useContext(FeedBackContext);
     const [state, dispatch] = useReducer(FeedBackReducer, ctx);
 
@@ -193,8 +192,6 @@ function FeedBacks(props) {
         }
 
     }
-
-
 
     const [hover, setHover] = React.useState(-1);
 
@@ -267,8 +264,10 @@ function FeedBacks(props) {
 
                 if (props.show === true) {
                     var client = HttpClientFactory.get(FeedbackClient);
-                    var result = await client.posts(props.showId, pageNumber);
-                    setPageNumber(result.pageNumber + 1);
+                    var page = pageNumber + 1;
+                    var result = await client.posts(props.showId, page);
+                    //console.log(result.pageNumber);
+                    setPageNumber(result.pageNumber);
                     setLoading(false);
                     result.items.forEach((item, index) => { state.feedbacks.push(item) });
                     dispatch({
@@ -290,17 +289,12 @@ export default function Posts() {
 
     const { userId } = useParams();
     const { user } = useAuthContext();
-    const [pageNumber, setPageNumber] = useState(2);
-    const ctx = useContext(FeedBackContext);
-    const [state, dispatch] = useReducer(FeedBackReducer, ctx);
-    const { dcReducer } = useDataContext();
 
     const [isLoading, setLoading] = useState(true);
- 
+    const [data, setData] = useState({});
 
     useEffect(() => {
 
-        dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: false, url: "/profile", profileUrl: "/Posts" } });
         var id = userId;
 
         if (user != null && id == undefined) {
@@ -311,57 +305,13 @@ export default function Posts() {
             var client = HttpClientFactory.get(PostsClient, user);
             var model = new SearchParameters({ term: null, pageNumber: 1 });
             var result = await client.all(id, model);
-            dispatch({
-                type: "load-more",
-                data: {
-                    itemsCount: result.itemsCount,
-                    pageNumber: result.pageNumber,
-                    items: result.items,
-                }
-            });
+            setData(result);
             setLoading(false);
-
-        dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/profile", profileUrl: "/Posts" } });
         }
 
         load();
         return () => { };
     }, [user]);
-
- 
-    window.onscroll = async function (ev) {
-        var totalPageHeight = document.body.scrollHeight;
-        var scrollPoint = window.scrollY + window.innerHeight;
-        if (scrollPoint >= totalPageHeight) {
-           await loadMoreFeedBacks();
-        }
-    };
-
-    async function loadMoreFeedBacks() {
-        var id = userId;
-
-        if (user != null && id == undefined) {
-            id = user.profile.sub;
-        }
-       
-            var client = HttpClientFactory.get(PostsClient, user);
-            var model = new SearchParameters({ term: null, pageNumber: pageNumber });
-        var result = await client.all(id, model);
-        if (result.itemsCount > 0) {
-            setPageNumber(result.pageNumber + 1);
-        }
-            result.items.forEach((item, index) => { state.items.push(item) });
-            dispatch({
-                type: "load-more",
-                data: {
-                    itemsCount: state.itemsCount,
-                    pageNumber: pageNumber,
-                    items: state.items,
-                }
-            });
-         
-   }
-
 
     function PostImages(props) {
         if (props.images.length == 1) {
@@ -506,8 +456,8 @@ export default function Posts() {
     return (
         <div className="row">
             <div className="col-12 lower-section">
-                <div className="col-12 col-md-6 col-lg-5 col-xl-5 timeline" >
-                    {isLoading ? <><SkeletonCard /><SkeletonCard /></> : state.items.map((post, i) => <SinglePost key={i} post={post} />)}
+                <div className="col-12 col-lg-9 col-xl-7 timeline">
+                    {isLoading ? <><SkeletonCard /><SkeletonCard /></> : data.items.map((post, i) => <SinglePost key={i} post={post} />)}
                 </div>
             </div>
         </div>

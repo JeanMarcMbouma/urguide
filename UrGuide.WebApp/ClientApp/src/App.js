@@ -22,7 +22,6 @@ import AuthRoute from './components/api-authorization/AuthRoute';
 import { AuthContextProvider } from './components/api-authorization/AuthService'
 import { ApplicationPaths } from './components/api-authorization/ApiAuthorizationConstants';
 import LoginCallback from './components/api-authorization/LoginCallback';
-import LogoutCallback from './components/api-authorization/LogoutCallback';
 import ClientDetails from './components/user/ClientDetails';
 import { DataContextProvider } from './data/GlobalDataContext';
 import Message from './components/message/message';
@@ -36,7 +35,6 @@ export default class App extends Component {
     static displayName = App.name;
 
     render() {
-
         return (
             <DataContextProvider>
                 <AuthContextProvider>

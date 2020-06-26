@@ -343,3 +343,10 @@
     display: flex;
     flex-direction: column;
 }
+ @media only screen and (max-width: 860px){
+    .reservation-small-screen{
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;      
+    }
+ }

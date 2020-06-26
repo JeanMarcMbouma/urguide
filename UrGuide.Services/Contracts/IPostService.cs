@@ -14,7 +14,6 @@ namespace UrGuide.Services.Contracts
         Task<Result<IEnumerable<PostModel>>> GetLast100PostsAsync(CancellationToken cancellationToken);
         Task<Result<bool>> UpdatePostAsync(PostUpdateModel model, CancellationToken cancellationToken);
         Task<Result<bool>> DeletePostAsync(string id, CancellationToken cancellationToken);
-        Task<Result<bool>> UpdatePostAttributesAsync(string id, SetAttribute[] attributes, CancellationToken cancellationToken);
         Task<Result<IEnumerable<ItineraryModel>>> GetItinerariesAsync(string postId, CancellationToken cancellationToken);
         Task<Result<IEnumerable<PostModel>>> GetTop10PostsAsync(CancellationToken cancellationToken);
         Task<Result<IEnumerable<PostModel>>> GetTop100PostsAsync(CancellationToken cancellationToken);

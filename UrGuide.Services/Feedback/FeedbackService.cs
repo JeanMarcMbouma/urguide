@@ -46,37 +46,14 @@ namespace UrGuide.Services.Feedback
                 return Result.Of(false).WithErrors("You cannot write a review against your own post");
             }
 
-            var rating = post.Attributes.GetItem(Data.Entities.Posts.AttributeTypes.Rating);
-            if(rating == null)
-            {
-                rating = new Data.Entities.Attributes.GenericAttribute
-                {
-                    Name = nameof(Data.Entities.Posts.AttributeTypes.Rating),
-                    Value = Constants.Zero
-                };
-                post.Attributes.Add(rating);
-            }
-            var reviews = post.Attributes.GetItem(Data.Entities.Posts.AttributeTypes.Reviews);
-            if(reviews == null)
-            {
-                reviews = new Data.Entities.Attributes.GenericAttribute
-                {
-                    Name = nameof(Data.Entities.Posts.AttributeTypes.Reviews),
-                    Value = Constants.Zero
-                };
-                post.Attributes.Add(reviews);
-            }
-
-            int reviewCount = reviews;
-            reviews.Value = (reviewCount + 1).ToString();
-            int r = rating;
-            int avg = reviewCount == 0 ? feedback.Rating : (int)Math.Ceiling(new[] { r, feedback.Rating }.Average());
-            rating.Value = avg.ToString();
+            
+            post.Reviews++;
+            post.Rating = (int)Math.Ceiling(new[] { post.Rating, feedback.Rating }.Average());
             var author = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
-            string authorFirstName = author.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+            string authorFirstName = author.FirstName;
 
-            string postAuthorFirstName = post.User.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
-            string postAuthorEmail = post.User.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
+            string postAuthorFirstName = post.User.FirstName;
+            string postAuthorEmail = post.User.Email;
             
             post.Feedback.Add(new Data.Shared.Feedback
             {
@@ -99,7 +76,7 @@ Rating: {feedback.Rating} star(s).";
                 ToName = postAuthorFirstName,
                 To = postAuthorEmail
             }) ;
-            await NotificationService.SystemNotifyAsync(author.Id, content, null);
+            await NotificationService.SystemNotifyAsync(post.User.Id, content, null);
             await Context.SaveChangesAsync(cancellationToken);
             return Result.Of(true);
         }
@@ -132,10 +109,10 @@ Rating: {feedback.Rating} star(s).";
             int avg = firstRatingEver ? feedback.Rating : (int)Math.Ceiling(new[] { r, feedback.Rating }.Average());
             rating.Value = avg.ToString();
             var author = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
-            string authorFirstName = author.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
+            string authorFirstName = author.FirstName;
 
-            string userFirstName = user.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.FirstName);
-            string userEmail = user.Attributes.Get<string>(Data.Entities.Users.AttributeTypes.EmailAddress);
+            string userFirstName = user.FirstName;
+            string userEmail = user.Email;
 
             user.Feedback.Add(new Data.Shared.Feedback
             {

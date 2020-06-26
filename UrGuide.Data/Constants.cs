@@ -5,5 +5,6 @@
         public const string Schema = "ug";
         public const string GuidFn = "NEWID()";
         public const string No = "No";
+        public const string NA = "N/A";
     }
 }
