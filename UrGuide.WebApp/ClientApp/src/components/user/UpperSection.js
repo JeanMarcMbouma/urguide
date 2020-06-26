@@ -166,7 +166,7 @@ function RealUpperSection(props) {
                                         <span className='user-profile-location' >{props.location}</span>
                                         <br />
                                         <br />
-                                        <Rating name="read-only" value={props.rating} readOnly />
+                                        <Rating name="read-only" value={+props.rating} readOnly />
                                         <br />
                                         <br />
                                         <p>

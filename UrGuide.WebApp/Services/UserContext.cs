@@ -17,8 +17,12 @@ namespace UrGuide.WebApp.Services
         }
 
         public IHttpContextAccessor HttpContextAccessor { get; }
-
+#if DEBUG
+        public string UserId => HttpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "00000000-0000-0000-0000-000000000000";
+#else
         public string UserId => HttpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+#endif
+
         public Task<string> Id_Token => HttpContextAccessor.HttpContext.GetTokenAsync("id_token");
         public Task<string> Access_Token => HttpContextAccessor.HttpContext.GetTokenAsync("access_token");
         public bool IsAuthenticated => HttpContextAccessor.HttpContext.User.Identity.IsAuthenticated;

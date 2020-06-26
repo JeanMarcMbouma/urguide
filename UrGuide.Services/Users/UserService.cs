@@ -15,6 +15,7 @@ using UrGuide.Services.Extensions;
 using Microsoft.EntityFrameworkCore;
 using MediatR;
 using UrGuide.Services.Auditing.Command;
+using System.ComponentModel.DataAnnotations;
 
 namespace UrGuide.Services.Users
 {
@@ -124,12 +125,11 @@ namespace UrGuide.Services.Users
                         ImageUrl = imageUrl
                     }
                 };
+                user.FirstName = createGuide.FirstName;
+                user.LastName = createGuide.LastName;
+                user.Email = createGuide.Email;
                 user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailOptIn), Value = Constants.Yes });
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailAddress), Value = createGuide.Email });
                 user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.UserName), Value = createGuide.Email });
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.NickName), Value = createGuide.Email });
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.FirstName), Value = createGuide.FirstName });
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.LastName), Value = createGuide.LastName });
                 user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.NickName), Value = createGuide.Email });
                 user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Consent), Value = Constants.Yes });
                 user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.GuideOptIn), Value = Constants.Yes });
@@ -187,15 +187,16 @@ namespace UrGuide.Services.Users
                     }
                 };
 
+                user.FirstName = createUser.FirstName;
+                user.LastName = createUser.LastName;
+                user.Email = createUser.Email;
+
                 user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailOptIn), Value = Constants.Yes });
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.EmailAddress), Value = createUser.Email });
                 user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.UserName), Value = createUser.Email });
                 user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.NickName), Value = createUser.Email });
                 user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Consent), Value = Constants.Yes });
                 user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.GuideOptIn), Value = Constants.No });
                 user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Subscription), Value = nameof(Subscriptions.None) });
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.FirstName), Value = createUser.FirstName });
-                user.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.LastName), Value = createUser.LastName });
 
                 await user.SetLocationAsync(UserContext, IPStackService);
 
@@ -271,10 +272,9 @@ namespace UrGuide.Services.Users
 
                 user.ProfileImage.ImageUrl = imageUrl;
             }
-
+            user.FirstName = updateGuide.FirstName;
+            user.LastName = updateGuide.LastName;
             var attributes = new[]{ 
-                    new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.FirstName), Value = updateGuide.FirstName },
-                    new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.LastName), Value = updateGuide.LastName },
                     new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Phone), Value = updateGuide.Phone },
                     new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.Country), Value = updateGuide.Country },
                     new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.City), Value = updateGuide.City },
@@ -335,15 +335,22 @@ namespace UrGuide.Services.Users
 
                 user.ProfileImage.ImageUrl = imageUrl;
             }
-
-            var attributes = new[]{
-                    new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.FirstName), Value = updateUser.FirstName },
-                    new SetAttribute { Name = nameof(Data.Entities.Users.AttributeTypes.LastName), Value = updateUser.LastName }
-                };
-
-            SetAttributesInternal(attributes, user);
+            user.LastName = updateUser.LastName;
+            user.FirstName = updateUser.FirstName;
 
             return Result.Of(true);
+        }
+
+        public async Task<Result<PagedList<UserInfo>>> GetUsersAsync(SearchParameters searchParameters, CancellationToken cancellationToken)
+        {
+            var geo = searchParameters.Nearby ? await IPStackService.GetLocationAsync(UserContext) : null;
+            var users = await PagedList.Of(Context.Users
+                .Where(x => geo == null || x.Location.Distance(geo) <= Constants.Distance)
+                .Where(x => EF.Functions.Like(x.FirstName, $"%{searchParameters.Term}%")
+                || EF.Functions.Like(x.LastName, $"%{searchParameters.Term}%")), 
+                searchParameters.PageNumber
+                , u => Mapper.Map<UserInfo>(u), cancellationToken);
+            return Result.Of(users);
         }
     }
 }

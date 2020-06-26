@@ -174,7 +174,6 @@ export default function Header() {
             if (user === null)
                 return;
 
-            console.log(user);
             const client = HttpClientFactory.get(NotificationsClient, user);
             try {
 

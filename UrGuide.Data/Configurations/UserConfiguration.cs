@@ -13,6 +13,9 @@ namespace UrGuide.Data.Configurations
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id).HasColumnName("UserId").IsRequired();
             builder.Property(x => x.LastActivityDate);
+            builder.Property(x => x.FirstName).IsRequired().HasMaxLength(200).HasDefaultValue(Constants.NA);
+            builder.Property(x => x.LastName).IsRequired().HasMaxLength(200).HasDefaultValue(Constants.NA);
+            builder.Property(x => x.Email).IsRequired().HasMaxLength(255).HasDefaultValue(Constants.NA);
             builder.Ignore(x => x.FullName);
             builder.Property(x => x.Location);
 
@@ -55,7 +58,7 @@ namespace UrGuide.Data.Configurations
                 b.Property(x => x.Text).IsRequired().HasMaxLength(2000);
                 b.Property(x => x.Created).IsRequired();
                 b.Property(x => x.Rating).IsRequired();
-                b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_User_Feedback_Users").OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_User_Feedback_Users");
             });
 
             string systemUserId = "00000000-0000-0000-0000-000000000000";

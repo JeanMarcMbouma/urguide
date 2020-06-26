@@ -119,34 +119,6 @@ namespace UrGuide.WebApp.Controllers
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
 
-        [HttpPut("{postId}/attributes/{name}/update")]
-        public async Task<IActionResult> EditAttribute(string postId, string name, SetAttribute attribute, CancellationToken cancellationToken)
-        {
-            if (name != attribute.Name)
-            {
-                return BadRequest();
-            }
-
-            var result = await _postService.UpdatePostAttributesAsync(postId, new[] { attribute }, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
-        }
-
-        [HttpPut("{postId}/attributes/batchupdate")]
-        public async Task<IActionResult> EditAttributes(string postId, SetAttribute[] attributes, CancellationToken cancellationToken)
-        {
-            if (attributes == null)
-                return BadRequest();
-            var result = await _postService.UpdatePostAttributesAsync(postId, attributes, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
-        }
-
-        [HttpDelete("{postId}/attributes/{name}/remove")]
-        public async Task<IActionResult> RemoveAttribute(string postId, string name, CancellationToken cancellationToken)
-        {
-            
-            var result = await _postService.UpdatePostAttributesAsync(postId, new[] { new SetAttribute { Name = name, Value = string.Empty } }, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
-        }
 
         [HttpDelete("{postId}/remove")]
         public async Task<IActionResult> DeletePost(string postId, CancellationToken cancellationToken)

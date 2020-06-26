@@ -28,8 +28,7 @@ namespace UrGuide.Services.Lookup
             {
                 ImageUrl = c.ImageLink,
                 Name = c.Name,
-                Stats = Context.Posts.Count(p => p.Attributes.Any(a => EF.Functions.Like(a.Value, $"%{c.Name}%")
-                && a.Name == nameof(AttributeTypes.Categories)))
+                Stats = Context.Posts.Count(p => EF.Functions.Like(p.Tags, $"%{c.Name}%"))
             }).OrderByDescending(c => c.Stats).ThenBy(c => c.Name).AsEnumerable();
 
             return Result.Of(result);

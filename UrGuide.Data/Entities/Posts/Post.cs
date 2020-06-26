@@ -1,7 +1,6 @@
 ﻿using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using UrGuide.Data.Entities.Attributes;
 using UrGuide.Data.Entities.Contracts;
@@ -11,11 +10,10 @@ using UrGuide.Data.Shared;
 
 namespace UrGuide.Data.Entities.Posts
 {
-    public class Post : IAttributeEnabledEntity, IUserOwnedEntity, IGeoEntity, ILastUpdatableEntity
+    public class Post : IUserOwnedEntity, IGeoEntity, ILastUpdatableEntity
     {
         public Post()
         {
-            Attributes = new HashSet<GenericAttribute>();
             BidHistories = new HashSet<BidHistory>();
             Feedback = new HashSet<Feedback>();
             Itineraries = new HashSet<Itinerary>();
@@ -27,10 +25,25 @@ namespace UrGuide.Data.Entities.Posts
         public string Id { get; set; }
         public string Text { get; set; }
         public string Description { get; set; }
+        public int Likes { get; set; }
+        public int Dislikes { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public bool BidEnabled { get; set; }
+        public int Rating { get; set; }
+        public int Reviews { get; set; }
+        public int AllocatedSeats { get; set; }
+        public int ReservedSeats { get; set; }
+        public string GeoLocation { get; set; }
+        public string Tags { get; set; }
+        public string Cost { get; set; }
+        public int BidCount { get; set; }
+        public int ItineraryCount { get; set; }
+        public string LastBid { get; set; }
+
         public DateTime DateOfPublication { get; set; }
         public DateTime LastUpdated { get; set; }
 
-        public virtual ICollection<GenericAttribute> Attributes { get; protected set; }
         public virtual ICollection<BidHistory> BidHistories { get; protected set; }
         public virtual ICollection<Feedback> Feedback { get; protected set; }
         public virtual ICollection<Itinerary> Itineraries { get; protected set; }
@@ -42,8 +55,7 @@ namespace UrGuide.Data.Entities.Posts
         public virtual User User { get; set; }
         public virtual Point Location { get; set; }
 
-        public bool IsPastDue => !DateTime.TryParse($"{Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.DateEnd)))} {Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.TimeEnd)))}",
-          CultureInfo.GetCultureInfo("en-US"), DateTimeStyles.AssumeUniversal, out DateTime date) || date < DateTime.UtcNow; 
+        public bool IsPastDue => EndDate.HasValue && EndDate.Value <  DateTime.UtcNow; 
 
         public void NewBid(string value, User user)
         {
@@ -64,13 +76,12 @@ namespace UrGuide.Data.Entities.Posts
 
             if (Bid == null)
             {
-                var priceAttr = Attributes.First(f => f.Name == nameof(AttributeTypes.Amount));
                 Bid = new Bid
                 {
                     NewValue = value,
                     Author = user,
                     LastUpdated = DateTime.UtcNow,
-                    OldValue = priceAttr
+                    OldValue = Cost
                 };
             }
             else
@@ -88,13 +99,8 @@ namespace UrGuide.Data.Entities.Posts
                 BidHistories.Add(newHistory);
             }
 
-            var lastBid = Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.LastBid));
-            if(lastBid == null)
-            {
-                lastBid = new GenericAttribute { Name = nameof(AttributeTypes.LastBid) };
-                Attributes.Add(lastBid);
-            }
-            lastBid.Value = Bid.NewValue;
+            LastBid = Bid.NewValue;
+            BidCount++;
         }
 
         public void AcceptBid()
@@ -114,23 +120,9 @@ namespace UrGuide.Data.Entities.Posts
                 };
 
                 BidHistories.Add(history);
-                var priceAttr = Attributes.First(f => f.Name == nameof(AttributeTypes.Amount));
-                var lastBid = Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.LastBid));
-                Bid.OldValue = priceAttr.Value;
-
-                if (lastBid != null)
-                {
-                    lastBid.Value = Bid.OldValue;
-                }
-                else
-                {
-                    Attributes.Add(new GenericAttribute
-                    {
-                        Name = nameof(AttributeTypes.LastBid),
-                        Value = Bid.OldValue
-                    });
-                }
-                priceAttr.Value = Bid.NewValue;
+                Bid.OldValue = Cost;
+                LastBid = Cost;
+                Cost = Bid.NewValue;
             }
             else
             {
@@ -185,14 +177,13 @@ namespace UrGuide.Data.Entities.Posts
                 throw new ArgumentException("You cannot reserve 0 seats.");
             }
 
-            int seatsAvailable = Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.AllocatedSeats)));
             int reserved = Reservations.Sum(x => x.Seats);
-            if (seatsAvailable == reserved)
+            if (ReservedSeats == reserved)
             {
                 throw new InvalidOperationException("This item is sold out");
             }
 
-            if (seatsAvailable <= reserved + seats)
+            if (ReservedSeats <= reserved + seats)
             {
                 throw new InvalidOperationException("We can't allocated this many seats.");
             }
@@ -203,17 +194,7 @@ namespace UrGuide.Data.Entities.Posts
                 Seats = seats
             });
 
-            var reservedSeats = Attributes.FirstOrDefault(a => a.Name.Equals(nameof(AttributeTypes.ReservedSeats)));
-            if(reservedSeats == null)
-            {
-                reservedSeats = new GenericAttribute
-                {
-                    Name = nameof(AttributeTypes.ReservedSeats)
-                };
-                Attributes.Add(reservedSeats);
-            }
-
-            reservedSeats.Value = (reserved + seats).ToString();
+            ReservedSeats = (reserved + seats);
         }
 
         public void EditReservation(string userId, int seats)
@@ -239,23 +220,21 @@ namespace UrGuide.Data.Entities.Posts
                 throw new ArgumentException("You cannot reserve 0 seats, cancel your reservation instead");
             }
 
-            int seatsAvailable = Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.AllocatedSeats)));
             int reserved = Reservations.Sum(x => x.Seats) - reservation.Seats;
 
-            if (seatsAvailable == reserved)
+            if (ReservedSeats == reserved)
             {
                 throw new InvalidOperationException("This item is sold out");
             }
 
-            if (seatsAvailable <= reserved + seats)
+            if (ReservedSeats <= reserved + seats)
             {
                 throw new InvalidOperationException("We can't allocated this many seats.");
             }
 
             reservation.Seats = seats;
 
-            var reservedSeats = Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.ReservedSeats)));
-            reservedSeats.Value = (reserved + seats).ToString();
+            ReservedSeats = (reserved + seats);
         }
 
         public void CancelReservation(string userId)
@@ -276,10 +255,7 @@ namespace UrGuide.Data.Entities.Posts
                 throw new InvalidOperationException("A reservation doesn't exist for this user.");
             }
 
-            int reserved = Reservations.Sum(x => x.Seats) - reservation.Seats;
-            var reservedSeats = Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.ReservedSeats)));
-            reservedSeats.Value = reserved.ToString();
-
+            ReservedSeats = Reservations.Sum(x => x.Seats) - reservation.Seats;
             Reservations.Remove(reservation);
         }
 
@@ -290,8 +266,6 @@ namespace UrGuide.Data.Entities.Posts
                 throw new ArgumentNullException(nameof(userId));
             }
 
-            var likes = Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.Likes)));
-            var dislikes = Attributes.First(a => a.Name.Equals(nameof(AttributeTypes.Dislikes)));
 
             var userReaction = UserReactions.FirstOrDefault(u => u.UserId == userId);
             if (userReaction != null && (userReaction.Type == reactionType))
@@ -301,11 +275,11 @@ namespace UrGuide.Data.Entities.Posts
                
                 if(reactionType == UserReaction.ReactionType.Like)
                 {
-                    likes.Value = (likes - 1).ToString();
+                    Likes--;
                 }
                 else
                 {
-                    dislikes.Value = (dislikes - 1).ToString();
+                    Dislikes--;
                 }
                 return;
             }
@@ -324,26 +298,22 @@ namespace UrGuide.Data.Entities.Posts
                 userReaction.Type = reactionType;
             }
 
-            int allLikes = likes;
-            int disLikes = dislikes;
 
             switch (reactionType)
             {
                 case UserReaction.ReactionType.Like:
-                    allLikes++;
+                    Likes++;
                     if (previousReaction.HasValue)
-                        disLikes--;
+                        Dislikes--;
                     break;
                 case UserReaction.ReactionType.DisLike:
-                    disLikes++;
+                    Dislikes++;
                     if (previousReaction.HasValue)
-                        allLikes--;
+                        Likes--;
                     break;
                 default:
                     break;
             }
-            likes.Value = allLikes.ToString();
-            dislikes.Value = disLikes.ToString();
         }
     }
 }

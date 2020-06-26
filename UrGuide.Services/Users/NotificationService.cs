@@ -50,6 +50,17 @@ namespace UrGuide.Services.Users
             return Result.Of(items);
         }
 
+        public async Task<Result<Model.Users.Notification>> GetNotificationAsync(string notificationId, CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of<Model.Users.Notification>().WithErrors(ErrorMessages.NotAuthenticated);
+            var user = await Context.Users.FirstAsync(x => x.Id == UserContext.UserId, cancellationToken);
+            var notification = user?.Notifications.FirstOrDefault(x => x.Id == notificationId);
+            if (notification == null)
+                return Result.Of<Model.Users.Notification>().WithErrors(ErrorMessages.NotFoundEntityForKey);
+            return Result.Of(Mapper.Map<Model.Users.Notification>(notification));
+        }
+
         public async Task<Result<PagedList<Model.Users.Notification>>> GetUnreadAsync(PaginationParameters pagination, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
