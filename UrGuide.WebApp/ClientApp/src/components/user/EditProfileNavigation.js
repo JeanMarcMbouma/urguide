@@ -56,11 +56,11 @@ function Example() {
                 </Modal.Header>
                 <Modal.Body>Do you really want to delete your account?</Modal.Body>
                 <Modal.Footer >
-                    <div className="align-items-center">
-                        <Button color='secondary' variant='outlined' onClick={deleteAccount}>
+                    <div>
+                        <Button className="mx-2" color='secondary' variant='outlined' onClick={deleteAccount}>
                             Yes
                         </Button>
-                        <Button color="primary" variant='outlined' onClick={handleClose}>
+                        <Button className="mx-2" color="primary" variant='outlined' onClick={handleClose}>
                             No
                         </Button>
                     </div>
