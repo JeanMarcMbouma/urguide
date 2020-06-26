@@ -71,7 +71,9 @@ function ClientProfile() {
     const [state, dispatch] = useReducer(EditProfileReducer, ctx);
     const { dataContext, dcReducer } = useDataContext();
     useEffect(() => {
+
         var fetch = async () => {
+
             if (!user)
                 return;
 
@@ -83,6 +85,7 @@ function ClientProfile() {
             var data = await client.getdetails();
             dcReducer({ type: ActionTypes.PROFILE, data: data })
             setValues(data);
+  
         };
         fetch();
         return () => { };
@@ -275,6 +278,8 @@ function Profile() {
 
     useEffect(() => {
         var fetch = async () => {
+
+            dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: false, url: "/profile", profileUrl: "/Edit" } });
             if (!user)
                 return;
 
@@ -286,6 +291,7 @@ function Profile() {
             var data = await client.getdetails();
             dcReducer({ type: ActionTypes.PROFILE, data: data });
             setValues(data);
+            dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/profile", profileUrl: "/Edit" } });
         };
         fetch();
         return () => { };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useReducer } from 'react';
 import { Avatar, CardHeader, CircularProgress } from '@material-ui/core';
 import { HttpClientFactory } from '../httpclient';
 import { NotificationsClient } from '../api';
@@ -15,11 +15,11 @@ import { Link } from 'react-router-dom';
 import "./NavMenu.css";
 import { NavbarBrand } from 'reactstrap';
 import NotificationsReducer from './NotificationsReducer';
-import { useReducer } from 'react';
 import NotificationsContext from './NotificationsContext';
 import { useAuthContext } from './api-authorization/AuthService';
 import { FiLogOut } from 'react-icons/fi';
 import { SignalRClient } from '../hub';
+import { useDataContext } from '../data/GlobalDataContext';
 
 
 const useStyles = makeStyles (() => ({
@@ -45,29 +45,6 @@ const useStyles = makeStyles (() => ({
   },
 }));
 
-function ActivateLink(event) {
-
-    var buttons = document.querySelectorAll("button");
-
-    [].forEach.call(buttons, function (el) {
-        el.classList.remove("active-icon");
-    });
-
-    var divs = document.querySelectorAll("div");
-
-    [].forEach.call(divs, function (el) {
-        el.classList.remove("active-div");
-    });
-
-    var target = event.target;
-    var icon = target.closest("button");
-    var div = target.closest("div"); 
-    icon.className += ' active-icon';
-    div.className += ' active-div';
- 
-}
-
-
 
 
 export default function Header() {
@@ -78,6 +55,7 @@ export default function Header() {
     const [pageNumber, setpageNumber] = useState(2);
     const ctx = useContext(NotificationsContext);
     const [state, dispatch] = useReducer(NotificationsReducer, ctx);
+    const { dataContext } = useDataContext();
 
     const { manager, user } = useAuthContext();
 
@@ -130,7 +108,6 @@ export default function Header() {
         console.log(user);
         const client = HttpClientFactory.get(NotificationsClient, user);
         await client.mark_as_read(notificationId).then((status) => {
-            alert(status);
             if (unread > 0 && status) {
 
                 setUnread(unread - 1);
@@ -219,38 +196,86 @@ export default function Header() {
                         </div>
                         <div className="col-8 col-sm-6 col-md-6 col-lg-4 centered-div"  >
                             <div className='row justify-content-end'>
-                                <div className='col-3 col-md-3 col-lg-3 mid-2 text-center'>
+                                {dataContext.url === "/feed" ? <div className='col-3 col-md-3 col-lg-3 mid-2 text-center active-div'>
                                     <Link to="/feed"  >
-                                        <IconButton onClick={(e) => ActivateLink(e)}>
+                                        <IconButton className="active-icon">
                                             <HomeOutlinedIcon fontSize="large" />
                                         </IconButton>
                                     </Link>
-                                </div>
-                                <div className='col-3 col-md-3 col-lg-3 mid-2 text-center'>
+                                </div> : <div className='col-3 col-md-3 col-lg-3 mid-2 text-center'>
+                                        <Link to="/feed"  >
+                                            <IconButton>
+                                                <HomeOutlinedIcon fontSize="large" />
+                                            </IconButton>
+                                        </Link>
+                                    </div>  }
+                               
+                                {dataContext.url === "/discover" ?
+                                    <div className='col-3 col-md-3 col-lg-3 mid-2 text-center active-div'>
+                                        <Link to="/discover/nearme"  >
+                                            <IconButton className="active-icon">
+                                                <SearchIcon fontSize="large" />
+                                            </IconButton>
+                                        </Link>
+                                    </div>
+                                    :
+                                   <div className='col-3 col-md-3 col-lg-3 mid-2 text-center'>
                                     <Link to="/discover/nearme"  >
-                                        <IconButton onClick={(e) => ActivateLink(e)}>
+                                        <IconButton >
                                             <SearchIcon fontSize="large" />
                                         </IconButton>
                                     </Link>
                                 </div>
-                                <div className='col-3 col-md-3 col-lg-3 mid-3 text-center'>
-                                    {profile.role === "guide" ? <Link to="/profile"  >
-                                        <IconButton onClick={(e) => ActivateLink(e)} >
-                                            <PersonIcon fontSize="large" />
-                                        </IconButton>
-                                    </Link> : <Link to="/account/details"  >
-                                            <IconButton onClick={(e) => ActivateLink(e)} >
+                            }
+                                {dataContext.url === "/profile" ?
+
+                                    <div className='col-3 col-md-3 col-lg-3 mid-3 text-center active-div'>
+                                        {profile.role === "guide" ? <Link to="/profile"  >
+                                            <IconButton className="active-icon"  >
                                                 <PersonIcon fontSize="large" />
                                             </IconButton>
-                                        </Link>}
-                                </div>
-                                <div className='col-3 col-md-3 col-lg-3 mid-3 text-center'  >
-                                    <Link to="/messages">
-                                        <IconButton onClick={(e) => ActivateLink(e)}>
+                                        </Link> : <Link to="/account/details"  >
+                                                <IconButton className="active-icon" >
+                                                    <PersonIcon fontSize="large" />
+                                                </IconButton>
+                                            </Link>}
+                                    </div>
+                                    :
+                                    <div className='col-3 col-md-3 col-lg-3 mid-3 text-center'>
+                                        {profile.role === "guide" ? <Link to="/profile"  >
+                                            <IconButton>
+                                                <PersonIcon fontSize="large" />
+                                            </IconButton>
+                                        </Link> : <Link to="/account/details"  >
+                                                <IconButton  >
+                                                    <PersonIcon fontSize="large" />
+                                                </IconButton>
+                                            </Link>}
+                                    </div>
+                                    
+                                   
+                            }
+
+
+                                {dataContext.url === "/message" ?
+                                    <div className='col-3 col-md-3 col-lg-3 mid-3 text-center active-div'  >
+                                        <Link to="/message">
+                                            <IconButton className="active-icon" >
+                                                <MailOutlineIcon fontSize="large" />
+                                            </IconButton>
+                                        </Link>
+                                    </div>
+
+                                    :
+
+                                 <div className='col-3 col-md-3 col-lg-3 mid-3 text-center'  >
+                                    <Link to="/message">
+                                        <IconButton>
                                             <MailOutlineIcon fontSize="large" />
                                         </IconButton>
                                     </Link>
                                 </div>
+                            }
                             </div>
                         </div>
                         <div className="col-6 col-sm-3 col-md-3 right-div">

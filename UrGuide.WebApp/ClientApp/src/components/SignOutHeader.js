@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import "./NavMenu.css";
 import { NavbarBrand, Container } from 'reactstrap';
 import { useAuthContext } from './api-authorization/AuthService';
+import MainLogo from '../images/final1.png';
 
 const useStyles = makeStyles(() => ({
     header: {

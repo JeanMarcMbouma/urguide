@@ -43,8 +43,8 @@ export default function LoginReducer(state: any, action: any) {
             context.passwordErrorMessage = context.passwordError ? "your password must contains minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character." : '';
             if (validEmail && validpassword) {
 
-               // action.data.callback(context);
-               login(context);
+               action.data.callback(context);
+               //login(context);
             }
 
             return context;

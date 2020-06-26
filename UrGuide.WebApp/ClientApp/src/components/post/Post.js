@@ -1,5 +1,5 @@
 ﻿import React, {
-    useState, useContext, useMemo, useReducer, Component
+    useState, useContext, useMemo, useReducer, Component, useEffect
 } from 'react';
 import {
     CardHeader,
@@ -75,32 +75,51 @@ function Itinerary(props) {
 
 
     const [itineraries, setItineraries] = useState([]);
+    const [isLoading, setLoading] = useState(true);
 
-    useMemo(async () => {
-        const api = HttpClientFactory.getPostClient();
-        var result = await api.itineraries(props.postId);
-        setItineraries(result);
+    useEffect(() => {
 
+        var fetch = async () => {
+
+            if (!props.show)
+                return;
+            const api = HttpClientFactory.getPostClient();
+
+            try {
+                var result = await api.itineraries(props.postId);
+                setItineraries(result);
+                setLoading(false);
+            }
+            catch (e) {
+                console.log(e);
+            }
+        }
+
+        fetch();
+        return () => { };
     }, []);
 
 
     return (
-        props.show ? <div className='itinerary_wrapper'>
-            {itineraries.length > 0 ? <h5>Itinerary of this tour</h5> : <h5>No itinerary found.</h5>}
-            <section className="itinerary">
-                {itineraries.map((itinerary, i) => (
-                    <div className="itinerary__block" key={itinerary.ordinal}  >
-                        <div className="itinerary__midpoint"></div>
-                        <div className="itinerary__content itinerary__content--left">
-                            <h3 className="itinerary__place">{itinerary.title}</h3>
-                            <p className="itinerary__text--left">
-                                {itinerary.description}
-                            </p>
-                        </div>
-                    </div>
-                ))}
-            </section>
-        </div> : null
+      
+        isLoading && props.show  ? <><br /> <h4 className='text-center'><CircularProgress  /></h4></> :
+                props.show ? <div className='itinerary_wrapper'>
+                    {itineraries.length > 0 ? <h5>Itinerary of this tour</h5> : <h5>No itinerary found.</h5>}
+                    <section className="itinerary">
+                        {itineraries.map((itinerary, i) => (
+                            <div className="itinerary__block" key={itinerary.ordinal}  >
+                                <div className="itinerary__midpoint"></div>
+                                <div className="itinerary__content itinerary__content--left">
+                                    <h3 className="itinerary__place">{itinerary.title}</h3>
+                                    <p className="itinerary__text--left">
+                                        {itinerary.description}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </section>
+                </div> : null
+       
     );
 
 }
@@ -137,19 +156,31 @@ function Comments(props) {
     ];
 
     const [bids, setBids] = useState([]);
+    const [isLoading, setLoading] = useState(true);
 
 
+    useEffect(() => {
 
-    useMemo(async () => {
+        var fetch = async () => {
 
-        if (!props.postId) {
-            return;
+            if (!props.postId || !props.show) {
+                return;
+            }
+            const api = HttpClientFactory.get(BidClient);
+
+            try {
+                var result = await api.history(props.postId);
+                setBids(result);
+                setLoading(false);
+            }
+            catch (e) {
+                console.log(e);
+            }
         }
-        const api = HttpClientFactory.get(BidClient);
-        var result = await api.history(props.postId);
-        setBids(result);
 
-    }, [user]);
+        fetch();
+        return () => { };
+    }, []);
 
     const [bid, setBid] = React.useState(25);
     const handleChangeBid = (event, newValue) => {
@@ -230,7 +261,8 @@ function Comments(props) {
     }
 
     return (
-        props.show ? <div className='comments' >
+        isLoading && props.show ? <><br /> <h4 className='text-center'><CircularProgress /></h4></> :
+            props.show ? <div className='comments' >
             <div noValidate autoComplete="off" className='new-bid'>
                 <Grid item xs={12} >
                     <Typography id="bid-slider" gutterBottom>
@@ -301,7 +333,7 @@ function Comments(props) {
 
                                 }
                             </div>
-                        </div>))} </> : <h6>No bid yet.</h6>
+                        </div>))} </> : <><h6>No bid yet.</h6><br/><br/></>
 
 
 
@@ -318,7 +350,7 @@ export default function Post() {
     let { postId, imageId } = useParams();
     const [post, setPost] = useState({});
     const actionCtx = useContext(ActionsContext);
-    const [actionsState, dispatchAction] = useReducer(ActionsReducer, actionCtx);
+    const [state, dispatchAction] = useReducer(ActionsReducer, actionCtx);
 
     const { manager, user } = useAuthContext();
 
@@ -328,16 +360,99 @@ export default function Post() {
 
     const [isLoading, setLoading] = React.useState(true);
 
+   
+
+    async function handleReaction(state) {
+
+        const client = HttpClientFactory.getPostClient(user);
+
+        const model = new UserReactionModel({
+            postId: state.post.id,
+            like: state.like,
+        });
+
+        try {
+
+            await client.reaction(state.post.id, model);
+
+        }
+        catch (e) {
+            console.log(e);
+        }
+
+    }
+
+    function setDefaultIndex(arr, fromIndex, toIndex) {
+        var element = arr[fromIndex];
+        arr.splice(fromIndex, 1);
+        arr.splice(toIndex, 0, element);
+    }
+
+    useEffect(() => {
+        var fetch = async () => {
+            const api = HttpClientFactory.get(PostsClient, user);
+            try {
+                var result = await api.retrieve(postId);
+                result.images.forEach((img, index) => {
+
+                    if (img.id === imageId) {
+                        setDefaultIndex(result.images, index, 0);
+                    }
+                });
+                dispatchAction({
+                    type: "set-single-post",
+                    data: {
+                        post:result,
+                    }
+                })
+                setLoading(false);
+            } catch (e) {
+                console.log(e);
+            }
+
+        }
+
+        fetch();
+        return () => { };
+    }, [user]);
+
+    async function signIn(e) {
+        e.preventDefault();
+        if (!user)
+            await manager.signIn(window.location.href);
+        return false;
+    }
+
+    const [showComments, setShowComments] = React.useState(false);
+    const [showItinerary, setShowItinerary] = React.useState(false);
+
+    function toggleComments() {
+        if (showItinerary && !showComments) {
+
+            setShowItinerary(!showItinerary);
+        }
+        setShowComments(!showComments);
+    }
+
+    function toggleItinerary() {
+
+        if (showComments && !showItinerary) {
+
+            setShowComments(!showComments);
+        }
+        setShowItinerary(!showItinerary);
+    }
+
     function Description(props) {
         return (<>
             <div className='container-fluid description'>
                 <div className='row'>
                     <div className='col-12' >
                         <CardHeader
-                            avatar={<Link to={`/g/${post.authorId}`} ><Avatar alt={props.post.author} src={props.post.authorAvatar} /> </Link>}
+                            avatar={<Link to={`/g/${props.post.authorId}`} ><Avatar alt={props.post.author} src={props.post.authorAvatar} /> </Link>}
                             title={
                                 <h6>
-                                    <Link to={`/g/${post.authorId}`} >{props.post.author}</Link>
+                                    <Link to={`/g/${props.post.authorId}`} >{props.post.author}</Link>
                                 </h6>
                             }
                             subheader={props.post.publicationDate}
@@ -467,74 +582,11 @@ export default function Post() {
     }
 
 
-    async function handleReaction(state) {
-
-        const client = HttpClientFactory.getPostClient(user);
-
-        const model = new UserReactionModel({
-            postId: state.post.id,
-            like: state.like,
-        });
-
-        try {
-
-            await client.reaction(state.post.id, model);
-
-        }
-        catch (e) {
-            console.log(e);
-        }
-
-    }
-
-    function setDefaultIndex(arr, fromIndex, toIndex) {
-        var element = arr[fromIndex];
-        arr.splice(fromIndex, 1);
-        arr.splice(toIndex, 0, element);
-    }
-
-    useMemo(async () => {
-        const api = HttpClientFactory.get(PostsClient, user);
-        try {
-            var result = await api.retrieve(postId);
-            result.images.forEach((img, index) => {
-
-                if (img.id === imageId) {
-                    setDefaultIndex(result.images, index,0);
-                }
-            });
-            setPost(result);
-            actionsState.post = result;
-            setLoading(false);
-        } catch (e) {
-            console.log(e);
-        }
-
-    }, [user]);
-
-    async function signIn(e) {
-        e.preventDefault();
-        if (!user)
-            await manager.signIn(window.location.href);
-        return false;
-    }
-
-    const [showComments, setShowComments] = React.useState(false);
-    const [showItinerary, setShowItinerary] = React.useState(false);
-
-    function toggleComments() {
-        setShowComments(!showComments);
-    }
-
-    function toggleItinerary() {
-        setShowItinerary(!showItinerary);
-    }
-
     const [index, setIndex] = React.useState(0);
 
     function navigateForwardGallery(index) {
         var num = index + 1;
-        if (num === post.images.length)
+        if (num === state.post.images.length)
         {
             setIndex(0);
         }
@@ -547,7 +599,7 @@ export default function Post() {
         
         if (index === 0) {
 
-            var num = post.images.length - 1;
+            var num = state.post.images.length - 1;
             setIndex(num);
         }
         else
@@ -561,6 +613,7 @@ export default function Post() {
         window.history.back();
     }
 
+
     return (
         isLoading ? <PostLoading /> : <div className="post-container">
             <div>
@@ -569,14 +622,14 @@ export default function Post() {
                         <div className="col-12 card-photo">
                             <div className="row">
                                 
-                                <div className="col-12 item-photo" style={{ backgroundImage: `url(${post.images[index].imageBase64})` }}>
+                                <div className="col-12 item-photo" style={{ backgroundImage: `url(${state.post.images[index].imageBase64})` }}>
                                     <div className='close-page-icon-div'>
                                         <IconButton onClick={() => goBack()}>
                                             <AiFillCloseCircle className='close-page-icon' />
                                         </IconButton>
                                 </div>
                                     {
-                                        post.images.length > 1 ? <div className="container-fluid nav-box">
+                                        state.post.images.length > 1 ? <div className="container-fluid nav-box">
                                             <div className="row justify-content-between">
                                                 <div className="col-2 col-md-1 col-lg-1">
                                                     <IconButton className='nav-btn-div' onClick={() => navigateBackGallery(index)}>
@@ -596,7 +649,7 @@ export default function Post() {
                         </div>
                     </div>
                     <div className="col-12 col-lg-4 col-xl-3 description-section">
-                            <Description user={user} post={post} />
+                            <Description user={user} post={state.post} />
                     </div>
                 </div>
             </div>

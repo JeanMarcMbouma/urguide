@@ -1,4 +1,4 @@
-﻿import React, { Component, useReducer, useContext } from "react";
+﻿import React, { Component, useReducer, useContext, useEffect } from "react";
 import {
   Button,
   Link,
@@ -19,6 +19,7 @@ import "./GuideRegistration.css";
 import { HttpClientFactory } from "../../httpclient";
 import { CreateGuideModel, Client } from "../../api";
 import { BlobToBase64 } from "../../helpers/fileHelpers";
+import { useDataContext, ActionTypes } from "../../data/GlobalDataContext";
 
 function Copyright() {
   return (
@@ -52,7 +53,10 @@ function getSteps() {
 }
 
 function getStepContent(stepIndex, state) {
-  switch (stepIndex) {
+
+ 
+    switch (stepIndex) {
+
     case 0:
       return (
         <div>
@@ -184,35 +188,6 @@ const navigateToReturnUrl = (returnUrl) => {
     window.location.replace(returnUrl);
 }
 
-
-
-const createGuide = async function (state) {
-    const date = state.birthday;
-    const birthday = date.toString();
-    const returnUrl = getReturnUrl();
-    const api = HttpClientFactory.get(Client);
-    BlobToBase64(state.picture, (filename, base64Url, blobUrl) => {
-        api.newguide(returnUrl, new CreateGuideModel({
-            email: state.email,
-            address: state.address,
-            birthDay: birthday,
-            city: state.city,
-            confirmPassword: state.confirmPassword,
-            country: state.country,
-            description: state.description,
-            firstName: state.firstName,
-            gender: state.gender,
-            lastName: state.lastName,
-            password: state.password,
-            phone: state.phone,
-            profileImage: base64Url
-        })).then(() => {
-            navigateToReturnUrl(`${window.location.origin}/sign-up-confirm`);
-        });
-    });
-}
-
-
 const userStyles = makeStyles(theme => ({
   paper: {
     marginTop: theme.spacing(8),
@@ -237,154 +212,189 @@ const userStyles = makeStyles(theme => ({
   }
 }));
 
-function Context() {
-  const steps = getSteps();
 
-  var activeStep = 0;
 
-  const ctx = useContext(GuideContext);
-  const [state, dispatch] = useReducer(GuideReducer, ctx);
-  activeStep = state.step;
-  var maxWidth = activeStep != 0 ? "md" : "xs";
-  var marginLeftValue = activeStep != 0 ? 15 : 0;
+export default function GuideRegistration() {
 
-  var BackButton =
-    activeStep != 0 ? (
-      <Button
-        variant="contained"
-        onClick={() =>
-          dispatch({
-            type: "go-back",
-            data: {
-              email: document.getElementById("guide-email").value,
-              password: document.getElementById("guide-password").value,
-              confirmPassword: document.getElementById("confirm-password")
-                .value,
-              profilePic: document.getElementById("profile-pic-input").files
-                    .length,
-                picture: document.getElementById("profile-pic-input").files[0],
-              firstName: document.getElementById("firstName").value,
-              lastName: document.getElementById("lastName").value,
-                gender: document.getElementsByName("gender")[0].value,
-              birthday: document.getElementById("date-picker-inline").value,
-                country: document.getElementsByName("country")[0].value,
-              city: document.getElementById("city").value,
-              phone: document.getElementById("phone").value,
-              address: document.getElementById("address").value,
-              description: document.getElementById("description").value,
-              isChecked: document.getElementById("guide-checkbox").checked,
-                step: activeStep,
-               
-            }
-          })
+    const { dcReducer } = useDataContext();
+
+    useEffect(() => {
+
+        dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/guide/sign-up/", } });
+    }, []);
+
+
+    function Context() {
+        const steps = getSteps();
+
+        const ctx = useContext(GuideContext);
+        const [state, dispatch] = useReducer(GuideReducer, ctx);
+        var activeStep = state.step;
+        var maxWidth = activeStep != 0 ? "md" : "xs";
+        var marginLeftValue = activeStep != 0 ? 15 : 0;
+
+        async function createGuide(state) {
+
+            dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: false, url: "/guide/sign-up/", } });
+            const date = state.birthday;
+            const birthday = date.toString();
+            const returnUrl = getReturnUrl();
+            const api = HttpClientFactory.get(Client);
+                BlobToBase64(state.picture, (filename, base64Url, blobUrl) => {
+                    api.newguide(returnUrl, new CreateGuideModel({
+                        email: state.email,
+                        address: state.address,
+                        birthDay: birthday,
+                        city: state.city,
+                        confirmPassword: state.confirmPassword,
+                        country: state.country,
+                        description: state.description,
+                        firstName: state.firstName,
+                        gender: state.gender,
+                        lastName: state.lastName,
+                        password: state.password,
+                        phone: state.phone,
+                        profileImage: base64Url
+                    })).then(() => {
+
+                        dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/guide/sign-up/", } });
+                        navigateToReturnUrl(`${window.location.origin}/sign-up-confirm`);
+                    });
+                });
         }
-        className={stepperStyles.backButton}
-          >
-              Go Back
-      </Button>
-    ) : (
-      <span></span>
-    );
-  var NextButton =
-    activeStep === steps.length - 1 ? (
-      <Button
-        variant="contained"
-        color="primary"
-        className="next-btn"
-        id="submit-btn"
-        style={{ marginLeft: marginLeftValue }}
-        onClick={() =>
-          dispatch({
-            type: "submit",
-            data: {
-              email: document.getElementById("guide-email").value,
-              password: document.getElementById("guide-password").value,
-              confirmPassword: document.getElementById("confirm-password")
-                .value,
-              profilePic: document.getElementById("profile-pic-input").files
-                    .length,
-                picture: document.getElementById("profile-pic-input").files[0],
-              firstName: document.getElementById("firstName").value,
-              lastName: document.getElementById("lastName").value,
-                gender: document.getElementsByName("gender")[0].value,
-                birthday: document.getElementById("date-picker-inline").value,
-                country: document.getElementsByName("country")[0].value,
-              city: document.getElementById("city").value,
-              phone: document.getElementById("phone").value,
-              address: document.getElementById("address").value,
-              description: document.getElementById("description").value,
-              isChecked: document.getElementById("guide-checkbox").checked,
-                step: activeStep,
-                sendData: createGuide
-            }
-          })
-        }
-      >
-        Finish
-      </Button>
-    ) : (
-      <Button
-        style={{ marginLeft: marginLeftValue }}
-        variant="contained"
-        color="primary"
-        type="button"
-        onClick={() => dispatch({
-          type: "validate-guide",
-          data: {
-            email: document.getElementById("guide-email").value,
-            password: document.getElementById("guide-password").value,
-            confirmPassword: document.getElementById("confirm-password").value,
-              profilePic: document.getElementById("profile-pic-input").files.length,
-              picture: document.getElementById("profile-pic-input").files[0],
-            firstName: document.getElementById("firstName").value,
-            lastName: document.getElementById("lastName").value,
-              gender: document.getElementsByName("gender")[0].value,
-              birthday: document.getElementById("date-picker-inline").value,
-              country: document.getElementsByName("country")[0].value,
-            city: document.getElementById("city").value,
-            phone: document.getElementById("phone").value,
-            address: document.getElementById("address").value,
-            description: document.getElementById("description").value,
-            isChecked: document.getElementById("guide-checkbox").checked,
-            step: activeStep,
-           
-          }
-        })}
-      >
-        Continue
-      </Button>
-    );
+        var BackButton =
+            activeStep != 0 ? (
+                <Button
+                    variant="contained"
+                    onClick={() =>
+                        dispatch({
+                            type: "go-back",
+                            data: {
+                                email: document.getElementById("guide-email").value,
+                                password: document.getElementById("guide-password").value,
+                                confirmPassword: document.getElementById("confirm-password")
+                                    .value,
+                                profilePic: document.getElementById("profile-pic-input").files
+                                    .length,
+                                picture: document.getElementById("profile-pic-input").files[0],
+                                firstName: document.getElementById("firstName").value,
+                                lastName: document.getElementById("lastName").value,
+                                gender: document.getElementsByName("gender")[0].value,
+                                birthday: document.getElementById("date-picker-inline").value,
+                                country: document.getElementsByName("country")[0].value,
+                                city: document.getElementById("city").value,
+                                phone: document.getElementById("phone").value,
+                                address: document.getElementById("address").value,
+                                description: document.getElementById("description").value,
+                                isChecked: document.getElementById("guide-checkbox").checked,
+                                step: activeStep,
 
-  return (
-    <div className="guide-registration-wrapper">
-      <Box mt={2} mb={10}>
-        <Stepper activeStep={activeStep} alternativeLabel>
-          {steps.map(label => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-      </Box>
-      <div>
-        <Container maxWidth={maxWidth}>
-          <Box mt={4} mb={4}>
-            {getStepContent(activeStep, state)}
-                  </Box>
-          <Box ml={3}>
-            {BackButton}
-            {NextButton}
-          </Box>
-        </Container>
-      </div>
-    </div>
-  );
-}
+                            }
+                        })
+                    }
+                    className={stepperStyles.backButton}
+                >
+                    Go Back
+      </Button>
+            ) : (
+                    <span></span>
+                );
+        var NextButton =
+            activeStep === steps.length - 1 ? (
+                <Button
+                    variant="contained"
+                    color="primary"
+                    className="next-btn"
+                    id="submit-btn"
+                    style={{ marginLeft: marginLeftValue }}
+                    onClick={() =>
+                        dispatch({
+                            type: "send-data",
+                            data: {
+                                email: document.getElementById("guide-email").value,
+                                password: document.getElementById("guide-password").value,
+                                 confirmPassword: document.getElementById("confirm-password")
+                                    .value,
+                                profilePic: document.getElementById("profile-pic-input").files
+                                    .length,
+                                picture: document.getElementById("profile-pic-input").files[0],
+                                firstName: document.getElementById("firstName").value,
+                                lastName: document.getElementById("lastName").value,
+                                gender: document.getElementsByName("gender")[0].value,
+                                birthday: document.getElementById("date-picker-inline").value,
+                                country: document.getElementsByName("country")[0].value,
+                                city: document.getElementById("city").value,
+                                phone: document.getElementById("phone").value,
+                                address: document.getElementById("address").value,
+                                description: document.getElementById("description").value,
+                                isChecked: document.getElementById("guide-checkbox").checked,
+                                sendData: createGuide,
+                                step: activeStep,
+                            }
+                        })
+                    }
+                >
+                    Finish
+      </Button>
+            ) : (
+                    <Button
+                        style={{ marginLeft: marginLeftValue }}
+                        variant="contained"
+                        color="primary"
+                        type="button"
+                        onClick={() => dispatch({
+                            type: "validate-guide",
+                            data: {
+                                email: document.getElementById("guide-email").value,
+                                password: document.getElementById("guide-password").value,
+                                confirmPassword: document.getElementById("confirm-password").value,
+                                profilePic: document.getElementById("profile-pic-input").files.length,
+                                picture: document.getElementById("profile-pic-input").files[0],
+                                firstName: document.getElementById("firstName").value,
+                                lastName: document.getElementById("lastName").value,
+                                gender: document.getElementsByName("gender")[0].value,
+                                birthday: document.getElementById("date-picker-inline").value,
+                                country: document.getElementsByName("country")[0].value,
+                                city: document.getElementById("city").value,
+                                phone: document.getElementById("phone").value,
+                                address: document.getElementById("address").value,
+                                description: document.getElementById("description").value,
+                                isChecked: document.getElementById("guide-checkbox").checked,
+                                step: activeStep,
 
-export class GuideRegistration extends Component {
-  static displayName = GuideRegistration.name;
+                            }
+                        })}
+                    >
+                        Continue
+      </Button>
+                );
 
-  render() {
+        return (
+            <div className="guide-registration-wrapper">
+                <Box mt={2} mb={10}>
+                    <Stepper activeStep={activeStep} alternativeLabel>
+                        {steps.map(label => (
+                            <Step key={label}>
+                                <StepLabel>{label}</StepLabel>
+                            </Step>
+                        ))}
+                    </Stepper>
+                </Box>
+                <div>
+                    <Container maxWidth={maxWidth}>
+                        <Box mt={4} mb={4}>
+                            {getStepContent(state.step, state)}
+                        </Box>
+                        <Box ml={3}>
+                            {BackButton}
+                            {NextButton}
+                        </Box>
+                    </Container>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <Box mb={18}>
         <form className={userStyles.form} noValidate>
@@ -392,5 +402,5 @@ export class GuideRegistration extends Component {
         </form>
       </Box>
     );
-  }
+  
 }

@@ -33,6 +33,7 @@ import {
     Paper,
     Switch,
     FormControlLabel,
+    CircularProgress
   
 } from '@material-ui/core';
 import Skeleton from '@material-ui/lab/Skeleton';
@@ -219,19 +220,36 @@ function Itinerary(props) {
 
     const [itineraries, setItineraries] = useState([]);
    
-    useMemo(async () => {
+    const [isLoading, setLoading] = useState(true);
 
-        if (!props.show)
-            return;
-        const api = HttpClientFactory.getPostClient();
-        var result = await api.itineraries(props.postId);
-        setItineraries(result);
+    useEffect(() => {
 
-    }, [props.show]);
+        var fetch = async () => {
 
+            if (!props.show)
+                return;
+            const api = HttpClientFactory.getPostClient();
+
+            try {
+                var result = await api.itineraries(props.postId);
+                setItineraries(result);
+                setLoading(false);
+            }
+            catch (e) {
+                console.log(e);
+            }
+        }
+
+        fetch();
+        return () => { };
+    }, []);
+
+
+   
 
     return (
-        props.show && props.showId === props.postId ? <div className='itinerary_wrapper'>
+        isLoading && props.show && props.showId === props.postId ? <><br /> <h4 className='text-center'><CircularProgress /></h4></> :
+            props.show ? <div className='itinerary_wrapper'>
             {itineraries.length > 0 ? <h5>Itinerary of this tour</h5> : <h5>No itinerary found.</h5>}
             <section className="itinerary">
             {itineraries.map((itinerary, i) => (
@@ -283,19 +301,33 @@ function Comments(props) {
     ];
 
     const [bids, setBids] = useState([]);
+    const [isLoading, setLoading] = useState(true);
+    const [bid, setBid] = React.useState(25);
 
-    useMemo(async () => {
+    useEffect(() => {
 
-        if (!props.postId || !props.show) {
-            return;
+        var fetch = async () => {
+
+            if (!props.postId || !props.show) {
+                return;
+            }
+            const api = HttpClientFactory.get(BidClient);
+
+            try {
+                var result = await api.history(props.postId);
+                setBids(result);
+                setLoading(false);
+            }
+            catch (e) {
+                console.log(e);
+            }
         }
-        const api = HttpClientFactory.get(BidClient);
-        var result = await api.history(props.postId);
-        setBids(result);
-       
+
+        fetch();
+        return () => { };
     }, [user, props.show]);
 
-    const [bid, setBid] = React.useState(25);
+  
     const handleChangeBid = (event, newValue) => {
         setBid(newValue);
        
@@ -303,8 +335,7 @@ function Comments(props) {
 
     async function createNewBid(state) {
 
-        //console.log(user);
-        if (!state.postId) {
+        if (!state.postId || !user) {
             return;
         }
         const client = HttpClientFactory.get(BidClient, user);
@@ -368,14 +399,13 @@ function Comments(props) {
 
     }
 
-
-
     function valuetext(value) {
         return `${value}`;
     }
-
+  
         return (
-            props.show && props.showId === props.postId ? <div className='comments' >
+            isLoading && props.show && props.showId === props.postId ? <><br /> <h4 className='text-center'><CircularProgress /></h4></> :
+                props.show ? <div className='comments' >
                 <div noValidate autoComplete="off" className='new-bid'>
                     <Grid item xs={12} >
                         <Typography id="bid-slider" gutterBottom>
@@ -492,8 +522,8 @@ export default function CentralBar() {
         });
 
         try {
-
-            await client.reaction(state.post.id, model);
+           
+           await client.reaction(state.post.id, model);
 
         }
         catch (e) {
@@ -514,8 +544,8 @@ export default function CentralBar() {
     useEffect(() => {
         var fetch = async () => {
 
-            resetCallback(user);
-
+            dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed:false, url: "/feed" } });
+            
             if (dataContext && dataContext.posts && dataContext.posts.length) {
                 actionsState.posts = dataContext.posts;
                 setLoading(false);
@@ -525,6 +555,7 @@ export default function CentralBar() {
             api.last10().then(result => {
                 actionsState.posts = result;
                 dcReducer({ type: ActionTypes.POSTS, data: result });
+                dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/feed" } });
             }).then(() => {
                 setLoading(false);
             });
@@ -545,12 +576,22 @@ export default function CentralBar() {
     const [showItinerary, setShowItinerary] = React.useState({ show: false, id: null });
 
     function toggleComments(postId) {
+        if (showItinerary.show && !showComments.show) {
+
+            setShowItinerary({ show: !showItinerary.show, id: postId });
+        }
         setShowComments({ show:!showComments.show, id: postId });
     }
 
     function toggleItinerary(postId) {
+        if (showComments.show && !showItinerary.show) {
+
+            setShowComments({ show: !showComments.show, id: postId });
+        }
         setShowItinerary({show:!showItinerary.show, id:postId});
     }
+
+   
 
 
     function ViewPost() {
@@ -558,6 +599,8 @@ export default function CentralBar() {
        
 
         async function createNewPost(state) {
+
+            dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: false, url: "/feed" } });
 
             const client = HttpClientFactory.getPostClient(user);
 
@@ -580,10 +623,11 @@ export default function CentralBar() {
                 await client.create(model);
                 const returnUrl = authService.getReturnUrl();
                 navigateToReturnUrl(returnUrl);
-               
+
             }
             catch (e) {
                 console.log(e);
+               
             }
 
         }

@@ -1,4 +1,4 @@
-﻿import React, { Component, useState, useMemo } from "react";
+﻿import React, { Component, useState, useMemo, useEffect } from "react";
 import Posts from "./Posts";
 import Galleries from "./Galleries";
 import EditProfile from "./EditProfile";
@@ -16,7 +16,7 @@ import UserContext from "./../UserContext";
 import AuthRoute from "../api-authorization/AuthRoute";
 import { useAuthUser } from "../api-authorization/AuthService";
 import { HttpClientFactory } from "../../httpclient";
-import { DataContextProvider } from "../../data/GlobalDataContext";
+import { DataContextProvider, useDataContext, ActionTypes } from "../../data/GlobalDataContext";
 
 
 
@@ -24,7 +24,7 @@ function ProfileLayout() {
 
     let { path } = useRouteMatch();
     const user = useAuthUser();
-
+    const { dcReducer } = useDataContext();
     const [values, setValues] = useState({
         userId: null,
         profileImage: null,
@@ -35,7 +35,14 @@ function ProfileLayout() {
         rating: 0,
     });
 
-    useMemo(async () => {
+    useEffect(() => {
+
+      
+
+        let doWork = async () => {
+
+
+            dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/profile", profileUrl: "/Reviews" } });
 
         if (!user)
             return;
@@ -50,6 +57,11 @@ function ProfileLayout() {
             loading: false,
             rating: data.rating
         });
+
+        }
+
+        doWork();
+        return () => { };
 
     }, [user]);
 

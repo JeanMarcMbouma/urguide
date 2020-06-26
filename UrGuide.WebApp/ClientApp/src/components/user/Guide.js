@@ -32,7 +32,9 @@ function ProfileLayout() {
         rating: 0,
     });
 
+
     useEffect(() => {
+
         let doWork = async () => {
             var api = HttpClientFactory.get(UsersClient);
             var data = await api.info(userId);
@@ -46,6 +48,7 @@ function ProfileLayout() {
                 loading: false,
                 rating: data.rating
             });
+
         }
 
         doWork();

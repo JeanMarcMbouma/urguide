@@ -12,7 +12,8 @@ const GalleryContext = createContext({
     currentFile: null,
     idToRemove: 0,
     emptyGalleryMessage:'',
-   
+    galleries: [],
+    loading: true,
 });
 
 export default GalleryContext;

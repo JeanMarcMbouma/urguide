@@ -1,0 +1,55 @@
+﻿.conversation-layout {
+    margin-top:20px;
+    padding-top: 0;
+    height:80vh;
+    position:relative;
+}
+
+.contacts-panel {
+    height: 80vh;
+    background-color: white;
+    overflow-y: scroll;
+    width:100%;
+    overflow-x:hidden;
+}
+
+
+.sender-infos {
+    position: absolute;
+    top: 0;
+    height:40px;
+    width:90%;
+}
+.sender-name{
+    font-size:16px;
+}
+
+
+.btn-reply-span{
+    margin-left:20px;
+}
+.email-icon{
+    margin-left:5px;
+}
+
+.message-sent-layout {
+    position: absolute;
+    bottom: 0;
+    width: 90%;
+    height:auto;
+}
+
+.message-sent {
+    border-radius: 6px;
+    background-color: #3f51b5;
+    height: auto;
+    width: 100%;
+    padding:8px;
+}
+.message-time{
+    font-size:14px;
+}
+.message-text{
+    font-size:15px;
+    color:white;
+}

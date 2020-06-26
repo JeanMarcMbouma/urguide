@@ -7,16 +7,17 @@
         case "like-action":
             context.post = action.data.post;
             context.posts = action.data.posts;
-           // console.log(context.posts);
             context.posts.forEach((post, index) => {
 
                 if(post.id === context.post.id && post.reactionType === 2) {
-                    context.post.reactionType = 0;
+                    context.post.reactionType = 4;
                     context.post.likes = (context.post.likes - 1);
+                    context.post.dislikes = (context.post.dislikes + 1);
                     context.posts[index] = context.post;
                     context.like = false;
                     action.data.callback(context);
                     return context;
+
                 }
 
                 if (post.id === context.post.id && post.reactionType === 4 ) {
@@ -27,6 +28,8 @@
                     context.like = true;
                     action.data.callback(context);
                     return context;
+
+
                 }
                 if (post.id === context.post.id && post.reactionType === 0) {
                     context.post.reactionType = 2;
@@ -34,9 +37,14 @@
                     context.posts[index] = context.post;
                     context.like = true;
                     action.data.callback(context);
-                    return context;
+                   
+                  
                 }
             });
+
+            return context;
+
+            break;
 
         case "dislike-action":
             context.post = action.data.post;
@@ -44,10 +52,12 @@
             context.posts.forEach((post, index) => {
 
                 if (post.id === context.post.id && post.reactionType === 4) {
-                    context.post.reactionType = 0;
+                    context.post.reactionType = 2;
                     context.post.dislikes = (context.post.dislikes - 1);
+                    context.post.likes = (context.post.likes + 1);
                     context.like = true;
                     context.posts[index] = context.post;
+                    action.data.callback(context);
                     return context;
                 }
 
@@ -57,6 +67,7 @@
                     context.post.dislikes = (context.post.dislikes + 1);
                     context.like = false;
                     context.posts[index] = context.post;
+                    action.data.callback(context);
                     return context;
                 }
                 if (post.id === context.post.id && post.reactionType === 0) {
@@ -64,49 +75,63 @@
                     context.post.dislikes = (context.post.dislikes + 1);
                     context.like = false;
                     context.posts[index] = context.post;
+                    action.data.callback(context);
 
-                    return context;
                 }
             });
+
+            return context;
+
+            break;
         case "single-like-action":
             context.post = action.data.post;
            
-                if (context.post.reactionType === 2) {
-                    context.post.reactionType = 0;
-                    context.post.likes = (context.post.likes - 1);
-                    context.like = false;
-                    action.data.callback(context);
-                    return context;
-                }
+            if (context.post.reactionType === 2) {
+                context.post.reactionType = 4;
+                context.post.likes = (context.post.likes - 1);
+                context.post.dislikes = (context.post.dislikes + 1);
+                context.like = false;
+                action.data.callback(context);
+                return context;
+
+            }
 
             if (context.post.reactionType === 4) {
-                    context.post.reactionType = 2;
-                    context.post.dislikes = (context.post.dislikes - 1);
-                    context.post.likes = (context.post.likes + 1);
-                    context.like = true;
-                    action.data.callback(context);
-                    return context;
-                }
-               if (context.post.reactionType === 0) {
-                    context.post.reactionType = 2;
-                    context.post.likes = (context.post.likes + 1);
-                    context.like = true;
-                    action.data.callback(context);
-                    return context;
+                context.post.reactionType = 2;
+                context.post.dislikes = (context.post.dislikes - 1);
+                context.post.likes = (context.post.likes + 1);
+                context.like = true;
+                action.data.callback(context);
+                return context;
+
+
             }
+            if (context.post.reactionType === 0) {
+                context.post.reactionType = 2;
+                context.post.likes = (context.post.likes + 1);
+                context.like = true;
+                action.data.callback(context);
+
+
+            }
+
+            return context;
+
+            break;
 
         case "single-dislike-action":
             context.post = action.data.post;
 
-            if (context.post.reactionType === 2) {
-                context.post.reactionType = 0;
+            if (context.post.reactionType === 4) {
+                context.post.reactionType = 2;
                 context.post.dislikes = (context.post.dislikes - 1);
+                context.post.likes = (context.post.likes + 1);
                 context.like = true;
                 action.data.callback(context);
                 return context;
             }
 
-            if (context.post.reactionType === 4) {
+            if (context.post.reactionType === 2) {
                 context.post.reactionType = 4;
                 context.post.likes = (context.post.likes - 1);
                 context.post.dislikes = (context.post.dislikes + 1);
@@ -119,10 +144,15 @@
                 context.post.dislikes = (context.post.dislikes + 1);
                 context.like = false;
                 action.data.callback(context);
-                return context;
+
             }
 
             return context;
 
+            break;
+        case "set-single-post":
+            context.post = action.data.post;
+
+            return context;
     }
 }

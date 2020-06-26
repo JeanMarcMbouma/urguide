@@ -28,7 +28,8 @@ const GuideContext = createContext({
   descriptionError: false,
   isChecked: true,
   step: 0,
-  newly: true
+    newly: true,
+
 });
 
 export default GuideContext;

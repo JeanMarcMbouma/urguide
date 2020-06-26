@@ -1,4 +1,4 @@
-﻿import React, { Component, useContext, useReducer } from 'react';
+﻿import React, { Component, useContext, useReducer, useEffect } from 'react';
 import {
     Grid, Button, IconButton, Box, Avatar, Typography
 } from "@material-ui/core";
@@ -12,6 +12,7 @@ import { useAuthUser } from '../api-authorization/AuthService';
 import { HttpClientFactory } from '../../httpclient';
 import { CatalogsClient, CreateImageCatalogModel, ImageFileCreateModel } from '../../api';
 import { BlobToBase64 } from '../../helpers/fileHelpers';
+import { useDataContext, ActionTypes } from "../../data/GlobalDataContext";
 
 function Gallery() {
 
@@ -44,6 +45,12 @@ function Gallery() {
 
     const ctx = useContext(GalleryContext);
     const [state, dispatch] = useReducer(GalleryReducer, ctx);
+    const { dcReducer } = useDataContext();
+    useEffect(() => { 
+        dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/profile", profileUrl: "/NewGallery" } });
+    }, [user]);
+
+   
     var currentFile = null;
 
     let data = state.files;

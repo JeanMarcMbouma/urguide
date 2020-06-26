@@ -50,8 +50,13 @@ export default function FeedBackReducer(state, action) {
             return context;
 
             break;
-      
+        case "load-more":
 
+            context.pageNumber = action.data.pageNumber;
+            context.itemsCount = action.data.itemsCount;
+            context.items = action.data.items;
+            return context;
+            break;
     }
 
     return context;

@@ -1,4 +1,4 @@
-﻿import React, {  useState, useEffect, useReducer,  } from "react";
+﻿import React, {  useState, useEffect, useReducer, useContext,  } from "react";
 import {
     Grid,
     FormHelperText,
@@ -27,7 +27,8 @@ import { BlobToBase64 } from "../../helpers/fileHelpers";
 import TextField from '@material-ui/core/TextField';
 import { GalleryDetails } from "./gallery/GalleryDetails";
 import GalleryReducer from "./gallery/GalleryReducer";
-
+import GalleryContext from "./gallery/GalleryContext";
+import { useDataContext, ActionTypes } from "../../data/GlobalDataContext";
 
 const buttonStyles = makeStyles(theme => ({
     root: {
@@ -97,7 +98,7 @@ function GalleryCard(props) {
                 name: fileName,
                 imageBase64: base64Url,
             };
-            
+
             const model = new ImageFileCreateModel(newFile);
             client.addimage(gallery.catalogId, model).then(function (image) {
                 let images = gallery.files.slice();
@@ -119,7 +120,7 @@ function GalleryCard(props) {
             description: model.description
         })).then(() => {
             setEditing(false);
-            setGallery({ ...gallery, name: model.title, description: model.description});
+            setGallery({ ...gallery, name: model.title, description: model.description });
             setStatus({ message: 'Saved successfully', code: 200 });
         }).catch((e) => {
             setStatus({ message: 'Oops ! something went wrong.', code: 400 });
@@ -127,7 +128,7 @@ function GalleryCard(props) {
     }
     const fileInit = React.createRef();
 
-    const [state, dispatch] = useReducer(GalleryReducer, {...gallery});
+    const [state, dispatch] = useReducer(GalleryReducer, { ...gallery });
 
     function revertChanges() {
         dispatch({
@@ -151,22 +152,22 @@ function GalleryCard(props) {
                 <button id='data-sender' className='input-file'  >
                 </button>
                 <div className='row justify-content-end'>
-                    {  !props.visitor  ? 
-                    <div className='col-3 col-lg-1'>
-                        <Dropdown>
-                            <Dropdown.Toggle className='dropdown-button' >
-                                <AiOutlineSetting className='cog-icon' />
-                            </Dropdown.Toggle>
-                            
-                            <Dropdown.Menu>
-                                <Dropdown.Item onClick={handleAddImage} ><span className='md-icon' ><MdAddAPhoto /></span>Add photo</Dropdown.Item>
-                                <Dropdown.Item onClick={() => setEditing(!editing)} ><span className='md-icon'><MdModeEdit /></span>  Edit details </Dropdown.Item>
-                                <Dropdown.Item onClick={deleteGallery}><span className='md-icon' ><MdDelete /></span>  Delete gallery</Dropdown.Item>
-                                { gallery.files.length ? <Dropdown.Item><Link to={`/gallery/${gallery.catalogId}/shot/${gallery.files[0].id}`} ><span className='md-icon'><MdVisibility /></span>  See details</Link></Dropdown.Item> : <></>}
-                            </Dropdown.Menu>
-                        </Dropdown>
-                    </div> : null }
-                   
+                    {!props.visitor ?
+                        <div className='col-3 col-lg-1'>
+                            <Dropdown>
+                                <Dropdown.Toggle className='dropdown-button' >
+                                    <AiOutlineSetting className='cog-icon' />
+                                </Dropdown.Toggle>
+
+                                <Dropdown.Menu>
+                                    <Dropdown.Item onClick={handleAddImage} ><span className='md-icon' ><MdAddAPhoto /></span>Add photo</Dropdown.Item>
+                                    <Dropdown.Item onClick={() => setEditing(!editing)} ><span className='md-icon'><MdModeEdit /></span>  Edit details </Dropdown.Item>
+                                    <Dropdown.Item onClick={deleteGallery}><span className='md-icon' ><MdDelete /></span>  Delete gallery</Dropdown.Item>
+                                    {gallery.files.length ? <Dropdown.Item><Link to={`/gallery/${gallery.catalogId}/shot/${gallery.files[0].id}`} ><span className='md-icon'><MdVisibility /></span>  See details</Link></Dropdown.Item> : <></>}
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </div> : null}
+
                 </div>
                 <br />
                 <div className='row justify-content-start'>
@@ -175,13 +176,13 @@ function GalleryCard(props) {
                         {status.code == 400 ? <Alert severity="error">{status.message}</Alert> : null}
                         <br />
                         <br />
-                        {editing 
-                        ?   <form noValidate autoComplete="off">
+                        {editing
+                            ? <form noValidate autoComplete="off">
                                 <GalleryDetails title={state.name}
-                                 description={state.description}
-                                 titleError={state.titleError}
-                                 descriptionError={state.descriptionError}
-                                 />
+                                    description={state.description}
+                                    titleError={state.titleError}
+                                    descriptionError={state.descriptionError}
+                                />
                                 <Button className="col-lg-2 m-3" onClick={() => dispatch({
                                     type: 'update-gallery',
                                     data: {
@@ -194,20 +195,20 @@ function GalleryCard(props) {
                                 })} variant="contained" color="primary" type="button">Save changes</Button>
                                 <Button className="col-lg-2 m-3" onClick={revertChanges} variant="contained" color="primary" type="button">Cancel</Button>
                             </form>
-                        :   <>
+                            : <>
                                 <h4>{gallery.name}</h4>
                                 <p>{gallery.description}</p>
                             </>}
                     </div>
                     {gallery.files.map((img, i) => (
-                    <div key={i} className='col-12 col-sm-6 col-md-4 col-xl-3 photo-div'>
-                        {setEditing(false)}
-                        <Link to={`/gallery/${gallery.catalogId}/shot/${img.id}`} >  <div className='photo' style={{ backgroundImage: `url(${img.imageBase64})` }}></div></Link>
-                    </div>))}
+                        <div key={i} className='col-12 col-sm-6 col-md-4 col-xl-3 photo-div'>
+                            {setEditing(false)}
+                            <Link to={`/gallery/${gallery.catalogId}/shot/${img.id}`} >  <div className='photo' style={{ backgroundImage: `url(${img.imageBase64})` }}></div></Link>
+                        </div>))}
                 </div>
             </div></>
     );
-           
+
 }
 
 
@@ -255,41 +256,67 @@ export default function Galleries() {
     const { profile } = user || {
         profile: {}
     };
-
-    const [model, setModel] = useState({ galleries: [], loading: true });
+    const ctx = useContext(GalleryContext);
+    const [state, dispatch] = useReducer(GalleryReducer, ctx);
+    const { dcReducer } = useDataContext();
+    const client = HttpClientFactory.get(CatalogsClient);
+    const [value, setValue] = useState([{}]);
 
     useEffect(() => {
+
         let fetch = async () => {
-
+           
+            dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: false, url: "/profile", profileUrl: "/Galleries" } });
             if (userId != null) {
-                let client = HttpClientFactory.get(CatalogsClient);
+          
+                client.all(userId).then(result => {
 
-                client.all(userId).then(catalogs => {
-                    setModel({ galleries: catalogs, loading: false });
+                    dispatch({
+                        type: "set-data",
+                        data: {
+                            files: [],
+                            description: '',
+                            galleries: result,
+                            loading: false,
+                        }
+                    });
+
+                    dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/profile", profileUrl: "/Galleries" } });
                 });
+
             }
             else {
-                let client = HttpClientFactory.get(CatalogsClient);
+               
+                client.all(profile.sub).then(result => {
+                    dispatch({
+                        type: "set-data",
+                        data: {
+                            files: [],
+                            description: '',
+                            galleries: result,
+                            loading: false,
+                        }
+                    });
 
-                client.all(profile.sub).then(catalogs => {
-                    setModel({ galleries: catalogs, loading: false });
+                    dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/profile", profileUrl: "/Galleries" } });
                 });
-            }
-        };
+             }
+        }
+
         fetch();
         return () => { };
-    }, [user]);
+    }, []);
 
+    var id = userId != null ? userId : profile.sub;
+    var isVisitor = userId != null ? true : false;
 
     return (
         <div className="row">
             <div className="col-12 lower-section">
                 <div className='row justify-content-center'>
-                    {userId != null ? <div className="col-12 col-lg-10">
-                        {model.loading ? <GallerySkeleton /> : model.galleries.map((gallery, i) => (<GalleryCard key={i} gallery={gallery} userId={userId} visitor={true} user={null}/>))}
-                    </div> : <div className="col-12 col-lg-10">
-                            {model.loading ? <GallerySkeleton /> : model.galleries.map((gallery, i) => (<GalleryCard key={i} gallery={gallery} userId={profile.sub} visitor={false} user={user} />))}
-                        </div> }
+                    <div className="col-12 col-lg-10">
+                        {state.loading ? <GallerySkeleton /> : state.galleries.map((gallery, i) => (<GalleryCard key={i} gallery={gallery} userId={id} visitor={isVisitor} user={user} />))}
+                    </div> 
                 </div>
             </div>
         </div>

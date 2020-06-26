@@ -12,10 +12,8 @@ import Gallery from "./components/user/gallery/Gallery";
 import {
     ClientRegistration,
 } from './components/client-registration/ClientRegistration';
-import {
-    GuideRegistration,
-} from './components/guide-registration/GuideRegistration';
-import { Layout } from './components/Layout';
+import  GuideRegistration from './components/guide-registration/GuideRegistration';
+import Layout from './components/Layout';
 import Home from './components/MainPage/Home';
 import EmailConfirmation from './components/confirmation/EmailConfirmation';
 import RegistrationConfirmation
@@ -27,7 +25,7 @@ import LoginCallback from './components/api-authorization/LoginCallback';
 import LogoutCallback from './components/api-authorization/LogoutCallback';
 import ClientDetails from './components/user/ClientDetails';
 import { DataContextProvider } from './data/GlobalDataContext';
-import Messages from './components/messages/messages';
+import Message from './components/message/message';
 import ForgetPassword from './components/confirmation/ForgetPassword';
 import ResetPassword from './components/confirmation/ResetPassword';
 
@@ -74,11 +72,11 @@ export default class App extends Component {
                                 </RegisterLayout>
                             </Route>
 
-                            <Route path="/(feed|profile|account|messages)">
+                            <Route path="/(feed|profile|account|message)">
                                 <Layout>
                                     <Route path="/feed" component={Home} />
                                     <AuthRoute path="/profile" component={Profile} />
-                                    <AuthRoute path="/messages" component={Messages} />
+                                    <AuthRoute path="/message" component={Message} />
                                     <AuthRoute path="/account" component={ClientDetails} />
                                 </Layout>
                             </Route>

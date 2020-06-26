@@ -74,6 +74,12 @@
             }
         case 'revert-changes':
             return action.data;
+        case 'set-data':
+            context.galleries = action.data.galleries;
+            context.loading = action.data.loading;
+            console.log(context.galleries);
+            return context;
+            break;
     }
 
     return context;

@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Loader } from "../Layout";
 
 
 export class LoginLayout extends Component {
@@ -6,6 +7,7 @@ export class LoginLayout extends Component {
 
   render() {
       return <div>
+          <Loader/>
           {this.props.children}
       </div>;
   }

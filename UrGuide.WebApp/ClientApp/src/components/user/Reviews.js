@@ -22,6 +22,7 @@ import "./UserStyle.css"
 import FeedBackContext from './FeedbackContext';
 import FeedBackReducer from './FeedBackReducer';
 import { useAuthContext } from '../api-authorization/AuthService';
+import { useDataContext, ActionTypes } from "../../data/GlobalDataContext";
 
 
 
@@ -71,10 +72,13 @@ export default function Reviews(props) {
     const [pageNumber, setPageNumber] = useState(1);
     const initialValues = { review: '', rating: 1 };
     const [values, setValues] = useState(initialValues);
+    const { dcReducer } = useDataContext();
 
 
     const client = HttpClientFactory.get(FeedbackClient, user);
     useEffect(() => {
+
+        dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: false, url: "/profile", profileUrl: "/Reviews" } });
 
         client.users(props.userId || user.profile.sub, pageNumber)
             .then(r => {
@@ -83,12 +87,38 @@ export default function Reviews(props) {
                     data: {
                         feedbacks: r.items
                     }
-                })
+                });
+
+                dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/profile", profileUrl: "/Reviews" } });
+                setPageNumber(pageNumber + 1);
             });
 
         return () => { };
     }, [user, pageNumber]);
-        
+
+
+
+    window.onscroll = async function (ev) {
+        var totalPageHeight = document.body.scrollHeight;
+        var scrollPoint = window.scrollY + window.innerHeight;
+        if (scrollPoint >= totalPageHeight) {
+            await loadMoreReviews();
+        }
+    };
+
+    async function loadMoreReviews() {
+        client.users(props.userId || user.profile.sub, pageNumber)
+            .then(r => {
+                r.items.forEach((item, index) => { state.feedbacks.push(item) });
+                dispatch({
+                    type: "loading",
+                    data: {
+                        feedbacks: state.feedbacks
+                    }
+                });
+                setPageNumber(pageNumber + 1);
+            });
+    }
 
     const handleChange = prop => event => {
         setValues({ ...values, [prop]: event.target.value });
