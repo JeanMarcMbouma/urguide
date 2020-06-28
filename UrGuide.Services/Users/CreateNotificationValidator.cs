@@ -8,7 +8,7 @@ namespace UrGuide.Services.Users
         public CreateNotificationValidator()
         {
             RuleFor(x => x.Content).NotEmpty();
-            RuleFor(x => x.IsSystem).Must((x, v) => x.AuthorId == Constants.SystemUserId);
+            RuleFor(x => x.IsSystem).Must((x, v) => !x.IsSystem || x.AuthorId == Constants.SystemUserId);
             RuleFor(x => x.AuthorId).NotEmpty();
         }
     }
