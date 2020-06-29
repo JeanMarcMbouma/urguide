@@ -4,6 +4,8 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using UrGuide.Core;
+using UrGuide.Core.Attributes;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Posts;
 using UrGuide.Data.Shared;
@@ -97,7 +99,7 @@ Rating: {feedback.Rating} star(s).";
             if (rating == null)
             {
                 firstRatingEver = true;
-                rating = new Data.Entities.Attributes.GenericAttribute
+                rating = new GenericAttribute
                 {
                     Name = nameof(Data.Entities.Posts.AttributeTypes.Rating),
                     Value = Constants.Zero

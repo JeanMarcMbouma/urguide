@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using UrGuide.Core;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Users;
 using UrGuide.Model;

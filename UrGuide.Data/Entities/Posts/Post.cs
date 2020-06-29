@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UrGuide.Data.Entities.Attributes;
 using UrGuide.Data.Entities.Contracts;
 using UrGuide.Data.Entities.Shared;
 using UrGuide.Data.Entities.Users;

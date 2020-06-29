@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using UrGuide.Core;
 using UrGuide.Data;
 using UrGuide.Model;
 using UrGuide.Model.Auditing;

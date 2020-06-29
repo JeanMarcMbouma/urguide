@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace UrGuide.Data.Entities.Attributes
+namespace UrGuide.Core.Attributes
 {
     [Owned]
     public class GenericAttribute
@@ -8,7 +8,7 @@ namespace UrGuide.Data.Entities.Attributes
         public string Name { get; set; }
         public string Value { get; set; }
 
-        public static implicit operator string (GenericAttribute attribute)
+        public static implicit operator string(GenericAttribute attribute)
         {
             return attribute?.Value;
         }
@@ -22,9 +22,9 @@ namespace UrGuide.Data.Entities.Attributes
         {
             if (attribute == null)
                 return false;
-            if (string.IsNullOrEmpty(attribute.Value) 
-                || attribute.Value.Equals(Constants.No) 
-                || attribute.Value.Equals("1") 
+            if (string.IsNullOrEmpty(attribute.Value)
+                || attribute.Value.Equals(Constants.No)
+                || attribute.Value.Equals("1")
                 || attribute.Value.Equals(false.ToString(), System.StringComparison.OrdinalIgnoreCase))
                 return false;
             return true;

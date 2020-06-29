@@ -1,4 +1,5 @@
 ﻿using System;
+using UrGuide.Core.Contracts;
 
 namespace UrGuide.Data.Entities.Contracts
 {

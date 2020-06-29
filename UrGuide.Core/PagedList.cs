@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using UrGuide.Data.Entities.Contracts;
+using UrGuide.Core.Contracts;
 
-namespace UrGuide.Model
+namespace UrGuide.Core
 {
     public class PagedList<T> : PagedList
     {
@@ -69,7 +69,7 @@ namespace UrGuide.Model
             return result;
         }
 
-        
+
     }
 
     public static class PagedListExtensions

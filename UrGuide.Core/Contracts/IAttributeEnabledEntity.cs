@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using UrGuide.Data.Entities.Attributes;
+using UrGuide.Core.Attributes;
 
-namespace UrGuide.Data.Entities.Contracts
+namespace UrGuide.Core.Contracts
 {
     public interface IAttributeEnabledEntity : IEntity
     {

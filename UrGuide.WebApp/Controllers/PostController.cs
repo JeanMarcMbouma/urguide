@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UrGuide.Core;
 using UrGuide.Model;
 using UrGuide.Model.Posts;
 using UrGuide.Services.Contracts;
