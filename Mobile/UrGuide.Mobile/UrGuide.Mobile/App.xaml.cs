@@ -1,20 +1,16 @@
-﻿using System;
+﻿using UrGuide.Mobile.Contracts;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
-using UrGuide.Mobile.Services;
-using UrGuide.Mobile.Views;
 
 namespace UrGuide.Mobile
 {
     public partial class App : Application
     {
 
-        public App()
+        public App(IMainPageService mainPageService)
         {
             InitializeComponent();
 
-            DependencyService.Register<MockDataStore>();
-            MainPage = new AppShell();
+            MainPage = mainPageService.GetMainPage();
         }
 
         protected override void OnStart()

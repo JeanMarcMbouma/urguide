@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Foundation;
+using Microsoft.Extensions.DependencyInjection;
 using UIKit;
 
 namespace UrGuide.Mobile.iOS
@@ -24,9 +25,15 @@ namespace UrGuide.Mobile.iOS
         {
             global::Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
             global::Xamarin.Forms.Forms.Init();
-            LoadApplication(new App());
+            Forms.Init(RegisterServices);
+            LoadApplication(Forms.Ioc.GetService<App>());
 
             return base.FinishedLaunching(app, options);
+        }
+
+        private void RegisterServices(IServiceCollection services)
+        {
+            
         }
     }
 }
