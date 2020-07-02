@@ -18,10 +18,16 @@ namespace UrGuide.Mobile
             services.AddSingleton<App>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddScoped<LandingItemViewModel>();
+            services.AddScoped<MainPageViewModel>();
         }
         public static void Init(Action<IServiceCollection> registerServices)
         {
-            Device.SetFlags(new[] { "CollectionView_Experimental", "Shapes_Experimental" });
+            Device.SetFlags(new[] { 
+                "CollectionView_Experimental", 
+                "Shapes_Experimental", 
+                "CarouselView_Experimental",
+                "Expander_Experimental"
+            });
             var services = new ServiceCollection();
             ConfigureServices(services);
             registerServices?.Invoke(services);
