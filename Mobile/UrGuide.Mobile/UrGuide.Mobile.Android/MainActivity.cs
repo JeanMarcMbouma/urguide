@@ -7,6 +7,7 @@ using Android.Views;
 using Android.Widget;
 using Android.OS;
 using Microsoft.Extensions.DependencyInjection;
+using FFImageLoading.Forms.Platform;
 
 namespace UrGuide.Mobile.Droid
 {
@@ -20,7 +21,6 @@ namespace UrGuide.Mobile.Droid
 
             base.OnCreate(savedInstanceState);
 
-            global::Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             Forms.Init(RegisterServices);
@@ -29,7 +29,7 @@ namespace UrGuide.Mobile.Droid
 
         private void RegisterServices(IServiceCollection services)
         {
-            
+            CachedImageRenderer.Init(true);
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)

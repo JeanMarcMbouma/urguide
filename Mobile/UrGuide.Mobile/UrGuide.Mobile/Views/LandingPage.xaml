@@ -2,14 +2,82 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
              mc:Ignorable="d"
-             x:Class="UrGuide.Mobile.Views.LandingPage">
-    <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
-        </StackLayout>
-    </ContentPage.Content>
+             xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels" xmlns:model="clr-namespace:UrGuide.Mobile.Models"
+             x:Class="UrGuide.Mobile.Views.LandingPage"
+             x:DataType="vm:LandingItemViewModel"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False"
+             >
+    <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" RowSpacing="8" RowDefinitions="*,100">
+        <CarouselView VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
+                      ItemsSource="{Binding Path=Items}"
+                      IndicatorView="indicator"
+            >
+            <CarouselView.EmptyView>
+                <Frame HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" 
+                     >
+                    <StackLayout Orientation="Vertical" Spacing="8" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
+                        <Label Text="UrGuide" TextColor="#3F51B5" 
+                               FontSize="40" FontAttributes="Bold"
+                               HorizontalOptions="CenterAndExpand"
+                           />
+                        <Label Text="Become a tourism guide at your ease and pace" TextColor="#3F51B5" 
+                               FontSize="Subtitle" VerticalOptions="Center"
+                               HorizontalOptions="CenterAndExpand"
+                           />
+                        <ff:CachedImage Source="icon.png" Aspect="AspectFill" VerticalOptions="Center" WidthRequest="46" HeightRequest="46"
+                               HorizontalOptions="CenterAndExpand"
+                           />
+                    </StackLayout>
+                </Frame>
+            </CarouselView.EmptyView>
+            <CarouselView.ItemTemplate>
+                <DataTemplate x:DataType="model:LandingItem" >
+                    <Frame HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+                        <StackLayout Orientation="Vertical" Spacing="8" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
+                            <ff:CachedImage 
+                                    Source="{Binding ImageUrl}" 
+                                    Aspect="AspectFill" 
+                                    WidthRequest="300" 
+                                    HeightRequest="300"
+                                    DownsampleToViewSize="True"
+                                    HorizontalOptions="CenterAndExpand"
+                                Margin="0,0,0,8"
+                                />
+                            <Label Text="{Binding Header}" TextColor="#3F51B5" 
+                               FontSize="40" FontAttributes="Bold"
+                               HorizontalOptions="CenterAndExpand"
+                           />
+                                
+                                <Label Text="{Binding Description}" TextColor="#3F51B5" 
+                               FontSize="Subtitle" VerticalOptions="Center"
+                               HorizontalOptions="CenterAndExpand"
+                           />
+                                
+                            </StackLayout>
+                        </Frame>
+                </DataTemplate>
+            </CarouselView.ItemTemplate>
+        </CarouselView>
+        <IndicatorView x:Name="indicator" Grid.Row="1"
+                       IndicatorColor="#3F51B590" 
+                       HorizontalOptions="CenterAndExpand"
+                       IndicatorSize="15"
+                       IndicatorsShape="Circle"
+                       SelectedIndicatorColor="#3F51B5"></IndicatorView>
+        <Frame HorizontalOptions="End" VerticalOptions="Start" CornerRadius="4" Margin="8">
+            <Label Text="Skip" TextColor="#3F51B5" 
+                   VerticalOptions="CenterAndExpand" 
+                   HorizontalOptions="CenterAndExpand"
+                   VerticalTextAlignment="Center"
+                   FontAttributes="Bold"
+                   FontSize="Subtitle"></Label>
+            <Frame.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding Path=SkipCommand}"/>
+            </Frame.GestureRecognizers>
+        </Frame>
+    </Grid>
 </ContentPage>

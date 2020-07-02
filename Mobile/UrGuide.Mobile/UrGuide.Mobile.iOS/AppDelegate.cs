@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using FFImageLoading.Forms.Platform;
 using Foundation;
 using Microsoft.Extensions.DependencyInjection;
 using UIKit;
@@ -23,7 +23,6 @@ namespace UrGuide.Mobile.iOS
         //
         public override bool FinishedLaunching(UIApplication app, NSDictionary options)
         {
-            global::Xamarin.Forms.Forms.SetFlags("CollectionView_Experimental");
             global::Xamarin.Forms.Forms.Init();
             Forms.Init(RegisterServices);
             LoadApplication(Forms.Ioc.GetService<App>());
@@ -33,7 +32,7 @@ namespace UrGuide.Mobile.iOS
 
         private void RegisterServices(IServiceCollection services)
         {
-            
+            CachedImageRenderer.Init();
         }
     }
 }

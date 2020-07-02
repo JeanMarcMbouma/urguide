@@ -2,6 +2,9 @@
 using System;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Services;
+using UrGuide.Mobile.ViewModels;
+using UrGuide.Mobile.Views;
+using Xamarin.Forms;
 
 namespace UrGuide.Mobile
 {
@@ -13,9 +16,12 @@ namespace UrGuide.Mobile
             services.AddSingleton<AppShell>();
             services.AddSingleton<IMainPageService, MainPageService>();
             services.AddSingleton<App>();
+            services.AddSingleton<INavigationService, NavigationService>();
+            services.AddScoped<LandingItemViewModel>();
         }
         public static void Init(Action<IServiceCollection> registerServices)
         {
+            Device.SetFlags(new[] { "CollectionView_Experimental", "Shapes_Experimental" });
             var services = new ServiceCollection();
             ConfigureServices(services);
             registerServices?.Invoke(services);
