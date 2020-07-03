@@ -18,7 +18,7 @@ namespace UrGuide.Mobile
             services.AddSingleton<App>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddScoped<LandingItemViewModel>();
-            services.AddScoped<MainPageViewModel>();
+            services.AddScoped<PostsViewModel>();
         }
         public static void Init(Action<IServiceCollection> registerServices)
         {
@@ -26,12 +26,21 @@ namespace UrGuide.Mobile
                 "CollectionView_Experimental", 
                 "Shapes_Experimental", 
                 "CarouselView_Experimental",
-                "Expander_Experimental"
+                "Expander_Experimental",
+                //"FastRenderers_Experimental"
             });
+
+            RegisterRoutes();
             var services = new ServiceCollection();
             ConfigureServices(services);
             registerServices?.Invoke(services);
             Ioc = services.BuildServiceProvider();
+        }
+
+        private static void RegisterRoutes()
+        {
+            Routing.RegisterRoute("posts", typeof(PostPage));
+            Routing.RegisterRoute("posts/details", typeof(PostDetailPage));
         }
     }
 }

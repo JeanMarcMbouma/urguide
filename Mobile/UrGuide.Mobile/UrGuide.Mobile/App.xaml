@@ -2,10 +2,32 @@
 <Application xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:cv="clr-namespace:UrGuide.Mobile.Converters"
              mc:Ignorable="d"
              x:Class="UrGuide.Mobile.App">
     <Application.Resources>
-        
+        <ResourceDictionary>
+            <Color x:Key="IconColor">#3F51B5</Color>
+            <Color x:Key="IconColorLight">#803F51B5</Color>
+            <Color x:Key="IndicatorColor">#703F51B5</Color>
+            <Color x:Key="IndicatorSelectedColor">#3F51B5</Color>
+            <Color x:Key="FavoriteIcon">Orange</Color>
+            <x:Boolean x:Key="FalseValue" ></x:Boolean>
+            <Color x:Key="NavigationPrimary">#3F51B5</Color>
+            <cv:NumericToSocialUnitConverter x:Key="NumericToSocialUnitConverter" />
+            <Style x:Key="BaseStyle" TargetType="Element">
+                <Setter Property="Shell.BackgroundColor" Value="{StaticResource NavigationPrimary}" />
+                <Setter Property="Shell.ForegroundColor" Value="White" />
+                <Setter Property="Shell.TitleColor" Value="White" />
+                <Setter Property="Shell.DisabledColor" Value="#B4FFFFFF" />
+                <Setter Property="Shell.UnselectedColor" Value="#95FFFFFF" />
+                <Setter Property="Shell.TabBarBackgroundColor" Value="{StaticResource NavigationPrimary}" />
+                <Setter Property="Shell.TabBarForegroundColor" Value="White"/>
+                <Setter Property="Shell.TabBarUnselectedColor" Value="#95FFFFFF"/>
+                <Setter Property="Shell.TabBarTitleColor" Value="White"/>
+            </Style>
+            <Style TargetType="TabBar" BasedOn="{StaticResource BaseStyle}" />
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -12,19 +12,19 @@ namespace UrGuide.Mobile.Services
 {
     class NavigationService : INavigationService
     {
-        public void GoToRoot()
+        public Task GotoAsync(string uri)
         {
-            App.Current.MainPage = new SharedTransitionNavigationPage(new MainPage());
+            return Shell.Current.GoToAsync(uri);
         }
 
         public Task PushAsync(Page page, bool animated)
         {
-            return AppShell.Current.Navigation.PushAsync(page, animated);
+            return Shell.Current.Navigation.PushAsync(page, animated);
         }
 
         public Task PushModalAsync(Page modalPage, bool animated)
         {
-            return AppShell.Current.Navigation.PushModalAsync(modalPage, animated);
+            return Shell.Current.Navigation.PushModalAsync(modalPage, animated);
         }
     }
 }

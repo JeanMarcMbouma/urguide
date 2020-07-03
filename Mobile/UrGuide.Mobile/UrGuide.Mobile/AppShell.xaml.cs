@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using UrGuide.Mobile.Contracts;
-using Xamarin.Forms;
+﻿using Plugin.SharedTransitions;
 
 namespace UrGuide.Mobile
 {
-    public partial class AppShell : Xamarin.Forms.Shell
+    public partial class AppShell : SharedTransitionShell
     {
         public AppShell()
         {

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace UrGuide.Mobile.Models
 {
-    class PostItem : Model.Posts.PostModel
+    public class PostItem : Model.Posts.PostModel
     {
         public List<Model.Posts.ItineraryModel> Itineraries { get; set; }
     }

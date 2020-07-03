@@ -13,6 +13,6 @@ namespace UrGuide.Mobile.Services
         {
             _shell = shell ?? throw new System.ArgumentNullException(nameof(shell));
         }
-        public Page GetMainPage() => Xamarin.Essentials.VersionTracking.IsFirstLaunchEver ? (Page)_shell : new SharedTransitionNavigationPage(new MainPage());
+        public Page GetMainPage() => _shell;
     }
 }

@@ -40,9 +40,9 @@ namespace UrGuide.Mobile.ViewModels
                 }
             };
             _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
-            SkipCommand = new Command(() =>
+            SkipCommand = new AsyncCommand(async () =>
             {
-                _navigation.GoToRoot();
+                await _navigation.GotoAsync("posts");
             });
         }
     }

@@ -5,8 +5,7 @@ namespace UrGuide.Mobile
 {
     public partial class App : Application
     {
-
-        public App(IMainPageService mainPageService)
+        public App(IMainPageService mainPageService) : base()
         {
             InitializeComponent();
 
