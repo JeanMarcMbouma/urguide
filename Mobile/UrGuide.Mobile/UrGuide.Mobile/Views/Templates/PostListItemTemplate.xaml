@@ -13,7 +13,7 @@
              x:DataType="m:PostItem">
     <Frame VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand"
                    CornerRadius="8" >
-            <Grid RowDefinitions="70,Auto,Auto,Auto,*" ColumnDefinitions="70,*" Margin="8,0,8,8">
+            <Grid RowDefinitions="70,Auto,Auto,Auto,*" ColumnDefinitions="70,*" Margin="8,0,8,-12">
 
                 <ff:CachedImage Source="{Binding AuthorAvatar}"
                             Aspect="AspectFit" HeightRequest="46" WidthRequest="46">
@@ -23,8 +23,16 @@
                              Margin="8">
                     <Label Text="{Binding Author}" FontSize="Medium" 
                        FontAttributes="Bold"/>
-                    <Label Text="{Binding PublicationDate}" FontSize="Small"/>
-                </StackLayout>
+                    
+                <Label FontSize="Small">
+                    <Label.Text>
+                        <MultiBinding StringFormat="{}{0} {1}">
+                            <Binding Path="PublicationDate"/>
+                            <Binding Path="Countdown.Left"/>
+                        </MultiBinding>
+                    </Label.Text>
+                </Label>
+            </StackLayout>
                 <Path
                         Data="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
                         Grid.Column="1"
@@ -69,14 +77,14 @@
                               Stroke="{StaticResource IconColor}"
                               Fill="{StaticResource IconColor}"
                               HeightRequest="24" WidthRequest="24"/>
-                    <Grid ColumnDefinitions="10,*" RowDefinitions="Auto,*" RowSpacing="5" Margin="10,0,0,0">
+                    <Grid ColumnDefinitions="10,*" RowDefinitions="Auto,*" RowSpacing="5" Margin="10,-14,0,0">
                         <BoxView Grid.RowSpan="2" HorizontalOptions="Start" VerticalOptions="StartAndExpand" 
                                      WidthRequest="2"
                                      BackgroundColor="{StaticResource IconColor}"/>
-                        <BoxView HorizontalOptions="StartAndExpand"  VerticalOptions="Center" WidthRequest="8" HeightRequest="4"
+                        <BoxView HorizontalOptions="StartAndExpand"  VerticalOptions="Center" WidthRequest="8" HeightRequest="2"
                                      BackgroundColor="{StaticResource IconColor}"
                                      CornerRadius="4"/>
-                        <BoxView Grid.Row="1" HorizontalOptions="StartAndExpand"  VerticalOptions="Center" WidthRequest="8" HeightRequest="4"
+                        <BoxView Grid.Row="1" HorizontalOptions="StartAndExpand"  VerticalOptions="Center" WidthRequest="8" HeightRequest="2"
                                      BackgroundColor="{StaticResource IconColor}"
                                      CornerRadius="4"/>
                         <Label Grid.Column="1" FontSize="Small" FontAttributes="Bold"  >
@@ -111,7 +119,7 @@
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>
                             <Frame CornerRadius="4" Padding="8" HasShadow="True" BackgroundColor="{StaticResource IconColor}">
-                                <Label Text="{Binding .}" FontSize="Small" FontAttributes="Bold" 
+                                <Label Text="{Binding}" FontSize="Small" FontAttributes="Bold" 
                                            TextColor="White"/>
                             </Frame>
                         </DataTemplate>
@@ -199,9 +207,12 @@
                 <Grid
                        VerticalOptions="EndAndExpand"
                        HorizontalOptions="EndAndExpand"
+                    Margin="0,12,0,0"
                     >
-                    <BoxView Color="{StaticResource IconColor}" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
+                    <BoxView Color="{StaticResource IconColor}" VerticalOptions="FillAndExpand" 
+                             HorizontalOptions="FillAndExpand" 
                              CornerRadius="0,12,0,12"
+                             HeightRequest="50"
                              >
                         <BoxView.GestureRecognizers>
                             <TapGestureRecognizer 

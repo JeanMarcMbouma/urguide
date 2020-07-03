@@ -65,9 +65,9 @@ namespace UrGuide.Mobile.ViewModels
                             Name = "Image 1"
                         }
                     },
-                    StartDate = "12-May-2020",
+                    StartDate = "01-Jul-2020",
                     StartTime = "12:09",
-                    EndDate = "28-May-2020",
+                    EndDate = "04-Jul-2020",
                     EndTime = "11:00",
                     PublicationDate = "11-May-2020 11:30:04",
                     Itineraries = new List<ItineraryModel>
