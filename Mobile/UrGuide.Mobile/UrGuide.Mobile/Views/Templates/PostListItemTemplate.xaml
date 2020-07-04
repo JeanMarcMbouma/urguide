@@ -119,7 +119,7 @@
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>
                             <Frame CornerRadius="4" Padding="8" HasShadow="True" BackgroundColor="{StaticResource IconColor}">
-                                <Label Text="{Binding}" FontSize="Small" FontAttributes="Bold" 
+                                <Label Text="{Binding Path=.}" FontSize="Small" FontAttributes="Bold" 
                                            TextColor="White"/>
                             </Frame>
                         </DataTemplate>
@@ -180,15 +180,45 @@
                     </CollectionView.ItemsLayout>
                 </CollectionView>
                 <StackLayout Orientation="Horizontal" Spacing="8">
+                    <StackLayout Orientation="Horizontal" Spacing="8">
                     <Path Data="M466.27 286.69C475.04 271.84 480 256 480 236.85c0-44.015-37.218-85.58-85.82-85.58H357.7c4.92-12.81 8.85-28.13 8.85-46.54C366.55 31.936 328.86 0 271.28 0c-61.607 0-58.093 94.933-71.76 108.6-22.747 22.747-49.615 66.447-68.76 83.4H32c-17.673 0-32 14.327-32 32v240c0 17.673 14.327 32 32 32h64c14.893 0 27.408-10.174 30.978-23.95 44.509 1.001 75.06 39.94 177.802 39.94 7.22 0 15.22.01 22.22.01 77.117 0 111.986-39.423 112.94-95.33 13.319-18.425 20.299-43.122 17.34-66.99 9.854-18.452 13.664-40.343 8.99-62.99zm-61.75 53.83c12.56 21.13 1.26 49.41-13.94 57.57 7.7 48.78-17.608 65.9-53.12 65.9h-37.82c-71.639 0-118.029-37.82-171.64-37.82V240h10.92c28.36 0 67.98-70.89 94.54-97.46 28.36-28.36 18.91-75.63 37.82-94.54 47.27 0 47.27 32.98 47.27 56.73 0 39.17-28.36 56.72-28.36 94.54h103.99c21.11 0 37.73 18.91 37.82 37.82.09 18.9-12.82 37.81-22.27 37.81 13.489 14.555 16.371 45.236-5.21 65.62zM88 432c0 13.255-10.745 24-24 24s-24-10.745-24-24 10.745-24 24-24 24 10.745 24 24z" 
                               Stroke="{StaticResource IconColor}" Fill="{StaticResource IconColor}"
                               HeightRequest="24" WidthRequest="24" Aspect="Uniform"
-                              HorizontalOptions="Center"/>
-                    <Label Text="{Binding Likes, Converter={StaticResource NumericToSocialUnitConverter}}" HorizontalOptions="Center" VerticalOptions="Center" />
-                    <Path Data="M466.27 286.69C475.04 271.84 480 256 480 236.85c0-44.015-37.218-85.58-85.82-85.58H357.7c4.92-12.81 8.85-28.13 8.85-46.54C366.55 31.936 328.86 0 271.28 0c-61.607 0-58.093 94.933-71.76 108.6-22.747 22.747-49.615 66.447-68.76 83.4H32c-17.673 0-32 14.327-32 32v240c0 17.673 14.327 32 32 32h64c14.893 0 27.408-10.174 30.978-23.95 44.509 1.001 75.06 39.94 177.802 39.94 7.22 0 15.22.01 22.22.01 77.117 0 111.986-39.423 112.94-95.33 13.319-18.425 20.299-43.122 17.34-66.99 9.854-18.452 13.664-40.343 8.99-62.99zm-61.75 53.83c12.56 21.13 1.26 49.41-13.94 57.57 7.7 48.78-17.608 65.9-53.12 65.9h-37.82c-71.639 0-118.029-37.82-171.64-37.82V240h10.92c28.36 0 67.98-70.89 94.54-97.46 28.36-28.36 18.91-75.63 37.82-94.54 47.27 0 47.27 32.98 47.27 56.73 0 39.17-28.36 56.72-28.36 94.54h103.99c21.11 0 37.73 18.91 37.82 37.82.09 18.9-12.82 37.81-22.27 37.81 13.489 14.555 16.371 45.236-5.21 65.62zM88 432c0 13.255-10.745 24-24 24s-24-10.745-24-24 10.745-24 24-24 24 10.745 24 24z" 
+                              HorizontalOptions="Center">
+                        
+                        <Path.Triggers>
+                            <DataTrigger TargetType="Path" Binding="{Binding ReactionType}" Value="{x:Static vm:PostsViewModel.Like}" >
+                                <Setter Property="Data" Value="M104 224H24c-13.255 0-24 10.745-24 24v240c0 13.255 10.745 24 24 24h80c13.255 0 24-10.745 24-24V248c0-13.255-10.745-24-24-24zM64 472c-13.255 0-24-10.745-24-24s10.745-24 24-24 24 10.745 24 24-10.745 24-24 24zM384 81.452c0 42.416-25.97 66.208-33.277 94.548h101.723c33.397 0 59.397 27.746 59.553 58.098.084 17.938-7.546 37.249-19.439 49.197l-.11.11c9.836 23.337 8.237 56.037-9.308 79.469 8.681 25.895-.069 57.704-16.382 74.757 4.298 17.598 2.244 32.575-6.148 44.632C440.202 511.587 389.616 512 346.839 512l-2.845-.001c-48.287-.017-87.806-17.598-119.56-31.725-15.957-7.099-36.821-15.887-52.651-16.178-6.54-.12-11.783-5.457-11.783-11.998v-213.77c0-3.2 1.282-6.271 3.558-8.521 39.614-39.144 56.648-80.587 89.117-113.111 14.804-14.832 20.188-37.236 25.393-58.902C282.515 39.293 291.817 0 312 0c24 0 72 8 72 81.452z"/>
+                            </DataTrigger>
+                        </Path.Triggers>
+                    </Path>
+                    <Label Text="{Binding Path=Likes,Mode=OneWay, Converter={StaticResource NumericToSocialUnitConverter}}" HorizontalOptions="Center" VerticalOptions="Center" />
+                        <StackLayout.GestureRecognizers>
+                            <TapGestureRecognizer 
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostsViewModel}}, Path=LikeCommand}"
+                                CommandParameter="{Binding}"
+                                />
+                        </StackLayout.GestureRecognizers>
+                    </StackLayout>
+                    <StackLayout Orientation="Horizontal" Spacing="8">
+                        <Path Data="M466.27 286.69C475.04 271.84 480 256 480 236.85c0-44.015-37.218-85.58-85.82-85.58H357.7c4.92-12.81 8.85-28.13 8.85-46.54C366.55 31.936 328.86 0 271.28 0c-61.607 0-58.093 94.933-71.76 108.6-22.747 22.747-49.615 66.447-68.76 83.4H32c-17.673 0-32 14.327-32 32v240c0 17.673 14.327 32 32 32h64c14.893 0 27.408-10.174 30.978-23.95 44.509 1.001 75.06 39.94 177.802 39.94 7.22 0 15.22.01 22.22.01 77.117 0 111.986-39.423 112.94-95.33 13.319-18.425 20.299-43.122 17.34-66.99 9.854-18.452 13.664-40.343 8.99-62.99zm-61.75 53.83c12.56 21.13 1.26 49.41-13.94 57.57 7.7 48.78-17.608 65.9-53.12 65.9h-37.82c-71.639 0-118.029-37.82-171.64-37.82V240h10.92c28.36 0 67.98-70.89 94.54-97.46 28.36-28.36 18.91-75.63 37.82-94.54 47.27 0 47.27 32.98 47.27 56.73 0 39.17-28.36 56.72-28.36 94.54h103.99c21.11 0 37.73 18.91 37.82 37.82.09 18.9-12.82 37.81-22.27 37.81 13.489 14.555 16.371 45.236-5.21 65.62zM88 432c0 13.255-10.745 24-24 24s-24-10.745-24-24 10.745-24 24-24 24 10.745 24 24z" 
                               Stroke="{StaticResource IconColor}" Fill="{StaticResource IconColor}"
-                              HeightRequest="24" WidthRequest="24" Aspect="Uniform" Rotation="180"/>
-                    <Label Text="{Binding Dislikes, Converter={StaticResource NumericToSocialUnitConverter}}" HorizontalOptions="Center" VerticalOptions="Center" />
+                              HeightRequest="24" WidthRequest="24" Aspect="Uniform" Rotation="180">
+                            
+                            <Path.Triggers>
+                                <DataTrigger TargetType="Path" Binding="{Binding ReactionType}" Value="{x:Static vm:PostsViewModel.DisLike}" >
+                                    <Setter Property="Data" Value="M0 56v240c0 13.255 10.745 24 24 24h80c13.255 0 24-10.745 24-24V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56zm40 200c0-13.255 10.745-24 24-24s24 10.745 24 24-10.745 24-24 24-24-10.745-24-24zm272 256c-20.183 0-29.485-39.293-33.931-57.795-5.206-21.666-10.589-44.07-25.393-58.902-32.469-32.524-49.503-73.967-89.117-113.111a11.98 11.98 0 0 1-3.558-8.521V59.901c0-6.541 5.243-11.878 11.783-11.998 15.831-.29 36.694-9.079 52.651-16.178C256.189 17.598 295.709.017 343.995 0h2.844c42.777 0 93.363.413 113.774 29.737 8.392 12.057 10.446 27.034 6.148 44.632 16.312 17.053 25.063 48.863 16.382 74.757 17.544 23.432 19.143 56.132 9.308 79.469l.11.11c11.893 11.949 19.523 31.259 19.439 49.197-.156 30.352-26.157 58.098-59.553 58.098H350.723C358.03 364.34 384 388.132 384 430.548 384 504 336 512 312 512z"/>
+                                </DataTrigger>
+                            </Path.Triggers>
+                        </Path>
+                        <Label Text="{Binding Path=Dislikes, Mode=OneWay, Converter={StaticResource NumericToSocialUnitConverter}}" HorizontalOptions="Center" VerticalOptions="Center" />
+                        <StackLayout.GestureRecognizers>
+                            <TapGestureRecognizer 
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostsViewModel}}, Path=DislikeCommand}"
+                                CommandParameter="{Binding}"
+                                />
+                        </StackLayout.GestureRecognizers>
+                    </StackLayout>
                     <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" Spacing="24">
                         <Path Data="M 504.971 199.362 l -22.627 -22.627 c -9.373 -9.373 -24.569 -9.373 -33.941 0 l -5.657 5.657 L 329.608 69.255 l 5.657 -5.657 c 9.373 -9.373 9.373 -24.569 0 -33.941 L 312.638 7.029 c -9.373 -9.373 -24.569 -9.373 -33.941 0 L 154.246 131.48 c -9.373 9.373 -9.373 24.569 0 33.941 l 22.627 22.627 c 9.373 9.373 24.569 9.373 33.941 0 l 5.657 -5.657 l 39.598 39.598 l -81.04 81.04 l -5.657 -5.657 c -12.497 -12.497 -32.758 -12.497 -45.255 0 L 9.373 412.118 c -12.497 12.497 -12.497 32.758 0 45.255 l 45.255 45.255 c 12.497 12.497 32.758 12.497 45.255 0 l 114.745 -114.745 c 12.497 -12.497 12.497 -32.758 0 -45.255 l -5.657 -5.657 l 81.04 -81.04 l 39.598 39.598 l -5.657 5.657 c -9.373 9.373 -9.373 24.569 0 33.941 l 22.627 22.627 c 9.373 9.373 24.569 9.373 33.941 0 l 124.451 -124.451 c 9.372 -9.372 9.372 -24.568 0 -33.941 Z"
                               Stroke="{StaticResource IconColor}" Fill="{StaticResource IconColor}"
@@ -210,9 +240,10 @@
                     Margin="0,12,0,0"
                     >
                     <BoxView Color="{StaticResource IconColor}" VerticalOptions="FillAndExpand" 
-                             HorizontalOptions="FillAndExpand" 
-                             CornerRadius="0,12,0,12"
+                             HorizontalOptions="EndAndExpand" 
+                             CornerRadius="25"
                              HeightRequest="50"
+                             WidthRequest="50"
                              >
                         <BoxView.GestureRecognizers>
                             <TapGestureRecognizer 
@@ -221,13 +252,9 @@
                                 />
                         </BoxView.GestureRecognizers>
                     </BoxView>
-                    <Label Text="Detail" 
-                       FontSize="Medium" 
-                       TextColor="White"
-                       FontAttributes="Bold" VerticalOptions="CenterAndExpand" 
-                           HorizontalOptions="EndAndExpand" Margin="0,0,40,0"/>
-                    <Path Data="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"
-                          WidthRequest="16" HeightRequest="16"
+
+                    <Path Data="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"
+                          WidthRequest="24" HeightRequest="24"
                           Stroke="White"
                           Fill="White"
                           Aspect="Uniform" VerticalOptions="Center" HorizontalOptions="End" Margin="0,0,12,0"/>

@@ -3,21 +3,24 @@ using MvvmHelpers.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
 using UrGuide.Model.Posts;
-using Xamarin.Essentials;
 
 namespace UrGuide.Mobile.ViewModels
 {
     public class PostsViewModel : BaseViewModel
     {
+        public const int Like = 2;
+        public const int DisLike = 4;
+        public const int Unknown = 0;
         private PostItem selected;
         private readonly INavigationService _navigation;
-
-        public ICommand ViewDetailsCommand =>
+        private ICommand _viewDetailCommand;
+        private ICommand _likeCommand;
+        private ICommand _dislikeCommand;
+        public ICommand ViewDetailsCommand => _viewDetailCommand ??=
             new AsyncCommand<PostItem>(async (item) =>
             {
                 var it = Items.First(x => x.Id == item.Id);
@@ -27,6 +30,41 @@ namespace UrGuide.Mobile.ViewModels
                 }), true);
                 Selected = null;
             });
+
+        public ICommand LikeCommand => _likeCommand ??= new Command<PostItem>((item) =>
+        {
+            var it = Items.First(x => x.Id == item.Id);
+            if (it.ReactionType == Like)
+            {
+                it.Likes--;
+                it.ReactionType = Unknown;
+                return;
+            }
+            if (it.ReactionType == DisLike)
+            {
+                it.Dislikes--;
+            }
+            it.Likes++;
+            it.ReactionType = Like;
+        });
+
+        public ICommand DislikeCommand => _dislikeCommand ??= new Command<PostItem>((item) =>
+        {
+            var it = Items.First(x => x.Id == item.Id);
+            if (it.ReactionType == DisLike)
+            { 
+                it.Dislikes--;
+                it.ReactionType = Unknown;
+                return;
+            }
+            if (it.ReactionType == Like)
+            { 
+                it.Likes--; 
+            }
+            it.Dislikes++;
+            it.ReactionType = DisLike;
+        });
+
         public ObservableRangeCollection<PostItem> Items { get; }
         public PostItem Selected
         {
@@ -63,11 +101,16 @@ namespace UrGuide.Mobile.ViewModels
                         {
                             ImageBase64 = "http://urguide.azurewebsites.net/images/362B092F-5A07-4B03-AA46-BFC181BC6392.png",
                             Name = "Image 1"
+                        },
+                        new Model.Shared.ImageFileModel
+                        {
+                            ImageBase64 = "http://urguide.azurewebsites.net/images/A0733818-5052-4642-A650-E154E8539490.png",
+                            Name = "Image 2"
                         }
                     },
-                    StartDate = "01-Jul-2020",
+                    StartDate = "04-Jul-2020",
                     StartTime = "12:09",
-                    EndDate = "04-Jul-2020",
+                    EndDate = "06-Jul-2020",
                     EndTime = "11:00",
                     PublicationDate = "11-May-2020 11:30:04",
                     Itineraries = new List<ItineraryModel>
@@ -82,7 +125,8 @@ namespace UrGuide.Mobile.ViewModels
                             Title = "Douala",
                             Description = "The economic capital of Cameroon"
                         }
-                    }
+                    },
+                    ReactionType = Like
                 },
                  new PostItem
                 {
@@ -114,9 +158,9 @@ namespace UrGuide.Mobile.ViewModels
                             Name = "Image 1"
                         }
                     },
-                    StartDate = "12-May-2020",
+                    StartDate = "12-Jul-2020",
                     StartTime = "12:09",
-                    EndDate = "28-May-2020",
+                    EndDate = "28-Jul-2020",
                     EndTime = "11:00",
                     PublicationDate = "11-May-2020 11:30:04",
                     Itineraries = new List<ItineraryModel>
