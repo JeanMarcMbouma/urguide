@@ -75,7 +75,7 @@ namespace UrGuide.Mobile.Models
                     DateTime.TryParse($"{enddate} {endtime}", out var end))
                 {
                     IsActive = end > DateTime.UtcNow;
-                    TimeLeft = (start - end).Negate();
+                    TimeLeft = (DateTime.UtcNow - start).Negate();
                     Device.StartTimer(TimeSpan.FromSeconds(1), UpdateTimer);
                 }
             }
