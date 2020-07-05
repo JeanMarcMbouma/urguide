@@ -4,11 +4,14 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels"
+             xmlns:st="clr-namespace:Plugin.SharedTransitions;assembly=Plugin.SharedTransitions"
              mc:Ignorable="d"
              xmlns:tt="clr-namespace:UrGuide.Mobile.Views.Templates"
              x:Class="UrGuide.Mobile.Views.PostPage"
              x:DataType="vm:PostsViewModel"
              Title="Recent posts"
+             st:SharedTransitionShell.TransitionDuration="300"
+             st:SharedTransitionShell.TransitionSelectedGroup="{Binding Selected.Id}"
              >
     <ContentPage.Resources>
         <DataTemplate x:Key="PostModelTemplate">

@@ -40,7 +40,6 @@ namespace UrGuide.Mobile
         private static void RegisterRoutes()
         {
             Routing.RegisterRoute("posts", typeof(PostPage));
-            Routing.RegisterRoute("posts/details", typeof(PostDetailPage));
         }
     }
 }

@@ -3,17 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UrGuide.Mobile.Models;
-using UrGuide.Mobile.ViewModels;
+
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace UrGuide.Mobile.Views.Templates
+namespace UrGuide.Mobile.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class PostListItemTemplate : ContentView
+    public partial class Notifications : ContentPage
     {
-        public PostListItemTemplate()
+        public Notifications()
         {
             InitializeComponent();
         }

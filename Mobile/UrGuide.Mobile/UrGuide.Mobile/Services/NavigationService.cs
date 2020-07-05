@@ -19,7 +19,7 @@ namespace UrGuide.Mobile.Services
 
         public Task PushAsync(Page page, bool animated)
         {
-            return Shell.Current.Navigation.PushAsync(page, animated);
+            return Shell.Current.Navigation.PushAsync(page);
         }
 
         public Task PushModalAsync(Page modalPage, bool animated)

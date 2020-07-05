@@ -23,12 +23,13 @@ namespace UrGuide.Mobile.ViewModels
         public ICommand ViewDetailsCommand => _viewDetailCommand ??=
             new AsyncCommand<PostItem>(async (item) =>
             {
-                var it = Items.First(x => x.Id == item.Id);
-                await _navigation.PushAsync(new Views.PostDetailPage(new PostDetailViewModel
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                 {
-                    Selected = it
-                }), true);
-                Selected = null;
+                    Selected = item;
+                });
+                
+                var it = Items.First(x => x.Id == item.Id);
+                await _navigation.PushAsync(new Views.PostDetailPage(new PostDetailViewModel(it)), true);
             });
 
         public ICommand LikeCommand => _likeCommand ??= new Command<PostItem>((item) =>
