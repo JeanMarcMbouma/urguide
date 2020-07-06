@@ -7,7 +7,7 @@
              xmlns:shared="clr-namespace:UrGuide.Model.Shared;assembly=UrGuide.Model" 
              xmlns:mm="clr-namespace:UrGuide.Model.Posts;assembly=UrGuide.Model"
              xmlns:st="clr-namespace:Plugin.SharedTransitions;assembly=Plugin.SharedTransitions"
-             xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels"
+             xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels" xmlns:behaviors="clr-namespace:UrGuide.Mobile.Behaviors"
              mc:Ignorable="d"
              x:Class="UrGuide.Mobile.Views.Templates.PostDetailTemplate">
     <ContentView.Content>
@@ -241,7 +241,13 @@
                               HeightRequest="24" WidthRequest="24" Aspect="Uniform" />
                             <Label Text="{Binding BidCount}" FontAttributes="Bold"
                                        Margin="-20,0,0,0" TranslationY="-8" TextColor="{StaticResource IconColor}"/>
-
+                            <StackLayout.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}, Path=ViewBidCommand}"
+                                                      CommandParameter="{Binding}" NumberOfTapsRequired="1" />
+                            </StackLayout.GestureRecognizers>
+                            <StackLayout.Behaviors>
+                                <behaviors:ScaleInOutBehavior Scale="0.9" />
+                            </StackLayout.Behaviors>
                         </StackLayout>
                     </StackLayout>
                 </StackLayout>

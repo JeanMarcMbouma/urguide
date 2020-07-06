@@ -10,25 +10,34 @@
     Title="UrGuide"
     x:Class="UrGuide.Mobile.AppShell">
 
+    <st:SharedTransitionShell.Resources>
+        <!--Icons-->
+
+        <FontImageSource x:Key="HomeFontIcon" FontFamily="fas" Glyph="&#xf015;" />
+        <FontImageSource x:Key="SearchFontIcon" FontFamily="fas" Glyph="&#xf002;" />
+        <FontImageSource x:Key="BellFontIcon" FontFamily="fas" Glyph="&#xf0f3;" />
+        <FontImageSource x:Key="FavoriteFontIcon" FontFamily="fas" Glyph="&#xf004;" />
+        <FontImageSource x:Key="ProfileFontIcon" FontFamily="fas" Glyph="&#xf2bd;" />
+    </st:SharedTransitionShell.Resources>
     <!-- Your Pages -->
     
     <TabBar x:Name="RootTab">
         <Tab Title="Home" Icon="tab_about.png" IsEnabled="False">
             <ShellContent ContentTemplate="{DataTemplate local:LandingPage}"/>
         </Tab>
-        <Tab Title="Posts" Icon="tab_feed.png">
+        <Tab Title="Home" Icon="{StaticResource HomeFontIcon}" >
             <ShellContent Route="posts" ContentTemplate="{DataTemplate local:PostPage}" />
         </Tab>
-        <Tab Title="Discover" Icon="tab_feed.png">
+        <Tab Title="Discover" Icon="{StaticResource SearchFontIcon}">
             <ShellContent Route="discover" ContentTemplate="{DataTemplate local:Discover}" />
         </Tab>
-        <Tab Title="Notifications" Icon="tab_feed.png">
+        <Tab Title="Notifications" Icon="{StaticResource BellFontIcon}">
             <ShellContent Route="messages" ContentTemplate="{DataTemplate local:Notifications}" />
         </Tab>
-        <Tab Title="Favorite" Icon="tab_feed.png">
+        <Tab Title="Favorite" Icon="{StaticResource FavoriteFontIcon}">
             <ShellContent Route="favorite" ContentTemplate="{DataTemplate local:Favorite}" />
         </Tab>
-        <Tab Title="Profile" Icon="tab_feed.png">
+        <Tab Title="Profile" Icon="{StaticResource ProfileFontIcon}">
             <ShellContent Route="profile" ContentTemplate="{DataTemplate local:Profile}" />
         </Tab>
     </TabBar>

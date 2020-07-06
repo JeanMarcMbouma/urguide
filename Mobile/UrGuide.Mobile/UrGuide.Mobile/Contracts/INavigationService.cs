@@ -1,14 +1,13 @@
-﻿using Plugin.SharedTransitions;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace UrGuide.Mobile.Contracts
 {
     public interface INavigationService
     {
-        Task PushAsync(Page page, bool animated);
-        Task PushModalAsync(Page modalPage, bool animated);
+        Task PushAsync(Page page, bool animated = true);
+        Task PushModalAsync(Page modalPage, bool animated = true);
         Task GotoAsync(string uri);
+        Task PopModalAsync(bool animated = true);
     }
 }

@@ -7,7 +7,7 @@
              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms" 
              xmlns:shared="clr-namespace:UrGuide.Model.Shared;assembly=UrGuide.Model" 
              xmlns:st="clr-namespace:Plugin.SharedTransitions;assembly=Plugin.SharedTransitions"
-             xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels"
+             xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels" xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" xmlns:behaviors="clr-namespace:UrGuide.Mobile.Behaviors"
              mc:Ignorable="d"
              x:Class="UrGuide.Mobile.Views.Templates.PostListItemTemplate"
              x:DataType="m:PostItem">
@@ -252,27 +252,30 @@
                        HorizontalOptions="EndAndExpand"
                     Margin="0,12,0,0"
                     >
-                    <BoxView Color="{StaticResource IconColor}" VerticalOptions="FillAndExpand" 
-                             HorizontalOptions="EndAndExpand" 
-                             CornerRadius="25"
-                             HeightRequest="50"
-                             WidthRequest="50"
-                             >
-                        <BoxView.GestureRecognizers>
+                    <y:PancakeView BackgroundColor="{StaticResource IconColor}"
+                                   VerticalOptions="FillAndExpand"
+                                   HorizontalOptions="EndAndExpand"
+                                   CornerRadius="25"
+                                   HeightRequest="50"
+                                   WidthRequest="50"
+                                   >
+                        <y:PancakeView.GestureRecognizers>
                             <TapGestureRecognizer 
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostsViewModel}}, Path=ViewDetailsCommand}"
                                 CommandParameter="{Binding}"
                                 NumberOfTapsRequired="1"
                                 />
-                        </BoxView.GestureRecognizers>
-                    </BoxView>
-
-                    <Path Data="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"
+                        </y:PancakeView.GestureRecognizers>
+                        <y:PancakeView.Behaviors>
+                            <behaviors:ScaleInOutBehavior Scale="0.8" />
+                        </y:PancakeView.Behaviors>
+                        <Path Data="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"
                           WidthRequest="24" HeightRequest="24"
                           Stroke="White"
                           Fill="White"
-                          Aspect="Uniform" VerticalOptions="Center" HorizontalOptions="End" Margin="0,0,12,0"/>
-                    
+                          Aspect="Uniform" VerticalOptions="Center" HorizontalOptions="Center"/>
+                    </y:PancakeView>
+
                 </Grid>
                 
             </StackLayout>

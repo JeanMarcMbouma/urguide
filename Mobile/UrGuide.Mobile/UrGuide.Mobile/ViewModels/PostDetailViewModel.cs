@@ -1,7 +1,9 @@
 ﻿using MvvmHelpers;
 using MvvmHelpers.Commands;
 using System.Windows.Input;
+using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
+using UrGuide.Mobile.Views.Dialog;
 
 namespace UrGuide.Mobile.ViewModels
 {
@@ -11,6 +13,13 @@ namespace UrGuide.Mobile.ViewModels
 
         private ICommand _likeCommand;
         private ICommand _dislikeCommand;
+        private ICommand _viewBidCommand;
+
+        public ICommand ViewBidCommand => _viewBidCommand ??= new AsyncCommand<PostItem>(async (item) =>
+        {
+            BidDialogViewModel.Item = item;
+            await NavigationService.PushModalAsync(new BidDialog(BidDialogViewModel), true);
+        });
 
         public ICommand LikeCommand => _likeCommand ??= new Command(() =>
         {
@@ -53,9 +62,14 @@ namespace UrGuide.Mobile.ViewModels
                 SetProperty(ref selected, value);
             }
         }
-        public PostDetailViewModel(PostItem item)
+
+        public INavigationService NavigationService { get; }
+        public BidDialogViewModel BidDialogViewModel { get; }
+
+        public PostDetailViewModel(INavigationService navigationService, BidDialogViewModel bidDialogViewModel)
         {
-            Selected = item ?? throw new System.ArgumentNullException(nameof(item));
+            NavigationService = navigationService ?? throw new System.ArgumentNullException(nameof(navigationService));
+            BidDialogViewModel = bidDialogViewModel ?? throw new System.ArgumentNullException(nameof(bidDialogViewModel));
         }
     }
 }

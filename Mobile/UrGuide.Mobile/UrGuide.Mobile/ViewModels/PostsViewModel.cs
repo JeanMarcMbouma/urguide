@@ -17,6 +17,7 @@ namespace UrGuide.Mobile.ViewModels
         public const int Unknown = 0;
         private PostItem selected;
         private readonly INavigationService _navigation;
+        private readonly PostDetailViewModel _detailViewModel;
         private ICommand _viewDetailCommand;
         private ICommand _likeCommand;
         private ICommand _dislikeCommand;
@@ -27,9 +28,9 @@ namespace UrGuide.Mobile.ViewModels
                 {
                     Selected = item;
                 });
-                
-                var it = Items.First(x => x.Id == item.Id);
-                await _navigation.PushAsync(new Views.PostDetailPage(new PostDetailViewModel(it)), true);
+
+                _detailViewModel.Selected = Items.First(x => x.Id == item.Id);
+                await _navigation.PushAsync(new Views.PostDetailPage(_detailViewModel), true);
             });
 
         public ICommand LikeCommand => _likeCommand ??= new Command<PostItem>((item) =>
@@ -75,7 +76,7 @@ namespace UrGuide.Mobile.ViewModels
                 SetProperty(ref selected, value);
             }
         }
-        public PostsViewModel(INavigationService navigation)
+        public PostsViewModel(INavigationService navigation, PostDetailViewModel detailViewModel)
         {
             Items = new ObservableRangeCollection<PostItem>
             {
@@ -180,6 +181,7 @@ namespace UrGuide.Mobile.ViewModels
                 }
             };
             _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
+            this._detailViewModel = detailViewModel ?? throw new ArgumentNullException(nameof(detailViewModel));
         }
     }
 }

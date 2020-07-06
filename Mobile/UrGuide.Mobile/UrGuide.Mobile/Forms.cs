@@ -6,6 +6,7 @@ using UrGuide.Mobile.ViewModels;
 using UrGuide.Mobile.Views;
 using Xamarin.Forms;
 
+[assembly: ExportFont("Font Awesome 5 Free-Solid-900.otf", Alias ="fas")]
 namespace UrGuide.Mobile
 {
     public static class Forms
@@ -19,6 +20,8 @@ namespace UrGuide.Mobile
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddScoped<LandingItemViewModel>();
             services.AddScoped<PostsViewModel>();
+            services.AddScoped<PostDetailViewModel>();
+            services.AddScoped<BidDialogViewModel>();
         }
         public static void Init(Action<IServiceCollection> registerServices)
         {
@@ -27,7 +30,8 @@ namespace UrGuide.Mobile
                 "Shapes_Experimental", 
                 "CarouselView_Experimental",
                 "Expander_Experimental",
-                //"FastRenderers_Experimental"
+                "FastRenderers_Experimental",
+                "SwipeView_Experimental"
             });
 
             RegisterRoutes();

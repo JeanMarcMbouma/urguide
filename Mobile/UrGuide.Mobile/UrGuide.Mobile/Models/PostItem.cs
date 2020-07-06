@@ -86,6 +86,7 @@ namespace UrGuide.Mobile.Models
                 {
                     TimeLeft = TimeLeft.Subtract(TimeSpan.FromSeconds(1));
                     OnPropertyChanged(nameof(Left));
+                    OnPropertyChanged(nameof(IsActive));
                 });
                 return TimeLeft.TotalSeconds > 0;
             }

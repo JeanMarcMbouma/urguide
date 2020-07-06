@@ -7,7 +7,11 @@
              mc:Ignorable="d"
              x:Class="UrGuide.Mobile.App">
     <Application.Resources>
+        
+        
         <ResourceDictionary>
+            
+            <!--Colors-->
             <Color x:Key="IconColor">#3F51B5</Color>
             <Color x:Key="IconColorLight">#803F51B5</Color>
             <Color x:Key="IndicatorColor">#703F51B5</Color>
@@ -15,7 +19,11 @@
             <Color x:Key="FavoriteIcon">Orange</Color>
             <x:Boolean x:Key="FalseValue" ></x:Boolean>
             <Color x:Key="NavigationPrimary">#3F51B5</Color>
+            
+            <!--Convertes-->
             <cv:NumericToSocialUnitConverter x:Key="NumericToSocialUnitConverter" />
+            
+            <!-- Shell -->
             <Style x:Key="BaseStyle" TargetType="Element">
                 <Setter Property="Shell.BackgroundColor" Value="{StaticResource NavigationPrimary}" />
                 <Setter Property="Shell.ForegroundColor" Value="White" />

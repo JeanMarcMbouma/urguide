@@ -17,12 +17,17 @@ namespace UrGuide.Mobile.Services
             return Shell.Current.GoToAsync(uri);
         }
 
-        public Task PushAsync(Page page, bool animated)
+        public Task PopModalAsync(bool animated = true)
         {
-            return Shell.Current.Navigation.PushAsync(page);
+            return Shell.Current.Navigation.PopModalAsync(animated);
         }
 
-        public Task PushModalAsync(Page modalPage, bool animated)
+        public Task PushAsync(Page page, bool animated = true)
+        {
+            return Shell.Current.Navigation.PushAsync(page, animated);
+        }
+
+        public Task PushModalAsync(Page modalPage, bool animated = true)
         {
             return Shell.Current.Navigation.PushModalAsync(modalPage, animated);
         }
