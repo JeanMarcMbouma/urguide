@@ -234,16 +234,29 @@
                               HeightRequest="24" WidthRequest="24" Aspect="Uniform"/>
                         <Label Text="{Binding BidCount}" FontAttributes="Bold"
                                        Margin="-20,0,0,0" TranslationY="-8" TextColor="{StaticResource IconColor}"/>
+                        <StackLayout Orientation="Horizontal" Spacing="4">
+                            <StackLayout.Triggers>
+                                <DataTrigger TargetType="StackLayout" Binding="{Binding Reviews}" Value="0">
+                                    <Setter Property="IsVisible" Value="False"/>
+                                </DataTrigger>
+                            </StackLayout.Triggers>
+                            <Path Data="M448 0H64C28.7 0 0 28.7 0 64v288c0 35.3 28.7 64 64 64h96v84c0 9.8 11.2 15.5 19.1 9.7L304 416h144c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64z"
+                                  Stroke="{StaticResource IconColor}" Fill="{StaticResource IconColor}"
+                                  HeightRequest="24" WidthRequest="24" Aspect="Uniform"/>
+                            <Label Text="{Binding Reviews}" FontAttributes="Bold" 
+                                   TextColor="{StaticResource IconColor}"
+                                   TranslationY="-8"/>
+                        </StackLayout>
                         <StackLayout Orientation="Horizontal" Spacing="4"
                                      st:Transition.Group="{Binding Id}"
                                      st:Transition.Name="ItineraryCount">
-                        <Path Data="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-                                  Stroke="{StaticResource IconColor}"
-                                  Fill="{StaticResource IconColor}"
-                                  HeightRequest="24" WidthRequest="24"
-                                  Aspect="Uniform"/>
-                        <Label Text="{Binding ItineraryCount}" FontAttributes="Bold"
-                                        TranslationY="-8" TextColor="{StaticResource IconColor}"/>
+                            <Path Data="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                                      Stroke="{StaticResource IconColor}"
+                                      Fill="{StaticResource IconColor}"
+                                      HeightRequest="24" WidthRequest="24"
+                                      Aspect="Uniform"/>
+                            <Label Text="{Binding ItineraryCount}" FontAttributes="Bold"
+                                            TranslationY="-8" TextColor="{StaticResource IconColor}"/>
                         </StackLayout>
                     </StackLayout>
                 </StackLayout>
@@ -267,7 +280,7 @@
                                 />
                         </y:PancakeView.GestureRecognizers>
                         <y:PancakeView.Behaviors>
-                            <behaviors:ScaleInOutBehavior Scale="0.8" />
+                            <behaviors:ScaleInOutBehavior Scale="0.9" />
                         </y:PancakeView.Behaviors>
                         <Path Data="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"
                           WidthRequest="24" HeightRequest="24"

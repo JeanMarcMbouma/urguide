@@ -8,6 +8,12 @@ namespace UrGuide.Mobile.Models
 {
     public class PostItem : ObservableObject
     {
+
+        private PostItemCountdown _countdown;
+        private int _reactionType;
+        private int _likes;
+        private int _dislikes;
+
         public PostItem()
         {
             Images = new HashSet<ImageFileModel>();
@@ -19,13 +25,10 @@ namespace UrGuide.Mobile.Models
         public string Price { get; set; }
         public string Rating { get; set; }
         public string Location { get; set; }
-        public int Likes { get => likes; set => SetProperty(ref likes, value); }
-        public int Dislikes { get => dislikes; set => SetProperty(ref dislikes, value); }
+        public int Likes { get => _likes; set => SetProperty(ref _likes, value); }
+        public int Dislikes { get => _dislikes; set => SetProperty(ref _dislikes, value); }
         public string PublicationDate { get; set; }
-        public string LastEditDate { get; set; }
-        public string StartingBid { get; set; }
         public string LastBid { get; set; }
-        public string Status { get; set; }
         public int Seats { get; set; }
         public int ReservedSeats { get; set; }
         public string StartDate { get; set; }
@@ -36,8 +39,8 @@ namespace UrGuide.Mobile.Models
         public bool HasReacted { get; set; }
         public int ReactionType
         {
-            get => reactionType;
-            set => SetProperty(ref reactionType, value, onChanged: () =>
+            get => _reactionType;
+            set => SetProperty(ref _reactionType, value, onChanged: () =>
             {
                 OnPropertyChanged(nameof(Likes));
                 OnPropertyChanged(nameof(Dislikes));
@@ -51,12 +54,11 @@ namespace UrGuide.Mobile.Models
         public string Author { get; set; }
         public string AuthorAvatar { get; set; }
         public bool IsBidOptIn { get; set; }
-        private PostItemCountdown _countdown;
-        private int reactionType;
-        private int likes;
-        private int dislikes;
+        public int Reviews { get; set; }
+
 
         public List<Model.Posts.ItineraryModel> Itineraries { get; set; }
+        public ObservableRangeCollection<AuthoredFeedback> FeedBack { get; set; } = new ObservableRangeCollection<AuthoredFeedback>();
 
         public PostItemCountdown Countdown => _countdown ??= new PostItemCountdown(StartDate, StartTime, EndDate, EndTime);
 

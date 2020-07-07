@@ -21,6 +21,7 @@ namespace UrGuide.Mobile.ViewModels
         private ICommand _viewDetailCommand;
         private ICommand _likeCommand;
         private ICommand _dislikeCommand;
+
         public ICommand ViewDetailsCommand => _viewDetailCommand ??=
             new AsyncCommand<PostItem>(async (item) =>
             {
@@ -76,6 +77,8 @@ namespace UrGuide.Mobile.ViewModels
                 SetProperty(ref selected, value);
             }
         }
+
+        
         public PostsViewModel(INavigationService navigation, PostDetailViewModel detailViewModel)
         {
             Items = new ObservableRangeCollection<PostItem>
@@ -128,7 +131,29 @@ namespace UrGuide.Mobile.ViewModels
                             Description = "The economic capital of Cameroon"
                         }
                     },
-                    ReactionType = Like
+                    ReactionType = Like,
+                    Reviews = 2,
+                    FeedBack = new ObservableRangeCollection<Model.Shared.AuthoredFeedback>
+                    {
+                        new Model.Shared.AuthoredFeedback
+                        {
+                            Rating = 4,
+                            Text = "I love this guy",
+                            AuthorFullName = "Catherine Dubois",
+                            AuthorId = Guid.Empty.ToString(),
+                            AuthorImage = "http://urguide.azurewebsites.net/thumb/00000000-0000-0000-0000-000000000000.png",
+                            PublicationDate = "12-Jun-2020 12:45:02"
+                        },
+                        new Model.Shared.AuthoredFeedback
+                        {
+                            Rating = 5,
+                            Text = "Lucky you!",
+                            AuthorFullName = "Alain Dubois",
+                            AuthorId = Guid.Empty.ToString(),
+                            AuthorImage = "http://urguide.azurewebsites.net/thumb/00000000-0000-0000-0000-000000000000.png",
+                            PublicationDate = "12-Jun-2020 12:45:02"
+                        }
+                    }
                 },
                  new PostItem
                 {
@@ -176,6 +201,19 @@ namespace UrGuide.Mobile.ViewModels
                         {
                             Title = "Douala",
                             Description = "The economic capital of Cameroon"
+                        }
+                    },
+                    Reviews = 1,
+                    FeedBack = new ObservableRangeCollection<Model.Shared.AuthoredFeedback>
+                    {
+                        new Model.Shared.AuthoredFeedback
+                        {
+                            Rating = 4,
+                            Text = "I love this guy",
+                            AuthorFullName = "Catherine Dubois",
+                            AuthorId = Guid.Empty.ToString(),
+                            AuthorImage = "http://urguide.azurewebsites.net/thumb/00000000-0000-0000-0000-000000000000.png",
+                            PublicationDate = "12-Jun-2020 12:45:02"
                         }
                     }
                 }

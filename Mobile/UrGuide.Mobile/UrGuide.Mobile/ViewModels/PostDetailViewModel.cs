@@ -1,5 +1,6 @@
 ﻿using MvvmHelpers;
 using MvvmHelpers.Commands;
+using System;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
@@ -14,7 +15,25 @@ namespace UrGuide.Mobile.ViewModels
         private ICommand _likeCommand;
         private ICommand _dislikeCommand;
         private ICommand _viewBidCommand;
+        private ICommand _newFeedbackCommand;
 
+        public ICommand NewFeedBackCommand => _newFeedbackCommand ??= new Command(() =>
+        {
+            if (!string.IsNullOrEmpty(NewFeedBack.Text))
+            {
+                Selected.FeedBack.Add(new Model.Shared.AuthoredFeedback
+                {
+                    AuthorFullName = "Me",
+                    AuthorImage = "http://urguide.azurewebsites.net/thumb/00000000-0000-0000-0000-000000000000.png",
+                    PublicationDate = DateTime.Now.ToString("dd-MMM-yyyy HH:mm:ss"),
+                    Rating = NewFeedBack.Rating,
+                    Text = NewFeedBack.Text
+                });
+            }
+            NewFeedBack.Rating = 1;
+            NewFeedBack.Text = string.Empty;
+            OnPropertyChanged(nameof(NewFeedBack));
+        });
         public ICommand ViewBidCommand => _viewBidCommand ??= new AsyncCommand<PostItem>(async (item) =>
         {
             BidDialogViewModel.Item = item;
@@ -63,6 +82,7 @@ namespace UrGuide.Mobile.ViewModels
             }
         }
 
+        public UrGuide.Model.Shared.FeedbackModel NewFeedBack { get; } = new Model.Shared.FeedbackModel();
         public INavigationService NavigationService { get; }
         public BidDialogViewModel BidDialogViewModel { get; }
 

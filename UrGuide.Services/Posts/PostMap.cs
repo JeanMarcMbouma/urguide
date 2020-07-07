@@ -31,7 +31,7 @@ namespace UrGuide.Services.Posts
                 .ForMember(x => x.Categories, x => x.MapFrom(f => f.Data.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries)))
                 .ForMember(x => x.Images, x => x.MapFrom(f => f.Data.Catalog.Images.Select(i => new ImageFileModel
                 {
-                    Id = i.Id, 
+                    Id = i.Id,
                     ImageBase64 = i.ImageUrl,
                     Name = i.Attributes.FirstOrDefault(a => a.Name == nameof(Model.Catalogs.CreateImageCatalogModel.Name))
                 })))
@@ -47,7 +47,8 @@ namespace UrGuide.Services.Posts
                 .ForMember(x => x.LastBid, x => x.MapFrom(f => f.Data.LastBid))
                 .ForMember(x => x.AuthorId, x => x.MapFrom(p => p.Data.User != null ? p.Data.User.Id : Constants.EmptyGuid))
                 .ForMember(x => x.Author, x => x.MapFrom(p => p.Data.User != null ? p.Data.User.FullName : Constants.Unknown))
-                .ForMember(x => x.AuthorAvatar, x => x.MapFrom(p => p.Data.User != null && p.Data.User.ProfileImage != null ? p.Data.User.ProfileImage.ImageUrl : Constants.UnknownImage));
+                .ForMember(x => x.AuthorAvatar, x => x.MapFrom(p => p.Data.User != null && p.Data.User.ProfileImage != null ? p.Data.User.ProfileImage.ImageUrl : Constants.UnknownImage))
+                .ForMember(x => x.Reviews, x => x.MapFrom(p => p.Data.Reviews));
 
             CreateMap<Itinerary, ItineraryModel>()
                 .ReverseMap();
