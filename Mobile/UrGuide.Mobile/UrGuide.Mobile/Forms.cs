@@ -22,6 +22,7 @@ namespace UrGuide.Mobile
             services.AddScoped<PostsViewModel>();
             services.AddScoped<PostDetailViewModel>();
             services.AddScoped<BidDialogViewModel>();
+            services.AddScoped<FavoriteViewModel>();
         }
         public static void Init(Action<IServiceCollection> registerServices)
         {

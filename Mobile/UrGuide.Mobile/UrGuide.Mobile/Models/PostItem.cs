@@ -13,6 +13,7 @@ namespace UrGuide.Mobile.Models
         private int _reactionType;
         private int _likes;
         private int _dislikes;
+        private bool favorite;
 
         public PostItem()
         {
@@ -61,6 +62,8 @@ namespace UrGuide.Mobile.Models
         public ObservableRangeCollection<AuthoredFeedback> FeedBack { get; set; } = new ObservableRangeCollection<AuthoredFeedback>();
 
         public PostItemCountdown Countdown => _countdown ??= new PostItemCountdown(StartDate, StartTime, EndDate, EndTime);
+
+        public bool Favorite { get => favorite; set => SetProperty(ref favorite, value); }
 
         public class PostItemCountdown : ObservableObject
         {

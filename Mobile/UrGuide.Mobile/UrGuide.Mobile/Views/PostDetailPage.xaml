@@ -7,7 +7,8 @@
              xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels"
              mc:Ignorable="d"
              x:Class="UrGuide.Mobile.Views.PostDetailPage" x:DataType="vm:PostDetailViewModel" 
-             Title="{Binding Selected.Text}">
+             Title="{Binding Selected.Text}"
+             >
     <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
         <ScrollView>
             <tt:PostDetailTemplate BindingContext="{Binding Selected}"/>

@@ -3,6 +3,7 @@ using MvvmHelpers.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
@@ -10,7 +11,8 @@ using UrGuide.Model.Posts;
 
 namespace UrGuide.Mobile.ViewModels
 {
-    public class PostsViewModel : BaseViewModel
+    class FavoriteViewModel
+    : BaseViewModel
     {
         public const int Like = 2;
         public const int DisLike = 4;
@@ -21,14 +23,14 @@ namespace UrGuide.Mobile.ViewModels
         private ICommand _viewDetailCommand;
         private ICommand _likeCommand;
         private ICommand _dislikeCommand;
-        private ICommand _markAsFavoriteCommand;
+        private ICommand _removeFavoriteCommand;
 
-        public ICommand ToggleFavoriteCommand => _markAsFavoriteCommand ??= new Command<PostItem>(item =>
+        public ICommand RemoveFavoriteCommand => _removeFavoriteCommand ??= new Command<PostItem>((item) =>
         {
             var it = Items.First(x => x.Id == item.Id);
-            it.Favorite = !it.Favorite;
+            it.Favorite = false;
+            Items.Remove(it);
         });
-
         public ICommand ViewDetailsCommand => _viewDetailCommand ??=
             new AsyncCommand<PostItem>(async (item) =>
             {
@@ -62,14 +64,14 @@ namespace UrGuide.Mobile.ViewModels
         {
             var it = Items.First(x => x.Id == item.Id);
             if (it.ReactionType == DisLike)
-            { 
+            {
                 it.Dislikes--;
                 it.ReactionType = Unknown;
                 return;
             }
             if (it.ReactionType == Like)
-            { 
-                it.Likes--; 
+            {
+                it.Likes--;
             }
             it.Dislikes++;
             it.ReactionType = DisLike;
@@ -78,15 +80,15 @@ namespace UrGuide.Mobile.ViewModels
         public ObservableRangeCollection<PostItem> Items { get; }
         public PostItem Selected
         {
-            get => selected; 
+            get => selected;
             set
             {
                 SetProperty(ref selected, value);
             }
         }
 
-        
-        public PostsViewModel(INavigationService navigation, PostDetailViewModel detailViewModel)
+
+        public FavoriteViewModel(INavigationService navigation, PostDetailViewModel detailViewModel)
         {
             Items = new ObservableRangeCollection<PostItem>
             {
@@ -160,7 +162,8 @@ namespace UrGuide.Mobile.ViewModels
                             AuthorImage = "http://urguide.azurewebsites.net/thumb/00000000-0000-0000-0000-000000000000.png",
                             PublicationDate = "12-Jun-2020 12:45:02"
                         }
-                    }
+                    },
+                    Favorite = true
                 },
                  new PostItem
                 {
@@ -222,7 +225,8 @@ namespace UrGuide.Mobile.ViewModels
                             AuthorImage = "http://urguide.azurewebsites.net/thumb/00000000-0000-0000-0000-000000000000.png",
                             PublicationDate = "12-Jun-2020 12:45:02"
                         }
-                    }
+                    },
+                    Favorite = true
                 }
             };
             _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));

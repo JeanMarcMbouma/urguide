@@ -16,7 +16,12 @@ namespace UrGuide.Mobile.ViewModels
         private ICommand _dislikeCommand;
         private ICommand _viewBidCommand;
         private ICommand _newFeedbackCommand;
+        private ICommand _markAsFavoriteCommand;
 
+        public ICommand ToggleFavoriteCommand => _markAsFavoriteCommand ??= new Command(() =>
+        {
+            Selected.Favorite = !Selected.Favorite;
+        });
         public ICommand NewFeedBackCommand => _newFeedbackCommand ??= new Command(() =>
         {
             if (!string.IsNullOrEmpty(NewFeedBack.Text))
@@ -82,7 +87,9 @@ namespace UrGuide.Mobile.ViewModels
             }
         }
 
-        public UrGuide.Model.Shared.FeedbackModel NewFeedBack { get; } = new Model.Shared.FeedbackModel();
+        public UrGuide.Model.Shared.FeedbackModel NewFeedBack { get; } = new Model.Shared.FeedbackModel { 
+            Rating = 1
+        };
         public INavigationService NavigationService { get; }
         public BidDialogViewModel BidDialogViewModel { get; }
 
