@@ -111,6 +111,9 @@
                         <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}, Path=ToggleFavoriteCommand}"
                                           CommandParameter="{Binding}" NumberOfTapsRequired="1"/>
                     </Path.GestureRecognizers>
+                    <Path.Behaviors>
+                        <behaviors:TapFeedbackBehavior/>
+                    </Path.Behaviors>
                 </Path>
                 <StackLayout st:Transition.Name="Hours" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Vertical" VerticalOptions="StartAndExpand" Spacing="12">
                     <StackLayout Orientation="Horizontal" Spacing="8">

@@ -23,6 +23,7 @@ namespace UrGuide.Mobile
             services.AddScoped<PostDetailViewModel>();
             services.AddScoped<BidDialogViewModel>();
             services.AddScoped<FavoriteViewModel>();
+            services.AddScoped<ProfileViewModel>();
         }
         public static void Init(Action<IServiceCollection> registerServices)
         {
@@ -32,7 +33,8 @@ namespace UrGuide.Mobile
                 "CarouselView_Experimental",
                 "Expander_Experimental",
                 "FastRenderers_Experimental",
-                "SwipeView_Experimental"
+                "SwipeView_Experimental",
+                "Markup_Experimental"
             });
 
             RegisterRoutes();

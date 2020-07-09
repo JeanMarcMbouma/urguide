@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:shared="clr-namespace:UrGuide.Model.Shared;assembly=UrGuide.Model" 
+             xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms" 
+             xmlns:controls="clr-namespace:UrGuide.Mobile.Views.Controls" 
+             xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+             mc:Ignorable="d"
+             x:Class="UrGuide.Mobile.Views.Templates.Profile.ReviewsTemplate"
+             xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels">
+  <ContentView.Content>
+        <CollectionView ItemSizingStrategy="MeasureAllItems" 
+                        ItemsSource="{Binding Feedbacks, Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}}" Margin="0,20,0,20">
+            <CollectionView.Header>
+                <StackLayout Orientation="Horizontal" Spacing="8"
+                                    Padding="0,4,0,0">
+                    <Label Text="Reviews" FontSize="Medium" FontAttributes="Bold"
+                                   />
+
+                    <Path Data="M448 0H64C28.7 0 0 28.7 0 64v288c0 35.3 28.7 64 64 64h96v84c0 9.8 11.2 15.5 19.1 9.7L304 416h144c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64z"
+                                Stroke="{StaticResource IconColor}"
+                                Fill="{StaticResource IconColor}"
+                                HeightRequest="24" 
+                                WidthRequest="24"
+                                Aspect="Uniform"
+                                VerticalOptions="Start"/>
+                    <Label Text="{Binding Reviews}" FontAttributes="Bold"
+                                TranslationY="-8"    TextColor="{StaticResource IconColor}"/>
+                </StackLayout>
+            </CollectionView.Header>
+            <CollectionView.Footer>
+                <StackLayout Orientation="Vertical">
+                    <Label Text="Write a review" FontSize="Medium" FontAttributes="Bold"/>
+                    <controls:Rating Minimum="1" Maximum="5" Value="{Binding Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}, Path=NewFeedBack.Rating}"/>
+                    <Label Text="Text" FontSize="Medium"/>
+                    <Frame VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
+                                   HeightRequest="200" CornerRadius="4" BorderColor="{StaticResource IconColor}"
+                                   Padding="0">
+
+                        <Editor HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"
+                                       Margin="0,0,0,-8" Text="{Binding Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}, Path=NewFeedBack.Text}"
+                                   />
+                    </Frame>
+                    <y:PancakeView BackgroundColor="{StaticResource IconColor}"
+                                           VerticalOptions="EndAndExpand"
+                                           HorizontalOptions="EndAndExpand" CornerRadius="8"
+                                           WidthRequest="100"
+                                           HeightRequest="40"
+                                           >
+                        <Label VerticalOptions="Center" HorizontalOptions="Center" TextColor="White"
+                                       FontAttributes="Bold" FontSize="Medium" Text="Submit"/>
+                        <y:PancakeView.GestureRecognizers>
+                            <TapGestureRecognizer NumberOfTapsRequired="1"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}, Path=NewFeedBackCommand}"
+                                                              />
+                        </y:PancakeView.GestureRecognizers>
+                    </y:PancakeView>
+                </StackLayout>
+            </CollectionView.Footer>
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="4"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="shared:AuthoredFeedback">
+                    <Frame CornerRadius="4" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+                        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,8,*">
+                            <ff:CachedImage Source="{Binding AuthorImage}"
+                                                        WidthRequest="64" HeightRequest="64" Aspect="AspectFit"/>
+                            <StackLayout Grid.Column="2" Orientation="Vertical">
+                                <Label Text="{Binding AuthorFullName}" FontSize="Medium" 
+                                                FontAttributes="Bold"/>
+                                <Label FontSize="Small" Text="{Binding PublicationDate}" />
+                            </StackLayout>
+                            <StackLayout Orientation="Vertical" HorizontalOptions="CenterAndExpand"
+                                                     VerticalOptions="CenterAndExpand"
+                                                     Grid.Row="1">
+                                <controls:Rating Value="{Binding Rating}" StarHeightRequest="12" StarWidthRequest="12"
+                                                         Spacing="4" IsEnabled="False"/>
+                            </StackLayout>
+                            <Label Grid.Row="1" Grid.Column="2" VerticalOptions="CenterAndExpand"
+                                               HorizontalOptions="StartAndExpand"
+                                               FontSize="Subtitle" Text="{Binding Text}"/>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </ContentView.Content>
+</ContentView>

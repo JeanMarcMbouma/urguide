@@ -3,19 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UrGuide.Mobile.ViewModels;
+
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace UrGuide.Mobile.Views
+namespace UrGuide.Mobile.Views.Templates.Profile
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class Profile : ContentPage
+    public partial class ReviewsTemplate : ContentView
     {
-        public Profile()
+        public ReviewsTemplate()
         {
             InitializeComponent();
-            BindingContext = Forms.Ioc.GetService<ProfileViewModel>();
         }
     }
 }

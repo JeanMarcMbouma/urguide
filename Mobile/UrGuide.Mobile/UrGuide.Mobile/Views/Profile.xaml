@@ -5,12 +5,125 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="UrGuide.Mobile.Views.Profile"
-             Title="Profile">
-    <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
-        </StackLayout>
-    </ContentPage.Content>
+             xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels" 
+             xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:models="clr-namespace:UrGuide.Model.Users;assembly=UrGuide.Model" 
+             xmlns:controls="clr-namespace:UrGuide.Mobile.Views.Controls" 
+             xmlns:tpl="clr-namespace:UrGuide.Mobile.Views.Templates.Profile"
+             Title="Profile"
+             x:DataType="vm:ProfileViewModel">
+    <ContentPage.Resources>
+        <Style x:Key="MenuTextColor" TargetType="Label">
+            <Setter Property="TextColor" Value="White" />
+            <Setter Property="HorizontalOptions" Value="Center"/>
+            <Setter Property="VerticalOptions" Value="Center"/>
+        </Style>
+        <DataTemplate x:Key="PostTemplate">
+            <tpl:PostsTemplate />
+        </DataTemplate>
+        <DataTemplate x:Key="GalleryTemplate">
+            <tpl:GalleryTemplate />
+        </DataTemplate>
+        <DataTemplate x:Key="ReviewsTemplate">
+            <tpl:ReviewsTemplate />
+        </DataTemplate>
+        <tpl:ProfileModeTemplateSelector x:Key="TemplateSelector"
+                                         PostsTemplate="{StaticResource PostTemplate}"
+                                         GalleryTemplate="{StaticResource GalleryTemplate}"
+                                         ReviewsTemplate="{StaticResource ReviewsTemplate}"
+                                         />
+    </ContentPage.Resources>
+    <ScrollView>
+        <Grid RowDefinitions="Auto,Auto,*" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
+              RowSpacing="0">
+            <Frame HasShadow="True" IsClippedToBounds="True" VerticalOptions="FillAndExpand"
+                   HorizontalOptions="FillAndExpand" BorderColor="LightGray">
+            <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
+                         Margin="16" BindingContext="{Binding Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}},Path=UserInfo}" x:DataType="models:UserInfo"
+                         Spacing="8">
+                <ff:CachedImage Source="{Binding ProfileImage}"
+                                WidthRequest="100" HeightRequest="100" DownsampleToViewSize="True"
+                                Aspect="AspectFit" HorizontalOptions="CenterAndExpand"/>
+                <Label Text="{Binding FullName}" FontSize="Medium" FontAttributes="Bold" HorizontalOptions="CenterAndExpand" />
+                <controls:Rating Value="{Binding Rating}" IsEnabled="False" HorizontalOptions="CenterAndExpand"
+                                 StarHeightRequest="{OnIdiom Phone=18,Default=24}"
+                                 StarWidthRequest="{OnIdiom Phone=18, Default=24}"/>
+                <Label Text="{Binding Description}" FontSize="Subtitle" HorizontalOptions="CenterAndExpand" Margin="0,0,0,8"/>
+            </StackLayout>
+            </Frame>
+            <Frame Grid.Row="1" IsClippedToBounds="True" HasShadow="True" BackgroundColor="{StaticResource IconColor}" 
+                   HorizontalOptions="FillAndExpand" Padding="4" Margin="16,-20,16,20" CornerRadius="8">
+                <Grid ColumnDefinitions="*,*,*" HorizontalOptions="FillAndExpand" ColumnSpacing="4">
+                    <StackLayout Orientation="Horizontal" VerticalOptions="CenterAndExpand" 
+                                 HorizontalOptions="CenterAndExpand"
+                                 >
+                        <Path Data="M448 0H64C28.7 0 0 28.7 0 64v288c0 35.3 28.7 64 64 64h96v84c0 7.1 5.8 12 12 12 2.4 0 4.9-.7 7.1-2.4L304 416h144c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64zm16 352c0 8.8-7.2 16-16 16H288l-12.8 9.6L208 428v-60H64c-8.8 0-16-7.2-16-16V64c0-8.8 7.2-16 16-16h384c8.8 0 16 7.2 16 16v288z"
+                              HeightRequest="24" WidthRequest="24"
+                              Aspect="Uniform"
+                              Stroke="White"
+                              Fill="White">
+                            <Path.Triggers>
+                                <DataTrigger TargetType="Path" Binding="{Binding Path=Mode}"
+                                             Value="{x:Static vm:ProfileDisplayMode.Reviews}">
+                                    <Setter Property="Fill" Value="{StaticResource FavoriteIcon}"/>
+                                    <Setter Property="Stroke" Value="{StaticResource FavoriteIcon}"/>
+                                </DataTrigger>
+                            </Path.Triggers>
+                        </Path>
+                        <Label Text="Reviews" FontSize="Subtitle" FontAttributes="Bold" Style="{StaticResource MenuTextColor}"/>
+                        <StackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ViewReviewsCommand}"/>
+                        </StackLayout.GestureRecognizers>
+                    </StackLayout>
+                    <BoxView BackgroundColor="White" WidthRequest="1" HorizontalOptions="End"  />
+
+                    <StackLayout Grid.Column="1" Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
+                        <Path Data="M3 18h12v-2H3v2zM3 6v2h18V6H3zm0 7h18v-2H3v2z"
+                              HeightRequest="24" WidthRequest="24"
+                              Aspect="Uniform"
+                              Stroke="White"
+                              Fill="White">
+                            <Path.Triggers>
+                                <DataTrigger TargetType="Path" Binding="{Binding Path=Mode}"
+                                             Value="{x:Static vm:ProfileDisplayMode.Posts}">
+                                    <Setter Property="Fill" Value="{StaticResource FavoriteIcon}"/>
+                                    <Setter Property="Stroke" Value="{StaticResource FavoriteIcon}"/>
+                                </DataTrigger>
+                            </Path.Triggers>
+                        </Path>
+                        <Label Text="Posts" FontSize="Subtitle" FontAttributes="Bold" Style="{StaticResource MenuTextColor}"/>
+                        <StackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ViewPostsCommand}"/>
+                        </StackLayout.GestureRecognizers>
+                    </StackLayout>
+                    <BoxView Grid.Column="1" BackgroundColor="White" WidthRequest="1" 
+                             VerticalOptions="StartAndExpand" HorizontalOptions="End" />
+
+                    <StackLayout Grid.Column="2" Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
+                        <Path Data="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"
+                              HeightRequest="24" WidthRequest="24"
+                              Aspect="Uniform"
+                              Stroke="White"
+                              Fill="White">
+                        <Path.Triggers>
+                            <DataTrigger TargetType="Path" Binding="{Binding Path=Mode}"
+                                             Value="{x:Static vm:ProfileDisplayMode.Gallery}">
+                                <Setter Property="Fill" Value="{StaticResource FavoriteIcon}"/>
+                                <Setter Property="Stroke" Value="{StaticResource FavoriteIcon}"/>
+                            </DataTrigger>
+                        </Path.Triggers>
+                        </Path>
+                        <Label Text="Gallery" FontSize="Subtitle" FontAttributes="Bold" Style="{StaticResource MenuTextColor}"/>
+                        <StackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ViewGalleryCommand}"/>
+                        </StackLayout.GestureRecognizers>
+                    </StackLayout>
+                </Grid>
+            </Frame>
+            <CollectionView Grid.Row="2" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"
+                            Margin="12,0,12,0"
+                         ItemsSource="{Binding Items}" ItemTemplate="{StaticResource TemplateSelector}">
+            </CollectionView>
+        </Grid>
+    </ScrollView>
 </ContentPage>

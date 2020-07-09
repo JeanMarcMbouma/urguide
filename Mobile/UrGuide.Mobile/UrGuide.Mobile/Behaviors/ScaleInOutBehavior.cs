@@ -1,5 +1,6 @@
 ﻿using System;
 using Xamarin.Forms;
+using Xamarin.Forms.Markup;
 
 namespace UrGuide.Mobile.Behaviors
 {
@@ -18,29 +19,21 @@ namespace UrGuide.Mobile.Behaviors
             BindableProperty.Create(nameof(Scale), typeof(double), typeof(ScaleInOutBehavior), 1.0);
 
 
-        bool isAnimating = false;
+        private Animation _animation;
         View associatedObject;
         protected override void OnAttachedTo(View bindable)
         {
             base.OnAttachedTo(bindable);
             associatedObject = bindable;
-            isAnimating = true;
-            Device.StartTimer(TimeSpan.FromSeconds(1), Redraw);
-        }
-
-        private bool Redraw()
-        {
-            Device.BeginInvokeOnMainThread(async () =>
-            {
-                await associatedObject.ScaleTo(Scale, 250, Easing.CubicInOut);
-                await associatedObject.ScaleTo(1, 250, Easing.CubicInOut);
-            });
-            return isAnimating;
+            _animation = new Animation((scale) => {
+                associatedObject.Scale = scale;
+            }, Scale, 1, Easing.SinInOut, () => { });
+            _animation.Commit(associatedObject, "ScaleInOut", length: 750, repeat: () => true);
         }
 
         protected override void OnDetachingFrom(View bindable)
         {
-            isAnimating = false;
+            _animation = null;
             base.OnDetachingFrom(bindable);
             associatedObject = null;
         }
