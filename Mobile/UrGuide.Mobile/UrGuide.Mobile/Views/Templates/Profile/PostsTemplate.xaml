@@ -20,17 +20,16 @@
                         <Grid RowDefinitions="70,Auto,*" ColumnDefinitions="*" 
                               >
                             <StackLayout VerticalOptions="StartAndExpand" Orientation="Vertical" Spacing="12"
+                                         HorizontalOptions="FillAndExpand" Grid.ColumnSpan="2"
                             st:Transition.Name="Author" st:Transition.Group="{Binding Id}">
                                 <Label Text="{Binding Author}" FontSize="Medium" 
                        FontAttributes="Bold"/>
 
-                                <Label FontSize="Small">
-                                    <Label.Text>
-                                        <MultiBinding StringFormat="{}{0} {1}">
-                                            <Binding Path="PublicationDate"/>
-                                            <Binding Path="Countdown.Left"/>
-                                        </MultiBinding>
-                                    </Label.Text>
+                                <Label FontSize="Small" Text="{Binding PublicationDate}">
+                                   
+                                </Label>
+                                <Label FontSize="Small" Text="{Binding Countdown.Left}"
+                                       HorizontalOptions="EndAndExpand">
                                 </Label>
                             </StackLayout>
                             <Path st:Transition.Name="FavIcon" st:Transition.Group="{Binding Id}"
@@ -91,7 +90,7 @@
                                    >
                                         <y:PancakeView.GestureRecognizers>
                                             <TapGestureRecognizer 
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}, Path=ViewDetailsCommand}"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}, Path=ViewPostDetailsCommand}"
                                 CommandParameter="{Binding}"
                                 NumberOfTapsRequired="1"
                                 />
@@ -113,6 +112,9 @@
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout ItemSpacing="8" Orientation="Vertical"/>
+            </CollectionView.ItemsLayout>
         </CollectionView>
     </ContentView.Content>
 </ContentView>

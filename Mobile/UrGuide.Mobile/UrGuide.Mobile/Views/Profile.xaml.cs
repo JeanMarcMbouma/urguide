@@ -17,5 +17,11 @@ namespace UrGuide.Mobile.Views
             InitializeComponent();
             BindingContext = Forms.Ioc.GetService<ProfileViewModel>();
         }
+
+        protected override void OnAppearing()
+        {
+            (BindingContext as ProfileViewModel).LoadItemsCommand.Execute(null);
+            base.OnAppearing();
+        }
     }
 }

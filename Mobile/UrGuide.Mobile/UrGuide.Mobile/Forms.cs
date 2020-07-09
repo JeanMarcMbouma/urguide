@@ -18,6 +18,7 @@ namespace UrGuide.Mobile
             services.AddSingleton<IMainPageService, MainPageService>();
             services.AddSingleton<App>();
             services.AddSingleton<INavigationService, NavigationService>();
+            services.AddSingleton<IPostItemService, PostItemService>();
             services.AddScoped<LandingItemViewModel>();
             services.AddScoped<PostsViewModel>();
             services.AddScoped<PostDetailViewModel>();
@@ -47,6 +48,8 @@ namespace UrGuide.Mobile
         private static void RegisterRoutes()
         {
             Routing.RegisterRoute("posts", typeof(PostPage));
+            Routing.RegisterRoute("posts/details", typeof(PostDetailPage));
+            Routing.RegisterRoute("postdetails", typeof(PostDetailPage));
         }
     }
 }

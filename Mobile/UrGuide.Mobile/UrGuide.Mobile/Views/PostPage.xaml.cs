@@ -12,5 +12,11 @@ namespace UrGuide.Mobile.Views
             InitializeComponent();
             BindingContext = Forms.Ioc.GetService<PostsViewModel>();
         }
+
+        protected override void OnAppearing()
+        {
+            (BindingContext as PostsViewModel).LoadItemsCommand.Execute(null);
+            base.OnAppearing();
+        }
     }
 }

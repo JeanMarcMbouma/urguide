@@ -91,11 +91,17 @@ namespace UrGuide.Mobile.ViewModels
             Rating = 1
         };
         public INavigationService NavigationService { get; }
+        public IPostItemService PostItemService { get; }
         public BidDialogViewModel BidDialogViewModel { get; }
+        public string Id { set {
+                Selected = PostItemService.GetById(value);    
+            } 
+        }
 
-        public PostDetailViewModel(INavigationService navigationService, BidDialogViewModel bidDialogViewModel)
+        public PostDetailViewModel(INavigationService navigationService, IPostItemService postItemService, BidDialogViewModel bidDialogViewModel)
         {
             NavigationService = navigationService ?? throw new System.ArgumentNullException(nameof(navigationService));
+            PostItemService = postItemService ?? throw new ArgumentNullException(nameof(postItemService));
             BidDialogViewModel = bidDialogViewModel ?? throw new System.ArgumentNullException(nameof(bidDialogViewModel));
         }
     }

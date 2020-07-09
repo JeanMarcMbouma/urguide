@@ -20,15 +20,19 @@
     </ContentPage.Resources>
     <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" BackgroundColor="LightGray"
           >
-        <CollectionView ItemsSource="{Binding Items}"
+        <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadItemsCommand}"
+                     RefreshColor="{StaticResource FavoriteIcon}" HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand" >
+            <CollectionView ItemsSource="{Binding Items}"
                         ItemTemplate="{StaticResource PostModelTemplate}"
-                        Margin="8" HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand"
+                        HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand"
+                        Margin="8" 
                         SelectionMode="None"
                         BackgroundColor="Transparent"
                        >
-            <CollectionView.ItemsLayout>
-                <LinearItemsLayout ItemSpacing="8" Orientation="Vertical" />
-            </CollectionView.ItemsLayout>
-        </CollectionView>
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout ItemSpacing="8" Orientation="Vertical" />
+                </CollectionView.ItemsLayout>
+            </CollectionView>
+        </RefreshView>
     </Grid>
 </ContentPage>

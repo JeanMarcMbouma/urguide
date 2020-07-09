@@ -3,6 +3,7 @@ using MvvmHelpers.Commands;
 using System;
 using System.Linq;
 using System.Windows.Input;
+using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
 using UrGuide.Model.Catalogs;
 using UrGuide.Model.Posts;
@@ -14,9 +15,16 @@ namespace UrGuide.Mobile.ViewModels
     class ProfileViewModel : BaseViewModel
     {
         private ProfileDisplayMode mode = ProfileDisplayMode.Reviews;
-        private Command _viewReviewsCommand;
-        private Command _viewPostsCommand;
-        private Command _viewGaleryCommand;
+        private ICommand _viewReviewsCommand;
+        private ICommand _viewPostsCommand;
+        private ICommand _viewGaleryCommand;
+        private ICommand _viewPostDetailsCommand;
+        private ICommand _loadItemsCommand;
+        public ProfileViewModel(INavigationService navigation, IPostItemService postItemService)
+        {
+            Navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
+            PostItemService = postItemService ?? throw new ArgumentNullException(nameof(postItemService));
+        }
 
         public UserInfo UserInfo { get; set; } = new UserInfo
         {
@@ -46,6 +54,17 @@ namespace UrGuide.Mobile.ViewModels
         {
             new WrapperViewModel()
         };
+        public ICommand LoadItemsCommand => _loadItemsCommand ??= new Command(async () =>
+        {
+            IsBusy = true;
+            var items = await PostItemService.GetItemsAsync();
+            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            {
+                Posts.ReplaceRange(items);
+            });
+            IsBusy = false;
+        });
+        public ICommand ViewPostDetailsCommand => _viewPostDetailsCommand ??= new Command<PostItem>(async (item) => await Navigation.GotoAsync($"postdetails?Id={item.Id}"));
         public ICommand ViewReviewsCommand => _viewReviewsCommand ??= new Command(() => Mode = ProfileDisplayMode.Reviews);
         public ICommand ViewPostsCommand => _viewPostsCommand ??= new Command(() => Mode = ProfileDisplayMode.Posts);
         public ICommand ViewGalleryCommand => _viewGaleryCommand ??= new Command(() => Mode = ProfileDisplayMode.Gallery);
@@ -126,71 +145,14 @@ namespace UrGuide.Mobile.ViewModels
                 }
             }
         };
-        public ObservableRangeCollection<PostItem> Posts { get; set; } = new ObservableRangeCollection<PostItem>
-        {
-            new PostItem
-                {
-                    Id = "1",
-                    Author = "Jean Marc",
-                    AuthorAvatar = "http://urguide.azurewebsites.net/images/85e526dd-6b92-4700-b427-6c7d7fe40a45.png",
-                    AuthorId = Guid.Empty.ToString(),
-                    BidCount = 3,
-                    Categories = { "Sport", "Extreme", "Nature"},
-                    Text= "Tour around Azov sea",
-                    Description = "This is another tour that will help you discover the best out of a million",
-                    Dislikes = 1200,
-                    IsBidOptIn = true,
-                    HasReacted = true,
-                    Likes = 1502,
-                    ItineraryCount = 4,
-                    Price = "$20",
-                    Location = "Azov sea, Ukraine",
-                    Seats = 10,
-                    Images =  {
-                        new Model.Shared.ImageFileModel
-                        {
-                            ImageBase64 = "http://urguide.azurewebsites.net/images/362B092F-5A07-4B03-AA46-BFC181BC6392.png",
-                            Name = "Image 1"
-                        },
-                        new Model.Shared.ImageFileModel
-                        {
-                            ImageBase64 = "http://urguide.azurewebsites.net/images/A0733818-5052-4642-A650-E154E8539490.png",
-                            Name = "Image 2"
-                        }
-                    },
-                    StartDate = "04-Jul-2020",
-                    StartTime = "12:09",
-                    EndDate = "06-Jul-2020",
-                    EndTime = "11:00",
-                    PublicationDate = "11-May-2020 11:30:04",
-                    Reviews = 2,
-                    FeedBack = new ObservableRangeCollection<Model.Shared.AuthoredFeedback>
-                    {
-                        new Model.Shared.AuthoredFeedback
-                        {
-                            Rating = 4,
-                            Text = "I love this guy",
-                            AuthorFullName = "Catherine Dubois",
-                            AuthorId = Guid.Empty.ToString(),
-                            AuthorImage = "http://urguide.azurewebsites.net/thumb/00000000-0000-0000-0000-000000000000.png",
-                            PublicationDate = "12-Jun-2020 12:45:02"
-                        },
-                        new Model.Shared.AuthoredFeedback
-                        {
-                            Rating = 5,
-                            Text = "Lucky you!",
-                            AuthorFullName = "Alain Dubois",
-                            AuthorId = Guid.Empty.ToString(),
-                            AuthorImage = "http://urguide.azurewebsites.net/thumb/00000000-0000-0000-0000-000000000000.png",
-                            PublicationDate = "12-Jun-2020 12:45:02"
-                        }
-                    }
-                }
-        };
+        public ObservableRangeCollection<PostItem> Posts { get; set; } = new ObservableRangeCollection<PostItem>();
         public UrGuide.Model.Shared.FeedbackModel NewFeedBack { get; } = new Model.Shared.FeedbackModel
         {
             Rating = 1
         };
+        public INavigationService Navigation { get; }
+        public IPostItemService PostItemService { get; }
+
         public class WrapperViewModel : BaseViewModel
         {
             private ProfileDisplayMode mode = ProfileDisplayMode.Reviews;
