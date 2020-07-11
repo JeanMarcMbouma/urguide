@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:tt="clr-namespace:UrGuide.Mobile.Views.Templates"
+             xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels"
+             mc:Ignorable="d"
+             x:Class="UrGuide.Mobile.Views.PostDetailPage" x:DataType="vm:PostDetailViewModel" 
+             Title="{Binding Selected.Text}"
+             >
+    <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+        <ScrollView>
+            <tt:PostDetailTemplate BindingContext="{Binding Selected}"/>
+        </ScrollView>
+    </Grid>
+</ContentPage>

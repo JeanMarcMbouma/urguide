@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:tt="clr-namespace:UrGuide.Mobile.Views.Templates"
+             xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels"
+             mc:Ignorable="d"
+             x:Class="UrGuide.Mobile.Views.Favorite"
+             Title="Favorites"
+             x:DataType="vm:FavoriteViewModel">
+    <ContentPage.Resources>
+        <DataTemplate x:Key="PostModelTemplate">
+            <tt:FavoriteItemTemplate />
+        </DataTemplate>
+    </ContentPage.Resources>
+    <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" BackgroundColor="LightGray"
+          >
+        <CollectionView ItemsSource="{Binding Items}"
+                        ItemTemplate="{StaticResource PostModelTemplate}"
+                        Margin="8" HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand"
+                        SelectionMode="None"
+                        BackgroundColor="Transparent"
+                       >
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout ItemSpacing="8" Orientation="Vertical" />
+            </CollectionView.ItemsLayout>
+        </CollectionView>
+    </Grid>
+</ContentPage>

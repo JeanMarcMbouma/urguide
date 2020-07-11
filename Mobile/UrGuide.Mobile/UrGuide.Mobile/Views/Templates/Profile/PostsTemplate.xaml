@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="UrGuide.Mobile.Views.Templates.Profile.PostsTemplate"
+             xmlns:st="clr-namespace:Plugin.SharedTransitions;assembly=Plugin.SharedTransitions" 
+             xmlns:behaviors="clr-namespace:UrGuide.Mobile.Behaviors"
+             xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels" 
+             xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+             xmlns:models="clr-namespace:UrGuide.Mobile.Models">
+  <ContentView.Content>
+        <CollectionView ItemSizingStrategy="MeasureAllItems" 
+                        ItemsSource="{Binding Posts, Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}}" Margin="0,20,0,20">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="{x:Type models:PostItem}">
+                    <Frame VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
+                               CornerRadius="4" BorderColor="{StaticResource IconColorLight}">
+                        <Grid RowDefinitions="70,Auto,*" ColumnDefinitions="*" 
+                              >
+                            <StackLayout VerticalOptions="StartAndExpand" Orientation="Vertical" Spacing="12"
+                                         HorizontalOptions="FillAndExpand" Grid.ColumnSpan="2"
+                            st:Transition.Name="Author" st:Transition.Group="{Binding Id}">
+                                <Label Text="{Binding Author}" FontSize="Medium" 
+                       FontAttributes="Bold"/>
+
+                                <Label FontSize="Small" Text="{Binding PublicationDate}">
+                                   
+                                </Label>
+                                <Label FontSize="Small" Text="{Binding Countdown.Left}"
+                                       HorizontalOptions="EndAndExpand">
+                                </Label>
+                            </StackLayout>
+                            <Path st:Transition.Name="FavIcon" st:Transition.Group="{Binding Id}"
+                        Data="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+                        Grid.Column="1"
+                        HorizontalOptions="End"
+                        Stroke="{StaticResource FavoriteIcon}"
+                        StrokeThickness="1"
+                        WidthRequest="32"
+                        HeightRequest="32"
+                        >
+                                <Path.Triggers>
+                                    <DataTrigger TargetType="Path" Binding="{Binding Favorite}" Value="{Static x:Boolean.TrueString}">
+                                        <Setter Property="Fill" Value="{StaticResource FavoriteIcon}"/>
+                                    </DataTrigger>
+                                </Path.Triggers>
+                                <Path.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}, Path=ToggleFavoriteCommand}"
+                                          CommandParameter="{Binding}" NumberOfTapsRequired="1"/>
+                                </Path.GestureRecognizers>
+                                <Path.Behaviors>
+                                    <behaviors:TapFeedbackBehavior/>
+                                </Path.Behaviors>
+                            </Path>
+                            <!--Categories-->
+                            <StackLayout Grid.Row="1" VerticalOptions="StartAndExpand" 
+                             Orientation="Horizontal" Spacing="8"
+                             BindableLayout.ItemsSource="{Binding Categories}"
+                             st:Transition.Group="{Binding Id}"
+                             st:Transition.Name="Categories"
+                             Margin="0,8,0,0">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="{x:Type x:String}">
+                                        <Frame CornerRadius="4" Padding="8" HasShadow="True" BackgroundColor="{StaticResource IconColor}">
+                                            <Label Text="{Binding}" FontSize="Small" FontAttributes="Bold" 
+                                           TextColor="White" MinimumWidthRequest="70"/>
+                                        </Frame>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </StackLayout>
+                            <!--Images-->
+                            <StackLayout Grid.Row="2" Orientation="Vertical" Grid.ColumnSpan="2"
+                             VerticalOptions="StartAndExpand" Spacing="8">
+                                <Label Text="{Binding Description}" 
+                           VerticalOptions="Start"/>
+
+                                <Grid
+                       VerticalOptions="EndAndExpand"
+                       HorizontalOptions="EndAndExpand"
+                    Margin="0,12,0,0"
+                    >
+                                    <y:PancakeView BackgroundColor="{StaticResource IconColor}"
+                                   VerticalOptions="FillAndExpand"
+                                   HorizontalOptions="EndAndExpand"
+                                   CornerRadius="25"
+                                   HeightRequest="50"
+                                   WidthRequest="50"
+                                   >
+                                        <y:PancakeView.GestureRecognizers>
+                                            <TapGestureRecognizer 
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}, Path=ViewPostDetailsCommand}"
+                                CommandParameter="{Binding}"
+                                NumberOfTapsRequired="1"
+                                />
+                                        </y:PancakeView.GestureRecognizers>
+                                        <y:PancakeView.Behaviors>
+                                            <behaviors:ScaleInOutBehavior Scale="0.9" />
+                                        </y:PancakeView.Behaviors>
+                                        <Path Data="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"
+                          WidthRequest="24" HeightRequest="24"
+                          Stroke="White"
+                          Fill="White"
+                          Aspect="Uniform" VerticalOptions="Center" HorizontalOptions="Center"/>
+                                    </y:PancakeView>
+
+                                </Grid>
+
+                            </StackLayout>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout ItemSpacing="8" Orientation="Vertical"/>
+            </CollectionView.ItemsLayout>
+        </CollectionView>
+    </ContentView.Content>
+</ContentView>

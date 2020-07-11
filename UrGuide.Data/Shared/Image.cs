@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using UrGuide.Data.Entities.Attributes;
+using UrGuide.Core.Attributes;
 
 namespace UrGuide.Data.Entities.Shared
 {

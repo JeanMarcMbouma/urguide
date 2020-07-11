@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using UrGuide.Core.Attributes;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Shared;
 using UrGuide.Model;
@@ -75,7 +76,7 @@ namespace UrGuide.Services.Catalogs
                 ImageUrl = imageFile.ImageBase64,
                 MimeType = FileExtensionHelper.GetImageMimeType(imageFile)
             };
-            newImage.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(imageFile.Name), Value = imageFile.Name });
+            newImage.Attributes.Add(new GenericAttribute { Name = nameof(imageFile.Name), Value = imageFile.Name });
 
             catalog.Images.Add(newImage);
 
@@ -118,11 +119,11 @@ namespace UrGuide.Services.Catalogs
                     ImageUrl = file.ImageBase64,
                     MimeType = FileExtensionHelper.GetImageMimeType(file)
                 };
-                image.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(file.Name), Value = file.Name });
+                image.Attributes.Add(new GenericAttribute { Name = nameof(file.Name), Value = file.Name });
                 catalog.Images.Add(image);
             }
-            catalog.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(catalogModel.Name), Value = catalogModel.Name });
-            catalog.Attributes.Add(new Data.Entities.Attributes.GenericAttribute { Name = nameof(catalogModel.Description), Value = catalogModel.Description });
+            catalog.Attributes.Add(new GenericAttribute { Name = nameof(catalogModel.Name), Value = catalogModel.Name });
+            catalog.Attributes.Add(new GenericAttribute { Name = nameof(catalogModel.Description), Value = catalogModel.Description });
             Context.ImageCatalogs.Add(catalog);
             return Result.Of(catalog);
         }

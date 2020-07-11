@@ -40,5 +40,6 @@ namespace UrGuide.Model.Posts
         public string Author { get; set; }
         public string AuthorAvatar { get; set; }
         public bool IsBidOptIn { get; set; }
+        public int Reviews { get; set; }
     }
 }
