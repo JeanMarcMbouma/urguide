@@ -22,6 +22,11 @@ namespace UrGuide.Mobile.Services
             return PushModalAsync(modal);
         }
 
+        public Task DisplayErrorAsync(string title = "Error", string message = "An error has occured", string yesText = "Ok")
+        {
+            return ConfirmAsync(null, title, message, yesText, displayNoButton: false);
+        }
+
         public Task GotoAsync(string uri)
         {
             return Shell.Current.GoToAsync(uri);

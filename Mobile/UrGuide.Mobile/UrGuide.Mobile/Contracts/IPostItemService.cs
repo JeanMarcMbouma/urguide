@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using UrGuide.Mobile.Models;
+using UrGuide.Model.Results;
 
 namespace UrGuide.Mobile.Contracts
 {
@@ -10,6 +9,7 @@ namespace UrGuide.Mobile.Contracts
     {
         Task<IEnumerable<PostItem>> GetItemsAsync();
         Task<IEnumerable<PostItem>> GetFavoriteAsync();
+        Result<IEnumerable<DiscoverItem>> Search(bool nearby, string category = null, string searchTerm = null);
         PostItem GetById(string id);
     }
 }

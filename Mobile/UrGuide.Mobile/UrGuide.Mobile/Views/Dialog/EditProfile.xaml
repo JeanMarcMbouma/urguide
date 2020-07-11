@@ -7,6 +7,7 @@
              xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels" xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms" xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
              mc:Ignorable="d"
              x:Class="UrGuide.Mobile.Views.Dialog.EditProfile"
+             xmlns:local="clr-namespace:UrGuide.Mobile"
              x:DataType="vm:EditProfileViewModel" BackgroundColor="Transparent">
     <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" BackgroundColor="#90000000"
           >
@@ -45,103 +46,180 @@
                         <Label Text="Upload image" HorizontalOptions="CenterAndExpand" TextDecorations="Underline"
                                TextColor="{StaticResource IconColor}" FontSize="Subtitle"/>
                     </StackLayout>
-                    <StackLayout Grid.Row="2" Orientation="Vertical" HorizontalOptions="FillAndExpand" 
+                    <ScrollView Grid.Row="2" HorizontalOptions="FillAndExpand" 
+                                     VerticalOptions="FillAndExpand">
+                        <StackLayout Orientation="Vertical" HorizontalOptions="FillAndExpand" 
                                      VerticalOptions="FillAndExpand" Spacing="16">
-                        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
-                            <Label Text="F. Name" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
-                                       FontAttributes="Bold" WidthRequest="70" HorizontalTextAlignment="End"/>
-                            <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
+                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand">
+                                <Label Text="First Name" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
+                                       FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
+                                <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
                                        Padding="0" CornerRadius="4" Margin="2">
-                                <Entry Text="{Binding FirstName}" Placeholder="First Name" 
+                                    <Entry Text="{Binding FirstName}" Placeholder="First Name" 
                                            HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand"
                                            HeightRequest="50" Margin="0,0,0,-8" x:Name="fname" BackgroundColor="Transparent"/>
-                                <Frame.Triggers>
-                                    <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference fname}, Path=Text}"
+                                    <Frame.Triggers>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference fname}, Path=Text}"
                                                  Value="{x:Null}">
-                                        <Setter Property="BorderColor" Value="Red"/>
-                                    </DataTrigger>
-                                    <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference fname}, Path=Text}"
+                                            <Setter Property="BorderColor" Value="Red"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference fname}, Path=Text}"
                                                  Value="{x:Static x:String.Empty}">
-                                        <Setter Property="BorderColor" Value="Red"/>
-                                    </DataTrigger>
-                                </Frame.Triggers>
-                            </Frame>
-                        </StackLayout>
-                        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
-                            <Label Text="L. Name" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
-                                       FontAttributes="Bold" WidthRequest="70" HorizontalTextAlignment="End"/>
-                            <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
+                                            <Setter Property="BorderColor" Value="Red"/>
+                                        </DataTrigger>
+                                    </Frame.Triggers>
+                                </Frame>
+                            </StackLayout>
+                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand">
+                                <Label Text="Last Name" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
+                                       FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
+                                <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
                                        Padding="0" CornerRadius="4" Margin="2">
-                                <Entry Text="{Binding LastName}" Placeholder="Last Name" 
+                                    <Entry Text="{Binding LastName}" Placeholder="Last Name" 
                                            HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand"
                                            HeightRequest="50" Margin="0,0,0,-8" x:Name="lname"/>
-                                <Frame.Triggers>
-                                    <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference lname}, Path=Text}"
+                                    <Frame.Triggers>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference lname}, Path=Text}"
                                                  Value="{x:Null}">
-                                        <Setter Property="BorderColor" Value="Red"/>
-                                    </DataTrigger>
-                                    <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference lname}, Path=Text}"
+                                            <Setter Property="BorderColor" Value="Red"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference lname}, Path=Text}"
                                                  Value="{x:Static x:String.Empty}">
-                                        <Setter Property="BorderColor" Value="Red"/>
-                                    </DataTrigger>
-                                </Frame.Triggers>
-                            </Frame>
-                        </StackLayout>
+                                            <Setter Property="BorderColor" Value="Red"/>
+                                        </DataTrigger>
+                                    </Frame.Triggers>
+                                </Frame>
+                            </StackLayout>
 
-                        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
-                            <Label Text="Country" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
-                                       FontAttributes="Bold" WidthRequest="70" HorizontalTextAlignment="End"/>
-                            <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
+                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" IsVisible="{Binding IsGuide}">
+                                <Label Text="Country" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
+                                       FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
+                                <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
                                        Padding="0" CornerRadius="4" Margin="2">
-                                <Entry Text="{Binding Country}" Placeholder="Country" 
+                                    <Picker SelectedItem="{Binding Country}" ItemsSource="{x:Static local:Constants.Countries}"
                                            HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand"
                                            HeightRequest="50" Margin="0,0,0,-8" x:Name="country"/>
-                                <Frame.Triggers>
-                                    <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference country}, Path=Text}"
+                                    <Frame.Triggers>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference country}, Path=SelectedItem}"
                                                  Value="{x:Null}">
-                                        <Setter Property="BorderColor" Value="Red"/>
-                                    </DataTrigger>
-                                    <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference country}, Path=Text}"
+                                            <Setter Property="BorderColor" Value="Red"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference country}, Path=SelectedItem}"
                                                  Value="{x:Static x:String.Empty}">
-                                        <Setter Property="BorderColor" Value="Red"/>
-                                    </DataTrigger>
-                                </Frame.Triggers>
-                            </Frame>
-                        </StackLayout>
+                                            <Setter Property="BorderColor" Value="Red"/>
+                                        </DataTrigger>
+                                    </Frame.Triggers>
+                                </Frame>
+                            </StackLayout>
 
-                        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
-                            <Label Text="City" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
-                                       FontAttributes="Bold" WidthRequest="70" HorizontalTextAlignment="End"/>
-                            <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
+                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" IsVisible="{Binding IsGuide}">
+                                <Label Text="City" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
+                                       FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
+                                <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
                                        Padding="0" CornerRadius="4" Margin="2">
-                                <Entry Text="{Binding City}" Placeholder="City" 
+                                    <Entry Text="{Binding City}" Placeholder="City" 
                                            HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand"
                                            HeightRequest="50" Margin="0,0,0,-8" x:Name="city"/>
-                                <Frame.Triggers>
-                                    <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference city}, Path=Text}"
+                                    <Frame.Triggers>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference city}, Path=Text}"
                                                  Value="{x:Null}">
-                                        <Setter Property="BorderColor" Value="Red"/>
-                                    </DataTrigger>
-                                    <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference city}, Path=Text}"
+                                            <Setter Property="BorderColor" Value="Red"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference city}, Path=Text}"
                                                  Value="{x:Static x:String.Empty}">
-                                        <Setter Property="BorderColor" Value="Red"/>
-                                    </DataTrigger>
-                                </Frame.Triggers>
-                            </Frame>
-                        </StackLayout>
-                        <y:PancakeView CornerRadius="8" HeightRequest="40" WidthRequest="90" 
+                                            <Setter Property="BorderColor" Value="Red"/>
+                                        </DataTrigger>
+                                    </Frame.Triggers>
+                                </Frame>
+                            </StackLayout>
+
+                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" IsVisible="{Binding IsGuide}">
+                                <Label Text="Address" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
+                                       FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
+                                <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
+                                       Padding="0" CornerRadius="4" Margin="2">
+                                    <Editor Text="{Binding Address}" Placeholder="Address" 
+                                           HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand"
+                                           HeightRequest="100" Margin="0,0,0,-8" x:Name="address"/>
+                                    <Frame.Triggers>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference address}, Path=Text}"
+                                                 Value="{x:Null}">
+                                            <Setter Property="BorderColor" Value="Red"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference address}, Path=Text}"
+                                                 Value="{x:Static x:String.Empty}">
+                                            <Setter Property="BorderColor" Value="Red"/>
+                                        </DataTrigger>
+                                    </Frame.Triggers>
+                                </Frame>
+                            </StackLayout>
+
+                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" IsVisible="{Binding IsGuide}">
+                                <Label Text="Birth day" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
+                                       FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
+                                <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="StartAndExpand"
+                                       Padding="0" CornerRadius="4" Margin="2" WidthRequest="120">
+                                    <DatePicker Date="{Binding BirthDay}" Format="dd-MMM-yyyy"
+                                           HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand"
+                                           HeightRequest="50" Margin="0,0,0,-8" x:Name="birth"/>
+                                    <Frame.Triggers>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference birth}, Path=Date}"
+                                                 Value="{x:Null}">
+                                            <Setter Property="BorderColor" Value="Red"/>
+                                        </DataTrigger>
+                                    </Frame.Triggers>
+                                </Frame>
+                            </StackLayout>
+
+                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" IsVisible="{Binding IsGuide}">
+                                <Label Text="Gender" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
+                                       FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
+                                <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="StartAndExpand"
+                                       Padding="0" CornerRadius="4" Margin="2" WidthRequest="120">
+                                    <Picker SelectedItem="{Binding Gender, FallbackValue='Female'}" 
+                                        VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                        HeightRequest="50" Margin="0,0,0,-8">
+                                        <Picker.Items>
+                                            <x:String>Female</x:String>
+                                            <x:String>Male</x:String>
+                                        </Picker.Items>
+                                    </Picker>
+                                </Frame>
+                            </StackLayout>
+                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" IsVisible="{Binding IsGuide}">
+                                <Label Text="Description" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
+                                       FontAttributes="Bold" />
+                                <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
+                                       Padding="0" CornerRadius="4" Margin="2">
+                                    <Editor Text="{Binding Description}" Placeholder="Description" 
+                                           HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand"
+                                           HeightRequest="100" Margin="0,0,0,-8" x:Name="description"/>
+                                    <Frame.Triggers>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference description}, Path=Text}"
+                                                 Value="{x:Null}">
+                                            <Setter Property="BorderColor" Value="Red"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference description}, Path=Text}"
+                                                 Value="{x:Static x:String.Empty}">
+                                            <Setter Property="BorderColor" Value="Red"/>
+                                        </DataTrigger>
+                                    </Frame.Triggers>
+                                </Frame>
+                            </StackLayout>
+                            <y:PancakeView CornerRadius="8" HeightRequest="40" WidthRequest="90" 
                                        HorizontalOptions="EndAndExpand"
                                                VerticalOptions="CenterAndExpand"
                                                BackgroundColor="{StaticResource IconColor}">
-                            <Label Text="Save" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
+                                <Label Text="Save" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
                                            FontSize="Medium" TextColor="White" FontAttributes="Bold"/>
-                            <y:PancakeView.GestureRecognizers>
-                                <TapGestureRecognizer NumberOfTapsRequired="1"
+                                <y:PancakeView.GestureRecognizers>
+                                    <TapGestureRecognizer NumberOfTapsRequired="1"
                                                               Command="{Binding SaveCommand}"
                                                               />
-                            </y:PancakeView.GestureRecognizers>
-                        </y:PancakeView>
-                    </StackLayout>
+                                </y:PancakeView.GestureRecognizers>
+                            </y:PancakeView>
+                        </StackLayout>
+                    </ScrollView>
                 </Grid>
             </Frame>
         </RefreshView>

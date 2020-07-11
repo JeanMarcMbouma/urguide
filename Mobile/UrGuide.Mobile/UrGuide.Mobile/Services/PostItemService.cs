@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
 using UrGuide.Model.Posts;
+using UrGuide.Model.Results;
 
 namespace UrGuide.Mobile.Services
 {
@@ -233,6 +234,70 @@ namespace UrGuide.Mobile.Services
                         }
                     }
                  }
+            }.AsEnumerable());
+        }
+
+        public Result<IEnumerable<DiscoverItem>> Search(bool nearby, string category = null, string searchTerm = null)
+        {
+            return Result.Of(new[]
+            {
+                new DiscoverItem
+                {
+                    Author = "Jean Marc",
+                    AuthorImage = "http://urguide.azurewebsites.net/images/85e526dd-6b92-4700-b427-6c7d7fe40a45.png",
+                    PostId = "2",
+                    Files = new ObservableRangeCollection<Model.Shared.ImageFileModel>
+                    {
+                        new Model.Shared.ImageFileModel
+                        {
+                            ImageBase64 = "http://urguide.azurewebsites.net/images/362B092F-5A07-4B03-AA46-BFC181BC6392.png",
+                            Name = "Image 1"
+                        },
+                        new Model.Shared.ImageFileModel
+                        {
+                            ImageBase64 = "http://urguide.azurewebsites.net/images/A0733818-5052-4642-A650-E154E8539490.png",
+                            Name = "Image 2"
+                        }
+                    }
+                },
+                new DiscoverItem
+                {
+                    Author = "Johnny",
+                    AuthorImage = "http://urguide.azurewebsites.net/images/85e526dd-6b92-4700-b427-6c7d7fe40a45.png",
+                    PostId = "2",
+                    Files = new ObservableRangeCollection<Model.Shared.ImageFileModel>
+                    {
+                        new Model.Shared.ImageFileModel
+                        {
+                            ImageBase64 = "http://urguide.azurewebsites.net/images/362B092F-5A07-4B03-AA46-BFC181BC6392.png",
+                            Name = "Image 1"
+                        },
+                        new Model.Shared.ImageFileModel
+                        {
+                            ImageBase64 = "http://urguide.azurewebsites.net/images/A0733818-5052-4642-A650-E154E8539490.png",
+                            Name = "Image 2"
+                        }
+                    }
+                },
+                new DiscoverItem
+                {
+                    Author = "Jeanne D'arc",
+                    AuthorImage = "http://urguide.azurewebsites.net/images/85e526dd-6b92-4700-b427-6c7d7fe40a45.png",
+                    PostId = "2",
+                    Files = new ObservableRangeCollection<Model.Shared.ImageFileModel>
+                    {
+                        new Model.Shared.ImageFileModel
+                        {
+                            ImageBase64 = "http://urguide.azurewebsites.net/images/362B092F-5A07-4B03-AA46-BFC181BC6392.png",
+                            Name = "Image 1"
+                        },
+                        new Model.Shared.ImageFileModel
+                        {
+                            ImageBase64 = "http://urguide.azurewebsites.net/images/A0733818-5052-4642-A650-E154E8539490.png",
+                            Name = "Image 2"
+                        }
+                    }
+                }
             }.AsEnumerable());
         }
     }

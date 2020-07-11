@@ -30,6 +30,8 @@ namespace UrGuide.Mobile
             services.AddScoped<FavoriteViewModel>();
             services.AddScoped<ProfileViewModel>();
             services.AddScoped<EditProfileViewModel>();
+            services.AddScoped<ChangePasswordViewModel>();
+            services.AddScoped<DiscoverViewModel>();
         }
         public static void Init(Action<IServiceCollection> registerServices)
         {
