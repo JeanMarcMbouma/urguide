@@ -4,6 +4,7 @@ using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Services;
 using UrGuide.Mobile.ViewModels;
 using UrGuide.Mobile.Views;
+using UrGuide.Mobile.Views.Dialog;
 using Xamarin.Forms;
 
 [assembly: ExportFont("Font Awesome 5 Free-Solid-900.otf", Alias ="fas")]
@@ -19,12 +20,16 @@ namespace UrGuide.Mobile
             services.AddSingleton<App>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPostItemService, PostItemService>();
+            services.AddSingleton<IUserService, UserService>();
+
+
             services.AddScoped<LandingItemViewModel>();
             services.AddScoped<PostsViewModel>();
             services.AddScoped<PostDetailViewModel>();
             services.AddScoped<BidDialogViewModel>();
             services.AddScoped<FavoriteViewModel>();
             services.AddScoped<ProfileViewModel>();
+            services.AddScoped<EditProfileViewModel>();
         }
         public static void Init(Action<IServiceCollection> registerServices)
         {
@@ -50,6 +55,7 @@ namespace UrGuide.Mobile
             Routing.RegisterRoute("posts", typeof(PostPage));
             Routing.RegisterRoute("posts/details", typeof(PostDetailPage));
             Routing.RegisterRoute("postdetails", typeof(PostDetailPage));
+            Routing.RegisterRoute("profile", typeof(Profile));
         }
     }
 }

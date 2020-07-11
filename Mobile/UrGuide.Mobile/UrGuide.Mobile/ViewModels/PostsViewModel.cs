@@ -30,15 +30,14 @@ namespace UrGuide.Mobile.ViewModels
             it.Favorite = !it.Favorite;
         });
 
-        public ICommand LoadItemsCommand => _loadItemsCommand ??= new Command(async () =>
+        public ICommand LoadItemsCommand => _loadItemsCommand ??= new AsyncCommand(async () =>
         {
-            IsBusy = true;
-            var items = await PostItemService.GetItemsAsync();
+            var items = await PostItemService.GetItemsAsync().ConfigureAwait(false);
             Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
             {
                 Items.ReplaceRange(items);
+                IsBusy = false;
             });
-            IsBusy = false;
         });
 
         public ICommand ViewDetailsCommand => _viewDetailCommand ??=
@@ -104,6 +103,7 @@ namespace UrGuide.Mobile.ViewModels
             _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
             PostItemService = postItemService ?? throw new ArgumentNullException(nameof(postItemService));
             _detailViewModel = detailViewModel ?? throw new ArgumentNullException(nameof(detailViewModel));
+            IsBusy = true;
         }
     }
 }

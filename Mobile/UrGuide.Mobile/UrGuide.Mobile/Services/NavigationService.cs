@@ -1,17 +1,27 @@
-﻿using Plugin.SharedTransitions;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
+﻿using System;
 using System.Threading.Tasks;
 using UrGuide.Mobile.Contracts;
-using UrGuide.Mobile.Views;
+using UrGuide.Mobile.Views.Dialog;
 using Xamarin.Forms;
 
 namespace UrGuide.Mobile.Services
 {
     class NavigationService : INavigationService
     {
+        public Task ConfirmAsync(Action<DialogResult> callback, string title = null, string message = null, string yesText = "Yes", string noText = "No", bool displayNoButton = true)
+        {
+            var modal = new YesNoConfirmation
+            {
+                Title = title ?? "Warning",
+                DisplayText = message ?? "Are you sure?",
+                Callback = callback,
+                DisplayNoButton = displayNoButton,
+                YesText = yesText ?? "Yes",
+                NoText = noText ?? "No"
+            };
+            return PushModalAsync(modal);
+        }
+
         public Task GotoAsync(string uri)
         {
             return Shell.Current.GoToAsync(uri);

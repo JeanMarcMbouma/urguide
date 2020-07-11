@@ -8,11 +8,11 @@
              xmlns:m="clr-namespace:UrGuide.Model;assembly=UrGuide.Model"
              xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels" xmlns:behaviors="clr-namespace:UrGuide.Mobile.Behaviors" xmlns:models="clr-namespace:UrGuide.Model.Posts;assembly=UrGuide.Model" xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms" xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
              Title="Bids"
-             x:DataType="vm:BidDialogViewModel">
-    <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" BackgroundColor="#70000000"
+             x:DataType="vm:BidDialogViewModel" BackgroundColor="Transparent">
+    <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" BackgroundColor="#90000000"
           >
-        <RefreshView Command="{Binding LoadBidCommand}" IsEnabled="True" IsRefreshing="{Binding IsBusy}" />
-        <Frame VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" BackgroundColor="LightGray"
+        <RefreshView Command="{Binding LoadBidCommand}" IsEnabled="True" IsRefreshing="{Binding IsBusy}" >
+            <Frame VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" BackgroundColor="LightGray"
                Margin="8" CornerRadius="8">
             <CollectionView ItemsSource="{Binding Items}" ItemSizingStrategy="MeasureAllItems"
                         Header="Bid history" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
@@ -132,5 +132,6 @@
         </CollectionView>
 
         </Frame>
+        </RefreshView>
     </Grid>
 </ContentPage>

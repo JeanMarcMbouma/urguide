@@ -18,10 +18,11 @@
             <tt:PostListItemTemplate />
         </DataTemplate>
     </ContentPage.Resources>
-    <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" BackgroundColor="LightGray"
-          >
-        <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadItemsCommand}"
+    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadItemsCommand}"
                      RefreshColor="{StaticResource FavoriteIcon}" HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand" >
+        <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" BackgroundColor="LightGray"
+          >
+       
             <CollectionView ItemsSource="{Binding Items}"
                         ItemTemplate="{StaticResource PostModelTemplate}"
                         HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand"
@@ -33,6 +34,6 @@
                     <LinearItemsLayout ItemSpacing="8" Orientation="Vertical" />
                 </CollectionView.ItemsLayout>
             </CollectionView>
-        </RefreshView>
-    </Grid>
+        </Grid>
+   </RefreshView>
 </ContentPage>

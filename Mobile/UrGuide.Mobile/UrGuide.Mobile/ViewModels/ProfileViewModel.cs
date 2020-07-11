@@ -5,6 +5,8 @@ using System.Linq;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
+using UrGuide.Mobile.Services;
+using UrGuide.Mobile.Views.Dialog;
 using UrGuide.Model.Catalogs;
 using UrGuide.Model.Posts;
 using UrGuide.Model.Shared;
@@ -20,23 +22,20 @@ namespace UrGuide.Mobile.ViewModels
         private ICommand _viewGaleryCommand;
         private ICommand _viewPostDetailsCommand;
         private ICommand _loadItemsCommand;
-        public ProfileViewModel(INavigationService navigation, IPostItemService postItemService)
+        private ICommand _editProfileCommand;
+        private ICommand _createGalleryCommand;
+        private ICommand _changePasswordCommand;
+        private ICommand _deleteAccountCommand;
+        private UserInfo userInfo;
+
+        public ProfileViewModel(INavigationService navigation, IPostItemService postItemService, IUserService userService)
         {
             Navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
             PostItemService = postItemService ?? throw new ArgumentNullException(nameof(postItemService));
+            UserService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
-        public UserInfo UserInfo { get; set; } = new UserInfo
-        {
-            City = "Yaounde",
-            Country = "Cameroon",
-            Description = "I am the guide you were looking for.",
-            Rating = 4,
-            FirstName = "Jean Marc",
-            LastName = "Mbouma",
-            FullName = "Jean Marc Mbouma",
-            ProfileImage = "http://urguide.azurewebsites.net/images/85e526dd-6b92-4700-b427-6c7d7fe40a45.png",
-        };
+        public UserInfo UserInfo { get => userInfo; set => SetProperty(ref userInfo, value); }
 
         public ProfileDisplayMode Mode
         {
@@ -54,6 +53,17 @@ namespace UrGuide.Mobile.ViewModels
         {
             new WrapperViewModel()
         };
+
+        public ICommand EditProfileCommand => _editProfileCommand ??= new AsyncCommand(async () => await Navigation.PushModalAsync(new EditProfile()));
+        public ICommand ChangePasswordCommand => _changePasswordCommand ??= new AsyncCommand(async () => await Navigation.PushModalAsync(new ChangePassword()));
+        public ICommand DeleteAccountCommand => _deleteAccountCommand ??= new AsyncCommand(async () => await Navigation.ConfirmAsync(DeleteAccount));
+
+        private void DeleteAccount(DialogResult result)
+        {
+            
+        }
+
+        public ICommand CreateGalleryCommand => _createGalleryCommand ??= new AsyncCommand(async () => await Navigation.PushModalAsync(new CreateGallery()));
         public ICommand LoadItemsCommand => _loadItemsCommand ??= new Command(async () =>
         {
             IsBusy = true;
@@ -61,6 +71,7 @@ namespace UrGuide.Mobile.ViewModels
             Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
             {
                 Posts.ReplaceRange(items);
+                UserInfo = UserService.GetUserInfo(null);
             });
             IsBusy = false;
         });
@@ -152,6 +163,7 @@ namespace UrGuide.Mobile.ViewModels
         };
         public INavigationService Navigation { get; }
         public IPostItemService PostItemService { get; }
+        public IUserService UserService { get; }
 
         public class WrapperViewModel : BaseViewModel
         {

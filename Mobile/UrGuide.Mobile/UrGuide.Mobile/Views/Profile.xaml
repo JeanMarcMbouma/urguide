@@ -9,7 +9,7 @@
              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              xmlns:models="clr-namespace:UrGuide.Model.Users;assembly=UrGuide.Model" 
              xmlns:controls="clr-namespace:UrGuide.Mobile.Views.Controls" 
-             xmlns:tpl="clr-namespace:UrGuide.Mobile.Views.Templates.Profile"
+             xmlns:tpl="clr-namespace:UrGuide.Mobile.Views.Templates.Profile" xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
              Title="Profile"
              x:DataType="vm:ProfileViewModel">
     <ContentPage.Resources>
@@ -33,7 +33,9 @@
                                          ReviewsTemplate="{StaticResource ReviewsTemplate}"
                                          />
     </ContentPage.Resources>
-    <ScrollView>
+    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadItemsCommand}">
+    <AbsoluteLayout>
+    <ScrollView AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional">
         <Grid RowDefinitions="Auto,Auto,*" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
               RowSpacing="0">
             <Frame HasShadow="True" IsClippedToBounds="True" VerticalOptions="FillAndExpand"
@@ -44,7 +46,23 @@
                 <ff:CachedImage Source="{Binding ProfileImage}"
                                 WidthRequest="100" HeightRequest="100" DownsampleToViewSize="True"
                                 Aspect="AspectFit" HorizontalOptions="CenterAndExpand"/>
-                <Label Text="{Binding FullName}" FontSize="Medium" FontAttributes="Bold" HorizontalOptions="CenterAndExpand" />
+                    <Label Text="{Binding FullName}" FontSize="Medium" FontAttributes="Bold" HorizontalOptions="CenterAndExpand" />
+                    <Label FontSize="Medium" HorizontalOptions="CenterAndExpand">
+                        <Label.Text>
+                            <MultiBinding StringFormat="{}{0}, {1}">
+                                <Binding Path="City" />
+                                <Binding Path="Country" />
+                            </MultiBinding>
+                        </Label.Text>
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding City}" Value="{x:Static x:String.Empty}">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding City}" Value="{x:Null}">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
                 <controls:Rating Value="{Binding Rating}" IsEnabled="False" HorizontalOptions="CenterAndExpand"
                                  StarHeightRequest="{OnIdiom Phone=18,Default=24}"
                                  StarWidthRequest="{OnIdiom Phone=18, Default=24}"/>
@@ -121,9 +139,95 @@
                 </Grid>
             </Frame>
             <CollectionView Grid.Row="2" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"
+                            ItemSizingStrategy="MeasureAllItems"
                             Margin="12,0,12,0"
                          ItemsSource="{Binding Items}" ItemTemplate="{StaticResource TemplateSelector}">
             </CollectionView>
+            
         </Grid>
     </ScrollView>
+        <Expander AbsoluteLayout.LayoutBounds="0.97,0.97, 170,70"
+                  AbsoluteLayout.LayoutFlags="PositionProportional" Rotation="180"
+                  x:Name="floatingButton" Tapped="Expander_Tapped">
+                <Expander.Header>
+                    <y:PancakeView WidthRequest="64" HeightRequest="64" CornerRadius="32" 
+                               BackgroundColor="{StaticResource FavoriteIcon}"
+                               VerticalOptions="Center" HorizontalOptions="Start"
+                     HasShadow="True" IsClippedToBounds="True"  >
+                        <Path Data="M416 208H272V64c0-17.67-14.33-32-32-32h-32c-17.67 0-32 14.33-32 32v144H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h144v144c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32V304h144c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z"
+                          WidthRequest="24" HeightRequest="24"
+                          Stroke="{StaticResource IconColor}"
+                          Fill="{StaticResource IconColor}" Aspect="Uniform"
+                          VerticalOptions="Center" HorizontalOptions="Center">
+                            <Path.Triggers>
+                                <DataTrigger TargetType="Path" Binding="{Binding Source={Reference floatingButton},Path=IsExpanded}"
+                                         Value="{x:Static x:Boolean.TrueString}">
+                                    <Setter Property="Rotation" Value="45"/>
+                                </DataTrigger>
+                            </Path.Triggers>
+                        </Path>
+                    </y:PancakeView>
+                </Expander.Header>
+                <StackLayout Orientation="Vertical" Spacing="8" Margin="0,10,0,10" VerticalOptions="FillAndExpand"
+                         HorizontalOptions="FillAndExpand" BackgroundColor="{StaticResource IconColor}"
+                         Padding="12">
+                <BoxView HeightRequest="1" BackgroundColor="White" HorizontalOptions="FillAndExpand"/>
+
+                    <StackLayout Orientation="Horizontal" Spacing="8" Rotation="180"
+                             HorizontalOptions="End">
+                        <Path Data="M176 432c0 44.112-35.888 80-80 80s-80-35.888-80-80 35.888-80 80-80 80 35.888 80 80zM25.26 25.199l13.6 272C39.499 309.972 50.041 320 62.83 320h66.34c12.789 0 23.331-10.028 23.97-22.801l13.6-272C167.425 11.49 156.496 0 142.77 0H49.23C35.504 0 24.575 11.49 25.26 25.199z"
+                              HeightRequest="24" WidthRequest="24"
+                              Aspect="Uniform"
+                              Stroke="White"
+                              Fill="White"/>
+                        <Label Text="Delete account" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" TextColor="White"/>
+                        <StackLayout.GestureRecognizers>
+                            <TapGestureRecognizer NumberOfTapsRequired="1" Command="{Binding DeleteAccountCommand}" Tapped="Close_Expander"/>
+                        </StackLayout.GestureRecognizers>
+                    </StackLayout>
+                    <BoxView HeightRequest="1" BackgroundColor="White" HorizontalOptions="FillAndExpand"/>
+                    <StackLayout Orientation="Horizontal" Spacing="8" Rotation="180"
+                             HorizontalOptions="End">
+                        <Path Data="M402.6 83.2l90.2 90.2c3.8 3.8 3.8 10 0 13.8L274.4 405.6l-92.8 10.3c-12.4 1.4-22.9-9.1-21.5-21.5l10.3-92.8L388.8 83.2c3.8-3.8 10-3.8 13.8 0zm162-22.9l-48.8-48.8c-15.2-15.2-39.9-15.2-55.2 0l-35.4 35.4c-3.8 3.8-3.8 10 0 13.8l90.2 90.2c3.8 3.8 10 3.8 13.8 0l35.4-35.4c15.2-15.3 15.2-40 0-55.2zM384 346.2V448H64V128h229.8c3.2 0 6.2-1.3 8.5-3.5l40-40c7.6-7.6 2.2-20.5-8.5-20.5H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V306.2c0-10.7-12.9-16-20.5-8.5l-40 40c-2.2 2.3-3.5 5.3-3.5 8.5z"
+                              HeightRequest="24" WidthRequest="24"
+                              Aspect="Uniform"
+                              Stroke="White"
+                              Fill="White"/>
+                        <Label Text="Edit profile" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" TextColor="White"/>
+                        <StackLayout.GestureRecognizers>
+                            <TapGestureRecognizer NumberOfTapsRequired="1" Command="{Binding EditProfileCommand}" Tapped="Close_Expander"/>
+                        </StackLayout.GestureRecognizers>
+                    </StackLayout>
+                    <BoxView HeightRequest="1" BackgroundColor="White" HorizontalOptions="FillAndExpand"/>
+                <StackLayout Orientation="Horizontal" Spacing="8" Rotation="180"
+                             HorizontalOptions="End">
+                    <Path Data="M416 208H272V64c0-17.67-14.33-32-32-32h-32c-17.67 0-32 14.33-32 32v144H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h144v144c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32V304h144c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z"
+                              HeightRequest="24" WidthRequest="24"
+                              Aspect="Uniform"
+                              Stroke="White"
+                              Fill="White"/>
+                    <Label Text="New gallery" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" TextColor="White"/>
+                    <StackLayout.GestureRecognizers>
+                        <TapGestureRecognizer NumberOfTapsRequired="1" Command="{Binding CreateGalleryCommand}" Tapped="Close_Expander"/>
+                    </StackLayout.GestureRecognizers>
+                </StackLayout>
+                <BoxView HeightRequest="1" BackgroundColor="White" HorizontalOptions="FillAndExpand"/>
+                    <StackLayout Orientation="Horizontal" Spacing="8" Rotation="180"
+                             HorizontalOptions="End">
+                        <Path Data="M466.5 83.7l-192-80a48.15 48.15 0 0 0-36.9 0l-192 80C27.7 91.1 16 108.6 16 128c0 198.5 114.5 335.7 221.5 380.3 11.8 4.9 25.1 4.9 36.9 0C360.1 472.6 496 349.3 496 128c0-19.4-11.7-36.9-29.5-44.3zM256.1 446.3l-.1-381 175.9 73.3c-3.3 151.4-82.1 261.1-175.8 307.7z"
+                              HeightRequest="24" WidthRequest="24"
+                              Aspect="Uniform"
+                              Stroke="White"
+                              Fill="White"/>
+                        <Label Text="Change password" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" TextColor="White"/>
+                        <StackLayout.GestureRecognizers>
+                            <TapGestureRecognizer NumberOfTapsRequired="1" Command="{Binding ChangePasswordCommand}" Tapped="Close_Expander"/>
+                        </StackLayout.GestureRecognizers>
+                    </StackLayout>
+                    <BoxView HeightRequest="1" BackgroundColor="White" HorizontalOptions="FillAndExpand"/>
+            </StackLayout>
+        </Expander>
+
+        </AbsoluteLayout>
+    </RefreshView>
 </ContentPage>
