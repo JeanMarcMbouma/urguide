@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Core;
@@ -565,8 +567,10 @@ Post: <strong>{post.Text}</strong></br>
 
         private async Task<Result<PagedList<PostModel>>> InternalSearch(string userId, SearchParameters pagination, CancellationToken cancellationToken)
         {
-            var geo = pagination.Nearby ? await IPStackService.GetLocationAsync(UserContext) : null; 
-            var posts = await PagedList.Of(Context.Posts
+            var geo = pagination.Nearby ? await IPStackService.GetLocationAsync(UserContext) : null;
+            var where = pagination.Extra.Any() ? $"WHERE ({string.Join(" OR ", pagination.Extra.Select(x => $"Tags LIKE '%{x}%'"))})" : string.Empty;
+            var query = $"SELECT * FROM ug.Posts {where}";
+            var posts = await PagedList.Of(Context.Posts.FromSqlRaw(query)
                             .Where(x => pagination.Term == null || 
                             ( 
                                 EF.Functions.Like(x.GeoLocation, $"%{pagination.Term}%") || 
