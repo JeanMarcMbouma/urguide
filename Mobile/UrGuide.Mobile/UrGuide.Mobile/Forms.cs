@@ -1,4 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AppCenter;
+using Microsoft.AppCenter.Analytics;
+using Microsoft.AppCenter.Crashes;
+using Microsoft.AppCenter.Distribute;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Services;
@@ -35,7 +39,7 @@ namespace UrGuide.Mobile
         }
         public static void Init(Action<IServiceCollection> registerServices)
         {
-            Device.SetFlags(new[] { 
+            Xamarin.Forms.Device.SetFlags(new[] { 
                 "CollectionView_Experimental", 
                 "Shapes_Experimental", 
                 "CarouselView_Experimental",
@@ -44,6 +48,11 @@ namespace UrGuide.Mobile
                 "SwipeView_Experimental",
                 "Markup_Experimental"
             });
+
+            AppCenter.Start("android=c61793ee-ed79-4a3d-b023-15303f271bb4;" /*+
+                  "uwp={Your UWP App secret here};" +
+                  "ios={Your iOS App secret here}"*/,
+                   typeof(Crashes), typeof(Analytics), typeof(Distribute));
 
             RegisterRoutes();
             var services = new ServiceCollection();

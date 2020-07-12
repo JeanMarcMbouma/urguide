@@ -39,7 +39,21 @@
                                      VerticalOptions="FillAndExpand" Spacing="16">
                     <Label Text="{Binding Source={Reference dialog}, Path=DisplayText, FallbackValue='Are you sure?'}" FontSize="Medium" HorizontalOptions="CenterAndExpand"/>
 
-                    <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" VerticalOptions="EndAndExpand">
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand" VerticalOptions="EndAndExpand">
+
+                        <y:PancakeView CornerRadius="8" HeightRequest="40" WidthRequest="90" 
+                                       HorizontalOptions="Start"
+                                               VerticalOptions="CenterAndExpand"
+                                       IsVisible="{Binding Source={Reference dialog}, Path=DisplayNoButton}"
+                                               BackgroundColor="{StaticResource IconColor}">
+                            <Label Text="{Binding Source={Reference dialog}, Path=NoText}" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
+                                           FontSize="Medium" TextColor="White" FontAttributes="Bold"/>
+                            <y:PancakeView.GestureRecognizers>
+                                <TapGestureRecognizer NumberOfTapsRequired="1"
+                                                              Tapped="No_Tapped"
+                                                              />
+                            </y:PancakeView.GestureRecognizers>
+                        </y:PancakeView>
                         <y:PancakeView CornerRadius="8" HeightRequest="40" WidthRequest="90" 
                                        HorizontalOptions="EndAndExpand"
                                                VerticalOptions="CenterAndExpand"
@@ -53,19 +67,6 @@
                             </y:PancakeView.GestureRecognizers>
                         </y:PancakeView>
 
-                        <y:PancakeView CornerRadius="8" HeightRequest="40" WidthRequest="90" 
-                                       HorizontalOptions="StartAndExpand"
-                                               VerticalOptions="CenterAndExpand"
-                                       IsVisible="{Binding Source={Reference dialog}, Path=DisplayNoButton}"
-                                               BackgroundColor="{StaticResource IconColor}">
-                            <Label Text="{Binding Source={Reference dialog}, Path=NoText}" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
-                                           FontSize="Medium" TextColor="White" FontAttributes="Bold"/>
-                            <y:PancakeView.GestureRecognizers>
-                                <TapGestureRecognizer NumberOfTapsRequired="1"
-                                                              Tapped="No_Tapped"
-                                                              />
-                            </y:PancakeView.GestureRecognizers>
-                        </y:PancakeView>
                     </StackLayout>
                 </StackLayout>
             </Grid>
