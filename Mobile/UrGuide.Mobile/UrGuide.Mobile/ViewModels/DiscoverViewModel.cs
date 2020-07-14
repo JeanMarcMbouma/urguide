@@ -33,7 +33,7 @@ namespace UrGuide.Mobile.ViewModels
         {
             option.Selected = !option.Selected;
             var nearby = SearchOptions.Any(x => x.Text.Equals("Nearby") && x.Selected);
-            var category = SearchOptions.FirstOrDefault(x => !x.Text.Equals("Nearby") && x.Selected)?.Text;
+            var category = SearchOptions.Where(x => !x.Text.Equals("Nearby") && x.Selected).Select(x => x.Text);
             IsBusy = true;
             var r = PostItemService.Search(nearby, category, SearchTerm);
             if (!r.HasError)
@@ -43,7 +43,7 @@ namespace UrGuide.Mobile.ViewModels
         public ICommand SearchCommand => _searchCommand ??= new Command(() =>
         {
             var nearby = SearchOptions.Any(x => x.Text.Equals("Nearby") && x.Selected);
-            var category = SearchOptions.FirstOrDefault(x => !x.Text.Equals("Nearby") && x.Selected)?.Text;
+            var category = SearchOptions.Where(x => !x.Text.Equals("Nearby") && x.Selected).Select(x => x.Text);
             IsBusy = true;
             var r = PostItemService.Search(nearby, category, SearchTerm);
             if (!r.HasError)

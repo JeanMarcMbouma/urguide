@@ -1,17 +1,18 @@
-﻿using Microsoft.AppCenter;
+﻿using AutoMapper;
+using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.AppCenter.Distribute;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using UrGuide.Mobile.Contracts;
+using UrGuide.Mobile.Mapping;
 using UrGuide.Mobile.Services;
 using UrGuide.Mobile.ViewModels;
 using UrGuide.Mobile.Views;
-using UrGuide.Mobile.Views.Dialog;
 using Xamarin.Forms;
 
-[assembly: ExportFont("Font Awesome 5 Free-Solid-900.otf", Alias ="fas")]
+[assembly: ExportFont("Font Awesome 5 Free-Solid-900.otf", Alias = "fas")]
 namespace UrGuide.Mobile
 {
     public static class Forms
@@ -19,6 +20,9 @@ namespace UrGuide.Mobile
         public static IServiceProvider Ioc { get; private set; }
         public static void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpClient<API.PostsClient>(client => {
+                client.BaseAddress = new Uri(Constants.BaseUrl);
+            });
             services.AddSingleton<AppShell>();
             services.AddSingleton<IMainPageService, MainPageService>();
             services.AddSingleton<App>();
@@ -36,6 +40,8 @@ namespace UrGuide.Mobile
             services.AddScoped<EditProfileViewModel>();
             services.AddScoped<ChangePasswordViewModel>();
             services.AddScoped<DiscoverViewModel>();
+
+            services.AddAutoMapper(typeof(PostProfile).Assembly);
         }
         public static void Init(Action<IServiceCollection> registerServices)
         {
@@ -66,7 +72,7 @@ namespace UrGuide.Mobile
             Routing.RegisterRoute("posts", typeof(PostPage));
             Routing.RegisterRoute("posts/details", typeof(PostDetailPage));
             Routing.RegisterRoute("postdetails", typeof(PostDetailPage));
-            Routing.RegisterRoute("profile", typeof(Profile));
+            Routing.RegisterRoute("profile", typeof(Views.Profile));
         }
     }
 }

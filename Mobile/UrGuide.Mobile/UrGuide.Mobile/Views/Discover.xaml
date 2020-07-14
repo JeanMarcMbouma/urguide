@@ -33,7 +33,8 @@
                 </Frame>
             </StackLayout>
             <CollectionView HeightRequest="40" HorizontalOptions="FillAndExpand" Margin="12"
-                            BackgroundColor="Transparent" ItemsSource="{Binding SearchOptions}">
+                            BackgroundColor="Transparent" ItemsSource="{Binding SearchOptions}"
+                            ItemSizingStrategy="MeasureAllItems">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout ItemSpacing="4" Orientation="Horizontal"/>
                 </CollectionView.ItemsLayout>

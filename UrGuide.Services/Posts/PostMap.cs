@@ -35,6 +35,7 @@ namespace UrGuide.Services.Posts
                     ImageBase64 = i.ImageUrl,
                     Name = i.Attributes.FirstOrDefault(a => a.Name == nameof(Model.Catalogs.CreateImageCatalogModel.Name))
                 })))
+                .ForMember(x => x.Itineraries, x => x.MapFrom(y => y.Data.Itineraries))
                 .ForMember(x => x.LastEditDate, x => x.MapFrom(f => DateTimeHelper.GetDateTime(f.Data.LastUpdated, DateTimeKind.Local)))
                 .ForMember(x => x.Seats, x => x.MapFrom(f => f.Data.AllocatedSeats))
                 .ForMember(x => x.ReservedSeats, x => x.MapFrom(f => f.Data.ReservedSeats))
