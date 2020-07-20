@@ -21,6 +21,12 @@ namespace UrGuide.Mobile.Mapping
                 .ForMember(x => x.ImageBase64, x => x.MapFrom(y => $"{Constants.BaseUrl}/{y.ImageBase64}"));
 
             CreateMap<API.ItineraryModel, Model.Posts.ItineraryModel>();
+
+            CreateMap<API.AuthoredFeedback, Model.Shared.AuthoredFeedback>()
+                .ForMember(x => x.AuthorImage, x => x.MapFrom(y => $"{Constants.BaseUrl}/{y.AuthorImage}"));
+
+            CreateMap<API.CategoryModel, Model.Lookup.CategoryModel>()
+                .ForMember(x => x.ImageUrl, x => x.MapFrom(y => $"{Constants.BaseUrl}/{y.ImageUrl}"));
         }
     }
 }

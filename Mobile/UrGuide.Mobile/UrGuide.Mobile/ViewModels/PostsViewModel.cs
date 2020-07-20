@@ -1,12 +1,12 @@
 ﻿using MvvmHelpers;
 using MvvmHelpers.Commands;
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
-using UrGuide.Model.Posts;
+using UrGuide.Model.Lookup;
 
 namespace UrGuide.Mobile.ViewModels
 {
@@ -23,7 +23,9 @@ namespace UrGuide.Mobile.ViewModels
         private ICommand _dislikeCommand;
         private ICommand _markAsFavoriteCommand;
         private ICommand _loadItemsCommand;
+        private ICommand _searchCategoryCommand;
 
+        public ICommand SearchCategoryCommand => _searchCategoryCommand ??= new AsyncCommand<CategoryModel>(async (model) => await _navigation.GotoAsync($"//discover?Category={model.Name}"));
         public ICommand ToggleFavoriteCommand => _markAsFavoriteCommand ??= new Command<PostItem>(item =>
         {
             var it = Items.First(x => x.Id == item.Id);
@@ -35,7 +37,8 @@ namespace UrGuide.Mobile.ViewModels
             var items = await PostItemService.GetItemsAsync().ConfigureAwait(false);
             Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
             {
-                Items.ReplaceRange(items);
+                if(!items.HasError)
+                    Items.ReplaceRange(items.Data);
                 IsBusy = false;
             });
         });
@@ -87,6 +90,7 @@ namespace UrGuide.Mobile.ViewModels
         });
 
         public ObservableRangeCollection<PostItem> Items { get; } = new ObservableRangeCollection<PostItem>();
+        public ObservableRangeCollection<CategoryModel> Categories { get; } = new ObservableRangeCollection<CategoryModel>();
         public PostItem Selected
         {
             get => selected; 
@@ -104,6 +108,19 @@ namespace UrGuide.Mobile.ViewModels
             PostItemService = postItemService ?? throw new ArgumentNullException(nameof(postItemService));
             _detailViewModel = detailViewModel ?? throw new ArgumentNullException(nameof(detailViewModel));
             IsBusy = true;
+        }
+
+        public async Task Init()
+        {
+            var r = await PostItemService.GetCategoriesAsync().ConfigureAwait(false);
+            if (!r.HasError)
+            {
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+                {
+                    Categories.ReplaceRange(r.Data);
+                });
+            }
+            LoadItemsCommand.Execute(null);
         }
     }
 }

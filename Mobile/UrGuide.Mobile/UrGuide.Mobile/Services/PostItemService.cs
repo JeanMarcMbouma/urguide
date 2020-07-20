@@ -16,19 +16,47 @@ namespace UrGuide.Mobile.Services
 {
     class PostItemService : IPostItemService
     {
-        public PostItemService(PostsClient client, IMapper mapper)
+        public PostItemService(PostsClient client, FeedbackClient feedbackClient, LookupClient lookupClient, IMapper mapper)
         {
             Client = client ?? throw new ArgumentNullException(nameof(client));
+            FeedbackClient = feedbackClient ?? throw new ArgumentNullException(nameof(feedbackClient));
+            LookupClient = lookupClient ?? throw new ArgumentNullException(nameof(lookupClient));
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public PostsClient Client { get; }
+        public FeedbackClient FeedbackClient { get; }
+        public LookupClient LookupClient { get; }
         public IMapper Mapper { get; }
 
-        public PostItem GetById(string id)
+        public async Task<Result<PostItem>> GetByIdAsync(string id)
         {
-            var post = Client.RetrieveAsync(id).GetAwaiter().GetResult();
-            return Mapper.Map<PostItem>(post);
+            try
+            {
+                var post = await Client.RetrieveAsync(id);
+                var model = Mapper.Map<PostItem>(post);
+                var feedback = await GetPostFeedbackAsync(id);
+                if (!feedback.HasError)
+                    model.FeedBack.ReplaceRange(feedback.Data);
+                return Result.Of(model);
+            }
+            catch (ApiException e)
+            {
+                return Result.Of<PostItem>().WithErrors(e.Message);
+            }
+        }
+
+        public async Task<Result<IEnumerable<Model.Lookup.CategoryModel>>> GetCategoriesAsync()
+        {
+            try
+            {
+                var categories = await LookupClient.CategoriesAsync();
+                return Result.Of(Mapper.Map<IEnumerable<Model.Lookup.CategoryModel>>(categories));
+            }
+            catch (ApiException e)
+            {
+                return Result.Of<IEnumerable<Model.Lookup.CategoryModel>>().WithErrors(e.Message);
+            }
         }
 
         public Task<IEnumerable<PostItem>> GetFavoriteAsync()
@@ -110,22 +138,53 @@ namespace UrGuide.Mobile.Services
             }.AsEnumerable());
         }
 
-        public async Task<IEnumerable<PostItem>> GetItemsAsync()
+        public async Task<Result<IEnumerable<PostItem>>> GetItemsAsync()
         {
-            var posts = await Client.Last10Async();
-            return Mapper.Map<IEnumerable<PostItem>>(posts);
+            try
+            {
+                var posts = await Client.Last10Async();
+                return Result.Of(Mapper.Map<IEnumerable<PostItem>>(posts));
+            }
+            catch (ApiException e)
+            {
+
+                return Result.Of<IEnumerable<PostItem>>().WithErrors(e.Message);
+            }
+            
         }
 
-        public Result<IEnumerable<DiscoverItem>> Search(bool nearby, IEnumerable<string> categories = null, string searchTerm = null)
+        public async Task<Result<IEnumerable<Model.Shared.AuthoredFeedback>>> GetPostFeedbackAsync(string id, int pageNumber = 1)
         {
-            var posts = Client.SearchAsync(new SearchParameters
+            try
             {
-                Extra = categories.ToList(),
-                Nearby = nearby,
-                PageNumber = 1,
-                Term = searchTerm
-            }).GetAwaiter().GetResult();
-            return Result.Of(Mapper.Map<IEnumerable<DiscoverItem>>(posts.Items.AsEnumerable()));
+                var feedbackPagedList = await FeedbackClient.PostsAsync(id, pageNumber);
+                return Result.Of(Mapper.Map<IEnumerable<Model.Shared.AuthoredFeedback>>(feedbackPagedList.Items));
+            }
+            catch (ApiException e)
+            {
+                return Result.Of<IEnumerable<Model.Shared.AuthoredFeedback>>().WithErrors(e.Message);
+            }
+        }
+
+        public async Task<Result<IEnumerable<DiscoverItem>>> SearchAsync(bool nearby, IEnumerable<string> categories = null, string searchTerm = null, int pageNumber = 1)
+        {
+            try
+            {
+                var posts = await Client.SearchAsync(new SearchParameters
+                {
+                    Extra = categories.ToList(),
+                    Nearby = nearby,
+                    PageNumber = pageNumber,
+                    Term = searchTerm
+                }).ConfigureAwait(false);
+
+                return Result.Of(Mapper.Map<IEnumerable<DiscoverItem>>(posts.Items.AsEnumerable()));
+            }
+            catch (ApiException e)
+            {
+
+                return Result.Of<IEnumerable<DiscoverItem>>().WithErrors(e.Message);
+            }
         }
     }
 }

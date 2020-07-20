@@ -6,12 +6,15 @@
              xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels"
              xmlns:st="clr-namespace:Plugin.SharedTransitions;assembly=Plugin.SharedTransitions"
              mc:Ignorable="d"
-             xmlns:tt="clr-namespace:UrGuide.Mobile.Views.Templates"
+             xmlns:tt="clr-namespace:UrGuide.Mobile.Views.Templates" 
+             xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:m="clr-namespace:UrGuide.Model.Lookup;assembly=UrGuide.Model" xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
              x:Class="UrGuide.Mobile.Views.PostPage"
              x:DataType="vm:PostsViewModel"
-             Title="Recent posts"
+             Shell.NavBarIsVisible="False"
              st:SharedTransitionShell.TransitionDuration="300"
              st:SharedTransitionShell.TransitionSelectedGroup="{Binding Selected.Id}"
+             BackgroundColor="LightGray"
              >
     <ContentPage.Resources>
         <DataTemplate x:Key="PostModelTemplate">
@@ -20,20 +23,59 @@
     </ContentPage.Resources>
     <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadItemsCommand}"
                      RefreshColor="{StaticResource FavoriteIcon}" HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand" >
-        <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" BackgroundColor="LightGray"
+        <StackLayout Orientation="Vertical" Margin="8" Spacing="20" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
           >
-       
-            <CollectionView ItemsSource="{Binding Items}"
+            <StackLayout Orientation="Vertical" Spacing="0" HeightRequest="520">
+                <y:PancakeView BackgroundColor="#60000000" CornerRadius="4,4,0,0" Padding="8">
+                    <Label Text="Categories" FontSize="Title" FontAttributes="Bold" TextColor="White"/>
+                </y:PancakeView>
+                <CollectionView ItemsSource="{Binding Categories}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Horizontal"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="m:CategoryModel">
+                            <Grid HeightRequest="250" WidthRequest="200">
+                                <ff:CachedImage Source="{Binding ImageUrl}"
+                                                        WidthRequest="64" HeightRequest="64"
+                                                        Aspect="AspectFill"/>
+                                <y:PancakeView VerticalOptions="End" HorizontalOptions="FillAndExpand" 
+                                           HeightRequest="40" BackgroundColor="#60000000">
+                                    <Label Text="{Binding Name}" TextColor="White" Margin="4"
+                                       FontSize="Medium" FontAttributes="Bold" VerticalOptions="Center"/>
+                                </y:PancakeView>
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostsViewModel}}, Path=SearchCategoryCommand}" NumberOfTapsRequired="1"
+                                                          CommandParameter="{Binding}"/>
+                                </Grid.GestureRecognizers>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </StackLayout>
+            <StackLayout Orientation="Vertical" Spacing="0">
+                
+                    <y:PancakeView BackgroundColor="{StaticResource FavoriteIcon}" CornerRadius="4,4,0,0" Padding="8">
+                        <Label Text="Recent posts" FontSize="Title" FontAttributes="Bold" TextColor="White"/>
+                    </y:PancakeView>
+                
+                <CollectionView ItemsSource="{Binding Items}"
                         ItemTemplate="{StaticResource PostModelTemplate}"
                         HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand"
-                        Margin="8" 
                         SelectionMode="None"
                         BackgroundColor="Transparent"
                        >
-                <CollectionView.ItemsLayout>
-                    <LinearItemsLayout ItemSpacing="8" Orientation="Vertical" />
-                </CollectionView.ItemsLayout>
-            </CollectionView>
-        </Grid>
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout ItemSpacing="8" Orientation="Vertical" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.EmptyView>
+                        <StackLayout Orientation="Horizontal" Margin="20">
+                            <Label Text="Nothing yet in your region" FontSize="Medium" FontAttributes="Bold"
+                                    HorizontalOptions="CenterAndExpand"/>
+                        </StackLayout>
+                    </CollectionView.EmptyView>
+                </CollectionView>
+            </StackLayout>
+        </StackLayout>
    </RefreshView>
 </ContentPage>

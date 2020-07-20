@@ -3,9 +3,11 @@ using MvvmHelpers.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
+using Xamarin.Essentials;
 
 namespace UrGuide.Mobile.ViewModels
 {
@@ -18,10 +20,14 @@ namespace UrGuide.Mobile.ViewModels
         private string searchTerm;
         private ICommand _searchByOptionCommand;
         private ICommand _viewPostCommand;
-        public DiscoverViewModel(IPostItemService postItemService, INavigationService navigation)
+        public DiscoverViewModel(IPostItemService postItemService, INavigationService navigation, PostsViewModel postsViewModel)
         {
             PostItemService = postItemService ?? throw new ArgumentNullException(nameof(postItemService));
             Navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
+            SearchOptions.AddRange(postsViewModel.Categories.Select(x => {
+                SearchOption option = x.Name;
+                return option;
+                }));
         }
 
         public ICommand ViewPostCommand => _viewPostCommand ??= new AsyncCommand<DiscoverItem>(async (item) =>
@@ -29,27 +35,32 @@ namespace UrGuide.Mobile.ViewModels
             await Navigation.GotoAsync($"postdetails?Id={item.PostId}");
         });
 
-        public ICommand SearchByOptionCommand => _searchByOptionCommand ??= new Command<SearchOption>((option) =>
+        public ICommand SearchByOptionCommand => _searchByOptionCommand ??= new AsyncCommand<SearchOption>(async (option) =>
         {
             option.Selected = !option.Selected;
-            var nearby = SearchOptions.Any(x => x.Text.Equals("Nearby") && x.Selected);
-            var category = SearchOptions.Where(x => !x.Text.Equals("Nearby") && x.Selected).Select(x => x.Text);
-            IsBusy = true;
-            var r = PostItemService.Search(nearby, category, SearchTerm);
-            if (!r.HasError)
-                Items.ReplaceRange(r.Data);
-            IsBusy = false;
+            await Search();
         });
-        public ICommand SearchCommand => _searchCommand ??= new Command(() =>
+
+        private async Task Search()
         {
             var nearby = SearchOptions.Any(x => x.Text.Equals("Nearby") && x.Selected);
             var category = SearchOptions.Where(x => !x.Text.Equals("Nearby") && x.Selected).Select(x => x.Text);
             IsBusy = true;
-            var r = PostItemService.Search(nearby, category, SearchTerm);
-            if (!r.HasError)
-                Items.ReplaceRange(r.Data);
-            IsBusy = false;
-        });
+            await PostItemService.SearchAsync(nearby, category, SearchTerm)
+            .ContinueWith(r =>
+            {
+                var result = r.Result;
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    if (!result.HasError)
+                        Items.ReplaceRange(result.Data);
+
+                    IsBusy = false;
+                });
+            });
+        }
+
+        public ICommand SearchCommand => _searchCommand ??= new AsyncCommand(Search);
 
         public string SearchTerm
         {
@@ -78,15 +89,11 @@ namespace UrGuide.Mobile.ViewModels
         public ObservableRangeCollection<string> Suggestions { get; } = new ObservableRangeCollection<string>();
         public ObservableRangeCollection<SearchOption> SearchOptions { get; } = new ObservableRangeCollection<SearchOption>
         {
-            "Nearby",
-            "Extreme",
-            "Sport",
-            "Nature",
-            "Kids",
-            "Others"
+            "Nearby"
         };
         public IPostItemService PostItemService { get; }
         public INavigationService Navigation { get; }
+        public PostsViewModel PostsViewModel { get; }
         public ObservableRangeCollection<DiscoverItem> Items { get; } = new ObservableRangeCollection<DiscoverItem>(); 
     }
 

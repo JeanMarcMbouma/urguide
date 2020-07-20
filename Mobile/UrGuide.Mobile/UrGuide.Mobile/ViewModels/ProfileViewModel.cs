@@ -64,16 +64,17 @@ namespace UrGuide.Mobile.ViewModels
         }
 
         public ICommand CreateGalleryCommand => _createGalleryCommand ??= new AsyncCommand(async () => await Navigation.PushModalAsync(new CreateGallery()));
-        public ICommand LoadItemsCommand => _loadItemsCommand ??= new Command(async () =>
+        public ICommand LoadItemsCommand => _loadItemsCommand ??= new AsyncCommand(async () =>
         {
             IsBusy = true;
             var items = await PostItemService.GetItemsAsync();
             Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
             {
-                Posts.ReplaceRange(items);
+                if(!items.HasError)
+                    Posts.ReplaceRange(items.Data);
                 UserInfo = UserService.GetUserInfo(null);
+                IsBusy = false;
             });
-            IsBusy = false;
         });
         public ICommand ViewPostDetailsCommand => _viewPostDetailsCommand ??= new Command<PostItem>(async (item) => await Navigation.GotoAsync($"postdetails?Id={item.Id}"));
         public ICommand ViewReviewsCommand => _viewReviewsCommand ??= new Command(() => Mode = ProfileDisplayMode.Reviews);

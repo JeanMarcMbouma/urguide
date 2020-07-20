@@ -23,6 +23,13 @@ namespace UrGuide.Mobile
             services.AddHttpClient<API.PostsClient>(client => {
                 client.BaseAddress = new Uri(Constants.BaseUrl);
             });
+            services.AddHttpClient<API.FeedbackClient>(client => {
+                client.BaseAddress = new Uri(Constants.BaseUrl);
+            });
+            services.AddHttpClient<API.LookupClient>(client => {
+                client.BaseAddress = new Uri(Constants.BaseUrl);
+            });
+
             services.AddSingleton<AppShell>();
             services.AddSingleton<IMainPageService, MainPageService>();
             services.AddSingleton<App>();
@@ -73,6 +80,7 @@ namespace UrGuide.Mobile
             Routing.RegisterRoute("posts/details", typeof(PostDetailPage));
             Routing.RegisterRoute("postdetails", typeof(PostDetailPage));
             Routing.RegisterRoute("profile", typeof(Views.Profile));
+            Routing.RegisterRoute("discover", typeof(Views.Discover));
         }
     }
 }

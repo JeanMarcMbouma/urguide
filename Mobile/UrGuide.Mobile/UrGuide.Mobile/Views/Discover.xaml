@@ -67,8 +67,9 @@
                 <CollectionView ItemsSource="{Binding Items}" ItemSizingStrategy="MeasureAllItems">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:DiscoverItem">
-                            <Frame VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
-                               CornerRadius="4" BorderColor="{StaticResource IconColorLight}" HeightRequest="250" Padding="0">
+                                <StackLayout  BackgroundColor="Transparent">
+                            <Frame HeightRequest="250"
+                               CornerRadius="4" BorderColor="{StaticResource IconColorLight}" Padding="0">
 
                                 <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" >
                                     <CarouselView ItemsSource="{Binding Files}" HorizontalOptions="FillAndExpand"
@@ -129,8 +130,9 @@
                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DiscoverViewModel}},Path=ViewPostCommand}" 
                                                           CommandParameter="{Binding}"/>
                                 </Frame.GestureRecognizers>
-                            </Frame>
-                        </DataTemplate>
+                                    </Frame>
+                                </StackLayout>
+                            </DataTemplate>
                     </CollectionView.ItemTemplate>
                     <CollectionView.ItemsLayout>
                         <GridItemsLayout Span="{OnIdiom Phone=2,Default=4}" Orientation="Vertical" HorizontalItemSpacing="8" VerticalItemSpacing="8"/>

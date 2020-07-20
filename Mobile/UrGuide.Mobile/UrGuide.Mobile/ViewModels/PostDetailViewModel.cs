@@ -17,7 +17,23 @@ namespace UrGuide.Mobile.ViewModels
         private ICommand _viewBidCommand;
         private ICommand _newFeedbackCommand;
         private ICommand _markAsFavoriteCommand;
+        private ICommand _loadSelectedItemCommand;
 
+        public ICommand LoadSelectedItemCommand => _loadSelectedItemCommand ??= new AsyncCommand(async () =>
+        {
+            IsBusy = true;
+            await PostItemService.GetByIdAsync(_id).ContinueWith(r => {
+                var result = r.Result;
+                Xamarin.Essentials.MainThread.BeginInvokeOnMainThread(() =>
+                {
+
+                    if (!result.HasError)
+                        Selected = result.Data;
+                    IsBusy = false;
+                });
+                return r.Result;
+            });
+        });
         public ICommand ToggleFavoriteCommand => _markAsFavoriteCommand ??= new Command(() =>
         {
             Selected.Favorite = !Selected.Favorite;
@@ -83,6 +99,7 @@ namespace UrGuide.Mobile.ViewModels
         {
             get => selected; set
             {
+                _id = value.Id;
                 SetProperty(ref selected, value);
             }
         }
@@ -93,8 +110,13 @@ namespace UrGuide.Mobile.ViewModels
         public INavigationService NavigationService { get; }
         public IPostItemService PostItemService { get; }
         public BidDialogViewModel BidDialogViewModel { get; }
-        public string Id { set {
-                Selected = PostItemService.GetById(value);    
+
+        private string _id;
+        public string Id { 
+            get { return _id; }
+            set {
+                _id = value;
+                LoadSelectedItemCommand.Execute(null);
             } 
         }
 
