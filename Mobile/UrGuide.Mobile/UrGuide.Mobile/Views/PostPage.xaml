@@ -31,7 +31,8 @@
                         <Setter Property="IsVisible" Value="False"/>
                     </DataTrigger>
                 </StackLayout.Triggers>
-                <CollectionView ItemsSource="{Binding Categories}" Header="Categories" HeightRequest="250">
+                <Label Text="Categories" FontSize="Title" FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
+                <CollectionView ItemsSource="{Binding Categories}" HeightRequest="250">
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout Orientation="Horizontal"/>
                     </CollectionView.ItemsLayout>
