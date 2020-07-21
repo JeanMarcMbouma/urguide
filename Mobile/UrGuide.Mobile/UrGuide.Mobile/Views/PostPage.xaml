@@ -23,6 +23,7 @@
     </ContentPage.Resources>
     <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadItemsCommand}"
                      RefreshColor="{StaticResource FavoriteIcon}" HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand" >
+        <ScrollView>
         <StackLayout Orientation="Vertical" Margin="8" Spacing="20" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
           >
             <StackLayout Orientation="Vertical" Spacing="0" HeightRequest="520">
@@ -76,6 +77,7 @@
                     </CollectionView.EmptyView>
                 </CollectionView>
             </StackLayout>
-        </StackLayout>
-   </RefreshView>
+            </StackLayout>
+        </ScrollView>
+    </RefreshView>
 </ContentPage>
