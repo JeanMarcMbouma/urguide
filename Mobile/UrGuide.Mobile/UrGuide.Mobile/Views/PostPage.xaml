@@ -24,13 +24,14 @@
     <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadItemsCommand}"
                      RefreshColor="{StaticResource FavoriteIcon}" HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand" >
         <ScrollView>
-        <StackLayout Orientation="Vertical" Margin="8" Spacing="20" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
+        <StackLayout Orientation="Vertical" Margin="8" Spacing="8" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
           >
-            <StackLayout Orientation="Vertical" Spacing="0" HeightRequest="520">
-                <y:PancakeView BackgroundColor="#60000000" CornerRadius="4,4,0,0" Padding="8">
-                    <Label Text="Categories" FontSize="Title" FontAttributes="Bold" TextColor="White"/>
-                </y:PancakeView>
-                <CollectionView ItemsSource="{Binding Categories}">
+                <StackLayout.Triggers>
+                    <DataTrigger TargetType="StackLayout" Binding="{Binding IsBusy}" Value="{x:Static x:Boolean.TrueString}">
+                        <Setter Property="IsVisible" Value="False"/>
+                    </DataTrigger>
+                </StackLayout.Triggers>
+                <CollectionView ItemsSource="{Binding Categories}" Header="Categories" HeightRequest="250">
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout Orientation="Horizontal"/>
                     </CollectionView.ItemsLayout>
@@ -53,30 +54,16 @@
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
-            </StackLayout>
-            <StackLayout Orientation="Vertical" Spacing="0">
-                
-                    <y:PancakeView BackgroundColor="{StaticResource FavoriteIcon}" CornerRadius="4,4,0,0" Padding="8">
-                        <Label Text="Recent posts" FontSize="Title" FontAttributes="Bold" TextColor="White"/>
-                    </y:PancakeView>
-                
-                <CollectionView ItemsSource="{Binding Items}"
-                        ItemTemplate="{StaticResource PostModelTemplate}"
-                        HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand"
-                        SelectionMode="None"
-                        BackgroundColor="Transparent"
-                       >
-                    <CollectionView.ItemsLayout>
-                        <LinearItemsLayout ItemSpacing="8" Orientation="Vertical" />
-                    </CollectionView.ItemsLayout>
-                    <CollectionView.EmptyView>
-                        <StackLayout Orientation="Horizontal" Margin="20">
-                            <Label Text="Nothing yet in your region" FontSize="Medium" FontAttributes="Bold"
-                                    HorizontalOptions="CenterAndExpand"/>
-                        </StackLayout>
-                    </CollectionView.EmptyView>
-                </CollectionView>
-            </StackLayout>
+                <Label Text="Recent posts" FontSize="Title" FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
+                <StackLayout Orientation="Vertical" Spacing="8" BindableLayout.ItemsSource="{Binding Items}"
+                        BackgroundColor="Transparent" BindableLayout.ItemTemplate="{StaticResource PostModelTemplate}"
+                    HorizontalOptions="FillAndExpand" 
+                            VerticalOptions="StartAndExpand">
+                    <BindableLayout.EmptyView>
+                        <Label Text="Nothing yet in your region" FontSize="Medium" FontAttributes="Bold"
+                            HorizontalOptions="CenterAndExpand"/>
+                    </BindableLayout.EmptyView>
+                </StackLayout>
             </StackLayout>
         </ScrollView>
     </RefreshView>
