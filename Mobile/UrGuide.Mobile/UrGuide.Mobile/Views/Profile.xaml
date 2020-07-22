@@ -9,7 +9,10 @@
              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              xmlns:models="clr-namespace:UrGuide.Model.Users;assembly=UrGuide.Model" 
              xmlns:controls="clr-namespace:UrGuide.Mobile.Views.Controls" 
-             xmlns:tpl="clr-namespace:UrGuide.Mobile.Views.Templates.Profile" xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+             xmlns:tpl="clr-namespace:UrGuide.Mobile.Views.Templates.Profile" 
+             xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+             BackgroundColor="#ececec"
+             Shell.NavBarIsVisible="False"
              Title="Profile"
              x:DataType="vm:ProfileViewModel">
     <ContentPage.Resources>
@@ -38,7 +41,7 @@
     <ScrollView AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional">
         <Grid RowDefinitions="Auto,Auto,*" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
               RowSpacing="0">
-            <Frame HasShadow="True" IsClippedToBounds="True" VerticalOptions="FillAndExpand"
+                    <Frame HasShadow="True" IsClippedToBounds="True" VerticalOptions="FillAndExpand"
                    HorizontalOptions="FillAndExpand" BorderColor="LightGray">
             <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
                          Margin="16" BindingContext="{Binding Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}},Path=UserInfo}" x:DataType="models:UserInfo"

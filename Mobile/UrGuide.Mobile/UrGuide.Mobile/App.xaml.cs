@@ -1,4 +1,5 @@
-﻿using UrGuide.Mobile.Contracts;
+﻿using Microsoft.AppCenter.Distribute;
+using UrGuide.Mobile.Contracts;
 using Xamarin.Forms;
 
 namespace UrGuide.Mobile
@@ -14,6 +15,7 @@ namespace UrGuide.Mobile
 
         protected override void OnStart()
         {
+            Distribute.CheckForUpdate();
         }
 
         protected override void OnSleep()

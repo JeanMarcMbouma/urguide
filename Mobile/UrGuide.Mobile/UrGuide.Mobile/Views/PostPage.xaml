@@ -14,7 +14,7 @@
              Shell.NavBarIsVisible="False"
              st:SharedTransitionShell.TransitionDuration="300"
              st:SharedTransitionShell.TransitionSelectedGroup="{Binding Selected.Id}"
-             BackgroundColor="LightGray"
+             BackgroundColor="#ececec"
              >
     <ContentPage.Resources>
         <DataTemplate x:Key="PostModelTemplate">

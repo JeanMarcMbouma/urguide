@@ -7,18 +7,21 @@
              xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels"
              mc:Ignorable="d"
              x:Class="UrGuide.Mobile.Views.Favorite"
+             Shell.NavBarIsVisible="False"
              Title="Favorites"
+             BackgroundColor="#ececec"
              x:DataType="vm:FavoriteViewModel">
     <ContentPage.Resources>
         <DataTemplate x:Key="PostModelTemplate">
             <tt:FavoriteItemTemplate />
         </DataTemplate>
     </ContentPage.Resources>
-    <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" BackgroundColor="LightGray"
-          >
+    <StackLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
+          Orientation="Vertical" Spacing="8" Margin="8">
+        <Label Text="Favorites" FontSize="Title" FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
         <CollectionView ItemsSource="{Binding Items}"
                         ItemTemplate="{StaticResource PostModelTemplate}"
-                        Margin="8" HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand"
+                        HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand"
                         SelectionMode="None"
                         BackgroundColor="Transparent"
                        >
@@ -26,5 +29,5 @@
                 <LinearItemsLayout ItemSpacing="8" Orientation="Vertical" />
             </CollectionView.ItemsLayout>
         </CollectionView>
-    </Grid>
+    </StackLayout>
 </ContentPage>

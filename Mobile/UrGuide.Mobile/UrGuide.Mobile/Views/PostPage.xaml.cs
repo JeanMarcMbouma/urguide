@@ -10,6 +10,7 @@ namespace UrGuide.Mobile.Views
         public PostPage()
         {
             InitializeComponent();
+            AppShell.RemoveWelcomeScreen();
             BindingContext = Forms.Ioc.GetService<PostsViewModel>();
         }
 

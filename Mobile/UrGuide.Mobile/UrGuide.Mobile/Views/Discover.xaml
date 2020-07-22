@@ -11,11 +11,13 @@
              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              xmlns:m="clr-namespace:UrGuide.Model.Shared;assembly=UrGuide.Model"
              x:DataType="vm:DiscoverViewModel"
+             BackgroundColor="#ececec"
              Title="Discover">
     
     <AbsoluteLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
-        <StackLayout AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional" Spacing="4" Orientation="Vertical" Margin="12" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand">
-            <StackLayout Orientation="Horizontal" HeightRequest="50" Margin="8" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+        <StackLayout AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional" Spacing="8" 
+                     Orientation="Vertical" Margin="8,12,8,8" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand">
+            <StackLayout Orientation="Horizontal" HeightRequest="50"  HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
                 <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
                        VerticalOptions="StartAndExpand" CornerRadius="24" Padding="0">
                     <StackLayout Orientation="Horizontal" VerticalOptions="FillAndExpand"
@@ -32,7 +34,7 @@
                     </StackLayout>
                 </Frame>
             </StackLayout>
-            <CollectionView HeightRequest="40" HorizontalOptions="FillAndExpand" Margin="12"
+            <CollectionView HeightRequest="40" HorizontalOptions="FillAndExpand" Margin="6"
                             BackgroundColor="Transparent" ItemsSource="{Binding SearchOptions}"
                             ItemSizingStrategy="MeasureAllItems">
                 <CollectionView.ItemsLayout>
@@ -67,11 +69,8 @@
                 <CollectionView ItemsSource="{Binding Items}" ItemSizingStrategy="MeasureAllItems">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:DiscoverItem">
-                                <StackLayout  BackgroundColor="Transparent">
-                            <Frame HeightRequest="250"
-                               CornerRadius="4" BorderColor="{StaticResource IconColorLight}" Padding="0">
-
-                                <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" >
+                                <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
+                                      HeightRequest="250">
                                     <CarouselView ItemsSource="{Binding Files}" HorizontalOptions="FillAndExpand"
                                           VerticalOptions="FillAndExpand"  x:Name="ImageFrame"
                                           IndicatorView="indicator">
@@ -79,23 +78,24 @@
                                             <DataTemplate x:DataType="{x:Type m:ImageFileModel}">
 
                                                 <ff:CachedImage 
-                                Aspect="AspectFill"
-                                Source="{Binding ImageBase64}"
-                                WidthRequest="{Binding Source={Reference ImageFrame},Path=Width}"
-                                HeightRequest="{Binding Source={Reference ImageFrame},Path=Height}"
-                                />
+                                                Aspect="AspectFill"
+                                                Source="{Binding ImageBase64}"
+                                                WidthRequest="{Binding Source={Reference ImageFrame},Path=Width}"
+                                                HeightRequest="{Binding Source={Reference ImageFrame},Path=Height}"
+                                                />      
                                             </DataTemplate>
                                         </CarouselView.ItemTemplate>
                                     </CarouselView>
-                                    <BoxView HorizontalOptions="FillAndExpand" HeightRequest="40" BackgroundColor="#70000000"
+                                    <BoxView HorizontalOptions="FillAndExpand" HeightRequest="40" 
+                                             BackgroundColor="#50000000"
                                  VerticalOptions="End" CornerRadius="4"/>
                                     <StackLayout Orientation="Vertical" VerticalOptions="StartAndExpand"
                                                  HorizontalOptions="FillAndExpand" Spacing="0"
                                                  BackgroundColor="#20000000">
-                                            <StackLayout HorizontalOptions="Start"
+                                        <StackLayout HorizontalOptions="Start"
                                                          VerticalOptions="StartAndExpand"
                                                          Margin="8">
-                                                <ff:CachedImage Source="{Binding AuthorImage}" 
+                                            <ff:CachedImage Source="{Binding AuthorImage}" 
                                                     Aspect="AspectFit"
                                                     WidthRequest="64"
                                                     HeightRequest="64"
@@ -103,39 +103,29 @@
                                                     HorizontalOptions="CenterAndExpand"
                                                     ></ff:CachedImage>
 
-                                                <Label Text="{Binding Author}" VerticalOptions="End" 
+                                            <Label Text="{Binding Author}" VerticalOptions="End" 
                                                        HorizontalOptions="CenterAndExpand"
                                    MaxLines="1"  
                                    TextColor="White" FontSize="Small" FontAttributes="Bold" CharacterSpacing="1" />
-                                            </StackLayout>
-                                        
-                                    </StackLayout>
-                                        <StackLayout Orientation="Horizontal" VerticalOptions="End" 
-                                                     HorizontalOptions="Start" Margin="8" Spacing="8">
-                                            <Path Data="M288 144a110.94 110.94 0 0 0-31.24 5 55.4 55.4 0 0 1 7.24 27 56 56 0 0 1-56 56 55.4 55.4 0 0 1-27-7.24A111.71 111.71 0 1 0 288 144zm284.52 97.4C518.29 135.59 410.93 64 288 64S57.68 135.64 3.48 241.41a32.35 32.35 0 0 0 0 29.19C57.71 376.41 165.07 448 288 448s230.32-71.64 284.52-177.41a32.35 32.35 0 0 0 0-29.19zM288 400c-98.65 0-189.09-55-237.93-144C98.91 167 189.34 112 288 112s189.09 55 237.93 144C477.1 345 386.66 400 288 400z"
-                                                  Aspect="Uniform"
-                                                  WidthRequest="24"
-                                                  HeightRequest="24"
-                                                  Stroke="White"
-                                                  Fill="White"/>
                                         </StackLayout>
-                                        
+
+                                    </StackLayout>
+
                                     <IndicatorView x:Name="indicator" VerticalOptions="End"
                                            HorizontalOptions="EndAndExpand" 
                                            IndicatorColor="#70ffffff"
                                            HeightRequest="40" 
                                            IndicatorSize="10" SelectedIndicatorColor="#fff"/>
-                                </Grid>
-                                <Frame.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DiscoverViewModel}},Path=ViewPostCommand}" 
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DiscoverViewModel}},Path=ViewPostCommand}" 
                                                           CommandParameter="{Binding}"/>
-                                </Frame.GestureRecognizers>
-                                    </Frame>
-                                </StackLayout>
+                                    </Grid.GestureRecognizers>
+                                </Grid>
                             </DataTemplate>
                     </CollectionView.ItemTemplate>
                     <CollectionView.ItemsLayout>
-                        <GridItemsLayout Span="{OnIdiom Phone=2,Default=4}" Orientation="Vertical" HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
+                        <GridItemsLayout Span="{OnIdiom Phone=2,Default=4}" Orientation="Vertical" 
+                                         HorizontalItemSpacing="4" VerticalItemSpacing="0"/>
                     </CollectionView.ItemsLayout>
                 </CollectionView>  
             </ScrollView>

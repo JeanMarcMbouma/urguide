@@ -5,6 +5,7 @@ using Android.Runtime;
 using Android.OS;
 using Microsoft.Extensions.DependencyInjection;
 using FFImageLoading.Forms.Platform;
+using Microsoft.AppCenter.Distribute;
 
 namespace UrGuide.Mobile.Droid
 {
@@ -17,7 +18,7 @@ namespace UrGuide.Mobile.Droid
             ToolbarResource = Resource.Layout.Toolbar;
 
             base.OnCreate(savedInstanceState);
-
+            Distribute.SetEnabledForDebuggableBuild(false);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             Forms.Init(RegisterServices);
