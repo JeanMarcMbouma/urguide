@@ -15,6 +15,7 @@ namespace UrGuide.Mobile.ViewModels
         public const int Like = 2;
         public const int DisLike = 4;
         public const int Unknown = 0;
+        private bool _initialized;
         private PostItem selected;
         private readonly INavigationService _navigation;
         private readonly PostDetailViewModel _detailViewModel;
@@ -112,9 +113,12 @@ namespace UrGuide.Mobile.ViewModels
 
         public async Task Init()
         {
+            if (_initialized)
+                return;
             var r = await PostItemService.GetCategoriesAsync().ConfigureAwait(false);
             if (!r.HasError)
             {
+                _initialized = true;
                 Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
                 {
                     Categories.ReplaceRange(r.Data);

@@ -70,7 +70,7 @@
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:DiscoverItem">
                                 <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
-                                      HeightRequest="250">
+                                      HeightRequest="250" x:Name="container">
                                     <CarouselView ItemsSource="{Binding Files}" HorizontalOptions="FillAndExpand"
                                           VerticalOptions="FillAndExpand"  x:Name="ImageFrame"
                                           IndicatorView="indicator">
@@ -82,7 +82,12 @@
                                                 Source="{Binding ImageBase64}"
                                                 WidthRequest="{Binding Source={Reference ImageFrame},Path=Width}"
                                                 HeightRequest="{Binding Source={Reference ImageFrame},Path=Height}"
-                                                />      
+                                                >
+                                                    <ff:CachedImage.GestureRecognizers>
+                                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DiscoverViewModel}},Path=ViewPostCommand}" 
+                                                          CommandParameter="{Binding Source={Reference container}, Path=BindingContext}"/>
+                                                    </ff:CachedImage.GestureRecognizers>
+                                                </ff:CachedImage>      
                                             </DataTemplate>
                                         </CarouselView.ItemTemplate>
                                     </CarouselView>

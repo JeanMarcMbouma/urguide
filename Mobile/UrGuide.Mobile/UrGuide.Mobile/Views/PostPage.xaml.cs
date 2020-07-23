@@ -16,8 +16,9 @@ namespace UrGuide.Mobile.Views
 
         protected override void OnAppearing()
         {
+            var vm = (BindingContext as PostsViewModel);
             base.OnAppearing();
-            _ = (BindingContext as PostsViewModel).Init();
+            _ = vm.Init();
         }
     }
 }
