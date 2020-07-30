@@ -16,18 +16,34 @@ namespace UrGuide.Mobile.Services
 {
     class PostItemService : IPostItemService
     {
-        public PostItemService(PostsClient client, FeedbackClient feedbackClient, LookupClient lookupClient, IMapper mapper)
+        public PostItemService(PostsClient client, BidClient bidClient, FeedbackClient feedbackClient,
+                               LookupClient lookupClient, IMapper mapper)
         {
             Client = client ?? throw new ArgumentNullException(nameof(client));
+            BidClient = bidClient ?? throw new ArgumentNullException(nameof(bidClient));
             FeedbackClient = feedbackClient ?? throw new ArgumentNullException(nameof(feedbackClient));
             LookupClient = lookupClient ?? throw new ArgumentNullException(nameof(lookupClient));
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public PostsClient Client { get; }
+        public BidClient BidClient { get; }
         public FeedbackClient FeedbackClient { get; }
         public LookupClient LookupClient { get; }
         public IMapper Mapper { get; }
+
+        public async Task<Result<IEnumerable<Model.Posts.BidHistoryModel>>> GetBidHistoryAsync(string id)
+        {
+            try
+            {
+                var bidHistory = await BidClient.HistoryAsync(id);
+                return Result.Of(Mapper.Map<IEnumerable<Model.Posts.BidHistoryModel>>(bidHistory));
+            }
+            catch (ApiException e)
+            {
+                return Result.Of<IEnumerable<Model.Posts.BidHistoryModel>>().WithErrors(e.Message);
+            }
+        }
 
         public async Task<Result<PostItem>> GetByIdAsync(string id)
         {

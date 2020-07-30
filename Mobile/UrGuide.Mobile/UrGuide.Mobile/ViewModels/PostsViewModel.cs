@@ -54,6 +54,8 @@ namespace UrGuide.Mobile.ViewModels
 
                 _detailViewModel.Selected = Items.First(x => x.Id == item.Id);
                 await _navigation.PushAsync(new Views.PostDetailPage(_detailViewModel), true);
+                var feedback = await PostItemService.GetPostFeedbackAsync(item.Id);
+                _detailViewModel.Selected.FeedBack.ReplaceRange(feedback.Data);
             });
 
         public ICommand LikeCommand => _likeCommand ??= new Command<PostItem>((item) =>

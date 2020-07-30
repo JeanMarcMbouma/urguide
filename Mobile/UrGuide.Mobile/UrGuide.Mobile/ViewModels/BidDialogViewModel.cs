@@ -1,7 +1,6 @@
 ﻿using MvvmHelpers;
 using MvvmHelpers.Commands;
 using System;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
@@ -14,41 +13,28 @@ namespace UrGuide.Mobile.ViewModels
         private ICommand _closeDialogCommand;
         private ICommand _loadBidCommand;
         private ICommand _newBidCommand;
-        public BidDialogViewModel(INavigationService navigationService)
+        private PostItem item;
+
+        public BidDialogViewModel(INavigationService navigationService, IPostItemService postItemService)
         {
             NavigationService = navigationService ?? throw new System.ArgumentNullException(nameof(navigationService));
-            Items = new ObservableRangeCollection<BidHistoryModel>
-            {
-                new BidHistoryModel
-                {
-                    Author = "John Doe",
-                    AuthorImage = "http://urguide.azurewebsites.net/images/85e526dd-6b92-4700-b427-6c7d7fe40a45.png",
-                    Created = "12-Jun-2020 12:30",
-                    Value = "$45"
-                },
-                new BidHistoryModel
-                {
-                    Author = "Jane Doe",
-                    AuthorImage = "http://urguide.azurewebsites.net/images/85e526dd-6b92-4700-b427-6c7d7fe40a45.png",
-                    Created = "12-Jun-2020 12:30",
-                    Value = "$45"
-                },
-                new BidHistoryModel
-                {
-                    Author = "Guffy",
-                    AuthorImage = "http://urguide.azurewebsites.net/images/85e526dd-6b92-4700-b427-6c7d7fe40a45.png",
-                    Created = "12-Jun-2020 13:30",
-                    Value = "$45",
-                    IsActive = true
-                }
-            };
+            PostItemService = postItemService ?? throw new ArgumentNullException(nameof(postItemService));
         }
-        public PostItem Item { get; set; }
-        public ObservableRangeCollection<BidHistoryModel> Items { get; }
+        public PostItem Item
+        {
+            get => item; set
+            {
+                item = value;
+                LoadBidCommand.Execute(null);
+            }
+        }
+        public ObservableRangeCollection<BidHistoryModel> Items { get; } = new ObservableRangeCollection<BidHistoryModel>();
         public bool CanRejectBid { get; set; } = true;
         public bool CanApproveBid { get; set; } = true;
         public INavigationService NavigationService { get; }
+        public IPostItemService PostItemService { get; }
 
+        public string PostId { get; set; }
         public ICommand CloseDialogCommand => _closeDialogCommand ??= new AsyncCommand(async () =>
         {
             await NavigationService.PopModalAsync();
@@ -60,7 +46,8 @@ namespace UrGuide.Mobile.ViewModels
             {
                 IsBusy = true;
             });
-            await Task.Delay(3000);
+            var items = await PostItemService.GetBidHistoryAsync(Item.Id);
+            Items.ReplaceRange(items.Data);
             Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
             {
                 IsBusy = false;

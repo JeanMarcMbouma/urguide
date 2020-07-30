@@ -13,6 +13,7 @@ using UrGuide.Mobile.Views;
 using Xamarin.Forms;
 
 [assembly: ExportFont("Font Awesome 5 Free-Solid-900.otf", Alias = "fas")]
+[assembly: ExportFont("Font Awesome 5 Free-Regular-400.otf", Alias = "far")]
 namespace UrGuide.Mobile
 {
     public static class Forms
@@ -27,6 +28,10 @@ namespace UrGuide.Mobile
                 client.BaseAddress = new Uri(Constants.BaseUrl);
             });
             services.AddHttpClient<API.LookupClient>(client => {
+                client.BaseAddress = new Uri(Constants.BaseUrl);
+            });
+
+            services.AddHttpClient<API.BidClient>(client => {
                 client.BaseAddress = new Uri(Constants.BaseUrl);
             });
 

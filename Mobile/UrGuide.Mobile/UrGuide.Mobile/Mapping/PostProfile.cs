@@ -27,6 +27,9 @@ namespace UrGuide.Mobile.Mapping
 
             CreateMap<API.CategoryModel, Model.Lookup.CategoryModel>()
                 .ForMember(x => x.ImageUrl, x => x.MapFrom(y => $"{Constants.BaseUrl}/{y.ImageUrl}"));
+
+            CreateMap<API.BidHistoryModel, Model.Posts.BidHistoryModel>()
+                .ForMember(x => x.AuthorImage, x => x.MapFrom(y => $"{Constants.BaseUrl}/{y.AuthorImage}"));
         }
     }
 }

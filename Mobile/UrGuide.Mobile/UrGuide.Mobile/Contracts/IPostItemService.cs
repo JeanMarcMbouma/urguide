@@ -14,5 +14,6 @@ namespace UrGuide.Mobile.Contracts
         Task<Result<IEnumerable<DiscoverItem>>> SearchAsync(bool nearby, IEnumerable<string> categories = null, string searchTerm = null, int pageNumber = 1);
         Task<Result<PostItem>> GetByIdAsync(string id);
         Task<Result<IEnumerable<Model.Shared.AuthoredFeedback>>> GetPostFeedbackAsync(string id, int pageNumber = 1);
+        Task<Result<IEnumerable<Model.Posts.BidHistoryModel>>> GetBidHistoryAsync(string id);
     }
 }

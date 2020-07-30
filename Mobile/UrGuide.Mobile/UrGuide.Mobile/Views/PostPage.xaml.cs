@@ -10,7 +10,6 @@ namespace UrGuide.Mobile.Views
         public PostPage()
         {
             InitializeComponent();
-            AppShell.RemoveWelcomeScreen();
             BindingContext = Forms.Ioc.GetService<PostsViewModel>();
         }
 
@@ -18,6 +17,7 @@ namespace UrGuide.Mobile.Views
         {
             var vm = (BindingContext as PostsViewModel);
             base.OnAppearing();
+            AppShell.RemoveWelcomeScreen();
             _ = vm.Init();
         }
     }
