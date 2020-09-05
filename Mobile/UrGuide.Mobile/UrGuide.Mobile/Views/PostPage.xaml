@@ -32,7 +32,7 @@
                     </DataTrigger>
                 </StackLayout.Triggers>
                 <Label Text="Categories" FontSize="Title" FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
-                <CollectionView ItemsSource="{Binding Categories}" HeightRequest="250">
+                <CollectionView ItemsSource="{Binding Categories}" HeightRequest="250" ItemSizingStrategy="MeasureAllItems">
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout Orientation="Horizontal"/>
                     </CollectionView.ItemsLayout>
@@ -40,7 +40,11 @@
                         <DataTemplate x:DataType="m:CategoryModel">
                             <Grid HeightRequest="250" WidthRequest="200">
                                 <ff:CachedImage Source="{Binding ImageUrl}"
-                                                        WidthRequest="64" HeightRequest="64"
+                                                        VerticalOptions="FillAndExpand"
+                                                        HorizontalOptions="FillAndExpand"
+                                                DownsampleToViewSize="True"
+                                                HeightRequest="250"
+                                                WidthRequest="250"
                                                         Aspect="AspectFill"/>
                                 <y:PancakeView VerticalOptions="End" HorizontalOptions="FillAndExpand" 
                                            HeightRequest="40" BackgroundColor="#60000000">

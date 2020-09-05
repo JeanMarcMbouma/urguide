@@ -7,10 +7,9 @@ using System.Threading.Tasks;
 using UrGuide.Mobile.API;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
-using UrGuide.Mobile.Views;
-using UrGuide.Model.Posts;
 using UrGuide.Model.Results;
-using Xamarin.Forms;
+using System.Reactive.Linq;
+using Akavache;
 
 namespace UrGuide.Mobile.Services
 {
@@ -34,20 +33,16 @@ namespace UrGuide.Mobile.Services
 
         public async Task<Result<IEnumerable<Model.Posts.BidHistoryModel>>> GetBidHistoryAsync(string id)
         {
-            try
+            return await BlobCache.UserAccount.GetOrFetchObject($"bid_{id}", async () =>
             {
                 var bidHistory = await BidClient.HistoryAsync(id);
                 return Result.Of(Mapper.Map<IEnumerable<Model.Posts.BidHistoryModel>>(bidHistory));
-            }
-            catch (ApiException e)
-            {
-                return Result.Of<IEnumerable<Model.Posts.BidHistoryModel>>().WithErrors(e.Message);
-            }
+            }).Catch(Observable.Return(Result.Of<IEnumerable<Model.Posts.BidHistoryModel>>().WithErrors("Error occured")));
         }
 
         public async Task<Result<PostItem>> GetByIdAsync(string id)
         {
-            try
+            return await BlobCache.UserAccount.GetOrFetchObject($"post_{id}", async () =>
             {
                 var post = await Client.RetrieveAsync(id);
                 var model = Mapper.Map<PostItem>(post);
@@ -55,24 +50,16 @@ namespace UrGuide.Mobile.Services
                 if (!feedback.HasError)
                     model.FeedBack.ReplaceRange(feedback.Data);
                 return Result.Of(model);
-            }
-            catch (ApiException e)
-            {
-                return Result.Of<PostItem>().WithErrors(e.Message);
-            }
+            }).Catch(Observable.Return(Result.Of<PostItem>().WithErrors("Error occured")));
         }
 
         public async Task<Result<IEnumerable<Model.Lookup.CategoryModel>>> GetCategoriesAsync()
         {
-            try
+            return await BlobCache.UserAccount.GetOrFetchObject("categories", async () =>
             {
                 var categories = await LookupClient.CategoriesAsync();
                 return Result.Of(Mapper.Map<IEnumerable<Model.Lookup.CategoryModel>>(categories));
-            }
-            catch (ApiException e)
-            {
-                return Result.Of<IEnumerable<Model.Lookup.CategoryModel>>().WithErrors(e.Message);
-            }
+            }).Catch(Observable.Return(Result.Of<IEnumerable<Model.Lookup.CategoryModel>>().WithErrors("Error occured")));
         }
 
         public Task<IEnumerable<PostItem>> GetFavoriteAsync()

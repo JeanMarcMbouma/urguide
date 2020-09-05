@@ -15,9 +15,10 @@
              x:Class="UrGuide.Mobile.Views.Templates.PostListItemTemplate"
              x:DataType="m:PostItem">
     <Frame VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand"
-                   CornerRadius="8" 
+                   CornerRadius="8" Padding="0"
            >
-            <Grid RowDefinitions="70,Auto,Auto,Auto,*" ColumnDefinitions="70,*" Margin="0,0,0,-12">
+        <StackLayout Orientation="Vertical" Spacing="0" Padding="0">
+            <Grid RowDefinitions="70,Auto,Auto,*" ColumnDefinitions="70,*" Margin="12">
 
                 <ff:CachedImage Source="{Binding AuthorAvatar}"
                             Aspect="AspectFit" HeightRequest="46" WidthRequest="46"
@@ -130,14 +131,17 @@
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </StackLayout>
-                <!--Images-->
-            <StackLayout Grid.Row="3" Orientation="Vertical" Grid.ColumnSpan="2"
-                             VerticalOptions="StartAndExpand" Spacing="8">
+               
+            </Grid>
+            <!--Images-->
+            <StackLayout  Orientation="Vertical" 
+                             VerticalOptions="StartAndExpand" Spacing="8" >
                 <Label Text="{Binding Description}" 
-                           VerticalOptions="Start"/>
+                           VerticalOptions="Start" Margin="12" MaxLines="4"/>
+                <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" HeightRequest="300">
                 <CollectionView ItemsSource="{Binding Images}" 
                               VerticalOptions="Start" 
-                              HeightRequest="250" 
+                              HeightRequest="300" 
                               st:Transition.Group="{Binding Id}"
                               st:Transition.Name="PostImages"
                               >
@@ -174,7 +178,7 @@
                                 </VisualStateManager.VisualStateGroups>
 
                                 <ff:CachedImage Source="{Binding ImageBase64}" 
-                                                    HeightRequest="250"
+                                                    HeightRequest="300"
                                                     Aspect="AspectFill"
                                                     DownsampleToViewSize="True"
                                                     VerticalOptions="Start"/>
@@ -185,108 +189,100 @@
                         <LinearItemsLayout Orientation="Horizontal" ItemSpacing="4" />
                     </CollectionView.ItemsLayout>
                 </CollectionView>
-                <StackLayout Orientation="Horizontal" Spacing="8">
-                    <!-- Likes / dislikes buttons-->
-                    <StackLayout Orientation="Horizontal" Spacing="8">
-                        <Image Source="{FontImage FontFamily=far, 
+                    <StackLayout Orientation="Horizontal" Spacing="8" Padding="12" HeightRequest="40" VerticalOptions="End" HorizontalOptions="FillAndExpand"
+                             BackgroundColor="#80ffffff">
+                        <!-- Likes / dislikes buttons-->
+                        <StackLayout Orientation="Horizontal" Spacing="8">
+                            <Image Source="{FontImage FontFamily=far, 
                         Glyph={x:Static icons:FAI.ThumbsUp}, 
                         Color={StaticResource IconColor},Size=24}" >
-                            <Image.Triggers>
-                                <DataTrigger TargetType="Image" Binding="{Binding ReactionType}" Value="{x:Static vm:PostsViewModel.Like}" >
-                                    <Setter Property="Source" Value="{FontImage FontFamily=fas, 
+                                <Image.Triggers>
+                                    <DataTrigger TargetType="Image" Binding="{Binding ReactionType}" Value="{x:Static vm:PostsViewModel.Like}" >
+                                        <Setter Property="Source" Value="{FontImage FontFamily=fas, 
                                         Glyph={x:Static icons:FAI.ThumbsUp}, 
                                         Color={StaticResource IconColor},Size=24}"/>
-                                </DataTrigger>
-                            </Image.Triggers>
-                        </Image>
-                        <Label Text="{Binding Path=Likes,Mode=OneWay, Converter={StaticResource NumericToSocialUnitConverter}}" HorizontalOptions="Center" VerticalOptions="Center" />
-                        <StackLayout.GestureRecognizers>
-                            <TapGestureRecognizer 
+                                    </DataTrigger>
+                                </Image.Triggers>
+                            </Image>
+                            <Label Text="{Binding Path=Likes,Mode=OneWay, Converter={StaticResource NumericToSocialUnitConverter}}" HorizontalOptions="Center" VerticalOptions="Center" />
+                            <StackLayout.GestureRecognizers>
+                                <TapGestureRecognizer 
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostsViewModel}}, Path=LikeCommand}"
                                 CommandParameter="{Binding}"
                                 />
-                        </StackLayout.GestureRecognizers>
-                    </StackLayout>
-                    <StackLayout Orientation="Horizontal" Spacing="8">
-                        <Image Source="{FontImage FontFamily=far, 
+                            </StackLayout.GestureRecognizers>
+                        </StackLayout>
+                        <StackLayout Orientation="Horizontal" Spacing="8">
+                            <Image Source="{FontImage FontFamily=far, 
                         Glyph={x:Static icons:FAI.ThumbsDown}, 
                         Color={StaticResource IconColor},Size=24}" >
-                            <Image.Triggers>
-                                <DataTrigger TargetType="Image" Binding="{Binding ReactionType}" Value="{x:Static vm:PostsViewModel.DisLike}" >
-                                    <Setter Property="Source" Value="{FontImage FontFamily=fas, 
+                                <Image.Triggers>
+                                    <DataTrigger TargetType="Image" Binding="{Binding ReactionType}" Value="{x:Static vm:PostsViewModel.DisLike}" >
+                                        <Setter Property="Source" Value="{FontImage FontFamily=fas, 
                                         Glyph={x:Static icons:FAI.ThumbsDown}, 
                                         Color={StaticResource IconColor},Size=24}"/>
-                                </DataTrigger>
-                            </Image.Triggers>
-                        </Image>
-                        <Label Text="{Binding Path=Dislikes, Mode=OneWay, Converter={StaticResource NumericToSocialUnitConverter}}" HorizontalOptions="Center" VerticalOptions="Center" />
-                        <StackLayout.GestureRecognizers>
-                            <TapGestureRecognizer 
+                                    </DataTrigger>
+                                </Image.Triggers>
+                            </Image>
+                            <Label Text="{Binding Path=Dislikes, Mode=OneWay, Converter={StaticResource NumericToSocialUnitConverter}}" HorizontalOptions="Center" VerticalOptions="Center" />
+                            <StackLayout.GestureRecognizers>
+                                <TapGestureRecognizer 
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostsViewModel}}, Path=DislikeCommand}"
                                 CommandParameter="{Binding}"
                                 />
-                        </StackLayout.GestureRecognizers>
-                    </StackLayout>
-                    <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" Spacing="24">
-                        <Image Source="{FontImage FontFamily=fas, 
+                            </StackLayout.GestureRecognizers>
+                        </StackLayout>
+                        <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" Spacing="24">
+                            <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.Gavel}, 
                         Color={StaticResource IconColor},Size=24}" />
-                        <Label Text="{Binding BidCount}" FontAttributes="Bold"
+                            <Label Text="{Binding BidCount}" FontAttributes="Bold"
                                        Margin="-20,0,0,0" TranslationY="-8" TextColor="{StaticResource IconColor}"/>
-                        <StackLayout Orientation="Horizontal" Spacing="4">
-                            <StackLayout.Triggers>
-                                <DataTrigger TargetType="StackLayout" Binding="{Binding Reviews}" Value="0">
-                                    <Setter Property="IsVisible" Value="False"/>
-                                </DataTrigger>
-                            </StackLayout.Triggers>
-                            <Image Source="{FontImage FontFamily=far, 
+                            <StackLayout Orientation="Horizontal" Spacing="4">
+                                <StackLayout.Triggers>
+                                    <DataTrigger TargetType="StackLayout" Binding="{Binding Reviews}" Value="0">
+                                        <Setter Property="IsVisible" Value="False"/>
+                                    </DataTrigger>
+                                </StackLayout.Triggers>
+                                <Image Source="{FontImage FontFamily=far, 
                         Glyph={x:Static icons:FAI.Comment}, 
                         Color={StaticResource IconColor},Size=24}" />
-                            <Label Text="{Binding Reviews}" FontAttributes="Bold" 
+                                <Label Text="{Binding Reviews}" FontAttributes="Bold" 
                                    TextColor="{StaticResource IconColor}"
                                    TranslationY="-8"/>
-                        </StackLayout>
-                        <StackLayout Orientation="Horizontal" Spacing="4"
+                            </StackLayout>
+                            <StackLayout Orientation="Horizontal" Spacing="4"
                                      st:Transition.Group="{Binding Id}"
                                      st:Transition.Name="ItineraryCount">
-                            <Image Source="{FontImage FontFamily=fas, 
+                                <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.MapPin}, 
                         Color={StaticResource IconColor},Size=24}" />
-                            <Label Text="{Binding ItineraryCount}" FontAttributes="Bold"
+                                <Label Text="{Binding ItineraryCount}" FontAttributes="Bold"
                                             TranslationY="-8" TextColor="{StaticResource IconColor}"/>
+                            </StackLayout>
                         </StackLayout>
+                        <y:PancakeView BackgroundColor="{StaticResource IconColor}"
+                                       CornerRadius="25"
+                                       HeightRequest="50"
+                                       WidthRequest="50"
+                                       >
+                            <y:PancakeView.GestureRecognizers>
+                                <TapGestureRecognizer 
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostsViewModel}}, Path=ViewDetailsCommand}"
+                                    CommandParameter="{Binding}"
+                                    NumberOfTapsRequired="1"
+                                    />
+                            </y:PancakeView.GestureRecognizers>
+                            <y:PancakeView.Behaviors>
+                                <behaviors:ScaleInOutBehavior Scale="0.9" />
+                            </y:PancakeView.Behaviors>
+                            <Image Source="{FontImage FontFamily=fas, 
+                                Glyph={x:Static icons:FAI.ArrowRight}, 
+                                Color=White,Size=24}" VerticalOptions="Center" HorizontalOptions="Center"/>
+                        </y:PancakeView>
                     </StackLayout>
-                </StackLayout>
-                <Grid
-                       VerticalOptions="EndAndExpand"
-                       HorizontalOptions="EndAndExpand"
-                    Margin="0,12,0,0"
-                    >
-                    <y:PancakeView BackgroundColor="{StaticResource IconColor}"
-                                   VerticalOptions="FillAndExpand"
-                                   HorizontalOptions="EndAndExpand"
-                                   CornerRadius="25"
-                                   HeightRequest="50"
-                                   WidthRequest="50"
-                                   >
-                        <y:PancakeView.GestureRecognizers>
-                            <TapGestureRecognizer 
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostsViewModel}}, Path=ViewDetailsCommand}"
-                                CommandParameter="{Binding}"
-                                NumberOfTapsRequired="1"
-                                />
-                        </y:PancakeView.GestureRecognizers>
-                        <y:PancakeView.Behaviors>
-                            <behaviors:ScaleInOutBehavior Scale="0.9" />
-                        </y:PancakeView.Behaviors>
-                        <Image Source="{FontImage FontFamily=fas, 
-                            Glyph={x:Static icons:FAI.ArrowRight}, 
-                            Color=White,Size=24}" VerticalOptions="Center" HorizontalOptions="Center"/>
-                    </y:PancakeView>
-
                 </Grid>
-                
             </StackLayout>
-        </Grid>
-        </Frame>
+        </StackLayout>
+    </Frame>
 </ContentView>

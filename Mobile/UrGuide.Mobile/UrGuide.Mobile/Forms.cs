@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Akavache;
+using AutoMapper;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
@@ -77,6 +78,7 @@ namespace UrGuide.Mobile
             ConfigureServices(services);
             registerServices?.Invoke(services);
             Ioc = services.BuildServiceProvider();
+            BlobCache.ApplicationName = "UrGuide";
         }
 
         private static void RegisterRoutes()
