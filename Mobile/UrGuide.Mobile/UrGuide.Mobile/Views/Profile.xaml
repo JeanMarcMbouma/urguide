@@ -10,7 +10,7 @@
              xmlns:models="clr-namespace:UrGuide.Model.Users;assembly=UrGuide.Model" 
              xmlns:controls="clr-namespace:UrGuide.Mobile.Views.Controls" 
              xmlns:tpl="clr-namespace:UrGuide.Mobile.Views.Templates.Profile" 
-             xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers"
              BackgroundColor="#ececec"
              Shell.NavBarIsVisible="False"
              Title="Profile"
@@ -78,20 +78,19 @@
                     <StackLayout Orientation="Horizontal" VerticalOptions="CenterAndExpand" 
                                  HorizontalOptions="CenterAndExpand"
                                  >
-                        <Path Data="M448 0H64C28.7 0 0 28.7 0 64v288c0 35.3 28.7 64 64 64h96v84c0 7.1 5.8 12 12 12 2.4 0 4.9-.7 7.1-2.4L304 416h144c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64zm16 352c0 8.8-7.2 16-16 16H288l-12.8 9.6L208 428v-60H64c-8.8 0-16-7.2-16-16V64c0-8.8 7.2-16 16-16h384c8.8 0 16 7.2 16 16v288z"
-                              HeightRequest="24" WidthRequest="24"
-                              Aspect="Uniform"
-                              Stroke="White"
-                              Fill="White">
-                            <Path.Triggers>
-                                <DataTrigger TargetType="Path" Binding="{Binding Path=Mode}"
+                                <Image Source="{FontImage FontFamily=fas, 
+                                    Glyph={x:Static icons:FAI.Comment}, 
+                                    Color=White,Size=24}" >
+                                    <Image.Triggers>
+                                        <DataTrigger TargetType="Image" Binding="{Binding Path=Mode}"
                                              Value="{x:Static vm:ProfileDisplayMode.Reviews}">
-                                    <Setter Property="Fill" Value="{StaticResource FavoriteIcon}"/>
-                                    <Setter Property="Stroke" Value="{StaticResource FavoriteIcon}"/>
-                                </DataTrigger>
-                            </Path.Triggers>
-                        </Path>
-                        <Label Text="Reviews" FontSize="Subtitle" FontAttributes="Bold" Style="{StaticResource MenuTextColor}"/>
+                                            <Setter Property="Source" Value="{FontImage FontFamily=fas, 
+                                    Glyph={x:Static icons:FAI.Comment}, 
+                                    Color={StaticResource FavoriteIcon},Size=24}"/>
+                                        </DataTrigger>
+                                    </Image.Triggers>
+                                </Image>
+                                <Label Text="Reviews" FontSize="Subtitle" FontAttributes="Bold" Style="{StaticResource MenuTextColor}"/>
                         <StackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ViewReviewsCommand}"/>
                         </StackLayout.GestureRecognizers>
@@ -99,20 +98,19 @@
                     <BoxView BackgroundColor="White" WidthRequest="1" HorizontalOptions="End"  />
 
                     <StackLayout Grid.Column="1" Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
-                        <Path Data="M3 18h12v-2H3v2zM3 6v2h18V6H3zm0 7h18v-2H3v2z"
-                              HeightRequest="24" WidthRequest="24"
-                              Aspect="Uniform"
-                              Stroke="White"
-                              Fill="White">
-                            <Path.Triggers>
-                                <DataTrigger TargetType="Path" Binding="{Binding Path=Mode}"
+                                <Image Source="{FontImage FontFamily=fas, 
+                                    Glyph={x:Static icons:FAI.List}, 
+                                    Color=White,Size=24}" >
+                                    <Image.Triggers>
+                                        <DataTrigger TargetType="Image" Binding="{Binding Path=Mode}"
                                              Value="{x:Static vm:ProfileDisplayMode.Posts}">
-                                    <Setter Property="Fill" Value="{StaticResource FavoriteIcon}"/>
-                                    <Setter Property="Stroke" Value="{StaticResource FavoriteIcon}"/>
-                                </DataTrigger>
-                            </Path.Triggers>
-                        </Path>
-                        <Label Text="Posts" FontSize="Subtitle" FontAttributes="Bold" Style="{StaticResource MenuTextColor}"/>
+                                            <Setter Property="Source" Value="{FontImage FontFamily=fas, 
+                                    Glyph={x:Static icons:FAI.List}, 
+                                    Color={StaticResource FavoriteIcon},Size=24}"/>
+                                        </DataTrigger>
+                                    </Image.Triggers>
+                                </Image>
+                                <Label Text="Posts" FontSize="Subtitle" FontAttributes="Bold" Style="{StaticResource MenuTextColor}"/>
                         <StackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ViewPostsCommand}"/>
                         </StackLayout.GestureRecognizers>
@@ -121,20 +119,19 @@
                              VerticalOptions="StartAndExpand" HorizontalOptions="End" />
 
                     <StackLayout Grid.Column="2" Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
-                        <Path Data="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"
-                              HeightRequest="24" WidthRequest="24"
-                              Aspect="Uniform"
-                              Stroke="White"
-                              Fill="White">
-                        <Path.Triggers>
-                            <DataTrigger TargetType="Path" Binding="{Binding Path=Mode}"
+                                <Image Source="{FontImage FontFamily=fas, 
+                                    Glyph={x:Static icons:FAI.Th}, 
+                                    Color=White,Size=24}" >
+                                    <Image.Triggers>
+                                        <DataTrigger TargetType="Image" Binding="{Binding Path=Mode}"
                                              Value="{x:Static vm:ProfileDisplayMode.Gallery}">
-                                <Setter Property="Fill" Value="{StaticResource FavoriteIcon}"/>
-                                <Setter Property="Stroke" Value="{StaticResource FavoriteIcon}"/>
-                            </DataTrigger>
-                        </Path.Triggers>
-                        </Path>
-                        <Label Text="Gallery" FontSize="Subtitle" FontAttributes="Bold" Style="{StaticResource MenuTextColor}"/>
+                                            <Setter Property="Source" Value="{FontImage FontFamily=fas, 
+                                    Glyph={x:Static icons:FAI.Th}, 
+                                    Color={StaticResource FavoriteIcon},Size=24}"/>
+                                        </DataTrigger>
+                                    </Image.Triggers>
+                                </Image>
+                                <Label Text="Gallery" FontSize="Subtitle" FontAttributes="Bold" Style="{StaticResource MenuTextColor}"/>
                         <StackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ViewGalleryCommand}"/>
                         </StackLayout.GestureRecognizers>
@@ -153,23 +150,22 @@
                   AbsoluteLayout.LayoutFlags="PositionProportional" Rotation="180"
                   x:Name="floatingButton" Tapped="Expander_Tapped">
                 <Expander.Header>
-                    <y:PancakeView WidthRequest="64" HeightRequest="64" CornerRadius="32" 
-                               BackgroundColor="{StaticResource FavoriteIcon}"
-                               VerticalOptions="Center" HorizontalOptions="Start"
-                      IsClippedToBounds="True"  >
-                        <Path Data="M416 208H272V64c0-17.67-14.33-32-32-32h-32c-17.67 0-32 14.33-32 32v144H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h144v144c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32V304h144c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z"
-                          WidthRequest="24" HeightRequest="24"
-                          Stroke="{StaticResource IconColor}"
-                          Fill="{StaticResource IconColor}" Aspect="Uniform"
-                          VerticalOptions="Center" HorizontalOptions="Center">
-                            <Path.Triggers>
-                                <DataTrigger TargetType="Path" Binding="{Binding Source={Reference floatingButton},Path=IsExpanded}"
+                    <Frame  HorizontalOptions="Start" VerticalOptions="Center" CornerRadius="32" HeightRequest="64" WidthRequest="64"
+                            Padding="0" BackgroundColor="{StaticResource FavoriteIcon}">
+                    <Image Source="{FontImage FontFamily=fas, 
+                                    Glyph={x:Static icons:FAI.Plus}, 
+                                    Color=White,Size=24}" Aspect="AspectFit"
+                           HeightRequest="32" WidthRequest="32" HorizontalOptions="Center" VerticalOptions="Center">
+                        <Image.Triggers>
+                            <DataTrigger TargetType="Image" Binding="{Binding Source={Reference floatingButton},Path=IsExpanded}"
                                          Value="{x:Static x:Boolean.TrueString}">
-                                    <Setter Property="Rotation" Value="45"/>
-                                </DataTrigger>
-                            </Path.Triggers>
-                        </Path>
-                    </y:PancakeView>
+                                <Setter Property="Source" Value="{FontImage FontFamily=fas, 
+                                    Glyph={x:Static icons:FAI.Times}, 
+                                    Color=White,Size=24}"/>
+                            </DataTrigger>
+                        </Image.Triggers>
+                    </Image>
+                    </Frame>
                 </Expander.Header>
                 <StackLayout Orientation="Vertical" Spacing="8" Margin="0,10,0,10" VerticalOptions="FillAndExpand"
                          HorizontalOptions="FillAndExpand" BackgroundColor="{StaticResource IconColor}"

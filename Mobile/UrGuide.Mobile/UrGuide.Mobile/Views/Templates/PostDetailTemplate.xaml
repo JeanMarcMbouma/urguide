@@ -74,7 +74,7 @@
                            SelectedIndicatorColor="White"
                            IndicatorSize="12" BackgroundColor="#40000000"
                            HeightRequest="50"
-                           VerticalOptions="EndAndExpand"></IndicatorView>
+                           VerticalOptions="EndAndExpand" HideSingle="False"></IndicatorView>
             <Grid Grid.Row="1" RowDefinitions="70,Auto,Auto,Auto,Auto,*" ColumnDefinitions="70,*" 
                   HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" Margin="20">
 
@@ -200,12 +200,12 @@
                         <!--Like / dislike buttons-->
                         <StackLayout Orientation="Horizontal" Spacing="8">
                             <Image Source="{FontImage FontFamily=far, 
-                        Glyph={x:Static icons:FAI.ThumbsUp}, 
+                        Glyph={x:Static icons:FAI.Heart}, 
                         Color={StaticResource IconColor},Size=24}" >
                                 <Image.Triggers>
                                     <DataTrigger TargetType="Image" Binding="{Binding ReactionType}" Value="{x:Static vm:PostsViewModel.Like}" >
                                         <Setter Property="Source" Value="{FontImage FontFamily=fas, 
-                                        Glyph={x:Static icons:FAI.ThumbsUp}, 
+                                        Glyph={x:Static icons:FAI.Heart}, 
                                         Color={StaticResource IconColor},Size=24}"/>
                                     </DataTrigger>
                                 </Image.Triggers>
@@ -214,26 +214,6 @@
                             <StackLayout.GestureRecognizers>
                                 <TapGestureRecognizer 
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}, Path=LikeCommand}"
-                                CommandParameter="{Binding}"
-                                />
-                            </StackLayout.GestureRecognizers>
-                        </StackLayout>
-                        <StackLayout Orientation="Horizontal" Spacing="8">
-                            <Image Source="{FontImage FontFamily=far, 
-                        Glyph={x:Static icons:FAI.ThumbsDown}, 
-                        Color={StaticResource IconColor},Size=24}" >
-                                <Image.Triggers>
-                                    <DataTrigger TargetType="Image" Binding="{Binding ReactionType}" Value="{x:Static vm:PostsViewModel.DisLike}" >
-                                        <Setter Property="Source" Value="{FontImage FontFamily=fas, 
-                                        Glyph={x:Static icons:FAI.ThumbsDown}, 
-                                        Color={StaticResource IconColor},Size=24}"/>
-                                    </DataTrigger>
-                                </Image.Triggers>
-                            </Image>
-                            <Label Text="{Binding Path=Dislikes, Mode=OneWay, Converter={StaticResource NumericToSocialUnitConverter}}" HorizontalOptions="Center" VerticalOptions="Center" />
-                            <StackLayout.GestureRecognizers>
-                                <TapGestureRecognizer 
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}, Path=DislikeCommand}"
                                 CommandParameter="{Binding}"
                                 />
                             </StackLayout.GestureRecognizers>
@@ -300,7 +280,8 @@
                     </StackLayout>
                 </Expander>
                 <!--Reviews-->
-                <CollectionView Grid.Row="5" Grid.ColumnSpan="2" ItemSizingStrategy="MeasureAllItems" ItemsSource="{Binding FeedBack}" Margin="0,20,0,20">
+                <CollectionView Grid.Row="5" Grid.ColumnSpan="2" ItemSizingStrategy="MeasureAllItems" ItemsSource="{Binding FeedBack}"
+                                Margin="0,20,0,20">
                     <CollectionView.Header>
                         <StackLayout Orientation="Horizontal" Spacing="8"
                                     Padding="0,4,0,0">

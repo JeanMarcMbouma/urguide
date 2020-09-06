@@ -38,6 +38,7 @@ namespace UrGuide.Mobile.ViewModels
         {
             Selected.Favorite = !Selected.Favorite;
             await PostItemService.ToggleFavorites(Selected);
+            Xamarin.Forms.MessagingCenter.Send(this, "favorite", Selected);
         });
         public ICommand NewFeedBackCommand => _newFeedbackCommand ??= new Command(() =>
         {

@@ -128,6 +128,18 @@ namespace UrGuide.Mobile.ViewModels
                 });
             }
             LoadItemsCommand.Execute(null);
+            Xamarin.Forms.MessagingCenter.Subscribe<FavoriteViewModel, PostItem>(this, "favorite", (fvm, item) =>
+            {
+                var it = Items.FirstOrDefault(x => x.Id == item.Id);
+                if(it != null)
+                    it.Favorite = item.Favorite;
+            });
+            Xamarin.Forms.MessagingCenter.Subscribe<PostDetailViewModel, PostItem>(this, "favorite", (fvm, item) =>
+            {
+                var it = Items.FirstOrDefault(x => x.Id == item.Id);
+                if (it != null && it != Selected)
+                    it.Favorite = item.Favorite;
+            });
         }
     }
 }

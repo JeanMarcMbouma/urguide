@@ -17,8 +17,8 @@ namespace UrGuide.Mobile.Models
 
         public PostItem()
         {
-            Images = new HashSet<ImageFileModel>();
-            Categories = new HashSet<string>();
+            Images = new List<ImageFileModel>();
+            Categories = new List<string>();
         }
         public string Id { get; set; }
         public string Text { get; set; }
@@ -49,8 +49,8 @@ namespace UrGuide.Mobile.Models
         }
         public int BidCount { get; set; }
         public int ItineraryCount { get; set; }
-        public ICollection<string> Categories { get; protected set; }
-        public ICollection<ImageFileModel> Images { get; protected set; }
+        public List<string> Categories { get; set; }
+        public List<ImageFileModel> Images { get; set; }
         public string AuthorId { get; set; }
         public string Author { get; set; }
         public string AuthorAvatar { get; set; }

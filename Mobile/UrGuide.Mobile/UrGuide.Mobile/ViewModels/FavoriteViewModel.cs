@@ -42,6 +42,7 @@ namespace UrGuide.Mobile.ViewModels
             it.Favorite = false;
             await PostItemService.ToggleFavorites(it);
             Items.Remove(it);
+            Xamarin.Forms.MessagingCenter.Send(this, "favorite", it);
         });
         public ICommand ViewDetailsCommand => _viewDetailCommand ??=
             new AsyncCommand<PostItem>(async (item) =>

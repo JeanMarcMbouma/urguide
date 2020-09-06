@@ -5,12 +5,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:tt="clr-namespace:UrGuide.Mobile.Views.Templates"
              xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels"
+             xmlns:st="clr-namespace:Plugin.SharedTransitions;assembly=Plugin.SharedTransitions"
              mc:Ignorable="d"
              x:Class="UrGuide.Mobile.Views.Favorite"
              Shell.NavBarIsVisible="False"
              Title="Favorites"
              BackgroundColor="#ececec"
-             x:DataType="vm:FavoriteViewModel">
+             x:DataType="vm:FavoriteViewModel"
+             st:SharedTransitionShell.TransitionDuration="300"
+             st:SharedTransitionShell.TransitionSelectedGroup="{Binding Selected.Id}">
     <ContentPage.Resources>
         <DataTemplate x:Key="PostModelTemplate">
             <tt:FavoriteItemTemplate />
@@ -29,6 +32,10 @@
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout ItemSpacing="8" Orientation="Vertical" />
                 </CollectionView.ItemsLayout>
+                <CollectionView.EmptyView>
+                    <Label Text="Nothing here!" FontSize="Medium" FontAttributes="Bold"
+                            HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+                </CollectionView.EmptyView>
             </CollectionView>
         </StackLayout>
     </RefreshView>

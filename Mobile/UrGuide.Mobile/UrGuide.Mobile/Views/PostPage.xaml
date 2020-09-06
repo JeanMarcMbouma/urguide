@@ -24,7 +24,7 @@
     <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadItemsCommand}"
                      RefreshColor="{StaticResource FavoriteIcon}" HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand" >
         <ScrollView>
-        <StackLayout Orientation="Vertical" Margin="8" Spacing="8" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
+        <StackLayout Orientation="Vertical" Margin="8,8,8,20" Spacing="8" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
           >
                 <StackLayout.Triggers>
                     <DataTrigger TargetType="StackLayout" Binding="{Binding IsBusy}" Value="{x:Static x:Boolean.TrueString}">

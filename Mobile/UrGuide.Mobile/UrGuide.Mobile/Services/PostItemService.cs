@@ -17,14 +17,19 @@ namespace UrGuide.Mobile.Services
     {
         private const string Favorites_CacheKey = "favorites";
 
-        public PostItemService(PostsClient client, BidClient bidClient, FeedbackClient feedbackClient,
-                               LookupClient lookupClient, IMapper mapper)
+        public PostItemService(PostsClient client,
+                               BidClient bidClient,
+                               FeedbackClient feedbackClient,
+                               LookupClient lookupClient,
+                               IMapper mapper,
+                               IBlobCache cache)
         {
             Client = client ?? throw new ArgumentNullException(nameof(client));
             BidClient = bidClient ?? throw new ArgumentNullException(nameof(bidClient));
             FeedbackClient = feedbackClient ?? throw new ArgumentNullException(nameof(feedbackClient));
             LookupClient = lookupClient ?? throw new ArgumentNullException(nameof(lookupClient));
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            Cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
         public PostsClient Client { get; }
@@ -32,10 +37,11 @@ namespace UrGuide.Mobile.Services
         public FeedbackClient FeedbackClient { get; }
         public LookupClient LookupClient { get; }
         public IMapper Mapper { get; }
+        public IBlobCache Cache { get; }
 
         public async Task<Result<IEnumerable<Model.Posts.BidHistoryModel>>> GetBidHistoryAsync(string id)
         {
-            return await BlobCache.UserAccount.GetOrFetchObject($"bid_{id}", async () =>
+            return await Cache.GetOrFetchObject($"bid_{id}", async () =>
             {
                 var bidHistory = await BidClient.HistoryAsync(id);
                 return Result.Of(Mapper.Map<IEnumerable<Model.Posts.BidHistoryModel>>(bidHistory));
@@ -44,7 +50,7 @@ namespace UrGuide.Mobile.Services
 
         public async Task<Result<PostItem>> GetByIdAsync(string id)
         {
-            var item = await BlobCache.UserAccount.GetOrFetchObject($"post_{id}", async () =>
+            var item = await Cache.GetOrFetchObject($"post_{id}", async () =>
             {
                 var post = await Client.RetrieveAsync(id);
                 var model = Mapper.Map<PostItem>(post);
@@ -61,7 +67,7 @@ namespace UrGuide.Mobile.Services
 
         public async Task<Result<IEnumerable<Model.Lookup.CategoryModel>>> GetCategoriesAsync()
         {
-            return await BlobCache.UserAccount.GetOrFetchObject("categories", async () =>
+            return await Cache.GetOrFetchObject("categories", async () =>
             {
                 var categories = await LookupClient.CategoriesAsync();
                 return Result.Of(Mapper.Map<IEnumerable<Model.Lookup.CategoryModel>>(categories));
@@ -70,7 +76,7 @@ namespace UrGuide.Mobile.Services
 
         public async Task<IEnumerable<PostItem>> GetFavoriteAsync()
         {
-            return await BlobCache.UserAccount.GetOrCreateObject(Favorites_CacheKey, () => new List<PostItem>());
+            return await Cache.GetOrCreateObject(Favorites_CacheKey, () => new List<PostItem>());
         }
 
         public async Task<Result<IEnumerable<PostItem>>> GetItemsAsync()
@@ -130,7 +136,7 @@ namespace UrGuide.Mobile.Services
 
         public async Task ToggleFavorites(PostItem it)
         {
-            var favorites = await BlobCache.UserAccount.GetOrCreateObject(Favorites_CacheKey, () => new List<PostItem>());
+            var favorites = await Cache.GetOrCreateObject(Favorites_CacheKey, () => new List<PostItem>());
             var item = favorites.FirstOrDefault(f => f.Id.Equals(it.Id));
             if (item != null)
             {
@@ -141,8 +147,8 @@ namespace UrGuide.Mobile.Services
                 it.Favorite = true;
                 favorites.Add(it);
             }
-            await BlobCache.UserAccount.Invalidate(Favorites_CacheKey);
-            await BlobCache.UserAccount.InsertObject(Favorites_CacheKey, favorites);
+            await Cache.Invalidate(Favorites_CacheKey);
+            await Cache.InsertObject(Favorites_CacheKey, favorites);
         }
     }
 }

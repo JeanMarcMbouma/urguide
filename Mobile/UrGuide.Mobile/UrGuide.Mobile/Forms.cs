@@ -55,6 +55,8 @@ namespace UrGuide.Mobile
             services.AddScoped<DiscoverViewModel>();
 
             services.AddAutoMapper(typeof(PostProfile).Assembly);
+
+            services.AddSingleton((s) => BlobCache.LocalMachine);
         }
         public static void Init(Action<IServiceCollection> registerServices)
         {
