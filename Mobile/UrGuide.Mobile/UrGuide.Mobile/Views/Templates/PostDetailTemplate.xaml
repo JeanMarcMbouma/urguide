@@ -98,7 +98,7 @@
                     </Label>
                 </StackLayout>
                 <Image Source="{FontImage FontFamily=far, 
-                        Glyph={x:Static icons:FAI.Heart}, 
+                        Glyph={x:Static icons:FAI.Bookmark}, 
                         Color={StaticResource FavoriteIcon},Size=24}" Grid.Column="1"
                         HorizontalOptions="End" Margin="0,-24,0,0"
                    st:Transition.Name="FavIcon" >
@@ -109,7 +109,7 @@
                     <Image.Triggers>
                         <DataTrigger TargetType="Image" Binding="{Binding Favorite}" Value="{Static x:Boolean.TrueString}">
                             <Setter Property="Source" Value="{FontImage FontFamily=fas, 
-                        Glyph={x:Static icons:FAI.Heart}, 
+                        Glyph={x:Static icons:FAI.Bookmark}, 
                         Color={StaticResource FavoriteIcon},Size=24}"/>
                         </DataTrigger>
                     </Image.Triggers>

@@ -27,10 +27,11 @@ namespace UrGuide.Mobile.ViewModels
         private ICommand _searchCategoryCommand;
 
         public ICommand SearchCategoryCommand => _searchCategoryCommand ??= new AsyncCommand<CategoryModel>(async (model) => await _navigation.GotoAsync($"//discover?Category={model.Name}"));
-        public ICommand ToggleFavoriteCommand => _markAsFavoriteCommand ??= new Command<PostItem>(item =>
+        public ICommand ToggleFavoriteCommand => _markAsFavoriteCommand ??= new AsyncCommand<PostItem>(async item =>
         {
             var it = Items.First(x => x.Id == item.Id);
             it.Favorite = !it.Favorite;
+            await PostItemService.ToggleFavorites(it);
         });
 
         public ICommand LoadItemsCommand => _loadItemsCommand ??= new AsyncCommand(async () =>

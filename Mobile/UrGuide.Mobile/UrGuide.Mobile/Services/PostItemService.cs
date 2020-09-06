@@ -15,6 +15,8 @@ namespace UrGuide.Mobile.Services
 {
     class PostItemService : IPostItemService
     {
+        private const string Favorites_CacheKey = "favorites";
+
         public PostItemService(PostsClient client, BidClient bidClient, FeedbackClient feedbackClient,
                                LookupClient lookupClient, IMapper mapper)
         {
@@ -42,7 +44,7 @@ namespace UrGuide.Mobile.Services
 
         public async Task<Result<PostItem>> GetByIdAsync(string id)
         {
-            return await BlobCache.UserAccount.GetOrFetchObject($"post_{id}", async () =>
+            var item = await BlobCache.UserAccount.GetOrFetchObject($"post_{id}", async () =>
             {
                 var post = await Client.RetrieveAsync(id);
                 var model = Mapper.Map<PostItem>(post);
@@ -51,6 +53,10 @@ namespace UrGuide.Mobile.Services
                     model.FeedBack.ReplaceRange(feedback.Data);
                 return Result.Of(model);
             }).Catch(Observable.Return(Result.Of<PostItem>().WithErrors("Error occured")));
+            var favorites = await GetFavoriteAsync();
+            if (!item.HasError)
+                item.Data.Favorite = favorites.Any(f => f.Id == item.Data.Id);
+            return item;
         }
 
         public async Task<Result<IEnumerable<Model.Lookup.CategoryModel>>> GetCategoriesAsync()
@@ -62,83 +68,9 @@ namespace UrGuide.Mobile.Services
             }).Catch(Observable.Return(Result.Of<IEnumerable<Model.Lookup.CategoryModel>>().WithErrors("Error occured")));
         }
 
-        public Task<IEnumerable<PostItem>> GetFavoriteAsync()
+        public async Task<IEnumerable<PostItem>> GetFavoriteAsync()
         {
-            return Task.FromResult(new []{
-                new PostItem
-                {
-                    Id = "1",
-                    Author = "Jean Marc",
-                    AuthorAvatar = "http://urguide.azurewebsites.net/images/85e526dd-6b92-4700-b427-6c7d7fe40a45.png",
-                    AuthorId = Guid.Empty.ToString(),
-                    BidCount = 3,
-                    Categories = { "Sport", "Extreme", "Nature" },
-                    Text = "Tour around Azov sea",
-                    Description = "This is another tour that will help you discover the best out of a million",
-                    Dislikes = 1200,
-                    IsBidOptIn = true,
-                    HasReacted = true,
-                    Likes = 1502,
-                    ItineraryCount = 4,
-                    Price = "$20",
-                    Location = "Azov sea, Ukraine",
-                    Seats = 10,
-                    Images =  {
-                        new Model.Shared.ImageFileModel
-                        {
-                            ImageBase64 = "http://urguide.azurewebsites.net/images/362B092F-5A07-4B03-AA46-BFC181BC6392.png",
-                            Name = "Image 1"
-                        },
-                        new Model.Shared.ImageFileModel
-                        {
-                            ImageBase64 = "http://urguide.azurewebsites.net/images/A0733818-5052-4642-A650-E154E8539490.png",
-                            Name = "Image 2"
-                        }
-                    },
-                    StartDate = "04-Jul-2020",
-                    StartTime = "12:09",
-                    EndDate = "06-Jul-2020",
-                    EndTime = "11:00",
-                    PublicationDate = "11-May-2020 11:30:04",
-                    Itineraries = new List<Model.Posts.ItineraryModel>
-                    {
-                        new Model.Posts.ItineraryModel
-                        {
-                            Title = "Yaounde",
-                            Description = "The capital of Cameroon"
-                        },
-                        new Model.Posts.ItineraryModel
-                        {
-                            Title = "Douala",
-                            Description = "The economic capital of Cameroon"
-                        }
-                    },
-                    ReactionType = 1,
-                    Reviews = 2,
-                    FeedBack = new ObservableRangeCollection<Model.Shared.AuthoredFeedback>
-                    {
-                        new Model.Shared.AuthoredFeedback
-                        {
-                            Rating = 4,
-                            Text = "I love this guy",
-                            AuthorFullName = "Catherine Dubois",
-                            AuthorId = Guid.Empty.ToString(),
-                            AuthorImage = "http://urguide.azurewebsites.net/thumb/00000000-0000-0000-0000-000000000000.png",
-                            PublicationDate = "12-Jun-2020 12:45:02"
-                        },
-                        new Model.Shared.AuthoredFeedback
-                        {
-                            Rating = 5,
-                            Text = "Lucky you!",
-                            AuthorFullName = "Alain Dubois",
-                            AuthorId = Guid.Empty.ToString(),
-                            AuthorImage = "http://urguide.azurewebsites.net/thumb/00000000-0000-0000-0000-000000000000.png",
-                            PublicationDate = "12-Jun-2020 12:45:02"
-                        }
-                    },
-                    Favorite= true
-                }
-            }.AsEnumerable());
+            return await BlobCache.UserAccount.GetOrCreateObject(Favorites_CacheKey, () => new List<PostItem>());
         }
 
         public async Task<Result<IEnumerable<PostItem>>> GetItemsAsync()
@@ -146,7 +78,13 @@ namespace UrGuide.Mobile.Services
             try
             {
                 var posts = await Client.Last10Async();
-                return Result.Of(Mapper.Map<IEnumerable<PostItem>>(posts));
+                var favorites = await GetFavoriteAsync();
+                var items = Mapper.Map<IEnumerable<PostItem>>(posts).Select(x =>
+                    {
+                        x.Favorite = favorites.Any(f => f.Id == x.Id);
+                        return x;
+                    });
+                return Result.Of(items);
             }
             catch (ApiException e)
             {
@@ -188,6 +126,23 @@ namespace UrGuide.Mobile.Services
 
                 return Result.Of<IEnumerable<DiscoverItem>>().WithErrors(e.Message);
             }
+        }
+
+        public async Task ToggleFavorites(PostItem it)
+        {
+            var favorites = await BlobCache.UserAccount.GetOrCreateObject(Favorites_CacheKey, () => new List<PostItem>());
+            var item = favorites.FirstOrDefault(f => f.Id.Equals(it.Id));
+            if (item != null)
+            {
+                item.Favorite = false;
+                favorites.Remove(item);
+            } else
+            {
+                it.Favorite = true;
+                favorites.Add(it);
+            }
+            await BlobCache.UserAccount.Invalidate(Favorites_CacheKey);
+            await BlobCache.UserAccount.InsertObject(Favorites_CacheKey, favorites);
         }
     }
 }

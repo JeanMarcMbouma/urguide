@@ -15,278 +15,220 @@
              x:Class="UrGuide.Mobile.Views.Templates.FavoriteItemTemplate"
              x:DataType="m:PostItem">
     <Frame VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand"
-                   CornerRadius="8" 
+                   CornerRadius="8" Padding="0"
            >
-        <Grid RowDefinitions="70,Auto,Auto,Auto,*" ColumnDefinitions="70,*" Margin="0,0,0,-12">
+        <StackLayout Orientation="Vertical" Spacing="0" Padding="0">
+            <Grid RowDefinitions="70,Auto,Auto,*" ColumnDefinitions="70,*" Margin="12">
 
-            <ff:CachedImage Source="{Binding AuthorAvatar}"
+                <ff:CachedImage Source="{Binding AuthorAvatar}"
                             Aspect="AspectFit" HeightRequest="46" WidthRequest="46"
                                 st:Transition.Name="AuthorAvatar"
                                 st:Transition.Group="{Binding Id}">
-            </ff:CachedImage>
+                </ff:CachedImage>
 
-            <StackLayout Grid.Column="1" VerticalOptions="StartAndExpand" Orientation="Vertical" Spacing="12"
+                <StackLayout Grid.Column="1" VerticalOptions="StartAndExpand" Orientation="Vertical" Spacing="12"
                              Margin="8" st:Transition.Name="Author" st:Transition.Group="{Binding Id}">
-                <Label Text="{Binding Author}" FontSize="Medium" 
+                    <Label Text="{Binding Author}" FontSize="Medium" 
                        FontAttributes="Bold"/>
 
-                <Label FontSize="Small">
-                    <Label.Text>
-                        <MultiBinding StringFormat="{}{0} {1}">
-                            <Binding Path="PublicationDate"/>
-                            <Binding Path="Countdown.Left"/>
-                        </MultiBinding>
-                    </Label.Text>
-                </Label>
-            </StackLayout>
-            <Image Source="{FontImage FontFamily=far, 
-                        Glyph={x:Static icons:FAI.Heart}, 
+                    <Label FontSize="Small">
+                        <Label.Text>
+                            <MultiBinding StringFormat="{}{0} {1}">
+                                <Binding Path="PublicationDate"/>
+                                <Binding Path="Countdown.Left"/>
+                            </MultiBinding>
+                        </Label.Text>
+                    </Label>
+                </StackLayout>
+                <Image Source="{FontImage FontFamily=far, 
+                        Glyph={x:Static icons:FAI.Bookmark}, 
                         Color={StaticResource FavoriteIcon},Size=24}" Grid.Column="1"
                         HorizontalOptions="End" Margin="0,-24,0,0"
                    st:Transition.Name="FavIcon" st:Transition.Group="{Binding Id}">
-                <Image.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FavoriteViewModel}}, Path=ToggleFavoriteCommand}"
+                    <Image.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FavoriteViewModel}}, Path=RemoveFavoriteCommand}"
                                           CommandParameter="{Binding}" NumberOfTapsRequired="1"/>
-                </Image.GestureRecognizers>
-                <Image.Triggers>
-                    <DataTrigger TargetType="Image" Binding="{Binding Favorite}" Value="{Static x:Boolean.TrueString}">
-                        <Setter Property="Source" Value="{FontImage FontFamily=fas, 
-                        Glyph={x:Static icons:FAI.Heart}, 
+                    </Image.GestureRecognizers>
+                    <Image.Triggers>
+                        <DataTrigger TargetType="Image" Binding="{Binding Favorite}" Value="{Static x:Boolean.TrueString}">
+                            <Setter Property="Source" Value="{FontImage FontFamily=fas, 
+                        Glyph={x:Static icons:FAI.Bookmark}, 
                         Color={StaticResource FavoriteIcon},Size=24}"/>
-                    </DataTrigger>
-                </Image.Triggers>
-            </Image>
-            <!-- Hours-->
-            <StackLayout st:Transition.Name="Hours" st:Transition.Group="{Binding Id}" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Vertical" VerticalOptions="StartAndExpand" Spacing="12">
-                <StackLayout Orientation="Horizontal" Spacing="8">
-                    <Image Source="{FontImage FontFamily=fas, 
+                        </DataTrigger>
+                    </Image.Triggers>
+                </Image>
+                <!-- Hours-->
+                <StackLayout st:Transition.Name="Hours" st:Transition.Group="{Binding Id}" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Vertical" VerticalOptions="StartAndExpand" Spacing="12">
+                    <StackLayout Orientation="Horizontal" Spacing="8">
+                        <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.MapPin}, 
                         Color={StaticResource IconColor},Size=24}" WidthRequest="24"/>
-                    <Label Text="{Binding Location, StringFormat='Place: {0}'}" FontSize="Medium" FontAttributes="Bold"/>
-                </StackLayout>
-                <StackLayout Orientation="Horizontal" Spacing="8">
-                    <Image Source="{FontImage FontFamily=fas, 
+                        <Label Text="{Binding Location, StringFormat='Place: {0}'}" FontSize="Medium" FontAttributes="Bold"/>
+                    </StackLayout>
+                    <StackLayout Orientation="Horizontal" Spacing="8">
+                        <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.DollarSign}, 
                         Color={StaticResource IconColor},Size=24}" WidthRequest="24"/>
-                    <Label Text="{Binding Price, StringFormat='Budget: {0}'}" FontSize="Medium" FontAttributes="Bold"/>
-                </StackLayout>
-                <StackLayout Spacing="8" Orientation="Horizontal">
-                    <Image Source="{FontImage FontFamily=fas, 
+                        <Label Text="{Binding Price, StringFormat='Budget: {0}'}" FontSize="Medium" FontAttributes="Bold"/>
+                    </StackLayout>
+                    <StackLayout Spacing="8" Orientation="Horizontal">
+                        <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.Users}, 
                         Color={StaticResource IconColor},Size=24}" WidthRequest="24" />
-                    <Label Text="{Binding Seats, StringFormat='Seats: {0}'}" FontSize="Medium" FontAttributes="Bold"/>
-                </StackLayout>
-                <Image Source="{FontImage FontFamily=fas, 
+                        <Label Text="{Binding Seats, StringFormat='Seats: {0}'}" FontSize="Medium" FontAttributes="Bold"/>
+                    </StackLayout>
+                    <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.Clock}, 
                         Color={StaticResource IconColor},Size=24}" HorizontalOptions="Start" />
-                <Grid ColumnDefinitions="10,*" RowDefinitions="Auto,*" RowSpacing="5" Margin="10,-14,0,0">
-                    <BoxView Grid.RowSpan="2" HorizontalOptions="Start" VerticalOptions="StartAndExpand" 
+                    <Grid ColumnDefinitions="10,*" RowDefinitions="Auto,*" RowSpacing="5" Margin="10,-14,0,0">
+                        <BoxView Grid.RowSpan="2" HorizontalOptions="Start" VerticalOptions="StartAndExpand" 
                                      WidthRequest="2"
                                      BackgroundColor="{StaticResource IconColor}"/>
-                    <BoxView HorizontalOptions="StartAndExpand"  VerticalOptions="Center" WidthRequest="8" HeightRequest="2"
+                        <BoxView HorizontalOptions="StartAndExpand"  VerticalOptions="Center" WidthRequest="8" HeightRequest="2"
                                      BackgroundColor="{StaticResource IconColor}"
                                      CornerRadius="4"/>
-                    <BoxView Grid.Row="1" HorizontalOptions="StartAndExpand"  VerticalOptions="Center" WidthRequest="8" HeightRequest="2"
+                        <BoxView Grid.Row="1" HorizontalOptions="StartAndExpand"  VerticalOptions="Center" WidthRequest="8" HeightRequest="2"
                                      BackgroundColor="{StaticResource IconColor}"
                                      CornerRadius="4"/>
-                    <Label Grid.Column="1" FontSize="Small" FontAttributes="Bold"  >
-                        <Label.FormattedText>
-                            <FormattedString>
-                                <FormattedString.Spans>
-                                    <Span Text="{Binding StartDate}"/>
-                                    <Span Text=" "/>
-                                    <Span Text="{Binding StartTime}"/>
-                                </FormattedString.Spans>
-                            </FormattedString>
-                        </Label.FormattedText>
-                    </Label>
-                    <Label Grid.Column="1" Grid.Row="1" FontSize="Small" FontAttributes="Bold" VerticalOptions="Center">
-                        <Label.FormattedText>
-                            <FormattedString>
-                                <FormattedString.Spans>
-                                    <Span Text="{Binding EndDate}"/>
-                                    <Span Text=" "/>
-                                    <Span Text="{Binding EndTime}"/>
-                                </FormattedString.Spans>
-                            </FormattedString>
-                        </Label.FormattedText>
-                    </Label>
-                </Grid>
+                        <Label Grid.Column="1" FontSize="Small" FontAttributes="Bold"  >
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <FormattedString.Spans>
+                                        <Span Text="{Binding StartDate}"/>
+                                        <Span Text=" "/>
+                                        <Span Text="{Binding StartTime}"/>
+                                    </FormattedString.Spans>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Label Grid.Column="1" Grid.Row="1" FontSize="Small" FontAttributes="Bold" VerticalOptions="Center">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <FormattedString.Spans>
+                                        <Span Text="{Binding EndDate}"/>
+                                        <Span Text=" "/>
+                                        <Span Text="{Binding EndTime}"/>
+                                    </FormattedString.Spans>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </Grid>
 
-            </StackLayout>
-            <!--Categories-->
-            <StackLayout Grid.ColumnSpan="2" Grid.Row="2" VerticalOptions="StartAndExpand" 
+                </StackLayout>
+                <!--Categories-->
+                <StackLayout Grid.ColumnSpan="2" Grid.Row="2" VerticalOptions="StartAndExpand" 
                              Orientation="Horizontal" Spacing="8"
                              BindableLayout.ItemsSource="{Binding Categories}"
                              st:Transition.Group="{Binding Id}"
                              st:Transition.Name="Categories"
                              Margin="0,8,0,0">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="{x:Type x:String}">
-                        <Frame CornerRadius="4" Padding="8" HasShadow="True" BackgroundColor="{StaticResource IconColor}">
-                            <Label Text="{Binding}" FontSize="Small" FontAttributes="Bold" 
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="{x:Type x:String}">
+                            <Frame CornerRadius="4" Padding="8" HasShadow="True" BackgroundColor="{StaticResource IconColor}">
+                                <Label Text="{Binding}" FontSize="Small" FontAttributes="Bold" 
                                            TextColor="White"/>
-                        </Frame>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </StackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </StackLayout>
+
+            </Grid>
             <!--Images-->
-            <StackLayout Grid.Row="3" Orientation="Vertical" Grid.ColumnSpan="2"
-                             VerticalOptions="StartAndExpand" Spacing="8">
+            <StackLayout  Orientation="Vertical" 
+                             VerticalOptions="StartAndExpand" Spacing="8" >
                 <Label Text="{Binding Description}" 
-                           VerticalOptions="Start"/>
-                <CollectionView ItemsSource="{Binding Images}" 
+                           VerticalOptions="Start" Margin="12" MaxLines="4"/>
+                <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" HeightRequest="300">
+                    <CollectionView ItemsSource="{Binding Images}" 
                               VerticalOptions="Start" 
-                              HeightRequest="250" 
+                              HeightRequest="300" 
                               st:Transition.Group="{Binding Id}"
                               st:Transition.Name="PostImages"
                               >
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="shared:ImageFileModel">
-                            <StackLayout>
-                                <VisualStateManager.VisualStateGroups>
-                                    <VisualStateGroup x:Name="CommonStates">
-                                        <VisualState x:Name="CurrentItem">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale"
-                                        Value="1.1" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState x:Name="PreviousItem">
-                                            <VisualState.Setters>
-                                                <Setter Property="Opacity"
-                                        Value="0.5" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState x:Name="NextItem">
-                                            <VisualState.Setters>
-                                                <Setter Property="Opacity"
-                                        Value="0.5" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState x:Name="DefaultItem">
-                                            <VisualState.Setters>
-                                                <Setter Property="Opacity"
-                                        Value="0.25" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateManager.VisualStateGroups>
-
-                                <ff:CachedImage Source="{Binding ImageBase64}" 
-                                                    HeightRequest="250"
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="shared:ImageFileModel">
+                                <StackLayout>
+                                    <ff:CachedImage Source="{Binding ImageBase64}" 
+                                                    HeightRequest="300"
                                                     Aspect="AspectFill"
-                                                    DownsampleToViewSize="True"
                                                     VerticalOptions="Start"/>
-                            </StackLayout>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                    <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="4" />
-                    </CollectionView.ItemsLayout>
-                </CollectionView>
-                <StackLayout Orientation="Horizontal" Spacing="8">
-                    <!-- Likes / dislikes buttons-->
-                    <StackLayout Orientation="Horizontal" Spacing="8">
-                        <Image Source="{FontImage FontFamily=far, 
-                        Glyph={x:Static icons:FAI.ThumbsUp}, 
-                        Color={StaticResource IconColor},Size=24}" >
-                            <Image.Triggers>
-                                <DataTrigger TargetType="Image" Binding="{Binding ReactionType}" Value="{x:Static vm:FavoriteViewModel.Like}" >
-                                    <Setter Property="Source" Value="{FontImage FontFamily=fas, 
-                                        Glyph={x:Static icons:FAI.ThumbsUp}, 
-                                        Color={StaticResource IconColor},Size=24}"/>
-                                </DataTrigger>
-                            </Image.Triggers>
-                        </Image>
-                        <Label Text="{Binding Path=Likes,Mode=OneWay, Converter={StaticResource NumericToSocialUnitConverter}}" HorizontalOptions="Center" VerticalOptions="Center" />
-                        <StackLayout.GestureRecognizers>
-                            <TapGestureRecognizer 
+                                </StackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Horizontal" ItemSpacing="4" />
+                        </CollectionView.ItemsLayout>
+                    </CollectionView>
+                    <StackLayout Orientation="Horizontal" Spacing="8" Padding="12" HeightRequest="40" VerticalOptions="End" HorizontalOptions="FillAndExpand"
+                             BackgroundColor="#90000000">
+                        <!-- Likes / dislikes buttons-->
+                        <StackLayout Orientation="Horizontal" Spacing="8">
+                            <Image Source="{FontImage FontFamily=far, 
+                        Glyph={x:Static icons:FAI.Heart}, 
+                        Color=White,Size=24}" >
+                                <Image.Triggers>
+                                    <DataTrigger TargetType="Image" Binding="{Binding ReactionType}" Value="{x:Static vm:FavoriteViewModel.Like}" >
+                                        <Setter Property="Source" Value="{FontImage FontFamily=fas, 
+                                        Glyph={x:Static icons:FAI.Heart}, 
+                                        Color=White,Size=24}"/>
+                                    </DataTrigger>
+                                </Image.Triggers>
+                            </Image>
+                            <Label Text="{Binding Path=Likes,Mode=OneWay, Converter={StaticResource NumericToSocialUnitConverter}}" 
+                                   HorizontalOptions="Center" VerticalOptions="Center" TextColor="White"/>
+                            <StackLayout.GestureRecognizers>
+                                <TapGestureRecognizer 
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FavoriteViewModel}}, Path=LikeCommand}"
                                 CommandParameter="{Binding}"
                                 />
-                        </StackLayout.GestureRecognizers>
-                    </StackLayout>
-                    <StackLayout Orientation="Horizontal" Spacing="8">
-                        <Image Source="{FontImage FontFamily=far, 
-                        Glyph={x:Static icons:FAI.ThumbsDown}, 
-                        Color={StaticResource IconColor},Size=24}" >
-                            <Image.Triggers>
-                                <DataTrigger TargetType="Image" Binding="{Binding ReactionType}" Value="{x:Static vm:FavoriteViewModel.DisLike}" >
-                                    <Setter Property="Source" Value="{FontImage FontFamily=fas, 
-                                        Glyph={x:Static icons:FAI.ThumbsDown}, 
-                                        Color={StaticResource IconColor},Size=24}"/>
-                                </DataTrigger>
-                            </Image.Triggers>
-                        </Image>
-                        <Label Text="{Binding Path=Dislikes, Mode=OneWay, Converter={StaticResource NumericToSocialUnitConverter}}" HorizontalOptions="Center" VerticalOptions="Center" />
-                        <StackLayout.GestureRecognizers>
-                            <TapGestureRecognizer 
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FavoriteViewModel}}, Path=DislikeCommand}"
-                                CommandParameter="{Binding}"
-                                />
-                        </StackLayout.GestureRecognizers>
-                    </StackLayout>
-                    <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" Spacing="24">
-                        <Image Source="{FontImage FontFamily=fas, 
-                        Glyph={x:Static icons:FAI.Gavel}, 
-                        Color={StaticResource IconColor},Size=24}" />
-                        <Label Text="{Binding BidCount}" FontAttributes="Bold"
-                                       Margin="-20,0,0,0" TranslationY="-8" TextColor="{StaticResource IconColor}"/>
-                        <StackLayout Orientation="Horizontal" Spacing="4">
-                            <StackLayout.Triggers>
-                                <DataTrigger TargetType="StackLayout" Binding="{Binding Reviews}" Value="0">
-                                    <Setter Property="IsVisible" Value="False"/>
-                                </DataTrigger>
-                            </StackLayout.Triggers>
-                            <Image Source="{FontImage FontFamily=far, 
-                        Glyph={x:Static icons:FAI.Comment}, 
-                        Color={StaticResource IconColor},Size=24}" />
-                            <Label Text="{Binding Reviews}" FontAttributes="Bold" 
-                                   TextColor="{StaticResource IconColor}"
-                                   TranslationY="-8"/>
+                            </StackLayout.GestureRecognizers>
                         </StackLayout>
-                        <StackLayout Orientation="Horizontal" Spacing="4"
+                        <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" Spacing="24">
+                            <Image Source="{FontImage FontFamily=fas, 
+                        Glyph={x:Static icons:FAI.Gavel}, 
+                        Color=White,Size=24}" />
+                            <Label Text="{Binding BidCount}" FontAttributes="Bold"
+                                       Margin="-20,0,0,0" TranslationY="-8" TextColor="White"/>
+                            <StackLayout Orientation="Horizontal" Spacing="4">
+                                <StackLayout.Triggers>
+                                    <DataTrigger TargetType="StackLayout" Binding="{Binding Reviews}" Value="0">
+                                        <Setter Property="IsVisible" Value="False"/>
+                                    </DataTrigger>
+                                </StackLayout.Triggers>
+                                <Image Source="{FontImage FontFamily=far, 
+                        Glyph={x:Static icons:FAI.Comment}, 
+                        Color=White,Size=24}" />
+                                <Label Text="{Binding Reviews}" FontAttributes="Bold" 
+                                   TextColor="White"
+                                   TranslationY="-8"/>
+                            </StackLayout>
+                            <StackLayout Orientation="Horizontal" Spacing="4"
                                      st:Transition.Group="{Binding Id}"
                                      st:Transition.Name="ItineraryCount">
-                            <Image Source="{FontImage FontFamily=fas, 
+                                <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.MapPin}, 
-                        Color={StaticResource IconColor},Size=24}" />
-                            <Label Text="{Binding ItineraryCount}" FontAttributes="Bold"
-                                            TranslationY="-8" TextColor="{StaticResource IconColor}"/>
+                        Color=White,Size=24}" />
+                                <Label Text="{Binding ItineraryCount}" FontAttributes="Bold"
+                                            TranslationY="-8" TextColor="White"/>
+                            </StackLayout>
+                            <StackLayout HorizontalOptions="EndAndExpand" Orientation="Horizontal"
+                                       >
+                                <StackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer 
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FavoriteViewModel}}, Path=ViewDetailsCommand}"
+                                    CommandParameter="{Binding}"
+                                    NumberOfTapsRequired="1"
+                                    />
+                                </StackLayout.GestureRecognizers>
+                                <Image Source="{FontImage FontFamily=fas, 
+                                Glyph={x:Static icons:FAI.ArrowRight}, 
+                                Color=White,Size=24}" VerticalOptions="Center" HorizontalOptions="Center"/>
+                            </StackLayout>
                         </StackLayout>
+
                     </StackLayout>
-                </StackLayout>
-                <Grid
-                       VerticalOptions="EndAndExpand"
-                       HorizontalOptions="EndAndExpand"
-                    Margin="0,12,0,0"
-                    >
-                    <y:PancakeView BackgroundColor="{StaticResource IconColor}"
-                                   VerticalOptions="FillAndExpand"
-                                   HorizontalOptions="EndAndExpand"
-                                   CornerRadius="25"
-                                   HeightRequest="50"
-                                   WidthRequest="50"
-                                   >
-                        <y:PancakeView.GestureRecognizers>
-                            <TapGestureRecognizer 
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FavoriteViewModel}}, Path=ViewDetailsCommand}"
-                                CommandParameter="{Binding}"
-                                NumberOfTapsRequired="1"
-                                />
-                        </y:PancakeView.GestureRecognizers>
-                        <y:PancakeView.Behaviors>
-                            <behaviors:ScaleInOutBehavior Scale="0.9" />
-                        </y:PancakeView.Behaviors>
-                        <Image Source="{FontImage FontFamily=fas, 
-                            Glyph={x:Static icons:FAI.ArrowRight}, 
-                            Color=White,Size=24}" VerticalOptions="Center" HorizontalOptions="Center"/>
-                    </y:PancakeView>
-
                 </Grid>
-
             </StackLayout>
-        </Grid>
+        </StackLayout>
     </Frame>
 </ContentView>

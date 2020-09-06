@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UrGuide.Mobile.ViewModels;
+﻿using UrGuide.Mobile.ViewModels;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -16,6 +11,12 @@ namespace UrGuide.Mobile.Views
         {
             InitializeComponent();
             BindingContext = Forms.Ioc.GetService<FavoriteViewModel>();
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            (BindingContext as FavoriteViewModel).LoadItemsCommand.Execute(null);
         }
     }
 }

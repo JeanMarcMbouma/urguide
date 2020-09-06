@@ -15,5 +15,6 @@ namespace UrGuide.Mobile.Contracts
         Task<Result<PostItem>> GetByIdAsync(string id);
         Task<Result<IEnumerable<Model.Shared.AuthoredFeedback>>> GetPostFeedbackAsync(string id, int pageNumber = 1);
         Task<Result<IEnumerable<Model.Posts.BidHistoryModel>>> GetBidHistoryAsync(string id);
+        Task ToggleFavorites(PostItem it);
     }
 }

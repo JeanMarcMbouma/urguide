@@ -34,9 +34,10 @@ namespace UrGuide.Mobile.ViewModels
                 return r.Result;
             });
         });
-        public ICommand ToggleFavoriteCommand => _markAsFavoriteCommand ??= new Command(() =>
+        public ICommand ToggleFavoriteCommand => _markAsFavoriteCommand ??= new AsyncCommand(async () =>
         {
             Selected.Favorite = !Selected.Favorite;
+            await PostItemService.ToggleFavorites(Selected);
         });
         public ICommand NewFeedBackCommand => _newFeedbackCommand ??= new Command(() =>
         {

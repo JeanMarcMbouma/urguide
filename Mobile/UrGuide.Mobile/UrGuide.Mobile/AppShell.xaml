@@ -16,7 +16,7 @@
         <FontImageSource x:Key="HomeFontIcon" FontFamily="fas" Glyph="&#xf015;" />
         <FontImageSource x:Key="SearchFontIcon" FontFamily="fas" Glyph="&#xf002;" />
         <FontImageSource x:Key="BellFontIcon" FontFamily="fas" Glyph="&#xf0f3;" />
-        <FontImageSource x:Key="FavoriteFontIcon" FontFamily="fas" Glyph="&#xf004;" />
+        <FontImageSource x:Key="FavoriteFontIcon" FontFamily="fas" Glyph="&#xf02e;" />
         <FontImageSource x:Key="ProfileFontIcon" FontFamily="fas" Glyph="&#xf2bd;" />
     </st:SharedTransitionShell.Resources>
     <!-- Your Pages -->
@@ -34,7 +34,7 @@
         <Tab Title="Notifications" Icon="{StaticResource BellFontIcon}">
             <ShellContent Route="messages" ContentTemplate="{DataTemplate local:Notifications}" />
         </Tab>
-        <Tab Title="Favorite" Icon="{StaticResource FavoriteFontIcon}">
+        <Tab Title="Saved" Icon="{StaticResource FavoriteFontIcon}">
             <ShellContent Route="favorite" ContentTemplate="{DataTemplate local:Favorite}" />
         </Tab>
         <Tab Title="Profile" Icon="{StaticResource ProfileFontIcon}">
