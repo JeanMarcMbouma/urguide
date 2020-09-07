@@ -110,7 +110,7 @@ function ClientProfile() {
 
 
     const profilePicGrid = (
-        <Grid item xs={12}>
+        <Grid item xs={12} >
             <div className="edit-avatar-wrapper">
                 {values.profileImage ?
 

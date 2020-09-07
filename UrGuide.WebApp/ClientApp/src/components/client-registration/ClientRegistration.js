@@ -31,9 +31,7 @@ import { useDataContext, ActionTypes } from "../../data/GlobalDataContext";
 function Navigation() {
   return (
     <Container>
-      <div className="register-avatar-wrapper">
-        <div className="register-avatar"></div>
-      </div>
+
       <div className="typo">
         <Typography component="h1" variant="h5" className="text-center">
           Sign up as
@@ -46,7 +44,6 @@ function Navigation() {
               color="inherit"
               className="navigator-link"
               href="sign-up"
-              style={{ textDecoration: "none", color: "black" }}
             >
               A TOURIST
             </Link>
@@ -54,9 +51,9 @@ function Navigation() {
           <Grid item xs={5} sm={6} className="guide-btn text-center">
             <Link
               color="inherit"
-              className="navigator-link"
+              className="navigator-link-2"
               href="guide/sign-up"
-              style={{ textDecoration: "none", color: "whitesmoke" }}
+             
             >
               A GUIDE
             </Link>

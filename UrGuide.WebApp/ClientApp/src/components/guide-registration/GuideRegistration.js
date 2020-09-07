@@ -372,7 +372,7 @@ export default function GuideRegistration() {
         return (
             <div className="guide-registration-wrapper">
                 <Box mt={2} mb={10}>
-                    <Stepper activeStep={activeStep} alternativeLabel>
+                    <Stepper style={{ backgroundColor:`transparent` }} activeStep={activeStep} alternativeLabel>
                         {steps.map(label => (
                             <Step key={label}>
                                 <StepLabel>{label}</StepLabel>

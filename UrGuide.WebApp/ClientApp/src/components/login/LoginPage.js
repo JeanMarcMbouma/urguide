@@ -29,6 +29,7 @@ import { LoginModel } from './../../api'
 import { HttpClientFactory } from './../../httpclient'
 import authService from '../api-authorization/AuthService';
 import { useDataContext, ActionTypes } from "../../data/GlobalDataContext";
+import Logo from '../../Logo.png';
 
 function Copyright() {
     return (
@@ -305,8 +306,9 @@ export class LoginPage extends Component  {
                     >
                         <div className="login-paper">
                             <Typography component="h1" variant="h5" className="text-center">
-                                Sign in
+                                <img className='logo' src={Logo} alt='Logo' />
                             </Typography>
+                        
                             <form className="login-form" noValidate>
                                 
                                 <Container component="main" maxWidth="xs">

@@ -8,6 +8,8 @@ import {
     Avatar,
     CardHeader,
     CircularProgress,
+    Paper
+
 } from "@material-ui/core";
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import ChatBubbleOutlineOutlinedIcon from '@material-ui/icons/ChatBubbleOutlineOutlined';
@@ -131,7 +133,7 @@ export default function Discover() {
     async function loadMoreResult() {
    
         var element = document.getElementById("search-location");
-        if (element === undefined)
+        if (element === undefined || element === null)
             return;
         var location = document.getElementById("search-location").value;
         const api = HttpClientFactory.getPostClient();
@@ -244,7 +246,8 @@ export default function Discover() {
                                 <input type="text" placeholder="Where are you going ?" autoComplete="off" id="search-location" onChange={handleChange} onBlur={() => setShow(false)} className="searchbar" />
                                 <img src="https://images-na.ssl-images-amazon.com/images/I/41gYkruZM2L.png" onClick={() => performSearch()} alt="Magnifying Glass" className="button-search" />
                             </div>
-                            {show ? <div className="search-suggestions">
+                            {show ?
+                                <Paper className="search-suggestions">
                                 <div className="container-fluid">
                                     <div className="row">
                                         {suggestions.length > 0 ?
@@ -256,12 +259,13 @@ export default function Discover() {
                                                 <AiOutlineStop className="suggestion-icon" />  <span className="suggestion-text-not-found">No location found.</span>
                                             </div>}
                                     </div>
-                                </div>
-                            </div> : null}
+                                    </div>
+                                </Paper>
+                             : null}
                         </div>
                     </div>
                 </div>
-                        <div className='main'>
+                        <div className='main'> 
                     <div className='container-fluid'>
                         <div className='row square-grid' >
                             {isLoading ? <div className="col-12 loading-icon"><h4 className="text-center"><CircularProgress /></h4></div> :
@@ -270,7 +274,7 @@ export default function Discover() {
 
                                         state.items.map((post, i) =>
 
-                                            (<div key={i} className={`col-12 col-sm-6 col-md-6 col-lg-6 col-xl-4 square-grid-item`} style={{ backgroundImage: `url(${post.images[0].imageBase64})` }} >
+                                            (<div key={i} className={`col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 square-grid-item`} style={{ backgroundImage: `url(${post.images[0].imageBase64})` }} >
                                                 <Link to={`/post/${post.id}/shot/${post.images[0].id}`}>
                                                     <table className="inner-container">
                                                         <tbody>

@@ -219,7 +219,7 @@ function Itinerary(props) {
 
 
     const [itineraries, setItineraries] = useState([]);
-   
+
     const [isLoading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -245,13 +245,12 @@ function Itinerary(props) {
     }, []);
 
 
-   
 
     return (
-        isLoading && props.show && props.showId === props.postId ? <><br /> <h4 className='text-center'><CircularProgress /></h4></> :
-            props.show ? <div className='itinerary_wrapper'>
-            {itineraries.length > 0 ? <h5>Itinerary of this tour</h5> : <h5>No itinerary found.</h5>}
-            <section className="itinerary">
+        props.show && props.postId === props.showId ? <>{ isLoading ? <>< br /> <h4 className='text-center'><CircularProgress /></h4></> :
+           <div className='itinerary_wrapper'>
+        {itineraries.length > 0 ? <h5>Itinerary of this tour</h5> : <h5>No itinerary found.</h5>}
+        <section className="itinerary">
             {itineraries.map((itinerary, i) => (
                 <div className="itinerary__block" key={itinerary.ordinal}  >
                     <div className="itinerary__midpoint"></div>
@@ -263,8 +262,10 @@ function Itinerary(props) {
                     </div>
                 </div>
             ))}
-            </section>
-        </div> : null
+        </section>
+            </div>
+        }</>
+ : null
     );
 
 }
@@ -280,8 +281,8 @@ function Comments(props) {
 
     async function signIn(e) {
         e.preventDefault();
-        if(!user)
-           await manager.signIn(window.location.href);
+        if (!user)
+            await manager.signIn(window.location.href);
         return false;
     }
 
@@ -317,6 +318,8 @@ function Comments(props) {
                 var result = await api.history(props.postId);
                 setBids(result);
                 setLoading(false);
+                //console.log(result);
+                //console.log(bids);
             }
             catch (e) {
                 console.log(e);
@@ -327,10 +330,10 @@ function Comments(props) {
         return () => { };
     }, [user, props.show]);
 
-  
+
     const handleChangeBid = (event, newValue) => {
         setBid(newValue);
-       
+
     };
 
     async function createNewBid(state) {
@@ -347,7 +350,7 @@ function Comments(props) {
 
         try {
 
-            await client.newbid(state.postId,model);
+            await client.newbid(state.postId, model);
             var result = await client.history(state.postId);
             setBids(result);
         }
@@ -357,55 +360,15 @@ function Comments(props) {
 
     }
 
-    async function acceptBid(event) {
-
-    
-        if (!props.postId) {
-            return;
-        }
-        const client = HttpClientFactory.get(BidClient, user);
-        try{
-
-            var target = event.target;
-            target.style.color = '#1dc76f';
-            target.style.fontWeight = '600';
-            target.innerHTML = '<b>Accepted</b>';
-            await client.accept(props.postId);
-           
-        }
-        catch (e) {
-            console.log(e);
-        }
-
-    }
-    async function rejectBid(event) {
-
-        if (!props.postId) {
-            return;
-        }
-        const client = HttpClientFactory.get(BidClient, user);
-        try {
-
-            var target = event.target;
-            target.style.color = '#d4144f';
-            target.style.fontWeight = '600';
-            target.innerHTML = '<b>Rejected</b>';
-            await client.reject(props.postId);
-
-        }
-        catch (e) {
-            console.log(e);
-        }
-
-    }
+   
 
     function valuetext(value) {
         return `${value}`;
     }
-  
-        return (
-            isLoading && props.show && props.showId === props.postId ? <><br /> <h4 className='text-center'><CircularProgress /></h4></> :
-                props.show ? <div className='comments' >
+
+    return (
+        props.show && props.postId === props.showId ? <>{ isLoading ? <><br /><h4 className='text-center'><CircularProgress /></h4></> :
+            <div className='comments' >
                 <div noValidate autoComplete="off" className='new-bid'>
                     <Grid item xs={12} >
                         <Typography id="bid-slider" gutterBottom>
@@ -424,13 +387,13 @@ function Comments(props) {
                             valueLabelDisplay="auto"
                         />
                     </Grid>
-                    {user ?  <Button variant="contained" color="primary"
+                    {user ? <Button variant="contained" color="primary"
                         onClick={() =>
                             dispatch({
                                 type: "new-bid",
                                 data: {
-                                    postId:props.postId,
-                                    value:bid,
+                                    postId: props.postId,
+                                    value: bid,
                                     callback: createNewBid,
                                 }
                             })
@@ -439,49 +402,32 @@ function Comments(props) {
                         Bid now
                     </Button> : <Button variant="contained" color="primary"
                             onClick={signIn}
-                    >
-                        Bid now
-                    </Button> }
+                        >
+                            Bid now
+                    </Button>}
                 </div>
                 {
                     bids.length > 0 ? <>
                         <h6>Bids History ({bids.length})</h6>
-                        <br/>
-                        { bids.map((bid, i) => (
-                        <div className='cmt-div' key={i} >
-                            <CardHeader
-                                avatar={<Avatar alt={bid.author} src={bid.authorImage} />}
-                                title={
-                                    <h6>
-                                        {bid.author}
-                                    </h6>
-                                }
-                                subheader={bid.created}
-                            />
-                            <div className='comment-text'>
+                        <br />
+                        {bids.map((bid, i) => (
+                            <div className='cmt-div' key={i} >
+                                <CardHeader
+                                    avatar={<Avatar alt={bid.author} src={bid.authorImage} />}
+                                    title={
+                                        <h6>
+                                            {bid.author}
+                                        </h6>
+                                    }
+                                    subheader={bid.created}
+                                />
+                                <div className='comment-text'>
                                     <p>{bid.author} made a proposal of {bid.value}.</p>
 
-                                  
-                                    {user && profile.sub === props.post.authorId?
-                                        <div className='row'>
-                                        <div className='col-5 col-md-3'>
-                                            <span onClick={(e) => acceptBid(e)} className='accept'>Accept  <AiOutlineCheck /></span>
-                                        </div>
-                                            <div className='col-5 col-md-3'>
-                                                <span className='reject' onClick={(e) => rejectBid(e)} >Reject   <AiOutlineStop /></span>
-
-                                            </div> 
-                                        </div>
-                                            : null
-                                            
-                                         }
-                            </div>
-                        </div>)) } </> :  <h6>No bid yet.</h6>
-                      
-
-                
+                                </div>
+                            </div>))} </> : <h6>No bid yet.</h6>
                 }
-            </div> : null
+            </div>}</> : null
         );
 }
 
@@ -925,20 +871,22 @@ export default function CentralBar() {
                     <div className='container'>
                         <div className="row uploaded-files">
                             {state.files.map((path) => (<div className='col-12 col-lg-6' key={path.id}>
-                                <div className='card file-card' >
-                                    <div className='thumbnail' style={{ backgroundImage: `url(${path.href})` }}>
-                                        <div className='cancel-file'>
-                                            <IconButton onClick={() =>
-                                                dispatch({
-                                                    type: "remove-file",
-                                                    data: {
-                                                        idToRemove: path.id,
-                                                        files: state.files,
-                                                    }
-                                                })
-                                            }>
-                                                <RemoveCircleIcon />
-                                            </IconButton>
+                                <div className='card-wrapper'>
+                                    <div className='card' >
+                                        <div className='thumbnail-1' style={{ backgroundImage: `url(${path.href})` }}>
+                                            <div className='cancel-file'>
+                                                <IconButton onClick={() =>
+                                                    dispatch({
+                                                        type: "remove-file",
+                                                        data: {
+                                                            idToRemove: path.id,
+                                                            files: state.files,
+                                                        }
+                                                    })
+                                                }>
+                                                    <RemoveCircleIcon />
+                                                </IconButton>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -990,7 +938,7 @@ export default function CentralBar() {
 
                                     />
                                 </FormControl>
-                                {showSuggestions ? <div className="search-suggestions">
+                                {showSuggestions ? <Paper className="search-suggestions">
                                     <div className="container-fluid">
                                         <div className="row">
                                             {suggestions.length > 0 ?
@@ -1003,7 +951,7 @@ export default function CentralBar() {
                                                 </div>}
                                         </div>
                                     </div>
-                                </div> : null}
+                                </Paper> : null}
                             </Grid>
                             <Grid item xs={12} sm={6} >
                                 <MuiPickersUtilsProvider utils={MomentUtils}>
@@ -1181,13 +1129,13 @@ export default function CentralBar() {
         }
         if (props.images.length == 2) {
             return (<div className='row'>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
+                <div className='col-12 col-sm-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
                     <Link to={`/post/${props.postId}/shot/${props.images[0].id}`} >
                         <div style={{ height: `100%`, width: `100%` }}>
                         </div>
                     </Link>
                 </div>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
+                <div className='col-12 col-sm-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
                     <Link to={`/post/${props.postId}/shot/${props.images[1].id}`} >
                         <div style={{ height: `100%`, width: `100%` }}>
                         </div>
@@ -1198,13 +1146,13 @@ export default function CentralBar() {
         if (props.images.length == 3) {
             return (<div className='row'>
                 
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
+                <div className='col-12 col-sm-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
                     <Link to={`/post/${props.postId}/shot/${props.images[0].id}`} >
                         <div style={{height:`100%`, width:`100%`}}>
                         </div>
                     </Link>
                </div>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
+                <div className='col-12 col-sm-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
                     <Link to={`/post/${props.postId}/shot/${props.images[1].id}`} >
                         <div style={{ height: `100%`, width: `100%` }}>
                         </div>
@@ -1220,25 +1168,25 @@ export default function CentralBar() {
         }
         if (props.images.length == 4) {
             return (<div className='row'>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
+                <div className='col-12 col-sm-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
                     <Link to={`/post/${props.postId}/shot/${props.images[0].id}`} >
                         <div style={{ height: `100%`, width: `100%` }}>
                         </div>
                     </Link>
                 </div>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
+                <div className='col-12 col-sm-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
                     <Link to={`/post/${props.postId}/shot/${props.images[1].id}`} >
                         <div style={{ height: `100%`, width: `100%` }}>
                         </div>
                     </Link>
                 </div>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[2].imageBase64})` }}>
+                <div className='col-12 col-sm-6 post-img' style={{ backgroundImage: `url(${props.images[2].imageBase64})` }}>
                     <Link to={`/post/${props.postId}/shot/${props.images[2].id}`} >
                         <div style={{ height: `100%`, width: `100%` }}>
                         </div>
                     </Link>
                 </div>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[3].imageBase64})` }}>
+                <div className='col-12 col-sm-6 post-img' style={{ backgroundImage: `url(${props.images[3].imageBase64})` }}>
                     <Link to={`/post/${props.postId}/shot/${props.images[3].id}`} >
                         <div style={{ height: `100%`, width: `100%` }}>
                         </div>
@@ -1282,7 +1230,7 @@ export default function CentralBar() {
         const Reservation = ({ post, reserved }) => {
 
             if (post.reservedSeats === post.seats) {
-                return (<Button className="col-2" variant="contained" color="success" onlick={() => { }}>
+                return (<Button className="col-2" variant="contained" color="success" onClick={() => { }}>
                         Sold out
                     </Button>)
             } else if (user && user.profile.sub !== post.authorId) {
@@ -1436,12 +1384,12 @@ export default function CentralBar() {
     }
 
     return (
-        <div className="col-xs-12 col-sm-7 col-md-7 col-lg-6 col-xl-5 timeline">
+        <div className="col-xs-12 col-sm-12 col-md-7 col-lg-5 col-xl-5 timeline-1">
             <div >
                 {profile.role === "guide" ? <ViewPost /> : null}
                 {
                     isLoading ? <><SkeletonCard /><SkeletonCard /></> :
-                        actionsState.posts.map((post, i) => <SinglePost key={i} post={post}/>) 
+                        actionsState.posts.length > 0 ? actionsState.posts.map((post, i) => <SinglePost key={i} post={post} />) : (<div><br /><br /><br /><h4 className="text-center">No post available yet.</h4></div>)
                 }
             </div>
         </div>

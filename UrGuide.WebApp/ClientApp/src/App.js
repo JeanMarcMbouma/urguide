@@ -25,6 +25,7 @@ import LoginCallback from './components/api-authorization/LoginCallback';
 import ClientDetails from './components/user/ClientDetails';
 import { DataContextProvider } from './data/GlobalDataContext';
 import Message from './components/message/message';
+import Received from './components/message/received';
 import ForgetPassword from './components/confirmation/ForgetPassword';
 import ResetPassword from './components/confirmation/ResetPassword';
 
@@ -76,6 +77,11 @@ export default class App extends Component {
                                     <AuthRoute path="/profile" component={Profile} />
                                     <AuthRoute path="/message" component={Message} />
                                     <AuthRoute path="/account" component={ClientDetails} />
+                                </Layout>
+                            </Route>
+                            <Route path="/msg/:msgId">
+                                <Layout>
+                                    <Route path={`/msg/:msgId`} component={Received} />
                                 </Layout>
                             </Route>
                             <Route path="/discover/:cat">

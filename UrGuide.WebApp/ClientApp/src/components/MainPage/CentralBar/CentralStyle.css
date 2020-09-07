@@ -33,22 +33,28 @@
     display: none;
 }
 
-.file-card {
+.timeline-1{
+    position:relative;
+}
+/*.file-card {
     width: 100%;
-    height: 220px;
+    height: 180px;
     padding-bottom: 20px;
     margin-bottom: 25px;
     padding: 0px;
     background-size: cover;
     background-position: center center;
+}*/
+.card-wrapper {
+    margin-top: 20px;
 }
-
-.thumbnail {
-    height: 240px !important;
+.thumbnail-1 {
+    height: 200px !important;
     width: 100%;
     padding: 0px;
     background-size: cover;
     background-position: center center;
+
 }
 
 
@@ -62,20 +68,18 @@
 .search-suggestions {
     height: auto;
     background-color: white;
-    -webkit-box-shadow: 4px 16px 32px -12px rgba(0,0,0,0.75);
-    -moz-box-shadow: 4px 16px 32px -12px rgba(0,0,0,0.75);
-    box-shadow: 4px 16px 32px -12px rgba(0,0,0,0.75);
     width: 100%;
     margin-top: 10px;
     border-radius: 4px;
     padding: 5px 5px 15px 0px;
     position:absolute;
     z-index:50;
+    margin-left:-14px !important;
 }
 
 .suggestion-line {
     margin-top: 15px;
-    margin-left: 4px;
+   margin-left:5px;
 }
 
     .suggestion-line:hover {
@@ -150,9 +154,15 @@
 
 
 @media only screen and (min-width: 990px) {
-    .timeline {
+    .timeline-1 {
         display: table;
         margin: 0 auto;
+        left: 140px;
+    }
+    .timeline-2{
+        display: table;
+        margin: 0 auto;
+       
     }
 }
 

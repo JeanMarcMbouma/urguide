@@ -48,7 +48,7 @@ function Example() {
 
     return (
         <>
-            <Button style={{ textDecoration: `none` }} className="text-dark p-0" onClick={handleShow}><HighlightOffIcon fontSize="small" /> <span className='btn-title'>Delete My Account</span></Button>
+            <div style={{cursor:'pointer'}}  className="text-dark p-0" onClick={handleShow}><HighlightOffIcon fontSize="small" /> <span className='btn-title'>Delete My Account</span></div>
 
             <Modal show={show} onHide={handleClose} centered>
                 <Modal.Header closeButton>
@@ -87,7 +87,7 @@ export default function EditProfileNavigation(props) {
                         <Link to='/profile/password' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><VisibilityIcon fontSize="small" /> <span className='btn-title'>Change Password</span></Link>
                     </div>
                     <div className='col-11 edit-panel-link'>
-                        <Link to='/' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><PaymentIcon fontSize="small" /> <span className='btn-title'>Credit Card Details</span></Link>
+                        <Link to='/' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><PaymentIcon fontSize="small" /> <span className='btn-title'>Payments Details</span></Link>
                     </div>
                     <div className='col-11 edit-panel-link'> 
                         <Example />
@@ -103,7 +103,7 @@ export default function EditProfileNavigation(props) {
                             <Link to='/account/password' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><VisibilityIcon fontSize="small" /> <span className='btn-title'>Change Password</span></Link>
                         </div>
                         <div className='col-11 edit-panel-link'>
-                            <Link to='/' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><PaymentIcon fontSize="small" /> <span className='btn-title'>Credit Card Details</span></Link>
+                            <Link to='/' style={{ textDecoration: `none` }} tag={Link} className="text-dark" ><PaymentIcon fontSize="small" /> <span className='btn-title'>Payments Details</span></Link>
                         </div>
                         <div className='col-11 edit-panel-link'>
                             <Example />

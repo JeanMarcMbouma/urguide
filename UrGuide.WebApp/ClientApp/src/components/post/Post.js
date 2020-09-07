@@ -34,7 +34,6 @@ import Slider from '@material-ui/core/Slider';
 import AttachMoneyOutlinedIcon from '@material-ui/icons/AttachMoneyOutlined';
 import PeopleOutlineOutlinedIcon from '@material-ui/icons/PeopleOutlineOutlined';
 import AlarmOutlinedIcon from '@material-ui/icons/AlarmOutlined';
-import "./Post.css";
 import { withStyles } from '@material-ui/core/styles';
 import NewBidReducer from '../MainPage/CentralBar/NewBidReducer';
 import NewBidContext from '../MainPage/CentralBar/NewBidContext';
@@ -45,6 +44,7 @@ import { useAuthContext } from '../api-authorization/AuthService';
 import authService from '../api-authorization/AuthService';
 import { HttpClientFactory } from '../../httpclient';
 import { PostsClient, ItineraryModel, BidModel, UserReactionModel, BidClient } from '../../api';
+import "./Post.css";
 
 
 function Header(props) {
@@ -213,47 +213,7 @@ function Comments(props) {
 
     }
 
-    async function acceptBid(event) {
-
-
-        if (!props.postId) {
-            return;
-        }
-        const client = HttpClientFactory.get(BidClient, user);
-        try {
-
-            var target = event.target;
-            target.style.color = '#1dc76f';
-            target.style.fontWeight = '600';
-            target.innerHTML = '<b>Accepted</b>';
-            await client.accept(props.postId);
-
-        }
-        catch (e) {
-            console.log(e);
-        }
-
-    }
-    async function rejectBid(event) {
-
-        if (!props.postId) {
-            return;
-        }
-        const client = HttpClientFactory.get(BidClient, user);
-        try {
-
-            var target = event.target;
-            target.style.color = '#d4144f';
-            target.style.fontWeight = '600';
-            target.innerHTML = '<b>Rejected</b>';
-            await client.reject(props.postId);
-
-        }
-        catch (e) {
-            console.log(e);
-        }
-
-    }
+    
 
 
     function valuetext(value) {
@@ -317,21 +277,6 @@ function Comments(props) {
                             />
                             <div className='comment-text'>
                                 <p>{bid.author} made a proposal of {bid.value}.</p>
-
-
-                                {user && profile.sub === props.post.authorId ?
-                                    <div className='row'>
-                                        <div className='col-5 col-md-5'>
-                                            <span onClick={(e) => acceptBid(e)} className='accept'>Accept  <AiOutlineCheck /></span>
-                                        </div>
-                                        <div className='col-5 col-md-5'>
-                                            <span className='reject' onClick={(e) => rejectBid(e)} >Reject   <AiOutlineStop /></span>
-
-                                        </div>
-                                    </div>
-                                    : null
-
-                                }
                             </div>
                         </div>))} </> : <><h6>No bid yet.</h6><br/><br/></>
 
@@ -530,7 +475,7 @@ export default function Post() {
                                     })
                                 }>
                                     <AiFillDislike className='disliked_icon' />
-                                </IconButton> : <IconButton onClick={() =>
+                                </IconButton> : <IconButton className='dislike_div' onClick={() =>
                                     dispatchAction({
                                         type: "single-dislike-action",
                                         data: {
@@ -539,7 +484,7 @@ export default function Post() {
                                         }
                                     })
                                 } >
-                                        <AiOutlineDislike />
+                                        <AiOutlineDislike  />
                                     </IconButton>}
                                 <span className='text-center' >{props.post.dislikes}</span>
                             </div></> :

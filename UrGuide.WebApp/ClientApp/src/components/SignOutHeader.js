@@ -26,7 +26,7 @@ const useStyles = makeStyles(() => ({
         padding: '0px',
     },
     logo: {
-        width: '155px',
+        width: '165px',
         height: '55px',
     },
 }));
@@ -68,7 +68,7 @@ function SignOutHeader() {
                                         </IconButton>
                                     </Link>
                                 </div>
-                                <div className='col-4 col-sm-4 text-center'>
+                                <div className='col-4 col-sm-4 mt-1 text-center'>
                                     <Link to='/sign-in' onClick={signIn}>
                                         <span className='signout-link' >Sign In</span><span className='nav-icon-link'><FiLogIn /></span>
                                     </Link>

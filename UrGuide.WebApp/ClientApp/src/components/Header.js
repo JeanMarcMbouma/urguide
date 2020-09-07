@@ -45,7 +45,7 @@ const useStyles = makeStyles (() => ({
     marginTop: '-5px',
   },
   logo: {
-      width: '155px',
+      width: '165px',
       height: '55px',
   },
 }));
@@ -195,7 +195,7 @@ export default function Header() {
             <nav className='navigation-bar' >
                 <div className="container-fluid" >
                     <div className="row justify-content-between navbarRow">
-                        <div className="col-4 col-md-2 col-sm-3 col-lg-3 logo">
+                        <div className="col-4 col-sm-2  col-md-2 col-lg-3 logo">
                             <NavbarBrand className={classes.font} href="/"><img className={classes.logo} src={ Logo } alt='Logo' /></NavbarBrand>
                         </div>
                         <div className="col-8 col-sm-6 col-md-4 col-lg-4 centered-div"  >
@@ -282,11 +282,11 @@ export default function Header() {
                             }
                             </div>
                         </div>
-                        <div className="col-6 col-sm-6 col-md-4 d-flex justify-content-end mr-5 right-div">
-                            <div className='row'>
+                        <div className="col-8 col-sm-6 col-md-6 col-lg-4 right-div">
+                            <div className='row justify-content-end'>
                                 {
                                     profile.role === "guide" ? <Link to="/profile">
-                                        <div className='col-2 col-sm-6 col-md-3 userImage'>
+                                        <div className='col-1 col-sm-6 col-md-2 userImage'>
                                             <IconButton className={classes.avatarButton}>
                                                 <Avatar className={(classes.avatar)} src={profile.picture} />
                                             </IconButton>
@@ -296,7 +296,7 @@ export default function Header() {
                                         :
 
                                         <Link to="/account/details">
-                                            <div className='col-2 col-sm-6 col-md-3 userImage'>
+                                            <div className='col-1 col-sm-6 col-md-2 userImage'>
                                                 <IconButton className={classes.avatarButton}>
                                                     <Avatar className={(classes.avatar)} src={profile.picture} />
                                                 </IconButton>
@@ -304,23 +304,21 @@ export default function Header() {
                                         </Link>
                                 }
 
-                                <div className='col-4 col-md-3 col-lg-4 username'>
-                                    <span>{ user.profile.given_name }</span>
+                                <div className='col-4 col-md-4 username'>
+                                    <span style={{ fontSize: `14px` }}>{user.profile.given_name}</span>
                                 </div>
-                                <div className='col-1 col-sm-1 d-flex justify-content-between' >
-                                    <div>
-                                        <IconButton onClick={ToggleNotifications}>
+                                <div className='col-2 col-sm-3 col-md-2 col-lg-2' >
+                                     <IconButton onClick={ToggleNotifications}>
                                             <Badge badgeContent={unread} max={9} color="error">
                                                 <NotificationsNoneOutlinedIcon />
                                             </Badge>
                                         </IconButton>
-                                    </div>
-                                    <div>
-                                        <IconButton onClick={signOut}>
-                                            <FiLogOut />
-                                        </IconButton>
-                                    </div>
-                                </div>
+                            </div>
+                                <div className='col-3 col-sm-3 col-md-3 col-lg-2' >
+                                   <IconButton onClick={signOut}>
+                                    <FiLogOut />
+                                </IconButton>
+                                  </div>
                             </div>
                         </div>
                     </div>
@@ -377,8 +375,3 @@ export default function Header() {
         </>
     )
 }
-
-
-//function Loading() {
-//    return (<div className="loading-icon"><h6 className="text-center"><CircularProgress ></CircularProgress></h6></div>);
-//}

@@ -47,6 +47,7 @@ const dataContextReducer = (state, action) => {
                 action.data.completed = true;
             }
             if (action.data.profileUrl) {
+           
                 return { ...state, loadingcompleted: action.data.completed, url: action.data.url, profileUrl: action.data.profileUrl, loading: false, };
             }
             return { ...state, loadingcompleted: action.data.completed, url: action.data.url, loading: false, };

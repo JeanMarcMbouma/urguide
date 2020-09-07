@@ -6,6 +6,7 @@ import './RightStyle.css';
 import { PostsClient } from '../../../api';
 import { HttpClientFactory } from '../../../httpclient';
 import { ActionTypes, useDataContext } from '../../../data/GlobalDataContext';
+import { Link } from 'react-router-dom';
 
 
 
@@ -77,7 +78,7 @@ const Popular = () => {
 
 
     return (
-        <div className='col-sm-5 col-md-5 col-lg-3 col-xl-3 rounded rightbar popular' >
+        <div className='col-sm-4 col-md-4 col-lg-3 col-xl-3 rounded rightbar popular' >
             <div>
                 <div className="d-lg-flex p-0 mb-3 mt-3">
                     <div className='font-weight-bold title'>
@@ -90,7 +91,7 @@ const Popular = () => {
 
             </div>
             <div className='copyright-div'>
-                <span>Terms - Conditions - Cookies</span>
+                <span><Link className='link' to='/terms'>Terms</Link> - <Link className='link' to='/conditions'>Conditions</Link> - <Link className='link' to='/cookies'>Cookies</Link></span>
                 <br />
                 <span>&copy; Urguide 2020</span>
             </div>
