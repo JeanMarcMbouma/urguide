@@ -10,6 +10,7 @@
              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              xmlns:m="clr-namespace:UrGuide.Model.Lookup;assembly=UrGuide.Model" xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
              x:Class="UrGuide.Mobile.Views.PostPage"
+             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers"
              x:DataType="vm:PostsViewModel"
              Shell.NavBarIsVisible="False"
              st:SharedTransitionShell.TransitionDuration="300"
@@ -59,7 +60,19 @@
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
-                <Label Text="Recent posts" FontSize="Title" FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
+                <StackLayout Orientation="Horizontal" Padding="0" HorizontalOptions="FillAndExpand">
+                    <Label Text="Recent posts" FontSize="Title" FontAttributes="Bold" TextColor="{StaticResource IconColor}"
+                           VerticalOptions="EndAndExpand"/>
+                    <ImageButton Source="{FontImage FontFamily=fas, 
+                                    Glyph={x:Static icons:FAI.Pen}, 
+                                    Color={StaticResource IconColor},Size=24}" Aspect="AspectFit"
+                                 BorderColor="LightGray" BorderWidth="1"
+                                 BackgroundColor="#90ffffff"
+                                 Padding="8"
+                                 CornerRadius="4"
+                               HeightRequest="32" WidthRequest="32" HorizontalOptions="EndAndExpand" VerticalOptions="Center"
+                          />
+                </StackLayout>
                 <StackLayout Orientation="Vertical" Spacing="8" BindableLayout.ItemsSource="{Binding Items}"
                         BackgroundColor="Transparent" BindableLayout.ItemTemplate="{StaticResource PostModelTemplate}"
                     HorizontalOptions="FillAndExpand" 
@@ -69,6 +82,7 @@
                             HorizontalOptions="CenterAndExpand"/>
                     </BindableLayout.EmptyView>
                 </StackLayout>
+            <BoxView HeightRequest="10" HorizontalOptions="FillAndExpand"/>
             </StackLayout>
         </ScrollView>
     </RefreshView>

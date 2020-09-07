@@ -4,6 +4,7 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:converters="clr-namespace:UrGuide.Mobile.Converters"
+             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers"
              mc:Ignorable="d"
              xmlns:controls="clr-namespace:UrGuide.Mobile.Views.Controls"
              x:Class="UrGuide.Mobile.Views.Controls.Rating" x:Name="rating">
@@ -15,26 +16,19 @@
             <StackLayout BindableLayout.ItemsSource="{Binding Source={Reference rating}, Path=Items}" Orientation="Horizontal" >
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="controls:RatingModel">
-                        <Path 
-                            Data="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
-                            Stroke="{StaticResource IconColor}"
-                            WidthRequest="{Binding Source={RelativeSource AncestorType={x:Type controls:Rating}}, Path=StarWidthRequest}" 
-                            HeightRequest="{Binding Source={RelativeSource AncestorType={x:Type controls:Rating}}, Path=HeightRequest}"                            
-                            Aspect="Uniform">
-                            <Path.Triggers>
-                                <DataTrigger TargetType="Path" 
-                                      Binding="{Binding IsSelected}"
-                                      Value="{x:Static x:Boolean.TrueString}">
-                                    <Setter Property="Stroke" Value="{StaticResource FavoriteIcon}"/>
-                                    <Setter Property="Fill" Value="{StaticResource FavoriteIcon}"/>
+                        <Image Source="{FontImage Color={StaticResource IconColor},FontFamily=far,Glyph={x:Static icons:FAI.Star},Size=16}"
+                               >
+                            <Image.Triggers>
+                                <DataTrigger TargetType="Image" Binding="{Binding IsSelected}" Value="{x:Static x:Boolean.TrueString}" >
+                                    <Setter Property="Source" Value="{FontImage Color={StaticResource FavoriteIcon},FontFamily=fas,Glyph={x:Static icons:FAI.Star},Size=16}" />
                                 </DataTrigger>
-                            </Path.Triggers>
-                            <Path.GestureRecognizers>
+                            </Image.Triggers>
+                            <Image.GestureRecognizers>
                                 <TapGestureRecognizer NumberOfTapsRequired="1"
                                                       Command="{Binding Source={RelativeSource AncestorType={x:Type controls:Rating}}, Path=TappedCommand}"
                                                       CommandParameter="{Binding Value}"/>
-                            </Path.GestureRecognizers>
-                        </Path>
+                            </Image.GestureRecognizers>
+                        </Image>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </StackLayout>
