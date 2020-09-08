@@ -1,0 +1,100 @@
+﻿.conversation-layout {
+    margin-top:20px;
+    padding-top: 0;
+    height:80vh;
+    position:relative;
+}
+
+.contacts-panel {
+    height: 80vh;
+    background-color: white;
+    overflow-y: scroll;
+    width:100%;
+    overflow-x:hidden;
+}
+
+.suggestion-line {
+    margin-top: 15px;
+    margin-left: 4px;
+}
+.search-suggestions{
+    margin-left:0px !important;
+}
+
+.suggestion-text {
+    color: black;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    margin-left: 10px;
+    margin-top: 8px !important;
+}
+
+    .suggestion-text:hover {
+        color: black;
+        opacity: 0.8;
+    }
+
+.suggestion-text-not-found {
+    color: black;
+    font-size: 17px;
+    font-weight: 600;
+    font-style: italic;
+    margin-left: 6px;
+}
+
+.search-container {
+    width: 100%;
+    height: 45px;
+    position: relative;
+}
+
+.searchbar {
+    font-size: 17px;
+    width: 100%;
+    height: 45px;
+    border: none;
+    outline: none;
+    border-radius: 2.5rem;
+    border: 1px solid #d8d8d8;
+    padding: 5px 2px 2px 25px;
+    transition: all .2s;
+    transition-delay: .1s;
+}
+
+    .searchbar:focus {
+        border: 2px solid #1477d5;
+    }
+
+.sender-infos {
+    position: absolute;
+    top: 0;
+    height:40px;
+    width:90%;
+}
+.sender-name{
+    font-size:16px;
+}
+
+
+.btn-reply-span{
+    margin-left:20px;
+}
+.email-icon{
+    margin-left:5px;
+}
+
+
+.message-sent {
+    border-radius: 6px;
+    background-color: white;
+    height: auto;
+    width: 100%;
+    padding:8px;
+}
+.message-time{
+    font-size:14px;
+}
+.message-text{
+    font-size:14.5px;
+    color:#100f0f;
+}

@@ -1,5 +1,5 @@
 import React, {
-    useReducer, useContext, Component, useState
+    useReducer, useContext, Component, useState, useEffect
 } from "react";
 import {
     Grid,
@@ -28,6 +28,8 @@ import "./LoginPage.css";
 import { LoginModel } from './../../api'
 import { HttpClientFactory } from './../../httpclient'
 import authService from '../api-authorization/AuthService';
+import { useDataContext, ActionTypes } from "../../data/GlobalDataContext";
+import Logo from '../../Logo.png';
 
 function Copyright() {
     return (
@@ -65,13 +67,21 @@ function LoginForm() {
 
 
     const [LoginFailed, setLoginFailed] = useState('');
+    const { dcReducer } = useDataContext();
 
+    useEffect(() => {
+
+        dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/sign-in", } });
+    }, []);
 
     async function login(state) {
 
+
+        dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: false, url: "/sign-in", } });
+
         const client = HttpClientFactory.getClient();
-        //state.returnUrl = authService.getReturnUrl();
-        //console.log(state.returnUrl);
+        
+        state.returnUrl = authService.getReturnUrl();
         const loginModel = new LoginModel({
             userName: state.email,
             password: state.password,
@@ -82,10 +92,12 @@ function LoginForm() {
         {
             await client.login(state.returnUrl, loginModel);
             await authService.completeSignIn(state.returnUrl);
+
         }
         catch (e)
         {
             setLoginFailed('Invalid login attempt.');
+            dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/sign-in", } });
         }
     }
 
@@ -294,8 +306,9 @@ export class LoginPage extends Component  {
                     >
                         <div className="login-paper">
                             <Typography component="h1" variant="h5" className="text-center">
-                                Sign in
+                                <img className='logo' src={Logo} alt='Logo' />
                             </Typography>
+                        
                             <form className="login-form" noValidate>
                                 
                                 <Container component="main" maxWidth="xs">

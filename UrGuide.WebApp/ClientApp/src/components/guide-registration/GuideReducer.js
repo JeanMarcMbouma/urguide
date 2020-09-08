@@ -1,4 +1,7 @@
 import { string } from "prop-types";
+import { useDataContext, ActionTypes } from "../../data/GlobalDataContext";
+
+
 
 export default function GuideReducer(state, action) {
     let context = { ...state };
@@ -30,7 +33,7 @@ export default function GuideReducer(state, action) {
     let validpassword = passwordRegex.test(context.password);
     let validfname = nameRegex.test(context.firstName);
     let validlname = nameRegex.test(context.lastName);
-    let isDescriptionGotProperLength = 100 <= (context.description || '').length <= 500;
+    let isDescriptionGotProperLength = context.description.length > 100 && context.description.length < 500 ? true : false;
     let validgender = context.gender === "null" ? false : true;
     let validcountry = nameRegex.test(context.country);
     let validcity = nameRegex.test(context.city);
@@ -70,6 +73,8 @@ export default function GuideReducer(state, action) {
                 context.newly = context.step === 1 ? true : false;
 
                 return context;
+
+                break;
             }
             if (context.step === 1) {
                 context.step =
@@ -87,6 +92,8 @@ export default function GuideReducer(state, action) {
                 context.newly = context.step === 2 ? true : false;
 
                 return context;
+
+                break;
             }
 
         case "go-back":
@@ -96,19 +103,25 @@ export default function GuideReducer(state, action) {
 
             return context;
 
-        case "submit":
+            break;
+
+        case "send-data":
             context.newly =
                 context.step === 2 &&
                     !context.isChecked
                     ? true
                     : false;
             if (context.newly) {
-                action.data.sendData(state);
 
-                return context;
-
-            } else {
-                return context;
+           
+                action.data.sendData(context);
+               
             }
+
+          
+            return context;
+
+            break;
+            
     }
 }

@@ -19,9 +19,9 @@
     padding: 30px 10px 30px 5px;
     cursor: pointer;
     text-decoration: none;
+    font-weight: 100;
     color: black;
     font-size: 20px;
-    font-weight: 100;
 }
 .guide-btn {
   background-color: #4563de;
@@ -31,6 +31,30 @@
   color: whitesmoke;
   font-size: 20px;
   font-weight: 100;
+}
+
+@media only screen and (max-width: 540px) {
+
+    .client-btn {
+        background-color: #ebebeb;
+        height: 45px;
+        padding: 30px 10px 30px 5px;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 200;
+        color: black;
+        font-size: 15px;
+    }
+
+    .guide-btn {
+        background-color: #4563de;
+        height: 45px;
+        cursor: pointer;
+        text-decoration: none;
+        color: whitesmoke;
+        font-size: 15px;
+        font-weight: 200;
+    }
 }
 
 .client-btn:hover {

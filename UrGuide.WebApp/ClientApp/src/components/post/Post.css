@@ -327,8 +327,10 @@
 
 .disliked_icon {
     color: #cc0c0c !important;
+    
 }
 
 .dislike_div:hover {
-    color: #cc0c0c !important;
+    color: green !important;
+    
 }

@@ -21,11 +21,16 @@
     flex-direction: column;
     align-items: center;
     height: 100%;
+    margin-top:-25px;
 }
 .login-side {
     padding: 80px 25px 10px 25px
 }
 
+.logo{
+    height:65px;
+    width:190px;
+}
 .login-avatar-wrapper {
     width: 50%;
     margin: 0 auto;

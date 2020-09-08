@@ -25,7 +25,7 @@ export default function FeedBackReducer(state, action) {
 
             var text = String(context.userFeedback.review);
             let isTextValidUser =
-                text.length > 50 && text.length < 500 ? true : false;
+                text.length > 4 && text.length < 500 ? true : false;
             context.textError = isTextValidUser ? false : true;
             //console.log(context.userFeedback);
             if (isTextValidUser) {
@@ -40,7 +40,7 @@ export default function FeedBackReducer(state, action) {
 
             var text = String(context.userFeedback.review);
             let isTextValidPost =
-                text.length > 50 && text.length < 500 ? true : false;
+                text.length > 4 && text.length < 500 ? true : false;
             context.textError = isTextValidPost ? false : true;
             if (isTextValidPost) {
 
@@ -50,8 +50,13 @@ export default function FeedBackReducer(state, action) {
             return context;
 
             break;
-      
+        case "load-more":
 
+            context.pageNumber = action.data.pageNumber;
+            context.itemsCount = action.data.itemsCount;
+            context.items = action.data.items;
+            return context;
+            break;
     }
 
     return context;

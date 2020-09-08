@@ -25,6 +25,7 @@ import { Dropdown } from "react-bootstrap";
 import { BlobToBase64 } from "../../helpers/fileHelpers";
 import { GalleryDetails } from "./gallery/GalleryDetails";
 import GalleryReducer from "./gallery/GalleryReducer";
+import { useDataContext, ActionTypes } from "../../data/GlobalDataContext";
 
 
 function GalleryCard(props) {
@@ -212,13 +213,16 @@ export default function Galleries() {
     const { profile } = user || { profile: null };
 
     const [model, setModel] = useState({ galleries: [], loading: true });
+    const { dcReducer } = useDataContext();
 
     useEffect(() => {
         let fetch = async () => {
 
+            dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/profile", profileUrl: "/Galleries" } });
             if (!userId && !profile) {
                 return;
             }
+
             if (userId != null) {
                 let client = HttpClientFactory.get(CatalogsClient);
 
