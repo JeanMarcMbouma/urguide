@@ -116,6 +116,7 @@ namespace UrGuide.WebApp
             if (!env.IsDevelopment())
             { 
                 app.UseHsts();
+                app.UseHttpsRedirection();
             }
 
             serviceProvider.GetRequiredService<UrGuideAuthContext>().Database.Migrate();
@@ -123,7 +124,6 @@ namespace UrGuide.WebApp
 
             app.UseIpRateLimiting();
 
-            app.UseHttpsRedirection();
             app.UseForwardedHeaders(new ForwardedHeadersOptions { 
                 ForwardedHeaders = ForwardedHeaders.XForwardedProto
             });

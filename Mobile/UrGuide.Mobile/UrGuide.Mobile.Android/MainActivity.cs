@@ -6,6 +6,7 @@ using Android.OS;
 using Microsoft.Extensions.DependencyInjection;
 using FFImageLoading.Forms.Platform;
 using Microsoft.AppCenter.Distribute;
+using System.Net;
 
 namespace UrGuide.Mobile.Droid
 {
@@ -14,6 +15,10 @@ namespace UrGuide.Mobile.Droid
     {
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            ServicePointManager
+            .ServerCertificateValidationCallback +=
+            (sender, cert, chain, sslPolicyErrors) => true;
+
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
 

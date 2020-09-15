@@ -1,4 +1,5 @@
-﻿using UrGuide.Mobile.ViewModels;
+﻿using UrGuide.Mobile.Services.Identity;
+using UrGuide.Mobile.ViewModels;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -19,6 +20,12 @@ namespace UrGuide.Mobile.Views
             base.OnAppearing();
             AppShell.RemoveWelcomeScreen();
             _ = vm.Init();
+        }
+
+        private async void ImageButton_Clicked(object sender, System.EventArgs e)
+        {
+            var id = Forms.Ioc.GetService<IIdentityService>();
+            await id.SignInAsync();
         }
     }
 }

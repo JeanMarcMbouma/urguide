@@ -19,6 +19,8 @@
   <ItemGroup>
     <PackageReference Include="akavache.mobile" Version="6.10.20" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="IdentityModel" Version="4.4.0" />
+    <PackageReference Include="IdentityModel.OidcClient" Version="3.1.2" />
     <PackageReference Include="Microsoft.AppCenter.Analytics" Version="3.3.0" />
     <PackageReference Include="Microsoft.AppCenter.Crashes" Version="3.3.0" />
     <PackageReference Include="Microsoft.AppCenter.Distribute" Version="3.3.0" />

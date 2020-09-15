@@ -9,6 +9,7 @@ using System;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Mapping;
 using UrGuide.Mobile.Services;
+using UrGuide.Mobile.Services.Identity;
 using UrGuide.Mobile.ViewModels;
 using UrGuide.Mobile.Views;
 using Xamarin.Forms;
@@ -42,6 +43,7 @@ namespace UrGuide.Mobile
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPostItemService, PostItemService>();
             services.AddSingleton<IUserService, UserService>();
+            services.AddSingleton<IIdentityService, IdentityService>();
 
 
             services.AddScoped<LandingItemViewModel>();

@@ -1,4 +1,6 @@
 ﻿using IdentityModel;
+using IdentityServer4;
+using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using System;
 using UrGuide.Shared.Configuration;
 using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Data;
@@ -22,7 +25,8 @@ namespace UrGuide.WebApp.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddUrGuideAuthServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddUrGuideAuthServices(this IServiceCollection services, 
+            IConfiguration configuration)
         {
             services.Configure<IPStackConfiguration>(configuration.GetSection("IpStack"));
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
@@ -48,37 +52,52 @@ namespace UrGuide.WebApp.Extensions
             {
                 options.UserInteraction.LoginUrl = "/sign-in";
                 options.UserInteraction.LogoutUrl = "/account/logout";
-
-             
+                options.Authentication.CookieLifetime = TimeSpan.FromHours(2);
+                options.IssuerUri = "https://urguide.azurewebsites.net";
             })
             .AddApiAuthorization<UrGuideUser, UrGuideAuthContext>(options =>
             {
-                options.Clients.Add(new IdentityServer4.Models.Client
+                options.Clients.Add(new Client
                 {
                     ClientName = "UrGuide.WebAPI",
                     ClientId = "UrGuide.WebAPI",
                     AllowedScopes = { StandardScopes.OpenId },
-                    AllowedGrantTypes = { GrantTypes.ClientCredentials },
+                    AllowedGrantTypes = { OidcConstants.GrantTypes.ClientCredentials },
                     RequireConsent = false,
                     AllowAccessTokensViaBrowser = true,
                     RequireClientSecret = false,
-                    ClientSecrets = { new IdentityServer4.Models.Secret("secret".ToSha256()) }
+                    ClientSecrets = { new Secret("secret".ToSha256()) }
                 });
-
+                string xamarin = configuration.GetValue<string>("Xamarin");
+                options.Clients.Add(new Client
+                {
+                    ClientId = "xamarin",
+                    ClientName = "UrGuide Xamarin OpenId Client",
+                    AllowedGrantTypes = { "Hybrid" },
+                    //Used to retrieve the access token on the back channel.
+                    ClientSecrets =
+                    {
+                        new Secret("secret".Sha256())
+                    },
+                    RedirectUris = { xamarin },
+                    RequireConsent = false,
+                    RequirePkce = true,
+                    PostLogoutRedirectUris = { $"{xamarin}/Account/Redirecting" },
+                    AllowedScopes = 
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.OfflineAccess
+                    },
+                    //Allow requesting refresh tokens for long lived API access
+                    AllowOfflineAccess = true,
+                    AllowAccessTokensViaBrowser = true
+                });
             });
 
             services.AddScoped<IProfileService, ProfileService>();
             services.AddScoped<IInstantMessagingService, InstantMessagingService>();
-            /*
-             ,
-          "UrGuide.WebAPI": {
-            "Profile": "SPA",
-            "RedirectUri": "https://localhost:5001/swagger/oauth2-redirect.html",
-            "LogoutUri": "https://localhost:5001/swagger/oauth2-logout.html",
-            "ResponseType" :  "code",
-            "Scope": "profile openid"
-          }
-             */
+
             services.AddAuthentication()
                 .AddIdentityServerJwt();
             

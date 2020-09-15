@@ -70,7 +70,9 @@
                                  BackgroundColor="#90ffffff"
                                  Padding="8"
                                  CornerRadius="4"
-                               HeightRequest="32" WidthRequest="32" HorizontalOptions="EndAndExpand" VerticalOptions="Center"
+                               HeightRequest="32" WidthRequest="32" 
+                                 HorizontalOptions="EndAndExpand" VerticalOptions="Center"
+                                 Clicked="ImageButton_Clicked"
                           />
                 </StackLayout>
                 <StackLayout Orientation="Vertical" Spacing="8" BindableLayout.ItemsSource="{Binding Items}"
