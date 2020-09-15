@@ -73,7 +73,7 @@ namespace UrGuide.WebApp.Extensions
                 {
                     ClientId = "xamarin",
                     ClientName = "UrGuide Xamarin OpenId Client",
-                    AllowedGrantTypes = { "Hybrid" },
+                    AllowedGrantTypes = IdentityServer4.Models.GrantTypes.Hybrid,
                     //Used to retrieve the access token on the back channel.
                     ClientSecrets =
                     {
