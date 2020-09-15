@@ -15,10 +15,10 @@ namespace UrGuide.Mobile.Services.Identity
         public Task<LoginResult> SignInAsync()
         {
             var clientOptions = new OidcClientOptions {
-                Authority = GlobalSetting.Instance.AuthorizeEndpoint,
+                Authority = GlobalSetting.Instance.BaseIdentityEndpoint,
                 ClientId = GlobalSetting.Instance.ClientId,
                 ClientSecret = GlobalSetting.Instance.ClientSecret,
-                Scope = "openid profile offline_access",
+                Scope = "openid profile UrGuide.WebAppAPI offline_access",
                 Browser = new SystemBrowser(),
                 RedirectUri = GlobalSetting.Instance.Callback,
                 ResponseMode = OidcClientOptions.AuthorizeResponseMode.Redirect,
@@ -26,13 +26,14 @@ namespace UrGuide.Mobile.Services.Identity
                 {
                     Discovery = new DiscoveryPolicy
                     {
-                        RequireHttps = false
+                        RequireHttps = false,
+                        ValidateIssuerName = false
                     }
                 }
             };
 
             var client = new OidcClient(clientOptions);
-            return client.LoginAsync();
+            return client.LoginAsync(new LoginRequest());
         }
 
 
