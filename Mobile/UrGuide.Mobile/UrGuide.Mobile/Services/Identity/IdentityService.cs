@@ -18,7 +18,7 @@ namespace UrGuide.Mobile.Services.Identity
                 Authority = GlobalSetting.Instance.BaseIdentityEndpoint,
                 ClientId = GlobalSetting.Instance.ClientId,
                 ClientSecret = GlobalSetting.Instance.ClientSecret,
-                Scope = "openid profile UrGuide.WebAppAPI offline_access",
+                Scope = "openid profile offline_access",
                 Browser = new SystemBrowser(),
                 RedirectUri = GlobalSetting.Instance.Callback,
                 ResponseMode = OidcClientOptions.AuthorizeResponseMode.Redirect,
