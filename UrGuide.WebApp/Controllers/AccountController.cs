@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using IdentityServer4.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View;
 using System;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Model.Users;
@@ -19,14 +22,23 @@ namespace UrGuide.WebApp.Controllers
     public class AccountController : Controller
     {
 
-        public AccountController(IUserService userService, IAuthService authService)
+        public AccountController(IUserService userService, IAuthService authService, IIdentityServerInteractionService interactionService)
         {
             UserService = userService ?? throw new ArgumentNullException(nameof(userService));
             AuthService = authService ?? throw new ArgumentNullException(nameof(authService));
+            InteractionService = interactionService ?? throw new ArgumentNullException(nameof(interactionService));
         }
 
         public IUserService UserService { get; }
         public IAuthService AuthService { get; }
+        public IIdentityServerInteractionService InteractionService { get; }
+
+        [HttpGet("/login")]
+        public IActionResult Login(string returnUrl)
+        {
+            ViewBag.ReturnUrl = returnUrl;
+            return View();
+        }
 
         [HttpPost("/login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model, CancellationToken cancellationToken, string returnUrl = null)
@@ -38,6 +50,11 @@ namespace UrGuide.WebApp.Controllers
             }
             
             await HttpContext.SignInAsync(result.Data.Id, result.Data.UserName);
+            var context = InteractionService.GetAuthorizationContextAsync(returnUrl);
+            if (context != null)
+            {
+                return Redirect(returnUrl);
+            }
             return Ok(returnUrl);
         }
 

@@ -1,29 +1,3 @@
-import { Client, LoginModel, ApiException } from './../../api';
-import { HttpClientFactory } from './../../httpclient'
-import authService from '../api-authorization/AuthService';
-const navigateToReturnUrl = (returnUrl: any) => {
-
-    window.location.replace(returnUrl);
-}
-
-async function login(state: any) {
-
-    const returnUrl = state.returnUrl;
-    const client = HttpClientFactory.getClient();
-
-    const loginModel = new LoginModel({
-        userName: state.email,
-        password: state.password,
-        persist: state.isRemembered
-    });
-
-    try {
-        await client.login(returnUrl, loginModel);
-        await authService.completeSignIn(returnUrl);
-    } catch (e) {
-        state.LoginFailed = (<ApiException>e).message;
-    }
-}
 
 export default function LoginReducer(state: any, action: any) {
     let context = { ...state };

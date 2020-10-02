@@ -5,10 +5,11 @@ using SendGrid.Helpers.Mail;
 using UrGuide.Shared.Contracts;
 using UrGuide.Model.Messages;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace UrGuide.WebApp.Services
 {
-    public partial class EmailService : IEmailService
+    public partial class EmailService : IEmailService, IEmailSender
     {
         public IConfiguration Configuration { get; }
         public ILogger<EmailService> Logger { get; }
@@ -34,6 +35,16 @@ namespace UrGuide.WebApp.Services
                 var error = await response.Body.ReadAsStringAsync();
                 Logger.LogError(error);
             }
+        }
+
+        public Task SendEmailAsync(string email, string subject, string htmlMessage)
+        {
+            return SendAsync(new SendDirectMessageCommand
+            {
+                Content = htmlMessage,
+                To = email,
+                Subject = subject
+            });
         }
     }
 }

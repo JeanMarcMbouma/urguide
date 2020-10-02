@@ -4,6 +4,8 @@ using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -20,6 +22,7 @@ using UrGuide.WebApp.Data;
 using UrGuide.WebApp.Entities;
 using UrGuide.WebApp.Services;
 using static IdentityModel.OidcConstants;
+using static IdentityServer4.Models.IdentityResources;
 
 namespace UrGuide.WebApp.Extensions
 {
@@ -37,6 +40,7 @@ namespace UrGuide.WebApp.Extensions
                 return new UrlHelper(actionContext);
             });
             services.AddTransient<IEmailService, EmailService>();
+            services.AddTransient<IEmailSender, EmailService>();
             services.AddTransient<IWebHelper, WebHelper>();
             services.AddTransient<IAuthService, AuthService>();
             services.AddScoped<IUserContext, UserContext>();
@@ -47,13 +51,12 @@ namespace UrGuide.WebApp.Extensions
 
             services.AddDefaultIdentity<UrGuideUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<UrGuideAuthContext>();
+            string applicationUri = configuration.GetValue<string>("ApplicationUri");
 
             services.AddIdentityServer(options =>
             {
-                options.UserInteraction.LoginUrl = "/sign-in";
-                options.UserInteraction.LogoutUrl = "/account/logout";
                 options.Authentication.CookieLifetime = TimeSpan.FromHours(2);
-                options.IssuerUri = "https://urguide.azurewebsites.net";
+                options.IssuerUri = applicationUri;
             })
             .AddApiAuthorization<UrGuideUser, UrGuideAuthContext>(options =>
             {
@@ -61,12 +64,24 @@ namespace UrGuide.WebApp.Extensions
                 {
                     ClientName = "UrGuide.WebAPI",
                     ClientId = "UrGuide.WebAPI",
-                    AllowedScopes = { StandardScopes.OpenId },
-                    AllowedGrantTypes = { OidcConstants.GrantTypes.ClientCredentials },
-                    RequireConsent = false,
+                    AllowedGrantTypes = { GrantType.AuthorizationCode },
                     AllowAccessTokensViaBrowser = true,
+                    RequirePkce = true,
                     RequireClientSecret = false,
-                    ClientSecrets = { new Secret("secret".ToSha256()) }
+                    RedirectUris = { 
+                        $"{applicationUri}/swagger/oauth2-redirect.html",
+                        "https://localhost:5001/swagger/oauth2-redirect.html"
+                    },
+                    PostLogoutRedirectUris = { 
+                        $"{applicationUri}/swagger/" ,
+                        $"https://localhost:5001/swagger/" ,
+                    },
+
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile
+                    }
                 });
                 string xamarin = configuration.GetValue<string>("Xamarin");
                 options.Clients.Add(new Client
@@ -82,7 +97,7 @@ namespace UrGuide.WebApp.Extensions
                     RedirectUris = { xamarin },
                     RequireConsent = false,
                     RequirePkce = true,
-                    PostLogoutRedirectUris = { $"{xamarin}/Account/Redirecting" },
+                    PostLogoutRedirectUris = { xamarin },
                     AllowedScopes = 
                     {
                         IdentityServerConstants.StandardScopes.OpenId,

@@ -86,8 +86,9 @@ class AuthService {
         try {
             await this._initManager();
             const user = await this._mgr.signinCallback(returnUrl);
-            if (!user)
+            if (!user) {
                 return;
+            }
             this._onLoadUser(user);
             var state = user.state || null; 
             this.navigateToReturnUrl(this.getReturnUrl(state));
