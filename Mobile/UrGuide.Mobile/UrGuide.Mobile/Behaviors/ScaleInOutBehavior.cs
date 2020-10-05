@@ -1,6 +1,4 @@
-﻿using System;
-using Xamarin.Forms;
-using Xamarin.Forms.Markup;
+﻿using Xamarin.Forms;
 
 namespace UrGuide.Mobile.Behaviors
 {

@@ -1,14 +1,11 @@
 ﻿using MvvmHelpers;
 using MvvmHelpers.Commands;
 using System;
-using System.Linq;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
 using UrGuide.Mobile.Services;
 using UrGuide.Mobile.Views.Dialog;
-using UrGuide.Model.Catalogs;
-using UrGuide.Model.Posts;
 using UrGuide.Model.Shared;
 using UrGuide.Model.Users;
 

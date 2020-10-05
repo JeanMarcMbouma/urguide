@@ -1,8 +1,10 @@
 ﻿using MvvmHelpers;
 using MvvmHelpers.Commands;
+using ReactiveUI;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
@@ -21,12 +23,12 @@ namespace UrGuide.Mobile.ViewModels
         private readonly PostDetailViewModel _detailViewModel;
         private ICommand _viewDetailCommand;
         private ICommand _likeCommand;
-        private ICommand _dislikeCommand;
         private ICommand _markAsFavoriteCommand;
         private ICommand _loadItemsCommand;
         private ICommand _searchCategoryCommand;
 
-        public ICommand SearchCategoryCommand => _searchCategoryCommand ??= new AsyncCommand<CategoryModel>(async (model) => await _navigation.GotoAsync($"//discover?Category={model.Name}"));
+        public ICommand SearchCategoryCommand => _searchCategoryCommand ??= new AsyncCommand<CategoryModel>(
+            async (model) => await _navigation.GotoAsync($"//discover?Category={model.Name}"));
         public ICommand ToggleFavoriteCommand => _markAsFavoriteCommand ??= new AsyncCommand<PostItem>(async item =>
         {
             var it = Items.First(x => x.Id == item.Id);
@@ -34,16 +36,7 @@ namespace UrGuide.Mobile.ViewModels
             await PostItemService.ToggleFavorites(it);
         });
 
-        public ICommand LoadItemsCommand => _loadItemsCommand ??= new AsyncCommand(async () =>
-        {
-            var items = await PostItemService.GetItemsAsync().ConfigureAwait(false);
-            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
-            {
-                if(!items.HasError)
-                    Items.ReplaceRange(items.Data);
-                IsBusy = false;
-            });
-        });
+        public ICommand LoadItemsCommand => _loadItemsCommand ??= new Command(() => IsBusy = true);
 
         public ICommand ViewDetailsCommand => _viewDetailCommand ??=
             new AsyncCommand<PostItem>(async (item) =>
@@ -59,38 +52,10 @@ namespace UrGuide.Mobile.ViewModels
                 _detailViewModel.Selected.FeedBack.ReplaceRange(feedback.Data);
             });
 
-        public ICommand LikeCommand => _likeCommand ??= new Command<PostItem>((item) =>
+        public ICommand LikeCommand => _likeCommand ??= new AsyncCommand<PostItem>(async (item) =>
         {
             var it = Items.First(x => x.Id == item.Id);
-            if (it.ReactionType == Like)
-            {
-                it.Likes--;
-                it.ReactionType = Unknown;
-                return;
-            }
-            if (it.ReactionType == DisLike)
-            {
-                it.Dislikes--;
-            }
-            it.Likes++;
-            it.ReactionType = Like;
-        });
-
-        public ICommand DislikeCommand => _dislikeCommand ??= new Command<PostItem>((item) =>
-        {
-            var it = Items.First(x => x.Id == item.Id);
-            if (it.ReactionType == DisLike)
-            { 
-                it.Dislikes--;
-                it.ReactionType = Unknown;
-                return;
-            }
-            if (it.ReactionType == Like)
-            { 
-                it.Likes--; 
-            }
-            it.Dislikes++;
-            it.ReactionType = DisLike;
+            await PostItemService.SetUserReaction(it);
         });
 
         public ObservableRangeCollection<PostItem> Items { get; } = new ObservableRangeCollection<PostItem>();
@@ -105,33 +70,38 @@ namespace UrGuide.Mobile.ViewModels
         }
 
         public IPostItemService PostItemService { get; }
-
+        private CompositeDisposable _disposables = new CompositeDisposable();
         public PostsViewModel(INavigationService navigation, IPostItemService postItemService, PostDetailViewModel detailViewModel)
         {
             _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
             PostItemService = postItemService ?? throw new ArgumentNullException(nameof(postItemService));
             _detailViewModel = detailViewModel ?? throw new ArgumentNullException(nameof(detailViewModel));
-            IsBusy = true;
-        }
-
-        public async Task Init()
-        {
-            if (_initialized)
-                return;
-            var r = await PostItemService.GetCategoriesAsync().ConfigureAwait(false);
-            if (!r.HasError)
-            {
-                _initialized = true;
-                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            
+            this.WhenAnyValue(x => x.IsBusy)
+                .Where(busy => busy)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Do(async o =>
                 {
-                    Categories.ReplaceRange(r.Data);
-                });
-            }
-            LoadItemsCommand.Execute(null);
+                    var posts = await PostItemService.GetItemsAsync();
+                    if (!posts.HasError)
+                    {
+                        Items.ReplaceRange(posts.Data);
+                    }
+                    IsBusy = false;
+                })
+                .Do(async o => {
+                    var categories = await PostItemService.GetCategoriesAsync();
+                    if (!categories.HasError)
+                        Categories.ReplaceRange(categories.Data);
+                })
+                .DelaySubscription(TimeSpan.FromSeconds(5))
+                .Subscribe()
+                .DisposeWith(_disposables);
+            IsBusy = true;
             Xamarin.Forms.MessagingCenter.Subscribe<FavoriteViewModel, PostItem>(this, "favorite", (fvm, item) =>
             {
                 var it = Items.FirstOrDefault(x => x.Id == item.Id);
-                if(it != null)
+                if (it != null)
                     it.Favorite = item.Favorite;
             });
             Xamarin.Forms.MessagingCenter.Subscribe<PostDetailViewModel, PostItem>(this, "favorite", (fvm, item) =>

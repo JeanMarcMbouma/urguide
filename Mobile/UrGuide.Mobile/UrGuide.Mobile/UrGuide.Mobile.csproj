@@ -17,7 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="akavache.mobile" Version="6.10.20" />
+    <PackageReference Include="akavache" Version="6.10.20" />
+    <PackageReference Include="akavache.sqlite3" Version="6.10.20" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="IdentityModel" Version="4.4.0" />
     <PackageReference Include="IdentityModel.OidcClient" Version="3.1.2" />
@@ -27,6 +28,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.5" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.5" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="ReactiveUI" Version="11.5.35" />
     <PackageReference Include="Refractored.MvvmHelpers" Version="1.6.2" />
     <PackageReference Include="Xamarin.FFImageLoading.Forms" Version="2.4.11.982" />
     <PackageReference Include="Xamarin.Forms" Version="4.8.0.1364" />  
@@ -47,6 +49,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Views\CreatePost.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Update="Views\Dialog\BidDialog.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>

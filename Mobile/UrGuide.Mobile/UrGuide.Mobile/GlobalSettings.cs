@@ -1,12 +1,20 @@
-﻿using System;
-
-namespace UrGuide.Mobile
+﻿namespace UrGuide.Mobile
 {
     public class GlobalSetting
     {
-        public const string DefaultEndpoint = "https://urguide.azurewebsites.net"; // i.e.: "http://YOUR_IP" or "http://YOUR_DNS_NAME"
+        public const string DefaultEndpoint =
+#if !DEBUG
+            "https://urguide.azurewebsites.net";
+#else
+            "http://192.168.0.110:5000";
+#endif
+
+        // i.e.: "http://YOUR_IP" or "http://YOUR_DNS_NAME"
         public const string AuthScheme = "urguide";
         private string _baseIdentityEndpoint;
+        public const int Like = 2;
+        public const int DisLike = 4;
+        public const int Unknown = 0;
 
         public GlobalSetting()
         {

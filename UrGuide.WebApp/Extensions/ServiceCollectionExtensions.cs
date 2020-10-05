@@ -97,6 +97,7 @@ namespace UrGuide.WebApp.Extensions
                     RedirectUris = { xamarin },
                     RequireConsent = false,
                     RequirePkce = true,
+                    AlwaysIncludeUserClaimsInIdToken = true,
                     PostLogoutRedirectUris = { xamarin },
                     AllowedScopes = 
                     {
@@ -119,7 +120,7 @@ namespace UrGuide.WebApp.Extensions
             services.AddSignalR();
 
             services.AddSingleton<IUserIdProvider, UserIdProvider>();
-            //services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<JwtBearerOptions>, SignalRAuthPostConfigureOptions>()); 
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<JwtBearerOptions>, SignalRAuthPostConfigureOptions>()); 
             return services;
         }
     }

@@ -75,7 +75,7 @@
                            IndicatorSize="12" BackgroundColor="#40000000"
                            HeightRequest="50"
                            VerticalOptions="EndAndExpand" HideSingle="False"></IndicatorView>
-            <Grid Grid.Row="1" RowDefinitions="70,Auto,Auto,Auto,Auto,*" ColumnDefinitions="70,*" 
+            <Grid Grid.Row="1" RowDefinitions="70,Auto,Auto,Auto,Auto,Auto,*" ColumnDefinitions="70,*" 
                   HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" Margin="20">
 
 
@@ -280,79 +280,89 @@
                     </StackLayout>
                 </Expander>
                 <!--Reviews-->
-                <CollectionView Grid.Row="5" Grid.ColumnSpan="2" ItemSizingStrategy="MeasureAllItems" ItemsSource="{Binding FeedBack}"
-                                Margin="0,20,0,20">
-                    <CollectionView.Header>
-                        <StackLayout Orientation="Horizontal" Spacing="8"
-                                    Padding="0,4,0,0">
-                            <Label Text="Reviews" FontSize="Medium" FontAttributes="Bold"
+                <Grid Grid.Row="5" HorizontalOptions="FillAndExpand"
+                      Grid.ColumnSpan="2"
+                      RowDefinitions="Auto,Auto,*">
+                    <StackLayout Orientation="Horizontal" Spacing="8"
+                                    Padding="0,4,0,0"  VerticalOptions="StartAndExpand">
+                        <Label Text="Reviews" FontSize="Medium" FontAttributes="Bold"
                                    />
 
-                            <Image Source="{FontImage FontFamily=fas, 
+                        <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.Comment}, 
                         Color={StaticResource IconColor},Size=24}"
                             VerticalOptions="Start"/>
-                            <Label Text="{Binding Reviews}" FontAttributes="Bold"
+                        <Label Text="{Binding Reviews}" FontAttributes="Bold"
                                 TranslationY="-8"    TextColor="{StaticResource IconColor}"/>
-                        </StackLayout>
-                    </CollectionView.Header>
-                    <CollectionView.Footer>
-                        <StackLayout Orientation="Vertical">
-                            <Label Text="Write a review" FontSize="Medium" FontAttributes="Bold"/>
-                            <controls:Rating Minimum="1" Maximum="5" Value="{Binding Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}, Path=NewFeedBack.Rating}"/>
-                            <Label Text="Text" FontSize="Medium"/>
-                            <Frame VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
+                    </StackLayout>
+                    <StackLayout Grid.Row="1" 
+                                BindableLayout.ItemsSource="{Binding FeedBack}"
+                                Margin="0,20,0,20">
+                        <BindableLayout.EmptyView>
+                            <StackLayout Orientation="Horizontal">
+                                <Label HorizontalOptions="Center" VerticalOptions="Center"
+                                       Text="No reviews" FontSize="Medium"/>
+                            </StackLayout>
+                        </BindableLayout.EmptyView>
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="shared:AuthoredFeedback">
+                                <Frame CornerRadius="4" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+                                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,8,*">
+                                        <ff:CachedImage Source="{Binding AuthorImage}"
+                                                        WidthRequest="64" HeightRequest="64" Aspect="AspectFit"/>
+                                        <StackLayout Grid.Column="2" Orientation="Vertical">
+                                            <Label Text="{Binding AuthorFullName}" FontSize="Medium" 
+                                                FontAttributes="Bold"/>
+                                            <Label FontSize="Small" Text="{Binding PublicationDate}" />
+                                        </StackLayout>
+                                        <StackLayout Orientation="Vertical" HorizontalOptions="CenterAndExpand"
+                                                     VerticalOptions="StartAndExpand"
+                                                     Grid.Row="1">
+                                            <controls:Rating Value="{Binding Rating}" StarHeightRequest="12" StarWidthRequest="12"
+                                                         Spacing="4" IsEnabled="False"/>
+                                        </StackLayout>
+                                        <Label Grid.Row="1" Grid.Column="2" VerticalOptions="CenterAndExpand"
+                                               HorizontalOptions="StartAndExpand"
+                                               FontSize="Subtitle" Text="{Binding Text}"/>
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </StackLayout>
+
+                    <StackLayout Grid.Row="2" Orientation="Vertical" IsVisible="False">
+                        <StackLayout.Triggers>
+                            <DataTrigger TargetType="StackLayout" Binding="{Binding CanReview}">
+                                <Setter Property="IsVisible" Value="True" />
+                            </DataTrigger>
+                        </StackLayout.Triggers>
+                        <Label Text="Write a review" FontSize="Medium" FontAttributes="Bold"/>
+                        <controls:Rating Minimum="1" Maximum="5" Value="{Binding Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}, Path=NewFeedBack.Rating}"/>
+                        <Label Text="Text" FontSize="Medium"/>
+                        <Frame VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
                                    HeightRequest="200" CornerRadius="4" BorderColor="{StaticResource IconColor}"
                                    Padding="0">
 
-                                <Editor HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"
+                            <Editor HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"
                                        Margin="0,0,0,-8" Text="{Binding Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}, Path=NewFeedBack.Text}"
                                    />
-                            </Frame>
-                            <y:PancakeView BackgroundColor="{StaticResource IconColor}"
-                                           VerticalOptions="EndAndExpand"
-                                           HorizontalOptions="EndAndExpand" CornerRadius="8"
-                                           WidthRequest="100"
-                                           HeightRequest="40"
+                        </Frame>
+                        <Button Text="Submit"
+                                    BackgroundColor="{StaticResource IconColor}"
+                                    VerticalOptions="EndAndExpand"
+                                    HorizontalOptions="EndAndExpand" CornerRadius="8"
+                                    WidthRequest="100"
+                                    HeightRequest="40"
+                            TextColor="White"
                                            >
-                                <Label VerticalOptions="Center" HorizontalOptions="Center" TextColor="White"
-                                       FontAttributes="Bold" FontSize="Medium" Text="Submit"/>
-                                <y:PancakeView.GestureRecognizers>
-                                    <TapGestureRecognizer NumberOfTapsRequired="1"
+                            <Button.GestureRecognizers>
+                                <TapGestureRecognizer NumberOfTapsRequired="1"
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}, Path=NewFeedBackCommand}"
                                                               />
-                                </y:PancakeView.GestureRecognizers>
-                            </y:PancakeView>
-                        </StackLayout>
-                    </CollectionView.Footer>
-                    <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="4"/>
-                    </CollectionView.ItemsLayout>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="shared:AuthoredFeedback">
-                            <Frame CornerRadius="4" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
-                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,8,*">
-                                    <ff:CachedImage Source="{Binding AuthorImage}"
-                                                        WidthRequest="64" HeightRequest="64" Aspect="AspectFit"/>
-                                    <StackLayout Grid.Column="2" Orientation="Vertical">
-                                        <Label Text="{Binding AuthorFullName}" FontSize="Medium" 
-                                                FontAttributes="Bold"/>
-                                        <Label FontSize="Small" Text="{Binding PublicationDate}" />
-                                    </StackLayout>
-                                    <StackLayout Orientation="Vertical" HorizontalOptions="CenterAndExpand"
-                                                     VerticalOptions="StartAndExpand"
-                                                     Grid.Row="1">
-                                        <controls:Rating Value="{Binding Rating}" StarHeightRequest="12" StarWidthRequest="12"
-                                                         Spacing="4" IsEnabled="False"/>
-                                    </StackLayout>
-                                    <Label Grid.Row="1" Grid.Column="2" VerticalOptions="CenterAndExpand"
-                                               HorizontalOptions="StartAndExpand"
-                                               FontSize="Subtitle" Text="{Binding Text}"/>
-                                </Grid>
-                            </Frame>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+                            </Button.GestureRecognizers>
+                        </Button>
+                    </StackLayout>
+                </Grid>
             </Grid>
         </Grid>
     </ContentView.Content>

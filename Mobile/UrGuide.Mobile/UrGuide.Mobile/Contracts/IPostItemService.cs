@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UrGuide.Mobile.Models;
 using UrGuide.Model.Results;
@@ -16,5 +15,7 @@ namespace UrGuide.Mobile.Contracts
         Task<Result<IEnumerable<Model.Shared.AuthoredFeedback>>> GetPostFeedbackAsync(string id, int pageNumber = 1);
         Task<Result<IEnumerable<Model.Posts.BidHistoryModel>>> GetBidHistoryAsync(string id);
         Task ToggleFavorites(PostItem it);
+        Task SetUserReaction(PostItem it);
+        Task<Result<Model.Shared.AuthoredFeedback>> SendFeedback(string postId, Model.Shared.FeedbackModel newFeedBack);
     }
 }

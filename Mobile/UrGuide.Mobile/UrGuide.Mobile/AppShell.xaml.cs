@@ -1,5 +1,7 @@
-﻿using Plugin.SharedTransitions;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Plugin.SharedTransitions;
 using System.Linq;
+using UrGuide.Mobile.ViewModels;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
@@ -12,6 +14,7 @@ namespace UrGuide.Mobile
             InitializeComponent();
             if (!VersionTracking.IsFirstLaunchForCurrentBuild)
                 RootTab.Items.RemoveAt(0);
+            BindingContext = Forms.Ioc.GetRequiredService<ShellViewModel>();
         }
 
         public static void RemoveWelcomeScreen()

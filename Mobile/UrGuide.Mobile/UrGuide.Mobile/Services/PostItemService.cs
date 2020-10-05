@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using MvvmHelpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +9,7 @@ using UrGuide.Mobile.Models;
 using UrGuide.Model.Results;
 using System.Reactive.Linq;
 using Akavache;
+using System.Net.Http;
 
 namespace UrGuide.Mobile.Services
 {
@@ -17,27 +17,38 @@ namespace UrGuide.Mobile.Services
     {
         private const string Favorites_CacheKey = "favorites";
 
-        public PostItemService(PostsClient client,
+        public PostItemService(IHttpClientFactory clientFactory,
                                BidClient bidClient,
                                FeedbackClient feedbackClient,
                                LookupClient lookupClient,
                                IMapper mapper,
-                               IBlobCache cache)
+                               IBlobCache cache,
+                               IPreferenceService preference)
         {
-            Client = client ?? throw new ArgumentNullException(nameof(client));
+            _clientFactory = clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));
             BidClient = bidClient ?? throw new ArgumentNullException(nameof(bidClient));
             FeedbackClient = feedbackClient ?? throw new ArgumentNullException(nameof(feedbackClient));
             LookupClient = lookupClient ?? throw new ArgumentNullException(nameof(lookupClient));
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             Cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            Preference = preference ?? throw new ArgumentNullException(nameof(preference));
         }
 
-        public PostsClient Client { get; }
+        IHttpClientFactory _clientFactory;
+        public PostsClient Client
+        {
+            get
+            {
+                return new PostsClient(_clientFactory.CreateClient(nameof(PostsClient)));
+            }
+        }
+
         public BidClient BidClient { get; }
         public FeedbackClient FeedbackClient { get; }
         public LookupClient LookupClient { get; }
         public IMapper Mapper { get; }
         public IBlobCache Cache { get; }
+        public IPreferenceService Preference { get; }
 
         public async Task<Result<IEnumerable<Model.Posts.BidHistoryModel>>> GetBidHistoryAsync(string id)
         {
@@ -71,7 +82,7 @@ namespace UrGuide.Mobile.Services
             {
                 var categories = await LookupClient.CategoriesAsync();
                 return Result.Of(Mapper.Map<IEnumerable<Model.Lookup.CategoryModel>>(categories));
-            }).Catch(Observable.Return(Result.Of<IEnumerable<Model.Lookup.CategoryModel>>().WithErrors("Error occured")));
+            }, DateTime.UtcNow.AddYears(1)).Catch(Observable.Return(Result.Of<IEnumerable<Model.Lookup.CategoryModel>>().WithErrors("Error occured")));
         }
 
         public async Task<IEnumerable<PostItem>> GetFavoriteAsync()
@@ -134,6 +145,34 @@ namespace UrGuide.Mobile.Services
             }
         }
 
+        public async Task SetUserReaction(PostItem it)
+        {
+            if (it.HasReacted)
+            {
+                it.Likes--;
+                it.HasReacted = false;
+                it.ReactionType = GlobalSetting.Unknown;
+            } 
+            else
+            {
+                it.Likes++;
+                it.HasReacted = true;
+                it.ReactionType = GlobalSetting.Like;
+            }
+            try
+            {
+                await Client.ReactionAsync(it.Id, new UserReactionModel
+                {
+                    Like = true,
+                    PostId = it.Id
+                });
+            }
+            catch (ApiException e)
+            {
+                // do something as the user might have lost his authorization
+            }
+        }
+
         public async Task ToggleFavorites(PostItem it)
         {
             var favorites = await Cache.GetOrCreateObject(Favorites_CacheKey, () => new List<PostItem>());
@@ -148,7 +187,36 @@ namespace UrGuide.Mobile.Services
                 favorites.Add(it);
             }
             await Cache.Invalidate(Favorites_CacheKey);
-            await Cache.InsertObject(Favorites_CacheKey, favorites);
+            await Cache.InsertObject(Favorites_CacheKey, favorites, TimeSpan.FromDays(360));
+        }
+
+        public async Task<Result<Model.Shared.AuthoredFeedback>> SendFeedback(string postId, Model.Shared.FeedbackModel item)
+        {
+            try
+            {
+                var result = await Client.FeedbackAsync(postId, new FeedbackModel
+                {
+                    Rating = item.Rating,
+                    Text = item.Text
+                });
+                if (result)
+                {
+                    return Result.Of(new Model.Shared.AuthoredFeedback
+                    {
+                        AuthorFullName = Preference.FullName,
+                        AuthorId = Preference.UserId,
+                        AuthorImage = Preference.Image,
+                        Rating = item.Rating,
+                        Text = item.Text,
+                        PublicationDate = DateTime.Now.ToString("dd-MMM-yyyy HH:mm:ss")
+                    });
+                }
+                return Result.Of<Model.Shared.AuthoredFeedback>().WithErrors("Fail to post your feedback, please try later");
+            }
+            catch (ApiException e)
+            {
+                return Result.Of<Model.Shared.AuthoredFeedback>().WithErrors(e.Message);
+            }
         }
     }
 }

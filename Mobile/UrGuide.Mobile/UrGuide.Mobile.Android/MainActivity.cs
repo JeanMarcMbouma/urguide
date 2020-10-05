@@ -7,10 +7,17 @@ using Microsoft.Extensions.DependencyInjection;
 using FFImageLoading.Forms.Platform;
 using Microsoft.AppCenter.Distribute;
 using System.Net;
+using Akavache;
 
 namespace UrGuide.Mobile.Droid
 {
-    [Activity(Label = "UrGuide", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+    [Activity(Label = "UrGuide", 
+        Icon = "@mipmap/icon", 
+        Theme = "@style/MainTheme", 
+        MainLauncher = true, 
+        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation,
+        LaunchMode = LaunchMode.SingleTop
+        )]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         protected override void OnCreate(Bundle savedInstanceState)

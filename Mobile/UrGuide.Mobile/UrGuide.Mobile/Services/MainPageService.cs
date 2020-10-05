@@ -1,6 +1,4 @@
-﻿using Plugin.SharedTransitions;
-using UrGuide.Mobile.Contracts;
-using UrGuide.Mobile.Views;
+﻿using UrGuide.Mobile.Contracts;
 using Xamarin.Forms;
 
 namespace UrGuide.Mobile.Services

@@ -39,14 +39,15 @@
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="m:CategoryModel">
-                            <Grid HeightRequest="250" WidthRequest="200">
+                            <Grid HeightRequest="250" WidthRequest="200" BackgroundColor="LightGray">
                                 <ff:CachedImage Source="{Binding ImageUrl}"
                                                         VerticalOptions="FillAndExpand"
                                                         HorizontalOptions="FillAndExpand"
-                                                DownsampleToViewSize="True"
+                                                DownsampleUseDipUnits="True"
                                                 HeightRequest="250"
-                                                WidthRequest="250"
-                                                        Aspect="AspectFill"/>
+                                                WidthRequest="200"
+                                                CacheDuration="360"
+                                                        Aspect="AspectFill" />
                                 <y:PancakeView VerticalOptions="End" HorizontalOptions="FillAndExpand" 
                                            HeightRequest="40" BackgroundColor="#60000000">
                                     <Label Text="{Binding Name}" TextColor="White" Margin="4"
@@ -63,17 +64,7 @@
                 <StackLayout Orientation="Horizontal" Padding="0" HorizontalOptions="FillAndExpand">
                     <Label Text="Recent posts" FontSize="Title" FontAttributes="Bold" TextColor="{StaticResource IconColor}"
                            VerticalOptions="EndAndExpand"/>
-                    <ImageButton Source="{FontImage FontFamily=fas, 
-                                    Glyph={x:Static icons:FAI.Pen}, 
-                                    Color={StaticResource IconColor},Size=24}" Aspect="AspectFit"
-                                 BorderColor="LightGray" BorderWidth="1"
-                                 BackgroundColor="#90ffffff"
-                                 Padding="8"
-                                 CornerRadius="4"
-                               HeightRequest="32" WidthRequest="32" 
-                                 HorizontalOptions="EndAndExpand" VerticalOptions="Center"
-                                 Clicked="ImageButton_Clicked"
-                          />
+                    
                 </StackLayout>
                 <StackLayout Orientation="Vertical" Spacing="8" BindableLayout.ItemsSource="{Binding Items}"
                         BackgroundColor="Transparent" BindableLayout.ItemTemplate="{StaticResource PostModelTemplate}"

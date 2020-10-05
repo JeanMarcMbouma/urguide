@@ -132,7 +132,10 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="akavache.mobile">
+    <PackageReference Include="akavache">
+      <Version>6.10.20</Version>
+    </PackageReference>
+    <PackageReference Include="akavache.sqlite3">
       <Version>6.10.20</Version>
     </PackageReference>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection">
@@ -161,6 +164,9 @@
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>12.0.3</Version>
+    </PackageReference>
+    <PackageReference Include="ReactiveUI">
+      <Version>11.5.35</Version>
     </PackageReference>
     <PackageReference Include="Refractored.MvvmHelpers">
       <Version>1.6.2</Version>

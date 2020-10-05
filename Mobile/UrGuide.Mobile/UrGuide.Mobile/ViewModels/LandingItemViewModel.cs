@@ -1,13 +1,9 @@
 ﻿using MvvmHelpers;
 using MvvmHelpers.Commands;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
-using UrGuide.Mobile.Views;
-using Xamarin.Forms.Xaml;
 
 namespace UrGuide.Mobile.ViewModels
 {

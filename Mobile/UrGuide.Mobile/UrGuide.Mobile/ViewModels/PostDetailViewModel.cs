@@ -1,9 +1,11 @@
 ﻿using MvvmHelpers;
 using MvvmHelpers.Commands;
 using System;
+using System.Linq;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
+using UrGuide.Mobile.Services;
 using UrGuide.Mobile.Views.Dialog;
 
 namespace UrGuide.Mobile.ViewModels
@@ -40,61 +42,27 @@ namespace UrGuide.Mobile.ViewModels
             await PostItemService.ToggleFavorites(Selected);
             Xamarin.Forms.MessagingCenter.Send(this, "favorite", Selected);
         });
-        public ICommand NewFeedBackCommand => _newFeedbackCommand ??= new Command(() =>
+        public ICommand NewFeedBackCommand => _newFeedbackCommand ??= new Command(async () =>
         {
             if (!string.IsNullOrEmpty(NewFeedBack.Text))
             {
-                Selected.FeedBack.Add(new Model.Shared.AuthoredFeedback
-                {
-                    AuthorFullName = "Me",
-                    AuthorImage = "http://urguide.azurewebsites.net/thumb/00000000-0000-0000-0000-000000000000.png",
-                    PublicationDate = DateTime.Now.ToString("dd-MMM-yyyy HH:mm:ss"),
-                    Rating = NewFeedBack.Rating,
-                    Text = NewFeedBack.Text
-                });
+                var it = await PostItemService.SendFeedback(Selected.Id, NewFeedBack);
+                if(!it.HasError)
+                    Selected.FeedBack.Add(it.Data);
             }
-            NewFeedBack.Rating = 1;
+            NewFeedBack.Rating = 4;
             NewFeedBack.Text = string.Empty;
             OnPropertyChanged(nameof(NewFeedBack));
-        });
+        }, () => (NewFeedBack.Text ?? string.Empty).Length > 50);
         public ICommand ViewBidCommand => _viewBidCommand ??= new AsyncCommand<PostItem>(async (item) =>
         {
             BidDialogViewModel.Item = item;
             await NavigationService.PushModalAsync(new BidDialog(BidDialogViewModel), true);
         });
 
-        public ICommand LikeCommand => _likeCommand ??= new Command(() =>
+        public ICommand LikeCommand => _likeCommand ??= new Command(async () =>
         {
-            var it = Selected;
-            if (it.ReactionType == PostsViewModel.Like)
-            {
-                it.Likes--;
-                it.ReactionType = PostsViewModel.Unknown;
-                return;
-            }
-            if (it.ReactionType == PostsViewModel.DisLike)
-            {
-                it.Dislikes--;
-            }
-            it.Likes++;
-            it.ReactionType = PostsViewModel.Like;
-        });
-
-        public ICommand DislikeCommand => _dislikeCommand ??= new Command(() =>
-        {
-            var it = Selected;
-            if (it.ReactionType == PostsViewModel.DisLike)
-            {
-                it.Dislikes--;
-                it.ReactionType = PostsViewModel.Unknown;
-                return;
-            }
-            if (it.ReactionType == PostsViewModel.Like)
-            {
-                it.Likes--;
-            }
-            it.Dislikes++;
-            it.ReactionType = PostsViewModel.DisLike;
+            await PostItemService.SetUserReaction(Selected);
         });
 
         public PostItem Selected
@@ -107,11 +75,12 @@ namespace UrGuide.Mobile.ViewModels
         }
 
         public UrGuide.Model.Shared.FeedbackModel NewFeedBack { get; } = new Model.Shared.FeedbackModel { 
-            Rating = 1
+            Rating = 4
         };
         public INavigationService NavigationService { get; }
         public IPostItemService PostItemService { get; }
         public BidDialogViewModel BidDialogViewModel { get; }
+        public IPreferenceService Preference { get; }
 
         private string _id;
         public string Id { 
@@ -122,11 +91,18 @@ namespace UrGuide.Mobile.ViewModels
             } 
         }
 
-        public PostDetailViewModel(INavigationService navigationService, IPostItemService postItemService, BidDialogViewModel bidDialogViewModel)
+        public bool CanReview => Selected?.AuthorId != Preference.UserId
+            && Selected?.FeedBack.All(f => f.AuthorId != Preference.UserId) == true;
+
+        public PostDetailViewModel(INavigationService navigationService, 
+            IPostItemService postItemService, 
+            BidDialogViewModel bidDialogViewModel,
+            IPreferenceService preference)
         {
             NavigationService = navigationService ?? throw new System.ArgumentNullException(nameof(navigationService));
             PostItemService = postItemService ?? throw new ArgumentNullException(nameof(postItemService));
             BidDialogViewModel = bidDialogViewModel ?? throw new System.ArgumentNullException(nameof(bidDialogViewModel));
+            Preference = preference ?? throw new ArgumentNullException(nameof(preference));
         }
     }
 }

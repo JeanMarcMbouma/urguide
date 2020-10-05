@@ -1,14 +1,10 @@
 ﻿using MvvmHelpers;
 using MvvmHelpers.Commands;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
-using UrGuide.Model.Posts;
 
 namespace UrGuide.Mobile.ViewModels
 {

@@ -1,5 +1,4 @@
-﻿using UrGuide.Mobile.Contracts;
-using UrGuide.Mobile.ViewModels;
+﻿using UrGuide.Mobile.ViewModels;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
