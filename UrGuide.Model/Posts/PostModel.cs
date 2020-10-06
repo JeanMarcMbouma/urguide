@@ -9,6 +9,7 @@ namespace UrGuide.Model.Posts
         {
             Images = new HashSet<ImageFileModel>();
             Categories = new HashSet<string>();
+            Itineraries = new HashSet<ItineraryModel>();
         }
         public string Id { get; set; }
         public string Text { get; set; }
@@ -36,9 +37,12 @@ namespace UrGuide.Model.Posts
         public int ItineraryCount { get; set; }
         public ICollection<string> Categories { get; protected set; }
         public ICollection<ImageFileModel> Images { get; protected set; }
+        public ICollection<ItineraryModel> Itineraries { get; set; }
+
         public string AuthorId { get; set; }
         public string Author { get; set; }
         public string AuthorAvatar { get; set; }
         public bool IsBidOptIn { get; set; }
+        public int Reviews { get; set; }
     }
 }

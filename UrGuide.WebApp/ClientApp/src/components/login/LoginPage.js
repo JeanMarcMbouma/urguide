@@ -96,6 +96,7 @@ function LoginForm() {
         }
         catch (e)
         {
+            alert(e)
             setLoginFailed('Invalid login attempt.');
             dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/sign-in", } });
         }

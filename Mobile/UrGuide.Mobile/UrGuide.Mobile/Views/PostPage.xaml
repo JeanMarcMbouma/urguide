@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels"
+             xmlns:st="clr-namespace:Plugin.SharedTransitions;assembly=Plugin.SharedTransitions"
+             mc:Ignorable="d"
+             xmlns:tt="clr-namespace:UrGuide.Mobile.Views.Templates" 
+             xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:m="clr-namespace:UrGuide.Model.Lookup;assembly=UrGuide.Model" xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+             x:Class="UrGuide.Mobile.Views.PostPage"
+             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers"
+             x:DataType="vm:PostsViewModel"
+             Shell.NavBarIsVisible="False"
+             st:SharedTransitionShell.TransitionDuration="300"
+             st:SharedTransitionShell.TransitionSelectedGroup="{Binding Selected.Id}"
+             BackgroundColor="#ececec"
+             >
+    <ContentPage.Resources>
+        <DataTemplate x:Key="PostModelTemplate">
+            <tt:PostListItemTemplate />
+        </DataTemplate>
+    </ContentPage.Resources>
+    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadItemsCommand}"
+                     RefreshColor="{StaticResource FavoriteIcon}" HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand" >
+        <ScrollView>
+        <StackLayout Orientation="Vertical" Margin="8,8,8,20" Spacing="8" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
+          >
+                <StackLayout.Triggers>
+                    <DataTrigger TargetType="StackLayout" Binding="{Binding IsBusy}" Value="{x:Static x:Boolean.TrueString}">
+                        <Setter Property="IsVisible" Value="False"/>
+                    </DataTrigger>
+                </StackLayout.Triggers>
+                <Label Text="Categories" FontSize="Title" FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
+                <CollectionView ItemsSource="{Binding Categories}" HeightRequest="250" ItemSizingStrategy="MeasureAllItems">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Horizontal"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="m:CategoryModel">
+                            <Grid HeightRequest="250" WidthRequest="200" BackgroundColor="LightGray">
+                                <ff:CachedImage Source="{Binding ImageUrl}"
+                                                        VerticalOptions="FillAndExpand"
+                                                        HorizontalOptions="FillAndExpand"
+                                                DownsampleUseDipUnits="True"
+                                                HeightRequest="250"
+                                                WidthRequest="200"
+                                                CacheDuration="360"
+                                                        Aspect="AspectFill" />
+                                <y:PancakeView VerticalOptions="End" HorizontalOptions="FillAndExpand" 
+                                           HeightRequest="40" BackgroundColor="#60000000">
+                                    <Label Text="{Binding Name}" TextColor="White" Margin="4"
+                                       FontSize="Medium" FontAttributes="Bold" VerticalOptions="Center"/>
+                                </y:PancakeView>
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostsViewModel}}, Path=SearchCategoryCommand}" NumberOfTapsRequired="1"
+                                                          CommandParameter="{Binding}"/>
+                                </Grid.GestureRecognizers>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+                <StackLayout Orientation="Horizontal" Padding="0" HorizontalOptions="FillAndExpand">
+                    <Label Text="Recent posts" FontSize="Title" FontAttributes="Bold" TextColor="{StaticResource IconColor}"
+                           VerticalOptions="EndAndExpand"/>
+                    
+                </StackLayout>
+                <StackLayout Orientation="Vertical" Spacing="8" BindableLayout.ItemsSource="{Binding Items}"
+                        BackgroundColor="Transparent" BindableLayout.ItemTemplate="{StaticResource PostModelTemplate}"
+                    HorizontalOptions="FillAndExpand" 
+                            VerticalOptions="StartAndExpand">
+                    <BindableLayout.EmptyView>
+                        <Label Text="Nothing yet in your region" FontSize="Medium" FontAttributes="Bold"
+                            HorizontalOptions="CenterAndExpand"/>
+                    </BindableLayout.EmptyView>
+                </StackLayout>
+            <BoxView HeightRequest="10" HorizontalOptions="FillAndExpand"/>
+            </StackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>

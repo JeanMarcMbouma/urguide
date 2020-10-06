@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="UrGuide.Mobile.Views.CreatePost"
+             Shell.NavBarIsVisible="False"
+             Shell.PresentationMode="ModalAnimated"
+             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers" xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms" xmlns:mm="clr-namespace:UrGuide.Mobile.API">
+    <ContentPage.Content>
+        <ScrollView>
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="8" Margin="12"
+                  VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+                <StackLayout Orientation="Vertical" HorizontalOptions="FillAndExpand" Padding="8">
+                    <Label Text="Create a post" VerticalOptions="Center" HorizontalOptions="CenterAndExpand"
+                       FontSize="Title"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource NavigationPrimary}"/>
+                </StackLayout>
+                <StackLayout Grid.Row="1" Orientation="Vertical" HorizontalOptions="FillAndExpand">
+                    <Editor Placeholder="Title" HeightRequest="100"
+                       HorizontalOptions="FillAndExpand"
+                       MaxLength="200"
+                       VerticalOptions="Start"></Editor>
+                    <Editor Placeholder="Description" HeightRequest="250"
+                       HorizontalOptions="FillAndExpand"
+                       MaxLength="500"
+                       VerticalOptions="Start"></Editor>
+                </StackLayout>
+                <Expander Grid.Row="2"  IsExpanded="True" HorizontalOptions="FillAndExpand">
+                    <Expander.Header>
+                        <StackLayout Margin="0, 20, 0, 20" Orientation="Horizontal" Spacing="20"
+                                      HorizontalOptions="FillAndExpand">
+                            <Label Text="Itinerary of this tour" FontSize="Medium" FontAttributes="Bold"/>
+                            <StackLayout Orientation="Horizontal" Spacing="4" >
+                                <Image Source="{FontImage FontFamily=fas, 
+                        Glyph={x:Static icons:FAI.MapPin}, 
+                        Color={StaticResource IconColor},Size=24}" />
+                                <Label Text="{Binding ItineraryCount}" FontAttributes="Bold"
+                                        TranslationY="-8" TextColor="{StaticResource IconColor}"/>
+
+                            </StackLayout>
+                            <Button TextColor="White"
+                                ImageSource="{FontImage Color={StaticResource IconColor}, 
+                                    FontFamily=fas, 
+                                    Glyph={Static icons:FAI.Plus},Size=24}" 
+                                WidthRequest="32" HeightRequest="32"
+                                CornerRadius="16"
+                                VerticalOptions="Center"
+                                HorizontalOptions="EndAndExpand"
+                                Padding="4"
+                            ></Button>
+                        </StackLayout>
+                    </Expander.Header>
+                    <StackLayout BindableLayout.ItemsSource="{Binding Itineraries}" Spacing="0">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="mm:ItineraryModel">
+                                <Grid ColumnDefinitions="24,Auto" RowDefinitions="24,*" >
+                                    <BoxView WidthRequest="16" HeightRequest="16" CornerRadius="16" 
+                                     BackgroundColor="{StaticResource IconColor}"
+                                     VerticalOptions="Start" HorizontalOptions="Start"></BoxView>
+                                    <BoxView WidthRequest="2"
+                                     BackgroundColor="{StaticResource IconColor}"
+                                     VerticalOptions="StartAndExpand"
+                                     HorizontalOptions="Start"
+                                     Grid.RowSpan="2" 
+                                     Margin="7,2,0,0" TranslationY="14"></BoxView>
+                                    <BoxView WidthRequest="24" HeightRequest="1"
+                                     BackgroundColor="{StaticResource IconColor}"
+                                     VerticalOptions="Start"
+                                     HorizontalOptions="StartAndExpand"
+                                     Margin="2,7,0,0"></BoxView>
+                                    <Label Text="{Binding Title}" Grid.Column="2" VerticalOptions="StartAndExpand" 
+                                   HorizontalOptions="StartAndExpand"
+                                   FontAttributes="Bold" FontSize="Medium" Margin="0,-7,0,0"/>
+
+                                    <Label Text="{Binding Description}" Grid.Column="2" Grid.Row="1" VerticalOptions="StartAndExpand" 
+                                   HorizontalOptions="StartAndExpand"
+                                   FontSize="Subtitle" Margin="0,-7,0,10"/>
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </StackLayout>
+                </Expander>
+                <StackLayout Grid.Row="3" Orientation="Horizontal" HorizontalOptions="FillAndExpand"
+                                     HeightRequest="40">
+                    <Label Text="Add up to 4 images" FontSize="Medium" FontAttributes="Bold"
+                                   HorizontalOptions="StartAndExpand"/>
+
+                    <Button TextColor="White"
+                            ImageSource="{FontImage Color={StaticResource IconColor}, 
+                                FontFamily=fas, 
+                                Glyph={Static icons:FAI.Plus},Size=24}" 
+                            WidthRequest="32" HeightRequest="32"
+                            CornerRadius="16"
+                            VerticalOptions="Center"
+                            HorizontalOptions="End"
+                            Padding="4"
+                            ></Button>
+                </StackLayout>
+                <CollectionView Grid.Row="4" HorizontalOptions="FillAndExpand" 
+                             HeightRequest="220" ItemsSource="{Binding Images}"
+                             >
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8"></LinearItemsLayout>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <StackLayout Orientation="Horizontal">
+                                <ff:CachedImage Source="{Binding ImageBase64}" 
+                                                HeightRequest="200"
+                                                WidthRequest="200"
+                                                Aspect="AspectFill"
+                                                ></ff:CachedImage>
+                            </StackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+                <BoxView Grid.Row="5" HeightRequest="10" BackgroundColor="Transparent"></BoxView>
+            </Grid>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>

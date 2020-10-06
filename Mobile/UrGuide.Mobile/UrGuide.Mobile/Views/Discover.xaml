@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:controls="clr-namespace:UrGuide.Mobile.Views.Controls"
+             mc:Ignorable="d"
+             x:Class="UrGuide.Mobile.Views.Discover"
+             Shell.NavBarIsVisible="False"
+             xmlns:models="clr-namespace:UrGuide.Mobile.Models"
+             xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels" 
+             xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:m="clr-namespace:UrGuide.Model.Shared;assembly=UrGuide.Model"
+             x:DataType="vm:DiscoverViewModel"
+             BackgroundColor="#ececec"
+             Title="Discover">
+    
+    <AbsoluteLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+        <StackLayout AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional" Spacing="8" 
+                     Orientation="Vertical" Margin="8,12,8,8" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand">
+            <StackLayout Orientation="Horizontal" HeightRequest="50"  HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+                <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
+                       VerticalOptions="StartAndExpand" CornerRadius="24" Padding="0">
+                    <StackLayout Orientation="Horizontal" VerticalOptions="FillAndExpand"
+                                 HorizontalOptions="FillAndExpand" Spacing="8" > 
+                        <Entry HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" 
+                               Margin="20,0,0,-8" Text="{Binding SearchTerm}"/>
+                        <ImageButton WidthRequest="24" HeightRequest="24" BackgroundColor="Transparent"
+                                HorizontalOptions="End" VerticalOptions="CenterAndExpand" Margin="0,12,12,12"
+                                     Command="{Binding SearchCommand}">
+                            <ImageButton.Source>
+                                <FontImageSource FontFamily="fas" Glyph="&#xf002;" Color="{StaticResource IconColor}" />
+                            </ImageButton.Source>
+                        </ImageButton>
+                    </StackLayout>
+                </Frame>
+            </StackLayout>
+            <CollectionView HeightRequest="40" HorizontalOptions="FillAndExpand" Margin="6"
+                            BackgroundColor="Transparent" ItemsSource="{Binding SearchOptions}"
+                            ItemSizingStrategy="MeasureAllItems">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout ItemSpacing="4" Orientation="Horizontal"/>
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:SearchOption">
+                        <Frame BorderColor="{StaticResource IconColor}" CornerRadius="20"
+                               VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Padding="16,8,16,8">
+                            <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand"
+                                         VerticalOptions="CenterAndExpand">                     
+                                <Label Text="{Binding Text}" TextColor="{StaticResource IconColor}" FontSize="Subtitle" 
+                                   HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand"/>
+                            </StackLayout>
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DiscoverViewModel}}, Path=SearchByOptionCommand}"
+                                                      CommandParameter="{Binding}"/>
+                            </Frame.GestureRecognizers>
+                            <Frame.Triggers>
+                                <DataTrigger TargetType="Frame" Binding="{Binding Selected}" Value="{x:Static x:Boolean.TrueString}">
+                                    <Setter Property="BorderColor" Value="{StaticResource FavoriteIcon}"/>
+                                    <Setter Property="BackgroundColor" Value="{StaticResource FavoriteIcon}"/>
+                                </DataTrigger>
+                            </Frame.Triggers>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <RefreshView IsRefreshing="{Binding IsBusy}" RefreshColor="{StaticResource FavoriteIcon}"
+                         Command="{Binding SearchCommand}">
+            <ScrollView VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+                <CollectionView ItemsSource="{Binding Items}" ItemSizingStrategy="MeasureAllItems">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:DiscoverItem">
+                                <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
+                                      HeightRequest="250" x:Name="container">
+                                    <CarouselView ItemsSource="{Binding Files}" HorizontalOptions="FillAndExpand"
+                                          VerticalOptions="FillAndExpand"  x:Name="ImageFrame"
+                                          IndicatorView="indicator">
+                                        <CarouselView.ItemTemplate>
+                                            <DataTemplate x:DataType="{x:Type m:ImageFileModel}">
+
+                                                <ff:CachedImage 
+                                                Aspect="AspectFill"
+                                                Source="{Binding ImageBase64}"
+                                                WidthRequest="{Binding Source={Reference ImageFrame},Path=Width}"
+                                                HeightRequest="{Binding Source={Reference ImageFrame},Path=Height}"
+                                                >
+                                                    <ff:CachedImage.GestureRecognizers>
+                                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DiscoverViewModel}},Path=ViewPostCommand}" 
+                                                          CommandParameter="{Binding Source={Reference container}, Path=BindingContext}"/>
+                                                    </ff:CachedImage.GestureRecognizers>
+                                                </ff:CachedImage>      
+                                            </DataTemplate>
+                                        </CarouselView.ItemTemplate>
+                                    </CarouselView>
+                                    <BoxView HorizontalOptions="FillAndExpand" HeightRequest="40" 
+                                             BackgroundColor="#50000000"
+                                 VerticalOptions="End" CornerRadius="4"/>
+                                    <StackLayout Orientation="Vertical" VerticalOptions="StartAndExpand"
+                                                 HorizontalOptions="FillAndExpand" Spacing="0"
+                                                 BackgroundColor="#20000000">
+                                        <StackLayout HorizontalOptions="Start"
+                                                         VerticalOptions="StartAndExpand"
+                                                         Margin="8">
+                                            <ff:CachedImage Source="{Binding AuthorImage}" 
+                                                    Aspect="AspectFit"
+                                                    WidthRequest="64"
+                                                    HeightRequest="64"
+                                                    VerticalOptions="Start"
+                                                    HorizontalOptions="CenterAndExpand"
+                                                    ></ff:CachedImage>
+
+                                            <Label Text="{Binding Author}" VerticalOptions="End" 
+                                                       HorizontalOptions="CenterAndExpand"
+                                   MaxLines="1"  
+                                   TextColor="White" FontSize="Small" FontAttributes="Bold" CharacterSpacing="1" />
+                                        </StackLayout>
+
+                                    </StackLayout>
+
+                                    <IndicatorView x:Name="indicator" VerticalOptions="End"
+                                           HorizontalOptions="EndAndExpand" 
+                                           IndicatorColor="#70ffffff"
+                                           HeightRequest="40" 
+                                           IndicatorSize="10" SelectedIndicatorColor="#fff"/>
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DiscoverViewModel}},Path=ViewPostCommand}" 
+                                                          CommandParameter="{Binding}"/>
+                                    </Grid.GestureRecognizers>
+                                </Grid>
+                            </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Span="{OnIdiom Phone=2,Default=4}" Orientation="Vertical" 
+                                         HorizontalItemSpacing="4" VerticalItemSpacing="0"/>
+                    </CollectionView.ItemsLayout>
+                </CollectionView>  
+            </ScrollView>
+            </RefreshView>
+        </StackLayout>
+        <CollectionView HorizontalOptions="FillAndExpand" Margin="12"
+                            BackgroundColor="Transparent" 
+                            AbsoluteLayout.LayoutBounds="20,60,.9,1" 
+                            AbsoluteLayout.LayoutFlags="SizeProportional" SelectionMode="Single"
+                        ItemsSource="{Binding Suggestions}" IsVisible="{Binding HasSuggestions}"
+                        SelectedItem="{Binding SelectedSuggestion}">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout ItemSpacing="1" Orientation="Vertical"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="{x:Type x:String}">
+                    <Frame BorderColor="{StaticResource IconColor}" CornerRadius="2"
+                               VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Padding="16,8,16,8">
+                        <StackLayout Orientation="Horizontal" HorizontalOptions="StartAndExpand"
+                                         VerticalOptions="CenterAndExpand">
+                            <Label Text="{Binding}" TextColor="{StaticResource IconColor}" FontSize="Subtitle" 
+                                   HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand"
+                                       HorizontalTextAlignment="Start"/>
+                        </StackLayout>
+
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </AbsoluteLayout>
+</ContentPage>

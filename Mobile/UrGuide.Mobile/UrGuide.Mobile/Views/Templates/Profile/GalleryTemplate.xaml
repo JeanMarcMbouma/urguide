@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="UrGuide.Mobile.Views.Templates.Profile.GalleryTemplate"
+             xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels"
+             xmlns:models="clr-namespace:UrGuide.Mobile.Models" 
+             xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:m="clr-namespace:UrGuide.Model.Shared;assembly=UrGuide.Model">
+  <ContentView.Content>
+        <StackLayout Orientation="Vertical" Spacing="8"
+                     BindableLayout.ItemsSource="{Binding Catalogs, Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}}" Margin="0,20,0,20">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="{x:Type models:GalleryItem}">
+                    <Frame VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
+                               CornerRadius="4" BorderColor="{StaticResource IconColorLight}" HeightRequest="250" Padding="0">
+
+                        <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" >
+                            <CarouselView ItemsSource="{Binding Files}" HorizontalOptions="FillAndExpand"
+                                          VerticalOptions="FillAndExpand"  x:Name="ImageFrame"
+                                          IndicatorView="indicator">
+                                <CarouselView.ItemTemplate>
+                                    <DataTemplate x:DataType="{x:Type m:ImageFileModel}">
+
+                                        <ff:CachedImage 
+                                Aspect="AspectFill"
+                                Source="{Binding ImageBase64}"
+                                WidthRequest="{Binding Source={Reference ImageFrame},Path=Width}"
+                                HeightRequest="{Binding Source={Reference ImageFrame},Path=Height}"
+                                />      
+                                    </DataTemplate>
+                                </CarouselView.ItemTemplate>
+                            </CarouselView>
+                            <BoxView HorizontalOptions="FillAndExpand" HeightRequest="40" BackgroundColor="#70000000"
+                                 VerticalOptions="End" CornerRadius="4"/>
+                          
+                            <Label Text="{Binding Name}" VerticalOptions="End" HorizontalOptions="Start"
+                                   MaxLines="1"
+                                   TextColor="White" FontSize="Medium" Margin="10" FontAttributes="Bold" CharacterSpacing="1" />
+                            <IndicatorView x:Name="indicator" VerticalOptions="End"
+                                           HorizontalOptions="EndAndExpand" 
+                                           IndicatorColor="#70ffffff"
+                                           HeightRequest="40" 
+                                           IndicatorSize="10" SelectedIndicatorColor="#fff"/>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </StackLayout>
+    </ContentView.Content>
+</ContentView>

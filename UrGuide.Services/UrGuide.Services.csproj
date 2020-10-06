@@ -8,6 +8,7 @@
     <ProjectReference Include="..\UrGuide.Data\UrGuide.Data.csproj" />
     <ProjectReference Include="..\UrGuide.Model\UrGuide.Model.csproj" />
     <ProjectReference Include="..\UrGuide.Shared\UrGuide.Shared.csproj" />
+    <ProjectReference Include="..\UrGuide.Core\UrGuide.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

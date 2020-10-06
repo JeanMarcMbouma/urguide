@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<st:SharedTransitionShell  
+    xmlns:st="clr-namespace:Plugin.SharedTransitions;assembly=Plugin.SharedTransitions" 
+    xmlns="http://xamarin.com/schemas/2014/forms" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    xmlns:local="clr-namespace:UrGuide.Mobile.Views"
+    xmlns:fa="clr-namespace:UrGuide.Mobile.Helpers"
+    Title="UrGuide"
+    x:Class="UrGuide.Mobile.AppShell">
+
+    <st:SharedTransitionShell.Resources>
+        <!--Icons-->
+
+        <FontImageSource x:Key="HomeFontIcon" FontFamily="fas" Glyph="&#xf015;" />
+        <FontImageSource x:Key="SearchFontIcon" FontFamily="fas" Glyph="&#xf002;" />
+        <FontImageSource x:Key="BellFontIcon" FontFamily="fas" Glyph="&#xf0f3;" />
+        <FontImageSource x:Key="FavoriteFontIcon" FontFamily="fas" Glyph="&#xf02e;" />
+        <FontImageSource x:Key="ProfileFontIcon" FontFamily="fas" Glyph="&#xf2bd;" />
+        <FontImageSource x:Key="CreatePost" FontFamily="fas" Glyph="{Static fa:FAI.PlusCircle}" />
+    </st:SharedTransitionShell.Resources>
+    <!-- Your Pages -->
+    
+    <TabBar x:Name="RootTab">
+        <Tab Title="Home" Icon="tab_about.png" IsEnabled="False">
+            <ShellContent ContentTemplate="{DataTemplate local:LandingPage}"/>
+        </Tab>
+        <Tab Title="Home" Icon="{StaticResource HomeFontIcon}" >
+            <ShellContent Route="posts" ContentTemplate="{DataTemplate local:PostPage}" />
+        </Tab>
+        <Tab Title="Discover" Icon="{StaticResource SearchFontIcon}">
+            <ShellContent Route="discover" ContentTemplate="{DataTemplate local:Discover}" />
+        </Tab>
+        <Tab Title="Create" Icon="{StaticResource CreatePost}" IsVisible="{Binding IsGuide}">
+            <ShellContent Route="create" ContentTemplate="{DataTemplate local:CreatePost}" />
+        </Tab>
+        <!--<Tab Title="Notifications" Icon="{StaticResource BellFontIcon}">
+            <ShellContent Route="messages" ContentTemplate="{DataTemplate local:Notifications}" />
+        </Tab>-->
+        <Tab Title="Saved" Icon="{StaticResource FavoriteFontIcon}">
+            <ShellContent Route="favorite" ContentTemplate="{DataTemplate local:Favorite}" />
+        </Tab>
+        <Tab Title="Profile" Icon="{StaticResource ProfileFontIcon}" IsVisible="{Binding IsLoggedIn}">
+            <ShellContent Route="profile" ContentTemplate="{DataTemplate local:Profile}" />
+        </Tab>
+    </TabBar>
+
+    <!-- Optional Templates 
+    // These may be provided inline as below or as separate classes.
+
+    // This header appears at the top of the Flyout.
+    <Shell.FlyoutHeaderTemplate>
+        <DataTemplate>
+            <Grid>ContentHere</Grid>
+        </DataTemplate>
+    </Shell.FlyoutHeaderTemplate>
+
+    // ItemTemplate is for ShellItems as displayed in a Flyout
+    <Shell.ItemTemplate>
+        <DataTemplate>
+            <ContentView>
+                Bindable Properties: Title, Icon
+            </ContentView>
+        </DataTemplate>
+    </Shell.ItemTemplate>
+
+    // MenuItemTemplate is for MenuItems as displayed in a Flyout
+    <Shell.MenuItemTemplate>
+        <DataTemplate>
+            <ContentView>
+                Bindable Properties: Text, Icon
+            </ContentView>
+        </DataTemplate>
+    </Shell.MenuItemTemplate>
+
+    -->
+
+</st:SharedTransitionShell>

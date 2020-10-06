@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UrGuide.Data.Entities.Attributes;
+using UrGuide.Core.Attributes;
 using UrGuide.Data.Entities.Posts;
 using UAttribute = UrGuide.Data.Entities.Users.AttributeTypes;
 namespace UrGuide.Services.Extensions

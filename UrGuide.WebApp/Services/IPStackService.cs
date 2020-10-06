@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Net;
@@ -12,24 +13,35 @@ namespace UrGuide.WebApp.Services
 {
     public class IPStackService : IIPStackService
     {
-        public IPStackService(IOptions<IPStackConfiguration> options, IHttpClientFactory clientFactory)
+        public IPStackService(IOptions<IPStackConfiguration> options, 
+            IHttpClientFactory clientFactory,
+            ILogger<IPStackService> logger)
         {
             Options = options ?? throw new ArgumentNullException(nameof(options));
             ClientFactory = clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public IOptions<IPStackConfiguration> Options { get; }
         public IHttpClientFactory ClientFactory { get; }
+        public ILogger<IPStackService> Logger { get; }
 
         public async Task<IPStackInfo> GetAsync(IPAddress ip)
         {
             var client = ClientFactory.CreateClient();
             client.BaseAddress = new Uri(Options.Value.Url);
-            var response = await client.GetAsync($"{ip}?access_key={Options.Value.ApiKey}");
-            if(response.IsSuccessStatusCode)
+            try
             {
-                var dataString = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<ApiResponse>(dataString);
+                var response = await client.GetAsync($"{ip}?access_key={Options.Value.ApiKey}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var dataString = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<ApiResponse>(dataString);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "failed to retrieve ip location");
             }
             return null;
         }

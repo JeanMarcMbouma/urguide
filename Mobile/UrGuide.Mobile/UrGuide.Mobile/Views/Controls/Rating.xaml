@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:converters="clr-namespace:UrGuide.Mobile.Converters"
+             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers"
+             mc:Ignorable="d"
+             xmlns:controls="clr-namespace:UrGuide.Mobile.Views.Controls"
+             x:Class="UrGuide.Mobile.Views.Controls.Rating" x:Name="rating">
+    <ContentView.Resources>
+        <converters:RatingValueConverter x:Key="RatingValueConverter"/>
+    </ContentView.Resources>
+  <ContentView.Content>
+      <StackLayout Spacing="{Binding Source={Reference rating}, Path=Spacing}">
+            <StackLayout BindableLayout.ItemsSource="{Binding Source={Reference rating}, Path=Items}" Orientation="Horizontal" >
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="controls:RatingModel">
+                        <Image Source="{FontImage Color={StaticResource IconColor},FontFamily=far,Glyph={x:Static icons:FAI.Star},Size=16}"
+                               >
+                            <Image.Triggers>
+                                <DataTrigger TargetType="Image" Binding="{Binding IsSelected}" Value="{x:Static x:Boolean.TrueString}" >
+                                    <Setter Property="Source" Value="{FontImage Color={StaticResource FavoriteIcon},FontFamily=fas,Glyph={x:Static icons:FAI.Star},Size=16}" />
+                                </DataTrigger>
+                            </Image.Triggers>
+                            <Image.GestureRecognizers>
+                                <TapGestureRecognizer NumberOfTapsRequired="1"
+                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type controls:Rating}}, Path=TappedCommand}"
+                                                      CommandParameter="{Binding Value}"/>
+                            </Image.GestureRecognizers>
+                        </Image>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </StackLayout>
+      </StackLayout>
+  </ContentView.Content>
+</ContentView>
