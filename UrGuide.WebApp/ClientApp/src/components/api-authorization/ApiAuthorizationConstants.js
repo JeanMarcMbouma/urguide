@@ -24,8 +24,8 @@ const prefix = '/authentication';
 export const ApplicationPaths = {
   DefaultLoginRedirectPath: '/',
   ApiAuthorizationClientConfigurationUrl: `/_configuration/${ApplicationName}`,
-  ApiAuthorizationPrefix: prefix,
-  Login: `${prefix}/${LoginActions.Login}`,
+    ApiAuthorizationPrefix: prefix,
+  Login: `${prefix}/${LoginActions.Login}`,//`/sign-in`,
   LoginFailed: `${prefix}/${LoginActions.LoginFailed}`,
   LoginCallback: `${prefix}/${LoginActions.LoginCallback}`,
   Register: `${prefix}/${LoginActions.Register}`,
@@ -33,6 +33,6 @@ export const ApplicationPaths = {
   LogOut: `${prefix}/${LogoutActions.Logout}`,
   LoggedOut: `${prefix}/${LogoutActions.LoggedOut}`,
   LogOutCallback: `${prefix}/${LogoutActions.LogoutCallback}`,
-  IdentityRegisterPath: '/Identity/Account/Register',
+  IdentityRegisterPath: '/sign-up',
   IdentityManagePath: '/Identity/Account/Manage'
 };

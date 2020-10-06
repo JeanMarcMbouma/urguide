@@ -19,6 +19,8 @@ using Microsoft.AspNetCore.Http;
 using UrGuide.WebApp.Models;
 using UrGuide.WebApp.Hubs;
 using IdentityServer4;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace UrGuide.WebApp
 {
@@ -126,6 +128,19 @@ namespace UrGuide.WebApp
                 ForwardedHeaders = ForwardedHeaders.XForwardedProto
             });
 
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+          Path.Combine(Directory.GetCurrentDirectory(), "ClientApp/src")),
+                RequestPath = "/ClientApp/src",
+
+            });
+            app.UseDirectoryBrowser(new DirectoryBrowserOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                            Path.Combine(Directory.GetCurrentDirectory(), "ClientApp/src")),
+                RequestPath = "/ClientApp/src"
+            });
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 

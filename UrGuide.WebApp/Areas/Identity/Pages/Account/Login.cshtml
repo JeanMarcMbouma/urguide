@@ -1,16 +1,93 @@
-﻿@page
+﻿@page "/authentication/login"
 @model LoginModel
 
 @{
-    ViewData["Title"] = "Log in";
+    ViewData["Title"] = "Sign In !";
 }
 
-<h1>@ViewData["Title"]</h1>
-<div class="row">
+<div class="container">
+
+    <div class="row justify-content-center LoginGrid">
+        <div class="col-10 col-sm-8 col-md-5 col-lg-4 col-xl-4">
+            <h6 class="text-center"><img class="login-logo" src="~/ClientApp/src/Logo.png" /></h6>
+            <section>
+
+                <form id="account" method="post">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <br />
+                    <br />
+                    <div class="form-group">
+
+                        <input asp-for="Input.Email" class="form-control LOGINFORM" placeholder="email address" autocomplete="off" />
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+
+                        <input asp-for="Input.Password" class="form-control LOGINFORM" placeholder="password" autocomplete="off" />
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <p>
+                            <a id="forgot-password" href="/reset-password">Forgot password?</a>
+                        </p>
+                    </div>
+                    <div class="form-group">
+                        <button id="btnLogin" type="submit" class="btn form-control">SIGN IN</button>
+                    </div>
+                    <div class="form-group">
+                        <p>
+                            <br />
+                            <span>Don't have an account yet ? <a id="forgot-password" href="/sign-up">Register </a></span>
+                        </p>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <div class="row">
     <div class="col-md-4">
         <section>
             <form id="account" method="post">
-                <h4>Use a local account to log in.</h4>
+                <h4>Use a local account to log in. xxnnnc</h4>
                 <hr />
                 <div asp-validation-summary="All" class="text-danger"></div>
                 <div class="form-group">
@@ -40,6 +117,9 @@
                     </p>
                     <p>
                         <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
+                    </p>
+                    <p>
+                        <button type="submit" asp-page-handler="SendVerificationEmail" class="btn-link" style="padding:0px;margin:0px;border:0px">Resend email confirmation</button>
                     </p>
                 </div>
             </form>
@@ -79,4 +159,4 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-}
+} -->

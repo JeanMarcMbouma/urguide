@@ -49,12 +49,6 @@ export default class App extends Component {
                             />
                             <Route exact path="/reset-password" component={ForgetPassword} />
                             <Route exeact path="/pforget" component={ResetPassword} />
-
-                            <Route path="/sign-in">
-                                <LoginLayout>
-                                    <Route exact path="/sign-in" component={LoginPage} />
-                                </LoginLayout>
-                            </Route>
                             <Route path="/(sign-up|guide/sign-up|authentication/register)">
                                 <RegisterLayout>
                                     <Route exact path="/sign-up" component={ClientRegistration} />
@@ -106,3 +100,10 @@ export default class App extends Component {
         );
     }
 }
+
+
+//<Route path="/sign-in">
+//    <LoginLayout>
+//        <Route exact path="/sign-in" component={LoginPage} />
+//    </LoginLayout>
+//</Route>

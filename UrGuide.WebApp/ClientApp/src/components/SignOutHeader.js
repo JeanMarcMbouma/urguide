@@ -10,7 +10,6 @@ import "./NavMenu.css";
 import { NavbarBrand, Container } from 'reactstrap';
 import { useAuthContext } from './api-authorization/AuthService';
 import Logo from '../Logo.png'
-import { ApplicationPaths } from './api-authorization/ApiAuthorizationConstants'
 
 const useStyles = makeStyles(() => ({
     header: {
@@ -70,7 +69,7 @@ function SignOutHeader() {
                                     </Link>
                                 </div>
                                 <div className='col-4 col-sm-4 mt-1 text-center'>
-                                    <Link to={ ApplicationPaths.Login } onClick={signIn}>
+                                    <Link onClick={signIn}>
                                         <span className='signout-link' >Sign In</span><span className='nav-icon-link'><FiLogIn /></span>
                                     </Link>
                                 </div>
