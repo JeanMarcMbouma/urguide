@@ -1,9 +1,15 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using MvvmHelpers;
+using ReactiveUI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading.Tasks;
-
+using UrGuide.Mobile.Contracts;
+using UrGuide.Mobile.Models;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -15,11 +21,21 @@ namespace UrGuide.Mobile.Views
         public CreatePost()
         {
             InitializeComponent();
-            BindingContext = new VM();
+            BindingContext = new VM(Forms.Ioc.GetRequiredService<IPostItemService>());
         }
 
         class VM
         {
+            public VM(IPostItemService service)
+            {
+                Service = service ?? throw new ArgumentNullException(nameof(service));
+                service.GetCategoriesAsync().ToObservable()
+                    .Where(x => !x.HasError)
+                    .Select(x => x.Data.Select(c => new SearchOption { Text = c.Name }))
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .Do(x => SearchOptions.ReplaceRange(x))
+                    .Subscribe();
+            }
 
             public string Description { get; set; }
             public string Title { get; set; }
@@ -64,6 +80,8 @@ namespace UrGuide.Mobile.Views
             public TimeSpan EndTime { get; set; }
 
             public int ItineraryCount => Itineraries.Count();
+            public ObservableRangeCollection<SearchOption> SearchOptions { get; } = new ObservableRangeCollection<SearchOption>();
+            public IPostItemService Service { get; }
         }
     }
 }

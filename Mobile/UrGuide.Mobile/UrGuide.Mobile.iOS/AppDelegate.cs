@@ -5,6 +5,7 @@ using FFImageLoading.Forms.Platform;
 using Foundation;
 using Microsoft.Extensions.DependencyInjection;
 using UIKit;
+using Xamarin.Forms;
 
 namespace UrGuide.Mobile.iOS
 {
@@ -25,6 +26,7 @@ namespace UrGuide.Mobile.iOS
         {
             global::Xamarin.Forms.Forms.Init();
             Forms.Init(RegisterServices);
+            FormsMaterial.Init();
             LoadApplication(Forms.Ioc.GetService<App>());
 
             return base.FinishedLaunching(app, options);

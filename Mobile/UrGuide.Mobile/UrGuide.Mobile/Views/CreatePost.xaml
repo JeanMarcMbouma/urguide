@@ -4,26 +4,87 @@
              x:Class="UrGuide.Mobile.Views.CreatePost"
              Shell.NavBarIsVisible="False"
              Shell.PresentationMode="ModalAnimated"
-             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers" xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms" xmlns:mm="clr-namespace:UrGuide.Mobile.API">
+             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers"
+             xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms" 
+             xmlns:mm="clr-namespace:UrGuide.Mobile.API" 
+             xmlns:models="clr-namespace:UrGuide.Mobile.Models"
+             >
     <ContentPage.Content>
         <ScrollView>
-            <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="8" Margin="12"
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" RowSpacing="8" Margin="12"
                   VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
-                <StackLayout Orientation="Vertical" HorizontalOptions="FillAndExpand" Padding="8">
-                    <Label Text="Create a post" VerticalOptions="Center" HorizontalOptions="CenterAndExpand"
+                <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                    <Label Text="Create a post" VerticalOptions="Center" HorizontalOptions="StartAndExpand"
                        FontSize="Title"
                        FontAttributes="Bold"
                        TextColor="{StaticResource NavigationPrimary}"/>
+                    <ImageButton Source="{FontImage Color={StaticResource IconColor}, 
+                                    FontFamily=fas, 
+                                    Glyph={Static icons:FAI.Save},Size=24}" 
+                                WidthRequest="40" HeightRequest="40"
+                                CornerRadius="4"
+                                VerticalOptions="Center"
+                                HorizontalOptions="EndAndExpand"
+                                Padding="4"
+                                BackgroundColor="Transparent"
+                            ></ImageButton>
                 </StackLayout>
                 <StackLayout Grid.Row="1" Orientation="Vertical" HorizontalOptions="FillAndExpand">
-                    <Editor Placeholder="Title" HeightRequest="100"
+                    <Editor Placeholder="Title" HeightRequest="70"
                        HorizontalOptions="FillAndExpand"
                        MaxLength="200"
                        VerticalOptions="Start"></Editor>
-                    <Editor Placeholder="Description" HeightRequest="250"
+                    <Editor Placeholder="Description" HeightRequest="200"
                        HorizontalOptions="FillAndExpand"
                        MaxLength="500"
                        VerticalOptions="Start"></Editor>
+                    <StackLayout Orientation="Horizontal" Spacing="8">
+                        <Label Text="When" FontSize="Medium" VerticalOptions="Center"/>
+                        <DatePicker Date="{Binding Date}" Format="dd-MMM-yyyy" VerticalOptions="Center" HorizontalOptions="EndAndExpand"/>
+                    </StackLayout>
+
+                    <StackLayout Orientation="Horizontal" Spacing="8">
+                        <Label Text="Starting at" FontSize="Medium" VerticalOptions="Center"/>
+                        <TimePicker Time="{Binding StartTime}"  VerticalOptions="Center" HorizontalOptions="EndAndExpand"/>
+                    </StackLayout>
+
+                    <StackLayout Orientation="Horizontal" Spacing="8">
+                        <Label Text="Ending at" FontSize="Medium" VerticalOptions="Center"/>
+                        <TimePicker Time="{Binding EndTime}"  VerticalOptions="Center" HorizontalOptions="EndAndExpand"/>
+                    </StackLayout>
+
+                    <Label Text="Categories" FontSize="Medium" ></Label>
+                    <CollectionView HeightRequest="{OnIdiom Default=80, Phone=100}"  HorizontalOptions="FillAndExpand" Margin="6"
+                            BackgroundColor="Transparent" ItemsSource="{Binding SearchOptions}"
+                            ItemSizingStrategy="MeasureAllItems">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Span="2" HorizontalItemSpacing="8" Orientation="Horizontal" VerticalItemSpacing="4" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:SearchOption">
+                                <Frame BorderColor="{StaticResource IconColor}" CornerRadius="20"
+                               VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+
+
+                                    <StackLayout Orientation="Horizontal" HorizontalOptions="Center"
+                                         VerticalOptions="Center">
+                                        <Label Text="{Binding Text}" TextColor="{StaticResource IconColor}" FontSize="Subtitle" 
+                                   HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+                                    </StackLayout>
+                                    <!--<Frame.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DiscoverViewModel}}, Path=SearchByOptionCommand}"
+                                                      CommandParameter="{Binding}"/>
+                                    </Frame.GestureRecognizers>-->
+                                    <Frame.Triggers>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Selected}" Value="{x:Static x:Boolean.TrueString}">
+                                            <Setter Property="BorderColor" Value="{StaticResource FavoriteIcon}"/>
+                                            <Setter Property="BackgroundColor" Value="{StaticResource FavoriteIcon}"/>
+                                        </DataTrigger>
+                                    </Frame.Triggers>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
                 </StackLayout>
                 <Expander Grid.Row="2"  IsExpanded="True" HorizontalOptions="FillAndExpand">
                     <Expander.Header>
@@ -38,16 +99,27 @@
                                         TranslationY="-8" TextColor="{StaticResource IconColor}"/>
 
                             </StackLayout>
-                            <Button TextColor="White"
-                                ImageSource="{FontImage Color={StaticResource IconColor}, 
-                                    FontFamily=fas, 
-                                    Glyph={Static icons:FAI.Plus},Size=24}" 
-                                WidthRequest="32" HeightRequest="32"
-                                CornerRadius="16"
-                                VerticalOptions="Center"
-                                HorizontalOptions="EndAndExpand"
-                                Padding="4"
-                            ></Button>
+                            <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" Spacing="8">
+                                <ImageButton Source="{FontImage Color=White, 
+                                        FontFamily=fas, 
+                                        Glyph={Static icons:FAI.Plus},Size=24}" 
+                                    WidthRequest="32" HeightRequest="32"
+                                    CornerRadius="16"
+                                    VerticalOptions="Center"
+                                    Padding="4"
+                                    BackgroundColor="{StaticResource IconColor}"
+                                ></ImageButton>
+
+                                <ImageButton Source="{FontImage Color=White, 
+                                        FontFamily=fas, 
+                                        Glyph={Static icons:FAI.Undo},Size=24}" 
+                                    WidthRequest="32" HeightRequest="32"
+                                    CornerRadius="16"
+                                    VerticalOptions="Center"
+                                    Padding="4"
+                                    BackgroundColor="{StaticResource IconColor}"
+                                ></ImageButton>
+                            </StackLayout>
                         </StackLayout>
                     </Expander.Header>
                     <StackLayout BindableLayout.ItemsSource="{Binding Itineraries}" Spacing="0">
@@ -84,17 +156,27 @@
                                      HeightRequest="40">
                     <Label Text="Add up to 4 images" FontSize="Medium" FontAttributes="Bold"
                                    HorizontalOptions="StartAndExpand"/>
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" Spacing="8">
+                        <ImageButton Source="{FontImage Color=White, 
+                                        FontFamily=fas, 
+                                        Glyph={Static icons:FAI.Plus},Size=24}" 
+                                    WidthRequest="32" HeightRequest="32"
+                                    CornerRadius="16"
+                                    VerticalOptions="Center"
+                                    Padding="4"
+                                    BackgroundColor="{StaticResource IconColor}"
+                                ></ImageButton>
 
-                    <Button TextColor="White"
-                            ImageSource="{FontImage Color={StaticResource IconColor}, 
-                                FontFamily=fas, 
-                                Glyph={Static icons:FAI.Plus},Size=24}" 
-                            WidthRequest="32" HeightRequest="32"
-                            CornerRadius="16"
-                            VerticalOptions="Center"
-                            HorizontalOptions="End"
-                            Padding="4"
-                            ></Button>
+                        <ImageButton Source="{FontImage Color=White, 
+                                        FontFamily=fas, 
+                                        Glyph={Static icons:FAI.Undo},Size=24}" 
+                                    WidthRequest="32" HeightRequest="32"
+                                    CornerRadius="16"
+                                    VerticalOptions="Center"
+                                    Padding="4"
+                                    BackgroundColor="{StaticResource IconColor}"
+                                ></ImageButton>
+                    </StackLayout>
                 </StackLayout>
                 <CollectionView Grid.Row="4" HorizontalOptions="FillAndExpand" 
                              HeightRequest="220" ItemsSource="{Binding Images}"

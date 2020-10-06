@@ -18,7 +18,6 @@ import NotificationsReducer from './NotificationsReducer';
 import NotificationsContext from './NotificationsContext';
 import { useAuthContext } from './api-authorization/AuthService';
 import { FiLogOut } from 'react-icons/fi';
-import Logo from '../Logo.png'
 import { SignalRClient } from '../hub';
 import { useDataContext } from '../data/GlobalDataContext';
 
@@ -196,7 +195,7 @@ export default function Header() {
                 <div className="container-fluid" >
                     <div className="row justify-content-between navbarRow">
                         <div className="col-4 col-sm-2  col-md-2 col-lg-3 logo">
-                            <NavbarBrand className={classes.font} href="/"><img className={classes.logo} src={ Logo } alt='Logo' /></NavbarBrand>
+                            <NavbarBrand className={classes.font} href="/"><img className={classes.logo} src='Logo.png' alt='Logo' /></NavbarBrand>
                         </div>
                         <div className="col-8 col-sm-6 col-md-4 col-lg-4 centered-div"  >
                             <div className='row justify-content-end'>

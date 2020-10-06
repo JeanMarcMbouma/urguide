@@ -8,6 +8,7 @@ using FFImageLoading.Forms.Platform;
 using Microsoft.AppCenter.Distribute;
 using System.Net;
 using Akavache;
+using Xamarin.Forms;
 
 namespace UrGuide.Mobile.Droid
 {
@@ -33,6 +34,7 @@ namespace UrGuide.Mobile.Droid
             Distribute.SetEnabledForDebuggableBuild(false);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
+            FormsMaterial.Init(this, savedInstanceState);
             Forms.Init(RegisterServices);
             LoadApplication(Forms.Ioc.GetService<App>());
         }
