@@ -128,19 +128,19 @@ namespace UrGuide.WebApp
                 ForwardedHeaders = ForwardedHeaders.XForwardedProto
             });
 
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(
-          Path.Combine(Directory.GetCurrentDirectory(), "ClientApp/src")),
-                RequestPath = "/ClientApp/src",
+          //  app.UseStaticFiles(new StaticFileOptions
+          //  {
+          //      FileProvider = new PhysicalFileProvider(
+          //Path.Combine(Directory.GetCurrentDirectory(), "ClientApp/src")),
+          //      RequestPath = "/ClientApp/src",
 
-            });
-            app.UseDirectoryBrowser(new DirectoryBrowserOptions
-            {
-                FileProvider = new PhysicalFileProvider(
-                            Path.Combine(Directory.GetCurrentDirectory(), "ClientApp/src")),
-                RequestPath = "/ClientApp/src"
-            });
+          //  });
+          //  app.UseDirectoryBrowser(new DirectoryBrowserOptions
+          //  {
+          //      FileProvider = new PhysicalFileProvider(
+          //                  Path.Combine(Directory.GetCurrentDirectory(), "ClientApp/src")),
+          //      RequestPath = "/ClientApp/src"
+          //  });
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
