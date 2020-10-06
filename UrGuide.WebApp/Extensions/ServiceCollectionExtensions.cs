@@ -46,7 +46,7 @@ namespace UrGuide.WebApp.Extensions
 
             services.AddIdentityServer(options =>
             {
-                options.UserInteraction.LoginUrl = "/sign-in";
+                options.UserInteraction.LoginUrl = "/authentication/login";
                 options.UserInteraction.LogoutUrl = "/account/logout";
 
              

@@ -3,24 +3,24 @@ import authService from './AuthService';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
 
-const useStyles = makeStyles(theme => ({
-    positionLoader: {
-        top: '45%',
-        left: '50%',
-        position: 'absolute',
-    },
-}));
-
-
 const LoginCallBack = () => {
     
     const url = window.location.href;
     authService.completeSignIn(url);
-    const styles = useStyles();
+
     return (
-        <div className={styles.positionLoader}>
-            <CircularProgress />
-            <div>Please wait...</div>
+        <div className='container'>
+            <div className="row justify-content-center" style={{ marginTop: `28%` }} >
+                <div className="col-12">
+                    <h6 className="text-center" ><CircularProgress /></h6>
+
+                </div>
+            </div>
+            <div className="row justify-content-center" >
+                <div className="col-12">
+                   <h6 className="text-center" >Please wait...</h6>
+                </div>
+            </div>
         </div>
         );
 }
