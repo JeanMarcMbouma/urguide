@@ -100,10 +100,3 @@ export default class App extends Component {
         );
     }
 }
-
-
-//<Route path="/sign-in">
-//    <LoginLayout>
-//        <Route exact path="/sign-in" component={LoginPage} />
-//    </LoginLayout>
-//</Route>

@@ -69,6 +69,7 @@
 
   <ItemGroup>
     <Folder Include="ClientApp\public\images\" />
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
   <ItemGroup>

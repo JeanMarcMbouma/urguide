@@ -63,11 +63,11 @@
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:SearchOption">
                                 <Frame BorderColor="{StaticResource IconColor}" CornerRadius="20"
-                               VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+                               VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Padding="4">
 
 
-                                    <StackLayout Orientation="Horizontal" HorizontalOptions="Center"
-                                         VerticalOptions="Center">
+                                    <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand"
+                                         VerticalOptions="Center" Margin="12,8">
                                         <Label Text="{Binding Text}" TextColor="{StaticResource IconColor}" FontSize="Subtitle" 
                                    HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
                                     </StackLayout>

@@ -33,7 +33,7 @@
         <Tab Title="Discover" Icon="{StaticResource SearchFontIcon}">
             <ShellContent Route="discover" ContentTemplate="{DataTemplate local:Discover}" />
         </Tab>
-        <Tab Title="Create" Icon="{StaticResource CreatePost}" IsVisible="{Binding IsGuide}">
+        <Tab Title="Create" Icon="{StaticResource CreatePost}" >
             <ShellContent Route="create" ContentTemplate="{DataTemplate local:CreatePost}" />
         </Tab>
         <!--<Tab Title="Notifications" Icon="{StaticResource BellFontIcon}">
