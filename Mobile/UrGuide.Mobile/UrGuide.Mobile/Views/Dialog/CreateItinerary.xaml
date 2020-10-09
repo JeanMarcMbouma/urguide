@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+             xmlns:behaviors="clr-namespace:UrGuide.Mobile.Behaviors"
+             x:Class="UrGuide.Mobile.Views.Dialog.CreateItinerary"
+             xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels"
+             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers"
+             BackgroundColor="Transparent">
+    <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" BackgroundColor="#90000000"
+          >
+        <Frame VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" BackgroundColor="LightGray"
+               Margin="8" CornerRadius="8" HeightRequest="380">
+            <Grid RowDefinitions="50, Auto" RowSpacing="12">
+                <StackLayout Orientation="Horizontal" Spacing="8">
+                    <StackLayout VerticalOptions="Start" HorizontalOptions="StartAndExpand" Spacing="8" Orientation="Horizontal">
+                        <Label Text="New itinerary" FontSize="Medium" FontAttributes="Bold"
+                                   VerticalOptions="Center" HorizontalOptions="StartAndExpand"
+                                   />
+                    </StackLayout>
+                    <StackLayout VerticalOptions="Start" HorizontalOptions="EndAndExpand" >
+                        <ImageButton 
+                            Source="{Binding Source={FontImage Color=White, 
+                                FontFamily=fas, Glyph={Static icons:FAI.Times},Size=24}}"
+                                BackgroundColor="{StaticResource IconColor}" CornerRadius="16"
+                            Padding="4"
+                            WidthRequest="32" HeightRequest="32" Command="{Binding CloseDialogCommand}"/>
+                        <StackLayout.Behaviors>
+                            <behaviors:ScaleInOutBehavior Scale="0.9"/>
+                        </StackLayout.Behaviors>
+                    </StackLayout>
+                </StackLayout>
+                <StackLayout Grid.Row="1" Orientation="Vertical" HorizontalOptions="FillAndExpand" 
+                                     VerticalOptions="FillAndExpand" Spacing="16">
+                    <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+                        <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
+                                       Padding="0" CornerRadius="4" Margin="2">
+                            <Entry Text="{Binding Title}" Placeholder="Title" 
+                                           HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand"
+                                           HeightRequest="50" Margin="0,0,0,-8" x:Name="pass" BackgroundColor="Transparent"/>
+                            <Frame.Triggers>
+                                <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference pass}, Path=Text}"
+                                                 Value="{x:Null}">
+                                    <Setter Property="BorderColor" Value="Red"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference pass}, Path=Text}"
+                                                 Value="{x:Static x:String.Empty}">
+                                    <Setter Property="BorderColor" Value="Red"/>
+                                </DataTrigger>
+                            </Frame.Triggers>
+                        </Frame>
+                    </StackLayout>
+                    <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+                        <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
+                                       Padding="0" CornerRadius="4" Margin="2">
+                            <Editor Text="{Binding Description}" Placeholder="Description" 
+                                           HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand"
+                                           HeightRequest="200" Margin="0,0,0,-8" x:Name="cpass"/>
+                            <Frame.Triggers>
+                                <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference cpass}, Path=Text}"
+                                                 Value="{x:Null}">
+                                    <Setter Property="BorderColor" Value="Red"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Frame" Binding="{Binding Source={Reference cpass}, Path=Text}"
+                                                 Value="{x:Static x:String.Empty}">
+                                    <Setter Property="BorderColor" Value="Red"/>
+                                </DataTrigger>
+                            </Frame.Triggers>
+                        </Frame>
+                    </StackLayout>
+
+                    <Button CornerRadius="8" HeightRequest="40" 
+                                       HorizontalOptions="FillAndExpand"
+                                               VerticalOptions="CenterAndExpand"
+                                Margin="4,0"
+                                               BackgroundColor="{StaticResource FavoriteIcon}"
+                               TextColor="White" Text="Save" FontSize="Medium"
+                            FontAttributes="Bold"
+                            Visual="Material"
+                            Command="{Binding SaveCommand}"
+                            >
+                    </Button>
+                </StackLayout>
+            </Grid>
+        </Frame>
+    </Grid>
+</ContentPage>

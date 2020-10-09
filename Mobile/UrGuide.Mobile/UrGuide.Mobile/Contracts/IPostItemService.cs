@@ -7,6 +7,7 @@ namespace UrGuide.Mobile.Contracts
 {
     public interface IPostItemService
     {
+        Task Create(API.PostCreationModel post);
         Task<Result<IEnumerable<Model.Lookup.CategoryModel>>> GetCategoriesAsync();
         Task<Result<IEnumerable<PostItem>>> GetItemsAsync();
         Task<IEnumerable<PostItem>> GetFavoriteAsync();

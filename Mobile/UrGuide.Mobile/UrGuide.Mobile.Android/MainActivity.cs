@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using FFImageLoading.Forms.Platform;
 using Microsoft.AppCenter.Distribute;
 using System.Net;
-using Akavache;
 using Xamarin.Forms;
 
 namespace UrGuide.Mobile.Droid

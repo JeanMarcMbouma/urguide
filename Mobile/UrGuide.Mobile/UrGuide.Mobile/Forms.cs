@@ -47,6 +47,7 @@ namespace UrGuide.Mobile
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<IPreferenceService, PreferenceService>();
             services.AddSingleton<IIdentityService, IdentityService>();
+            services.AddSingleton<IFileService, FileService>();
 
 
             services.AddScoped<LandingItemViewModel>();

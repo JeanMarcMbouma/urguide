@@ -45,9 +45,16 @@
                         <Frame BorderColor="{StaticResource IconColor}" CornerRadius="20"
                                VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Padding="16,8,16,8">
                             <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand"
-                                         VerticalOptions="CenterAndExpand">                     
+                                         VerticalOptions="CenterAndExpand">
                                 <Label Text="{Binding Text}" TextColor="{StaticResource IconColor}" FontSize="Subtitle" 
-                                   HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand"/>
+                                   HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding Selected}" Value="{x:Static x:Boolean.TrueString}">
+                                            <Setter Property="TextColor" Value="White"/>
+                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
                             </StackLayout>
                             <Frame.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DiscoverViewModel}}, Path=SearchByOptionCommand}"

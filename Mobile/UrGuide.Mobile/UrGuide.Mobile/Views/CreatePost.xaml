@@ -8,6 +8,7 @@
              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms" 
              xmlns:mm="clr-namespace:UrGuide.Mobile.API" 
              xmlns:models="clr-namespace:UrGuide.Mobile.Models"
+             BackgroundColor="#ececec"
              >
     <ContentPage.Content>
         <ScrollView>
@@ -18,29 +19,25 @@
                        FontSize="Title"
                        FontAttributes="Bold"
                        TextColor="{StaticResource NavigationPrimary}"/>
-                    <ImageButton Source="{FontImage Color={StaticResource IconColor}, 
-                                    FontFamily=fas, 
-                                    Glyph={Static icons:FAI.Save},Size=24}" 
-                                WidthRequest="40" HeightRequest="40"
-                                CornerRadius="4"
-                                VerticalOptions="Center"
-                                HorizontalOptions="EndAndExpand"
-                                Padding="4"
-                                BackgroundColor="Transparent"
-                            ></ImageButton>
                 </StackLayout>
                 <StackLayout Grid.Row="1" Orientation="Vertical" HorizontalOptions="FillAndExpand">
                     <Editor Placeholder="Title" HeightRequest="70"
                        HorizontalOptions="FillAndExpand"
                        MaxLength="200"
-                       VerticalOptions="Start"></Editor>
+                       VerticalOptions="Start"
+                       Text="{Binding Title}"></Editor>
                     <Editor Placeholder="Description" HeightRequest="200"
                        HorizontalOptions="FillAndExpand"
                        MaxLength="500"
-                       VerticalOptions="Start"></Editor>
+                       VerticalOptions="Start"
+                       Text="{Binding Description}"></Editor>
                     <StackLayout Orientation="Horizontal" Spacing="8">
                         <Label Text="When" FontSize="Medium" VerticalOptions="Center"/>
-                        <DatePicker Date="{Binding Date}" Format="dd-MMM-yyyy" VerticalOptions="Center" HorizontalOptions="EndAndExpand"/>
+                        <DatePicker Date="{Binding Date}"
+                                    Format="dd-MMM-yyyy" 
+                                    VerticalOptions="Center" HorizontalOptions="EndAndExpand"
+                                    MinimumDate="{Binding MinDate}"
+                                    MaximumDate="{Binding MaxDate}"/>
                     </StackLayout>
 
                     <StackLayout Orientation="Horizontal" Spacing="8">
@@ -54,27 +51,32 @@
                     </StackLayout>
 
                     <Label Text="Categories" FontSize="Medium" ></Label>
-                    <CollectionView HeightRequest="{OnIdiom Default=80, Phone=100}"  HorizontalOptions="FillAndExpand" Margin="6"
+                    <CollectionView HeightRequest="40" HorizontalOptions="FillAndExpand" Margin="6"
                             BackgroundColor="Transparent" ItemsSource="{Binding SearchOptions}"
                             ItemSizingStrategy="MeasureAllItems">
                         <CollectionView.ItemsLayout>
-                            <GridItemsLayout Span="2" HorizontalItemSpacing="8" Orientation="Horizontal" VerticalItemSpacing="4" />
+                            <LinearItemsLayout ItemSpacing="4" Orientation="Horizontal"/>
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:SearchOption">
                                 <Frame BorderColor="{StaticResource IconColor}" CornerRadius="20"
-                               VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Padding="4">
-
-
-                                    <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand"
-                                         VerticalOptions="Center" Margin="12,8">
+                               VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Padding="16,8,16,8">
+                                    <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand"
+                                         VerticalOptions="CenterAndExpand">
                                         <Label Text="{Binding Text}" TextColor="{StaticResource IconColor}" FontSize="Subtitle" 
-                                   HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+                                   HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
+                                               >
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding Selected}" Value="{x:Static x:Boolean.TrueString}">
+                                                    <Setter Property="TextColor" Value="White"/>
+                                                    <Setter Property="FontAttributes" Value="Bold"/>
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
                                     </StackLayout>
-                                    <!--<Frame.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DiscoverViewModel}}, Path=SearchByOptionCommand}"
-                                                      CommandParameter="{Binding}"/>
-                                    </Frame.GestureRecognizers>-->
+                                    <Frame.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding SelectCommand}"/>
+                                    </Frame.GestureRecognizers>
                                     <Frame.Triggers>
                                         <DataTrigger TargetType="Frame" Binding="{Binding Selected}" Value="{x:Static x:Boolean.TrueString}">
                                             <Setter Property="BorderColor" Value="{StaticResource FavoriteIcon}"/>
@@ -85,22 +87,44 @@
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
+                    <Label Text="How much does it cost?" FontSize="Medium">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="How much does it cost?  "/>
+                                <Span Text="{Binding PriceFrom, StringFormat='{0}$ - '}" FontSize="Medium" FontAttributes="Bold"/>
+                                <Span Text="{Binding PriceTo, StringFormat='{0}$'}" FontSize="Medium" FontAttributes="Bold"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Slider Maximum="100" Value="{Binding PriceFrom}" MaximumTrackColor="{StaticResource FavoriteIcon}"
+                            MinimumTrackColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"/>
+                    <Slider Maximum="250" Value="{Binding PriceTo}" MaximumTrackColor="{StaticResource FavoriteIcon}"
+                            MinimumTrackColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"/>
+                    <Label Text="How many seats?" FontSize="Medium">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="How many seats?  "/>
+                                <Span Text="{Binding Seats, StringFormat='{0}'}" FontSize="Medium" FontAttributes="Bold"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Slider Maximum="10" Value="{Binding Seats}" MaximumTrackColor="{StaticResource FavoriteIcon}"
+                            MinimumTrackColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"/>
                 </StackLayout>
-                <Expander Grid.Row="2"  IsExpanded="True" HorizontalOptions="FillAndExpand">
-                    <Expander.Header>
-                        <StackLayout Margin="0, 20, 0, 20" Orientation="Horizontal" Spacing="20"
+                <StackLayout Grid.Row="2"  HorizontalOptions="FillAndExpand" Orientation="Vertical">
+                    <StackLayout Margin="0, 20, 0, 20" Orientation="Horizontal" Spacing="20"
                                       HorizontalOptions="FillAndExpand">
-                            <Label Text="Itinerary of this tour" FontSize="Medium" FontAttributes="Bold"/>
-                            <StackLayout Orientation="Horizontal" Spacing="4" >
-                                <Image Source="{FontImage FontFamily=fas, 
+                        <Label Text="Itinerary of this tour" FontSize="Medium" FontAttributes="Bold"/>
+                        <StackLayout Orientation="Horizontal" Spacing="4" >
+                            <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.MapPin}, 
                         Color={StaticResource IconColor},Size=24}" />
-                                <Label Text="{Binding ItineraryCount}" FontAttributes="Bold"
+                            <Label Text="{Binding ItineraryCount}" FontAttributes="Bold"
                                         TranslationY="-8" TextColor="{StaticResource IconColor}"/>
 
-                            </StackLayout>
-                            <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" Spacing="8">
-                                <ImageButton Source="{FontImage Color=White, 
+                        </StackLayout>
+                        <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" Spacing="8">
+                            <ImageButton Source="{FontImage Color=White, 
                                         FontFamily=fas, 
                                         Glyph={Static icons:FAI.Plus},Size=24}" 
                                     WidthRequest="32" HeightRequest="32"
@@ -108,21 +132,23 @@
                                     VerticalOptions="Center"
                                     Padding="4"
                                     BackgroundColor="{StaticResource IconColor}"
+                                    Command="{Binding CreateItineraryCommand}"
                                 ></ImageButton>
 
-                                <ImageButton Source="{FontImage Color=White, 
+                            <ImageButton Source="{FontImage Color=White, 
                                         FontFamily=fas, 
                                         Glyph={Static icons:FAI.Undo},Size=24}" 
                                     WidthRequest="32" HeightRequest="32"
                                     CornerRadius="16"
                                     VerticalOptions="Center"
                                     Padding="4"
+                                    Command="{Binding UndoItineraryCommand}"
                                     BackgroundColor="{StaticResource IconColor}"
                                 ></ImageButton>
-                            </StackLayout>
                         </StackLayout>
-                    </Expander.Header>
-                    <StackLayout BindableLayout.ItemsSource="{Binding Itineraries}" Spacing="0">
+                    </StackLayout>
+                    <StackLayout BindableLayout.ItemsSource="{Binding Itineraries}" Spacing="0"
+                                 HorizontalOptions="FillAndExpand">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="mm:ItineraryModel">
                                 <Grid ColumnDefinitions="24,Auto" RowDefinitions="24,*" >
@@ -151,7 +177,7 @@
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </StackLayout>
-                </Expander>
+                </StackLayout>
                 <StackLayout Grid.Row="3" Orientation="Horizontal" HorizontalOptions="FillAndExpand"
                                      HeightRequest="40">
                     <Label Text="Add up to 4 images" FontSize="Medium" FontAttributes="Bold"
@@ -165,6 +191,7 @@
                                     VerticalOptions="Center"
                                     Padding="4"
                                     BackgroundColor="{StaticResource IconColor}"
+                                    Command="{Binding UploadImageCommand}"
                                 ></ImageButton>
 
                         <ImageButton Source="{FontImage Color=White, 
@@ -175,28 +202,41 @@
                                     VerticalOptions="Center"
                                     Padding="4"
                                     BackgroundColor="{StaticResource IconColor}"
+                                    Command="{Binding UndoUploadImageCommand}"
                                 ></ImageButton>
                     </StackLayout>
                 </StackLayout>
-                <CollectionView Grid.Row="4" HorizontalOptions="FillAndExpand" 
-                             HeightRequest="220" ItemsSource="{Binding Images}"
+                <StackLayout Grid.Row="4" HorizontalOptions="FillAndExpand" 
+                              BindableLayout.ItemsSource="{Binding Images}" Orientation="Horizontal"
                              >
-                    <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8"></LinearItemsLayout>
-                    </CollectionView.ItemsLayout>
-                    <CollectionView.ItemTemplate>
+                  
+                    <BindableLayout.ItemTemplate>
                         <DataTemplate>
-                            <StackLayout Orientation="Horizontal">
-                                <ff:CachedImage Source="{Binding ImageBase64}" 
+                            <StackLayout Orientation="Horizontal" HeightRequest="220">
+                                <ff:CachedImage Source="{Binding ImageBase64, Converter={StaticResource Base64ToImageSourceConverter}}" 
                                                 HeightRequest="200"
                                                 WidthRequest="200"
                                                 Aspect="AspectFill"
                                                 ></ff:CachedImage>
                             </StackLayout>
                         </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-                <BoxView Grid.Row="5" HeightRequest="10" BackgroundColor="Transparent"></BoxView>
+                    </BindableLayout.ItemTemplate>
+                    <BindableLayout.EmptyView>
+                        <StackLayout Orientation="Horizontal">
+                            <ff:CachedImage Source="xamarin_logo.png"
+                                                HeightRequest="200"
+                                                WidthRequest="200"
+                                                Aspect="AspectFill"
+                                            BackgroundColor="LightGray"
+                                                ></ff:CachedImage>
+                        </StackLayout>
+                    </BindableLayout.EmptyView>
+                </StackLayout>
+                <Button Text="Submit" BackgroundColor="{StaticResource FavoriteIcon}"
+                        Visual="Material" CornerRadius="4"
+                        HorizontalOptions="FillAndExpand"
+                        Grid.Row="5" Margin="0,20"
+                        HeightRequest="40" Command="{Binding PublishCommand}"/>
             </Grid>
         </ScrollView>
     </ContentPage.Content>

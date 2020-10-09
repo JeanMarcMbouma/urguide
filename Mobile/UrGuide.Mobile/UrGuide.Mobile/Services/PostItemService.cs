@@ -85,6 +85,11 @@ namespace UrGuide.Mobile.Services
             }, DateTime.UtcNow.AddYears(1)).Catch(Observable.Return(Result.Of<IEnumerable<Model.Lookup.CategoryModel>>().WithErrors("Error occured")));
         }
 
+        public Task Create(API.PostCreationModel post)
+        {
+            return Client.CreateAsync(post);
+        }
+
         public async Task<IEnumerable<PostItem>> GetFavoriteAsync()
         {
             return await Cache.GetOrCreateObject(Favorites_CacheKey, () => new List<PostItem>());

@@ -22,6 +22,7 @@
             
             <!--Convertes-->
             <cv:NumericToSocialUnitConverter x:Key="NumericToSocialUnitConverter" />
+            <cv:Base64ToImageSourceConverter x:Key="Base64ToImageSourceConverter" />
             
             <!-- Shell -->
             <Style x:Key="BaseStyle" TargetType="Element">

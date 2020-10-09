@@ -34,7 +34,7 @@
             <ShellContent Route="discover" ContentTemplate="{DataTemplate local:Discover}" />
         </Tab>
         <Tab Title="Create" Icon="{StaticResource CreatePost}" >
-            <ShellContent Route="create" ContentTemplate="{DataTemplate local:CreatePost}" />
+            <ShellContent Route="create" ContentTemplate="{DataTemplate local:CreatePost}"/>
         </Tab>
         <!--<Tab Title="Notifications" Icon="{StaticResource BellFontIcon}">
             <ShellContent Route="messages" ContentTemplate="{DataTemplate local:Notifications}" />

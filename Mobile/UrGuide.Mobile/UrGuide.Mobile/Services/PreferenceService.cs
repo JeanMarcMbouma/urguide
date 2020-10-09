@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace UrGuide.Mobile.Services
+﻿namespace UrGuide.Mobile.Services
 {
     class PreferenceService : IPreferenceService
     {
