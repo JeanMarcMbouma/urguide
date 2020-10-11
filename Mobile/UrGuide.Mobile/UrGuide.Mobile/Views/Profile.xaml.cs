@@ -6,18 +6,11 @@ using Xamarin.Forms.Xaml;
 namespace UrGuide.Mobile.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class Profile : ContentPage
+    public partial class Profile : ContentView
     {
         public Profile()
         {
             InitializeComponent();
-            BindingContext = Forms.Ioc.GetService<ProfileViewModel>();
-        }
-
-        protected override void OnAppearing()
-        {
-            (BindingContext as ProfileViewModel).LoadItemsCommand.Execute(null);
-            base.OnAppearing();
         }
 
         private void Close_Expander(object sender, EventArgs e)

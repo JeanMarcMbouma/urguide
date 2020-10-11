@@ -1,6 +1,8 @@
 ﻿using MvvmHelpers;
 using MvvmHelpers.Commands;
+using Sharpnado.Presentation.Forms;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
@@ -9,7 +11,7 @@ using UrGuide.Mobile.Models;
 namespace UrGuide.Mobile.ViewModels
 {
     class FavoriteViewModel
-    : BaseViewModel
+    : BaseViewModel, INavigatableViewModel
     {
         public const int Like = 2;
         public const int DisLike = 4;
@@ -20,24 +22,14 @@ namespace UrGuide.Mobile.ViewModels
         private readonly PostDetailViewModel _detailViewModel;
         private ICommand _viewDetailCommand;
         private ICommand _likeCommand;
-        private ICommand _dislikeCommand;
         private ICommand _removeFavoriteCommand;
-        private ICommand _loadItemsCommand;
-
-        public ICommand LoadItemsCommand => _loadItemsCommand ??= new AsyncCommand(async () =>
-        {
-            IsBusy = true;
-            var items = await PostItemService.GetFavoriteAsync();
-            Items.ReplaceRange(items);
-            IsBusy = false;
-        });
 
         public ICommand RemoveFavoriteCommand => _removeFavoriteCommand ??= new AsyncCommand<PostItem>(async (item) =>
         {
-            var it = Items.First(x => x.Id == item.Id);
+            var it = ItemsLoader.Result.First(x => x.Id == item.Id);
             it.Favorite = false;
             await PostItemService.ToggleFavorites(it);
-            Items.Remove(it);
+            ItemsLoader.Load();
             Xamarin.Forms.MessagingCenter.Send(this, "favorite", it);
         });
         public ICommand ViewDetailsCommand => _viewDetailCommand ??=
@@ -48,45 +40,17 @@ namespace UrGuide.Mobile.ViewModels
                     Selected = item;
                 });
 
-                _detailViewModel.Selected = Items.First(x => x.Id == item.Id);
-                await _navigation.PushAsync(new Views.PostDetailPage(_detailViewModel), true);
+                _detailViewModel.Selected = ItemsLoader.Result.First(x => x.Id == item.Id);
+                await _navigation.PushAsyncWithSharedTransition(new Views.PostDetailPage(_detailViewModel), item.Id);
             });
 
-        public ICommand LikeCommand => _likeCommand ??= new Command<PostItem>((item) =>
+        public ICommand LikeCommand => _likeCommand ??= new Command<PostItem>(async (item) =>
         {
-            var it = Items.First(x => x.Id == item.Id);
-            if (it.ReactionType == Like)
-            {
-                it.Likes--;
-                it.ReactionType = Unknown;
-                return;
-            }
-            if (it.ReactionType == DisLike)
-            {
-                it.Dislikes--;
-            }
-            it.Likes++;
-            it.ReactionType = Like;
+            var it = ItemsLoader.Result.First(x => x.Id == item.Id);
+            await PostItemService.SetUserReaction(it);
         });
 
-        public ICommand DislikeCommand => _dislikeCommand ??= new Command<PostItem>((item) =>
-        {
-            var it = Items.First(x => x.Id == item.Id);
-            if (it.ReactionType == DisLike)
-            {
-                it.Dislikes--;
-                it.ReactionType = Unknown;
-                return;
-            }
-            if (it.ReactionType == Like)
-            {
-                it.Likes--;
-            }
-            it.Dislikes++;
-            it.ReactionType = DisLike;
-        });
-
-        public ObservableRangeCollection<PostItem> Items { get; }
+        public TaskLoaderNotifier<IEnumerable<PostItem>> ItemsLoader { get; }
         public PostItem Selected
         {
             get => selected;
@@ -100,10 +64,11 @@ namespace UrGuide.Mobile.ViewModels
 
         public FavoriteViewModel(INavigationService navigation, PostDetailViewModel detailViewModel, IPostItemService postItemService)
         {
-            Items = new ObservableRangeCollection<PostItem>();
             _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
             _detailViewModel = detailViewModel ?? throw new ArgumentNullException(nameof(detailViewModel));
             PostItemService = postItemService ?? throw new ArgumentNullException(nameof(postItemService));
+            ItemsLoader = new TaskLoaderNotifier<IEnumerable<PostItem>>(PostItemService.GetFavoriteAsync);
         }
+        public void Load(object paramter) => ItemsLoader.Load();
     }
 }

@@ -10,6 +10,8 @@ using UrGuide.Model.Results;
 using System.Reactive.Linq;
 using Akavache;
 using System.Net.Http;
+using Sharpnado.Presentation.Forms.Services;
+using System.Collections.ObjectModel;
 
 namespace UrGuide.Mobile.Services
 {
@@ -65,9 +67,6 @@ namespace UrGuide.Mobile.Services
             {
                 var post = await Client.RetrieveAsync(id);
                 var model = Mapper.Map<PostItem>(post);
-                var feedback = await GetPostFeedbackAsync(id);
-                if (!feedback.HasError)
-                    model.FeedBack.ReplaceRange(feedback.Data);
                 return Result.Of(model);
             }).Catch(Observable.Return(Result.Of<PostItem>().WithErrors("Error occured")));
             var favorites = await GetFavoriteAsync();
@@ -85,7 +84,7 @@ namespace UrGuide.Mobile.Services
             }, DateTime.UtcNow.AddYears(1)).Catch(Observable.Return(Result.Of<IEnumerable<Model.Lookup.CategoryModel>>().WithErrors("Error occured")));
         }
 
-        public Task Create(API.PostCreationModel post)
+        public Task Create(PostCreationModel post)
         {
             return Client.CreateAsync(post);
         }
@@ -116,17 +115,10 @@ namespace UrGuide.Mobile.Services
             
         }
 
-        public async Task<Result<IEnumerable<Model.Shared.AuthoredFeedback>>> GetPostFeedbackAsync(string id, int pageNumber = 1)
+        public async Task<PageResult<Model.Shared.AuthoredFeedback>> GetPostFeedbackAsync(string id, int pageNumber = 1)
         {
-            try
-            {
-                var feedbackPagedList = await FeedbackClient.PostsAsync(id, pageNumber);
-                return Result.Of(Mapper.Map<IEnumerable<Model.Shared.AuthoredFeedback>>(feedbackPagedList.Items));
-            }
-            catch (ApiException e)
-            {
-                return Result.Of<IEnumerable<Model.Shared.AuthoredFeedback>>().WithErrors(e.Message);
-            }
+            var feedbackPagedList = await FeedbackClient.PostsAsync(id, pageNumber);
+            return new PageResult<Model.Shared.AuthoredFeedback>(feedbackPagedList.ItemsCount, Mapper.Map<IEnumerable<Model.Shared.AuthoredFeedback>>(feedbackPagedList.Items).ToList());
         }
 
         public async Task<Result<IEnumerable<DiscoverItem>>> SearchAsync(bool nearby, IEnumerable<string> categories = null, string searchTerm = null, int pageNumber = 1)

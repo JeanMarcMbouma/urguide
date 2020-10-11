@@ -11,7 +11,7 @@ using UrGuide.Model.Users;
 
 namespace UrGuide.Mobile.ViewModels
 {
-    class ProfileViewModel : BaseViewModel
+    class ProfileViewModel : BaseViewModel, INavigatableViewModel
     {
         private ProfileDisplayMode mode = ProfileDisplayMode.Reviews;
         private ICommand _viewReviewsCommand;
@@ -77,85 +77,12 @@ namespace UrGuide.Mobile.ViewModels
         public ICommand ViewReviewsCommand => _viewReviewsCommand ??= new Command(() => Mode = ProfileDisplayMode.Reviews);
         public ICommand ViewPostsCommand => _viewPostsCommand ??= new Command(() => Mode = ProfileDisplayMode.Posts);
         public ICommand ViewGalleryCommand => _viewGaleryCommand ??= new Command(() => Mode = ProfileDisplayMode.Gallery);
-        public ObservableRangeCollection<AuthoredFeedback> Feedbacks { get; set; } = new ObservableRangeCollection<AuthoredFeedback> {
-        new Model.Shared.AuthoredFeedback
-                        {
-                            Rating = 4,
-                            Text = "I love this guy",
-                            AuthorFullName = "Catherine Dubois",
-                            AuthorId = Guid.Empty.ToString(),
-                            AuthorImage = "http://urguide.azurewebsites.net/thumb/00000000-0000-0000-0000-000000000000.png",
-                            PublicationDate = "12-Jun-2020 12:45:02"
-                        },
-                        new Model.Shared.AuthoredFeedback
-                        {
-                            Rating = 5,
-                            Text = "Lucky you!",
-                            AuthorFullName = "Alain Dubois",
-                            AuthorId = Guid.Empty.ToString(),
-                            AuthorImage = "http://urguide.azurewebsites.net/thumb/00000000-0000-0000-0000-000000000000.png",
-                            PublicationDate = "12-Jun-2020 12:45:02"
-                        }
-        };
-        public ObservableRangeCollection<GalleryItem> Catalogs { get; set; } = new ObservableRangeCollection<GalleryItem>
-        {
-            new GalleryItem
-            {
-                Name = "Yaounde",
-                Description = "The city of 7 hills",
-                Files = new ObservableRangeCollection<ImageFileModel>
-                {
-                    new Model.Shared.ImageFileModel
-                        {
-                            ImageBase64 = "http://urguide.azurewebsites.net/images/362B092F-5A07-4B03-AA46-BFC181BC6392.png",
-                            Name = "Image 1"
-                        }
-                        ,new Model.Shared.ImageFileModel
-                        {
-                            ImageBase64 = "http://urguide.azurewebsites.net/images/A0733818-5052-4642-A650-E154E8539490.png",
-                            Name = "Image 1"
-                        }
-                }
-            },
-            new GalleryItem
-            {
-                Name = "Douala",
-                Description = "Deido beach",
-                Files = new ObservableRangeCollection<ImageFileModel>
-                {
-                    new Model.Shared.ImageFileModel
-                        {
-                            ImageBase64 = "http://urguide.azurewebsites.net/images/362B092F-5A07-4B03-AA46-BFC181BC6392.png",
-                            Name = "Image 1"
-                        }
-                        ,new Model.Shared.ImageFileModel
-                        {
-                            ImageBase64 = "http://urguide.azurewebsites.net/images/A0733818-5052-4642-A650-E154E8539490.png",
-                            Name = "Image 1"
-                        }
-                }
-            },
-            new GalleryItem
-            {
-                Name = "Edea",
-                Description = "The sanaga maritime",
-                Files = new ObservableRangeCollection<ImageFileModel>
-                {
-                    new Model.Shared.ImageFileModel
-                        {
-                            ImageBase64 = "http://urguide.azurewebsites.net/images/362B092F-5A07-4B03-AA46-BFC181BC6392.png",
-                            Name = "Image 1"
-                        }
-                        ,new Model.Shared.ImageFileModel
-                        {
-                            ImageBase64 = "http://urguide.azurewebsites.net/images/A0733818-5052-4642-A650-E154E8539490.png",
-                            Name = "Image 1"
-                        }
-                }
-            }
-        };
+        public ObservableRangeCollection<AuthoredFeedback> Feedbacks { get; set; } 
+            = new ObservableRangeCollection<AuthoredFeedback>();
+        public ObservableRangeCollection<GalleryItem> Catalogs { get; set; } 
+            = new ObservableRangeCollection<GalleryItem>();
         public ObservableRangeCollection<PostItem> Posts { get; set; } = new ObservableRangeCollection<PostItem>();
-        public UrGuide.Model.Shared.FeedbackModel NewFeedBack { get; } = new Model.Shared.FeedbackModel
+        public FeedbackModel NewFeedBack { get; } = new FeedbackModel
         {
             Rating = 1
         };
@@ -170,6 +97,7 @@ namespace UrGuide.Mobile.ViewModels
             public ProfileDisplayMode Mode { get => mode; set => SetProperty(ref mode, value); }
 
         }
+        public void Load(object paramter) { }
 
     }
     public enum ProfileDisplayMode

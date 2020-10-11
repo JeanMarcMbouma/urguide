@@ -7,7 +7,7 @@ namespace UrGuide.Mobile.Mapping
     {
         public PostProfile()
         {
-            CreateMap<API.PostModel, Models.PostItem>()
+            CreateMap<API.PostModel, PostItem>()
                 .ForMember(x => x.AuthorAvatar, x => x.MapFrom(y => $"{GlobalSetting.DefaultEndpoint}/{y.AuthorAvatar}"));
 
             CreateMap<API.PostModel, DiscoverItem>()

@@ -19,6 +19,14 @@ using Akavache.Sqlite3;
 
 [assembly: ExportFont("Font Awesome 5 Free-Solid-900.otf", Alias = "fas")]
 [assembly: ExportFont("Font Awesome 5 Free-Regular-400.otf", Alias = "far")]
+[assembly: ExportFont("OpenSansBold.ttf", Alias = "FontBold")]
+[assembly: ExportFont("OpenSans-ExtraBold.ttf", Alias = "FontExtraBold")]
+[assembly: ExportFont("OpenSans-BoldItalic.ttf", Alias = "FontBoldItalic")]
+[assembly: ExportFont("OpenSans-Italic.ttf", Alias = "FontItalic")]
+[assembly: ExportFont("OpenSans-Light.ttf", Alias = "FontLight")]
+[assembly: ExportFont("OpenSans-Regular.ttf", Alias = "FontRegular")]
+[assembly: ExportFont("OpenSans-SemiBold.ttf", Alias = "FontSemiBold")]
+
 namespace UrGuide.Mobile
 {
     public static class Forms
@@ -39,8 +47,7 @@ namespace UrGuide.Mobile
             services.AddHttpClient<API.LookupClient>(clientRegistration);
             services.AddHttpClient<API.BidClient>(clientRegistration);
             
-            services.AddSingleton<AppShell>();
-            services.AddSingleton<IMainPageService, MainPageService>();
+            services.AddSingleton<IMainPageService, NavigationPageService>();
             services.AddSingleton<App>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPostItemService, PostItemService>();
@@ -50,7 +57,6 @@ namespace UrGuide.Mobile
             services.AddSingleton<IFileService, FileService>();
 
 
-            services.AddScoped<LandingItemViewModel>();
             services.AddScoped<PostsViewModel>();
             services.AddScoped<PostDetailViewModel>();
             services.AddScoped<BidDialogViewModel>();
@@ -60,6 +66,7 @@ namespace UrGuide.Mobile
             services.AddScoped<ChangePasswordViewModel>();
             services.AddScoped<DiscoverViewModel>();
             services.AddScoped<ShellViewModel>();
+            services.AddScoped<MainPageViewModel>();
 
             services.AddAutoMapper(typeof(PostProfile).Assembly);
 

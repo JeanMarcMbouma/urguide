@@ -17,7 +17,7 @@ namespace UrGuide.Mobile.ViewModels
 
         public BidDialogViewModel(INavigationService navigationService, IPostItemService postItemService)
         {
-            NavigationService = navigationService ?? throw new System.ArgumentNullException(nameof(navigationService));
+            NavigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
             PostItemService = postItemService ?? throw new ArgumentNullException(nameof(postItemService));
         }
         public PostItem Item

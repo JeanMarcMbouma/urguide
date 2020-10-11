@@ -1,5 +1,4 @@
-﻿
-using Android.App;
+﻿using Android.App;
 using Android.Content.PM;
 using Android.Runtime;
 using Android.OS;
@@ -8,6 +7,7 @@ using FFImageLoading.Forms.Platform;
 using Microsoft.AppCenter.Distribute;
 using System.Net;
 using Xamarin.Forms;
+using Sharpnado.Presentation.Forms.Droid;
 
 namespace UrGuide.Mobile.Droid
 {
@@ -34,6 +34,8 @@ namespace UrGuide.Mobile.Droid
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             FormsMaterial.Init(this, savedInstanceState);
+            SharpnadoInitializer.Initialize(enableInternalLogger: true, enableInternalDebugLogger: true);
+
             Forms.Init(RegisterServices);
             LoadApplication(Forms.Ioc.GetService<App>());
         }

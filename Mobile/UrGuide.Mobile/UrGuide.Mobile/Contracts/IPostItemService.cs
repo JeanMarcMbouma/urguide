@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Sharpnado.Presentation.Forms.Services;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UrGuide.Mobile.Models;
 using UrGuide.Model.Results;
@@ -13,7 +14,7 @@ namespace UrGuide.Mobile.Contracts
         Task<IEnumerable<PostItem>> GetFavoriteAsync();
         Task<Result<IEnumerable<DiscoverItem>>> SearchAsync(bool nearby, IEnumerable<string> categories = null, string searchTerm = null, int pageNumber = 1);
         Task<Result<PostItem>> GetByIdAsync(string id);
-        Task<Result<IEnumerable<Model.Shared.AuthoredFeedback>>> GetPostFeedbackAsync(string id, int pageNumber = 1);
+        Task<PageResult<Model.Shared.AuthoredFeedback>> GetPostFeedbackAsync(string id, int pageNumber = 1);
         Task<Result<IEnumerable<Model.Posts.BidHistoryModel>>> GetBidHistoryAsync(string id);
         Task ToggleFavorites(PostItem it);
         Task SetUserReaction(PostItem it);

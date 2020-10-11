@@ -5,18 +5,11 @@ using Xamarin.Forms.Xaml;
 namespace UrGuide.Mobile.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class Favorite : ContentPage
+    public partial class Favorite : ContentView
     {
         public Favorite()
         {
             InitializeComponent();
-            BindingContext = Forms.Ioc.GetService<FavoriteViewModel>();
-        }
-
-        protected override void OnAppearing()
-        {
-            base.OnAppearing();
-            (BindingContext as FavoriteViewModel).LoadItemsCommand.Execute(null);
         }
     }
 }

@@ -13,5 +13,6 @@ namespace UrGuide.Mobile.Contracts
         Task PushModalAsync(Page modalPage, bool animated = true);
         Task GotoAsync(string uri);
         Task PopModalAsync(bool animated = true);
+        Task PushAsyncWithSharedTransition(Page page, string groupId);
     }
 }

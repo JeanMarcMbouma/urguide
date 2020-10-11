@@ -5,18 +5,11 @@ using Xamarin.Forms.Xaml;
 namespace UrGuide.Mobile.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class PostPage : ContentPage
+    public partial class PostPage : ContentView
     {
         public PostPage()
         {
             InitializeComponent();
-            BindingContext = Forms.Ioc.GetService<PostsViewModel>();
-        }
-
-        protected override void OnAppearing()
-        {
-            base.OnAppearing();
-            AppShell.RemoveWelcomeScreen();
         }
     }
 }

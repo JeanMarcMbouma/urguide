@@ -1,17 +1,22 @@
 ﻿using Microsoft.AppCenter.Distribute;
+using Plugin.SharedTransitions;
 using UrGuide.Mobile.Contracts;
-using UrGuide.Mobile.Services.Identity;
+using UrGuide.Mobile.ViewModels;
 using Xamarin.Forms;
 
 namespace UrGuide.Mobile
 {
     public partial class App : Application
     {
-        public App(IMainPageService mainPageService, IIdentityService identity) : base()
+        public App(IMainPageService mainPageService) : base()
         {
             InitializeComponent();
-            _= identity.SignInAsync().ConfigureAwait(false);
             MainPage = mainPageService.GetMainPage();
+            if (MainPage is SharedTransitionNavigationPage nav)
+            if (nav.CurrentPage.BindingContext is INavigatableViewModel vm)
+            {
+                vm.Load(null);
+            }
         }
 
         protected override void OnStart()

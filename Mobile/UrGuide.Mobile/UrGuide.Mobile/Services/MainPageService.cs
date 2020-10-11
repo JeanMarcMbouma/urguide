@@ -1,16 +1,15 @@
-﻿using UrGuide.Mobile.Contracts;
+﻿using Plugin.SharedTransitions;
+using System;
+using UrGuide.Mobile.Contracts;
+using UrGuide.Mobile.Views;
 using Xamarin.Forms;
 
 namespace UrGuide.Mobile.Services
 {
-    class MainPageService : IMainPageService
+    class NavigationPageService : IMainPageService
     {
-        private readonly AppShell _shell;
-
-        public MainPageService(AppShell shell)
-        {
-            _shell = shell ?? throw new System.ArgumentNullException(nameof(shell));
-        }
-        public Page GetMainPage() => _shell;
+        readonly Lazy<SharedTransitionNavigationPage> _navigationPage = new Lazy<SharedTransitionNavigationPage>(() => 
+        new SharedTransitionNavigationPage (new MainPage()));
+        public Page GetMainPage() => _navigationPage.Value;
     }
 }

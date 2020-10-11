@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:controls="clr-namespace:UrGuide.Mobile.Views.Controls"
@@ -9,30 +9,30 @@
              xmlns:models="clr-namespace:UrGuide.Mobile.Models"
              xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels" 
              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
-             xmlns:m="clr-namespace:UrGuide.Model.Shared;assembly=UrGuide.Model"
+             xmlns:m="clr-namespace:UrGuide.Model.Shared;assembly=UrGuide.Model" xmlns:loaded="clr-namespace:Sharpnado.Presentation.Forms.CustomViews;assembly=Sharpnado.TaskLoaderView" xmlns:rv="clr-namespace:Sharpnado.MaterialFrame;assembly=Sharpnado.MaterialFrame"
              x:DataType="vm:DiscoverViewModel"
-             BackgroundColor="#ececec"
-             Title="Discover">
+             BackgroundColor="#ececec">
     
     <AbsoluteLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
         <StackLayout AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional" Spacing="8" 
                      Orientation="Vertical" Margin="8,12,8,8" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand">
-            <StackLayout Orientation="Horizontal" HeightRequest="50"  HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
-                <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
-                       VerticalOptions="StartAndExpand" CornerRadius="24" Padding="0">
-                    <StackLayout Orientation="Horizontal" VerticalOptions="FillAndExpand"
-                                 HorizontalOptions="FillAndExpand" Spacing="8" > 
+            <StackLayout Orientation="Horizontal" HeightRequest="60"  HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+                <rv:MaterialFrame  HorizontalOptions="FillAndExpand"
+                       VerticalOptions="StartAndExpand" CornerRadius="24" Padding="0"
+                                   >
+                    <StackLayout Orientation="Horizontal" VerticalOptions="FillAndExpand" 
+                                 HorizontalOptions="FillAndExpand" Spacing="8"  > 
                         <Entry HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" 
-                               Margin="20,0,0,-8" Text="{Binding SearchTerm}"/>
-                        <ImageButton WidthRequest="24" HeightRequest="24" BackgroundColor="Transparent"
-                                HorizontalOptions="End" VerticalOptions="CenterAndExpand" Margin="0,12,12,12"
+                               Margin="20,0,0,-10" Text="{Binding SearchTerm}"/>
+                        <ImageButton WidthRequest="32" HeightRequest="32" BackgroundColor="Transparent"
+                                HorizontalOptions="End" VerticalOptions="CenterAndExpand" Margin="8,8"
                                      Command="{Binding SearchCommand}">
                             <ImageButton.Source>
-                                <FontImageSource FontFamily="fas" Glyph="&#xf002;" Color="{StaticResource IconColor}" />
+                                <FontImageSource FontFamily="fas" Glyph="&#xf002;" Color="Accent" Size="32" />
                             </ImageButton.Source>
                         </ImageButton>
                     </StackLayout>
-                </Frame>
+                </rv:MaterialFrame>
             </StackLayout>
             <CollectionView HeightRequest="40" HorizontalOptions="FillAndExpand" Margin="6"
                             BackgroundColor="Transparent" ItemsSource="{Binding SearchOptions}"
@@ -70,10 +70,12 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
-            <RefreshView IsRefreshing="{Binding IsBusy}" RefreshColor="{StaticResource FavoriteIcon}"
-                         Command="{Binding SearchCommand}">
-            <ScrollView VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
-                <CollectionView ItemsSource="{Binding Items}" ItemSizingStrategy="MeasureAllItems">
+            <loaded:TaskLoaderView TaskLoaderNotifier="{Binding ItemsLoader}">
+                <RefreshView IsRefreshing="{Binding ItemsLoader.ShowRefresher}"
+                         RefreshColor="Accent"
+                         Command="{Binding ItemsLoader.RefreshCommand}">
+                    <ScrollView VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+                        <CollectionView ItemsSource="{Binding ItemsLoader.Result}" ItemSizingStrategy="MeasureAllItems">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:DiscoverItem">
                                 <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
@@ -137,11 +139,12 @@
                     </CollectionView.ItemTemplate>
                     <CollectionView.ItemsLayout>
                         <GridItemsLayout Span="{OnIdiom Phone=2,Default=4}" Orientation="Vertical" 
-                                         HorizontalItemSpacing="4" VerticalItemSpacing="0"/>
+                                         HorizontalItemSpacing="4" VerticalItemSpacing="4"/>
                     </CollectionView.ItemsLayout>
                 </CollectionView>  
             </ScrollView>
             </RefreshView>
+            </loaded:TaskLoaderView>
         </StackLayout>
         <CollectionView HorizontalOptions="FillAndExpand" Margin="12"
                             BackgroundColor="Transparent" 
@@ -168,4 +171,4 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
     </AbsoluteLayout>
-</ContentPage>
+</ContentView>

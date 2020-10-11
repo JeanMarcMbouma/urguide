@@ -11,7 +11,7 @@
              xmlns:behaviors="clr-namespace:UrGuide.Mobile.Behaviors" 
              xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" 
              xmlns:controls="clr-namespace:UrGuide.Mobile.Views.Controls"
-             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers"
+             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers" xmlns:renderedViews="clr-namespace:Sharpnado.Presentation.Forms.RenderedViews;assembly=Sharpnado.Presentation.Forms" xmlns:loader="clr-namespace:Sharpnado.Presentation.Forms.CustomViews;assembly=Sharpnado.TaskLoaderView"
              mc:Ignorable="d"
              x:Class="UrGuide.Mobile.Views.Templates.PostDetailTemplate">
     <ContentView.Content>
@@ -86,9 +86,9 @@
 
                 <StackLayout Grid.Row="0" Grid.Column="1" VerticalOptions="StartAndExpand" Orientation="Vertical" Spacing="12"
                              Margin="8" st:Transition.Name="Author" >
-                    <Label Text="{Binding Author}" FontSize="Medium" 
+                    <Label Text="{Binding Author}" FontSize="Medium" Style="{StaticResource TextHeadline}"
                        FontAttributes="Bold"/>
-                    <Label FontSize="Small">
+                    <Label FontSize="Small" Style="{StaticResource TextSmallCaption}">
                         <Label.Text>
                             <MultiBinding StringFormat="{}{0} {1}">
                                 <Binding Path="PublicationDate"/>
@@ -121,37 +121,40 @@
                     <StackLayout Orientation="Horizontal" Spacing="8">
                         <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.MapPin}, 
-                        Color={StaticResource IconColor},Size=24}" WidthRequest="24"/>
-                        <Label Text="{Binding Location, StringFormat='Place: {0}'}" FontSize="Medium" FontAttributes="Bold"/>
+                        Color={StaticResource Accent},Size=24}" WidthRequest="24"/>
+                        <Label Text="{Binding Location, StringFormat='Place: {0}'}" FontSize="Medium"
+                               Style="{StaticResource TextSubhead}" FontAttributes="Bold"/>
                     </StackLayout>
                     <StackLayout Orientation="Horizontal" Spacing="8">
                         <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.DollarSign}, 
-                        Color={StaticResource IconColor},Size=24}" WidthRequest="24"/>
-                        <Label Text="{Binding Price, StringFormat='Budget: {0}'}" FontSize="Medium" FontAttributes="Bold"/>
+                        Color={StaticResource Accent},Size=24}" WidthRequest="24"/>
+                        <Label Text="{Binding Price, StringFormat='Budget: {0}'}" FontSize="Medium"
+                               Style="{StaticResource TextSubhead}" FontAttributes="Bold"/>
                     </StackLayout>
                     <StackLayout Spacing="8" Orientation="Horizontal">
                         <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.Users}, 
-                        Color={StaticResource IconColor},Size=24}" WidthRequest="24"/>
-                        <Label Text="{Binding Seats, StringFormat='Seats: {0}'}" FontSize="Medium" FontAttributes="Bold"/>
+                        Color={StaticResource Accent},Size=24}" WidthRequest="24"/>
+                        <Label Text="{Binding Seats, StringFormat='Seats: {0}'}" FontSize="Medium"
+                               Style="{StaticResource TextSubhead}" FontAttributes="Bold"/>
                     </StackLayout>
                     <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.Clock}, 
-                        Color={StaticResource IconColor},Size=24}" HorizontalOptions="Start" />
+                        Color={StaticResource Accent},Size=24}" HorizontalOptions="Start" />
                     <Grid ColumnDefinitions="10,*" RowDefinitions="Auto,*" RowSpacing="5" Margin="10,-14,0,0">
                         <BoxView Grid.RowSpan="2" HorizontalOptions="Start" VerticalOptions="StartAndExpand" 
                                      WidthRequest="2"
-                                     BackgroundColor="{StaticResource IconColor}"/>
+                                     BackgroundColor="{StaticResource Accent}"/>
                         <BoxView HorizontalOptions="StartAndExpand"  VerticalOptions="Center" WidthRequest="8" 
                                  HeightRequest="2"
-                                     BackgroundColor="{StaticResource IconColor}"
+                                     BackgroundColor="{StaticResource Accent}"
                                      CornerRadius="4"/>
                         <BoxView Grid.Row="1" HorizontalOptions="StartAndExpand"  VerticalOptions="Center" 
                                  WidthRequest="8" HeightRequest="2"
-                                     BackgroundColor="{StaticResource IconColor}"
+                                     BackgroundColor="{StaticResource Accent}"
                                      CornerRadius="4"/>
-                        <Label Grid.Column="1" FontSize="Small" FontAttributes="Bold"  >
+                        <Label Grid.Column="1" FontSize="Small" FontAttributes="Bold" Style="{StaticResource TextSmallCaption}"  >
                             <Label.FormattedText>
                                 <FormattedString>
                                     <FormattedString.Spans>
@@ -162,7 +165,7 @@
                                 </FormattedString>
                             </Label.FormattedText>
                         </Label>
-                        <Label Grid.Column="1" Grid.Row="1" FontSize="Small" FontAttributes="Bold" VerticalOptions="Center">
+                        <Label Grid.Column="1" Grid.Row="1" FontSize="Small" Style="{StaticResource TextSmallCaption}" FontAttributes="Bold" VerticalOptions="Center">
                             <Label.FormattedText>
                                 <FormattedString>
                                     <FormattedString.Spans>
@@ -184,7 +187,7 @@
                              Margin="0,8,0,0">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="{x:Type x:String}">
-                            <Frame CornerRadius="4" Padding="8" HasShadow="True" BackgroundColor="{StaticResource IconColor}">
+                            <Frame CornerRadius="4" Padding="8" HasShadow="True" BackgroundColor="{StaticResource Accent}">
                                 <Label Text="{Binding}" FontSize="Small" FontAttributes="Bold" 
                                            TextColor="White"/>
                             </Frame>
@@ -193,9 +196,10 @@
                 </StackLayout>
                 <StackLayout Grid.Row="4" Orientation="Vertical" Grid.ColumnSpan="2"
                              VerticalOptions="StartAndExpand" Spacing="8">
-                    <Label Text="Description" FontSize="Medium" FontAttributes="Bold"/>
+                    <Label Text="Description" FontSize="Medium" FontAttributes="Bold"
+                           Style="{StaticResource TextHeader}" HorizontalTextAlignment="Start"/>
                     <Label Text="{Binding Description}" 
-                           VerticalOptions="Start"/>
+                           VerticalOptions="Start" Style="{StaticResource TextBody}"/>
                     <StackLayout Orientation="Horizontal" Spacing="8">
                         <!--Like / dislike buttons-->
                         <StackLayout Orientation="Horizontal" Spacing="8">
@@ -238,7 +242,8 @@
                 <Expander Grid.Row="3" Grid.ColumnSpan="2" IsExpanded="True">
                     <Expander.Header>
                         <StackLayout Margin="0, 20, 0, 20" Orientation="Horizontal" Spacing="20">
-                            <Label Text="Itinerary of this tour" FontSize="Medium" FontAttributes="Bold"/>
+                            <Label Text="Itinerary of this tour" FontSize="Medium" FontAttributes="Bold"
+                                    Style="{StaticResource TextHeader}" HorizontalTextAlignment="Start"/>
                             <StackLayout Orientation="Horizontal" Spacing="4"
                                 st:Transition.Name="ItineraryCount">
                                 <Image Source="{FontImage FontFamily=fas, 
@@ -269,10 +274,11 @@
                                      Margin="2,7,0,0"></BoxView>
                                     <Label Text="{Binding Title}" Grid.Column="2" VerticalOptions="StartAndExpand" 
                                    HorizontalOptions="StartAndExpand"
+                                            Style="{StaticResource TextSubhead}" HorizontalTextAlignment="Start"
                                    FontAttributes="Bold" FontSize="Medium" Margin="0,-7,0,0"/>
 
                                     <Label Text="{Binding Description}" Grid.Column="2" Grid.Row="1" VerticalOptions="StartAndExpand" 
-                                   HorizontalOptions="StartAndExpand"
+                                   HorizontalOptions="StartAndExpand"  Style="{StaticResource TextCaption}" HorizontalTextAlignment="Start"
                                    FontSize="Subtitle" Margin="0,-7,0,10"/>
                                 </Grid>
                             </DataTemplate>
@@ -286,6 +292,7 @@
                     <StackLayout Orientation="Horizontal" Spacing="8"
                                     Padding="0,4,0,0"  VerticalOptions="StartAndExpand">
                         <Label Text="Reviews" FontSize="Medium" FontAttributes="Bold"
+                                Style="{StaticResource TextHeader}" HorizontalTextAlignment="Start"
                                    />
 
                         <Image Source="{FontImage FontFamily=fas, 
@@ -295,16 +302,21 @@
                         <Label Text="{Binding Reviews}" FontAttributes="Bold"
                                 TranslationY="-8"    TextColor="{StaticResource IconColor}"/>
                     </StackLayout>
-                    <StackLayout Grid.Row="1" 
-                                BindableLayout.ItemsSource="{Binding FeedBack}"
-                                Margin="0,20,0,20">
-                        <BindableLayout.EmptyView>
-                            <StackLayout Orientation="Horizontal">
-                                <Label HorizontalOptions="Center" VerticalOptions="Center"
-                                       Text="No reviews" FontSize="Medium"/>
-                            </StackLayout>
-                        </BindableLayout.EmptyView>
-                        <BindableLayout.ItemTemplate>
+                    <loader:TaskLoaderView Grid.Row="1"
+                                           TaskLoaderNotifier="{Binding FeedbacksLoader, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}}">
+                        <renderedViews:HorizontalListView
+                                        Margin="0,20"
+                                         CollectionPadding="0,8"
+                                        InfiniteListLoader="{Binding FeedbackPaginator, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}} }"
+                                        ItemHeight="200"
+                                        ItemSpacing="8"
+                                        ItemWidth="250"
+                                        ItemsSource="{Binding Feedbacks, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}}"
+                                        SnapStyle="Center"             
+                                                      >
+
+                        <renderedViews:HorizontalListView.ItemTemplate>
+
                             <DataTemplate x:DataType="shared:AuthoredFeedback">
                                 <Frame CornerRadius="4" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
                                     <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,8,*">
@@ -327,12 +339,12 @@
                                     </Grid>
                                 </Frame>
                             </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </StackLayout>
-
+                        </renderedViews:HorizontalListView.ItemTemplate>
+                    </renderedViews:HorizontalListView>
+                    </loader:TaskLoaderView>
                     <StackLayout Grid.Row="2" Orientation="Vertical" IsVisible="False">
                         <StackLayout.Triggers>
-                            <DataTrigger TargetType="StackLayout" Binding="{Binding CanReview}">
+                            <DataTrigger TargetType="StackLayout" Binding="{Binding CanReview, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}}">
                                 <Setter Property="IsVisible" Value="True" />
                             </DataTrigger>
                         </StackLayout.Triggers>

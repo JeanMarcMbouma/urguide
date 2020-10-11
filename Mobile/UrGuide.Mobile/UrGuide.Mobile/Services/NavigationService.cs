@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Plugin.SharedTransitions;
+using System;
 using System.Threading.Tasks;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Views.Dialog;
@@ -39,12 +40,20 @@ namespace UrGuide.Mobile.Services
 
         public Task PushAsync(Page page, bool animated = true)
         {
-            return Shell.Current.Navigation.PushAsync(page, animated);
+            return Application.Current.MainPage.Navigation.PushAsync(page, animated);
+        }
+
+        public Task PushAsyncWithSharedTransition(Page page, string groupId)
+        {
+            Page currentPage = (Application.Current.MainPage as SharedTransitionNavigationPage).CurrentPage;
+            SharedTransitionNavigationPage.SetTransitionDuration(currentPage, 300);
+            SharedTransitionNavigationPage.SetTransitionSelectedGroup(currentPage, groupId);
+            return PushAsync(page);
         }
 
         public Task PushModalAsync(Page modalPage, bool animated = true)
         {
-            return Shell.Current.Navigation.PushModalAsync(modalPage, animated);
+            return Application.Current.MainPage.Navigation.PushModalAsync(modalPage, animated);
         }
     }
 }
