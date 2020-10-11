@@ -3,7 +3,7 @@
     public class GlobalSetting
     {
         public const string DefaultEndpoint =
-#if DEBUG
+#if !DEBUG
             "https://urguide.azurewebsites.net";
 #else
             "http://192.168.0.110:5000";
