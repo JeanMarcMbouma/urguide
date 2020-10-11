@@ -8,6 +8,7 @@ using Microsoft.AppCenter.Distribute;
 using System.Net;
 using Xamarin.Forms;
 using Sharpnado.Presentation.Forms.Droid;
+using Sharpnado.MaterialFrame.Droid;
 
 namespace UrGuide.Mobile.Droid
 {
@@ -35,7 +36,9 @@ namespace UrGuide.Mobile.Droid
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             FormsMaterial.Init(this, savedInstanceState);
             SharpnadoInitializer.Initialize(enableInternalLogger: true, enableInternalDebugLogger: true);
-
+            AndroidMaterialFrameRenderer.ThrowStopExceptionOnDraw = false;
+            AndroidMaterialFrameRenderer.BlurAutoUpdateDelayMilliseconds = 200;
+            AndroidMaterialFrameRenderer.BlurProcessingDelayMilliseconds = 100;
             Forms.Init(RegisterServices);
             LoadApplication(Forms.Ioc.GetService<App>());
         }

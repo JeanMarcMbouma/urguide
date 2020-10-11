@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using UrGuide.Mobile.API;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
 using UrGuide.Mobile.Services;
@@ -21,7 +20,6 @@ namespace UrGuide.Mobile.ViewModels
         private PostItem selected;
 
         private ICommand _likeCommand;
-        private ICommand _dislikeCommand;
         private ICommand _viewBidCommand;
         private ICommand _newFeedbackCommand;
         private ICommand _markAsFavoriteCommand;
@@ -104,7 +102,7 @@ namespace UrGuide.Mobile.ViewModels
         }
 
         public bool CanReview => Selected?.AuthorId != Preference.UserId
-            && Selected?.FeedBack.All(f => f.AuthorId != Preference.UserId) == true;
+            && Feedbacks.All(f => f.AuthorId != Preference.UserId) == true;
 
         public PostDetailViewModel(INavigationService navigationService, 
             IPostItemService postItemService, 
@@ -136,6 +134,7 @@ namespace UrGuide.Mobile.ViewModels
             Feedbacks = new ObservableRangeCollection<Model.Shared.AuthoredFeedback>();
             OnPropertyChanged(nameof(Feedbacks));
             FeedbacksLoader.Load(async () => (await FeedbackPaginator.LoadPage(1)).Items);
+            OnPropertyChanged(nameof(CanReview));
         }
     }
 }

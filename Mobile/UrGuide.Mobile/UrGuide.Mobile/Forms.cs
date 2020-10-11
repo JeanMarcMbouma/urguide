@@ -84,10 +84,13 @@ namespace UrGuide.Mobile
                 "Markup_Experimental"
             });
 
+#if !DEBUG
+
             AppCenter.Start("android=c61793ee-ed79-4a3d-b023-15303f271bb4;" /*+
                   "uwp={Your UWP App secret here};" +
                   "ios={Your iOS App secret here}"*/,
                    typeof(Crashes), typeof(Analytics), typeof(Distribute));
+#endif
 
             RegisterRoutes();
             var services = new ServiceCollection();
