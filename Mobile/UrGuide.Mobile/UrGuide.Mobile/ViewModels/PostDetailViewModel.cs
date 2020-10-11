@@ -119,7 +119,7 @@ namespace UrGuide.Mobile.ViewModels
             FeedbackPaginator = new Paginator<Model.Shared.AuthoredFeedback>(LoadFeedbackPageAsync);
         }
 
-        private async Task<PageResult<Model.Shared.AuthoredFeedback>> LoadFeedbackPageAsync(int pageSize, int pageNumber, bool arg3)
+        private async Task<PageResult<Model.Shared.AuthoredFeedback>> LoadFeedbackPageAsync(int pageNumber, int pageSize, bool arg3)
         {
             var result =  await PostItemService.GetPostFeedbackAsync(Id, pageNumber);
             Feedbacks.AddRange(result.Items);

@@ -59,4 +59,7 @@
   <assembly fullname="Sharpnado.Shadows">
     <type fullname="*"/>
   </assembly>
+  <assembly fullname="Sharpnado.TaskLoaderView">
+    <type fullname="*"/>
+  </assembly>
 </linker>
