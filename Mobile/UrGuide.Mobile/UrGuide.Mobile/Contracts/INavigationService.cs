@@ -11,7 +11,6 @@ namespace UrGuide.Mobile.Contracts
         Task DisplayErrorAsync(string title = "Error", string message = "An unexpected error has occured", string yesText = "Ok");
         Task PushAsync(Page page, bool animated = true);
         Task PushModalAsync(Page modalPage, bool animated = true);
-        Task GotoAsync(string uri);
         Task PopModalAsync(bool animated = true);
         Task PushAsyncWithSharedTransition(Page page, string groupId);
     }

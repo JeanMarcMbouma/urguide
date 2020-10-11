@@ -84,9 +84,9 @@ namespace UrGuide.Mobile.Services
             }, DateTime.UtcNow.AddYears(1)).Catch(Observable.Return(Result.Of<IEnumerable<Model.Lookup.CategoryModel>>().WithErrors("Error occured")));
         }
 
-        public Task Create(PostCreationModel post)
+        public async Task Create(PostCreationModel post)
         {
-            return Client.CreateAsync(post);
+            await Client.CreateAsync(post);
         }
 
         public async Task<IEnumerable<PostItem>> GetFavoriteAsync()

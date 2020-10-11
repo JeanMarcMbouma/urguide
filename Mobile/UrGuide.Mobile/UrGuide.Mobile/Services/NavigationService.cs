@@ -28,14 +28,9 @@ namespace UrGuide.Mobile.Services
             return ConfirmAsync(null, title, message, yesText, displayNoButton: false);
         }
 
-        public Task GotoAsync(string uri)
-        {
-            return Shell.Current.GoToAsync(uri);
-        }
-
         public Task PopModalAsync(bool animated = true)
         {
-            return Shell.Current.Navigation.PopModalAsync(animated);
+            return Application.Current.MainPage.Navigation.PopModalAsync(animated);
         }
 
         public Task PushAsync(Page page, bool animated = true)

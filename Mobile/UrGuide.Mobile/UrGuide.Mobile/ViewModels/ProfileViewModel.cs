@@ -73,7 +73,6 @@ namespace UrGuide.Mobile.ViewModels
                 IsBusy = false;
             });
         });
-        public ICommand ViewPostDetailsCommand => _viewPostDetailsCommand ??= new Command<PostItem>(async (item) => await Navigation.GotoAsync($"postdetails?Id={item.Id}"));
         public ICommand ViewReviewsCommand => _viewReviewsCommand ??= new Command(() => Mode = ProfileDisplayMode.Reviews);
         public ICommand ViewPostsCommand => _viewPostsCommand ??= new Command(() => Mode = ProfileDisplayMode.Posts);
         public ICommand ViewGalleryCommand => _viewGaleryCommand ??= new Command(() => Mode = ProfileDisplayMode.Gallery);

@@ -132,6 +132,10 @@ namespace UrGuide.Mobile.Views
                 CreateItineraryCommand
                     .Subscribe()
                     .DisposeWith(_disposables);
+                CreateItineraryCommand.ThrownExceptions.Subscribe(e =>
+                {
+                    MainThread.BeginInvokeOnMainThread(async () => await navigation.DisplayErrorAsync(message: e.Message));
+                });
 
                 var canUndoIti = this.WhenAnyValue(x => x.Itineraries.Count, c => c > 0);
                 UndoItineraryCommand = ReactiveCommand.Create(() =>
@@ -162,10 +166,14 @@ namespace UrGuide.Mobile.Views
 
                 PublishCommand = ReactiveCommand.Create(async () =>
                 {
+                    var location = await Geolocation.GetLocationAsync();
+                    var places = await Geocoding.GetPlacemarksAsync(location);
+                    var city = places.FirstOrDefault()?.Locality;
+                    var country = places.FirstOrDefault()?.CountryName;
+                    City = $"{city}, {country}";
                     if (string.IsNullOrEmpty(City))
                     {
-                        MainThread.BeginInvokeOnMainThread(async () => await navigation.DisplayErrorAsync(message: "We cannot determine your location"));
-                        return;
+                        throw new Exception("We cannot determine your location");
                     }
 
                     var post = new API.PostCreationModel
@@ -187,22 +195,14 @@ namespace UrGuide.Mobile.Views
                         GeoLocation = City
                     };
                     await Service.Create(post);
-                    //MainThread.BeginInvokeOnMainThread(async () => await navigation.PopModalAsync());
-                }, canSubmit);
+                    MainThread.BeginInvokeOnMainThread(async () => await navigation.PopModalAsync());
+                }, canSubmit, RxApp.MainThreadScheduler);
                 PublishCommand.Subscribe()
                     .DisposeWith(_disposables);
-
-                var geo = Observable.FromAsync(Geolocation.GetLocationAsync)
-                    .Do(async x =>
-                    {
-                        var places = await Geocoding.GetPlacemarksAsync(x);
-                        var city = places.FirstOrDefault()?.Locality;
-                        var country = places.FirstOrDefault()?.CountryName;
-                        City = $"{city}, {country}";
-                    })
-                    .Select(x => Geocoding.GetPlacemarksAsync(x))
-                    .Subscribe()
-                    .DisposeWith(_disposables);
+                PublishCommand.ThrownExceptions.Subscribe(e =>
+                {
+                    MainThread.BeginInvokeOnMainThread(async () => await navigation.DisplayErrorAsync(message: e.Message));
+                });
             }
 
             public string Description { get => description; set => this.RaiseAndSetIfChanged(ref description, value); }

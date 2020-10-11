@@ -50,4 +50,13 @@
   <assembly fullname="Microsoft.Extensions.Options">
     <type fullname="*"/>
   </assembly>
+  <assembly fullname="Sharpnado.Presentation.Forms">
+    <type fullname="*"/>
+  </assembly>
+  <assembly fullname="Sharpnado.Presentation.Forms.Droid">
+    <type fullname="*"/>
+  </assembly>
+  <assembly fullname="Sharpnado.Shadows">
+    <type fullname="*"/>
+  </assembly>
 </linker>

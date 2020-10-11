@@ -16,7 +16,7 @@
                     <Label Text="Create a post" VerticalOptions="Center" HorizontalOptions="StartAndExpand"
                        FontSize="Title"
                        FontAttributes="Bold"
-                       TextColor="{StaticResource NavigationPrimary}"/>
+                       Style="{StaticResource TextHeader}"/>
                 </StackLayout>
                 <StackLayout Grid.Row="1" Orientation="Vertical" HorizontalOptions="FillAndExpand">
                     <Editor Placeholder="Title" HeightRequest="70"
@@ -30,7 +30,8 @@
                        VerticalOptions="Start"
                        Text="{Binding Description}"></Editor>
                     <StackLayout Orientation="Horizontal" Spacing="8">
-                        <Label Text="When" FontSize="Medium" VerticalOptions="Center"/>
+                        <Label Text="When" FontSize="Medium" VerticalOptions="Center"
+                               Style="{StaticResource TextSubhead}"/>
                         <DatePicker Date="{Binding Date}"
                                     Format="dd-MMM-yyyy" 
                                     VerticalOptions="Center" HorizontalOptions="EndAndExpand"
@@ -39,16 +40,19 @@
                     </StackLayout>
 
                     <StackLayout Orientation="Horizontal" Spacing="8">
-                        <Label Text="Starting at" FontSize="Medium" VerticalOptions="Center"/>
+                        <Label Text="Starting at" FontSize="Medium" VerticalOptions="Center"
+                               Style="{StaticResource TextSubhead}"/>
                         <TimePicker Time="{Binding StartTime}"  VerticalOptions="Center" HorizontalOptions="EndAndExpand"/>
                     </StackLayout>
 
                     <StackLayout Orientation="Horizontal" Spacing="8">
-                        <Label Text="Ending at" FontSize="Medium" VerticalOptions="Center"/>
+                        <Label Text="Ending at" FontSize="Medium" VerticalOptions="Center"
+                               Style="{StaticResource TextSubhead}"/>
                         <TimePicker Time="{Binding EndTime}"  VerticalOptions="Center" HorizontalOptions="EndAndExpand"/>
                     </StackLayout>
 
-                    <Label Text="Categories" FontSize="Medium" ></Label>
+                    <Label Text="Categories" FontSize="Medium" 
+                               Style="{StaticResource TextSubheadline}"></Label>
                     <CollectionView HeightRequest="40" HorizontalOptions="FillAndExpand" Margin="6"
                             BackgroundColor="Transparent" ItemsSource="{Binding SearchOptions}"
                             ItemSizingStrategy="MeasureAllItems">
@@ -85,7 +89,8 @@
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
-                    <Label Text="How much does it cost?" FontSize="Medium">
+                    <Label Text="How much does it cost?" FontSize="Medium"
+                               Style="{StaticResource TextCaption}">
                         <Label.FormattedText>
                             <FormattedString>
                                 <Span Text="How much does it cost?  "/>
@@ -98,7 +103,8 @@
                             MinimumTrackColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"/>
                     <Slider Maximum="250" Value="{Binding PriceTo}" MaximumTrackColor="{StaticResource FavoriteIcon}"
                             MinimumTrackColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"/>
-                    <Label Text="How many seats?" FontSize="Medium">
+                    <Label Text="How many seats?" FontSize="Medium"
+                               Style="{StaticResource TextCaption}">
                         <Label.FormattedText>
                             <FormattedString>
                                 <Span Text="How many seats?  "/>
@@ -112,7 +118,8 @@
                 <StackLayout Grid.Row="2"  HorizontalOptions="FillAndExpand" Orientation="Vertical">
                     <StackLayout Margin="0, 20, 0, 20" Orientation="Horizontal" Spacing="20"
                                       HorizontalOptions="FillAndExpand">
-                        <Label Text="Itinerary of this tour" FontSize="Medium" FontAttributes="Bold"/>
+                        <Label Text="Itinerary of this tour" FontSize="Medium" FontAttributes="Bold"
+                               Style="{StaticResource TextSubheadline}"/>
                         <StackLayout Orientation="Horizontal" Spacing="4" >
                             <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.MapPin}, 
@@ -178,7 +185,8 @@
                 </StackLayout>
                 <StackLayout Grid.Row="3" Orientation="Horizontal" HorizontalOptions="FillAndExpand"
                                      HeightRequest="40">
-                    <Label Text="Add up to 4 images" FontSize="Medium" FontAttributes="Bold"
+                    <Label Text="Add up to 4 images" FontSize="Medium" FontAttributes="Bold" 
+                           Style="{StaticResource TextSubheadline}"
                                    HorizontalOptions="StartAndExpand"/>
                     <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" Spacing="8">
                         <ImageButton Source="{FontImage Color=White, 
@@ -204,7 +212,8 @@
                                 ></ImageButton>
                     </StackLayout>
                 </StackLayout>
-                <StackLayout Grid.Row="4" HorizontalOptions="FillAndExpand" 
+                <ScrollView Orientation="Horizontal" Grid.Row="4">
+                <StackLayout HorizontalOptions="FillAndExpand" 
                               BindableLayout.ItemsSource="{Binding Images}" Orientation="Horizontal"
                              >
                   
@@ -230,6 +239,7 @@
                         </StackLayout>
                     </BindableLayout.EmptyView>
                 </StackLayout>
+                </ScrollView>
                 <Button Text="Submit" BackgroundColor="{StaticResource FavoriteIcon}"
                         Visual="Material" CornerRadius="4"
                         HorizontalOptions="FillAndExpand"

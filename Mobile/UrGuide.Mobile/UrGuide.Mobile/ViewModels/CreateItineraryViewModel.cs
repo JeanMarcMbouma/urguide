@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using UrGuide.Mobile.API;
 using UrGuide.Mobile.Contracts;
+using Xamarin.Essentials;
 
 namespace UrGuide.Mobile.ViewModels
 {
@@ -30,6 +31,8 @@ namespace UrGuide.Mobile.ViewModels
                 navigation.PopModalAsync();
             }, canExecute, RxApp.MainThreadScheduler);
             SaveCommand.Subscribe().DisposeWith(_disposables);
+            SaveCommand.ThrownExceptions.Subscribe(e =>
+            MainThread.BeginInvokeOnMainThread(async () => await navigation.DisplayErrorAsync(message: e.Message)));
             CloseDialogCommand = ReactiveCommand.Create(() =>
             {
                 navigation.PopModalAsync();
