@@ -9,14 +9,15 @@ using System.Net;
 using Xamarin.Forms;
 using Sharpnado.Presentation.Forms.Droid;
 using Sharpnado.MaterialFrame.Droid;
+using Android.Support.V7.App;
 
 namespace UrGuide.Mobile.Droid
 {
     [Activity(Label = "UrGuide", 
-        Icon = "@mipmap/icon", 
+        Icon = "@drawable/logo_clean",
+        ScreenOrientation = ScreenOrientation.Portrait,
         Theme = "@style/MainTheme", 
-        MainLauncher = true, 
-        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation,
+        ConfigurationChanges = ConfigChanges.ScreenSize,
         LaunchMode = LaunchMode.SingleTop
         )]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
@@ -53,6 +54,22 @@ namespace UrGuide.Mobile.Droid
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+    [Activity(Label = "UrGuide",
+        Icon = "@mipmap/logo_clean",
+        MainLauncher = true,
+        NoHistory = true,
+        ScreenOrientation = ScreenOrientation.Portrait,
+        Theme = "@style/Splash",
+        LaunchMode = LaunchMode.SingleTop
+        )]
+    public class SplashScreen : AppCompatActivity
+    {
+        protected override void OnResume()
+        {
+            base.OnResume();
+            RunOnUiThread(() => StartActivity(typeof(MainActivity)));
         }
     }
 }
