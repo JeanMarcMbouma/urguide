@@ -15,6 +15,9 @@
   <assembly fullname="Newtonsoft.Json" >
     <type fullname="*"></type>
   </assembly>
+  <assembly fullname="IdentityModel" >
+    <type fullname="*"></type>
+  </assembly>
   <assembly fullname="Microsoft.Extensions.DependencyInjection.Abstractions">
   </assembly>
   <assembly fullname="Microsoft.Extensions.DependencyInjection">
