@@ -31,6 +31,13 @@ namespace UrGuide.Mobile.ViewModels
         public TaskLoaderNotifier<IEnumerable<PostItem>> PostItemsLoader { get; }
         public TaskLoaderNotifier<IEnumerable<CategoryModel>> CategoryLoader { get; }
         public Paginator<IEnumerable<PostItem>> Paginator { get; }
+        public ICommand SearchCategoryCommand
+        {
+            get => _searchCategoryCommand; set
+            {
+                this.RaiseAndSetIfChanged(ref _searchCategoryCommand, value);
+            }
+        }
 
         public ICommand ToggleFavoriteCommand => _markAsFavoriteCommand ??= new AsyncCommand<PostItem>(async item =>
         {
@@ -46,7 +53,7 @@ namespace UrGuide.Mobile.ViewModels
                 {
                     Selected = item;
                 });
-                
+
                 _detailViewModel.Selected = PostItemsLoader.Result.First(x => x.Id == item.Id);
                 await _navigation.PushAsyncWithSharedTransition(new Views.PostDetailPage(_detailViewModel), item.Id);
             });
@@ -59,7 +66,7 @@ namespace UrGuide.Mobile.ViewModels
 
         public PostItem Selected
         {
-            get => selected; 
+            get => selected;
             set
             {
                 this.RaiseAndSetIfChanged(ref selected, value);

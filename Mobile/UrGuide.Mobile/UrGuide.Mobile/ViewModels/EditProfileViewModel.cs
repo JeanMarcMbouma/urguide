@@ -23,19 +23,19 @@ namespace UrGuide.Mobile.ViewModels
         private string phone;
 
         public ICommand CloseDialogCommand => _closeDialogCommand ??= new AsyncCommand(async () => await NavigationService.PopModalAsync());
-        public ICommand LoadCommand => _loadCommand ??= new Command(() =>
+        public ICommand LoadCommand => _loadCommand ??= new Command(async () =>
         {
-            var user = UserService.CurrentUser;
-            FirstName = user.FirstName;
-            LastName = user.LastName;
-            Country = user.Country;
-            City = user.City;
-            ProfileImage = user.ProfileImage;
-            BirthDay = user.BirthDay;
-            Address = user.Address;
-            Gender = user.Gender;
-            Description = user.Description;
-            Phone = user.PhoneNumber;
+            //var user = await UserService.GetUserInfo();
+            //FirstName = user.FirstName;
+            //LastName = user.LastName;
+            //Country = user.Country;
+            //City = user.City;
+            //ProfileImage = user.ProfileImage;
+            //BirthDay = user.BirthDay;
+            //Address = user.Address;
+            //Gender = user.Gender;
+            //Description = user.Description;
+            //Phone = user.PhoneNumber;
         });
         public ICommand SaveCommand => _saveCommand ??= new AsyncCommand(async () => {
             var r = UserService.SaveProfile(new Model.Users.UpdateGuideModel
@@ -66,7 +66,6 @@ namespace UrGuide.Mobile.ViewModels
         public INavigationService NavigationService { get; }
         public IUserService UserService { get; }
 
-        public bool IsGuide => UserService.IsGuide;
         public string FirstName { get => firstName; set => SetProperty(ref firstName, value); }
         public string Address { get => address; set => SetProperty(ref address, value); }
         public string Gender { get => gender; set => SetProperty(ref gender, value); }

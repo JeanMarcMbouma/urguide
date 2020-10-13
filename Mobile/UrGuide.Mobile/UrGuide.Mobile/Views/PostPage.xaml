@@ -11,6 +11,7 @@
              x:Class="UrGuide.Mobile.Views.PostPage"
              x:DataType="vm:PostsViewModel"
              BackgroundColor="{StaticResource LightSurface}"
+             x:Name="page"
              >
     <ContentView.Resources>
         <DataTemplate x:Key="PostModelTemplate">
@@ -18,17 +19,20 @@
         </DataTemplate>
     </ContentView.Resources>
     <ScrollView>
-        <StackLayout Orientation="Vertical" Margin="8,8,8,20" Spacing="8" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
+        <RefreshView IsRefreshing="{Binding PostItemsLoader.ShowRefresher}"
+                         RefreshColor="Accent"
+                         Command="{Binding PostItemsLoader.RefreshCommand}">
+            <StackLayout Orientation="Vertical" Margin="8,8,8,20" Spacing="8" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
           >
-            <Label Text="Categories" HorizontalTextAlignment="Start" Style="{StaticResource TextHeader}"/>
+                <Label Text="Categories" HorizontalTextAlignment="Start" Style="{StaticResource TextHeader}"/>
 
-            <loader:TaskLoaderView AccentColor="Accent" TaskLoaderNotifier="{Binding CategoryLoader}">
-                <ScrollView Orientation="Horizontal">
-                    <StackLayout Orientation="Horizontal" Spacing="0" BindableLayout.ItemsSource="{Binding CategoryLoader.Result}" HeightRequest="250">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="m:CategoryModel">
-                                <Grid HeightRequest="250" WidthRequest="200" BackgroundColor="LightGray">
-                                    <ff:CachedImage Source="{Binding ImageUrl}"
+                <loader:TaskLoaderView AccentColor="Accent" TaskLoaderNotifier="{Binding CategoryLoader}">
+                    <ScrollView Orientation="Horizontal">
+                        <StackLayout Orientation="Horizontal" Spacing="0" BindableLayout.ItemsSource="{Binding CategoryLoader.Result}" HeightRequest="250">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="m:CategoryModel">
+                                    <Grid HeightRequest="250" WidthRequest="200" BackgroundColor="LightGray">
+                                        <ff:CachedImage Source="{Binding ImageUrl}"
                                                         VerticalOptions="FillAndExpand"
                                                         HorizontalOptions="FillAndExpand"
                                                 DownsampleUseDipUnits="True"
@@ -36,36 +40,38 @@
                                                 WidthRequest="200"
                                                 CacheDuration="360"
                                                         Aspect="AspectFill" />
-                                    <y:PancakeView VerticalOptions="End" HorizontalOptions="FillAndExpand" 
+                                        <y:PancakeView VerticalOptions="End" HorizontalOptions="FillAndExpand" 
                                            HeightRequest="40" BackgroundColor="#60000000">
-                                        <Label Text="{Binding Name}" TextColor="White" Margin="4"
+                                            <Label Text="{Binding Name}" TextColor="White" Margin="4"
                                        FontSize="Medium" FontAttributes="Bold" VerticalOptions="Center"/>
-                                    </y:PancakeView>
-                                    <Grid.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=SearchCategoryCommand}" NumberOfTapsRequired="1"
+                                        </y:PancakeView>
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostsViewModel}}, Path=SearchCategoryCommand}" NumberOfTapsRequired="1"
                                                           CommandParameter="{Binding}"/>
-                                    </Grid.GestureRecognizers>
-                                </Grid>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </StackLayout>
-                </ScrollView>
-            </loader:TaskLoaderView>
-            <StackLayout Orientation="Horizontal" Padding="0" HorizontalOptions="FillAndExpand">
-                <Label Text="Recent posts"  HorizontalTextAlignment="Start" Style="{StaticResource TextHeader}"
+                                        </Grid.GestureRecognizers>
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </StackLayout>
+                    </ScrollView>
+                </loader:TaskLoaderView>
+                <StackLayout Orientation="Horizontal" Padding="0" HorizontalOptions="FillAndExpand">
+                    <Label Text="Recent posts"  HorizontalTextAlignment="Start" Style="{StaticResource TextHeader}"
                            VerticalOptions="EndAndExpand"/>
-            </StackLayout>
-            <loader:TaskLoaderView AccentColor="Accent" TaskLoaderNotifier="{Binding PostItemsLoader}">
-                <StackLayout Orientation="Vertical" Spacing="8" BindableLayout.ItemsSource="{Binding PostItemsLoader.Result}"
+                </StackLayout>
+                <loader:TaskLoaderView AccentColor="Accent" TaskLoaderNotifier="{Binding PostItemsLoader}">
+
+                    <StackLayout Orientation="Vertical" Spacing="8" BindableLayout.ItemsSource="{Binding PostItemsLoader.Result}"
                         BackgroundColor="Transparent" BindableLayout.ItemTemplate="{StaticResource PostModelTemplate}"
                     HorizontalOptions="FillAndExpand" 
                             VerticalOptions="StartAndExpand">
-                    <BindableLayout.EmptyView>
-                        <Label Text="Nothing yet in your region" FontSize="Medium" FontAttributes="Bold"
+                        <BindableLayout.EmptyView>
+                            <Label Text="Nothing yet in your region" FontSize="Medium" FontAttributes="Bold"
                             HorizontalOptions="CenterAndExpand"/>
-                    </BindableLayout.EmptyView>
-                </StackLayout>
-            </loader:TaskLoaderView>
-        </StackLayout>
+                        </BindableLayout.EmptyView>
+                    </StackLayout>
+                </loader:TaskLoaderView>
+            </StackLayout>
+        </RefreshView>
     </ScrollView>
 </ContentView>

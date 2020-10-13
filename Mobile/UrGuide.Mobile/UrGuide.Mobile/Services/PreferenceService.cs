@@ -1,21 +1,35 @@
-﻿namespace UrGuide.Mobile.Services
+﻿using ReactiveUI;
+
+namespace UrGuide.Mobile.Services
 {
-    class PreferenceService : IPreferenceService
+    class PreferenceService : ReactiveObject, IPreferenceService
     {
         public string AuthToken
         {
             get => Xamarin.Essentials.Preferences.Get(nameof(AuthToken), string.Empty);
-            set => Xamarin.Essentials.Preferences.Set(nameof(AuthToken), value);
+            set
+            {
+                Xamarin.Essentials.Preferences.Set(nameof(AuthToken), value);
+                this.RaisePropertyChanged();
+            }
         }
         public string FullName
         {
             get => Xamarin.Essentials.Preferences.Get(nameof(FullName), string.Empty);
-            set => Xamarin.Essentials.Preferences.Set(nameof(FullName), value);
+            set
+            {
+                Xamarin.Essentials.Preferences.Set(nameof(FullName), value);
+                this.RaisePropertyChanged();
+            }
         }
         public string UserId
         {
             get => Xamarin.Essentials.Preferences.Get(nameof(UserId), string.Empty);
-            set => Xamarin.Essentials.Preferences.Set(nameof(UserId), value);
+            set
+            {
+                Xamarin.Essentials.Preferences.Set(nameof(UserId), value);
+                this.RaisePropertyChanged();
+            }
         }
         public string Image
         {

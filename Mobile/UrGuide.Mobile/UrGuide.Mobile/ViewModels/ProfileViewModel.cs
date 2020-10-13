@@ -1,6 +1,12 @@
 ﻿using MvvmHelpers;
 using MvvmHelpers.Commands;
+using Sharpnado.Presentation.Forms;
+using Sharpnado.Presentation.Forms.Paging;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
@@ -17,22 +23,48 @@ namespace UrGuide.Mobile.ViewModels
         private ICommand _viewReviewsCommand;
         private ICommand _viewPostsCommand;
         private ICommand _viewGaleryCommand;
-        private ICommand _viewPostDetailsCommand;
-        private ICommand _loadItemsCommand;
         private ICommand _editProfileCommand;
         private ICommand _createGalleryCommand;
         private ICommand _changePasswordCommand;
         private ICommand _deleteAccountCommand;
-        private UserInfo userInfo;
 
-        public ProfileViewModel(INavigationService navigation, IPostItemService postItemService, IUserService userService)
+        public ProfileViewModel(INavigationService navigation, 
+            IPostItemService postItemService, 
+            IUserService userService,
+            IPreferenceService preference)
         {
             Navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
             PostItemService = postItemService ?? throw new ArgumentNullException(nameof(postItemService));
             UserService = userService ?? throw new ArgumentNullException(nameof(userService));
+            Preference = preference ?? throw new ArgumentNullException(nameof(preference));
+            UserLoader = new TaskLoaderNotifier<UserInfo>(LoadUserAsync);
+            PostsLoader = new TaskLoaderNotifier<IEnumerable<PostItem>>();
+            GalleryLoader = new TaskLoaderNotifier<IEnumerable<GalleryItem>>(async () =>
+            {
+                var items = await UserService.GetGalleryItems(preference.UserId);
+
+                return items;
+            });
+            FeedbackLoader = new TaskLoaderNotifier<IEnumerable<AuthoredFeedback>>();
+            PostsPaginator = new Paginator<PostItem>(async (pageNumber, pageSize, b) =>
+            {
+                var result = await PostItemService.GetUserPosts(preference.UserId, pageNumber);
+                Posts.AddRange(result.Items);
+                return result;
+            });
+            FeedbackPaginator = new Paginator<AuthoredFeedback>(async (pageNumber, pageSize, b) =>
+            {
+                var result = await UserService.GetUserFeedback(preference.UserId, pageNumber);
+                Feedbacks.AddRange(result.Items);
+                return result;
+            });
         }
 
-        public UserInfo UserInfo { get => userInfo; set => SetProperty(ref userInfo, value); }
+        private Task<UserInfo> LoadUserAsync()
+        {
+            return UserService.GetUserInfo(Preference.UserId);
+        }
+
 
         public ProfileDisplayMode Mode
         {
@@ -61,25 +93,12 @@ namespace UrGuide.Mobile.ViewModels
         }
 
         public ICommand CreateGalleryCommand => _createGalleryCommand ??= new AsyncCommand(async () => await Navigation.PushModalAsync(new CreateGallery()));
-        public ICommand LoadItemsCommand => _loadItemsCommand ??= new AsyncCommand(async () =>
-        {
-            IsBusy = true;
-            var items = await PostItemService.GetItemsAsync();
-            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
-            {
-                if(!items.HasError)
-                    Posts.ReplaceRange(items.Data);
-                UserInfo = UserService.GetUserInfo(null);
-                IsBusy = false;
-            });
-        });
+       
         public ICommand ViewReviewsCommand => _viewReviewsCommand ??= new Command(() => Mode = ProfileDisplayMode.Reviews);
         public ICommand ViewPostsCommand => _viewPostsCommand ??= new Command(() => Mode = ProfileDisplayMode.Posts);
         public ICommand ViewGalleryCommand => _viewGaleryCommand ??= new Command(() => Mode = ProfileDisplayMode.Gallery);
         public ObservableRangeCollection<AuthoredFeedback> Feedbacks { get; set; } 
             = new ObservableRangeCollection<AuthoredFeedback>();
-        public ObservableRangeCollection<GalleryItem> Catalogs { get; set; } 
-            = new ObservableRangeCollection<GalleryItem>();
         public ObservableRangeCollection<PostItem> Posts { get; set; } = new ObservableRangeCollection<PostItem>();
         public FeedbackModel NewFeedBack { get; } = new FeedbackModel
         {
@@ -88,6 +107,14 @@ namespace UrGuide.Mobile.ViewModels
         public INavigationService Navigation { get; }
         public IPostItemService PostItemService { get; }
         public IUserService UserService { get; }
+        public IPreferenceService Preference { get; }
+
+        public TaskLoaderNotifier<UserInfo> UserLoader { get; }
+        public TaskLoaderNotifier<IEnumerable<AuthoredFeedback>> FeedbackLoader { get; }
+        public TaskLoaderNotifier<IEnumerable<PostItem>> PostsLoader { get; }
+        public TaskLoaderNotifier<IEnumerable<GalleryItem>> GalleryLoader { get; }
+        public Paginator<PostItem> PostsPaginator { get; }
+        public Paginator<AuthoredFeedback> FeedbackPaginator { get; }
 
         public class WrapperViewModel : BaseViewModel
         {
@@ -96,7 +123,12 @@ namespace UrGuide.Mobile.ViewModels
             public ProfileDisplayMode Mode { get => mode; set => SetProperty(ref mode, value); }
 
         }
-        public void Load(object paramter) { }
+        public void Load(object paramter) {
+            UserLoader.Load();
+            PostsLoader.Load(async () => (await PostsPaginator.LoadPage(1)).Items);
+            FeedbackLoader.Load(async () => (await FeedbackPaginator.LoadPage(1)).Items);
+            GalleryLoader.Load();
+        }
 
     }
     public enum ProfileDisplayMode

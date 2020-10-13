@@ -91,7 +91,7 @@
                                 </Frame>
                             </StackLayout>
 
-                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" IsVisible="{Binding IsGuide}">
+                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" >
                                 <Label Text="Country" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
                                        FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
                                 <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
@@ -112,7 +112,7 @@
                                 </Frame>
                             </StackLayout>
 
-                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" IsVisible="{Binding IsGuide}">
+                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" >
                                 <Label Text="City" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
                                        FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
                                 <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
@@ -133,7 +133,7 @@
                                 </Frame>
                             </StackLayout>
 
-                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" IsVisible="{Binding IsGuide}">
+                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" >
                                 <Label Text="Address" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
                                        FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
                                 <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"
@@ -154,7 +154,7 @@
                                 </Frame>
                             </StackLayout>
 
-                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" IsVisible="{Binding IsGuide}">
+                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" >
                                 <Label Text="Birth day" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
                                        FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
                                 <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="StartAndExpand"
@@ -171,7 +171,7 @@
                                 </Frame>
                             </StackLayout>
 
-                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" IsVisible="{Binding IsGuide}">
+                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" >
                                 <Label Text="Gender" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
                                        FontAttributes="Bold" TextColor="{StaticResource IconColor}"/>
                                 <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="StartAndExpand"
@@ -186,7 +186,7 @@
                                     </Picker>
                                 </Frame>
                             </StackLayout>
-                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" IsVisible="{Binding IsGuide}">
+                            <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand" >
                                 <Label Text="Description" VerticalOptions="Center" HorizontalOptions="Start" FontSize="Medium"
                                        FontAttributes="Bold" />
                                 <Frame BorderColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"

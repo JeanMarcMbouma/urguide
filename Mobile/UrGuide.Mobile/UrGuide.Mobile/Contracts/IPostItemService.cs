@@ -19,5 +19,6 @@ namespace UrGuide.Mobile.Contracts
         Task ToggleFavorites(PostItem it);
         Task SetUserReaction(PostItem it);
         Task<Result<Model.Shared.AuthoredFeedback>> SendFeedback(string postId, Model.Shared.FeedbackModel newFeedBack);
+        Task<PageResult<PostItem>> GetUserPosts(string userId, int pageNumber);
     }
 }

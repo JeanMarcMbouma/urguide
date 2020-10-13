@@ -28,6 +28,7 @@ namespace UrGuide.Mobile.Mapping
 
             CreateMap<API.BidHistoryModel, Model.Posts.BidHistoryModel>()
                 .ForMember(x => x.AuthorImage, x => x.MapFrom(y => $"{GlobalSetting.DefaultEndpoint}/{y.AuthorImage}"));
+            CreateMap<API.ImageCatalogModel, GalleryItem>();
         }
     }
 }

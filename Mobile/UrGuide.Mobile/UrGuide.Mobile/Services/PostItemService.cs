@@ -215,5 +215,14 @@ namespace UrGuide.Mobile.Services
                 return Result.Of<Model.Shared.AuthoredFeedback>().WithErrors(e.Message);
             }
         }
+
+        public async Task<PageResult<PostItem>> GetUserPosts(string userId, int pageNumber)
+        {
+            var items = await Client.AllAsync(userId, new SearchParameters
+            {
+                PageNumber = pageNumber
+            });
+            return new PageResult<PostItem>(items.ItemsCount, Mapper.Map<IEnumerable<PostItem>>(items.Items).ToList());
+        }
     }
 }

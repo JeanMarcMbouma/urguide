@@ -46,7 +46,9 @@ namespace UrGuide.Mobile
             services.AddHttpClient<API.FeedbackClient>(clientRegistration);
             services.AddHttpClient<API.LookupClient>(clientRegistration);
             services.AddHttpClient<API.BidClient>(clientRegistration);
-            
+            services.AddHttpClient<API.UsersClient>(clientRegistration);
+            services.AddHttpClient<API.CatalogsClient>(clientRegistration);
+
             services.AddSingleton<IMainPageService, NavigationPageService>();
             services.AddSingleton<App>();
             services.AddSingleton<INavigationService, NavigationService>();

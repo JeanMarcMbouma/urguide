@@ -15,8 +15,6 @@ namespace UrGuide.Mobile.Droid
 {
     [Activity(Label = "UrGuide", 
         Icon = "@drawable/logo_clean",
-        MainLauncher =true,
-        NoHistory = true,
         ScreenOrientation = ScreenOrientation.Portrait,
         Theme = "@style/MainTheme", 
         ConfigurationChanges = ConfigChanges.ScreenSize,
@@ -58,20 +56,20 @@ namespace UrGuide.Mobile.Droid
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
-    //[Activity(Label = "UrGuide",
-    //    Icon = "@mipmap/logo_clean",
-    //    //MainLauncher = true,
-    //    NoHistory = true,
-    //    ScreenOrientation = ScreenOrientation.Portrait,
-    //    Theme = "@style/Splash",
-    //    LaunchMode = LaunchMode.SingleTop
-    //    )]
-    //public class SplashScreen : AppCompatActivity
-    //{
-    //    protected override void OnResume()
-    //    {
-    //        base.OnResume();
-    //        RunOnUiThread(() => StartActivity(typeof(MainActivity)));
-    //    }
-    //}
+    [Activity(Label = "UrGuide",
+        Icon = "@mipmap/logo_clean",
+        MainLauncher = true,
+        NoHistory = true,
+        ScreenOrientation = ScreenOrientation.Portrait,
+        Theme = "@style/Splash",
+        LaunchMode = LaunchMode.SingleTop
+        )]
+    public class SplashScreen : AppCompatActivity
+    {
+        protected override void OnResume()
+        {
+            base.OnResume();
+            RunOnUiThread(() => StartActivity(typeof(MainActivity)));
+        }
+    }
 }

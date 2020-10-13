@@ -70,6 +70,8 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
+            <ScrollView>
+                
             <loaded:TaskLoaderView TaskLoaderNotifier="{Binding ItemsLoader}">
                 <RefreshView IsRefreshing="{Binding ItemsLoader.ShowRefresher}"
                          RefreshColor="Accent"
@@ -145,6 +147,8 @@
             </ScrollView>
             </RefreshView>
             </loaded:TaskLoaderView>
+            
+            </ScrollView>
         </StackLayout>
         <CollectionView HorizontalOptions="FillAndExpand" Margin="12"
                             BackgroundColor="Transparent" 

@@ -42,7 +42,8 @@ namespace UrGuide.Mobile.ViewModels
             {
                 var nearby = SearchOptions.Any(x => x.Text.Equals("Nearby") && x.Selected);
                 var category = SearchOptions.Where(x => !x.Text.Equals("Nearby") && x.Selected).Select(x => x.Text);
-                var items = await PostItemService.SearchAsync(nearby, category);
+                var term = !string.IsNullOrEmpty(SearchTerm) ? SearchTerm : null;
+                var items = await PostItemService.SearchAsync(nearby, category, term);
                 return items.Data;
             });
         }

@@ -10,7 +10,7 @@
              xmlns:models="clr-namespace:UrGuide.Model.Users;assembly=UrGuide.Model" 
              xmlns:controls="clr-namespace:UrGuide.Mobile.Views.Controls" 
              xmlns:tpl="clr-namespace:UrGuide.Mobile.Views.Templates.Profile" 
-             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers"
+             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers" xmlns:loader="clr-namespace:Sharpnado.Presentation.Forms.CustomViews;assembly=Sharpnado.TaskLoaderView"
              BackgroundColor="#ececec"
              x:DataType="vm:ProfileViewModel">
     <ContentView.Resources>
@@ -34,7 +34,8 @@
                                          ReviewsTemplate="{StaticResource ReviewsTemplate}"
                                          />
     </ContentView.Resources>
-    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadItemsCommand}">
+    <loader:TaskLoaderView TaskLoaderNotifier="{Binding UserLoader}" >
+        <RefreshView IsRefreshing="{Binding UserLoader.ShowRefresher}" Command="{Binding UserLoader.RefreshCommand}">
     <AbsoluteLayout>
     <ScrollView AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional">
         <Grid RowDefinitions="Auto,Auto,*" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
@@ -42,7 +43,7 @@
                     <Frame HasShadow="True" IsClippedToBounds="True" VerticalOptions="FillAndExpand"
                    HorizontalOptions="FillAndExpand" BorderColor="LightGray">
             <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
-                         Margin="16" BindingContext="{Binding Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}},Path=UserInfo}" x:DataType="models:UserInfo"
+                         Margin="16" BindingContext="{Binding Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}, Path=UserLoader.Result}" x:DataType="models:UserInfo"
                          Spacing="8">
                 <ff:CachedImage Source="{Binding ProfileImage}"
                                 WidthRequest="100" HeightRequest="100" DownsampleToViewSize="True"
@@ -146,7 +147,7 @@
     </ScrollView>
         <Expander AbsoluteLayout.LayoutBounds="0.97,0.97, 170,70"
                   AbsoluteLayout.LayoutFlags="PositionProportional" Rotation="180"
-                  x:Name="floatingButton" Tapped="Expander_Tapped">
+                  x:Name="floatingButton" Tapped="Expander_Tapped" IsVisible="False">
                 <Expander.Header>
                     <Frame  HorizontalOptions="Start" VerticalOptions="Center" CornerRadius="32" HeightRequest="64" WidthRequest="64"
                             Padding="0" BackgroundColor="{StaticResource FavoriteIcon}">
@@ -223,4 +224,5 @@
 
         </AbsoluteLayout>
     </RefreshView>
+    </loader:TaskLoaderView>
 </ContentView>
