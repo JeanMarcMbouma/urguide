@@ -5,54 +5,56 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:shared="clr-namespace:UrGuide.Model.Shared;assembly=UrGuide.Model" 
              xmlns:ff="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms" 
-             xmlns:controls="clr-namespace:UrGuide.Mobile.Views.Controls" 
-             xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+             xmlns:controls="clr-namespace:UrGuide.Mobile.Views.Controls"
              mc:Ignorable="d"
              x:Class="UrGuide.Mobile.Views.Templates.Profile.ReviewsTemplate"
              xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels" xmlns:renderedViews="clr-namespace:Sharpnado.Presentation.Forms.RenderedViews;assembly=Sharpnado.Presentation.Forms" xmlns:loader="clr-namespace:Sharpnado.Presentation.Forms.CustomViews;assembly=Sharpnado.TaskLoaderView">
-    <loader:TaskLoaderView TaskLoaderNotifier="{Binding FeedbackLoader, Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}}">
-        <renderedViews:HorizontalListView
+    <ScrollView>
+        <loader:TaskLoaderView TaskLoaderNotifier="{Binding FeedbackLoader, Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}}">
+            <renderedViews:HorizontalListView
                                         Margin="0,20"
                                         CollectionPadding="0,8"
                                         InfiniteListLoader="{Binding FeedbackPaginator, Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}} }"
-                                        ItemHeight="200"
                                         ItemSpacing="8"
-                            ItemWidth="400"
-                            HorizontalOptions="FillAndExpand"
+                                        ItemHeight="230"
+                                        ColumnCount="1"
+                                        HorizontalOptions="FillAndExpand"
                                         ItemsSource="{Binding Feedbacks, Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}}"
                                         SnapStyle="Center"   
                             ListLayout="Grid"
                                                       >
 
-            <renderedViews:HorizontalListView.ItemTemplate>
+                <renderedViews:HorizontalListView.ItemTemplate>
 
-                <DataTemplate x:DataType="shared:AuthoredFeedback">
-                    <ViewCell>
-                        <Frame CornerRadius="4" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
-                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,8,*">
-                                <ff:CachedImage Source="{Binding AuthorImage}"
+                    <DataTemplate x:DataType="shared:AuthoredFeedback">
+                        <ViewCell>
+                            <Frame CornerRadius="4" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,8,*">
+                                    <ff:CachedImage Source="{Binding AuthorImage}"
                                                         WidthRequest="48" HeightRequest="48" Aspect="AspectFit"/>
-                                <StackLayout Grid.Column="2" Orientation="Vertical">
-                                    <Label Text="{Binding AuthorFullName}" FontSize="Medium" 
+                                    <StackLayout Grid.Column="2" Orientation="Vertical">
+                                        <Label Text="{Binding AuthorFullName}" FontSize="Medium" 
                                                 FontAttributes="Bold" Style="{StaticResource TextHeader}" HorizontalTextAlignment="Start"/>
-                                    <Label FontSize="Small" Text="{Binding PublicationDate}" Style="{StaticResource TextSmallCaption}" />
-                                </StackLayout>
-                                <StackLayout Orientation="Vertical" HorizontalOptions="CenterAndExpand"
+                                        <Label FontSize="Small" Text="{Binding PublicationDate}" Style="{StaticResource TextSmallCaption}" />
+                                    </StackLayout>
+                                    <StackLayout Orientation="Vertical" HorizontalOptions="CenterAndExpand"
                                                      VerticalOptions="StartAndExpand"
                                                      Grid.Row="1">
-                                    <controls:Rating Value="{Binding Rating}" StarHeightRequest="12" StarWidthRequest="12"
+                                        <controls:Rating Value="{Binding Rating}" StarHeightRequest="12" StarWidthRequest="12"
                                                          Spacing="4" IsEnabled="False"/>
-                                </StackLayout>
-                                <Label Grid.Row="1" Grid.Column="2" VerticalOptions="CenterAndExpand"
+                                    </StackLayout>
+                                    <Label Grid.Row="1" Grid.Column="2" VerticalOptions="CenterAndExpand"
                                                HorizontalOptions="StartAndExpand"
                                                FontSize="Subtitle" Text="{Binding Text}" 
                                                        LineBreakMode="WordWrap"
                                                        Style="{StaticResource TextBody}"/>
-                            </Grid>
-                        </Frame>
-                    </ViewCell>
-                </DataTemplate>
-            </renderedViews:HorizontalListView.ItemTemplate>
-        </renderedViews:HorizontalListView>
-    </loader:TaskLoaderView>
+                                </Grid>
+                            </Frame>
+                        </ViewCell>
+                    </DataTemplate>
+                </renderedViews:HorizontalListView.ItemTemplate>
+            </renderedViews:HorizontalListView>
+        </loader:TaskLoaderView>
+
+    </ScrollView>
 </ContentView>

@@ -20,7 +20,23 @@ namespace UrGuide.Mobile.Services.Identity
         }
         public async Task SignInAsync()
         {
-            var clientOptions = new OidcClientOptions {
+            CreateClient();
+
+            var u = await _client.LoginAsync(new LoginRequest());
+            if (!u.IsError)
+            {
+                _preference.AuthToken = u.AccessToken;
+                _preference.FullName = u.User.Claims.LastOrDefault(c => c.Type == IdentityModel.JwtClaimTypes.Name)?.Value;
+                _preference.UserId = u.User.Claims.FirstOrDefault(c => c.Type == IdentityModel.JwtClaimTypes.Subject)?.Value;
+                _preference.Role = u.User.Claims.FirstOrDefault(c => c.Type == IdentityModel.JwtClaimTypes.Role)?.Value;
+                _preference.Image = $"{GlobalSetting.DefaultEndpoint}/{u.User.Claims.FirstOrDefault(c => c.Type == IdentityModel.JwtClaimTypes.Picture)?.Value}";
+            }
+        }
+
+        private void CreateClient()
+        {
+            var clientOptions = new OidcClientOptions
+            {
                 Authority = GlobalSetting.Instance.BaseIdentityEndpoint,
                 ClientId = GlobalSetting.Instance.ClientId,
                 ClientSecret = GlobalSetting.Instance.ClientSecret,
@@ -40,28 +56,29 @@ namespace UrGuide.Mobile.Services.Identity
             };
 
             _client ??= new OidcClient(clientOptions);
-            //string authToken = _preference.AuthToken;
-            //if (!string.IsNullOrEmpty(authToken))
-            //{
-            //    return;
-            //}
-            var u = await _client.LoginAsync(new LoginRequest());
-            if (!u.IsError)
+        }
+
+        public Task LogoutAsync()
+        {
+            _preference.AuthToken = string.Empty;
+            _preference.FullName = string.Empty;
+            _preference.UserId = string.Empty;
+            _preference.Role = string.Empty;
+            _preference.Image = string.Empty;
+            return Task.CompletedTask;
+        }
+
+        public async Task GetUserInfo()
+        {
+            CreateClient();
+            if (string.IsNullOrEmpty(_preference.AuthToken))
+                return;
+            var result = await _client.GetUserInfoAsync(_preference.AuthToken);
+            if (result.IsError)
             {
-                _preference.AuthToken = u.AccessToken;
-                _preference.FullName = u.User.Claims.LastOrDefault(c => c.Type == IdentityModel.JwtClaimTypes.Name )?.Value;
-                _preference.UserId = u.User.Claims.FirstOrDefault(c => c.Type == IdentityModel.JwtClaimTypes.Subject)?.Value;
-                _preference.Role = u.User.Claims.FirstOrDefault(c => c.Type == IdentityModel.JwtClaimTypes.Role)?.Value;
-                _preference.Image = $"{GlobalSetting.DefaultEndpoint}/{u.User.Claims.FirstOrDefault(c => c.Type == IdentityModel.JwtClaimTypes.Picture)?.Value}";
+                await LogoutAsync();
             }
         }
-
-        public async Task LogoutAsync()
-        {
-            await _client.LogoutAsync(new LogoutRequest {});
-            _preference.AuthToken = string.Empty;
-        }
-
 
         class SystemBrowser : IBrowser
         {

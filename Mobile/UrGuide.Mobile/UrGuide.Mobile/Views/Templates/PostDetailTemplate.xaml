@@ -307,18 +307,17 @@
                                         Margin="0,20"
                                         CollectionPadding="0,8"
                                         InfiniteListLoader="{Binding FeedbackPaginator, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}} }"
-                                        ItemHeight="200"
+                                        ColumnCount="1"
                                         ItemSpacing="8"
-                            ItemWidth="400"
                             HorizontalOptions="FillAndExpand"
                                         ItemsSource="{Binding Feedbacks, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}}"
                                         SnapStyle="Center"   
                             ListLayout="Grid"
                                                       >
 
-                        <renderedViews:HorizontalListView.ItemTemplate>
+                            <renderedViews:HorizontalListView.ItemTemplate>
 
-                            <DataTemplate x:DataType="shared:AuthoredFeedback">
+                                <DataTemplate x:DataType="shared:AuthoredFeedback">
                                     <ViewCell>
                                         <Frame CornerRadius="4" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
                                             <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,8,*">
@@ -343,9 +342,9 @@
                                             </Grid>
                                         </Frame>
                                     </ViewCell>
-                            </DataTemplate>
-                        </renderedViews:HorizontalListView.ItemTemplate>
-                    </renderedViews:HorizontalListView>
+                                </DataTemplate>
+                            </renderedViews:HorizontalListView.ItemTemplate>
+                        </renderedViews:HorizontalListView>
                     </loader:TaskLoaderView>
                     <StackLayout Grid.Row="2" Orientation="Vertical" IsVisible="False">
                         <StackLayout.Triggers>

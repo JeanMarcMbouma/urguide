@@ -167,14 +167,22 @@ namespace UrGuide.Mobile.Views
                 PublishCommand = ReactiveCommand.Create(async () =>
                 {
                     var location = await Geolocation.GetLocationAsync();
-                    var places = await Geocoding.GetPlacemarksAsync(location);
-                    var city = places.FirstOrDefault()?.Locality;
-                    var country = places.FirstOrDefault()?.CountryName;
-                    City = $"{city}, {country}";
-                    if (string.IsNullOrEmpty(City))
+                    try
                     {
-                        throw new Exception("We cannot determine your location");
+
+                        var places = await Geocoding.GetPlacemarksAsync(location);
+                        var city = places.FirstOrDefault()?.Locality;
+                        var country = places.FirstOrDefault()?.CountryName;
+                        City = $"{city}, {country}";
+
                     }
+                    catch (Exception)
+                    {
+                    }
+                    //if (string.IsNullOrEmpty(City))
+                    //{
+                    //    throw new Exception("We cannot determine your location");
+                    //}
 
                     var post = new API.PostCreationModel
                     {

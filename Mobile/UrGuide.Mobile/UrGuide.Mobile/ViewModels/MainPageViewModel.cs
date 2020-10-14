@@ -1,13 +1,16 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using System;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
 using UrGuide.Mobile.Services;
 using UrGuide.Mobile.Services.Identity;
 using UrGuide.Mobile.Views;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace UrGuide.Mobile.ViewModels
@@ -17,7 +20,7 @@ namespace UrGuide.Mobile.ViewModels
         private int selectedViewIndex = 0;
         private bool _isLoggedIn;
         private bool shouldLogin;
-
+        private readonly CompositeDisposable disposables = new CompositeDisposable();
         public int SelectedViewIndex
         {
             get => selectedViewIndex;
@@ -49,6 +52,8 @@ namespace UrGuide.Mobile.ViewModels
         }
         public ICommand CreatePostCommand { get; }
         public ICommand LoginCommand { get; }
+        public ICommand SignOutCommand { get; }
+        public ICommand SearchCategoryCommand { get; }
         public MainPageViewModel(
             INavigationService navigation,
             IPreferenceService preference,
@@ -73,22 +78,35 @@ namespace UrGuide.Mobile.ViewModels
                     ShouldLogin = !IsLoggedIn;
                 })
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe();
-            Posts.SearchCategoryCommand = new Command<SearchOption>(option =>
+                .Subscribe()
+                .DisposeWith(disposables);
+            SearchCategoryCommand = new Command<SearchOption>(option =>
             {
                 Discover.Select(option);
-                SelectedViewIndex = 2;
+                SelectedViewIndex = 1;
             });
 
             CreatePostCommand = new Command(() => navigation.PushModalAsync(new CreatePost()));
-            LoginCommand = new Command(async () => await identity.SignInAsync());
+            LoginCommand = new Command(async () =>
+            {
+                await identity.SignInAsync();
+                Profile.Load(null);
+            });
+            SignOutCommand = new Command(async () =>
+            {
+                await identity.LogoutAsync();
+                MainThread.BeginInvokeOnMainThread(() => SelectedViewIndex = 0);
+            });
+
+            identity.GetUserInfo().ToObservable().Subscribe().DisposeWith(disposables);
         }
 
         public void Load(object parameter)
         {
             Posts.Load(parameter);
             Discover.Load(parameter);
-            Profile.Load(parameter);
+            if(!string.IsNullOrEmpty(Preference.UserId))
+                Profile.Load(parameter);
             Favorite.Load(parameter);
         }
     }

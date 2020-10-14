@@ -6,5 +6,6 @@ namespace UrGuide.Mobile.Services.Identity
     {
         Task SignInAsync();
         Task LogoutAsync();
+        Task GetUserInfo();
     }
 }

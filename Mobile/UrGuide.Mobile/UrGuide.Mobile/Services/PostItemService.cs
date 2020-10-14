@@ -86,7 +86,8 @@ namespace UrGuide.Mobile.Services
 
         public async Task Create(PostCreationModel post)
         {
-            await Client.CreateAsync(post);
+            var p = await Client.CreateAsync(post);
+
         }
 
         public async Task<IEnumerable<PostItem>> GetFavoriteAsync()

@@ -54,7 +54,7 @@ namespace UrGuide.Mobile.ViewModels
                     Selected = item;
                 });
 
-                _detailViewModel.Selected = PostItemsLoader.Result.First(x => x.Id == item.Id);
+                _detailViewModel.Selected = PostItemsLoader.Result.FirstOrDefault(x => x.Id == item.Id) ?? item;
                 await _navigation.PushAsyncWithSharedTransition(new Views.PostDetailPage(_detailViewModel), item.Id);
             });
 
