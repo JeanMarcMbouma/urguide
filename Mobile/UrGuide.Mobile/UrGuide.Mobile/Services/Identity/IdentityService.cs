@@ -1,11 +1,13 @@
 ﻿using IdentityModel.Client;
 using IdentityModel.OidcClient;
 using IdentityModel.OidcClient.Browser;
+using Plugin.SharedTransitions;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
+using Xamarin.Forms;
 
 namespace UrGuide.Mobile.Services.Identity
 {
@@ -30,6 +32,11 @@ namespace UrGuide.Mobile.Services.Identity
                 _preference.UserId = u.User.Claims.FirstOrDefault(c => c.Type == IdentityModel.JwtClaimTypes.Subject)?.Value;
                 _preference.Role = u.User.Claims.FirstOrDefault(c => c.Type == IdentityModel.JwtClaimTypes.Role)?.Value;
                 _preference.Image = $"{GlobalSetting.DefaultEndpoint}/{u.User.Claims.FirstOrDefault(c => c.Type == IdentityModel.JwtClaimTypes.Picture)?.Value}";
+            } 
+            else
+            {
+                await (Application.Current.MainPage as SharedTransitionNavigationPage).
+                    CurrentPage.DisplayAlert("Sign in error", u.Error, "Cancel");
             }
         }
 
@@ -49,7 +56,13 @@ namespace UrGuide.Mobile.Services.Identity
                 {
                     Discovery = new DiscoveryPolicy
                     {
-                        RequireHttps = false,
+                        RequireHttps =
+#if DEBUG
+                            false
+#else
+                            true
+#endif
+                        ,
                         ValidateIssuerName = false
                     }
                 }
