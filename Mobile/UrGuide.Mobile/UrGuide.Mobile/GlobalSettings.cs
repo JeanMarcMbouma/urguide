@@ -28,6 +28,6 @@
 
         public string ClientSecret { get { return "secret"; } }
 
-        public string Callback { get; set; }
+        public string Callback { get; } = "urguide://callback";
     }
 }
