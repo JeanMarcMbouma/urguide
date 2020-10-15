@@ -7,18 +7,13 @@
              xmlns:mm="clr-namespace:UrGuide.Mobile.API" 
              xmlns:models="clr-namespace:UrGuide.Mobile.Models"
              BackgroundColor="#ececec"
+             Title="Create a post"
              >
     <ContentPage.Content>
         <ScrollView>
             <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" RowSpacing="8" Margin="12"
                   VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
-                <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                    <Label Text="Create a post" VerticalOptions="Center" HorizontalOptions="StartAndExpand"
-                       FontSize="Title"
-                       FontAttributes="Bold"
-                       Style="{StaticResource TextHeader}"/>
-                </StackLayout>
-                <StackLayout Grid.Row="1" Orientation="Vertical" HorizontalOptions="FillAndExpand">
+                <StackLayout Grid.Row="0" Orientation="Vertical" HorizontalOptions="FillAndExpand">
                     <Editor Placeholder="Title" HeightRequest="70"
                        HorizontalOptions="FillAndExpand"
                        MaxLength="200"
@@ -115,7 +110,7 @@
                     <Slider Maximum="10" Value="{Binding Seats}" MaximumTrackColor="{StaticResource FavoriteIcon}"
                             MinimumTrackColor="{StaticResource IconColor}" HorizontalOptions="FillAndExpand"/>
                 </StackLayout>
-                <StackLayout Grid.Row="2"  HorizontalOptions="FillAndExpand" Orientation="Vertical">
+                <StackLayout Grid.Row="1"  HorizontalOptions="FillAndExpand" Orientation="Vertical">
                     <StackLayout Margin="0, 20, 0, 20" Orientation="Horizontal" Spacing="20"
                                       HorizontalOptions="FillAndExpand">
                         <Label Text="Itinerary of this tour" FontSize="Medium" FontAttributes="Bold"
@@ -183,7 +178,7 @@
                         </BindableLayout.ItemTemplate>
                     </StackLayout>
                 </StackLayout>
-                <StackLayout Grid.Row="3" Orientation="Horizontal" HorizontalOptions="FillAndExpand"
+                <StackLayout Grid.Row="2" Orientation="Horizontal" HorizontalOptions="FillAndExpand"
                                      HeightRequest="40">
                     <Label Text="Add up to 4 images" FontSize="Medium" FontAttributes="Bold" 
                            Style="{StaticResource TextSubheadline}"
@@ -212,7 +207,7 @@
                                 ></ImageButton>
                     </StackLayout>
                 </StackLayout>
-                <ScrollView Orientation="Horizontal" Grid.Row="4">
+                <ScrollView Orientation="Horizontal" Grid.Row="3">
                 <StackLayout HorizontalOptions="FillAndExpand" 
                               BindableLayout.ItemsSource="{Binding Images}" Orientation="Horizontal"
                              >
@@ -243,7 +238,7 @@
                 <Button Text="Submit" BackgroundColor="{StaticResource FavoriteIcon}"
                         Visual="Material" CornerRadius="4"
                         HorizontalOptions="FillAndExpand"
-                        Grid.Row="5" Margin="0,20"
+                        Grid.Row="4" Margin="0,20"
                         HeightRequest="40" Command="{Binding PublishCommand}"/>
             </Grid>
         </ScrollView>

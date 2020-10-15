@@ -1,4 +1,5 @@
 ﻿using Microsoft.AppCenter.Distribute;
+using Microsoft.Extensions.DependencyInjection;
 using Plugin.SharedTransitions;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.ViewModels;
@@ -8,10 +9,10 @@ namespace UrGuide.Mobile
 {
     public partial class App : Application
     {
-        public App(IMainPageService mainPageService) : base()
+        public App() : base()
         {
             InitializeComponent();
-            MainPage = mainPageService.GetMainPage();
+            MainPage = Forms.Ioc.GetRequiredService<IMainPageService>().GetMainPage();
             if (MainPage is SharedTransitionNavigationPage nav)
             if (nav.CurrentPage.BindingContext is INavigatableViewModel vm)
             {

@@ -41,7 +41,7 @@ namespace UrGuide.Mobile.Droid
             AndroidMaterialFrameRenderer.BlurAutoUpdateDelayMilliseconds = 200;
             AndroidMaterialFrameRenderer.BlurProcessingDelayMilliseconds = 100;
             Forms.Init(RegisterServices);
-            LoadApplication(Forms.Ioc.GetService<App>());
+            LoadApplication(new App());
         }
 
         private void RegisterServices(IServiceCollection services)

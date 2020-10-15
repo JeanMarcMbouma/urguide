@@ -62,7 +62,7 @@
                 </StackLayout>
                 <loader:TaskLoaderView AccentColor="Accent" TaskLoaderNotifier="{Binding PostItemsLoader}">
 
-                    <StackLayout Orientation="Vertical" Spacing="8" BindableLayout.ItemsSource="{Binding PostItemsLoader.Result}"
+                    <StackLayout Orientation="Vertical" Spacing="8" BindableLayout.ItemsSource="{Binding Items}"
                         BackgroundColor="Transparent" BindableLayout.ItemTemplate="{StaticResource PostModelTemplate}"
                     HorizontalOptions="FillAndExpand" 
                             VerticalOptions="StartAndExpand">

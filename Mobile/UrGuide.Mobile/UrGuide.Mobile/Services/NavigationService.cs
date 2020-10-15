@@ -28,6 +28,11 @@ namespace UrGuide.Mobile.Services
             return ConfirmAsync(null, title, message, yesText, displayNoButton: false);
         }
 
+        public Task PopAsync()
+        {
+            return Application.Current.MainPage.Navigation.PopAsync();
+        }
+
         public Task PopModalAsync(bool animated = true)
         {
             return Application.Current.MainPage.Navigation.PopModalAsync(animated);

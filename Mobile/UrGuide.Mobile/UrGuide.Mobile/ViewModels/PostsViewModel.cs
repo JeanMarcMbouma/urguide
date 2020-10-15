@@ -30,7 +30,6 @@ namespace UrGuide.Mobile.ViewModels
 
         public TaskLoaderNotifier<IEnumerable<PostItem>> PostItemsLoader { get; }
         public TaskLoaderNotifier<IEnumerable<CategoryModel>> CategoryLoader { get; }
-        public Paginator<IEnumerable<PostItem>> Paginator { get; }
         public ICommand SearchCategoryCommand
         {
             get => _searchCategoryCommand; set
@@ -96,6 +95,8 @@ namespace UrGuide.Mobile.ViewModels
             });
         }
 
+
+        public MvvmHelpers.ObservableRangeCollection<PostItem> Items { get; set; } = new MvvmHelpers.ObservableRangeCollection<PostItem>();
         private async Task<IEnumerable<CategoryModel>> LoadCategoriesAsync()
         {
             var categories = await PostItemService.GetCategoriesAsync();
@@ -105,6 +106,7 @@ namespace UrGuide.Mobile.ViewModels
         private async Task<IEnumerable<PostItem>> LoadItemsAsync()
         {
             var posts = await PostItemService.GetItemsAsync();
+            Items.ReplaceRange(posts.Data);
             return posts.Data;
         }
 

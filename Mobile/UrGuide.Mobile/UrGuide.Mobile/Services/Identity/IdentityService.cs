@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using UrGuide.Mobile.Contracts;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
@@ -15,10 +16,12 @@ namespace UrGuide.Mobile.Services.Identity
     {
         private OidcClient _client;
         private readonly IPreferenceService _preference;
+        private readonly INavigationService _navigation;
 
-        public IdentityService(IPreferenceService preference)
+        public IdentityService(IPreferenceService preference, INavigationService navigation)
         {
             _preference = preference ?? throw new ArgumentNullException(nameof(preference));
+            _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
         }
         public async Task SignInAsync()
         {
@@ -35,8 +38,7 @@ namespace UrGuide.Mobile.Services.Identity
             } 
             else
             {
-                await (Application.Current.MainPage as SharedTransitionNavigationPage).
-                    CurrentPage.DisplayAlert("Sign in error", u.Error, "Cancel");
+                await _navigation.DisplayErrorAsync("Sign In [ERROR]", u.Error);
             }
         }
 

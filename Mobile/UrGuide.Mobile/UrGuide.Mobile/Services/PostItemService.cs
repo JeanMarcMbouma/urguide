@@ -12,6 +12,7 @@ using Akavache;
 using System.Net.Http;
 using Sharpnado.Presentation.Forms.Services;
 using System.Collections.ObjectModel;
+using System.Reactive.Threading.Tasks;
 
 namespace UrGuide.Mobile.Services
 {
@@ -83,12 +84,7 @@ namespace UrGuide.Mobile.Services
                 return Result.Of(Mapper.Map<IEnumerable<Model.Lookup.CategoryModel>>(categories));
             }, DateTime.UtcNow.AddYears(1)).Catch(Observable.Return(Result.Of<IEnumerable<Model.Lookup.CategoryModel>>().WithErrors("Error occured")));
         }
-
-        public async Task Create(PostCreationModel post)
-        {
-            var p = await Client.CreateAsync(post);
-
-        }
+        
 
         public async Task<IEnumerable<PostItem>> GetFavoriteAsync()
         {
@@ -225,5 +221,8 @@ namespace UrGuide.Mobile.Services
             });
             return new PageResult<PostItem>(items.ItemsCount, Mapper.Map<IEnumerable<PostItem>>(items.Items).ToList());
         }
+
+        public IObservable<PostItem> Create(PostCreationModel post) => Client.CreateAsync(post).ToObservable()
+                .Select(x => Mapper.Map<PostItem>(x));
     }
 }

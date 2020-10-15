@@ -57,7 +57,8 @@ namespace UrGuide.Mobile
             services.AddSingleton<IPreferenceService, PreferenceService>();
             services.AddSingleton<IIdentityService, IdentityService>();
             services.AddSingleton<IFileService, FileService>();
-
+            services.AddSingleton<PostItemCreationsQueue>();
+            services.AddSingleton<PostItemsQueue>();
 
             services.AddScoped<PostsViewModel>();
             services.AddScoped<PostDetailViewModel>();
@@ -69,6 +70,7 @@ namespace UrGuide.Mobile
             services.AddScoped<DiscoverViewModel>();
             services.AddScoped<ShellViewModel>();
             services.AddScoped<MainPageViewModel>();
+            services.AddTransient<CreatePostViewModel>();
 
             services.AddAutoMapper(typeof(PostProfile).Assembly);
 

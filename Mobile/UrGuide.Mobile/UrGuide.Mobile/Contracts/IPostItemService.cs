@@ -1,4 +1,5 @@
 ﻿using Sharpnado.Presentation.Forms.Services;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UrGuide.Mobile.Models;
@@ -8,7 +9,7 @@ namespace UrGuide.Mobile.Contracts
 {
     public interface IPostItemService
     {
-        Task Create(API.PostCreationModel post);
+        IObservable<PostItem> Create(API.PostCreationModel post);
         Task<Result<IEnumerable<Model.Lookup.CategoryModel>>> GetCategoriesAsync();
         Task<Result<IEnumerable<PostItem>>> GetItemsAsync();
         Task<IEnumerable<PostItem>> GetFavoriteAsync();

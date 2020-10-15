@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using System;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
@@ -61,7 +62,9 @@ namespace UrGuide.Mobile.ViewModels
             PostsViewModel posts,
             DiscoverViewModel discover,
             ProfileViewModel profile,
-            FavoriteViewModel favorite)
+            FavoriteViewModel favorite,
+            IPostItemService postItemService,
+            PostItemCreationsQueue creationsQueue)
         {
             Preference = preference ?? throw new System.ArgumentNullException(nameof(preference));
             Posts = posts ?? throw new System.ArgumentNullException(nameof(posts));
@@ -86,12 +89,25 @@ namespace UrGuide.Mobile.ViewModels
                 SelectedViewIndex = 1;
             });
 
-            CreatePostCommand = new Command(() => navigation.PushModalAsync(new CreatePost()));
+            CreatePostCommand = new Command(async () =>
+            {
+                if(string.IsNullOrEmpty(GlobalSetting.Instance.City))
+                {
+                    var location = await Geolocation.GetLocationAsync();
+                    var places = await Geocoding.GetPlacemarksAsync(location);
+                    var city = places.FirstOrDefault()?.Locality;
+                    var country = places.FirstOrDefault()?.CountryName;
+                    GlobalSetting.Instance.City = $"{city}, {country}";
+                }
+                await navigation.PushAsync(new CreatePost());
+            });
+
             LoginCommand = new Command(async () =>
             {
                 await identity.SignInAsync();
-                Profile.Load(null);
+                Load(null);
             });
+
             SignOutCommand = new Command(async () =>
             {
                 await identity.LogoutAsync();
@@ -99,6 +115,12 @@ namespace UrGuide.Mobile.ViewModels
             });
 
             identity.GetUserInfo().ToObservable().Subscribe().DisposeWith(disposables);
+
+            MessagingCenter.Instance.Subscribe<PostItemsQueue, PostItem>(this, nameof(PostItemsQueue), (sender,args) =>
+            {
+                MainThread.BeginInvokeOnMainThread(() => Posts.Items.Insert(0, args));
+            });
+
         }
 
         public void Load(object parameter)

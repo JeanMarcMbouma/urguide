@@ -29,5 +29,6 @@
         public string ClientSecret { get { return "secret"; } }
 
         public string Callback { get; } = "urguide://callback";
+        public string City { get; internal set; }
     }
 }
