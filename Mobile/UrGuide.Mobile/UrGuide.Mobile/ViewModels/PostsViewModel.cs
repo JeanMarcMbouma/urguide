@@ -1,8 +1,6 @@
 ﻿using MvvmHelpers.Commands;
-using Plugin.SharedTransitions;
 using ReactiveUI;
 using Sharpnado.Presentation.Forms;
-using Sharpnado.Presentation.Forms.Paging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,7 +38,7 @@ namespace UrGuide.Mobile.ViewModels
 
         public ICommand ToggleFavoriteCommand => _markAsFavoriteCommand ??= new AsyncCommand<PostItem>(async item =>
         {
-            var it = PostItemsLoader.Result.First(x => x.Id == item.Id);
+            var it = Items.First(x => x.Id == item.Id);
             it.Favorite = !it.Favorite;
             await PostItemService.ToggleFavorites(it);
         });
@@ -53,13 +51,13 @@ namespace UrGuide.Mobile.ViewModels
                     Selected = item;
                 });
 
-                _detailViewModel.Selected = PostItemsLoader.Result.FirstOrDefault(x => x.Id == item.Id) ?? item;
+                _detailViewModel.Selected = Items.FirstOrDefault(x => x.Id == item.Id) ?? item;
                 await _navigation.PushAsyncWithSharedTransition(new Views.PostDetailPage(_detailViewModel), item.Id);
             });
 
         public ICommand LikeCommand => _likeCommand ??= new AsyncCommand<PostItem>(async (item) =>
         {
-            var it = PostItemsLoader.Result.First(x => x.Id == item.Id);
+            var it = Items.First(x => x.Id == item.Id);
             await PostItemService.SetUserReaction(it);
         });
 
@@ -83,13 +81,13 @@ namespace UrGuide.Mobile.ViewModels
 
             Xamarin.Forms.MessagingCenter.Subscribe<FavoriteViewModel, PostItem>(this, "favorite", (fvm, item) =>
             {
-                var it = PostItemsLoader.Result.FirstOrDefault(x => x.Id == item.Id);
+                var it = Items.FirstOrDefault(x => x.Id == item.Id);
                 if (it != null)
                     it.Favorite = item.Favorite;
             });
             Xamarin.Forms.MessagingCenter.Subscribe<PostDetailViewModel, PostItem>(this, "favorite", (fvm, item) =>
             {
-                var it = PostItemsLoader.Result.FirstOrDefault(x => x.Id == item.Id);
+                var it = Items.FirstOrDefault(x => x.Id == item.Id);
                 if (it != null && it != Selected)
                     it.Favorite = item.Favorite;
             });

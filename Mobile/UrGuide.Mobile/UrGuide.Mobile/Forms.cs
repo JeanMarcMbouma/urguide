@@ -57,8 +57,7 @@ namespace UrGuide.Mobile
             services.AddSingleton<IPreferenceService, PreferenceService>();
             services.AddSingleton<IIdentityService, IdentityService>();
             services.AddSingleton<IFileService, FileService>();
-            services.AddSingleton<PostItemCreationsQueue>();
-            services.AddSingleton<PostItemsQueue>();
+
 
             services.AddScoped<PostsViewModel>();
             services.AddScoped<PostDetailViewModel>();
@@ -75,6 +74,7 @@ namespace UrGuide.Mobile
             services.AddAutoMapper(typeof(PostProfile).Assembly);
 
             services.AddSingleton((s) => BlobCache.LocalMachine);
+            services.AddSingleton((s) => MessagingCenter.Instance);
         }
         public static void Init(Action<IServiceCollection> registerServices)
         {

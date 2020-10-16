@@ -21,7 +21,7 @@
                                         HorizontalOptions="FillAndExpand"
                                         ItemsSource="{Binding Feedbacks, Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}}"
                                         SnapStyle="Center"   
-                            ListLayout="Grid"
+                                        ListLayout="Carousel"
                                                       >
 
                 <renderedViews:HorizontalListView.ItemTemplate>

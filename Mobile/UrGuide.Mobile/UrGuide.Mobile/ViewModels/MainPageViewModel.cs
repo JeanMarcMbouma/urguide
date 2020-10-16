@@ -1,11 +1,16 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Threading.Tasks;
 using System.Windows.Input;
+using UrGuide.Mobile.API;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
 using UrGuide.Mobile.Services;
@@ -20,7 +25,9 @@ namespace UrGuide.Mobile.ViewModels
     {
         private int selectedViewIndex = 0;
         private bool _isLoggedIn;
-        private bool shouldLogin;
+        private bool _canCreatePost;
+        private bool _shouldLogin;
+        private ObservableAsPropertyHelper<Location> _location;
         private readonly CompositeDisposable disposables = new CompositeDisposable();
         public int SelectedViewIndex
         {
@@ -28,6 +35,8 @@ namespace UrGuide.Mobile.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref selectedViewIndex, value);
+                if (value == 2)
+                    Favorite.Load(null);
             }
         }
 
@@ -36,6 +45,7 @@ namespace UrGuide.Mobile.ViewModels
         public DiscoverViewModel Discover { get; }
         public ProfileViewModel Profile { get; }
         public FavoriteViewModel Favorite { get; }
+        public Location Location => _location.Value;
         public bool IsLoggedIn
         {
             get => _isLoggedIn; set
@@ -43,12 +53,20 @@ namespace UrGuide.Mobile.ViewModels
                 this.RaiseAndSetIfChanged(ref _isLoggedIn, value);
             }
         }
+
+        public bool CanCreatePost
+        {
+            get => _canCreatePost; set
+            {
+                this.RaiseAndSetIfChanged(ref _canCreatePost, value);
+            }
+        }
         public bool ShouldLogin
         {
-            get => shouldLogin; 
+            get => _shouldLogin; 
             set
             {
-                this.RaiseAndSetIfChanged(ref shouldLogin, value);
+                this.RaiseAndSetIfChanged(ref _shouldLogin, value);
             }
         }
         public ICommand CreatePostCommand { get; }
@@ -64,7 +82,7 @@ namespace UrGuide.Mobile.ViewModels
             ProfileViewModel profile,
             FavoriteViewModel favorite,
             IPostItemService postItemService,
-            PostItemCreationsQueue creationsQueue)
+            IMessagingCenter messaging)
         {
             Preference = preference ?? throw new System.ArgumentNullException(nameof(preference));
             Posts = posts ?? throw new System.ArgumentNullException(nameof(posts));
@@ -79,6 +97,7 @@ namespace UrGuide.Mobile.ViewModels
                 {
                     IsLoggedIn = !string.IsNullOrEmpty(u);
                     ShouldLogin = !IsLoggedIn;
+                    CanCreatePost = IsLoggedIn && "guide".Equals(Preference.Role, StringComparison.OrdinalIgnoreCase);
                 })
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe()
@@ -89,18 +108,45 @@ namespace UrGuide.Mobile.ViewModels
                 SelectedViewIndex = 1;
             });
 
+            IObservable<Location> observable = Geolocation.GetLocationAsync()
+                        .ToObservable();
+
             CreatePostCommand = new Command(async () =>
             {
                 if(string.IsNullOrEmpty(GlobalSetting.Instance.City))
                 {
-                    var location = await Geolocation.GetLocationAsync();
-                    var places = await Geocoding.GetPlacemarksAsync(location);
-                    var city = places.FirstOrDefault()?.Locality;
-                    var country = places.FirstOrDefault()?.CountryName;
-                    GlobalSetting.Instance.City = $"{city}, {country}";
+                    await navigation.DisplayErrorAsync(message: "You need to enable location sharing");
+                    await observable.Retry();
+                    return;
                 }
                 await navigation.PushAsync(new CreatePost());
             });
+
+            
+            observable
+            .Catch(Observable.Empty<Location>())
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Select(x => x)
+            .ToProperty(this, x => x.Location, out _location);
+
+            this.WhenAnyValue(x => x.Location)
+                .Do(async location =>
+                {
+                    if (location == null) return;
+                    try
+                    {
+
+                        var places = await Geocoding.GetPlacemarksAsync(location);
+                        var city = places.FirstOrDefault()?.Locality;
+                        var country = places.FirstOrDefault()?.CountryName;
+                        GlobalSetting.Instance.City = $"{city}, {country}";
+                    }
+                    catch (Exception e)
+                    {
+                        if (Debugger.IsAttached) Debugger.Break();
+                    }
+                }).Catch(Observable.Empty<Location>()).Subscribe();
+            
 
             LoginCommand = new Command(async () =>
             {
@@ -116,13 +162,17 @@ namespace UrGuide.Mobile.ViewModels
 
             identity.GetUserInfo().ToObservable().Subscribe().DisposeWith(disposables);
 
-            MessagingCenter.Instance.Subscribe<PostItemsQueue, PostItem>(this, nameof(PostItemsQueue), (sender,args) =>
+            messaging.Subscribe<CreatePostViewModel, PostCreationModel>(this, nameof(PostCreationModel), (sender, args) =>
             {
-                MainThread.BeginInvokeOnMainThread(() => Posts.Items.Insert(0, args));
+                postItemService.Create(args)
+                .Do(x => MainThread.BeginInvokeOnMainThread(() => Posts.Items.Insert(0, x)))
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe()
+                .DisposeWith(disposables);
             });
-
         }
 
+        Task<IEnumerable<Placemark>> Get() => Geocoding.GetPlacemarksAsync(null);
         public void Load(object parameter)
         {
             Posts.Load(parameter);

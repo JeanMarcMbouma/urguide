@@ -75,6 +75,20 @@ namespace UrGuide.Mobile.ViewModels
                 {
                     Mode = value
                 });
+                switch (value)
+                {
+                    case ProfileDisplayMode.Reviews:
+                        FeedbackLoader.Load();
+                        break;
+                    case ProfileDisplayMode.Posts:
+                        PostsLoader.Load();
+                        break;
+                    case ProfileDisplayMode.Gallery:
+                        GalleryLoader.Load();
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 

@@ -14,6 +14,7 @@ using UrGuide.Mobile.Models;
 using UrGuide.Mobile.Services;
 using UrGuide.Mobile.Views.Dialog;
 using Xamarin.Essentials;
+using Xamarin.Forms;
 
 namespace UrGuide.Mobile.ViewModels
 {
@@ -21,7 +22,7 @@ namespace UrGuide.Mobile.ViewModels
     {
         private readonly IFileService _fileService;
         private readonly INavigationService _navigation;
-        private readonly PostItemCreationsQueue _creationsQueue;
+        private readonly IMessagingCenter _messaging;
         private CompositeDisposable _disposables = new CompositeDisposable();
         private DateTime date = DateTime.Today;
         private TimeSpan startTime = TimeSpan.FromHours(13);
@@ -41,12 +42,12 @@ namespace UrGuide.Mobile.ViewModels
         public CreatePostViewModel(IPostItemService service,
             IFileService fileService,
             INavigationService navigation,
-            PostItemCreationsQueue creationsQueue)
+            IMessagingCenter messaging)
         {
             Service = service ?? throw new ArgumentNullException(nameof(service));
             _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
             _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
-            _creationsQueue = creationsQueue ?? throw new ArgumentNullException(nameof(creationsQueue));
+            _messaging = messaging ?? throw new ArgumentNullException(nameof(messaging));
             service.GetCategoriesAsync().ToObservable()
                 .Where(x => !x.HasError)
                 .Select(x => x.Data.Select(c => new SearchOption { Text = c.Name }))
@@ -182,7 +183,7 @@ namespace UrGuide.Mobile.ViewModels
                 UnitPrice = $"{PriceFrom}$ - {PriceTo}$",
                 GeoLocation = GlobalSetting.Instance.City
             };
-            _creationsQueue.OnNext(post);
+            _messaging.Send(this, nameof(API.PostCreationModel), post);
             MainThread.BeginInvokeOnMainThread(async () => await _navigation.PopAsync());
         }
 
