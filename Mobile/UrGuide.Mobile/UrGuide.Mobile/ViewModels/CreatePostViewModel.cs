@@ -26,7 +26,7 @@ namespace UrGuide.Mobile.ViewModels
         private CompositeDisposable _disposables = new CompositeDisposable();
         private DateTime date = DateTime.Today;
         private TimeSpan startTime = TimeSpan.FromHours(13);
-        private TimeSpan endTime = TimeSpan.FromSeconds(18);
+        private TimeSpan endTime = TimeSpan.FromHours(18);
         private int priceFrom = 20;
         private int priceTo = 100;
         private int seats = 1;

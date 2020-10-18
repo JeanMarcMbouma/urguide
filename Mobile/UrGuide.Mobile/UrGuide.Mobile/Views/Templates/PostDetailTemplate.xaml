@@ -116,66 +116,60 @@
                         <behaviors:TapFeedbackBehavior/>
                     </Image.Behaviors>
                 </Image>
+                <!-- Hours-->
                 <StackLayout st:Transition.Name="Hours" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Vertical" VerticalOptions="StartAndExpand" Spacing="12">
                     <StackLayout Orientation="Horizontal" Spacing="8">
                         <Image Source="{FontImage FontFamily=fas, 
-                        Glyph={x:Static icons:FAI.MapPin}, 
-                        Color={StaticResource Accent},Size=24}" WidthRequest="24"/>
+                            Glyph={x:Static icons:FAI.MapPin}, 
+                            Color={StaticResource Accent},Size=24}" WidthRequest="24"/>
                         <Label Text="{Binding Location, StringFormat='Place: {0}'}" FontSize="Medium"
-                               Style="{StaticResource TextSubhead}" FontAttributes="Bold"/>
+                             Style="{StaticResource TextSubhead}"  FontAttributes="Bold" />
                     </StackLayout>
                     <StackLayout Orientation="Horizontal" Spacing="8">
                         <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.DollarSign}, 
                         Color={StaticResource Accent},Size=24}" WidthRequest="24"/>
-                        <Label Text="{Binding Price, StringFormat='Budget: {0}'}" FontSize="Medium"
-                               Style="{StaticResource TextSubhead}" FontAttributes="Bold"/>
+                        <Label Text="{Binding Price, StringFormat='Budget: {0}'}" FontSize="Medium" Style="{StaticResource TextSubhead}" FontAttributes="Bold"/>
                     </StackLayout>
                     <StackLayout Spacing="8" Orientation="Horizontal">
                         <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.Users}, 
-                        Color={StaticResource Accent},Size=24}" WidthRequest="24"/>
-                        <Label Text="{Binding Seats, StringFormat='Seats: {0}'}" FontSize="Medium"
-                               Style="{StaticResource TextSubhead}" FontAttributes="Bold"/>
+                        Color={StaticResource Accent},Size=24}" WidthRequest="24" />
+                        <Label Text="{Binding Seats, StringFormat='Seats: {0}'}" FontSize="Medium" 
+                               Style="{StaticResource TextSubhead}" FontAttributes="Bold">
+                        </Label>
+                        <Label Text="{Binding ReservedSeats, StringFormat=' Reserved : {0}'}" FontSize="Medium" 
+                               Style="{StaticResource TextSubhead}" FontAttributes="Bold"
+                               HorizontalOptions="EndAndExpand" >
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding ReservedSeats}" Value="0">
+                                    <Setter Property="IsVisible" Value="False" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+
                     </StackLayout>
-                    <Image Source="{FontImage FontFamily=fas, 
+                    <StackLayout Orientation="Horizontal">
+                        <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.Clock}, 
                         Color={StaticResource Accent},Size=24}" HorizontalOptions="Start" />
-                    <Grid ColumnDefinitions="10,*" RowDefinitions="Auto,*" RowSpacing="5" Margin="10,-14,0,0">
-                        <BoxView Grid.RowSpan="2" HorizontalOptions="Start" VerticalOptions="StartAndExpand" 
-                                     WidthRequest="2"
-                                     BackgroundColor="{StaticResource Accent}"/>
-                        <BoxView HorizontalOptions="StartAndExpand"  VerticalOptions="Center" WidthRequest="8" 
-                                 HeightRequest="2"
-                                     BackgroundColor="{StaticResource Accent}"
-                                     CornerRadius="4"/>
-                        <BoxView Grid.Row="1" HorizontalOptions="StartAndExpand"  VerticalOptions="Center" 
-                                 WidthRequest="8" HeightRequest="2"
-                                     BackgroundColor="{StaticResource Accent}"
-                                     CornerRadius="4"/>
-                        <Label Grid.Column="1" FontSize="Small" FontAttributes="Bold" Style="{StaticResource TextSmallCaption}"  >
+                        <Label Grid.Column="1" FontSize="Medium" FontAttributes="Bold"
+                               Style="{StaticResource TextSubhead}"  >
                             <Label.FormattedText>
                                 <FormattedString>
                                     <FormattedString.Spans>
+                                        <Span Text="When: "/>
                                         <Span Text="{Binding StartDate}"/>
-                                        <Span Text=" "/>
+                                        <Span Text="  "/>
                                         <Span Text="{Binding StartTime}"/>
-                                    </FormattedString.Spans>
-                                </FormattedString>
-                            </Label.FormattedText>
-                        </Label>
-                        <Label Grid.Column="1" Grid.Row="1" FontSize="Small" Style="{StaticResource TextSmallCaption}" FontAttributes="Bold" VerticalOptions="Center">
-                            <Label.FormattedText>
-                                <FormattedString>
-                                    <FormattedString.Spans>
-                                        <Span Text="{Binding EndDate}"/>
-                                        <Span Text=" "/>
+                                        <Span Text=" - "/>
                                         <Span Text="{Binding EndTime}"/>
                                     </FormattedString.Spans>
                                 </FormattedString>
                             </Label.FormattedText>
                         </Label>
-                    </Grid>
+
+                    </StackLayout>
 
                 </StackLayout>
                 <!--Categories-->
@@ -309,10 +303,11 @@
                                         InfiniteListLoader="{Binding FeedbackPaginator, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}} }"
                                         ColumnCount="1"
                                         ItemSpacing="8"
+                            ItemHeight="250"
                             HorizontalOptions="FillAndExpand"
                                         ItemsSource="{Binding Feedbacks, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}}"
                                         SnapStyle="Center"   
-                            ListLayout="Grid"
+                            ListLayout="Carousel"
                                                       >
 
                             <renderedViews:HorizontalListView.ItemTemplate>

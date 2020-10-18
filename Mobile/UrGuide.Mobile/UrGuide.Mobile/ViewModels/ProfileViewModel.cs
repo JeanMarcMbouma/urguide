@@ -41,20 +41,21 @@ namespace UrGuide.Mobile.ViewModels
             PostsLoader = new TaskLoaderNotifier<IEnumerable<PostItem>>();
             GalleryLoader = new TaskLoaderNotifier<IEnumerable<GalleryItem>>(async () =>
             {
-                var items = await UserService.GetGalleryItems(preference.UserId);
-
+                var items = await UserService.GetGalleryItems(Preference.UserId);
                 return items;
             });
             FeedbackLoader = new TaskLoaderNotifier<IEnumerable<AuthoredFeedback>>();
             PostsPaginator = new Paginator<PostItem>(async (pageNumber, pageSize, b) =>
             {
-                var result = await PostItemService.GetUserPosts(preference.UserId, pageNumber);
+                var result = await PostItemService.GetUserPosts(Preference.UserId, pageNumber);
+                Posts ??= new ObservableRangeCollection<PostItem>();
                 Posts.AddRange(result.Items);
                 return result;
             });
             FeedbackPaginator = new Paginator<AuthoredFeedback>(async (pageNumber, pageSize, b) =>
             {
-                var result = await UserService.GetUserFeedback(preference.UserId, pageNumber);
+                var result = await UserService.GetUserFeedback(Preference.UserId, pageNumber);
+                Feedbacks ??= new ObservableRangeCollection<AuthoredFeedback>();
                 Feedbacks.AddRange(result.Items);
                 return result;
             });

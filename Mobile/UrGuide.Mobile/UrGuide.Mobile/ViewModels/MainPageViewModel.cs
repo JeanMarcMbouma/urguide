@@ -92,12 +92,12 @@ namespace UrGuide.Mobile.ViewModels
             IsLoggedIn = false;
             ShouldLogin = !IsLoggedIn;
 
-            this.WhenAnyValue(x => x.Preference.UserId)
-                .Do(u =>
+            this.WhenAnyValue(x => x.Preference.UserId, x => x.Preference.Role)
+                .Do((data) =>
                 {
-                    IsLoggedIn = !string.IsNullOrEmpty(u);
+                    IsLoggedIn = !string.IsNullOrEmpty(data.Item1);
                     ShouldLogin = !IsLoggedIn;
-                    CanCreatePost = IsLoggedIn && "guide".Equals(Preference.Role, StringComparison.OrdinalIgnoreCase);
+                    CanCreatePost = IsLoggedIn && "guide".Equals(data.Item2, StringComparison.OrdinalIgnoreCase);
                 })
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe()

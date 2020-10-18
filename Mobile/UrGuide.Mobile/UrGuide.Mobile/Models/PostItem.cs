@@ -1,6 +1,8 @@
 ﻿using MvvmHelpers;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using UrGuide.Model.Shared;
 using Xamarin.Forms;
 
@@ -65,10 +67,19 @@ namespace UrGuide.Mobile.Models
 
         public bool Favorite { get => favorite; set => SetProperty(ref favorite, value); }
 
-        public class PostItemCountdown : ObservableObject
+        public class PostItemCountdown : ReactiveObject
         {
+            private bool isActive;
+
             public string Left => IsActive ? string.Format("   {0:dd} day(s) {0:hh\\:mm\\:ss}", TimeLeft) : string.Empty;
-            public bool IsActive { get; set; }
+            public bool IsActive
+            {
+                get => isActive; set
+                {
+                    this.RaiseAndSetIfChanged(ref isActive, value);
+                    this.RaisePropertyChanged(nameof(Left));
+                }
+            }
             public TimeSpan TimeLeft
             {
                 get; set;
@@ -81,19 +92,15 @@ namespace UrGuide.Mobile.Models
                 {
                     IsActive = end > DateTime.UtcNow;
                     TimeLeft = (DateTime.UtcNow - start).Negate();
-                    Device.StartTimer(TimeSpan.FromSeconds(1), UpdateTimer);
+                    Observable.Timer(TimeSpan.FromSeconds(1))
+                        .DoWhile(() => IsActive)
+                        .ObserveOn(RxApp.MainThreadScheduler)
+                        .Subscribe((v) =>
+                        {
+                            TimeLeft = TimeLeft.Subtract(TimeSpan.FromSeconds(1));
+                            IsActive = TimeLeft.TotalSeconds > 0;
+                        });
                 }
-            }
-
-            private bool UpdateTimer()
-            {
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    TimeLeft = TimeLeft.Subtract(TimeSpan.FromSeconds(1));
-                    OnPropertyChanged(nameof(Left));
-                    OnPropertyChanged(nameof(IsActive));
-                });
-                return TimeLeft.TotalSeconds > 0;
             }
 
             public override string ToString()

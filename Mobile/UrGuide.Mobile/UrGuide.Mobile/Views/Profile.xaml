@@ -10,7 +10,7 @@
              xmlns:models="clr-namespace:UrGuide.Model.Users;assembly=UrGuide.Model" 
              xmlns:controls="clr-namespace:UrGuide.Mobile.Views.Controls" 
              xmlns:tpl="clr-namespace:UrGuide.Mobile.Views.Templates.Profile" 
-             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers" xmlns:loader="clr-namespace:Sharpnado.Presentation.Forms.CustomViews;assembly=Sharpnado.TaskLoaderView"
+             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers" xmlns:loader="clr-namespace:Sharpnado.Presentation.Forms.CustomViews;assembly=Sharpnado.TaskLoaderView" xmlns:tabs="clr-namespace:Sharpnado.Presentation.Forms.CustomViews.Tabs;assembly=Sharpnado.Presentation.Forms"
              BackgroundColor="#ececec"
              x:DataType="vm:ProfileViewModel">
     <ContentView.Resources>
@@ -86,7 +86,7 @@
 
                         />
                     <Frame Grid.Row="1" IsClippedToBounds="True" HasShadow="True" BackgroundColor="{StaticResource IconColor}" 
-                   HorizontalOptions="FillAndExpand" Padding="4" Margin="16,-20,16,20" CornerRadius="8">
+                   HorizontalOptions="FillAndExpand" Padding="4" Margin="16,-20,16,20" CornerRadius="8" >
                         <Grid ColumnDefinitions="*,*,*" HorizontalOptions="FillAndExpand" ColumnSpacing="4">
                             <StackLayout Orientation="Horizontal" VerticalOptions="CenterAndExpand" 
                                  HorizontalOptions="CenterAndExpand"
@@ -152,7 +152,7 @@
                         </Grid>
                     </Frame>
                     <StackLayout Grid.Row="2" HorizontalOptions="FillAndExpand"
-                                 VerticalOptions="FillAndExpand"
+                                 VerticalOptions="FillAndExpand" 
                                  Margin="12,0"
                                  BindableLayout.ItemsSource="{Binding Items}"
                                  BindableLayout.ItemTemplateSelector="{StaticResource TemplateSelector}"
