@@ -9,6 +9,7 @@ import { AiFillDislike } from 'react-icons/ai';
 import { AiFillLike } from 'react-icons/ai';
 import { AiOutlineStop } from 'react-icons/ai';
 import { AiOutlineCheck } from 'react-icons/ai';
+import { AiOutlineShareAlt } from 'react-icons/ai'
 import { BsSearch } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
 import cities from "../../discover/Cities";
@@ -81,6 +82,14 @@ import { PostsClient, PostCreationModel, ImageFileCreateModel, ItineraryModel, B
 import { BlobToBase64 } from '../../../helpers/fileHelpers';
 import { useDataContext, ActionTypes } from '../../../data/GlobalDataContext';
 
+import FacebookIcon from '@material-ui/icons/Facebook';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import TwitterIcon from '@material-ui/icons/Twitter';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Dialog from '@material-ui/core/Dialog';
+
 const styles = {
     root: {
         background: props =>
@@ -97,6 +106,7 @@ const styles = {
         height: 30,
         padding: '0 30px',
     },
+    
 };
 
 
@@ -121,7 +131,7 @@ const useStyles = makeStyles(theme => ({
     form: {
         width: "100%", // Fix IE 11 issue.
         marginTop: theme.spacing(1)
-    }
+    },
 }));
 
 
@@ -454,6 +464,69 @@ function Comments(props) {
             </div> : null
         );
 }
+
+function Share({post}) {
+
+
+    const [open, setOpen] = React.useState(false);
+    const handleClickOpen = () => { setOpen(true); };
+    const handleClose = () => {setOpen(false); };
+
+    const shareSites = ['Twitter', 'Facebook'];
+
+    const ChoosingSite = (props) => {
+
+        const { onClose, open } = props;
+        const handleClose = () => {onClose(); };
+      
+        let params = "menubar=no,toolbar=no,status=no"; 
+        let url = `${window.location.host}/post/${post.id}`;
+
+        const handleListItemClick = (selectedSite) => {
+            let link;
+            if(selectedSite==='Facebook'){
+            link = `http://www.facebook.com/sharer/sharer.php?u=${url}`;
+            }
+            else {
+            link = `https://twitter.com/intent/tweet?url=${url}&text=${post.description}&hashtags=${post.categories}`;
+            }
+            window.open(link, 'NewWindow', params);
+            onClose();
+        };
+
+        const siteIcon = (shareSite) => {
+            if (shareSite==="Facebook") {
+                 return <FacebookIcon/>
+            } else {
+                return <TwitterIcon/>
+            }
+        }
+      
+        return (
+          <Dialog onClose={handleClose} aria-labelledby="simple-dialog-title" open={open}>
+            <List>
+              {shareSites.map((shareSite) => (
+                <ListItem button onClick={() => handleListItemClick(shareSite)} key={shareSite}>
+                    <ListItemIcon>
+                        {siteIcon(shareSite)}
+                    </ListItemIcon>
+                    <ListItemText primary={shareSite} />
+                </ListItem>
+              ))}
+            </List>
+          </Dialog>
+        );
+      }
+
+        return (
+        <div>
+            <IconButton variant="outlined" onClick={handleClickOpen}>
+                <ShareIcon />
+            </IconButton>
+            <ChoosingSite open={open} onClose={handleClose} />
+        </div>
+          );
+};
 
 const navigateToReturnUrl = returnUrl => {
 
@@ -1298,11 +1371,12 @@ export default function CentralBar() {
                 </Typography>
             </CardContent>
             <PostImages images={post.images} postId={post.id} />
-            <CardActions className="container-fluid"  >
-                <div className='row d-flex justify-content-center' style={{ width: `100%` }}>
+
+                <CardActions className="container-fluid"  >
+                    <div className='row d-flex justify-content-around' style={{ width: `100%` }}>
 
                     {user ?
-                        <>  <div className='col-3 col-lg-3 text-center'>
+                        <>  <div className='text-center'>
                             {post.reactionType == 2 ? <IconButton className='like_div' onClick={() =>
                                 dispatchAction({
                                     type: "like-action",
@@ -1329,7 +1403,7 @@ export default function CentralBar() {
                                 </IconButton>}
                             <span className='text-center'>{post.likes}</span>
                         </div>
-                            <div className='col-3 col-lg-3 text-center'>
+                            <div className='text-center'>
                                 {post.reactionType === 4 ? <IconButton className='dislike_div' onClick={() =>
                                     dispatchAction({
                                         type: "dislike-action",
@@ -1356,14 +1430,14 @@ export default function CentralBar() {
                                 <span className='text-center' >{post.dislikes}</span>
                             </div></> :
 
-                        <><div className='col-3 col-lg-3 text-center'>
+                        <><div className='text-center'>
 
                             <IconButton className='like_div' onClick={signIn} >
                                 <AiOutlineLike />
                             </IconButton>
                             <span className='text-center'>{post.likes}</span>
                         </div>
-                            <div className='col-3 col-lg-3 text-center'>
+                            <div className='text-center'>
                                 <IconButton className='dislike_div' onClick={signIn} >
                                     <AiOutlineDislike />
                                 </IconButton>
@@ -1371,24 +1445,30 @@ export default function CentralBar() {
                             </div></>
                     }
                     {
-                        post.isBidOptIn ? <div className='col-3 col-lg-3 text-center'>
+                        post.isBidOptIn ? <div className='text-center'>
                             <IconButton onClick={() => toggleComments(post.id)}>
                                 <FaRegComment />
                             </IconButton>
                             <span className='text-center' >{post.bidCount}</span>
                         </div> : null
                     }
-                    <div className='col-3 col-lg-3 text-center'>
+                    <div className='text-center'>
                         <IconButton onClick={() => toggleItinerary(post.id)}>
                             <LocationOnIcon />
                         </IconButton>
                         <span className='text-center' >{post.itineraryCount}</span>
                     </div>
+                    <div>
+                        <Share post={post} />
+                    </div>
                 </div>
+
+                <Itinerary show={showItinerary.show} showId={showItinerary.id} postId={post.id} />
+                <Comments post={post} show={showComments.show} showId={showComments.id} postId={post.id} />
+                
             </CardActions>
-            <Itinerary show={showItinerary.show} showId={showItinerary.id} postId={post.id} />
-            <Comments post={post} show={showComments.show} showId={showComments.id} postId={post.id} />
-        </div>
+            
+            </div> 
     }
 
     return (
