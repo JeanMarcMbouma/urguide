@@ -1,0 +1,278 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Application xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:cv="clr-namespace:UrGuide.Mobile.Converters"
+             xmlns:rv="clr-namespace:Sharpnado.MaterialFrame;assembly=Sharpnado.MaterialFrame"
+             mc:Ignorable="d"
+             x:Class="UrGuide.Mobile.App">
+    <Application.Resources>
+        
+        
+        <ResourceDictionary>
+            <!--Shapnado colors Acrilic-->
+            <OnPlatform x:Key="ToolbarHeight" x:TypeArguments="GridLength">
+                <On Platform="iOS">140</On>
+                <On Platform="Android">120</On>
+            </OnPlatform>
+
+            <Thickness x:Key="StatusBarHeightPadding"
+                       Bottom="0"
+                       Left="0"
+                       Right="0">
+                <Thickness.Top>
+                    <OnPlatform x:TypeArguments="x:Double">
+                        <On Platform="iOS">20</On>
+                        <On Platform="Android">0</On>
+                    </OnPlatform>
+                </Thickness.Top>
+            </Thickness>
+
+            <GridLength x:Key="HeaderHeight">40</GridLength>
+
+            <Color x:Key="DarkSurface">#121212</Color>
+            <!--  Very light accent color  -->
+            <Color x:Key="LightSurface">#FAF8F9</Color>
+            <Color x:Key="AcrylicSurface">#E4E4E4</Color>
+            <Color x:Key="NeumorphismSurface">#F0F0F3</Color>
+
+            <Color x:Key="DarkElevation2dp">#212121</Color>
+            <Color x:Key="DarkElevation4dp">#272727</Color>
+            <Color x:Key="DarkElevation8dp">#2D2D2D</Color>
+            <Color x:Key="DarkElevation12dp">#323232</Color>
+            <Color x:Key="DarkElevation16dp">#353535</Color>
+            <Color x:Key="DarkElevation24dp">#373737</Color>
+
+            <Color x:Key="PrimaryColor">#FF0266</Color>
+            <Color x:Key="SecondaryColor">#6200EE</Color>
+
+            <Color x:Key="OnPrimaryColor">#000000</Color>
+            <Color x:Key="OnSecondaryColor">#000000</Color>
+
+            <Color x:Key="OnSurfaceColor">#FFFFFF</Color>
+
+            <Color x:Key="AcrylicFrameBackgroundColor">#F1F1F1</Color>
+
+            <Color x:Key="NavigationBarLightColor">#FFFFFF</Color>
+            <Color x:Key="BarTextColor">#FFFFFF</Color>
+
+            <Color x:Key="BlackC90">#414142</Color>
+            <Color x:Key="BlackC50">#939598</Color>
+            <Color x:Key="BlackC25">#C8C8C8</Color>
+            <Color x:Key="BlackC05">#F1F1F2</Color>
+            <Color x:Key="Black.20">#33000000</Color>
+            <Color x:Key="Blue">#008DA8</Color>
+            <Color x:Key="Red">#EE3524</Color>
+            <Color x:Key="Orange">#F6A01A</Color>
+            <Color x:Key="White">#F8F8F8</Color>
+
+            <Color x:Key="Primary">#121212</Color>
+            <Color x:Key="Accent">Accent</Color>
+            <Color x:Key="TransparentAccent">#00121212</Color>
+
+            <Style ApplyToDerivedTypes="True" TargetType="ContentPage">
+                <Setter Property="Padding">
+                    <Setter.Value>
+                        <OnPlatform x:TypeArguments="Thickness">
+                            <On Platform="iOS">0, 20, 0, 0</On>
+                            <On Platform="Android">0, 0, 0, 0</On>
+                        </OnPlatform>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="BackgroundColor" Value="{DynamicResource DynamicBackgroundColor}" />
+            </Style>
+
+            <Style ApplyToDerivedTypes="True" TargetType="NavigationPage">
+                <Setter Property="BarBackgroundColor" Value="{DynamicResource DynamicNavigationBarColor}" />
+                <Setter Property="BarTextColor" Value="{DynamicResource DynamicBarTextColor}" />
+            </Style>
+
+            <x:Double x:Key="SmallPadding">4</x:Double>
+            <x:Double x:Key="MediumPadding">8</x:Double>
+            <x:Double x:Key="StandardPadding">16</x:Double>
+
+            <Thickness x:Key="SmallTopThickness" Top="{StaticResource SmallPadding}" />
+
+            <Thickness x:Key="MediumTopThickness" Top="{StaticResource MediumPadding}" />
+
+            <Thickness x:Key="StandardTopThickness" Top="{StaticResource StandardPadding}" />
+
+            <Thickness x:Key="SmallThickness"
+                       Bottom="{StaticResource SmallPadding}"
+                       Left="{StaticResource SmallPadding}"
+                       Right="{StaticResource SmallPadding}"
+                       Top="{StaticResource SmallPadding}" />
+
+            <Thickness x:Key="MediumThickness"
+                       Bottom="{StaticResource MediumPadding}"
+                       Left="{StaticResource MediumPadding}"
+                       Right="{StaticResource MediumPadding}"
+                       Top="{StaticResource MediumPadding}" />
+
+            <Thickness x:Key="StandardThickness"
+                       Bottom="{StaticResource StandardPadding}"
+                       Left="{StaticResource StandardPadding}"
+                       Right="{StaticResource StandardPadding}"
+                       Top="{StaticResource StandardPadding}" />
+
+            <x:Double x:Key="SmallSpacing">4</x:Double>
+            <x:Double x:Key="MediumSpacing">8</x:Double>
+            <x:Double x:Key="StandardSpacing">16</x:Double>
+
+            <x:Double x:Key="TextSizeHeadline">20</x:Double>
+            <x:Double x:Key="TextSizeTitle">18</x:Double>
+            <x:Double x:Key="TextSizeSubhead">16</x:Double>
+            <x:Double x:Key="TextSizeBody">14</x:Double>
+            <x:Double x:Key="TextSizeCaption">12</x:Double>
+            <x:Double x:Key="TextSizeSmallCaption">11</x:Double>
+
+            <Color x:Key="TextPrimaryDarkColor">#FFFFFF</Color>
+            <Color x:Key="TextSecondaryDarkColor">#C0C0C0</Color>
+            <Color x:Key="TextTernaryDarkColor">#A0A0A0</Color>
+
+            <Color x:Key="TextPrimaryLightColor">#B0000000</Color>
+            <Color x:Key="TextSecondaryLightColor">#80000000</Color>
+            <Color x:Key="TextTernaryLightColor">#C8C8C8</Color>
+
+            <x:Double x:Key="ListViewSingleLineHeight">48</x:Double>
+            <x:Double x:Key="ListViewTwoLinesHeight">72</x:Double>
+            <x:Double x:Key="ListViewThreeLinesHeight">88</x:Double>
+
+            <Style x:Key="TextHeadline" TargetType="Label">
+                <Setter Property="FontFamily" Value="FontExtraBold" />
+                <Setter Property="TextColor" Value="{DynamicResource DynamicPrimaryTextColor}" />
+                <Setter Property="FontSize" Value="{StaticResource TextSizeHeadline}" />
+            </Style>
+
+            <Style x:Key="TextTitle" TargetType="Label">
+                <Setter Property="FontFamily" Value="FontBold" />
+                <Setter Property="TextColor" Value="{DynamicResource DynamicPrimaryTextColor}" />
+                <Setter Property="FontSize" Value="{StaticResource TextSizeTitle}" />
+            </Style>
+
+            <Style x:Key="TextSubheadline" TargetType="Label">
+                <Setter Property="FontFamily" Value="FontExtraBold" />
+                <Setter Property="TextColor" Value="{DynamicResource DynamicPrimaryTextColor}" />
+                <Setter Property="FontSize" Value="{StaticResource TextSizeSubhead}" />
+            </Style>
+
+            <Style x:Key="TextSubhead" TargetType="Label">
+                <Setter Property="FontFamily" Value="FontSemiBold" />
+                <Setter Property="TextColor" Value="{DynamicResource DynamicPrimaryTextColor}" />
+                <Setter Property="FontSize" Value="{StaticResource TextSizeSubhead}" />
+            </Style>
+
+            <Style x:Key="TextSubheadSecondary" TargetType="Label">
+                <Setter Property="FontFamily" Value="FontSemiBold" />
+                <Setter Property="TextColor" Value="{DynamicResource DynamicSecondaryTextColor}" />
+                <Setter Property="FontSize" Value="{StaticResource TextSizeSubhead}" />
+            </Style>
+
+            <Style x:Key="TextBody" TargetType="Label">
+                <Setter Property="FontFamily" Value="FontRegular" />
+                <Setter Property="TextColor" Value="{DynamicResource DynamicPrimaryTextColor}" />
+                <Setter Property="FontSize" Value="{StaticResource TextSizeBody}" />
+            </Style>
+
+            <Style x:Key="TextBodySecondary" TargetType="Label">
+                <Setter Property="FontFamily" Value="FontLight" />
+                <Setter Property="TextColor" Value="{DynamicResource DynamicPrimaryTextColor}" />
+                <Setter Property="FontSize" Value="{StaticResource TextSizeBody}" />
+            </Style>
+
+            <Style x:Key="TextCaption" TargetType="Label">
+                <Setter Property="FontFamily" Value="FontRegular" />
+                <Setter Property="TextColor" Value="{DynamicResource DynamicPrimaryTextColor}" />
+                <Setter Property="FontSize" Value="{StaticResource TextSizeCaption}" />
+            </Style>
+
+            <Style x:Key="TextSmallCaption"
+                   BasedOn="{StaticResource TextCaption}"
+                   TargetType="Label">
+                <Setter Property="FontSize" Value="{StaticResource TextSizeSmallCaption}" />
+            </Style>
+
+            <Style x:Key="TextCaptionSecondary" TargetType="Label">
+                <Setter Property="FontFamily" Value="FontLight" />
+                <Setter Property="TextColor" Value="{DynamicResource DynamicPrimaryTextColor}" />
+                <Setter Property="FontSize" Value="{StaticResource TextSizeCaption}" />
+            </Style>
+
+            <Style x:Key="TextCenter"
+                   BasedOn="{StaticResource TextBody}"
+                   TargetType="Label">
+                <Setter Property="HorizontalTextAlignment" Value="Center" />
+                <Setter Property="VerticalTextAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="TextSubheadCenter"
+                   BasedOn="{StaticResource TextSubhead}"
+                   TargetType="Label">
+                <Setter Property="HorizontalTextAlignment" Value="Center" />
+                <Setter Property="VerticalTextAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="TextSubheadSecondaryCenter"
+                   BasedOn="{StaticResource TextSubheadSecondary}"
+                   TargetType="Label">
+                <Setter Property="HorizontalTextAlignment" Value="Center" />
+                <Setter Property="VerticalTextAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="TextError"
+                   BasedOn="{StaticResource TextCenter}"
+                   TargetType="Label">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="TextColor" Value="{DynamicResource DynamicSecondaryTextColor}" />
+                <Setter Property="LineBreakMode" Value="CharacterWrap" />
+            </Style>
+
+            <Style x:Key="TextSnackbar"
+                   BasedOn="{StaticResource TextCenter}"
+                   TargetType="Label">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="LineBreakMode" Value="CharacterWrap" />
+                <Setter Property="TextColor" Value="{StaticResource White}" />
+            </Style>
+
+            <Style x:Key="TextHeader"
+                   BasedOn="{StaticResource TextSubheadline}"
+                   TargetType="Label">
+                <Setter Property="HorizontalTextAlignment" Value="Center" />
+                <Setter Property="VerticalTextAlignment" Value="End" />
+                <Setter Property="VerticalOptions" Value="End" />
+                <Setter Property="Margin" Value="0, 0, 0, 8" />
+                <Setter Property="TextColor" Value="{DynamicResource DynamicHeaderTextColor}" />
+            </Style>
+
+            <Style TargetType="Button">
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="BackgroundColor" Value="{StaticResource Accent}" />
+                <Setter Property="WidthRequest" Value="100" />
+                <Setter Property="FontFamily" Value="FontSemiBold" />
+            </Style>
+
+            <!--Colors-->
+            <Color x:Key="IconColor">Accent</Color>
+            <Color x:Key="IconColorLight">#803F51B5</Color>
+            <Color x:Key="IndicatorColor">#703F51B5</Color>
+            <Color x:Key="IndicatorSelectedColor">#3F51B5</Color>
+            <Color x:Key="FavoriteIcon">Orange</Color>
+            <x:Boolean x:Key="FalseValue" ></x:Boolean>
+            <Color x:Key="NavigationPrimary">#3F51B5</Color>
+            
+            <!--Convertes-->
+            <cv:NumericToSocialUnitConverter x:Key="NumericToSocialUnitConverter" />
+            <cv:Base64ToImageSourceConverter x:Key="Base64ToImageSourceConverter" />
+            
+            <Style TargetType="rv:MaterialFrame">
+                <Setter Property="MaterialTheme" Value="Acrylic" />
+                <Setter Property="Margin" Value="5, 5, 5, 10" />
+                <Setter Property="Padding" Value="20,15" />
+                <Setter Property="CornerRadius" Value="10" />
+                <Setter Property="LightThemeBackgroundColor" Value="{StaticResource AcrylicFrameBackgroundColor}" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

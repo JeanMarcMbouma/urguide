@@ -3,6 +3,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Collections.Generic;
 using System.Linq;
+using static IdentityModel.OidcConstants;
 
 namespace UrGuide.WebApp.Filters
 {
@@ -16,12 +17,7 @@ namespace UrGuide.WebApp.Filters
                                && !context.MethodInfo.GetCustomAttributes(true).OfType<AllowAnonymousAttribute>().Any();
 
             if (!hasAuthorize) return;
-            var requiredScopes = context.MethodInfo
-                                    .GetCustomAttributes(true)
-                                    .OfType<AuthorizeAttribute>()
-                                    .Select(attr => attr.Policy)
-                                    .Distinct();
-            
+
             operation.Responses.TryAdd("401", new OpenApiResponse { Description = "Unauthorized" });
             operation.Responses.TryAdd("403", new OpenApiResponse { Description = "Forbidden" });
             var oAuthScheme = new OpenApiSecurityScheme
@@ -30,12 +26,12 @@ namespace UrGuide.WebApp.Filters
             };
 
             operation.Security = new List<OpenApiSecurityRequirement>
-            {
-                new OpenApiSecurityRequirement
                 {
-                    [ oAuthScheme ] = requiredScopes.ToList()
-                }
-            };
+                    new OpenApiSecurityRequirement
+                    {
+                        [ oAuthScheme ] = new [] { "openid", "profile", "offline_access" }
+                    }
+                };
         }
     }
 }

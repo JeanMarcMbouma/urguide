@@ -2,6 +2,13 @@
   "version": "1.0",
   "defaultProvider": "unpkg",
   "libraries": [
-   
+    {
+      "library": "bootstrap@4.5.2",
+      "destination": "wwwroot/bootstrap/"
+    },
+    {
+      "library": "font-awesome@4.7.0",
+      "destination": "wwwroot/font-awesome/"
+    }
   ]
 }

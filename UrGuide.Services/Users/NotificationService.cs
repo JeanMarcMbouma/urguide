@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using UrGuide.Core;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Users;
 using UrGuide.Model;
@@ -48,6 +49,17 @@ namespace UrGuide.Services.Users
             var user = await Context.Users.FirstAsync(x => x.Id == UserContext.UserId, cancellationToken);
             var items = PagedList.Of(user.Notifications.OrderByDescending(x => x.Created), pagination.PageNumber, n => Mapper.Map<Model.Users.Notification>(n));
             return Result.Of(items);
+        }
+
+        public async Task<Result<Model.Users.Notification>> GetNotificationAsync(string notificationId, CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of<Model.Users.Notification>().WithErrors(ErrorMessages.NotAuthenticated);
+            var user = await Context.Users.FirstAsync(x => x.Id == UserContext.UserId, cancellationToken);
+            var notification = user?.Notifications.FirstOrDefault(x => x.Id == notificationId);
+            if (notification == null)
+                return Result.Of<Model.Users.Notification>().WithErrors(ErrorMessages.NotFoundEntityForKey);
+            return Result.Of(Mapper.Map<Model.Users.Notification>(notification));
         }
 
         public async Task<Result<PagedList<Model.Users.Notification>>> GetUnreadAsync(PaginationParameters pagination, CancellationToken cancellationToken)

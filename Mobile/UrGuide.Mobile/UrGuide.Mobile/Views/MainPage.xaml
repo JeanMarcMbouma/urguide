@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+             xmlns:tabs="clr-namespace:Sharpnado.Presentation.Forms.CustomViews.Tabs;assembly=Sharpnado.Presentation.Forms"
+             xmlns:fa="clr-namespace:UrGuide.Mobile.Helpers" 
+             xmlns:sh="clr-namespace:Sharpnado.Shades;assembly=Sharpnado.Shadows" 
+             xmlns:sv="clr-namespace:Sharpnado.Presentation.Forms.CustomViews;assembly=Sharpnado.Presentation.Forms"
+             x:Class="UrGuide.Mobile.Views.MainPage"
+             xmlns:views="clr-namespace:UrGuide.Mobile.Views"
+             NavigationPage.HasNavigationBar="False">
+    <ContentPage.Resources>
+        <FontImageSource x:Key="HomeFontIcon" FontFamily="fas" Glyph="&#xf015;" Color="Accent" />
+        <FontImageSource x:Key="SearchFontIcon" FontFamily="fas" Glyph="&#xf002;"  Color="Accent"/>
+        <FontImageSource x:Key="BellFontIcon" FontFamily="fas" Glyph="&#xf0f3;"  Color="Accent"/>
+        <FontImageSource x:Key="FavoriteFontIcon" FontFamily="fas" Glyph="&#xf02e;"  Color="Accent"/>
+        <FontImageSource x:Key="ProfileFontIcon" FontFamily="fas" Glyph="&#xf2bd;"  Color="Accent"/>
+        <FontImageSource x:Key="CreatePost" FontFamily="fas" Glyph="{Static fa:FAI.Plus}" Size="24" />
+        <FontImageSource x:Key="Login" FontFamily="fas" Glyph="{Static fa:FAI.DoorOpen}" Size="24" />
+        <FontImageSource x:Key="Logout" FontFamily="fas" Glyph="{Static fa:FAI.DoorClosed}" Size="24" />
+        <Style x:Key="TabStyle" TargetType="tabs:BottomTabItem">
+            <Setter Property="SelectedTabColor" Value="Accent" />
+            <Setter Property="LabelSize" Value="14" />
+            <Setter Property="UnselectedLabelColor" Value="White" />
+        </Style>
+    </ContentPage.Resources>
+    <ContentPage.Content>
+        <Grid RowDefinitions="*,Auto">
+            <!--<ScrollView>
+                
+            </ScrollView>-->
+            <tabs:ViewSwitcher x:Name="Switcher" Animate="True" SelectedIndex="{Binding SelectedViewIndex}">
+                <sv:LazyView Animate="True" x:TypeArguments="views:PostPage" BindingContext="{Binding Posts}"/>
+                <sv:LazyView Animate="True" x:TypeArguments="views:Discover" BindingContext="{Binding Discover}"/>
+                <sv:LazyView Animate="True" x:TypeArguments="views:Favorite" BindingContext="{Binding Favorite}"/>
+                <sv:LazyView Animate="True" x:TypeArguments="views:Profile" BindingContext="{Binding Profile}"/>
+            </tabs:ViewSwitcher>
+            <tabs:TabHostView x:Name="TabHost"  
+                    Grid.Row="1"
+                    BackgroundColor="White"
+                    SelectedIndex="{Binding Source={x:Reference Switcher}, Path=SelectedIndex, Mode=TwoWay}"
+                    Shades="{sh:SingleShade Offset='0,-1', Opacity=0.5,Color=Accent,BlurRadius=10}"
+                    TabType="Fixed">
+                <tabs:TabHostView.Tabs>
+                    <tabs:BottomTabItem 
+                            IconImageSource="{StaticResource HomeFontIcon}"
+                            Label="Home" />
+                    <tabs:BottomTabItem 
+                            IconImageSource="{StaticResource SearchFontIcon}"
+                            Label="Discover" />
+
+                    <!--  Circle button  -->
+                    <tabs:TabButton ButtonBackgroundColor="Accent"
+                        ButtonCircleSize="50"
+                        ButtonPadding="10"
+                        IconImageSource="{StaticResource Login}"
+                        Scale="1.3"
+                        TranslationY="-10" TapCommand="{Binding LoginCommand}"
+                        IsVisible="{Binding ShouldLogin}"/>
+                    
+                    <tabs:TabButton ButtonBackgroundColor="Accent"
+                        ButtonCircleSize="50"
+                        ButtonPadding="10"
+                        IconImageSource="{StaticResource CreatePost}"
+                        Scale="1.3"
+                        TranslationY="-10" TapCommand="{Binding CreatePostCommand}"
+                        IsVisible="{Binding CanCreatePost}"/>
+
+                    <tabs:BottomTabItem 
+                            IconImageSource="{StaticResource FavoriteFontIcon}"
+                            Label="Favorite" />
+                    <tabs:BottomTabItem 
+                            IconImageSource="{StaticResource ProfileFontIcon}"
+                            Label="Profile" IsVisible="{Binding IsLoggedIn}"
+                        IsTabStop="True"/>
+
+                </tabs:TabHostView.Tabs>
+            </tabs:TabHostView>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

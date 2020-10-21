@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import "./NavMenu.css";
 import { NavbarBrand, Container } from 'reactstrap';
 import { useAuthContext } from './api-authorization/AuthService';
-import Logo from '../Logo.png'
+import { ApplicationPaths } from './api-authorization/ApiAuthorizationConstants'
 
 const useStyles = makeStyles(() => ({
     header: {
@@ -26,7 +26,7 @@ const useStyles = makeStyles(() => ({
         padding: '0px',
     },
     logo: {
-        width: '155px',
+        width: '165px',
         height: '55px',
     },
 }));
@@ -50,7 +50,7 @@ function SignOutHeader() {
                 <div className="container-fluid" >
                     <div className="row justify-content-between navbarRow">
                         <div className="col-6 col-sm-3 col-lg-3">
-                            <NavbarBrand className={classes.font} href="/"><img className={classes.logo} src={ Logo } alt='Logo' /></NavbarBrand>
+                            <NavbarBrand className={classes.font} href="/"><img className={classes.logo} src='Logo.png' alt='Logo' /></NavbarBrand>
                         </div>
                         <div className="col-6 col-sm-6 col-md-6 col-lg-4"  >
                             <div className='row justify-content-end signout-links-row'>
@@ -68,8 +68,8 @@ function SignOutHeader() {
                                         </IconButton>
                                     </Link>
                                 </div>
-                                <div className='col-4 col-sm-4 text-center'>
-                                    <Link to='/sign-in' onClick={signIn}>
+                                <div className='col-4 col-sm-4 mt-1 text-center'>
+                                    <Link href={ApplicationPaths.Login} onClick={signIn}>
                                         <span className='signout-link' >Sign In</span><span className='nav-icon-link'><FiLogIn /></span>
                                     </Link>
                                 </div>

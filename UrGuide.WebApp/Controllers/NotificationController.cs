@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using UrGuide.Core;
 using UrGuide.Model;
 using UrGuide.Model.Messages;
 using UrGuide.Model.Results;
@@ -32,6 +33,14 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetUnread([FromQuery]PaginationParameters pagination, CancellationToken cancellationToken)
         {
             var result = await NotificationService.GetUnreadAsync(pagination, cancellationToken);
+            return result.HasError ? (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors)) : Ok(result.Data);
+        }
+
+        [HttpGet("{id}")]
+        [ProducesDefaultResponseType(typeof(Notification))]
+        public async Task<IActionResult> Get(string id, CancellationToken cancellationToken)
+        {
+            var result = await NotificationService.GetNotificationAsync(id, cancellationToken);
             return result.HasError ? (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors)) : Ok(result.Data);
         }
 

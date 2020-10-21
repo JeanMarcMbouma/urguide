@@ -1,5 +1,5 @@
 ﻿using System;
-using UrGuide.Data.Entities.Contracts;
+using UrGuide.Core.Contracts;
 
 namespace UrGuide.Data.Entities.Posts
 {

@@ -8,6 +8,7 @@
     <SpaRoot>ClientApp\</SpaRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
     <LangVersion>8.0</LangVersion>
+    <UserSecretsId>d216c234-b1d4-4e9e-be44-0c9a46cdacde</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +19,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.1.5" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.5" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Azure.SignalR" Version="1.4.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.5">
@@ -34,14 +36,18 @@
 
   <ItemGroup>
     <!-- Don't publish the SPA source files, but do show them in the project files list -->
+    <Compile Remove="ClientApp\public\js\**" />
     <Compile Remove="ClientApp\src\components\material-ui-core\**" />
     <Compile Remove="ClientApp\src\stylesheets\**" />
     <Content Remove="$(SpaRoot)**" />
+    <Content Remove="ClientApp\public\js\**" />
     <Content Remove="ClientApp\src\components\material-ui-core\**" />
     <Content Remove="ClientApp\src\stylesheets\**" />
+    <EmbeddedResource Remove="ClientApp\public\js\**" />
     <EmbeddedResource Remove="ClientApp\src\components\material-ui-core\**" />
     <EmbeddedResource Remove="ClientApp\src\stylesheets\**" />
     <None Remove="$(SpaRoot)**" />
+    <None Remove="ClientApp\public\js\**" />
     <None Remove="ClientApp\src\components\material-ui-core\**" />
     <None Remove="ClientApp\src\stylesheets\**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
@@ -65,8 +71,22 @@
 
   <ItemGroup>
     <Folder Include="ClientApp\public\images\" />
-    <Folder Include="ClientApp\public\js\" />
-    <Folder Include="Pages\Shared\" />
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Areas\Identity\Pages\Account\Login.cshtml" />
+    <None Include="Areas\Identity\Pages\Account\Logout.cshtml" />
+    <None Include="Areas\Identity\Pages\Account\_ViewImports.cshtml" />
+    <None Include="Areas\Identity\Pages\_ViewImports.cshtml" />
+    <None Include="Areas\Identity\Pages\_ViewStart.cshtml" />
+    <None Include="Pages\Error.cshtml" />
+    <None Include="Pages\Shared\_CookieConsentPartial.cshtml" />
+    <None Include="Pages\Shared\_Layout.cshtml" />
+    <None Include="Pages\Shared\_LoginPartial.cshtml" />
+    <None Include="Pages\Shared\_ValidationScriptsPartial.cshtml" />
+    <None Include="Pages\_ViewImports.cshtml" />
+    <None Include="Pages\_ViewStart.cshtml" />
   </ItemGroup>
 
   <ItemGroup>

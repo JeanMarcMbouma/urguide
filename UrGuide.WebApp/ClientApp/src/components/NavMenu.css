@@ -3,6 +3,10 @@
     z-index:100;
 }
 
+body {
+    background-color: #f7f8fa;
+}
+
 a.navbar-brand {
   white-space: normal;
   text-align: center;
@@ -28,13 +32,12 @@ button:focus {
 }
 
 .content {
-    /*background-color:white;*/
     height: 100%;
     margin: 0;
     bottom: 0;
+    margin-bottom:40px;
     background-color: #f7f8fa;
     padding-top: 80px;
-    z-index: -1;
 }
 
 .navigation-bar {
@@ -75,17 +78,19 @@ button:focus {
 
 .right-div {
     height: 40px;
+    padding-right: 15px;
 }
 
 .username{
     padding-top:16px;
 }
 
-@media only screen and (max-width: 768px) {
-    .username {
-        display: none;
-    }
 
+@media only screen and (max-width: 768px) {
+
+    .username {
+        display:none;
+    }
     .centered-div {
         display: none;
     }

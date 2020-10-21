@@ -6,7 +6,7 @@ import './NavMenu.css';
 import { makeStyles } from '@material-ui/core/styles';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { useAuthContext } from './api-authorization/AuthService';
-
+import { useDataContext, ActionTypes } from '../data/GlobalDataContext';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -38,49 +38,35 @@ function Navbar() {
 
 }
 
-export class Layout extends Component {
+export function Loader() {
 
-    constructor(props) {
-        super(props);
-        this.handleLoad = this.handleLoad.bind(this);
-        this.state = { Loading:true}
-    }
+    const { dataContext } = useDataContext();
+    return (<>
+        {dataContext.loadingcompleted ? null : <LinearIndeterminate />}
+    </>);
+}
 
-    componentDidMount() {
-        window.addEventListener('load', this.handleLoad);
-    }
+export default class Layout extends Component {
 
-    componentWillUnmount() {
-        window.removeEventListener('load', this.handleLoad)
-    }
+    render(){
 
-    handleLoad() {
-        this.setState(state => ({
-            Loading: !state.Loading
-        }));
-    }
- 
+       
+        return (
+            <>
+               <Loader/>
+                <Navbar />
+                <div className="container-fluid content">
 
-    render() {
-
-        const loader = this.state.Loading ? <LinearIndeterminate /> : null;
-  
-       return (
-           <>
-               {loader}
-              <Navbar />
-              <div className="container-fluid content">
-              
-                  <div className='row' >
-                      <div className='col-12'>
-                          {this.props.children}
+                    <div className='row' >
+                        <div className='col-12'>
+                            {this.props.children}
+                        </div>
+                    </div>
                 </div>
-                  </div>
-              </div>
-         </>
-    );
-    }
+            </>
+        );
 
+    }
    
 }
 

@@ -1,7 +1,11 @@
 ﻿using IdentityModel;
+using IdentityServer4;
+using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -11,18 +15,21 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using System;
 using UrGuide.Shared.Configuration;
 using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Data;
 using UrGuide.WebApp.Entities;
 using UrGuide.WebApp.Services;
 using static IdentityModel.OidcConstants;
+using static IdentityServer4.Models.IdentityResources;
 
 namespace UrGuide.WebApp.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddUrGuideAuthServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddUrGuideAuthServices(this IServiceCollection services, 
+            IConfiguration configuration)
         {
             services.Configure<IPStackConfiguration>(configuration.GetSection("IpStack"));
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
@@ -33,6 +40,7 @@ namespace UrGuide.WebApp.Extensions
                 return new UrlHelper(actionContext);
             });
             services.AddTransient<IEmailService, EmailService>();
+            services.AddTransient<IEmailSender, EmailService>();
             services.AddTransient<IWebHelper, WebHelper>();
             services.AddTransient<IAuthService, AuthService>();
             services.AddScoped<IUserContext, UserContext>();
@@ -43,49 +51,77 @@ namespace UrGuide.WebApp.Extensions
 
             services.AddDefaultIdentity<UrGuideUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<UrGuideAuthContext>();
+            string applicationUri = configuration.GetValue<string>("ApplicationUri");
 
             services.AddIdentityServer(options =>
             {
-                options.UserInteraction.LoginUrl = "/sign-in";
+                options.Authentication.CookieLifetime = TimeSpan.FromHours(2);
+                options.IssuerUri = applicationUri;
                 options.UserInteraction.LogoutUrl = "/account/logout";
-
-             
             })
             .AddApiAuthorization<UrGuideUser, UrGuideAuthContext>(options =>
             {
-                options.Clients.Add(new IdentityServer4.Models.Client
+                options.Clients.Add(new Client
                 {
                     ClientName = "UrGuide.WebAPI",
                     ClientId = "UrGuide.WebAPI",
-                    AllowedScopes = { StandardScopes.OpenId },
-                    AllowedGrantTypes = { GrantTypes.ClientCredentials },
-                    RequireConsent = false,
+                    AllowedGrantTypes = { GrantType.AuthorizationCode },
                     AllowAccessTokensViaBrowser = true,
+                    RequirePkce = true,
                     RequireClientSecret = false,
-                    ClientSecrets = { new IdentityServer4.Models.Secret("secret".ToSha256()) }
-                });
+                    RedirectUris = { 
+                        $"{applicationUri}/swagger/oauth2-redirect.html",
+                        "https://localhost:5001/swagger/oauth2-redirect.html"
+                    },
+                    PostLogoutRedirectUris = { 
+                        $"{applicationUri}/swagger/" ,
+                        $"https://localhost:5001/swagger/" ,
+                    },
 
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile
+                    }
+                });
+                string xamarin = configuration.GetValue<string>("Xamarin");
+                options.Clients.Add(new Client
+                {
+                    ClientId = "xamarin",
+                    ClientName = "UrGuide Xamarin OpenId Client",
+                    AllowedGrantTypes = { GrantType.AuthorizationCode },
+                    //Used to retrieve the access token on the back channel.
+                    ClientSecrets =
+                    {
+                        new Secret("secret".Sha256())
+                    },
+                    RedirectUris = { xamarin },
+                    RequireConsent = false,
+                    RequirePkce = true,
+                    AlwaysIncludeUserClaimsInIdToken = true,
+                    PostLogoutRedirectUris = { xamarin },
+                    AllowedScopes = 
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.OfflineAccess
+                    },
+                    //Allow requesting refresh tokens for long lived API access
+                    AllowOfflineAccess = true,
+                    AllowAccessTokensViaBrowser = true
+                });
             });
 
             services.AddScoped<IProfileService, ProfileService>();
             services.AddScoped<IInstantMessagingService, InstantMessagingService>();
-            /*
-             ,
-          "UrGuide.WebAPI": {
-            "Profile": "SPA",
-            "RedirectUri": "https://localhost:5001/swagger/oauth2-redirect.html",
-            "LogoutUri": "https://localhost:5001/swagger/oauth2-logout.html",
-            "ResponseType" :  "code",
-            "Scope": "profile openid"
-          }
-             */
+
             services.AddAuthentication()
                 .AddIdentityServerJwt();
             
             services.AddSignalR();
 
             services.AddSingleton<IUserIdProvider, UserIdProvider>();
-            //services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<JwtBearerOptions>, SignalRAuthPostConfigureOptions>()); 
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<JwtBearerOptions>, SignalRAuthPostConfigureOptions>()); 
             return services;
         }
     }

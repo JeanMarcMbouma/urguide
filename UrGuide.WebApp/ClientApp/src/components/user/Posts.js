@@ -30,7 +30,9 @@ import { HttpClientFactory } from '../../httpclient';
 import "./UserStyle.css";
 import FeedBackContext from './FeedbackContext';
 import FeedBackReducer from './FeedBackReducer';
-import { UsersClient, FeedbackModel, FeedbackClient, PostsClient, PostModelPagedList, SearchParameters } from '../../api';
+import { UsersClient, FeedbackModel, FeedbackClient, PostsClient, PostModelPagedList, SearchParameters, BidClient } from '../../api';
+import { useDataContext, ActionTypes } from '../../data/GlobalDataContext';
+import Modal from 'react-bootstrap/Modal';
 
 
 function SkeletonCard() {
@@ -123,6 +125,7 @@ const labels = {
 function FeedBacks(props) {
 
     const { manager, user } = useAuthContext();
+    const { userId } = useParams();
 
     async function signIn(e) {
         e.preventDefault();
@@ -134,11 +137,11 @@ function FeedBacks(props) {
     const [pageNumber, setPageNumber] = useState(1);
     const ctx = useContext(FeedBackContext);
     const [state, dispatch] = useReducer(FeedBackReducer, ctx);
-
     const initialValues = { review: '', rating: 1, postId: props.postId };
     const [values, setValues] = useState(initialValues);
 
     useEffect(() => {
+
         if (props.show === true && props.showId === props.postId) {
             var client = HttpClientFactory.get(FeedbackClient);
             client.posts(props.showId, 1).then(result => {
@@ -155,6 +158,38 @@ function FeedBacks(props) {
         return () => { };
     }, [props.show, props.showId]);
 
+    window.onscroll = async function (ev) {
+        var totalPageHeight = document.body.scrollHeight;
+        var scrollPoint = window.scrollY + window.innerHeight;
+        if (scrollPoint >= totalPageHeight) {
+            await loadMoreFeedBacks();
+        }
+    };
+
+    async function loadMoreFeedBacks() {
+        var id = userId;
+
+        if (user != null && id == undefined) {
+            id = user.profile.sub;
+        }
+
+        var client = HttpClientFactory.get(PostsClient, user);
+        var model = new SearchParameters({ term: null, pageNumber: pageNumber });
+        var result = await client.all(id, model);
+        if (result.itemsCount > 0) {
+            setPageNumber(result.pageNumber + 1);
+        }
+        result.items.forEach((item, index) => { state.items.push(item) });
+        dispatch({
+            type: "load-more",
+            data: {
+                itemsCount: state.itemsCount,
+                pageNumber: pageNumber,
+                items: state.items,
+            }
+        });
+
+    }
 
     const handleChange = prop => event => {
         setValues({ ...values, [prop]: event.target.value });
@@ -202,7 +237,7 @@ function FeedBacks(props) {
             {user && user.profile.sub === props.authorId ? null : <div className='col-12 col-lg-12 new-feedback'>
                 <TextField fullWidth value={values.review} multiline rows={7} onChange={handleChange("review")} rowsMax={7} id="outlined-basic" label="Your review on this tour" variant="outlined" placeholder="Did you participate to this tour ? Tell people how it was." />
                 <br />
-                {state.textError ? <><br /><span className='text-danger'>This field is required.</span><br /><br /></> : null}
+                {state.textError ? <><br /><span className='text-danger'>Please write a review between 4 and 500 characters.</span><br /><br /></> : null}
                 <div>
                     <br />
                     <span>Your experience</span>
@@ -292,19 +327,22 @@ export default function Posts() {
 
     const [isLoading, setLoading] = useState(true);
     const [data, setData] = useState({});
-
+    const { dcReducer  } = useDataContext();
+    var identificator = userId;
     useEffect(() => {
 
-        var id = userId;
 
-        if (user != null && id == undefined) {
-            id = user.profile.sub;
+       dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/profile", profileUrl: "/Posts" } });
+        
+        if (user != null && identificator == undefined) {
+            identificator = user.profile.sub;
+           
         }
 
         let load = async () => {
             var client = HttpClientFactory.get(PostsClient, user);
             var model = new SearchParameters({ term: null, pageNumber: 1 });
-            var result = await client.all(id, model);
+            var result = await client.all(identificator, model);
             setData(result);
             setLoading(false);
         }
@@ -326,13 +364,13 @@ export default function Posts() {
         }
         if (props.images.length == 2) {
             return (<div className='row'>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
+                <div className='col-12 col-sm-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
                     <Link to={`/post/${props.postId}/shot/${props.images[0].id}`} >
                         <div style={{ height: `100%`, width: `100%` }}>
                         </div>
                     </Link>
                 </div>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
+                <div className='col-12 col-sm-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
                     <Link to={`/post/${props.postId}/shot/${props.images[1].id}`} >
                         <div style={{ height: `100%`, width: `100%` }}>
                         </div>
@@ -343,13 +381,13 @@ export default function Posts() {
         if (props.images.length == 3) {
             return (<div className='row'>
 
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
+                <div className='col-12 col-sm-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
                     <Link to={`/post/${props.postId}/shot/${props.images[0].id}`} >
                         <div style={{ height: `100%`, width: `100%` }}>
                         </div>
                     </Link>
                 </div>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
+                <div className='col-12 col-sm-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
                     <Link to={`/post/${props.postId}/shot/${props.images[1].id}`} >
                         <div style={{ height: `100%`, width: `100%` }}>
                         </div>
@@ -365,25 +403,25 @@ export default function Posts() {
         }
         if (props.images.length == 4) {
             return (<div className='row'>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
+                <div className='col-12 col-sm-6 post-img' style={{ backgroundImage: `url(${props.images[0].imageBase64})` }}>
                     <Link to={`/post/${props.postId}/shot/${props.images[0].id}`} >
                         <div style={{ height: `100%`, width: `100%` }}>
                         </div>
                     </Link>
                 </div>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
+                <div className='col-12 col-sm-6 post-img' style={{ backgroundImage: `url(${props.images[1].imageBase64})` }}>
                     <Link to={`/post/${props.postId}/shot/${props.images[1].id}`} >
                         <div style={{ height: `100%`, width: `100%` }}>
                         </div>
                     </Link>
                 </div>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[2].imageBase64})` }}>
+                <div className='col-12 col-sm-6 post-img' style={{ backgroundImage: `url(${props.images[2].imageBase64})` }}>
                     <Link to={`/post/${props.postId}/shot/${props.images[2].id}`} >
                         <div style={{ height: `100%`, width: `100%` }}>
                         </div>
                     </Link>
                 </div>
-                <div className='col-12 col-lg-6 post-img' style={{ backgroundImage: `url(${props.images[3].imageBase64})` }}>
+                <div className='col-12 col-sm-6 post-img' style={{ backgroundImage: `url(${props.images[3].imageBase64})` }}>
                     <Link to={`/post/${props.postId}/shot/${props.images[3].id}`} >
                         <div style={{ height: `100%`, width: `100%` }}>
                         </div>
@@ -403,6 +441,126 @@ export default function Posts() {
         setShowReviews({ show: !showReviews.show, id: postId });
     }
 
+    const [showBids, setShowBids] = useState(false);
+    const [currentPostId, setCurrentPostId] = useState(null);
+    const [bids, setBids] = useState([]);
+    const [bidsLoading, setIsLoading] = useState(false);
+    async function getBids(postId) {
+
+        setIsLoading(true);
+
+        if (!postId) {
+            return;
+        }
+    
+        setCurrentPostId(postId);
+        const client = HttpClientFactory.get(BidClient, user);
+        try {
+
+            var result = await client.history(postId);
+            setBids(result);
+            setShowBids(true);
+            setIsLoading(false);
+        }
+        catch (e) {
+            console.log(e);
+        }
+
+    }
+
+    async function acceptBid() {
+
+
+        if (!currentPostId) {
+            return;
+        }
+        const client = HttpClientFactory.get(BidClient, user);
+        try {
+
+
+            await client.accept(currentPostId);
+            setShowBids(false);
+        }
+        catch (e) {
+            console.log(e);
+        }
+
+    }
+    async function rejectBid() {
+
+        if (!currentPostId) {
+            return;
+        }
+        const client = HttpClientFactory.get(BidClient, user);
+        try {
+
+            await client.reject(currentPostId);
+            setShowBids(false);
+        }
+        catch (e) {
+            console.log(e);
+        }
+
+    }
+
+    function Bids() {
+        return (<Modal
+            size="md"
+            show={showBids}
+            onHide={() => setShowBids(false)}
+            aria-labelledby="example-modal-sizes-title-lg"
+        >
+            <Modal.Header closeButton>
+                <Modal.Title >
+                    <h5> Bids history on this post.</h5>
+          </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <div className='container-fluid'>
+                    <div className='row justify-content-center'>
+                        {
+                            bids.length > 0 ? 
+                                bids.map((bid, i) => (
+                                    <div className='col-12 card-bid' key={i} >
+                                        <div className='cmt-div'  >
+                                            <CardHeader
+                                                avatar={<Avatar alt={bid.author} src={bid.authorImage} />}
+                                                title={
+                                                    <h6>
+                                                        {bid.author}
+                                                    </h6>
+                                                }
+                                                subheader={bid.created}
+                                            />
+                                            <div className='comment-text'>
+                                                <p>{bid.author} made a proposal of {bid.value}.</p>
+                                                <div className='row'>
+                                                    <div className='col-5 col-md-3'>
+                                                        <Button style={{ height: `30px` }} onClick={() => acceptBid()} variant="contained" color="primary" >Accept</Button>
+                                                    </div>
+                                                    <div className='col-5 col-md-3'>
+                                                        <Button style={{ height: `30px` }} onClick={() => rejectBid()} variant="contained" color="secondary" >Reject</Button>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                                : <div className='col-12'>
+                                    <br />
+                                    <br />
+                                    <h5 className='text-center'>No bid yet.</h5>
+                                    <br />
+                                    <br />
+                            </div>
+                        }
+                    </div>
+                </div>
+            </Modal.Body>
+        </Modal>);
+    }
+
 
     function SinglePost(props) {
 
@@ -410,7 +568,7 @@ export default function Posts() {
 
         return (<div className="p-3 mb-3 bg-white rounded post-card">
             <div className="col-12 mt-3 row">
-                <CardHeader className="col-10 p-2 m-0"
+                <CardHeader className="col-8 p-2 m-0"
                     avatar={<Link to={`/g/${post.authorId}`} ><Avatar alt={post.author} src={post.authorAvatar} /></Link>}
                     title={
                         <Link to={`/g/${post.authorId}`} >
@@ -421,6 +579,9 @@ export default function Posts() {
                     }
                     subheader={post.publicationDate}
                 />
+                {userId === undefined ? (<div className="col-4">{currentPostId === post.id && bidsLoading ? <CircularProgress size={22} style={{ marginTop: `-10px`}} /> : null}<Button style={{ height: `30px`, marginLeft: `15px`, }} variant="contained" color="primary" onClick={() => getBids(post.id)} >
+                    Bids
+                    </Button></div>) : null}
             </div>
             <CardContent>
                 <div className='row'>
@@ -454,10 +615,11 @@ export default function Posts() {
     }
 
     return (
-        <div className="row">
+        <div className="row justify-content-center">
+            <Bids />
             <div className="col-12 lower-section">
-                <div className="col-12 col-lg-9 col-xl-7 timeline">
-                    {isLoading ? <><SkeletonCard /><SkeletonCard /></> : data.items.map((post, i) => <SinglePost key={i} post={post} />)}
+                <div className="col-12 col-sm-8 col-md-7 col-lg-6 col-xl-5 timeline-2">
+                    {isLoading ? <><SkeletonCard /><SkeletonCard /></> : data.items.length > 0 ? data.items.map((post, i) => <SinglePost key={i} post={post} />) : (<div><br /><h5 className='text-center'>No post yet.</h5></div>)}
                 </div>
             </div>
         </div>

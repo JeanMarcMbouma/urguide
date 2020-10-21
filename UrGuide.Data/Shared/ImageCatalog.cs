@@ -1,7 +1,8 @@
 ﻿using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
-using UrGuide.Data.Entities.Attributes;
+using UrGuide.Core.Attributes;
+using UrGuide.Core.Contracts;
 using UrGuide.Data.Entities.Contracts;
 
 namespace UrGuide.Data.Entities.Shared

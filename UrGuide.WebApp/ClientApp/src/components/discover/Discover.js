@@ -8,6 +8,8 @@ import {
     Avatar,
     CardHeader,
     CircularProgress,
+    Paper
+
 } from "@material-ui/core";
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import ChatBubbleOutlineOutlinedIcon from '@material-ui/icons/ChatBubbleOutlineOutlined';
@@ -22,7 +24,7 @@ import {
     useParams,
     useRouteMatch
 } from "react-router-dom";
-//import cities from "cities.json";
+import { useDataContext, ActionTypes } from '../../data/GlobalDataContext';
 import cities from "./Cities";
 import Post from "../post/Post";
 import "./DiscoverStyle.css";
@@ -31,6 +33,7 @@ import SearchReducer from "./SearchReducer";
 import { HttpClientFactory } from "../../httpclient";
 import { URLSearchParams } from "url";
 import { SearchParameters } from "../../api";
+import { useAuthContext } from "../api-authorization/AuthService";
 
 
 
@@ -39,10 +42,11 @@ export default function Discover() {
     const { cat } = useParams();
     const ctx = useContext(SearchContext);
     const [state, dispatch] = useReducer(SearchReducer, ctx);
-
+    const [pageNumber, setPageNumber] = useState(2);
     const [show, setShow] = useState(false);
     const [isLoading, setLoading] = useState(true);
     const [suggestions, setSuggestions] = useState([]);
+    const {dataContext, dcReducer, resetCallback } = useDataContext();
 
     function handleChange() {
         setShow(true);
@@ -52,8 +56,27 @@ export default function Discover() {
         setSuggestions(result);
     }
 
+    const { manager, user } = useAuthContext();
+
+    const { profile } = user || {
+        profile: {}
+    };
 
     useEffect(() => {
+
+        dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/discover" } });
+        if (dataContext && dataContext.discover && dataContext.discover.length) {
+
+            if (cat === dataContext.cat || dataContext.cat != "nearme" ) {
+
+                state.items = dataContext.discover;
+                setLoading(false);
+                return;
+            }
+            
+        }
+
+        dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: false, url: "/discover" } });
 
         let doWork = async () => {
 
@@ -71,6 +94,7 @@ export default function Discover() {
                     items: items,
                 }
             });
+                dcReducer({ type: ActionTypes.DISCOVER, data: { items:items, url: "/discover", cat: cat} });
         }
         else
         {
@@ -85,8 +109,11 @@ export default function Discover() {
                     items: items,
                 }
             });
+
+                dcReducer({ type: ActionTypes.DISCOVER, data: { items: items, cat: cat} });
         }
 
+            dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: true, url: "/discover", } });
             setLoading(false);
         }
         doWork();
@@ -94,7 +121,92 @@ export default function Discover() {
         return () => { };
     }, []);
 
+
+    window.onscroll = async function (ev) {
+        var totalPageHeight = document.body.scrollHeight;
+        var scrollPoint = window.scrollY + window.innerHeight;
+        if (scrollPoint >= totalPageHeight) {
+            await loadMoreResult();
+        }
+    };
     
+    async function loadMoreResult() {
+   
+        var element = document.getElementById("search-location");
+        if (element === undefined || element === null)
+            return;
+        var location = document.getElementById("search-location").value;
+        const api = HttpClientFactory.getPostClient();
+        if (location != null && dataContext.isSearch) {
+                var model = new SearchParameters({ term: location, nearby: false, pageNumber: pageNumber });
+                var result = await api.search(model);
+                var items = result.items.filter(i => i.images.length > 0);
+                items.forEach((item, index) => { state.items.push(item) });
+                dispatch({
+                    type: "search",
+                    data: {
+                        itemsCount: state.itemsCount,
+                        pageNumber: pageNumber,
+                        items: state.items,
+                    }
+                });
+
+                dcReducer({ type: ActionTypes.DISCOVER, data: { items: items, cat: cat} });
+
+                if (items.length > 0) {
+                    setPageNumber(result.pageNumber + 1);
+                }
+               
+            }
+            else
+            {
+
+                if (cat === "nearme")
+                {
+
+                    var model = new SearchParameters({ term: null, nearby: true, pageNumber: pageNumber });
+                    var result = await api.search(model);
+                    var items = result.items.filter(i => i.images.length > 0);
+                    items.forEach((item, index) => { state.items.push(item) });
+                    dispatch({
+                        type: "near-me",
+                        data: {
+                            itemsCount: state.itemsCount,
+                            pageNumber: pageNumber,
+                            items: state.items,
+                        }
+                    });
+
+                    dcReducer({ type: ActionTypes.DISCOVER, data: { items: items, cat: cat,} });
+
+                    if (items.length > 0) {
+                        setPageNumber(result.pageNumber + 1);
+                    }
+
+                }
+                else {
+                    var model = new SearchParameters({ term: cat, nearby: false, pageNumber: pageNumber });
+                    var result = await api.search(model);
+                    var items = result.items.filter(i => i.images.length > 0);
+                    items.forEach((item, index) => { state.items.push(item) });
+                    dispatch({
+                        type: "search",
+                        data: {
+                            itemsCount: state.itemsCount,
+                            pageNumber: pageNumber,
+                            items: state.items,
+                        }
+                    });
+
+                    dcReducer({ type: ActionTypes.DISCOVER, data: { items: items, cat: cat,}});
+
+                    if (items.length > 0) {
+                        setPageNumber(result.pageNumber + 1);
+                    }
+
+                }
+            }
+    }
 
     async function performSearch()
     {
@@ -113,6 +225,8 @@ export default function Discover() {
                 items: items,
             }
         });
+
+        dcReducer({ type: ActionTypes.DISCOVER, data: { items: items, cat: cat} });
         setLoading(false);
 
     }
@@ -132,7 +246,8 @@ export default function Discover() {
                                 <input type="text" placeholder="Where are you going ?" autoComplete="off" id="search-location" onChange={handleChange} onBlur={() => setShow(false)} className="searchbar" />
                                 <img src="https://images-na.ssl-images-amazon.com/images/I/41gYkruZM2L.png" onClick={() => performSearch()} alt="Magnifying Glass" className="button-search" />
                             </div>
-                            {show ? <div className="search-suggestions">
+                            {show ?
+                                <Paper className="search-suggestions">
                                 <div className="container-fluid">
                                     <div className="row">
                                         {suggestions.length > 0 ?
@@ -144,21 +259,22 @@ export default function Discover() {
                                                 <AiOutlineStop className="suggestion-icon" />  <span className="suggestion-text-not-found">No location found.</span>
                                             </div>}
                                     </div>
-                                </div>
-                            </div> : null}
+                                    </div>
+                                </Paper>
+                             : null}
                         </div>
                     </div>
                 </div>
-                        <div className='main'>
-                            <div className='container-fluid'>
-                        <div className='row square-grid'>
+                        <div className='main'> 
+                    <div className='container-fluid'>
+                        <div className='row square-grid' >
                             {isLoading ? <div className="col-12 loading-icon"><h4 className="text-center"><CircularProgress /></h4></div> :
 
                              state.items.length > 0 ? 
 
                                         state.items.map((post, i) =>
 
-                                            (<div key={i} className={`col-12 col-sm-6 col-md-6 col-lg-6 col-xl-4 square-grid-item`} style={{ backgroundImage: `url(${post.images[0].imageBase64})` }} >
+                                            (<div key={i} className={`col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 square-grid-item`} style={{ backgroundImage: `url(${post.images[0].imageBase64})` }} >
                                                 <Link to={`/post/${post.id}/shot/${post.images[0].id}`}>
                                                     <table className="inner-container">
                                                         <tbody>

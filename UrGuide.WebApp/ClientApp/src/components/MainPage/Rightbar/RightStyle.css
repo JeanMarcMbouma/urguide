@@ -6,14 +6,21 @@
     color:#808080;
 }
 .rightbar {
-    position:fixed;
+    position:sticky;
     right: 20px;
     top: 80px;
     height:100%;
+    background-color:transparent;
+  
+}
+
+.link {
+    color: #4591de !important;
+    font-weight:500 !important;
 }
 
 
-@media only screen and (max-width: 576px) {
+@media only screen and (max-width: 768px) {
     .rightbar {
         display: none;
     }

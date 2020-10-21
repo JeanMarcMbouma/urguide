@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:tt="clr-namespace:UrGuide.Mobile.Views.Templates"
+             xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels"
+             xmlns:loader="clr-namespace:Sharpnado.Presentation.Forms.CustomViews;assembly=Sharpnado.TaskLoaderView"
+             mc:Ignorable="d"
+             x:Class="UrGuide.Mobile.Views.Favorite"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#ececec"
+             x:DataType="vm:FavoriteViewModel">
+    <ContentView.Resources>
+        <DataTemplate x:Key="PostModelTemplate">
+            <tt:FavoriteItemTemplate />
+        </DataTemplate>
+    </ContentView.Resources>
+    <loader:TaskLoaderView TaskLoaderNotifier="{Binding ItemsLoader}" AccentColor="Accent">
+        <RefreshView IsRefreshing="{Binding ItemsLoader.ShowRefresher}"
+                         RefreshColor="Accent"
+                         Command="{Binding ItemsLoader.RefreshCommand}">
+            <StackLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
+          Orientation="Vertical" Spacing="8" Margin="8">
+                <CollectionView ItemsSource="{Binding ItemsLoader.Result}"
+                        ItemTemplate="{StaticResource PostModelTemplate}"
+                        HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand"
+                        SelectionMode="None"
+                        BackgroundColor="Transparent"
+                       >
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout ItemSpacing="8" Orientation="Vertical" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.EmptyView>
+                        <Label Text="Nothing here!" FontSize="Medium" FontAttributes="Bold"
+                            HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+                    </CollectionView.EmptyView>
+                </CollectionView>
+            </StackLayout>
+        </RefreshView>
+    </loader:TaskLoaderView>
+</ContentView>

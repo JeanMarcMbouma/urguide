@@ -3,6 +3,8 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using UrGuide.Core.Attributes;
+using UrGuide.Core.Contracts;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Contracts;
 using UrGuide.Model;
@@ -50,7 +52,7 @@ namespace UrGuide.Services.Abstraction
                 var attr = genericAttributes.FirstOrDefault(a => a.Name.Equals(attribute.Name, System.StringComparison.OrdinalIgnoreCase));
                 if (attr == null)
                 {
-                    item.Attributes.Add(new Data.Entities.Attributes.GenericAttribute
+                    item.Attributes.Add(new GenericAttribute
                     {
                         Name = attribute.Name,
                         Value = attribute.Value
@@ -90,7 +92,7 @@ namespace UrGuide.Services.Abstraction
                 var attr = genericAttributes.FirstOrDefault(a => a.Name.Equals(attribute.Name, System.StringComparison.OrdinalIgnoreCase));
                 if (attr == null)
                 {
-                    item.Attributes.Add(new Data.Entities.Attributes.GenericAttribute
+                    item.Attributes.Add(new GenericAttribute
                     {
                         Name = attribute.Name,
                         Value = attribute.Value

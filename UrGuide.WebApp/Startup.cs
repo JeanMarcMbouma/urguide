@@ -13,15 +13,14 @@ using UrGuide.Services.Extensions;
 using FluentValidation.AspNetCore;
 using AspNetCoreRateLimit;
 using System.Collections.Generic;
-using static IdentityModel.OidcConstants;
-using IdentityModel;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using UrGuide.WebApp.Models;
-using Newtonsoft.Json;
 using UrGuide.WebApp.Hubs;
+using IdentityServer4;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace UrGuide.WebApp
 {
@@ -63,14 +62,15 @@ namespace UrGuide.WebApp
                     Type = SecuritySchemeType.OAuth2,
                     Flows = new OpenApiOAuthFlows
                     {
-                        ClientCredentials = new OpenApiOAuthFlow
+                        AuthorizationCode = new OpenApiOAuthFlow
                         {
                             AuthorizationUrl = new Uri("/connect/authorize", UriKind.Relative),
                             TokenUrl = new Uri("/connect/token", UriKind.Relative),
                             Scopes = new Dictionary<string, string>
                             {
-                                { StandardScopes.OpenId, "UrGuide Web API" },
-                                { StandardScopes.Profile, "User's profile" }
+                                { IdentityServerConstants.StandardScopes.OpenId, "UrGuide Web Application" },
+                                { IdentityServerConstants.StandardScopes.Profile, "UrGuide Web Application" },
+                                { IdentityServerConstants.StandardScopes.OfflineAccess, "UrGuide Web Application" }
                             }
                         }
                     }
@@ -116,6 +116,7 @@ namespace UrGuide.WebApp
             if (!env.IsDevelopment())
             { 
                 app.UseHsts();
+                app.UseHttpsRedirection();
             }
 
             serviceProvider.GetRequiredService<UrGuideAuthContext>().Database.Migrate();
@@ -123,11 +124,23 @@ namespace UrGuide.WebApp
 
             app.UseIpRateLimiting();
 
-            app.UseHttpsRedirection();
             app.UseForwardedHeaders(new ForwardedHeadersOptions { 
                 ForwardedHeaders = ForwardedHeaders.XForwardedProto
             });
 
+          //  app.UseStaticFiles(new StaticFileOptions
+          //  {
+          //      FileProvider = new PhysicalFileProvider(
+          //Path.Combine(Directory.GetCurrentDirectory(), "ClientApp/src")),
+          //      RequestPath = "/ClientApp/src",
+
+          //  });
+          //  app.UseDirectoryBrowser(new DirectoryBrowserOptions
+          //  {
+          //      FileProvider = new PhysicalFileProvider(
+          //                  Path.Combine(Directory.GetCurrentDirectory(), "ClientApp/src")),
+          //      RequestPath = "/ClientApp/src"
+          //  });
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
@@ -137,7 +150,8 @@ namespace UrGuide.WebApp
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ur Guide API v1");
                 c.OAuthClientId("UrGuide.WebAPI");
-                c.OAuthClientSecret("secret".ToSha256());
+                c.OAuthAppName("UrGuide Swagger UI");
+                c.OAuthUsePkce();
             });
             app.UseAuthentication();
             app.UseIdentityServer();

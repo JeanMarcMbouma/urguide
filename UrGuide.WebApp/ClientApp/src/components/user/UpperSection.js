@@ -20,6 +20,7 @@ import { useAuthUser } from "../api-authorization/AuthService";
 import { HttpClientFactory } from './../../httpclient';
 import "./UserStyle.css";
 import { LookupClient } from "../../api";
+import { useDataContext } from "../../data/GlobalDataContext";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -34,29 +35,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-
-function ActivateLink(event) {
-
-    var buttons = document.querySelectorAll("a");
-
-    [].forEach.call(buttons, function (el) {
-        el.classList.remove("active-nav-link");
-    });
-
-    var divs = document.querySelectorAll("div");
-
-    [].forEach.call(divs, function (el) {
-        el.classList.remove("active-nav-col");
-    });
-
-    var target = event.target;
-    var icon = target.closest("a");
-    var div = target.closest("div div");
-    //alert(target);
-    icon.className += ' active-nav-link';
-    div.className += ' active-nav-col';
-
-}
 
 function UpperSectionSkeleton() {
 
@@ -103,20 +81,20 @@ function UpperSectionSkeleton() {
                         </div>
                     </div>
                     <div className="nav-btn-div container">
-                        <div className='row nav-btn-row justify-content-center' >
-                        <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                        <div className='row nav-btn-row justify-content-start' >
+                        <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
                                 <Skeleton animation="wave" variant="rect" style={{ width: `100%`, height: `20px`, borderRadius: `8px`, marginBottom: `10px`, }} />
                             </div>
-                            <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                            <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
                                 <Skeleton animation="wave" variant="rect" style={{ width: `100%`, height: `20px`, borderRadius: `8px`, marginBottom: `10px`, }} />
                             </div>
-                            <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                            <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
                                 <Skeleton animation="wave" variant="rect" style={{ width: `100%`, height: `20px`, borderRadius: `8px`, marginBottom: `10px`, }} />
                             </div>
-                            <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                            <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
                                 <Skeleton animation="wave" variant="rect" style={{ width: `100%`, height: `20px`, borderRadius: `8px`, marginBottom: `10px`, }} />
                             </div>
-                            <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                            <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
                                 <Skeleton animation="wave" variant="rect" style={{ width: `100%`, height: `20px`, borderRadius: `8px`, marginBottom: `10px`, }} />
                             </div>
                         </div>
@@ -133,6 +111,8 @@ function RealUpperSection(props) {
 
 
     let { path } = useRouteMatch();
+
+    const { dataContext } = useDataContext();
 
     return (
         <div>
@@ -166,7 +146,7 @@ function RealUpperSection(props) {
                                         <span className='user-profile-location' >{props.location}</span>
                                         <br />
                                         <br />
-                                        <Rating name="read-only" value={props.rating} readOnly />
+                                        <Rating name="read-only" value={+props.rating} readOnly />
                                         <br />
                                         <br />
                                         <p>
@@ -178,58 +158,105 @@ function RealUpperSection(props) {
                         </div>
                     </div>
                     <div className="nav-btn-div container">
-                        <div className='row nav-btn-row justify-content-center' >
+                        <div className='row nav-btn-row justify-content-start' >
                            
                             {
                                 !props.visitor ?
 
                                     <>
-                                        <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
-                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile`} color="primary" onClick={(e) => ActivateLink(e)} >
-                                                <FaRegCommentAlt fontSize="large" /> <span className='btn-title'>Reviews</span>
+                                        {dataContext.profileUrl === "/Reviews" ? <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center active-nav-col'>
+                                            <Link className="active-nav-link" style={{ textDecoration: `none` }} tag={Link} to={`/profile`} color="primary"  >
+                                                <FaRegCommentAlt fontSize="large" /> <span className='btn-title title-nav'>Reviews</span>
                                             </Link>
-                                        </div>
-                                        <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
-                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile/posts`} color="primary" onClick={(e) => ActivateLink(e)} >
-                                                <NotesIcon fontSize="small" /> <span className='btn-title'>Posts</span>
-                                            </Link>
-                                        </div>
-                                        <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
-                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile/galleries`} color="primary" onClick={(e) => ActivateLink(e)} >
-                                                <AppsIcon fontSize="small" /> <span className='btn-title'>Galleries</span>
-                                            </Link>
-                                        </div>
-                                        <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
-                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile/details`} color="primary" onClick={(e) => ActivateLink(e)} >
-                                                <EditIcon fontSize="small" /> <span className='btn-title'>Edit profile</span>
-                                            </Link>
-                                        </div>
-                                        <div className='col-12 col-sm-6 col-md-2  col-lg-2 col-xl-2 nav-col text-center'>
-                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile/creategallery`} color="primary" onClick={(e) => ActivateLink(e)} >
-                                                <PhotoCameraIcon fontSize="small" /> <span className='btn-title'>New Gallery</span>
-                                            </Link>
-                                        </div>
+                                        </div> : <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                                <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile`} color="primary"  >
+                                                    <FaRegCommentAlt fontSize="large" /> <span className='btn-title title-nav'>Reviews</span>
+                                                </Link>
+                                            </div>
+                                        }
+                                        {
+                                            dataContext.profileUrl === "/Posts" ? <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center active-nav-col'>
+                                                <Link className="active-nav-link" style={{ textDecoration: `none` }} tag={Link} to={`/profile/posts`} color="primary" >
+                                                    <NotesIcon fontSize="small" /> <span className='btn-title title-nav'>Posts</span>
+                                                </Link>
+                                            </div> : <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                                    <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile/posts`} color="primary" >
+                                                        <NotesIcon fontSize="small" /> <span className='btn-title title-nav'>Posts</span>
+                                                    </Link>
+                                                </div>
+                                        }
+                                        {
+                                            dataContext.profileUrl === "/Galleries" ? <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center active-nav-col'>
+                                                <Link className="active-nav-link" style={{ textDecoration: `none` }} tag={Link} to={`/profile/galleries`} color="primary"  >
+                                                    <AppsIcon fontSize="small" /> <span className='btn-title title-nav'>Galleries</span>
+                                                </Link>
+                                            </div> : <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                                    <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile/galleries`} color="primary"  >
+                                                        <AppsIcon fontSize="small" /> <span className='btn-title title-nav'>Galleries</span>
+                                                    </Link>
+                                                </div>
+                                        }
+                                        {
+                                            dataContext.profileUrl === "/Edit" ? <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center active-nav-col'>
+                                                <Link className="active-nav-link" style={{ textDecoration: `none` }} tag={Link} to={`/profile/details`} color="primary" >
+                                                    <EditIcon fontSize="small" /> <span className='btn-title title-nav'>Edit profile</span>
+                                                </Link>
+                                            </div> : <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                                    <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile/details`} color="primary" >
+                                                        <EditIcon fontSize="small" /> <span className='btn-title title-nav'>Edit profile</span>
+                                                    </Link>
+                                                </div>
+                                        }
+                                        {
+                                            dataContext.profileUrl === "/NewGallery" ? <div className='col-2 col-md-2  col-lg-2 col-xl-2 nav-col text-center active-nav-col'>
+                                                <Link className="active-nav-link" style={{ textDecoration: `none` }} tag={Link} to={`/profile/creategallery`} color="primary"  >
+                                                    <PhotoCameraIcon fontSize="small" /> <span className='btn-title title-nav'>New Gallery</span>
+                                                </Link>
+                                            </div> : <div className='col-2 col-md-2  col-lg-2 col-xl-2 nav-col text-center'>
+                                                    <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile/creategallery`} color="primary"  >
+                                                        <PhotoCameraIcon fontSize="small" /> <span className='btn-title title-nav'>New Gallery</span>
+                                                    </Link>
+                                                </div>
+                                        }
                                     </>
 
-                                    : 
-
-                                    <>
-                                        <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
-                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}`} color="primary" onClick={(e) => ActivateLink(e)} >
-                                                <FaRegCommentAlt fontSize="large" /> <span className='btn-title'>Reviews</span>
+                                    :
+                                <>
+                                    {
+                                    dataContext.profileUrl === "/Reviews" ? <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center active-nav-col'>
+                                        <Link className="active-nav-link" style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}`} color="primary"  >
+                                                    <FaRegCommentAlt fontSize="large" /> <span className='btn-title title-nav'>Reviews</span>
+                                        </Link>
+                                    </div> : <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}`} color="primary"  >
+                                                        <FaRegCommentAlt fontSize="large" /> <span className='btn-title title-nav'>Reviews</span>
                                             </Link>
                                         </div>
-                                        <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
-                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}/posts`} color="primary" onClick={(e) => ActivateLink(e)} >
-                                                <NotesIcon fontSize="small" /> <span className='btn-title'>Posts</span>
-                                            </Link>
-                                        </div>
-                                        <div className='col-12 col-sm-6 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
-                                            <Link style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}/galleries`} color="primary" onClick={(e) => ActivateLink(e)} >
-                                                <AppsIcon fontSize="small" /> <span className='btn-title'>Galleries</span>
-                                            </Link>
-                                        </div>
-                                 </>
+                            }
+                                   {
+                                dataContext.profileUrl === "/Posts" ? <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center active-nav-col'>
+                                    <Link className="active-nav-link" style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}/posts`} color="primary" >
+                                                    <NotesIcon fontSize="small" /> <span className='btn-title title-nav'>Posts</span>
+                                    </Link>
+                                </div> : <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                        <Link style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}/posts`} color="primary" >
+                                                        <NotesIcon fontSize="small" /> <span className='btn-title title-nav'>Posts</span>
+                                        </Link>
+                                    </div>
+                            }
+                            {
+                                dataContext.profileUrl === "/Galleries" ? <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center active-nav-col'>
+                                    <Link className="active-nav-link" style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}/galleries`} color="primary"  >
+                                                    <AppsIcon fontSize="small" /> <span className='btn-title title-nav'>Galleries</span>
+                                    </Link>
+                                </div> : <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                        <Link style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}/galleries`} color="primary"  >
+                                                        <AppsIcon fontSize="small" /> <span className='btn-title title-nav'>Galleries</span>
+                                        </Link>
+                                    </div>
+                                        }
+                                        </>
+                                   
                             }
                         </div>
                     </div>
@@ -253,3 +280,4 @@ export default function UpperSection(props)
         );
 
 }
+

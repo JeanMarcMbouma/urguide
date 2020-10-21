@@ -2,7 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UrGuide.Data.Entities.Attributes;
+using UrGuide.Core.Attributes;
+using UrGuide.Core.Contracts;
 using UrGuide.Data.Entities.Contracts;
 using UrGuide.Data.Shared;
 
@@ -23,6 +24,9 @@ namespace UrGuide.Data.Entities.Users
         public DateTime LastActivityDate { get; set; }
         public virtual Image ProfileImage { get; set; }
         public virtual Point Location { get; set; }
-        public object FullName => $"{Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.FirstName))} {Attributes.FirstOrDefault(a => a.Name == nameof(AttributeTypes.LastName))}";
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public object FullName => $"{FirstName} {LastName}";
     }
 }

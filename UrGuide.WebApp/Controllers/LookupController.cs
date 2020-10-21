@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using UrGuide.Core;
+using UrGuide.Model;
 using UrGuide.Model.Lookup;
 using UrGuide.Model.Users;
 using UrGuide.Services.Contracts;
@@ -37,6 +39,14 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetOne(string id, CancellationToken cancellationToken)
         {
             var result = await UserService.GetUserInfo(id, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
+
+        [HttpGet("/users/search")]
+        [ProducesDefaultResponseType(typeof(PagedList<UserInfo>))]
+        public async Task<IActionResult> GetUsers([FromQuery]SearchParameters searchParameters, CancellationToken cancellationToken)
+        {
+            var result = await UserService.GetUsersAsync(searchParameters, cancellationToken);
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
     }
