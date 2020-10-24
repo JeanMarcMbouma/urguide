@@ -9,7 +9,7 @@ using UrGuide.Model.Posts;
 
 namespace UrGuide.Mobile.ViewModels
 {
-    public class BidDialogViewModel : BaseViewModel
+    public class BidDialogViewModel : BaseViewModel, INavigatableViewModel
     {
         private ICommand _closeDialogCommand;
         private ICommand _loadBidCommand;
@@ -50,7 +50,6 @@ namespace UrGuide.Mobile.ViewModels
             get => item; set
             {
                 item = value;
-                LoadBidCommand.Execute(null);
             }
         }
         public ObservableRangeCollection<BidHistoryModel> Items { get; } = new ObservableRangeCollection<BidHistoryModel>();
@@ -75,9 +74,9 @@ namespace UrGuide.Mobile.ViewModels
                 IsBusy = true;
             });
             var items = await PostItemService.GetBidHistoryAsync(Item.Id);
-            Items.ReplaceRange(items.Data);
             Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
             {
+                Items.ReplaceRange(items.Data);
                 IsBusy = false;
                 CanRejectBid = Preference.UserId == Item.AuthorId && Item.Countdown.IsActive;
                 CanApproveBid = CanRejectBid;
@@ -93,11 +92,16 @@ namespace UrGuide.Mobile.ViewModels
                 Items.Add(new BidHistoryModel
                 {
                     Author = Preference.FullName,
-                    AuthorImage = $"{GlobalSetting.DefaultEndpoint}/{Preference.Image}",
+                    AuthorImage = Preference.Image,
                     Created = DateTime.Now.ToString("dd-MMM-yyyy HH:mm"),
                     Value = $"${bid:#}"
                 });
             }
         });
+
+        public void Load(object parameter)
+        {
+            LoadBidCommand.Execute(null);
+        }
     }
 }

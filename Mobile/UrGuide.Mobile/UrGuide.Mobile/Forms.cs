@@ -49,6 +49,7 @@ namespace UrGuide.Mobile
             services.AddHttpClient<API.BidClient>(clientRegistration);
             services.AddHttpClient<API.UsersClient>(clientRegistration);
             services.AddHttpClient<API.CatalogsClient>(clientRegistration);
+            services.AddHttpClient<API.AccountClient>(clientRegistration);
 
             services.AddSingleton<IMainPageService, NavigationPageService>();
             services.AddSingleton<App>();

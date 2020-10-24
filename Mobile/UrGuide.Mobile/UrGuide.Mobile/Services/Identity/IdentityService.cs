@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using UrGuide.Mobile.API;
 using UrGuide.Mobile.Contracts;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -17,14 +18,19 @@ namespace UrGuide.Mobile.Services.Identity
         private OidcClient _client;
         private readonly IPreferenceService _preference;
         private readonly INavigationService _navigation;
+        private readonly AccountClient _account;
 
         public IBrowser Browser { get; }
 
-        public IdentityService(IPreferenceService preference, INavigationService navigation, IBrowser browser)
+        public IdentityService(IPreferenceService preference, 
+            INavigationService navigation, 
+            IBrowser browser,
+            AccountClient account)
         {
             _preference = preference ?? throw new ArgumentNullException(nameof(preference));
             _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
             Browser = browser ?? throw new ArgumentNullException(nameof(browser));
+            _account = account ?? throw new ArgumentNullException(nameof(account));
         }
         public async Task SignInAsync()
         {
@@ -80,15 +86,12 @@ namespace UrGuide.Mobile.Services.Identity
         public async Task LogoutAsync()
         {
             CreateClient();
-            var result = await _client.LogoutAsync();
-            if (!result.IsError)
-            {
-                _preference.AuthToken = string.Empty;
-                _preference.FullName = string.Empty;
-                _preference.UserId = string.Empty;
-                _preference.Role = string.Empty;
-                _preference.Image = string.Empty;
-            }
+            await _account.LogoutAsync(null); 
+            _preference.AuthToken = string.Empty;
+            _preference.FullName = string.Empty;
+            _preference.UserId = string.Empty;
+            _preference.Role = string.Empty;
+            _preference.Image = string.Empty;
         }
 
         public async Task GetUserInfo()
