@@ -16,6 +16,7 @@ using UrGuide.Mobile.ViewModels;
 using UrGuide.Mobile.Views;
 using Xamarin.Forms;
 using Akavache.Sqlite3;
+using IdentityModel.OidcClient.Browser;
 
 [assembly: ExportFont("Font Awesome 5 Free-Solid-900.otf", Alias = "fas")]
 [assembly: ExportFont("Font Awesome 5 Free-Regular-400.otf", Alias = "far")]
@@ -57,7 +58,7 @@ namespace UrGuide.Mobile
             services.AddSingleton<IPreferenceService, PreferenceService>();
             services.AddSingleton<IIdentityService, IdentityService>();
             services.AddSingleton<IFileService, FileService>();
-
+            services.AddSingleton<IBrowser, SystemBrowser>();
 
             services.AddScoped<PostsViewModel>();
             services.AddScoped<PostDetailViewModel>();

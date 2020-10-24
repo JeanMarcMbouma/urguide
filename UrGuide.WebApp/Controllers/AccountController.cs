@@ -139,13 +139,13 @@ namespace UrGuide.WebApp.Controllers
 
         [Authorize]
         [HttpGet("logout")]
-        public async Task<IActionResult> Signout(string returnUrl = null)
+        public async Task<IActionResult> Signout(string returnUrl = null, string post_logout_redirect_uri = null)
         {
             await AuthService.SignOutAsync();
             await HttpContext.SignOutAsync();
-            if (Url.IsLocalUrl(returnUrl))
-                return Redirect(returnUrl);
-            return Ok();
+            if (!string.IsNullOrEmpty(post_logout_redirect_uri))
+                return Redirect(post_logout_redirect_uri);
+            return Redirect(returnUrl);
         }
 
         [Authorize]

@@ -188,7 +188,7 @@
                     </BindableLayout.ItemTemplate>
                 </StackLayout>
                 <StackLayout Grid.Row="4" Orientation="Vertical" Grid.ColumnSpan="2"
-                             VerticalOptions="StartAndExpand" Spacing="8">
+                             VerticalOptions="StartAndExpand" Spacing="8" Margin="0,20">
                     <Label Text="Description" FontSize="Medium" FontAttributes="Bold"
                            Style="{StaticResource TextHeader}" HorizontalTextAlignment="Start"/>
                     <Label Text="{Binding Description}" 
@@ -215,7 +215,38 @@
                                 />
                             </StackLayout.GestureRecognizers>
                         </StackLayout>
+                        <StackLayout Orientation="Horizontal" HorizontalOptions="End" Margin="12,0,0,0" Spacing="24">
+                            <Image Source="{FontImage FontFamily=fas, 
+                        Glyph={x:Static icons:FAI.ShareAlt}, 
+                        Color={StaticResource IconColor},Size=24}" >
+                                <Image.GestureRecognizers>
+                                    <TapGestureRecognizer 
+                                        Command="{Binding Path=SharePostCommand, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}}"
+                                        CommandParameter="{Binding}"/>
+                                </Image.GestureRecognizers>
+                            </Image>
+                            <Image Source="{FontImage FontFamily=fas, 
+                                    Glyph={x:Static icons:FAI.CalendarCheck}, 
+                                    Color={StaticResource IconColor},Size=24}" 
+                                   IsVisible="{Binding Path=IsLoggedIn, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}}" >
+                                <Image.Triggers>
+                                    <DataTrigger TargetType="Image" Binding="{Binding HasReserved}"
+                                                 Value="{x:Static x:Boolean.TrueString}">
+                                        <Setter Property="Source" Value="{FontImage FontFamily=far,
+                                            Glyph={x:Static icons:FAI.CalendarTimes},
+                                            Color={StaticResource IconColor},Size=24}" />
+                                    </DataTrigger>
+                                </Image.Triggers>
+                                <Image.GestureRecognizers>
+                                    <TapGestureRecognizer 
+                                        Command="{Binding Path=MakeReservationCommand, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}}"
+                                        CommandParameter="{Binding}"/>
+                                </Image.GestureRecognizers>
+                            </Image>
+                        </StackLayout>
+
                         <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" Spacing="24">
+                            
                             <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.Gavel}, 
                         Color={StaticResource IconColor},Size=24}" />

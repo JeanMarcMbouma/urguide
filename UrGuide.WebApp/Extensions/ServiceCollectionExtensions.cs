@@ -57,7 +57,7 @@ namespace UrGuide.WebApp.Extensions
             {
                 options.Authentication.CookieLifetime = TimeSpan.FromHours(2);
                 options.IssuerUri = applicationUri;
-                options.UserInteraction.LogoutUrl = "/account/logout";
+                //options.UserInteraction.LogoutUrl = "/account/logout";
             })
             .AddApiAuthorization<UrGuideUser, UrGuideAuthContext>(options =>
             {

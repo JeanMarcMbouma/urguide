@@ -11,8 +11,8 @@ using System.Reactive.Linq;
 using Akavache;
 using System.Net.Http;
 using Sharpnado.Presentation.Forms.Services;
-using System.Collections.ObjectModel;
 using System.Reactive.Threading.Tasks;
+using Xamarin.Essentials;
 
 namespace UrGuide.Mobile.Services
 {
@@ -26,7 +26,8 @@ namespace UrGuide.Mobile.Services
                                LookupClient lookupClient,
                                IMapper mapper,
                                IBlobCache cache,
-                               IPreferenceService preference)
+                               IPreferenceService preference,
+                               INavigationService navigationService)
         {
             _clientFactory = clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));
             BidClient = bidClient ?? throw new ArgumentNullException(nameof(bidClient));
@@ -35,6 +36,7 @@ namespace UrGuide.Mobile.Services
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             Cache = cache ?? throw new ArgumentNullException(nameof(cache));
             Preference = preference ?? throw new ArgumentNullException(nameof(preference));
+            NavigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
         }
 
         IHttpClientFactory _clientFactory;
@@ -52,6 +54,7 @@ namespace UrGuide.Mobile.Services
         public IMapper Mapper { get; }
         public IBlobCache Cache { get; }
         public IPreferenceService Preference { get; }
+        public INavigationService NavigationService { get; }
 
         public async Task<Result<IEnumerable<Model.Posts.BidHistoryModel>>> GetBidHistoryAsync(string id)
         {
@@ -104,10 +107,10 @@ namespace UrGuide.Mobile.Services
                     });
                 return Result.Of(items);
             }
-            catch (ApiException e)
+            catch (ApiException<StringErrorEnvelop> e)
             {
 
-                return Result.Of<IEnumerable<PostItem>>().WithErrors(e.Message);
+                return Result.Of<IEnumerable<PostItem>>().WithErrors(string.Join(Environment.NewLine, e.Result.Errors));
             }
             
         }
@@ -132,10 +135,9 @@ namespace UrGuide.Mobile.Services
 
                 return Result.Of(Mapper.Map<IEnumerable<DiscoverItem>>(posts.Items.AsEnumerable()));
             }
-            catch (ApiException e)
+            catch (ApiException<StringErrorEnvelop> e)
             {
-
-                return Result.Of<IEnumerable<DiscoverItem>>().WithErrors(e.Message);
+                return Result.Of<IEnumerable<DiscoverItem>>().WithErrors(string.Join(Environment.NewLine, e.Result.Errors));
             }
         }
 
@@ -161,9 +163,9 @@ namespace UrGuide.Mobile.Services
                     PostId = it.Id
                 });
             }
-            catch (ApiException e)
+            catch (ApiException<StringErrorEnvelop> e)
             {
-                // do something as the user might have lost his authorization
+                await NavigationService.DisplayErrorAsync(message: string.Join(Environment.NewLine, e.Result.Errors));
             }
         }
 
@@ -207,9 +209,9 @@ namespace UrGuide.Mobile.Services
                 }
                 return Result.Of<Model.Shared.AuthoredFeedback>().WithErrors("Fail to post your feedback, please try later");
             }
-            catch (ApiException e)
+            catch (ApiException<StringErrorEnvelop> e)
             {
-                return Result.Of<Model.Shared.AuthoredFeedback>().WithErrors(e.Message);
+                return Result.Of<Model.Shared.AuthoredFeedback>().WithErrors(string.Join(Environment.NewLine, e.Result.Errors));
             }
         }
 
@@ -224,5 +226,91 @@ namespace UrGuide.Mobile.Services
 
         public IObservable<PostItem> Create(PostCreationModel post) => Client.CreateAsync(post).ToObservable()
                 .Select(x => Mapper.Map<PostItem>(x));
+
+        public async Task ToggleReservation(PostItem it)
+        {
+
+            try
+            {
+                if (it.HasReserved)
+                {
+                    await Client.CancelreservationAsync(it.Id);
+                    it.HasReserved = false;
+                    it.ReservedSeats--;
+                }
+                else
+                {
+                    await Client.MakereservationAsync(it.Id, new SeatReservationModel
+                    {
+                        PostId = it.Id,
+                        Seats = 1
+                    });
+                    it.HasReserved = true;
+                    it.ReservedSeats++;
+                }
+            }
+            catch (ApiException<StringErrorEnvelop> e)
+            {
+                await NavigationService.DisplayErrorAsync(message: string.Join(Environment.NewLine, e.Result.Errors));
+            }
+        }
+
+        public Task ShareItem(PostItem it)
+        {
+            var url = $"{GlobalSetting.DefaultEndpoint}/post/{it.Id}";
+
+            return Share.RequestAsync(new ShareTextRequest
+            {
+                Uri = url,
+                Title = it.Text
+            });
+        }
+
+        public async Task<Result<bool>> Bid(string id, double bid)
+        {
+            try
+            {
+                await BidClient.NewbidAsync(id, new BidModel
+                {
+                     PostId = id,
+                     Value = $"{bid:#.##}"
+                });
+                return Result.Of(true);
+            }
+            catch (ApiException<StringErrorEnvelop> e)
+            {
+                await NavigationService.DisplayErrorAsync(message: string.Join(Environment.NewLine, e.Result.Errors));
+                return Result.Of(false).WithErrors(e.Result.Errors.FirstOrDefault());
+            }
+        }
+
+        public async Task<Result<string>> AcceptBid(string id)
+        {
+            try
+            {
+                var post = await BidClient.AcceptAsync(id);
+                return Result.Of(post.LastBid);
+            }
+            catch (ApiException<StringErrorEnvelop> e)
+            {
+                await NavigationService.DisplayErrorAsync(message: string.Join(Environment.NewLine, e.Result.Errors));
+                return Result.Of(string.Empty).WithErrors(e.Result.Errors.FirstOrDefault());
+            }
+        }
+
+
+        public async Task<Result<string>> RejectBid(string id)
+        {
+            try
+            {
+                var post = await BidClient.RejectAsync(id);
+                return Result.Of(post.LastBid);
+            }
+            catch (ApiException<StringErrorEnvelop> e)
+            {
+                await NavigationService.DisplayErrorAsync(message: string.Join(Environment.NewLine, e.Result.Errors));
+                return Result.Of(string.Empty).WithErrors(e.Result.Errors.FirstOrDefault());
+            }
+        }
     }
 }

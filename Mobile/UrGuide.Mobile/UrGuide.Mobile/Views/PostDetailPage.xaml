@@ -12,11 +12,11 @@
              >
     
     <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
-        <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadSelectedItemCommand}">
+        <RefreshView IsRefreshing="{Binding LoadSelectedItem.ShowRefresher}" Command="{Binding LoadSelectedItem.RefreshCommand}">
             <ScrollView>
                 <tt:PostDetailTemplate BindingContext="{Binding Selected}">
                     <tt:PostDetailTemplate.Triggers>
-                        <DataTrigger TargetType="tt:PostDetailTemplate" Binding="{Binding Source={Reference details}, Path=BindingContext.IsBusy}"
+                        <DataTrigger TargetType="tt:PostDetailTemplate" Binding="{Binding Source={Reference details}, Path=BindingContext.LoadSelectedItem.ShowRefresher}"
                                      Value="{x:Static x:Boolean.TrueString}">
                             <Setter Property="IsVisible" Value="False"/>
                         </DataTrigger>

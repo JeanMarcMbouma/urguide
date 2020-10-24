@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
@@ -72,10 +73,9 @@ namespace UrGuide.Mobile.ViewModels
             get => mode; set
             {
                 SetProperty(ref mode, value);
-                Items.Replace(new WrapperViewModel
-                {
-                    Mode = value
-                });
+                var item = Items.First();
+                item.Mode = value;
+                Items.Replace(item);
                 switch (value)
                 {
                     case ProfileDisplayMode.Reviews:

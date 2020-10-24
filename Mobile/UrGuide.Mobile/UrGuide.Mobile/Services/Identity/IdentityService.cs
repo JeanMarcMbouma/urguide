@@ -18,10 +18,13 @@ namespace UrGuide.Mobile.Services.Identity
         private readonly IPreferenceService _preference;
         private readonly INavigationService _navigation;
 
-        public IdentityService(IPreferenceService preference, INavigationService navigation)
+        public IBrowser Browser { get; }
+
+        public IdentityService(IPreferenceService preference, INavigationService navigation, IBrowser browser)
         {
             _preference = preference ?? throw new ArgumentNullException(nameof(preference));
             _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
+            Browser = browser ?? throw new ArgumentNullException(nameof(browser));
         }
         public async Task SignInAsync()
         {
@@ -31,6 +34,7 @@ namespace UrGuide.Mobile.Services.Identity
             if (!u.IsError)
             {
                 _preference.AuthToken = u.AccessToken;
+                _preference.IdToken = u.IdentityToken;
                 _preference.FullName = u.User.Claims.LastOrDefault(c => c.Type == IdentityModel.JwtClaimTypes.Name)?.Value;
                 _preference.UserId = u.User.Claims.FirstOrDefault(c => c.Type == IdentityModel.JwtClaimTypes.Subject)?.Value;
                 _preference.Role = u.User.Claims.FirstOrDefault(c => c.Type == IdentityModel.JwtClaimTypes.Role)?.Value;
@@ -50,7 +54,7 @@ namespace UrGuide.Mobile.Services.Identity
                 ClientId = GlobalSetting.Instance.ClientId,
                 ClientSecret = GlobalSetting.Instance.ClientSecret,
                 Scope = "openid profile offline_access",
-                Browser = new SystemBrowser(),
+                Browser = Browser,
                 RedirectUri = GlobalSetting.Instance.Callback,
                 PostLogoutRedirectUri = GlobalSetting.Instance.Callback,
                 ResponseMode = OidcClientOptions.AuthorizeResponseMode.Redirect,
@@ -73,14 +77,18 @@ namespace UrGuide.Mobile.Services.Identity
             _client ??= new OidcClient(clientOptions);
         }
 
-        public Task LogoutAsync()
+        public async Task LogoutAsync()
         {
-            _preference.AuthToken = string.Empty;
-            _preference.FullName = string.Empty;
-            _preference.UserId = string.Empty;
-            _preference.Role = string.Empty;
-            _preference.Image = string.Empty;
-            return Task.CompletedTask;
+            CreateClient();
+            var result = await _client.LogoutAsync();
+            if (!result.IsError)
+            {
+                _preference.AuthToken = string.Empty;
+                _preference.FullName = string.Empty;
+                _preference.UserId = string.Empty;
+                _preference.Role = string.Empty;
+                _preference.Image = string.Empty;
+            }
         }
 
         public async Task GetUserInfo()
@@ -91,30 +99,38 @@ namespace UrGuide.Mobile.Services.Identity
             var result = await _client.GetUserInfoAsync(_preference.AuthToken);
             if (result.IsError)
             {
-                await LogoutAsync();
+                _preference.AuthToken = string.Empty;
+                _preference.FullName = string.Empty;
+                _preference.UserId = string.Empty;
+                _preference.Role = string.Empty;
+                _preference.Image = string.Empty;
             }
         }
 
-        class SystemBrowser : IBrowser
+    }
+    class SystemBrowser : IBrowser
+    {
+        public async Task<BrowserResult> InvokeAsync(BrowserOptions options, CancellationToken cancellationToken = default)
         {
-            public async Task<BrowserResult> InvokeAsync(BrowserOptions options, CancellationToken cancellationToken = default)
-            {
-                var authResult = await Xamarin.Essentials.WebAuthenticator.AuthenticateAsync(new Uri(options.StartUrl), new Uri(options.EndUrl));
+            var endUrl = options.EndUrl;
+            if (string.IsNullOrEmpty(options.EndUrl))
+                endUrl = GlobalSetting.Instance.Callback;
+            var authResult = await WebAuthenticator.AuthenticateAsync(new Uri(options.StartUrl), new Uri(endUrl));
 
-                return new BrowserResult
-                {
-                    Response = ParseAuthenticatorResult(authResult)
-                };
-            }
-
-            string ParseAuthenticatorResult(WebAuthenticatorResult result)
+            return new BrowserResult
             {
-                string code = result?.Properties["code"];
-                string scope = result?.Properties["scope"];
-                string state = result?.Properties["state"];
-                string sessionState = result?.Properties["session_state"];
-                return $"{GlobalSetting.Instance.Callback}#code={code}&scope={scope}&state={state}&session_state={sessionState}";
-            }
+                Response = ParseAuthenticatorResult(authResult)
+            };
+        }
+
+        string ParseAuthenticatorResult(WebAuthenticatorResult result)
+        {
+            string code = result?.Properties["code"];
+            string scope = result?.Properties["scope"];
+            string state = result?.Properties["state"];
+            string sessionState = result?.Properties["session_state"];
+            return $"{GlobalSetting.Instance.Callback}#code={code}&scope={scope}&state={state}&session_state={sessionState}";
         }
     }
+
 }
