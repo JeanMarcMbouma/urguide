@@ -147,8 +147,9 @@
                                 <StackLayout>
                                     <ff:CachedImage Source="{Binding ImageBase64}" 
                                                     HeightRequest="300"
-                                                    Aspect="AspectFill"
-                                                    VerticalOptions="Start"/>
+                                                    Aspect="Fill"
+                                                    VerticalOptions="FillAndExpand"
+                                                    HorizontalOptions="FillAndExpand"/>
                             </StackLayout>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
