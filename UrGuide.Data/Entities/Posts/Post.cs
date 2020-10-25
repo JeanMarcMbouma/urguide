@@ -184,7 +184,7 @@ namespace UrGuide.Data.Entities.Posts
 
             if (ReservedSeats <= reserved + seats)
             {
-                throw new InvalidOperationException("We can't allocated this many seats.");
+                throw new InvalidOperationException("We couldn't allocate this many seats.");
             }
 
             Reservations.Add(new Reservation
@@ -228,7 +228,7 @@ namespace UrGuide.Data.Entities.Posts
 
             if (ReservedSeats <= reserved + seats)
             {
-                throw new InvalidOperationException("We can't allocated this many seats.");
+                throw new InvalidOperationException("We couldn't allocate this many seats.");
             }
 
             reservation.Seats = seats;
