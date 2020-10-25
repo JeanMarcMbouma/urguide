@@ -32,6 +32,11 @@
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="m:CategoryModel">
                                     <Grid HeightRequest="250" WidthRequest="200" BackgroundColor="LightGray">
+
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=SearchCategoryCommand}" NumberOfTapsRequired="1"
+                                                          CommandParameter="{Binding}"/>
+                                        </Grid.GestureRecognizers>
                                         <ff:CachedImage Source="{Binding ImageUrl}"
                                                         VerticalOptions="FillAndExpand"
                                                         HorizontalOptions="FillAndExpand"
@@ -45,10 +50,6 @@
                                             <Label Text="{Binding Name}" TextColor="White" Margin="4"
                                        FontSize="Medium" FontAttributes="Bold" VerticalOptions="Center"/>
                                         </y:PancakeView>
-                                        <Grid.GestureRecognizers>
-                                            <TapGestureRecognizer  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostsViewModel}}, Path=SearchCategoryCommand}" NumberOfTapsRequired="1"
-                                                          CommandParameter="{Binding}"/>
-                                        </Grid.GestureRecognizers>
                                     </Grid>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
@@ -61,7 +62,7 @@
                 </StackLayout>
                 <loader:TaskLoaderView AccentColor="Accent" TaskLoaderNotifier="{Binding PostItemsLoader}">
 
-                    <StackLayout Orientation="Vertical" Spacing="8" BindableLayout.ItemsSource="{Binding PostItemsLoader.Result}"
+                    <StackLayout Orientation="Vertical" Spacing="8" BindableLayout.ItemsSource="{Binding Items}"
                         BackgroundColor="Transparent" BindableLayout.ItemTemplate="{StaticResource PostModelTemplate}"
                     HorizontalOptions="FillAndExpand" 
                             VerticalOptions="StartAndExpand">

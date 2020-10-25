@@ -7,5 +7,6 @@
         string UserId { get; set; }
         string Role { get; set; }
         string Image { get; set; }
+        string IdToken { get; set; }
     }
 }

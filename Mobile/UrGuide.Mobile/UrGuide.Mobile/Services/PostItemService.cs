@@ -11,7 +11,8 @@ using System.Reactive.Linq;
 using Akavache;
 using System.Net.Http;
 using Sharpnado.Presentation.Forms.Services;
-using System.Collections.ObjectModel;
+using System.Reactive.Threading.Tasks;
+using Xamarin.Essentials;
 
 namespace UrGuide.Mobile.Services
 {
@@ -25,7 +26,8 @@ namespace UrGuide.Mobile.Services
                                LookupClient lookupClient,
                                IMapper mapper,
                                IBlobCache cache,
-                               IPreferenceService preference)
+                               IPreferenceService preference,
+                               INavigationService navigationService)
         {
             _clientFactory = clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));
             BidClient = bidClient ?? throw new ArgumentNullException(nameof(bidClient));
@@ -34,6 +36,7 @@ namespace UrGuide.Mobile.Services
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             Cache = cache ?? throw new ArgumentNullException(nameof(cache));
             Preference = preference ?? throw new ArgumentNullException(nameof(preference));
+            NavigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
         }
 
         IHttpClientFactory _clientFactory;
@@ -51,14 +54,15 @@ namespace UrGuide.Mobile.Services
         public IMapper Mapper { get; }
         public IBlobCache Cache { get; }
         public IPreferenceService Preference { get; }
+        public INavigationService NavigationService { get; }
 
-        public async Task<Result<IEnumerable<Model.Posts.BidHistoryModel>>> GetBidHistoryAsync(string id)
+        public Task<Result<IEnumerable<Model.Posts.BidHistoryModel>>> GetBidHistoryAsync(string id)
         {
-            return await Cache.GetOrFetchObject($"bid_{id}", async () =>
+            return Try(async () =>
             {
                 var bidHistory = await BidClient.HistoryAsync(id);
                 return Result.Of(Mapper.Map<IEnumerable<Model.Posts.BidHistoryModel>>(bidHistory));
-            }).Catch(Observable.Return(Result.Of<IEnumerable<Model.Posts.BidHistoryModel>>().WithErrors("Error occured")));
+            }, e => Result.Of<IEnumerable<Model.Posts.BidHistoryModel>>().WithErrors(e.Message));
         }
 
         public async Task<Result<PostItem>> GetByIdAsync(string id)
@@ -83,11 +87,7 @@ namespace UrGuide.Mobile.Services
                 return Result.Of(Mapper.Map<IEnumerable<Model.Lookup.CategoryModel>>(categories));
             }, DateTime.UtcNow.AddYears(1)).Catch(Observable.Return(Result.Of<IEnumerable<Model.Lookup.CategoryModel>>().WithErrors("Error occured")));
         }
-
-        public async Task Create(PostCreationModel post)
-        {
-            await Client.CreateAsync(post);
-        }
+        
 
         public async Task<IEnumerable<PostItem>> GetFavoriteAsync()
         {
@@ -98,7 +98,7 @@ namespace UrGuide.Mobile.Services
         {
             try
             {
-                var posts = await Client.Last10Async();
+                var posts = await Client.Last100Async();
                 var favorites = await GetFavoriteAsync();
                 var items = Mapper.Map<IEnumerable<PostItem>>(posts).Select(x =>
                     {
@@ -107,10 +107,9 @@ namespace UrGuide.Mobile.Services
                     });
                 return Result.Of(items);
             }
-            catch (ApiException e)
+            catch (ApiException<StringErrorEnvelop> e)
             {
-
-                return Result.Of<IEnumerable<PostItem>>().WithErrors(e.Message);
+                return Result.Of<IEnumerable<PostItem>>().WithErrors(string.Join(Environment.NewLine, e.Result.Errors));
             }
             
         }
@@ -135,39 +134,35 @@ namespace UrGuide.Mobile.Services
 
                 return Result.Of(Mapper.Map<IEnumerable<DiscoverItem>>(posts.Items.AsEnumerable()));
             }
-            catch (ApiException e)
+            catch (ApiException<StringErrorEnvelop> e)
             {
-
-                return Result.Of<IEnumerable<DiscoverItem>>().WithErrors(e.Message);
+                return Result.Of<IEnumerable<DiscoverItem>>().WithErrors(string.Join(Environment.NewLine, e.Result.Errors));
             }
         }
 
         public async Task SetUserReaction(PostItem it)
         {
-            if (it.HasReacted)
-            {
-                it.Likes--;
-                it.HasReacted = false;
-                it.ReactionType = GlobalSetting.Unknown;
-            } 
-            else
-            {
-                it.Likes++;
-                it.HasReacted = true;
-                it.ReactionType = GlobalSetting.Like;
-            }
-            try
+            await Try(async () =>
             {
                 await Client.ReactionAsync(it.Id, new UserReactionModel
                 {
                     Like = true,
                     PostId = it.Id
                 });
-            }
-            catch (ApiException e)
-            {
-                // do something as the user might have lost his authorization
-            }
+                if (it.HasReacted)
+                {
+                    it.Likes--;
+                    it.HasReacted = false;
+                    it.ReactionType = GlobalSetting.Unknown;
+                }
+                else
+                {
+                    it.Likes++;
+                    it.HasReacted = true;
+                    it.ReactionType = GlobalSetting.Like;
+                }
+                return true;
+            }, e => false);
         }
 
         public async Task ToggleFavorites(PostItem it)
@@ -189,7 +184,7 @@ namespace UrGuide.Mobile.Services
 
         public async Task<Result<Model.Shared.AuthoredFeedback>> SendFeedback(string postId, Model.Shared.FeedbackModel item)
         {
-            try
+            return await Try(async () =>
             {
                 var result = await Client.FeedbackAsync(postId, new FeedbackModel
                 {
@@ -207,13 +202,10 @@ namespace UrGuide.Mobile.Services
                         Text = item.Text,
                         PublicationDate = DateTime.Now.ToString("dd-MMM-yyyy HH:mm:ss")
                     });
-                }
+                };
                 return Result.Of<Model.Shared.AuthoredFeedback>().WithErrors("Fail to post your feedback, please try later");
-            }
-            catch (ApiException e)
-            {
-                return Result.Of<Model.Shared.AuthoredFeedback>().WithErrors(e.Message);
-            }
+
+            }, e => Result.Of<Model.Shared.AuthoredFeedback>().WithErrors(e.Message));
         }
 
         public async Task<PageResult<PostItem>> GetUserPosts(string userId, int pageNumber)
@@ -223,6 +215,98 @@ namespace UrGuide.Mobile.Services
                 PageNumber = pageNumber
             });
             return new PageResult<PostItem>(items.ItemsCount, Mapper.Map<IEnumerable<PostItem>>(items.Items).ToList());
+        }
+
+        public IObservable<PostItem> Create(PostCreationModel post) => Client.CreateAsync(post).ToObservable()
+                .Select(x => Mapper.Map<PostItem>(x));
+
+        public async Task ToggleReservation(PostItem it)
+        {
+            await Try(async () =>
+            {
+                if (it.HasReserved)
+                {
+                    await Client.CancelreservationAsync(it.Id);
+                    it.HasReserved = false;
+                    it.ReservedSeats--;
+                }
+                else
+                {
+                    await Client.MakereservationAsync(it.Id, new SeatReservationModel
+                    {
+                        PostId = it.Id,
+                        Seats = 1
+                    });
+                    it.HasReserved = true;
+                    it.ReservedSeats++;
+                }
+                return true;
+            }, e => false);
+        }
+
+        public Task ShareItem(PostItem it)
+        {
+            var url = $"{GlobalSetting.DefaultEndpoint}/post/{it.Id}";
+
+            return Share.RequestAsync(new ShareTextRequest
+            {
+                Uri = url,
+                Title = it.Text
+            });
+        }
+
+        public Task<Result<bool>> Bid(string id, double bid)
+        {
+            return Try(async () =>
+            {
+                await BidClient.NewbidAsync(id, new BidModel
+                {
+                    PostId = id,
+                    Value = $"{bid:#.##}"
+                });
+                return Result.Of(true);
+            }, e => Result.Of(false).WithErrors(e.Message));
+        }
+
+        public Task<Result<string>> AcceptBid(string id)
+        {
+            return Try(async () =>
+            {
+                var post = await BidClient.AcceptAsync(id);
+                return Result.Of(post.LastBid);
+            }, e => Result.Of(string.Empty).WithErrors(e.Message));
+        }
+
+
+        public Task<Result<string>> RejectBid(string id)
+        {
+            return Try(async () =>
+            {
+                var post = await BidClient.RejectAsync(id);
+                return Result.Of(post.LastBid);
+            }, e => Result.Of(string.Empty).WithErrors(e.Message));
+        }
+
+
+        private async Task<T> Try<T>(Func<Task<T>> action, Func<Exception,T> defaultValue)
+        {
+            try
+            {
+                return await action();
+            }
+            catch (ApiException<StringErrorEnvelop> e)
+            {
+                await NavigationService.DisplayErrorAsync(message: string.Join(Environment.NewLine, e.Result.Errors));
+                return defaultValue(new Exception(string.Join(Environment.NewLine, e.Result.Errors)));
+            }
+            catch (ApiException e)
+            {
+                if (e.StatusCode == 401)
+                    await NavigationService.DisplayErrorAsync(message: "You must login prior to doing this action");
+                if (e.StatusCode == 500)
+                    await NavigationService.DisplayErrorAsync(message: "An unexpected error has occurred");
+                return defaultValue(new Exception(e.Message));
+            }
         }
     }
 }

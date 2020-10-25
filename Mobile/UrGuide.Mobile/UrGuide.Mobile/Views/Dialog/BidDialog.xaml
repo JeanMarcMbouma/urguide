@@ -26,10 +26,9 @@
             <CollectionView.HeaderTemplate>
                 <DataTemplate>
                     <StackLayout Orientation="Horizontal" Spacing="8">
-                            <Path Data="M 504.971 199.362 l -22.627 -22.627 c -9.373 -9.373 -24.569 -9.373 -33.941 0 l -5.657 5.657 L 329.608 69.255 l 5.657 -5.657 c 9.373 -9.373 9.373 -24.569 0 -33.941 L 312.638 7.029 c -9.373 -9.373 -24.569 -9.373 -33.941 0 L 154.246 131.48 c -9.373 9.373 -9.373 24.569 0 33.941 l 22.627 22.627 c 9.373 9.373 24.569 9.373 33.941 0 l 5.657 -5.657 l 39.598 39.598 l -81.04 81.04 l -5.657 -5.657 c -12.497 -12.497 -32.758 -12.497 -45.255 0 L 9.373 412.118 c -12.497 12.497 -12.497 32.758 0 45.255 l 45.255 45.255 c 12.497 12.497 32.758 12.497 45.255 0 l 114.745 -114.745 c 12.497 -12.497 12.497 -32.758 0 -45.255 l -5.657 -5.657 l 81.04 -81.04 l 39.598 39.598 l -5.657 5.657 c -9.373 9.373 -9.373 24.569 0 33.941 l 22.627 22.627 c 9.373 9.373 24.569 9.373 33.941 0 l 124.451 -124.451 c 9.372 -9.372 9.372 -24.568 0 -33.941 Z"
-                              Stroke="{StaticResource IconColor}" Fill="{StaticResource IconColor}"
-                              HeightRequest="24" WidthRequest="24" Aspect="Uniform" />
-                            <Label Text="{Binding Source={RelativeSource AncestorType={x:Type vm:BidDialogViewModel}}, Path=Item.Text, StringFormat=' - {0}'}" FontSize="Medium" FontAttributes="Bold"
+                                <Image Source="{FontImage Color={StaticResource IconColor},FontFamily=fas, Glyph={x:Static icons:FAI.Gavel},Size=24}" />
+
+                                <Label Text="{Binding Source={RelativeSource AncestorType={x:Type vm:BidDialogViewModel}}, Path=Item.Text, StringFormat=' - {0}'}" FontSize="Medium" FontAttributes="Bold"
                                VerticalOptions="Center" HorizontalOptions="StartAndExpand"
                                />
                         <StackLayout VerticalOptions="Start" HorizontalOptions="EndAndExpand" >

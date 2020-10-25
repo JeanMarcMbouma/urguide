@@ -16,6 +16,7 @@
         <FontImageSource x:Key="ProfileFontIcon" FontFamily="fas" Glyph="&#xf2bd;"  Color="Accent"/>
         <FontImageSource x:Key="CreatePost" FontFamily="fas" Glyph="{Static fa:FAI.Plus}" Size="24" />
         <FontImageSource x:Key="Login" FontFamily="fas" Glyph="{Static fa:FAI.DoorOpen}" Size="24" />
+        <FontImageSource x:Key="Logout" FontFamily="fas" Glyph="{Static fa:FAI.DoorClosed}" Size="24" />
         <Style x:Key="TabStyle" TargetType="tabs:BottomTabItem">
             <Setter Property="SelectedTabColor" Value="Accent" />
             <Setter Property="LabelSize" Value="14" />
@@ -24,14 +25,15 @@
     </ContentPage.Resources>
     <ContentPage.Content>
         <Grid RowDefinitions="*,Auto">
-            <ScrollView>
-                <tabs:ViewSwitcher x:Name="Switcher" Animate="True" SelectedIndex="{Binding SelectedViewIndex}">
-                    <sv:LazyView Animate="True" x:TypeArguments="views:PostPage" BindingContext="{Binding Posts}"/>
-                    <sv:LazyView Animate="True" x:TypeArguments="views:Discover" BindingContext="{Binding Discover}"/>
-                    <sv:LazyView Animate="True" x:TypeArguments="views:Favorite" BindingContext="{Binding Favorite}"/>
-                    <sv:LazyView Animate="True" x:TypeArguments="views:Profile" BindingContext="{Binding Profile}"/>
-                </tabs:ViewSwitcher>
-            </ScrollView>
+            <!--<ScrollView>
+                
+            </ScrollView>-->
+            <tabs:ViewSwitcher x:Name="Switcher" Animate="True" SelectedIndex="{Binding SelectedViewIndex}">
+                <sv:LazyView Animate="True" x:TypeArguments="views:PostPage" BindingContext="{Binding Posts}"/>
+                <sv:LazyView Animate="True" x:TypeArguments="views:Discover" BindingContext="{Binding Discover}"/>
+                <sv:LazyView Animate="True" x:TypeArguments="views:Favorite" BindingContext="{Binding Favorite}"/>
+                <sv:LazyView Animate="True" x:TypeArguments="views:Profile" BindingContext="{Binding Profile}"/>
+            </tabs:ViewSwitcher>
             <tabs:TabHostView x:Name="TabHost"  
                     Grid.Row="1"
                     BackgroundColor="White"
@@ -61,14 +63,16 @@
                         IconImageSource="{StaticResource CreatePost}"
                         Scale="1.3"
                         TranslationY="-10" TapCommand="{Binding CreatePostCommand}"
-                        IsVisible="{Binding IsLoggedIn}"/>
+                        IsVisible="{Binding CanCreatePost}"/>
 
                     <tabs:BottomTabItem 
                             IconImageSource="{StaticResource FavoriteFontIcon}"
                             Label="Favorite" />
                     <tabs:BottomTabItem 
                             IconImageSource="{StaticResource ProfileFontIcon}"
-                            Label="Profile" IsVisible="{Binding IsLoggedIn}"/>
+                            Label="Profile" IsVisible="{Binding IsLoggedIn}"
+                        IsTabStop="True"/>
+
                 </tabs:TabHostView.Tabs>
             </tabs:TabHostView>
         </Grid>

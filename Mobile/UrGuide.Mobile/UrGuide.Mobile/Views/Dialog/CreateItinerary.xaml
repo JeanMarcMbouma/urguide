@@ -13,6 +13,7 @@
             <Grid RowDefinitions="50, Auto" RowSpacing="12">
                 <StackLayout Orientation="Horizontal" Spacing="8">
                     <StackLayout VerticalOptions="Start" HorizontalOptions="StartAndExpand" Spacing="8" Orientation="Horizontal">
+                        <Image Source="{FontImage Color={StaticResource IconColor},FontFamily=fas, Glyph={x:Static icons:FAI.MapPin},Size=24}" />
                         <Label Text="New itinerary" FontSize="Medium" FontAttributes="Bold"
                                    VerticalOptions="Center" HorizontalOptions="StartAndExpand"
                                    />

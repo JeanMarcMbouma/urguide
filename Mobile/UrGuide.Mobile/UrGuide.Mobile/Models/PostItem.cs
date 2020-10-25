@@ -1,6 +1,8 @@
 ﻿using MvvmHelpers;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using UrGuide.Model.Shared;
 using Xamarin.Forms;
 
@@ -14,6 +16,9 @@ namespace UrGuide.Mobile.Models
         private int _likes;
         private int _dislikes;
         private bool favorite;
+        private bool hasReserved;
+        private int reservedSeats;
+        private int bidCount;
 
         public PostItem()
         {
@@ -31,12 +36,12 @@ namespace UrGuide.Mobile.Models
         public string PublicationDate { get; set; }
         public string LastBid { get; set; }
         public int Seats { get; set; }
-        public int ReservedSeats { get; set; }
+        public int ReservedSeats { get => reservedSeats; set => SetProperty(ref reservedSeats, value); }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public string EndTime { get; set; }
         public string StartTime { get; set; }
-        public bool HasReserved { get; set; }
+        public bool HasReserved { get => hasReserved; set => SetProperty(ref hasReserved, value); }
         public bool HasReacted { get; set; }
         public int ReactionType
         {
@@ -47,7 +52,7 @@ namespace UrGuide.Mobile.Models
                 OnPropertyChanged(nameof(Dislikes));
             });
         }
-        public int BidCount { get; set; }
+        public int BidCount { get => bidCount; set => SetProperty(ref bidCount, value); }
         public int ItineraryCount { get; set; }
         public List<string> Categories { get; set; }
         public List<ImageFileModel> Images { get; set; }
@@ -65,10 +70,19 @@ namespace UrGuide.Mobile.Models
 
         public bool Favorite { get => favorite; set => SetProperty(ref favorite, value); }
 
-        public class PostItemCountdown : ObservableObject
+        public class PostItemCountdown : ReactiveObject
         {
+            private bool isActive;
+
             public string Left => IsActive ? string.Format("   {0:dd} day(s) {0:hh\\:mm\\:ss}", TimeLeft) : string.Empty;
-            public bool IsActive { get; set; }
+            public bool IsActive
+            {
+                get => isActive; set
+                {
+                    this.RaiseAndSetIfChanged(ref isActive, value);
+                    this.RaisePropertyChanged(nameof(Left));
+                }
+            }
             public TimeSpan TimeLeft
             {
                 get; set;
@@ -81,19 +95,15 @@ namespace UrGuide.Mobile.Models
                 {
                     IsActive = end > DateTime.UtcNow;
                     TimeLeft = (DateTime.UtcNow - start).Negate();
-                    Device.StartTimer(TimeSpan.FromSeconds(1), UpdateTimer);
+                    Observable.Timer(TimeSpan.FromSeconds(1))
+                        .DoWhile(() => IsActive)
+                        .ObserveOn(RxApp.MainThreadScheduler)
+                        .Subscribe((v) =>
+                        {
+                            TimeLeft = TimeLeft.Subtract(TimeSpan.FromSeconds(1));
+                            IsActive = TimeLeft.TotalSeconds > 0;
+                        });
                 }
-            }
-
-            private bool UpdateTimer()
-            {
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    TimeLeft = TimeLeft.Subtract(TimeSpan.FromSeconds(1));
-                    OnPropertyChanged(nameof(Left));
-                    OnPropertyChanged(nameof(IsActive));
-                });
-                return TimeLeft.TotalSeconds > 0;
             }
 
             public override string ToString()

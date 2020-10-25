@@ -10,7 +10,7 @@
              xmlns:models="clr-namespace:UrGuide.Model.Users;assembly=UrGuide.Model" 
              xmlns:controls="clr-namespace:UrGuide.Mobile.Views.Controls" 
              xmlns:tpl="clr-namespace:UrGuide.Mobile.Views.Templates.Profile" 
-             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers" xmlns:loader="clr-namespace:Sharpnado.Presentation.Forms.CustomViews;assembly=Sharpnado.TaskLoaderView"
+             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers" xmlns:loader="clr-namespace:Sharpnado.Presentation.Forms.CustomViews;assembly=Sharpnado.TaskLoaderView" xmlns:tabs="clr-namespace:Sharpnado.Presentation.Forms.CustomViews.Tabs;assembly=Sharpnado.Presentation.Forms"
              BackgroundColor="#ececec"
              x:DataType="vm:ProfileViewModel">
     <ContentView.Resources>
@@ -34,47 +34,61 @@
                                          ReviewsTemplate="{StaticResource ReviewsTemplate}"
                                          />
     </ContentView.Resources>
-    <loader:TaskLoaderView TaskLoaderNotifier="{Binding UserLoader}" >
-        <RefreshView IsRefreshing="{Binding UserLoader.ShowRefresher}" Command="{Binding UserLoader.RefreshCommand}">
-    <AbsoluteLayout>
-    <ScrollView AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional">
-        <Grid RowDefinitions="Auto,Auto,*" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
+    <ScrollView Orientation="Vertical">
+        <loader:TaskLoaderView TaskLoaderNotifier="{Binding UserLoader}" >
+            <RefreshView IsRefreshing="{Binding UserLoader.ShowRefresher}" Command="{Binding UserLoader.RefreshCommand}">
+                <Grid RowDefinitions="Auto,Auto,*" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
               RowSpacing="0">
                     <Frame HasShadow="True" IsClippedToBounds="True" VerticalOptions="FillAndExpand"
                    HorizontalOptions="FillAndExpand" BorderColor="LightGray">
-            <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
+
+
+                        <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
                          Margin="16" BindingContext="{Binding Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}, Path=UserLoader.Result}" x:DataType="models:UserInfo"
                          Spacing="8">
-                <ff:CachedImage Source="{Binding ProfileImage}"
+                            <ff:CachedImage Source="{Binding ProfileImage}"
                                 WidthRequest="100" HeightRequest="100" DownsampleToViewSize="True"
                                 Aspect="AspectFit" HorizontalOptions="CenterAndExpand"/>
-                    <Label Text="{Binding FullName}" FontSize="Medium" FontAttributes="Bold" HorizontalOptions="CenterAndExpand" />
-                    <Label FontSize="Medium" HorizontalOptions="CenterAndExpand">
-                        <Label.Text>
-                            <MultiBinding StringFormat="{}{0}, {1}">
-                                <Binding Path="City" />
-                                <Binding Path="Country" />
-                            </MultiBinding>
-                        </Label.Text>
-                        <Label.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding City}" Value="{x:Static x:String.Empty}">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                            <DataTrigger TargetType="Label" Binding="{Binding City}" Value="{x:Null}">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Label.Triggers>
-                    </Label>
-                <controls:Rating Value="{Binding Rating}" IsEnabled="False" HorizontalOptions="CenterAndExpand"
+                            <Label Text="{Binding FullName}" FontSize="Medium" FontAttributes="Bold" HorizontalOptions="CenterAndExpand" />
+                            <Label FontSize="Medium" HorizontalOptions="CenterAndExpand">
+                                <Label.Text>
+                                    <MultiBinding StringFormat="{}{0}, {1}">
+                                        <Binding Path="City" />
+                                        <Binding Path="Country" />
+                                    </MultiBinding>
+                                </Label.Text>
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding City}" Value="{x:Static x:String.Empty}">
+                                        <Setter Property="IsVisible" Value="False"/>
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" Binding="{Binding City}" Value="{x:Null}">
+                                        <Setter Property="IsVisible" Value="False"/>
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                            <controls:Rating Value="{Binding Rating}" IsEnabled="False" HorizontalOptions="CenterAndExpand"
                                  StarHeightRequest="{OnIdiom Phone=18,Default=24}"
                                  StarWidthRequest="{OnIdiom Phone=18, Default=24}"/>
-                <Label Text="{Binding Description}" FontSize="Subtitle" HorizontalOptions="CenterAndExpand" Margin="0,0,0,8"/>
-            </StackLayout>
-            </Frame>
-            <Frame Grid.Row="1" IsClippedToBounds="True" HasShadow="True" BackgroundColor="{StaticResource IconColor}" 
-                   HorizontalOptions="FillAndExpand" Padding="4" Margin="16,-20,16,20" CornerRadius="8">
-                <Grid ColumnDefinitions="*,*,*" HorizontalOptions="FillAndExpand" ColumnSpacing="4">
-                    <StackLayout Orientation="Horizontal" VerticalOptions="CenterAndExpand" 
+                            <Label Text="{Binding Description}" FontSize="Subtitle" HorizontalOptions="CenterAndExpand" Margin="0,0,0,8"/>
+                        </StackLayout>
+                    </Frame>
+
+                    <ImageButton BackgroundColor="Transparent"
+                       Source="{FontImage FontFamily=fas, Glyph={x:Static icons:FAI.SignOutAlt}, Size=24
+                            ,Color=Accent}"
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=SignOutCommand}"
+                             WidthRequest="42"
+                             HeightRequest="42"
+                             VerticalOptions="Start"
+                             HorizontalOptions="End"
+                             Margin="4,8"
+                             IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path= IsLoggedIn}"
+
+                        />
+                    <Frame Grid.Row="1" IsClippedToBounds="True" HasShadow="True" BackgroundColor="{StaticResource IconColor}" 
+                   HorizontalOptions="FillAndExpand" Padding="4" Margin="16,-20,16,20" CornerRadius="8" >
+                        <Grid ColumnDefinitions="*,*,*" HorizontalOptions="FillAndExpand" ColumnSpacing="4">
+                            <StackLayout Orientation="Horizontal" VerticalOptions="CenterAndExpand" 
                                  HorizontalOptions="CenterAndExpand"
                                  >
                                 <Image Source="{FontImage FontFamily=fas, 
@@ -90,13 +104,13 @@
                                     </Image.Triggers>
                                 </Image>
                                 <Label Text="Reviews" FontSize="Subtitle" FontAttributes="Bold" Style="{StaticResource MenuTextColor}"/>
-                        <StackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ViewReviewsCommand}"/>
-                        </StackLayout.GestureRecognizers>
-                    </StackLayout>
-                    <BoxView BackgroundColor="White" WidthRequest="1" HorizontalOptions="End"  />
+                                <StackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ViewReviewsCommand}"/>
+                                </StackLayout.GestureRecognizers>
+                            </StackLayout>
+                            <BoxView BackgroundColor="White" WidthRequest="1" HorizontalOptions="End"  />
 
-                    <StackLayout Grid.Column="1" Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
+                            <StackLayout Grid.Column="1" Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
                                 <Image Source="{FontImage FontFamily=fas, 
                                     Glyph={x:Static icons:FAI.List}, 
                                     Color=White,Size=24}" >
@@ -110,14 +124,14 @@
                                     </Image.Triggers>
                                 </Image>
                                 <Label Text="Posts" FontSize="Subtitle" FontAttributes="Bold" Style="{StaticResource MenuTextColor}"/>
-                        <StackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ViewPostsCommand}"/>
-                        </StackLayout.GestureRecognizers>
-                    </StackLayout>
-                    <BoxView Grid.Column="1" BackgroundColor="White" WidthRequest="1" 
+                                <StackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ViewPostsCommand}"/>
+                                </StackLayout.GestureRecognizers>
+                            </StackLayout>
+                            <BoxView Grid.Column="1" BackgroundColor="White" WidthRequest="1" 
                              VerticalOptions="StartAndExpand" HorizontalOptions="End" />
 
-                    <StackLayout Grid.Column="2" Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
+                            <StackLayout Grid.Column="2" Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
                                 <Image Source="{FontImage FontFamily=fas, 
                                     Glyph={x:Static icons:FAI.Th}, 
                                     Color=White,Size=24}" >
@@ -131,98 +145,23 @@
                                     </Image.Triggers>
                                 </Image>
                                 <Label Text="Gallery" FontSize="Subtitle" FontAttributes="Bold" Style="{StaticResource MenuTextColor}"/>
-                        <StackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ViewGalleryCommand}"/>
-                        </StackLayout.GestureRecognizers>
+                                <StackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ViewGalleryCommand}"/>
+                                </StackLayout.GestureRecognizers>
+                            </StackLayout>
+                        </Grid>
+                    </Frame>
+                    <StackLayout Grid.Row="2" HorizontalOptions="FillAndExpand"
+                                 VerticalOptions="FillAndExpand" 
+                                 Margin="12,0"
+                                 BindableLayout.ItemsSource="{Binding Items}"
+                                 BindableLayout.ItemTemplateSelector="{StaticResource TemplateSelector}"
+                                 Orientation="Vertical">
+                        
                     </StackLayout>
                 </Grid>
-            </Frame>
-            <CollectionView Grid.Row="2" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"
-                            ItemSizingStrategy="MeasureAllItems"
-                            Margin="12,0,12,0"
-                         ItemsSource="{Binding Items}" ItemTemplate="{StaticResource TemplateSelector}">
-            </CollectionView>
-            
-        </Grid>
+
+            </RefreshView>
+        </loader:TaskLoaderView>
     </ScrollView>
-        <Expander AbsoluteLayout.LayoutBounds="0.97,0.97, 170,70"
-                  AbsoluteLayout.LayoutFlags="PositionProportional" Rotation="180"
-                  x:Name="floatingButton" Tapped="Expander_Tapped" IsVisible="False">
-                <Expander.Header>
-                    <Frame  HorizontalOptions="Start" VerticalOptions="Center" CornerRadius="32" HeightRequest="64" WidthRequest="64"
-                            Padding="0" BackgroundColor="{StaticResource FavoriteIcon}">
-                    <Image Source="{FontImage FontFamily=fas, 
-                                    Glyph={x:Static icons:FAI.Plus}, 
-                                    Color=White,Size=24}" Aspect="AspectFit"
-                           HeightRequest="32" WidthRequest="32" HorizontalOptions="Center" VerticalOptions="Center">
-                        <Image.Triggers>
-                            <DataTrigger TargetType="Image" Binding="{Binding Source={Reference floatingButton},Path=IsExpanded}"
-                                         Value="{x:Static x:Boolean.TrueString}">
-                                <Setter Property="Source" Value="{FontImage FontFamily=fas, 
-                                    Glyph={x:Static icons:FAI.Times}, 
-                                    Color=White,Size=24}"/>
-                            </DataTrigger>
-                        </Image.Triggers>
-                    </Image>
-                    </Frame>
-                </Expander.Header>
-                <StackLayout Orientation="Vertical" Spacing="8" Margin="0,10,0,10" VerticalOptions="FillAndExpand"
-                         HorizontalOptions="FillAndExpand" BackgroundColor="{StaticResource IconColor}"
-                         Padding="12">
-                <BoxView HeightRequest="1" BackgroundColor="White" HorizontalOptions="FillAndExpand"/>
-
-                    <StackLayout Orientation="Horizontal" Spacing="8" Rotation="180"
-                             HorizontalOptions="End">
-                        <Image Source="{FontImage FontFamily=fas, 
-                                    Glyph={x:Static icons:FAI.Exclamation}, 
-                                    Color=White,Size=24}" Aspect="AspectFit"
-                           HeightRequest="24" WidthRequest="24" HorizontalOptions="Center" VerticalOptions="Center"/>
-                        <Label Text="Delete account" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" TextColor="White"/>
-                        <StackLayout.GestureRecognizers>
-                            <TapGestureRecognizer NumberOfTapsRequired="1" Command="{Binding DeleteAccountCommand}" Tapped="Close_Expander"/>
-                        </StackLayout.GestureRecognizers>
-                    </StackLayout>
-                    <BoxView HeightRequest="1" BackgroundColor="White" HorizontalOptions="FillAndExpand"/>
-                    <StackLayout Orientation="Horizontal" Spacing="8" Rotation="180"
-                             HorizontalOptions="End">
-                        <Image Source="{FontImage FontFamily=fas, 
-                                    Glyph={x:Static icons:FAI.Edit}, 
-                                    Color=White,Size=24}" Aspect="AspectFit"
-                           HeightRequest="24" WidthRequest="24" HorizontalOptions="Center" VerticalOptions="Center"/>
-                        <Label Text="Edit profile" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" TextColor="White"/>
-                        <StackLayout.GestureRecognizers>
-                            <TapGestureRecognizer NumberOfTapsRequired="1" Command="{Binding EditProfileCommand}" Tapped="Close_Expander"/>
-                        </StackLayout.GestureRecognizers>
-                    </StackLayout>
-                    <BoxView HeightRequest="1" BackgroundColor="White" HorizontalOptions="FillAndExpand"/>
-                <StackLayout Orientation="Horizontal" Spacing="8" Rotation="180"
-                             HorizontalOptions="End">
-                        <Image Source="{FontImage FontFamily=fas, 
-                                    Glyph={x:Static icons:FAI.Plus}, 
-                                    Color=White,Size=24}" Aspect="AspectFit"
-                           HeightRequest="24" WidthRequest="24" HorizontalOptions="Center" VerticalOptions="Center"/>
-                        <Label Text="New gallery" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" TextColor="White"/>
-                    <StackLayout.GestureRecognizers>
-                        <TapGestureRecognizer NumberOfTapsRequired="1" Command="{Binding CreateGalleryCommand}" Tapped="Close_Expander"/>
-                    </StackLayout.GestureRecognizers>
-                </StackLayout>
-                <BoxView HeightRequest="1" BackgroundColor="White" HorizontalOptions="FillAndExpand"/>
-                    <StackLayout Orientation="Horizontal" Spacing="8" Rotation="180"
-                             HorizontalOptions="End">
-                        <Image Source="{FontImage FontFamily=fas, 
-                                    Glyph={x:Static icons:FAI.UserSecret}, 
-                                    Color=White,Size=24}" Aspect="AspectFit"
-                           HeightRequest="24" WidthRequest="24" HorizontalOptions="Center" VerticalOptions="Center"/>
-                        <Label Text="Change password" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" TextColor="White"/>
-                        <StackLayout.GestureRecognizers>
-                            <TapGestureRecognizer NumberOfTapsRequired="1" Command="{Binding ChangePasswordCommand}" Tapped="Close_Expander"/>
-                        </StackLayout.GestureRecognizers>
-                    </StackLayout>
-                    <BoxView HeightRequest="1" BackgroundColor="White" HorizontalOptions="FillAndExpand"/>
-            </StackLayout>
-        </Expander>
-
-        </AbsoluteLayout>
-    </RefreshView>
-    </loader:TaskLoaderView>
 </ContentView>

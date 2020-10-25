@@ -16,6 +16,7 @@ using UrGuide.Mobile.ViewModels;
 using UrGuide.Mobile.Views;
 using Xamarin.Forms;
 using Akavache.Sqlite3;
+using IdentityModel.OidcClient.Browser;
 
 [assembly: ExportFont("Font Awesome 5 Free-Solid-900.otf", Alias = "fas")]
 [assembly: ExportFont("Font Awesome 5 Free-Regular-400.otf", Alias = "far")]
@@ -48,6 +49,7 @@ namespace UrGuide.Mobile
             services.AddHttpClient<API.BidClient>(clientRegistration);
             services.AddHttpClient<API.UsersClient>(clientRegistration);
             services.AddHttpClient<API.CatalogsClient>(clientRegistration);
+            services.AddHttpClient<API.AccountClient>(clientRegistration);
 
             services.AddSingleton<IMainPageService, NavigationPageService>();
             services.AddSingleton<App>();
@@ -57,7 +59,7 @@ namespace UrGuide.Mobile
             services.AddSingleton<IPreferenceService, PreferenceService>();
             services.AddSingleton<IIdentityService, IdentityService>();
             services.AddSingleton<IFileService, FileService>();
-
+            services.AddSingleton<IBrowser, SystemBrowser>();
 
             services.AddScoped<PostsViewModel>();
             services.AddScoped<PostDetailViewModel>();
@@ -69,10 +71,12 @@ namespace UrGuide.Mobile
             services.AddScoped<DiscoverViewModel>();
             services.AddScoped<ShellViewModel>();
             services.AddScoped<MainPageViewModel>();
+            services.AddTransient<CreatePostViewModel>();
 
             services.AddAutoMapper(typeof(PostProfile).Assembly);
 
             services.AddSingleton((s) => BlobCache.LocalMachine);
+            services.AddSingleton((s) => MessagingCenter.Instance);
         }
         public static void Init(Action<IServiceCollection> registerServices)
         {

@@ -18,6 +18,9 @@
   <assembly fullname="IdentityModel" >
     <type fullname="*"></type>
   </assembly>
+  <assembly fullname="System.IdentityModel.Tokens.Jwt" >
+    <type fullname="*"></type>
+  </assembly>
   <assembly fullname="Microsoft.Extensions.DependencyInjection.Abstractions">
   </assembly>
   <assembly fullname="Microsoft.Extensions.DependencyInjection">

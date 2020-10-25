@@ -116,66 +116,60 @@
                         <behaviors:TapFeedbackBehavior/>
                     </Image.Behaviors>
                 </Image>
+                <!-- Hours-->
                 <StackLayout st:Transition.Name="Hours" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Vertical" VerticalOptions="StartAndExpand" Spacing="12">
                     <StackLayout Orientation="Horizontal" Spacing="8">
                         <Image Source="{FontImage FontFamily=fas, 
-                        Glyph={x:Static icons:FAI.MapPin}, 
-                        Color={StaticResource Accent},Size=24}" WidthRequest="24"/>
+                            Glyph={x:Static icons:FAI.MapPin}, 
+                            Color={StaticResource Accent},Size=24}" WidthRequest="24"/>
                         <Label Text="{Binding Location, StringFormat='Place: {0}'}" FontSize="Medium"
-                               Style="{StaticResource TextSubhead}" FontAttributes="Bold"/>
+                             Style="{StaticResource TextSubhead}"  FontAttributes="Bold" />
                     </StackLayout>
                     <StackLayout Orientation="Horizontal" Spacing="8">
                         <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.DollarSign}, 
                         Color={StaticResource Accent},Size=24}" WidthRequest="24"/>
-                        <Label Text="{Binding Price, StringFormat='Budget: {0}'}" FontSize="Medium"
-                               Style="{StaticResource TextSubhead}" FontAttributes="Bold"/>
+                        <Label Text="{Binding Price, StringFormat='Budget: {0}'}" FontSize="Medium" Style="{StaticResource TextSubhead}" FontAttributes="Bold"/>
                     </StackLayout>
                     <StackLayout Spacing="8" Orientation="Horizontal">
                         <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.Users}, 
-                        Color={StaticResource Accent},Size=24}" WidthRequest="24"/>
-                        <Label Text="{Binding Seats, StringFormat='Seats: {0}'}" FontSize="Medium"
-                               Style="{StaticResource TextSubhead}" FontAttributes="Bold"/>
+                        Color={StaticResource Accent},Size=24}" WidthRequest="24" />
+                        <Label Text="{Binding Seats, StringFormat='Seats: {0}'}" FontSize="Medium" 
+                               Style="{StaticResource TextSubhead}" FontAttributes="Bold">
+                        </Label>
+                        <Label Text="{Binding ReservedSeats, StringFormat=' Reserved : {0}'}" FontSize="Medium" 
+                               Style="{StaticResource TextSubhead}" FontAttributes="Bold"
+                               HorizontalOptions="EndAndExpand" >
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding ReservedSeats}" Value="0">
+                                    <Setter Property="IsVisible" Value="False" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+
                     </StackLayout>
-                    <Image Source="{FontImage FontFamily=fas, 
+                    <StackLayout Orientation="Horizontal">
+                        <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.Clock}, 
                         Color={StaticResource Accent},Size=24}" HorizontalOptions="Start" />
-                    <Grid ColumnDefinitions="10,*" RowDefinitions="Auto,*" RowSpacing="5" Margin="10,-14,0,0">
-                        <BoxView Grid.RowSpan="2" HorizontalOptions="Start" VerticalOptions="StartAndExpand" 
-                                     WidthRequest="2"
-                                     BackgroundColor="{StaticResource Accent}"/>
-                        <BoxView HorizontalOptions="StartAndExpand"  VerticalOptions="Center" WidthRequest="8" 
-                                 HeightRequest="2"
-                                     BackgroundColor="{StaticResource Accent}"
-                                     CornerRadius="4"/>
-                        <BoxView Grid.Row="1" HorizontalOptions="StartAndExpand"  VerticalOptions="Center" 
-                                 WidthRequest="8" HeightRequest="2"
-                                     BackgroundColor="{StaticResource Accent}"
-                                     CornerRadius="4"/>
-                        <Label Grid.Column="1" FontSize="Small" FontAttributes="Bold" Style="{StaticResource TextSmallCaption}"  >
+                        <Label Grid.Column="1" FontSize="Medium" FontAttributes="Bold"
+                               Style="{StaticResource TextSubhead}"  >
                             <Label.FormattedText>
                                 <FormattedString>
                                     <FormattedString.Spans>
+                                        <Span Text="When: "/>
                                         <Span Text="{Binding StartDate}"/>
-                                        <Span Text=" "/>
+                                        <Span Text="  "/>
                                         <Span Text="{Binding StartTime}"/>
-                                    </FormattedString.Spans>
-                                </FormattedString>
-                            </Label.FormattedText>
-                        </Label>
-                        <Label Grid.Column="1" Grid.Row="1" FontSize="Small" Style="{StaticResource TextSmallCaption}" FontAttributes="Bold" VerticalOptions="Center">
-                            <Label.FormattedText>
-                                <FormattedString>
-                                    <FormattedString.Spans>
-                                        <Span Text="{Binding EndDate}"/>
-                                        <Span Text=" "/>
+                                        <Span Text=" - "/>
                                         <Span Text="{Binding EndTime}"/>
                                     </FormattedString.Spans>
                                 </FormattedString>
                             </Label.FormattedText>
                         </Label>
-                    </Grid>
+
+                    </StackLayout>
 
                 </StackLayout>
                 <!--Categories-->
@@ -194,7 +188,7 @@
                     </BindableLayout.ItemTemplate>
                 </StackLayout>
                 <StackLayout Grid.Row="4" Orientation="Vertical" Grid.ColumnSpan="2"
-                             VerticalOptions="StartAndExpand" Spacing="8">
+                             VerticalOptions="StartAndExpand" Spacing="8" Margin="0,20">
                     <Label Text="Description" FontSize="Medium" FontAttributes="Bold"
                            Style="{StaticResource TextHeader}" HorizontalTextAlignment="Start"/>
                     <Label Text="{Binding Description}" 
@@ -221,7 +215,38 @@
                                 />
                             </StackLayout.GestureRecognizers>
                         </StackLayout>
+                        <StackLayout Orientation="Horizontal" HorizontalOptions="End" Margin="12,0,0,0" Spacing="24">
+                            <Image Source="{FontImage FontFamily=fas, 
+                        Glyph={x:Static icons:FAI.ShareAlt}, 
+                        Color={StaticResource IconColor},Size=24}" >
+                                <Image.GestureRecognizers>
+                                    <TapGestureRecognizer 
+                                        Command="{Binding Path=SharePostCommand, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}}"
+                                        CommandParameter="{Binding}"/>
+                                </Image.GestureRecognizers>
+                            </Image>
+                            <Image Source="{FontImage FontFamily=fas, 
+                                    Glyph={x:Static icons:FAI.CalendarCheck}, 
+                                    Color={StaticResource IconColor},Size=24}" 
+                                   IsVisible="{Binding Path=IsLoggedIn, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}}" >
+                                <Image.Triggers>
+                                    <DataTrigger TargetType="Image" Binding="{Binding HasReserved}"
+                                                 Value="{x:Static x:Boolean.TrueString}">
+                                        <Setter Property="Source" Value="{FontImage FontFamily=far,
+                                            Glyph={x:Static icons:FAI.CalendarTimes},
+                                            Color={StaticResource IconColor},Size=24}" />
+                                    </DataTrigger>
+                                </Image.Triggers>
+                                <Image.GestureRecognizers>
+                                    <TapGestureRecognizer 
+                                        Command="{Binding Path=MakeReservationCommand, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}}"
+                                        CommandParameter="{Binding}"/>
+                                </Image.GestureRecognizers>
+                            </Image>
+                        </StackLayout>
+
                         <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" Spacing="24">
+                            
                             <Image Source="{FontImage FontFamily=fas, 
                         Glyph={x:Static icons:FAI.Gavel}, 
                         Color={StaticResource IconColor},Size=24}" />
@@ -307,18 +332,18 @@
                                         Margin="0,20"
                                         CollectionPadding="0,8"
                                         InfiniteListLoader="{Binding FeedbackPaginator, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}} }"
-                                        ItemHeight="200"
+                                        ColumnCount="1"
                                         ItemSpacing="8"
-                            ItemWidth="400"
+                            ItemHeight="250"
                             HorizontalOptions="FillAndExpand"
                                         ItemsSource="{Binding Feedbacks, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}}"
                                         SnapStyle="Center"   
-                            ListLayout="Grid"
+                            ListLayout="Carousel"
                                                       >
 
-                        <renderedViews:HorizontalListView.ItemTemplate>
+                            <renderedViews:HorizontalListView.ItemTemplate>
 
-                            <DataTemplate x:DataType="shared:AuthoredFeedback">
+                                <DataTemplate x:DataType="shared:AuthoredFeedback">
                                     <ViewCell>
                                         <Frame CornerRadius="4" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
                                             <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,8,*">
@@ -343,9 +368,9 @@
                                             </Grid>
                                         </Frame>
                                     </ViewCell>
-                            </DataTemplate>
-                        </renderedViews:HorizontalListView.ItemTemplate>
-                    </renderedViews:HorizontalListView>
+                                </DataTemplate>
+                            </renderedViews:HorizontalListView.ItemTemplate>
+                        </renderedViews:HorizontalListView>
                     </loader:TaskLoaderView>
                     <StackLayout Grid.Row="2" Orientation="Vertical" IsVisible="False">
                         <StackLayout.Triggers>

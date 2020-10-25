@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
@@ -41,20 +42,21 @@ namespace UrGuide.Mobile.ViewModels
             PostsLoader = new TaskLoaderNotifier<IEnumerable<PostItem>>();
             GalleryLoader = new TaskLoaderNotifier<IEnumerable<GalleryItem>>(async () =>
             {
-                var items = await UserService.GetGalleryItems(preference.UserId);
-
+                var items = await UserService.GetGalleryItems(Preference.UserId);
                 return items;
             });
             FeedbackLoader = new TaskLoaderNotifier<IEnumerable<AuthoredFeedback>>();
             PostsPaginator = new Paginator<PostItem>(async (pageNumber, pageSize, b) =>
             {
-                var result = await PostItemService.GetUserPosts(preference.UserId, pageNumber);
+                var result = await PostItemService.GetUserPosts(Preference.UserId, pageNumber);
+                Posts ??= new ObservableRangeCollection<PostItem>();
                 Posts.AddRange(result.Items);
                 return result;
             });
             FeedbackPaginator = new Paginator<AuthoredFeedback>(async (pageNumber, pageSize, b) =>
             {
-                var result = await UserService.GetUserFeedback(preference.UserId, pageNumber);
+                var result = await UserService.GetUserFeedback(Preference.UserId, pageNumber);
+                Feedbacks ??= new ObservableRangeCollection<AuthoredFeedback>();
                 Feedbacks.AddRange(result.Items);
                 return result;
             });
@@ -71,10 +73,23 @@ namespace UrGuide.Mobile.ViewModels
             get => mode; set
             {
                 SetProperty(ref mode, value);
-                Items.Replace(new WrapperViewModel
+                var item = Items.First();
+                item.Mode = value;
+                Items.Replace(item);
+                switch (value)
                 {
-                    Mode = value
-                });
+                    case ProfileDisplayMode.Reviews:
+                        FeedbackLoader.Load();
+                        break;
+                    case ProfileDisplayMode.Posts:
+                        PostsLoader.Load();
+                        break;
+                    case ProfileDisplayMode.Gallery:
+                        GalleryLoader.Load();
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
@@ -86,7 +101,6 @@ namespace UrGuide.Mobile.ViewModels
         public ICommand EditProfileCommand => _editProfileCommand ??= new AsyncCommand(async () => await Navigation.PushModalAsync(new EditProfile()));
         public ICommand ChangePasswordCommand => _changePasswordCommand ??= new AsyncCommand(async () => await Navigation.PushModalAsync(new ChangePassword()));
         public ICommand DeleteAccountCommand => _deleteAccountCommand ??= new AsyncCommand(async () => await Navigation.ConfirmAsync(DeleteAccount));
-
         private void DeleteAccount(DialogResult result)
         {
             
