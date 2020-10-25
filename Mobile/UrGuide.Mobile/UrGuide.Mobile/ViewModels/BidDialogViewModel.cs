@@ -73,15 +73,22 @@ namespace UrGuide.Mobile.ViewModels
             {
                 IsBusy = true;
             });
-            var items = await PostItemService.GetBidHistoryAsync(Item.Id);
-            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            var results = await PostItemService.GetBidHistoryAsync(Item.Id);
+            if (results.HasError)
             {
-                Items.ReplaceRange(items.Data);
-                IsBusy = false;
-                CanRejectBid = Preference.UserId == Item.AuthorId && Item.Countdown.IsActive;
-                CanApproveBid = CanRejectBid;
-            });
-
+                await NavigationService.DisplayErrorAsync(message: string.Join(Environment.NewLine, results.Errors));
+            } 
+            else
+            {
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+                {
+                    Items.ReplaceRange(results.Data);
+                    Item.BidCount = Items.Count;
+                    IsBusy = false;
+                    CanRejectBid = Preference.UserId == Item.AuthorId && Item.Countdown.IsActive;
+                    CanApproveBid = CanRejectBid;
+                });
+            }
         });
 
         public ICommand NewBidCommand => _newBidCommand ??= new Command<double>(async (bid) =>
@@ -96,6 +103,7 @@ namespace UrGuide.Mobile.ViewModels
                     Created = DateTime.Now.ToString("dd-MMM-yyyy HH:mm"),
                     Value = $"${bid:#}"
                 });
+                Item.BidCount = Items.Count;
             }
         });
 

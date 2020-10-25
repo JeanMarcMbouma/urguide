@@ -58,11 +58,16 @@ namespace UrGuide.Mobile.Services
 
         public async Task<Result<IEnumerable<Model.Posts.BidHistoryModel>>> GetBidHistoryAsync(string id)
         {
-            return await Cache.GetOrFetchObject($"bid_{id}", async () =>
+            try
             {
+
                 var bidHistory = await BidClient.HistoryAsync(id);
                 return Result.Of(Mapper.Map<IEnumerable<Model.Posts.BidHistoryModel>>(bidHistory));
-            }).Catch(Observable.Return(Result.Of<IEnumerable<Model.Posts.BidHistoryModel>>().WithErrors("Error occured")));
+            }
+            catch (ApiException<StringErrorEnvelop> e)
+            {
+                return Result.Of<IEnumerable<Model.Posts.BidHistoryModel>>().WithErrors(string.Join(Environment.NewLine, e.Result.Errors));
+            }
         }
 
         public async Task<Result<PostItem>> GetByIdAsync(string id)
@@ -109,7 +114,6 @@ namespace UrGuide.Mobile.Services
             }
             catch (ApiException<StringErrorEnvelop> e)
             {
-
                 return Result.Of<IEnumerable<PostItem>>().WithErrors(string.Join(Environment.NewLine, e.Result.Errors));
             }
             

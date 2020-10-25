@@ -18,6 +18,7 @@ namespace UrGuide.Mobile.Models
         private bool favorite;
         private bool hasReserved;
         private int reservedSeats;
+        private int bidCount;
 
         public PostItem()
         {
@@ -51,7 +52,7 @@ namespace UrGuide.Mobile.Models
                 OnPropertyChanged(nameof(Dislikes));
             });
         }
-        public int BidCount { get; set; }
+        public int BidCount { get => bidCount; set => SetProperty(ref bidCount, value); }
         public int ItineraryCount { get; set; }
         public List<string> Categories { get; set; }
         public List<ImageFileModel> Images { get; set; }
