@@ -39,7 +39,20 @@ namespace UrGuide.Mobile.Services
         public string Role
         {
             get => Xamarin.Essentials.Preferences.Get(nameof(Role), string.Empty);
-            set => Xamarin.Essentials.Preferences.Set(nameof(Role), value);
+            set
+            {
+                Xamarin.Essentials.Preferences.Set(nameof(Role), value);
+                this.RaisePropertyChanged();
+            }
+        }
+
+        public string IdToken {
+            get => Xamarin.Essentials.Preferences.Get(nameof(IdToken), string.Empty);
+            set
+            {
+                Xamarin.Essentials.Preferences.Set(nameof(IdToken), value);
+                this.RaisePropertyChanged();
+            }
         }
     }
 }

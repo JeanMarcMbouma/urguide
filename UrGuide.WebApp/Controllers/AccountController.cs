@@ -143,8 +143,16 @@ namespace UrGuide.WebApp.Controllers
         {
             await AuthService.SignOutAsync();
             await HttpContext.SignOutAsync();
-            if (Url.IsLocalUrl(returnUrl))
+            var logoutId = Request.Query["logoutId"].ToString();
+
+            if (!string.IsNullOrEmpty(returnUrl))
                 return Redirect(returnUrl);
+            else if (!string.IsNullOrEmpty(logoutId))
+            {
+                var context = await InteractionService.GetLogoutContextAsync(logoutId);
+                returnUrl = context.PostLogoutRedirectUri;
+                return Redirect(returnUrl);
+            }
             return Ok();
         }
 

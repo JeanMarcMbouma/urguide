@@ -177,14 +177,15 @@ namespace UrGuide.Data.Entities.Posts
             }
 
             int reserved = Reservations.Sum(x => x.Seats);
-            if (ReservedSeats == reserved)
+
+            if (AllocatedSeats == reserved)
             {
                 throw new InvalidOperationException("This item is sold out");
             }
 
-            if (ReservedSeats <= reserved + seats)
+            if (AllocatedSeats <= reserved + seats)
             {
-                throw new InvalidOperationException("We can't allocated this many seats.");
+                throw new InvalidOperationException("We couldn't allocate this many seats.");
             }
 
             Reservations.Add(new Reservation
@@ -221,14 +222,14 @@ namespace UrGuide.Data.Entities.Posts
 
             int reserved = Reservations.Sum(x => x.Seats) - reservation.Seats;
 
-            if (ReservedSeats == reserved)
+            if (AllocatedSeats == reserved)
             {
                 throw new InvalidOperationException("This item is sold out");
             }
 
-            if (ReservedSeats <= reserved + seats)
+            if (AllocatedSeats <= reserved + seats)
             {
-                throw new InvalidOperationException("We can't allocated this many seats.");
+                throw new InvalidOperationException("We couldn't allocate this many seats.");
             }
 
             reservation.Seats = seats;

@@ -19,7 +19,12 @@ namespace UrGuide.Mobile.Contracts
         Task<Result<IEnumerable<Model.Posts.BidHistoryModel>>> GetBidHistoryAsync(string id);
         Task ToggleFavorites(PostItem it);
         Task SetUserReaction(PostItem it);
+        Task ToggleReservation(PostItem it);
         Task<Result<Model.Shared.AuthoredFeedback>> SendFeedback(string postId, Model.Shared.FeedbackModel newFeedBack);
         Task<PageResult<PostItem>> GetUserPosts(string userId, int pageNumber);
+        Task ShareItem(PostItem it);
+        Task<Result<bool>> Bid(string id, double bid);
+        Task<Result<string>> AcceptBid(string id);
+        Task<Result<string>> RejectBid(string id);
     }
 }

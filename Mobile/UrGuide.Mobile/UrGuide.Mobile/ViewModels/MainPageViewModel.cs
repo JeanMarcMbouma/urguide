@@ -73,6 +73,8 @@ namespace UrGuide.Mobile.ViewModels
         public ICommand LoginCommand { get; }
         public ICommand SignOutCommand { get; }
         public ICommand SearchCategoryCommand { get; }
+        public ICommand MakeReservationCommand { get; }
+        public ICommand SharePostCommand { get; }
         public MainPageViewModel(
             INavigationService navigation,
             IPreferenceService preference,
@@ -92,21 +94,33 @@ namespace UrGuide.Mobile.ViewModels
             IsLoggedIn = false;
             ShouldLogin = !IsLoggedIn;
 
-            this.WhenAnyValue(x => x.Preference.UserId, x => x.Preference.Role)
-                .Do((data) =>
-                {
-                    IsLoggedIn = !string.IsNullOrEmpty(data.Item1);
-                    ShouldLogin = !IsLoggedIn;
-                    CanCreatePost = IsLoggedIn && "guide".Equals(data.Item2, StringComparison.OrdinalIgnoreCase);
-                })
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe()
-                .DisposeWith(disposables);
+            this.WhenAnyValue(x => x.Preference.UserId, x => x.Preference.Role, (u, r)=> {
+                return (IsLoggedIn: !string.IsNullOrEmpty(u), IsGuide: "guide".Equals(r, StringComparison.OrdinalIgnoreCase));
+            })
+            .Do((data) =>
+            {
+                IsLoggedIn = data.IsLoggedIn;
+                ShouldLogin = !IsLoggedIn;
+                CanCreatePost = data.IsLoggedIn && data.IsGuide;
+            })
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe()
+            .DisposeWith(disposables);
             SearchCategoryCommand = new Command<SearchOption>(option =>
             {
                 Discover.Select(option);
                 SelectedViewIndex = 1;
             });
+
+            SharePostCommand = new Command<PostItem>(async it =>
+            {
+                await postItemService.ShareItem(it);
+            });
+
+            MakeReservationCommand = new Command<PostItem>(async it =>
+            {
+                await postItemService.ToggleReservation(it).ConfigureAwait(true);
+            }, it => IsLoggedIn);
 
             IObservable<Location> observable = Geolocation.GetLocationAsync()
                         .ToObservable();
@@ -143,7 +157,6 @@ namespace UrGuide.Mobile.ViewModels
                     }
                     catch (Exception e)
                     {
-                        if (Debugger.IsAttached) Debugger.Break();
                     }
                 }).Catch(Observable.Empty<Location>()).Subscribe();
             

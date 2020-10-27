@@ -2,7 +2,9 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" xmlns:behaviors="clr-namespace:UrGuide.Mobile.Behaviors"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:y="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" xmlns:behaviors="clr-namespace:UrGuide.Mobile.Behaviors"
+             xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers"
              mc:Ignorable="d"
              x:Class="UrGuide.Mobile.Views.Dialog.YesNoConfirmation" BackgroundColor="Transparent"
              x:Name="dialog">
@@ -13,20 +15,15 @@
             <Grid RowDefinitions="50, Auto" RowSpacing="12">
                 <StackLayout Orientation="Horizontal" Spacing="8">
                     <StackLayout VerticalOptions="Start" HorizontalOptions="StartAndExpand" Spacing="8" Orientation="Horizontal">
-                        <Path Data="M176 432c0 44.112-35.888 80-80 80s-80-35.888-80-80 35.888-80 80-80 80 35.888 80 80zM25.26 25.199l13.6 272C39.499 309.972 50.041 320 62.83 320h66.34c12.789 0 23.331-10.028 23.97-22.801l13.6-272C167.425 11.49 156.496 0 142.77 0H49.23C35.504 0 24.575 11.49 25.26 25.199z"
-                                  Stroke="{StaticResource IconColor}" Fill="{StaticResource IconColor}"
-                                  HeightRequest="24" WidthRequest="24" Aspect="Uniform" />
+                        <Image Source="{FontImage Color={StaticResource IconColor},FontFamily=fas, Glyph={x:Static icons:FAI.Exclamation},Size=24}" />
                         <Label Text="{Binding Source={Reference dialog}, Path=Title, FallbackValue='Warning'}" FontSize="Medium" FontAttributes="Bold"
                                    VerticalOptions="Center" HorizontalOptions="StartAndExpand"
                                    />
                     </StackLayout>
                     <StackLayout VerticalOptions="Start" HorizontalOptions="EndAndExpand" >
-                        <Path Data="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z"
-                      WidthRequest="32"
-                      HeightRequest="32"
-                      Aspect="Uniform"
-                      Stroke="{StaticResource IconColor}"
-                      Fill="{StaticResource IconColor}"/>
+                        <Image Source="{FontImage FontFamily=fas, 
+                        Glyph={x:Static icons:FAI.TimesCircle}, 
+                        Color={StaticResource IconColor},Size=24}" WidthRequest="24"/>
                         <StackLayout.GestureRecognizers>
                             <TapGestureRecognizer Tapped="Close_Tapped"/>
                         </StackLayout.GestureRecognizers>

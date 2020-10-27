@@ -16,6 +16,9 @@ namespace UrGuide.Mobile.Models
         private int _likes;
         private int _dislikes;
         private bool favorite;
+        private bool hasReserved;
+        private int reservedSeats;
+        private int bidCount;
 
         public PostItem()
         {
@@ -33,12 +36,12 @@ namespace UrGuide.Mobile.Models
         public string PublicationDate { get; set; }
         public string LastBid { get; set; }
         public int Seats { get; set; }
-        public int ReservedSeats { get; set; }
+        public int ReservedSeats { get => reservedSeats; set => SetProperty(ref reservedSeats, value); }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public string EndTime { get; set; }
         public string StartTime { get; set; }
-        public bool HasReserved { get; set; }
+        public bool HasReserved { get => hasReserved; set => SetProperty(ref hasReserved, value); }
         public bool HasReacted { get; set; }
         public int ReactionType
         {
@@ -49,7 +52,7 @@ namespace UrGuide.Mobile.Models
                 OnPropertyChanged(nameof(Dislikes));
             });
         }
-        public int BidCount { get; set; }
+        public int BidCount { get => bidCount; set => SetProperty(ref bidCount, value); }
         public int ItineraryCount { get; set; }
         public List<string> Categories { get; set; }
         public List<ImageFileModel> Images { get; set; }

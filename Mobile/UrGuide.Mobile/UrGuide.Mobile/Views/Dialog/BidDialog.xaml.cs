@@ -11,6 +11,7 @@ namespace UrGuide.Mobile.Views.Dialog
         {
             InitializeComponent();
             BindingContext = vm;
+            vm.Load(null);
         }
     }
 }
