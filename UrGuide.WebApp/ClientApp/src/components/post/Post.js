@@ -46,6 +46,14 @@ import { HttpClientFactory } from '../../httpclient';
 import { PostsClient, ItineraryModel, BidModel, UserReactionModel, BidClient } from '../../api';
 import "./Post.css";
 
+import {Helmet} from "react-helmet";
+import Menu from '@material-ui/core/Menu';
+import FacebookIcon from '@material-ui/icons/Facebook';
+import TwitterIcon from '@material-ui/icons/Twitter';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ShareIcon from '@material-ui/icons/Share';
+import MenuItem from '@material-ui/core/MenuItem';
+
 
 function Header(props) {
     return (<div>
@@ -287,8 +295,107 @@ function Comments(props) {
     );
 }
 
+function loadShareApi () {
+    (function FacebookSDK(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.0";
+        fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'))
 
+    window.twttr = (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0],
+        t = window.twttr || {};
+        if (d.getElementById(id)) return t;
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "https://platform.twitter.com/widgets.js";
+        fjs.parentNode.insertBefore(js, fjs);
+        t._e = [];
+        t.ready = function(f) {
+        t._e.push(f);};
+        return t;}(document, "script", "twitter-wjs"));
+}
 
+function Share({post}) {
+
+    const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const handleClick = (event) => {
+      setAnchorEl(event.currentTarget);
+    };
+  
+    const handleClose = () => {
+      setAnchorEl(null);
+    };
+
+    (function FacebookSDK(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.0";
+        fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'))
+
+    window.twttr = (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0],
+        t = window.twttr || {};
+        if (d.getElementById(id)) return t;
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "https://platform.twitter.com/widgets.js";
+        fjs.parentNode.insertBefore(js, fjs);
+        t._e = [];
+        t.ready = function(f) {
+        t._e.push(f);};
+        return t;}(document, "script", "twitter-wjs"));
+
+        return (
+        <div>
+            {console.log(post)}
+            <Helmet>
+                <meta property="og:url"           content={`${window.location.host}/post/${post.id}`} />
+                <meta property="og:type"          content="post" />
+                <meta property="og:title"         content={`Location: ${post.location}`} />
+                <meta property="og:description"   content={`${post.categories}.${post.description}`} />
+                {post.images.lenght > 0 
+                    ? (<meta property="og:image"         content={`${post.images[0].imageBase64}`} />)
+                    : 0
+                }
+                <meta name="twitter:card"         content="summary_large_image" />
+                <meta name="twitter:title"        content={`Location: ${post.location}`} />
+                {post.images.lenght > 0 
+                    ? (<meta name="twitter:description"  content={`${post.categories}.${post.description}, from ${window.location.host}/post/${post.id}`} />)
+                    : 0
+                }
+            </Helmet>
+            <IconButton variant="outlined" aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
+                <ShareIcon />
+            </IconButton>
+            <Menu
+                id="simple-menu"
+                anchorEl={anchorEl}
+                keepMounted
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+                >
+                <MenuItem>
+                    <ListItemIcon>
+                        <FacebookIcon />
+                    </ListItemIcon>
+                    <a href={`http://www.facebook.com/share.php?u=${window.location.host}/post/${post.id}&title=Shared from UrGuide`}>Facebook</a>
+                </MenuItem>
+                <MenuItem>
+                    <ListItemIcon>
+                        <TwitterIcon />
+                    </ListItemIcon>
+                    <a href="https://twitter.com/intent/tweet?status=Shared%20from%20UrGuide%">Twitter</a>
+                </MenuItem>
+            </Menu>
+        </div>
+          );
+};
 
 export default function Post() {
 
@@ -436,10 +543,10 @@ export default function Post() {
                     {props.post.description}
                 </Typography>
                 <br />
-                <div className='row d-flex reactions-panel' >
+                <div className='row d-flex justify-content-around w-100' >
 
                     {props.user ?
-                        <>  <div className='col-3 col-sm-2 col-md-2 col-lg-3 col-xl-3 text-center'>
+                        <>  <div className='text-center'>
                             {props.post.reactionType == 2 ? <IconButton className='like_div' onClick={() =>
                                 dispatchAction({
                                     type: "single-like-action",
@@ -464,7 +571,7 @@ export default function Post() {
                                 </IconButton>}
                             <span className='text-center'>{props.post.likes}</span>
                         </div>
-                            <div className='col-3 col-sm-2 col-md-2 col-lg-3 col-xl-3 text-center'>
+                            <div className='text-center'>
                                 {post.reactionType === 4 ? <IconButton className='dislike_div' onClick={() =>
                                     dispatchAction({
                                         type: "single-dislike-action",
@@ -489,14 +596,14 @@ export default function Post() {
                                 <span className='text-center' >{props.post.dislikes}</span>
                             </div></> :
 
-                        <><div className='col-3 col-sm-2 col-md-2 col-lg-3 col-xl-3 text-center'>
+                        <><div className='text-center'>
 
                             <IconButton className='like_div' onClick={signIn} >
                                 <AiOutlineLike />
                             </IconButton>
                             <span className='text-center'>{props.post.likes}</span>
                         </div>
-                            <div className='col-3 col-sm-2 col-md-2 col-lg-3 col-xl-3 text-center'>
+                            <div className='text-center'>
                                 <IconButton className='dislike_div' onClick={signIn} >
                                     <AiOutlineDislike />
                                 </IconButton>
@@ -504,18 +611,21 @@ export default function Post() {
                             </div></>
                     }
                     {
-                        props.post.isBidOptIn ? <div className='col-3 col-sm-2 col-md-2 col-lg-3 col-xl-3 text-center'>
+                        props.post.isBidOptIn ? <div className='text-center'>
                             <IconButton onClick={toggleComments}>
                                 <FaRegComment />
                             </IconButton>
                             <span className='text-center' >{props.post.bidCount}</span>
                         </div> : null
                     }
-                    <div className='col-3 col-sm-2 col-md-2 col-lg-3 col-xl-3 text-center'>
+                    <div className='text-center'>
                         <IconButton onClick={toggleItinerary}>
                             <LocationOnIcon />
                         </IconButton>
                         <span className='text-center' >{props.post.itineraryCount}</span>
+                    </div>
+                    <div className="text-center">
+                        <Share post={props.post} />
                     </div>
                 </div>
                 <Itinerary show={showItinerary} postId={props.post.id} />
@@ -557,6 +667,8 @@ export default function Post() {
     function goBack() {
         window.history.back();
     }
+
+    
 
 
     return (
