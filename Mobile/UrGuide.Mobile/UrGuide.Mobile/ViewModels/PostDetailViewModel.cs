@@ -74,6 +74,7 @@ namespace UrGuide.Mobile.ViewModels
             {
                 _id = value.Id;
                 this.RaiseAndSetIfChanged(ref selected, value);
+                Feedbacks.Clear();
                 Load();
             }
         }

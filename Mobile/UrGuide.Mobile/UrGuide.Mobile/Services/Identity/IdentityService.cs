@@ -87,7 +87,6 @@ namespace UrGuide.Mobile.Services.Identity
         {
             CreateClient();
             await _client.LogoutAsync(new LogoutRequest{
-                BrowserDisplayMode = DisplayMode.Hidden,
                 IdTokenHint = _preference.IdToken
             }); 
             _preference.AuthToken = string.Empty;

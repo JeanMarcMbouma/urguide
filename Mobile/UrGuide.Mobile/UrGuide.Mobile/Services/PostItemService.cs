@@ -246,7 +246,7 @@ namespace UrGuide.Mobile.Services
 
         public Task ShareItem(PostItem it)
         {
-            var url = $"{GlobalSetting.DefaultEndpoint}/post/{it.Id}";
+            var url = $"{GlobalSetting.DefaultEndpoint}/post/{it.Id}/shot/{it.Images[0].Id}";
 
             return Share.RequestAsync(new ShareTextRequest
             {

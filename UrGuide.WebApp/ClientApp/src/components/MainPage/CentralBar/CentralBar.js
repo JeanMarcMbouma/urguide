@@ -520,69 +520,6 @@ function Share({post}) {
           );
 };
 
-function Share({post}) {
-
-
-    const [open, setOpen] = React.useState(false);
-    const handleClickOpen = () => { setOpen(true); };
-    const handleClose = () => {setOpen(false); };
-
-    const shareSites = ['Twitter', 'Facebook'];
-
-    const ChoosingSite = (props) => {
-
-        const { onClose, open } = props;
-        const handleClose = () => {onClose(); };
-      
-        let params = "menubar=no,toolbar=no,status=no"; 
-        let url = `${window.location.host}/post/${post.id}`;
-
-        const handleListItemClick = (selectedSite) => {
-            let link;
-            if(selectedSite==='Facebook'){
-            link = `http://www.facebook.com/sharer/sharer.php?u=${url}`;
-            }
-            else {
-            link = `https://twitter.com/intent/tweet?url=${url}&text=${post.description}&hashtags=${post.categories}`;
-            }
-            window.open(link, 'NewWindow', params);
-            onClose();
-        };
-
-        const siteIcon = (shareSite) => {
-            if (shareSite==="Facebook") {
-                 return <FacebookIcon/>
-            } else {
-                return <TwitterIcon/>
-            }
-        }
-      
-        return (
-          <Dialog onClose={handleClose} aria-labelledby="simple-dialog-title" open={open}>
-            <List>
-              {shareSites.map((shareSite) => (
-                <ListItem button onClick={() => handleListItemClick(shareSite)} key={shareSite}>
-                    <ListItemIcon>
-                        {siteIcon(shareSite)}
-                    </ListItemIcon>
-                    <ListItemText primary={shareSite} />
-                </ListItem>
-              ))}
-            </List>
-          </Dialog>
-        );
-      }
-
-        return (
-        <div>
-            <IconButton variant="outlined" onClick={handleClickOpen}>
-                <ShareIcon />
-            </IconButton>
-            <ChoosingSite open={open} onClose={handleClose} />
-        </div>
-          );
-};
-
 const navigateToReturnUrl = returnUrl => {
 
     window.location.replace(returnUrl);

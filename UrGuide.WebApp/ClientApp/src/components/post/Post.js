@@ -355,7 +355,7 @@ function Share({post}) {
         <div>
             {console.log(post)}
             <Helmet>
-                <meta property="og:url"           content={`${window.location.host}/post/${post.id}`} />
+                <meta property="og:url"           content={`${window.location.host}/post/${post.id}/shot/${post.images[0].id}`} />
                 <meta property="og:type"          content="post" />
                 <meta property="og:title"         content={`Location: ${post.location}`} />
                 <meta property="og:description"   content={`${post.categories}.${post.description}`} />
