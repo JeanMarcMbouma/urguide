@@ -68,6 +68,7 @@ namespace UrGuide.Mobile.ViewModels
         public TaskLoaderNotifier<IEnumerable<Model.Shared.AuthoredFeedback>> FeedbacksLoader { get; }
         public Paginator<Model.Shared.AuthoredFeedback> FeedbackPaginator { get; }
         public ObservableRangeCollection<Model.Shared.AuthoredFeedback> Feedbacks { get; set; }
+            = new ObservableRangeCollection<Model.Shared.AuthoredFeedback>();
 
         public Model.Shared.FeedbackModel NewFeedBack { get; } = new Model.Shared.FeedbackModel
         {
@@ -80,6 +81,7 @@ namespace UrGuide.Mobile.ViewModels
 
         private string _id;
         private bool isLoggedIn;
+        private bool canReview;
 
         public string Id
         {
@@ -91,8 +93,7 @@ namespace UrGuide.Mobile.ViewModels
             }
         }
 
-        public bool CanReview => Selected?.AuthorId != Preference.UserId
-            && Feedbacks.All(f => f.AuthorId != Preference.UserId) == true;
+        public bool CanReview { get => canReview; set => this.RaiseAndSetIfChanged(ref canReview, value); }
 
         public bool IsLoggedIn { get => isLoggedIn; set => this.RaiseAndSetIfChanged(ref isLoggedIn, value); }
         public ICommand MakeReservationCommand { get; }
@@ -131,7 +132,15 @@ namespace UrGuide.Mobile.ViewModels
             .Do((data) =>
             {
                 IsLoggedIn = data.IsLoggedIn;
-            });
+            }).Subscribe();
+
+            this.WhenAnyValue(x => x.Feedbacks, x => x.Selected)
+                .Do((x) =>
+                {
+                    CanReview = IsLoggedIn && 
+                    x.Item2?.AuthorId != Preference.UserId &&
+                    (!x.Item1.Any() || x.Item1.All(f => f.AuthorId != Preference.UserId));
+                }).Subscribe();
 
             SharePostCommand = new Command<PostItem>(async it =>
             {
@@ -158,10 +167,8 @@ namespace UrGuide.Mobile.ViewModels
 
         private void Load()
         {
-            Feedbacks = new ObservableRangeCollection<Model.Shared.AuthoredFeedback>();
-            this.RaisePropertyChanged(nameof(Feedbacks));
             FeedbacksLoader.Load(async () => (await FeedbackPaginator.LoadPage(1)).Items);
-            this.RaisePropertyChanged(nameof(CanReview));
+            this.RaisePropertyChanged(nameof(Feedbacks));
         }
     }
 }
