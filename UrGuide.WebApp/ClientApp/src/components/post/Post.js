@@ -1,5 +1,5 @@
 ﻿import React, {
-    useState, useContext, useMemo, useReducer, Component, useEffect
+    useState, useContext, useReducer, useEffect
 } from 'react';
 import {
     CardHeader,
@@ -7,41 +7,28 @@ import {
     IconButton,
     Typography,
     Button,
-    Paper,
-    TextField,
-    CardActions,
-    CardContent,
     Grid,
     CircularProgress
 
 } from '@material-ui/core';
 import { Link, useParams } from 'react-router-dom';
 import { FaRegComment } from 'react-icons/fa';
-import { AiOutlineDislike } from 'react-icons/ai';
-import { AiOutlineLike } from 'react-icons/ai';
-import { AiFillDislike } from 'react-icons/ai';
-import { AiFillLike } from 'react-icons/ai';
+import { AiOutlineHeart } from 'react-icons/ai';
+import { AiFillHeart } from 'react-icons/ai';
 import { AiFillCloseCircle } from 'react-icons/ai';
-import { AiOutlineStop } from 'react-icons/ai';
-import { AiOutlineCheck } from 'react-icons/ai';
 import EventIcon from '@material-ui/icons/Event';
 import ArrowForwardIosOutlinedIcon from '@material-ui/icons/ArrowForwardIosOutlined';
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 import LocationOnIcon from '@material-ui/icons/LocationOn';
-import Skeleton from '@material-ui/lab/Skeleton';
-import Rating from '@material-ui/lab/Rating';
 import Slider from '@material-ui/core/Slider';
 import AttachMoneyOutlinedIcon from '@material-ui/icons/AttachMoneyOutlined';
 import PeopleOutlineOutlinedIcon from '@material-ui/icons/PeopleOutlineOutlined';
 import AlarmOutlinedIcon from '@material-ui/icons/AlarmOutlined';
-import { withStyles } from '@material-ui/core/styles';
 import NewBidReducer from '../MainPage/CentralBar/NewBidReducer';
 import NewBidContext from '../MainPage/CentralBar/NewBidContext';
 import ActionsContext from '../MainPage/CentralBar/ActionsContext';
 import ActionsReducer from '../MainPage/CentralBar/ActionsReducer';
-import { useAuthUser } from '../api-authorization/AuthService';
 import { useAuthContext } from '../api-authorization/AuthService';
-import authService from '../api-authorization/AuthService';
 import { HttpClientFactory } from '../../httpclient';
 import { PostsClient, ItineraryModel, BidModel, UserReactionModel, BidClient } from '../../api';
 import "./Post.css";
@@ -295,29 +282,6 @@ function Comments(props) {
     );
 }
 
-function loadShareApi () {
-    (function FacebookSDK(d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) return;
-        js = d.createElement(s); js.id = id;
-        js.src = "https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.0";
-        fjs.parentNode.insertBefore(js, fjs);
-        }(document, 'script', 'facebook-jssdk'))
-
-    window.twttr = (function(d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0],
-        t = window.twttr || {};
-        if (d.getElementById(id)) return t;
-        js = d.createElement(s);
-        js.id = id;
-        js.src = "https://platform.twitter.com/widgets.js";
-        fjs.parentNode.insertBefore(js, fjs);
-        t._e = [];
-        t.ready = function(f) {
-        t._e.push(f);};
-        return t;}(document, "script", "twitter-wjs"));
-}
-
 function Share({post}) {
 
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -370,7 +334,7 @@ function Share({post}) {
                     : 0
                 }
             </Helmet>
-            <IconButton variant="outlined" aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
+            <IconButton className='icon_div' variant="outlined" aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
                 <ShareIcon />
             </IconButton>
             <Menu
@@ -547,7 +511,7 @@ export default function Post() {
 
                     {props.user ?
                         <>  <div className='text-center'>
-                            {props.post.reactionType == 2 ? <IconButton className='like_div' onClick={() =>
+                            {props.post.reactionType == 2 ? <IconButton className='icon_div' onClick={() =>
                                 dispatchAction({
                                     type: "single-like-action",
                                     data: {
@@ -556,9 +520,9 @@ export default function Post() {
                                     }
                                 })
                             } >
-                                <AiFillLike className='liked_icon' />
+                                <AiFillHeart className='icon' />
                             </IconButton> :
-                                <IconButton className='like_div' onClick={() =>
+                                <IconButton className='icon_div' onClick={() =>
                                     dispatchAction({
                                         type: "single-like-action",
                                         data: {
@@ -567,60 +531,31 @@ export default function Post() {
                                         }
                                     })
                                 } >
-                                    <AiOutlineLike />
+                                    <AiOutlineHeart />
                                 </IconButton>}
                             <span className='text-center'>{props.post.likes}</span>
                         </div>
-                            <div className='text-center'>
-                                {post.reactionType === 4 ? <IconButton className='dislike_div' onClick={() =>
-                                    dispatchAction({
-                                        type: "single-dislike-action",
-                                        data: {
-                                            post: post,
-                                            callback: handleReaction
-                                        }
-                                    })
-                                }>
-                                    <AiFillDislike className='disliked_icon' />
-                                </IconButton> : <IconButton className='dislike_div' onClick={() =>
-                                    dispatchAction({
-                                        type: "single-dislike-action",
-                                        data: {
-                                            post: props.post,
-                                            callback: handleReaction
-                                        }
-                                    })
-                                } >
-                                        <AiOutlineDislike  />
-                                    </IconButton>}
-                                <span className='text-center' >{props.post.dislikes}</span>
-                            </div></> :
+                            </> :
 
                         <><div className='text-center'>
 
-                            <IconButton className='like_div' onClick={signIn} >
-                                <AiOutlineLike />
+                            <IconButton className='icon_div' onClick={signIn} >
+                                <AiOutlineHeart />
                             </IconButton>
                             <span className='text-center'>{props.post.likes}</span>
-                        </div>
-                            <div className='text-center'>
-                                <IconButton className='dislike_div' onClick={signIn} >
-                                    <AiOutlineDislike />
-                                </IconButton>
-                                <span className='text-center' >{props.post.dislikes}</span>
-                            </div></>
+                        </div></>
                     }
                     {
                         props.post.isBidOptIn ? <div className='text-center'>
-                            <IconButton onClick={toggleComments}>
-                                <FaRegComment />
+                            <IconButton className='icon_div' onClick={toggleComments}>
+                                <FaRegComment/>
                             </IconButton>
                             <span className='text-center' >{props.post.bidCount}</span>
                         </div> : null
                     }
                     <div className='text-center'>
-                        <IconButton onClick={toggleItinerary}>
-                            <LocationOnIcon />
+                        <IconButton className='icon_div' onClick={toggleItinerary}>
+                            <LocationOnIcon/>
                         </IconButton>
                         <span className='text-center' >{props.post.itineraryCount}</span>
                     </div>

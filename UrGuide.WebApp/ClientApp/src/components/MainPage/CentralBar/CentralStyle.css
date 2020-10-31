@@ -330,21 +330,14 @@
     display: none;
 }
 
-.liked_icon {
-    color: #1d32cf !important;
+.icon {
+    color: red !important;
 }
 
-.like_div:hover {
-    color:#1d32cf !important;
+.icon_div:hover {
+    color: red !important;
 }
 
-.disliked_icon {
-    color: #cc0c0c !important;
-}
-
-    .dislike_div:hover {
-        color: #cc0c0c !important;
-    }
 
 .reservation {
     width: 50px;
