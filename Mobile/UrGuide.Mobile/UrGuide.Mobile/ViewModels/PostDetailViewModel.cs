@@ -74,7 +74,6 @@ namespace UrGuide.Mobile.ViewModels
             {
                 _id = value.Id;
                 this.RaiseAndSetIfChanged(ref selected, value);
-                Feedbacks.Clear();
                 Load();
             }
         }
@@ -181,6 +180,7 @@ namespace UrGuide.Mobile.ViewModels
 
         private void Load()
         {
+            Feedbacks = new ObservableRangeCollection<Model.Shared.AuthoredFeedback>();
             FeedbacksLoader.Load(async () => (await FeedbackPaginator.LoadPage(1)).Items);
             this.RaisePropertyChanged(nameof(Feedbacks));
         }
