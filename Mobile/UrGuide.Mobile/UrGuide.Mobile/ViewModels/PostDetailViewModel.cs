@@ -19,6 +19,15 @@ namespace UrGuide.Mobile.ViewModels
 {
     public class PostDetailViewModel : ReactiveObject, INavigatableViewModel
     {
+        public class CreateFeedBack : ReactiveObject
+        {
+            private string text;
+            private int rating;
+
+            public int Rating { get => rating; set => this.RaiseAndSetIfChanged(ref rating, value); }
+            public string Text { get => text; set => this.RaiseAndSetIfChanged(ref text, value); }
+        }
+
         private PostItem selected;
 
         private ICommand _likeCommand;
@@ -36,14 +45,18 @@ namespace UrGuide.Mobile.ViewModels
         {
             if (!string.IsNullOrEmpty(NewFeedBack.Text))
             {
-                var it = await PostItemService.SendFeedback(Selected.Id, NewFeedBack);
+                var it = await PostItemService.SendFeedback(Selected.Id, new Model.Shared.FeedbackModel
+                {
+                    Rating = NewFeedBack.Rating,
+                    Text = NewFeedBack.Text
+                });
                 if (!it.HasError)
-                    Selected.FeedBack.Add(it.Data);
+                    Load();
             }
             NewFeedBack.Rating = 4;
             NewFeedBack.Text = string.Empty;
             this.RaisePropertyChanged(nameof(NewFeedBack));
-        }, () => (NewFeedBack.Text ?? string.Empty).Length > 50);
+        }, () => (NewFeedBack.Text ?? string.Empty).Length >= 50);
         public ICommand ViewBidCommand => _viewBidCommand ??= new AsyncCommand<PostItem>(async (item) =>
         {
             BidDialogViewModel.Item = item;
@@ -70,7 +83,7 @@ namespace UrGuide.Mobile.ViewModels
         public ObservableRangeCollection<Model.Shared.AuthoredFeedback> Feedbacks { get; set; }
             = new ObservableRangeCollection<Model.Shared.AuthoredFeedback>();
 
-        public Model.Shared.FeedbackModel NewFeedBack { get; } = new Model.Shared.FeedbackModel
+        public CreateFeedBack NewFeedBack { get; } = new CreateFeedBack
         {
             Rating = 4
         };
