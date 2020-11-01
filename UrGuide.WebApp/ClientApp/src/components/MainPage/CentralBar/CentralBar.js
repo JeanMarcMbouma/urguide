@@ -3,13 +3,9 @@ import React, {
 } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { FaRegComment } from 'react-icons/fa';
-import { AiOutlineDislike } from 'react-icons/ai';
-import { AiOutlineLike } from 'react-icons/ai';
-import { AiFillDislike } from 'react-icons/ai';
-import { AiFillLike } from 'react-icons/ai';
+import { AiOutlineHeart } from 'react-icons/ai';
+import { AiFillHeart } from 'react-icons/ai';
 import { AiOutlineStop } from 'react-icons/ai';
-import { AiOutlineCheck } from 'react-icons/ai';
-import { AiOutlineShareAlt } from 'react-icons/ai'
 import { BsSearch } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
 import cities from "../../discover/Cities";
@@ -28,8 +24,6 @@ import {
     Typography,
     ButtonGroup,
     Button,
-    CardMedia,
-    TextField,
     Chip,
     Paper,
     Switch,
@@ -38,19 +32,9 @@ import {
   
 } from '@material-ui/core';
 import Skeleton from '@material-ui/lab/Skeleton';
-import Rating from '@material-ui/lab/Rating';
-import { red } from '@material-ui/core/colors';
-import ShareIcon from '@material-ui/icons/Share';
-import PhotoIcon from '@material-ui/icons/Photo';
-import VideoLibraryIcon from '@material-ui/icons/VideoLibrary';
-import PersonAddIcon from '@material-ui/icons/PersonAdd';
-import AddLocationIcon from '@material-ui/icons/AddLocation';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import LocationOnIcon from '@material-ui/icons/LocationOn';
+import ShareIcon from '@material-ui/icons/Share';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
-import ChatIcon from '@material-ui/icons/Chat';
-import TagFacesIcon from '@material-ui/icons/TagFaces';
-import PropTypes from 'prop-types';
 import './CentralStyle.css';
 import 'date-fns';
 import Grid from '@material-ui/core/Grid';
@@ -58,15 +42,12 @@ import Slider from '@material-ui/core/Slider';
 import AttachMoneyOutlinedIcon from '@material-ui/icons/AttachMoneyOutlined';
 import PeopleOutlineOutlinedIcon from '@material-ui/icons/PeopleOutlineOutlined';
 import AlarmOutlinedIcon from '@material-ui/icons/AlarmOutlined';
-import DateFnsUtils from '@date-io/date-fns';
 import {
     MuiPickersUtilsProvider,
     KeyboardDatePicker,
     KeyboardTimePicker
 } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
-import clsx from "clsx";
-import { withStyles } from '@material-ui/core/styles';
 import PhotoLibraryIcon from '@material-ui/icons/PhotoLibrary';
 import NewPostContext from './NewPostContext';
 import NewPostReducer from './NewPostReducer';
@@ -74,7 +55,6 @@ import NewBidReducer from './NewBidReducer';
 import NewBidContext from './NewBidContext';
 import ActionsContext from './ActionsContext';
 import ActionsReducer from './ActionsReducer';
-import { useAuthUser } from '../../api-authorization/AuthService';
 import { useAuthContext } from '../../api-authorization/AuthService';
 import authService from '../../api-authorization/AuthService';
 //import { PostsClient, PostUpdateModel } from '../../../api';
@@ -476,7 +456,6 @@ function Share({post}) {
 
         return (
         <div>
-            {console.log(post)}
             <Helmet>
                 <meta property="og:url"           content={`${window.location.host}/post/${post.id}`} />
                 <meta property="og:type"          content="post" />
@@ -493,7 +472,7 @@ function Share({post}) {
                     : 0
                 }
             </Helmet>
-            <IconButton variant="outlined" aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
+            <IconButton className='icon_div' variant="outlined" aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
                 <ShareIcon />
             </IconButton>
             <Menu
@@ -1384,7 +1363,7 @@ export default function CentralBar() {
 
                     {user ?
                         <>  <div className='text-center'>
-                            {post.reactionType == 2 ? <IconButton className='like_div' onClick={() =>
+                            {post.reactionType == 2 ? <IconButton className='icon_div' onClick={() =>
                                 dispatchAction({
                                     type: "like-action",
                                     data: {
@@ -1394,9 +1373,9 @@ export default function CentralBar() {
                                     }
                                 })
                             } >
-                                <AiFillLike className='liked_icon' />
+                                <AiFillHeart className='icon' />
                             </IconButton> :
-                                <IconButton className='like_div' onClick={() =>
+                                <IconButton className='icon_div' onClick={() =>
                                     dispatchAction({
                                         type: "like-action",
                                         data: {
@@ -1406,62 +1385,30 @@ export default function CentralBar() {
                                         }
                                     })
                                 } >
-                                    <AiOutlineLike />
+                                    <AiOutlineHeart />
                                 </IconButton>}
                             <span className='text-center'>{post.likes}</span>
-                        </div>
-                            <div className='text-center'>
-                                {post.reactionType === 4 ? <IconButton className='dislike_div' onClick={() =>
-                                    dispatchAction({
-                                        type: "dislike-action",
-                                        data: {
-                                            post: post,
-                                            posts: actionsState.posts,
-                                            callback: handleReaction
-                                        }
-                                    })
-                                }>
-                                    <AiFillDislike className='disliked_icon' />
-                                </IconButton> : <IconButton onClick={() =>
-                                    dispatchAction({
-                                        type: "dislike-action",
-                                        data: {
-                                            post: post,
-                                            posts: actionsState.posts,
-                                            callback: handleReaction
-                                        }
-                                    })
-                                } >
-                                        <AiOutlineDislike />
-                                    </IconButton>}
-                                <span className='text-center' >{post.dislikes}</span>
-                            </div></> :
+                        </div></> :
 
                         <><div className='text-center'>
 
-                            <IconButton className='like_div' onClick={signIn} >
-                                <AiOutlineLike />
+                            <IconButton className='icon_div' onClick={signIn} >
+                                <AiOutlineHeart />
                             </IconButton>
                             <span className='text-center'>{post.likes}</span>
-                        </div>
-                            <div className='text-center'>
-                                <IconButton className='dislike_div' onClick={signIn} >
-                                    <AiOutlineDislike />
-                                </IconButton>
-                                <span className='text-center' >{post.dislikes}</span>
-                            </div></>
+                        </div></>
                     }
                     {
                         post.isBidOptIn ? <div className='text-center'>
-                            <IconButton onClick={() => toggleComments(post.id)}>
-                                <FaRegComment />
+                            <IconButton className='icon_div' onClick={() => toggleComments(post.id)}>
+                                <FaRegComment/>
                             </IconButton>
                             <span className='text-center' >{post.bidCount}</span>
                         </div> : null
                     }
                     <div className='text-center'>
-                        <IconButton onClick={() => toggleItinerary(post.id)}>
-                            <LocationOnIcon />
+                        <IconButton className='icon_div' onClick={() => toggleItinerary(post.id)}>
+                            <LocationOnIcon/>
                         </IconButton>
                         <span className='text-center' >{post.itineraryCount}</span>
                     </div>
