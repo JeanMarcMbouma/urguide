@@ -7,6 +7,7 @@ using Sharpnado.Presentation.Forms.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -14,25 +15,16 @@ using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
 using UrGuide.Mobile.Services;
 using UrGuide.Mobile.Views.Dialog;
+using Xamarin.Essentials;
 
 namespace UrGuide.Mobile.ViewModels
 {
     public class PostDetailViewModel : ReactiveObject, INavigatableViewModel
     {
-        public class CreateFeedBack : ReactiveObject
-        {
-            private string text;
-            private int rating;
-
-            public int Rating { get => rating; set => this.RaiseAndSetIfChanged(ref rating, value); }
-            public string Text { get => text; set => this.RaiseAndSetIfChanged(ref text, value); }
-        }
-
         private PostItem selected;
 
         private ICommand _likeCommand;
         private ICommand _viewBidCommand;
-        private ICommand _newFeedbackCommand;
         private ICommand _markAsFavoriteCommand;
         public TaskLoaderNotifier LoadSelectedItem { get; }
         public ICommand ToggleFavoriteCommand => _markAsFavoriteCommand ??= new AsyncCommand(async () =>
@@ -41,22 +33,7 @@ namespace UrGuide.Mobile.ViewModels
             await PostItemService.ToggleFavorites(Selected);
             Xamarin.Forms.MessagingCenter.Send(this, "favorite", Selected);
         });
-        public ICommand NewFeedBackCommand => _newFeedbackCommand ??= new Command(async () =>
-        {
-            if (!string.IsNullOrEmpty(NewFeedBack.Text))
-            {
-                var it = await PostItemService.SendFeedback(Selected.Id, new Model.Shared.FeedbackModel
-                {
-                    Rating = NewFeedBack.Rating,
-                    Text = NewFeedBack.Text
-                });
-                if (!it.HasError)
-                    Load();
-            }
-            NewFeedBack.Rating = 4;
-            NewFeedBack.Text = string.Empty;
-            this.RaisePropertyChanged(nameof(NewFeedBack));
-        }, () => (NewFeedBack.Text ?? string.Empty).Length >= 50);
+        public ReactiveCommand<Unit, Task> NewFeedBackCommand { get; }
         public ICommand ViewBidCommand => _viewBidCommand ??= new AsyncCommand<PostItem>(async (item) =>
         {
             BidDialogViewModel.Item = item;
@@ -83,10 +60,6 @@ namespace UrGuide.Mobile.ViewModels
         public ObservableRangeCollection<Model.Shared.AuthoredFeedback> Feedbacks { get; set; }
             = new ObservableRangeCollection<Model.Shared.AuthoredFeedback>();
 
-        public CreateFeedBack NewFeedBack { get; } = new CreateFeedBack
-        {
-            Rating = 4
-        };
         public INavigationService NavigationService { get; }
         public IPostItemService PostItemService { get; }
         public BidDialogViewModel BidDialogViewModel { get; }
@@ -95,6 +68,8 @@ namespace UrGuide.Mobile.ViewModels
         private string _id;
         private bool isLoggedIn;
         private bool canReview;
+        private int newFeedbackRating = 1;
+        private string newFeedbackText = string.Empty;
 
         public string Id
         {
@@ -111,7 +86,8 @@ namespace UrGuide.Mobile.ViewModels
         public bool IsLoggedIn { get => isLoggedIn; set => this.RaiseAndSetIfChanged(ref isLoggedIn, value); }
         public ICommand MakeReservationCommand { get; }
         public ICommand SharePostCommand { get; }
-
+        public string NewFeedbackText { get => newFeedbackText; set => this.RaiseAndSetIfChanged(ref newFeedbackText,  value); }
+        public int NewFeedbackRating { get => newFeedbackRating; set => this.RaiseAndSetIfChanged(ref newFeedbackRating, value); }
         public PostDetailViewModel(INavigationService navigationService,
             IPostItemService postItemService,
             BidDialogViewModel bidDialogViewModel,
@@ -150,10 +126,29 @@ namespace UrGuide.Mobile.ViewModels
             this.WhenAnyValue(x => x.Feedbacks, x => x.Selected)
                 .Do((x) =>
                 {
-                    CanReview = IsLoggedIn && 
+                    CanReview = IsLoggedIn &&
                     x.Item2?.AuthorId != Preference.UserId &&
                     (!x.Item1.Any() || x.Item1.All(f => f.AuthorId != Preference.UserId));
                 }).Subscribe();
+            var canSubmitReview = this.WhenAnyValue(x => x.NewFeedbackRating, x => x.NewFeedbackText)
+                .Select((x) => x.Item2?.Length >= 50);
+
+            NewFeedBackCommand = ReactiveCommand.Create(async () =>
+            {
+                var it = await PostItemService.SendFeedback(Selected.Id, new Model.Shared.FeedbackModel
+                {
+                    Rating = NewFeedbackRating,
+                    Text = NewFeedbackText
+                });
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    if (!it.HasError)
+                        Load();
+                    NewFeedbackRating = 1;
+                    NewFeedbackText = string.Empty;
+                });
+            }, canSubmitReview, RxApp.MainThreadScheduler);
+            NewFeedBackCommand.Subscribe();
 
             SharePostCommand = new Command<PostItem>(async it =>
             {

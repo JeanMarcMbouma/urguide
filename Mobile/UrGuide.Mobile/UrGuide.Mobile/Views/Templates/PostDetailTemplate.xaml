@@ -373,34 +373,6 @@
                             </renderedViews:HorizontalListView.ItemTemplate>
                         </renderedViews:HorizontalListView>
                     </loader:TaskLoaderView>
-                    <StackLayout Grid.Row="2" Orientation="Vertical" IsVisible="False">
-                        <StackLayout.Triggers>
-                            <DataTrigger TargetType="StackLayout"
-                                         Binding="{Binding CanReview, Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}}" Value="True">
-                                <Setter Property="IsVisible" Value="True" />
-                            </DataTrigger>
-                        </StackLayout.Triggers>
-                        <Label Text="Write a review" Style="{StaticResource TextHeader}" HorizontalTextAlignment="Start" FontSize="Medium" FontAttributes="Bold"/>
-                        <controls:Rating Minimum="1" Maximum="5" Value="{Binding Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}, Path=NewFeedBack.Rating}"/>
-                        <Frame Margin="0,10" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
-                                   HeightRequest="200" CornerRadius="4" BorderColor="{StaticResource IconColor}"
-                                   Padding="0">
-
-                            <Editor HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"
-                                       Margin="0,0,0,-8" Text="{Binding Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}, Path=NewFeedBack.Text}"
-                                   />
-                        </Frame>
-                        <Button Text="Submit"
-                                    BackgroundColor="{StaticResource FavoriteIcon}"
-                                    VerticalOptions="EndAndExpand"
-                                    HorizontalOptions="FillAndExpand" CornerRadius="8"
-                                    HeightRequest="40"
-                                Visual="Material"
-                            TextColor="White"
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostDetailViewModel}}, Path=NewFeedBackCommand}"
-                                           >
-                        </Button>
-                    </StackLayout>
                 </Grid>
             </Grid>
         </Grid>
