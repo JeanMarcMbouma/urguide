@@ -66,7 +66,7 @@ namespace UrGuide.Mobile.Views.Controls
             BindableProperty.Create(nameof(StarWidthRequest), typeof(int), typeof(Rating), 24);
 
         public static readonly BindableProperty ValueProperty =
-            BindableProperty.Create(nameof(Value), typeof(int), typeof(Rating), 1, propertyChanged: (bindable, o,n) => {
+            BindableProperty.Create(nameof(Value), typeof(int), typeof(Rating), 1, BindingMode.TwoWay, propertyChanged: (bindable, o,n) => {
                 if(bindable is Rating rating)
                 {
                     rating.Items.ReplaceRange(Enumerable.Range(1, rating.Maximum).Select(
