@@ -161,6 +161,12 @@ namespace UrGuide.Mobile.Services
                     it.HasReacted = true;
                     it.ReactionType = GlobalSetting.Like;
                 }
+                await UpdateCacheItem(it.Id, i => {
+                    i.HasReacted = it.HasReacted;
+                    i.Likes = it.Likes;
+                    i.ReactionType = it.ReactionType;
+                });
+
                 return true;
             }, e => false);
         }
@@ -182,6 +188,18 @@ namespace UrGuide.Mobile.Services
             await Cache.InsertObject(Favorites_CacheKey, favorites, TimeSpan.FromDays(360));
         }
 
+        private async Task UpdateCacheItem(string  id, Action<PostItem> update)
+        {
+            var favorites = await Cache.GetOrCreateObject(Favorites_CacheKey, () => new List<PostItem>());
+            var item = favorites.FirstOrDefault(f => f.Id.Equals(id));
+            if (item != null)
+            {
+                update?.Invoke(item);
+            }
+            await Cache.Invalidate(Favorites_CacheKey);
+            await Cache.InsertObject(Favorites_CacheKey, favorites, TimeSpan.FromDays(360));
+        }
+
         public async Task<Result<Model.Shared.AuthoredFeedback>> SendFeedback(string postId, Model.Shared.FeedbackModel item)
         {
             return await Try(async () =>
@@ -193,6 +211,7 @@ namespace UrGuide.Mobile.Services
                 });
                 if (result)
                 {
+                    await UpdateCacheItem(postId, i => i.Reviews++);
                     return Result.Of(new Model.Shared.AuthoredFeedback
                     {
                         AuthorFullName = Preference.FullName,
@@ -240,6 +259,11 @@ namespace UrGuide.Mobile.Services
                     it.HasReserved = true;
                     it.ReservedSeats++;
                 }
+                await UpdateCacheItem(it.Id, i => {
+                    i.HasReserved = it.HasReserved;
+                    i.ReservedSeats = it.ReservedSeats;
+                });
+
                 return true;
             }, e => false);
         }
@@ -264,6 +288,7 @@ namespace UrGuide.Mobile.Services
                     PostId = id,
                     Value = $"{bid:#.##}"
                 });
+                await UpdateCacheItem(id, i => i.BidCount++);
                 return Result.Of(true);
             }, e => Result.Of(false).WithErrors(e.Message));
         }

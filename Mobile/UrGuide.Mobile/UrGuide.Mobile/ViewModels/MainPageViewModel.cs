@@ -72,7 +72,6 @@ namespace UrGuide.Mobile.ViewModels
         public ICommand CreatePostCommand { get; }
         public ICommand LoginCommand { get; }
         public ICommand SignOutCommand { get; }
-        public ICommand SearchCategoryCommand { get; }
         public ICommand MakeReservationCommand { get; }
         public ICommand SharePostCommand { get; }
         public MainPageViewModel(
@@ -106,11 +105,6 @@ namespace UrGuide.Mobile.ViewModels
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe()
             .DisposeWith(disposables);
-            SearchCategoryCommand = new Command<SearchOption>(option =>
-            {
-                Discover.Select(option);
-                SelectedViewIndex = 1;
-            });
 
             SharePostCommand = new Command<PostItem>(async it =>
             {
@@ -183,6 +177,12 @@ namespace UrGuide.Mobile.ViewModels
                 .Subscribe()
                 .DisposeWith(disposables);
             });
+
+            posts.SelectCategory = (args) =>
+            {
+                Discover.Select(args.Name);
+                SelectedViewIndex = 1;
+            };
         }
 
         Task<IEnumerable<Placemark>> Get() => Geocoding.GetPlacemarksAsync(null);

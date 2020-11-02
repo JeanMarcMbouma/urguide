@@ -19,6 +19,7 @@ namespace UrGuide.Mobile.Models
         private bool hasReserved;
         private int reservedSeats;
         private int bidCount;
+        private int reviews;
 
         public PostItem()
         {
@@ -60,7 +61,7 @@ namespace UrGuide.Mobile.Models
         public string Author { get; set; }
         public string AuthorAvatar { get; set; }
         public bool IsBidOptIn { get; set; }
-        public int Reviews { get; set; }
+        public int Reviews { get => reviews; set => SetProperty(ref reviews, value); }
 
 
         public List<Model.Posts.ItineraryModel> Itineraries { get; set; }

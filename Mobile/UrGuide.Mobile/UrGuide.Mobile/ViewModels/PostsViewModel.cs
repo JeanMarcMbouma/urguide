@@ -10,6 +10,7 @@ using System.Windows.Input;
 using UrGuide.Mobile.Contracts;
 using UrGuide.Mobile.Models;
 using UrGuide.Model.Lookup;
+using Xamarin.Forms;
 
 namespace UrGuide.Mobile.ViewModels
 {
@@ -24,17 +25,12 @@ namespace UrGuide.Mobile.ViewModels
         private ICommand _viewDetailCommand;
         private ICommand _likeCommand;
         private ICommand _markAsFavoriteCommand;
-        private ICommand _searchCategoryCommand;
 
         public TaskLoaderNotifier<IEnumerable<PostItem>> PostItemsLoader { get; }
         public TaskLoaderNotifier<IEnumerable<CategoryModel>> CategoryLoader { get; }
-        public ICommand SearchCategoryCommand
-        {
-            get => _searchCategoryCommand; set
-            {
-                this.RaiseAndSetIfChanged(ref _searchCategoryCommand, value);
-            }
-        }
+        public ICommand SearchCategoryCommand { get; }
+
+        public Action<CategoryModel> SelectCategory;
 
         public ICommand ToggleFavoriteCommand => _markAsFavoriteCommand ??= new AsyncCommand<PostItem>(async item =>
         {
@@ -71,7 +67,10 @@ namespace UrGuide.Mobile.ViewModels
         }
 
         public IPostItemService PostItemService { get; }
-        public PostsViewModel(INavigationService navigation, IPostItemService postItemService, PostDetailViewModel detailViewModel)
+        public PostsViewModel(INavigationService navigation, 
+            IPostItemService postItemService, 
+            PostDetailViewModel detailViewModel,
+            IMessagingCenter messaging)
         {
             _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
             PostItemService = postItemService ?? throw new ArgumentNullException(nameof(postItemService));
@@ -79,17 +78,22 @@ namespace UrGuide.Mobile.ViewModels
             PostItemsLoader = new TaskLoaderNotifier<IEnumerable<PostItem>>(LoadItemsAsync);
             CategoryLoader = new TaskLoaderNotifier<IEnumerable<CategoryModel>>(LoadCategoriesAsync);
 
-            Xamarin.Forms.MessagingCenter.Subscribe<FavoriteViewModel, PostItem>(this, "favorite", (fvm, item) =>
+            messaging.Subscribe<FavoriteViewModel, PostItem>(this, "favorite", (fvm, item) =>
             {
                 var it = Items.FirstOrDefault(x => x.Id == item.Id);
                 if (it != null)
                     it.Favorite = item.Favorite;
             });
-            Xamarin.Forms.MessagingCenter.Subscribe<PostDetailViewModel, PostItem>(this, "favorite", (fvm, item) =>
+            messaging.Subscribe<PostDetailViewModel, PostItem>(this, "favorite", (fvm, item) =>
             {
                 var it = Items.FirstOrDefault(x => x.Id == item.Id);
                 if (it != null && it != Selected)
                     it.Favorite = item.Favorite;
+            });
+
+            SearchCategoryCommand = new MvvmHelpers.Commands.Command<CategoryModel>(c =>
+            {
+                SelectCategory?.Invoke(c);
             });
         }
 

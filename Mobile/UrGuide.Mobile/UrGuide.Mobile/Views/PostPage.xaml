@@ -18,25 +18,20 @@
             <tt:PostListItemTemplate />
         </DataTemplate>
     </ContentView.Resources>
-    <ScrollView>
-        <RefreshView IsRefreshing="{Binding PostItemsLoader.ShowRefresher}"
+    <RefreshView IsRefreshing="{Binding PostItemsLoader.ShowRefresher}"
                          RefreshColor="Accent"
                          Command="{Binding PostItemsLoader.RefreshCommand}">
+        <ScrollView>
             <StackLayout Orientation="Vertical" Margin="8,8,8,20" Spacing="8" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
           >
                 <Label Text="Categories" HorizontalTextAlignment="Start" Style="{StaticResource TextHeader}"/>
 
                 <loader:TaskLoaderView AccentColor="Accent" TaskLoaderNotifier="{Binding CategoryLoader}">
                     <ScrollView Orientation="Horizontal">
-                        <StackLayout Orientation="Horizontal" Spacing="0" BindableLayout.ItemsSource="{Binding CategoryLoader.Result}" HeightRequest="250">
+                        <StackLayout x:Name="categories" Orientation="Horizontal" Spacing="0" BindableLayout.ItemsSource="{Binding CategoryLoader.Result}" HeightRequest="250">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="m:CategoryModel">
                                     <Grid HeightRequest="250" WidthRequest="200" BackgroundColor="LightGray">
-
-                                        <Grid.GestureRecognizers>
-                                            <TapGestureRecognizer  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=SearchCategoryCommand}" NumberOfTapsRequired="1"
-                                                          CommandParameter="{Binding}"/>
-                                        </Grid.GestureRecognizers>
                                         <ff:CachedImage Source="{Binding ImageUrl}"
                                                         VerticalOptions="FillAndExpand"
                                                         HorizontalOptions="FillAndExpand"
@@ -44,12 +39,20 @@
                                                 HeightRequest="250"
                                                 WidthRequest="200"
                                                 CacheDuration="360"
-                                                        Aspect="AspectFill" />
-                                        <y:PancakeView VerticalOptions="End" HorizontalOptions="FillAndExpand" 
+                                                        InputTransparent="True"
+                                                        Aspect="AspectFill">
+                                        </ff:CachedImage>
+                                        <y:PancakeView VerticalOptions="End" 
+                                                       HorizontalOptions="FillAndExpand"
+                                                       InputTransparent="True"
                                            HeightRequest="40" BackgroundColor="#60000000">
                                             <Label Text="{Binding Name}" TextColor="White" Margin="4"
                                        FontSize="Medium" FontAttributes="Bold" VerticalOptions="Center"/>
                                         </y:PancakeView>
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PostsViewModel}}, Path=SearchCategoryCommand}" NumberOfTapsRequired="1"
+                                                          CommandParameter="{Binding}"/>
+                                        </Grid.GestureRecognizers>
                                     </Grid>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
@@ -73,6 +76,8 @@
                     </StackLayout>
                 </loader:TaskLoaderView>
             </StackLayout>
-        </RefreshView>
-    </ScrollView>
+
+        </ScrollView>
+    </RefreshView>
+
 </ContentView>

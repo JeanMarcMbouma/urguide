@@ -143,7 +143,10 @@ namespace UrGuide.Mobile.ViewModels
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
                     if (!it.HasError)
+                    {
                         Load();
+                        Selected.Reviews++;
+                    }
                     NewFeedbackRating = 1;
                     NewFeedbackText = string.Empty;
                 });
