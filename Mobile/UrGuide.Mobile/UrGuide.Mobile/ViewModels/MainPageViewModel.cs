@@ -187,6 +187,12 @@ namespace UrGuide.Mobile.ViewModels
 
         internal void GotoProfile()
         {
+
+            Profile.Load(new ProfileInfo
+            {
+                AuthorId = Preference.UserId,
+                AuthorFullName = Preference.FullName
+            });
             SelectedViewIndex = 3;
         }
 
