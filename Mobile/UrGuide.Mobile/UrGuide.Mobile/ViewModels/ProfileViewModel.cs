@@ -28,7 +28,7 @@ namespace UrGuide.Mobile.ViewModels
         private ICommand _createGalleryCommand;
         private ICommand _changePasswordCommand;
         private ICommand _deleteAccountCommand;
-
+        private string userId = null;
         public ProfileViewModel(INavigationService navigation, 
             IPostItemService postItemService, 
             IUserService userService,
@@ -40,22 +40,23 @@ namespace UrGuide.Mobile.ViewModels
             Preference = preference ?? throw new ArgumentNullException(nameof(preference));
             UserLoader = new TaskLoaderNotifier<UserInfo>(LoadUserAsync);
             PostsLoader = new TaskLoaderNotifier<IEnumerable<PostItem>>();
+            userId = preference.UserId;
             GalleryLoader = new TaskLoaderNotifier<IEnumerable<GalleryItem>>(async () =>
             {
-                var items = await UserService.GetGalleryItems(Preference.UserId);
+                var items = await UserService.GetGalleryItems(userId);
                 return items;
             });
             FeedbackLoader = new TaskLoaderNotifier<IEnumerable<AuthoredFeedback>>();
             PostsPaginator = new Paginator<PostItem>(async (pageNumber, pageSize, b) =>
             {
-                var result = await PostItemService.GetUserPosts(Preference.UserId, pageNumber);
+                var result = await PostItemService.GetUserPosts(userId, pageNumber);
                 Posts ??= new ObservableRangeCollection<PostItem>();
                 Posts.AddRange(result.Items);
                 return result;
             });
             FeedbackPaginator = new Paginator<AuthoredFeedback>(async (pageNumber, pageSize, b) =>
             {
-                var result = await UserService.GetUserFeedback(Preference.UserId, pageNumber);
+                var result = await UserService.GetUserFeedback(userId, pageNumber);
                 Feedbacks ??= new ObservableRangeCollection<AuthoredFeedback>();
                 Feedbacks.AddRange(result.Items);
                 return result;
@@ -64,7 +65,7 @@ namespace UrGuide.Mobile.ViewModels
 
         private Task<UserInfo> LoadUserAsync()
         {
-            return UserService.GetUserInfo(Preference.UserId);
+            return UserService.GetUserInfo(userId);
         }
 
 
@@ -138,6 +139,11 @@ namespace UrGuide.Mobile.ViewModels
 
         }
         public void Load(object paramter) {
+            if (paramter is ProfileInfo info)
+            {
+                userId = info.AuthorId;
+                Title = info.AuthorFullName;
+            }
             UserLoader.Load();
             PostsLoader.Load(async () => (await PostsPaginator.LoadPage(1)).Items);
             FeedbackLoader.Load(async () => (await FeedbackPaginator.LoadPage(1)).Items);
@@ -150,5 +156,11 @@ namespace UrGuide.Mobile.ViewModels
         Reviews = 1,
         Posts = 2,
         Gallery = 3
+    }
+
+    public class ProfileInfo
+    {
+        public string AuthorId { get; set; }
+        public string AuthorFullName { get; set; }
     }
 }

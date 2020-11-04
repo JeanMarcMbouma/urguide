@@ -65,7 +65,7 @@ namespace UrGuide.Mobile
             services.AddScoped<PostDetailViewModel>();
             services.AddScoped<BidDialogViewModel>();
             services.AddScoped<FavoriteViewModel>();
-            services.AddScoped<ProfileViewModel>();
+            services.AddTransient<ProfileViewModel>();
             services.AddScoped<EditProfileViewModel>();
             services.AddScoped<ChangePasswordViewModel>();
             services.AddScoped<DiscoverViewModel>();

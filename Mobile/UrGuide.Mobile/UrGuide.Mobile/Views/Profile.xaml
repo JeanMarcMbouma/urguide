@@ -73,7 +73,7 @@
                         </StackLayout>
                     </Frame>
 
-                    <ImageButton BackgroundColor="Transparent"
+                    <!--<ImageButton BackgroundColor="Transparent"
                        Source="{FontImage FontFamily=fas, Glyph={x:Static icons:FAI.SignOutAlt}, Size=24
                             ,Color=Accent}"
                         Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=SignOutCommand}"
@@ -84,7 +84,7 @@
                              Margin="4,8"
                              IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path= IsLoggedIn}"
 
-                        />
+                        />-->
                     <Frame Grid.Row="1" IsClippedToBounds="True" HasShadow="True" BackgroundColor="{StaticResource IconColor}" 
                    HorizontalOptions="FillAndExpand" Padding="4" Margin="16,-20,16,20" CornerRadius="8" >
                         <Grid ColumnDefinitions="*,*,*" HorizontalOptions="FillAndExpand" ColumnSpacing="4">

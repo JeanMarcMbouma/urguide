@@ -60,7 +60,7 @@
                             <ff:CachedImage Source="{Binding ImageBase64}" 
                                             HeightRequest="300"
                                             VerticalOptions="FillAndExpand"
-                                            Aspect="AspectFit"
+                                            Aspect="Fill"
                                             DownsampleToViewSize="True"
                                             HorizontalOptions="FillAndExpand"
                                             />
@@ -78,10 +78,10 @@
                   HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" Margin="20">
 
 
-                <ff:CachedImage Grid.Row="0" Source="{Binding AuthorAvatar}"
-                            Aspect="AspectFit" HeightRequest="46" WidthRequest="46"
-                                st:Transition.Name="AuthorAvatar">
-                </ff:CachedImage>
+                <controls:Avatar Source="{Binding AuthorAvatar}"
+                            AuthorId="{Binding AuthorId}"
+                            AuthorFullName="{Binding Author}"
+                            Size="46,46"/>
 
                 <StackLayout Grid.Row="0" Grid.Column="1" VerticalOptions="StartAndExpand" Orientation="Vertical" Spacing="12"
                              Margin="8" st:Transition.Name="Author" >

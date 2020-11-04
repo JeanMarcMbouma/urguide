@@ -12,7 +12,7 @@
              xmlns:m="clr-namespace:UrGuide.Model.Shared;assembly=UrGuide.Model" xmlns:loaded="clr-namespace:Sharpnado.Presentation.Forms.CustomViews;assembly=Sharpnado.TaskLoaderView" xmlns:rv="clr-namespace:Sharpnado.MaterialFrame;assembly=Sharpnado.MaterialFrame"
              x:DataType="vm:DiscoverViewModel"
              BackgroundColor="#ececec">
-    
+
     <AbsoluteLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
         <StackLayout AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional" Spacing="8" 
                      Orientation="Vertical" Margin="8,12,8,8" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand">
@@ -21,7 +21,7 @@
                        VerticalOptions="StartAndExpand" CornerRadius="24" Padding="0"
                                    >
                     <StackLayout Orientation="Horizontal" VerticalOptions="FillAndExpand" 
-                                 HorizontalOptions="FillAndExpand" Spacing="8"  > 
+                                 HorizontalOptions="FillAndExpand" Spacing="8"  >
                         <Entry HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" 
                                Margin="20,0,0,-10" Text="{Binding SearchTerm}"/>
                         <ImageButton WidthRequest="32" HeightRequest="32" BackgroundColor="Transparent"
@@ -71,47 +71,50 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
             <ScrollView>
-                
-            <loaded:TaskLoaderView TaskLoaderNotifier="{Binding ItemsLoader}">
-                <RefreshView IsRefreshing="{Binding ItemsLoader.ShowRefresher}"
+
+                <loaded:TaskLoaderView TaskLoaderNotifier="{Binding ItemsLoader}">
+                    <RefreshView IsRefreshing="{Binding ItemsLoader.ShowRefresher}"
                          RefreshColor="Accent"
                          Command="{Binding ItemsLoader.RefreshCommand}">
-                    <ScrollView VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
-                        <CollectionView ItemsSource="{Binding ItemsLoader.Result}" ItemSizingStrategy="MeasureAllItems">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:DiscoverItem">
-                                <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
+                        <ScrollView VerticalOptions="FillAndExpand"
+                                    HorizontalOptions="FillAndExpand"
+                                    HorizontalScrollBarVisibility="Never"
+                                    VerticalScrollBarVisibility="Never">
+                            <CollectionView ItemsSource="{Binding ItemsLoader.Result}" ItemSizingStrategy="MeasureAllItems">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:DiscoverItem">
+                                        <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
                                       HeightRequest="250" x:Name="container">
-                                    <CarouselView ItemsSource="{Binding Files}" HorizontalOptions="FillAndExpand"
+                                            <CarouselView ItemsSource="{Binding Files}" HorizontalOptions="FillAndExpand"
                                           VerticalOptions="FillAndExpand"  x:Name="ImageFrame"
                                           IndicatorView="indicator">
-                                        <CarouselView.ItemTemplate>
-                                            <DataTemplate x:DataType="{x:Type m:ImageFileModel}">
+                                                <CarouselView.ItemTemplate>
+                                                    <DataTemplate x:DataType="{x:Type m:ImageFileModel}">
 
-                                                <ff:CachedImage 
+                                                        <ff:CachedImage 
                                                 Aspect="AspectFill"
                                                 Source="{Binding ImageBase64}"
                                                 WidthRequest="{Binding Source={Reference ImageFrame},Path=Width}"
                                                 HeightRequest="{Binding Source={Reference ImageFrame},Path=Height}"
                                                 >
-                                                    <ff:CachedImage.GestureRecognizers>
-                                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DiscoverViewModel}},Path=ViewPostCommand}" 
+                                                            <ff:CachedImage.GestureRecognizers>
+                                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DiscoverViewModel}},Path=ViewPostCommand}" 
                                                           CommandParameter="{Binding Source={Reference container}, Path=BindingContext}"/>
-                                                    </ff:CachedImage.GestureRecognizers>
-                                                </ff:CachedImage>      
-                                            </DataTemplate>
-                                        </CarouselView.ItemTemplate>
-                                    </CarouselView>
-                                    <BoxView HorizontalOptions="FillAndExpand" HeightRequest="40" 
+                                                            </ff:CachedImage.GestureRecognizers>
+                                                        </ff:CachedImage>
+                                                    </DataTemplate>
+                                                </CarouselView.ItemTemplate>
+                                            </CarouselView>
+                                            <BoxView HorizontalOptions="FillAndExpand" HeightRequest="40" 
                                              BackgroundColor="#50000000"
                                  VerticalOptions="End" CornerRadius="4"/>
-                                    <StackLayout Orientation="Vertical" VerticalOptions="StartAndExpand"
+                                            <StackLayout Orientation="Vertical" VerticalOptions="StartAndExpand"
                                                  HorizontalOptions="FillAndExpand" Spacing="0"
                                                  BackgroundColor="#20000000">
-                                        <StackLayout HorizontalOptions="Start"
+                                                <StackLayout HorizontalOptions="Start"
                                                          VerticalOptions="StartAndExpand"
                                                          Margin="8">
-                                            <ff:CachedImage Source="{Binding AuthorImage}" 
+                                                    <ff:CachedImage Source="{Binding AuthorImage}" 
                                                     Aspect="AspectFit"
                                                     WidthRequest="64"
                                                     HeightRequest="64"
@@ -119,35 +122,35 @@
                                                     HorizontalOptions="CenterAndExpand"
                                                     ></ff:CachedImage>
 
-                                            <Label Text="{Binding Author}" VerticalOptions="End" 
+                                                    <Label Text="{Binding Author}" VerticalOptions="End" 
                                                        HorizontalOptions="CenterAndExpand"
                                    MaxLines="1"  
                                    TextColor="White" FontSize="Small" FontAttributes="Bold" CharacterSpacing="1" />
-                                        </StackLayout>
+                                                </StackLayout>
 
-                                    </StackLayout>
+                                            </StackLayout>
 
-                                    <IndicatorView x:Name="indicator" VerticalOptions="End"
+                                            <IndicatorView x:Name="indicator" VerticalOptions="End"
                                            HorizontalOptions="EndAndExpand" 
                                            IndicatorColor="#70ffffff"
                                            HeightRequest="40" 
                                            IndicatorSize="10" SelectedIndicatorColor="#fff"/>
-                                    <Grid.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DiscoverViewModel}},Path=ViewPostCommand}" 
+                                            <Grid.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DiscoverViewModel}},Path=ViewPostCommand}" 
                                                           CommandParameter="{Binding}"/>
-                                    </Grid.GestureRecognizers>
-                                </Grid>
-                            </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                    <CollectionView.ItemsLayout>
-                        <GridItemsLayout Span="{OnIdiom Phone=2,Default=4}" Orientation="Vertical" 
+                                            </Grid.GestureRecognizers>
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                                <CollectionView.ItemsLayout>
+                                    <GridItemsLayout Span="{OnIdiom Phone=2,Default=4}" Orientation="Vertical" 
                                          HorizontalItemSpacing="4" VerticalItemSpacing="4"/>
-                    </CollectionView.ItemsLayout>
-                </CollectionView>  
-            </ScrollView>
-            </RefreshView>
-            </loaded:TaskLoaderView>
-            
+                                </CollectionView.ItemsLayout>
+                            </CollectionView>
+                        </ScrollView>
+                    </RefreshView>
+                </loaded:TaskLoaderView>
+
             </ScrollView>
         </StackLayout>
         <CollectionView HorizontalOptions="FillAndExpand" Margin="12"

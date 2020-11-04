@@ -185,6 +185,11 @@ namespace UrGuide.Mobile.ViewModels
             };
         }
 
+        internal void GotoProfile()
+        {
+            SelectedViewIndex = 3;
+        }
+
         Task<IEnumerable<Placemark>> Get() => Geocoding.GetPlacemarksAsync(null);
         public void Load(object parameter)
         {

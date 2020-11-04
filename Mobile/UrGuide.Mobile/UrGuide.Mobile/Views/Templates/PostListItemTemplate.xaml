@@ -9,6 +9,7 @@
              xmlns:st="clr-namespace:Plugin.SharedTransitions;assembly=Plugin.SharedTransitions"
              xmlns:vm="clr-namespace:UrGuide.Mobile.ViewModels"
              xmlns:icons="clr-namespace:UrGuide.Mobile.Helpers"
+             xmlns:controls="clr-namespace:UrGuide.Mobile.Views.Controls"
              mc:Ignorable="d"
              x:Class="UrGuide.Mobile.Views.Templates.PostListItemTemplate"
              x:DataType="m:PostItem">
@@ -17,13 +18,13 @@
            >
         <StackLayout Orientation="Vertical" Spacing="0" Padding="0">
             <Grid RowDefinitions="70,Auto,Auto,*" ColumnDefinitions="70,*" Margin="12">
-
-                <ff:CachedImage Source="{Binding AuthorAvatar}"
-                            Aspect="AspectFit" HeightRequest="46" WidthRequest="46"
-                                st:Transition.Name="AuthorAvatar"
-                                st:Transition.Group="{Binding Id}">
-                </ff:CachedImage>
-
+                <controls:Avatar Source="{Binding AuthorAvatar}"
+                            AuthorId="{Binding AuthorId}"
+                            AuthorFullName="{Binding Author}"
+                            Size="46,46"
+                            st:Transition.Name="AuthorAvatar"
+                            st:Transition.Group="{Binding Id}"/>
+                
                 <StackLayout Grid.Column="1" VerticalOptions="StartAndExpand" Orientation="Vertical" Spacing="12"
                              Margin="8" st:Transition.Name="Author" st:Transition.Group="{Binding Id}">
                     <Label Text="{Binding Author}" FontSize="Medium" 
