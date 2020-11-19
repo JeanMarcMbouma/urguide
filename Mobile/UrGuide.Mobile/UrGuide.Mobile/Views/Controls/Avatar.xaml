@@ -9,7 +9,7 @@
                     HorizontalOptions="FillAndExpand"
                     VerticalOptions="FillAndExpand"
                     WidthRequest="{Binding Source={Reference page}, Path=WidthRequest}"
-                    HeightRequest="{Binding Source={Reference page}, Path=HeigthRequest}"
+                    HeightRequest="{Binding Source={Reference page}, Path=HeightRequest}"
                     >
         <ff:CachedImage.GestureRecognizers>
             <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped">

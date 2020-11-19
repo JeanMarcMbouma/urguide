@@ -149,7 +149,7 @@ namespace UrGuide.Mobile.ViewModels
                         var country = places.FirstOrDefault()?.CountryName;
                         GlobalSetting.Instance.City = $"{city}, {country}";
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                     }
                 }).Catch(Observable.Empty<Location>()).Subscribe();
