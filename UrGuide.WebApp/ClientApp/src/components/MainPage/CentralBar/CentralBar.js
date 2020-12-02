@@ -521,8 +521,9 @@ export default function CentralBar() {
 
     const ctx = useContext(NewPostContext);
     const [state, dispatch] = useReducer(NewPostReducer, ctx);
-     const actionCtx = useContext(ActionsContext);
+    const actionCtx = useContext(ActionsContext);
     const [actionsState, dispatchAction] = useReducer(ActionsReducer, actionCtx );
+    const [IsCreatingPost, setCreatingPost] = useState(false)
 
     
 
@@ -609,10 +610,10 @@ export default function CentralBar() {
 
 
     function ViewPost() {
-
        
-
         async function createNewPost(state) {
+
+            setCreatingPost(true);
 
             dcReducer({ type: ActionTypes.LOADINGCOMPLETED, data: { completed: false, url: "/feed" } });
 
@@ -633,7 +634,6 @@ export default function CentralBar() {
             });
 
             try {
-
                 await client.create(model);
                 const returnUrl = authService.getReturnUrl();
                 navigateToReturnUrl(returnUrl);
@@ -642,10 +642,10 @@ export default function CentralBar() {
             catch (e) {
                 console.log(e);
                
-            }
+            }  
 
         }
-
+        
         const [show, setShow] = useState(state.showPost);
         const [Categories, setCategories] = React.useState([
             { key: 0, label: 'Sport', checked: false },
@@ -827,7 +827,6 @@ export default function CentralBar() {
 
 
         return (<>
-
             {show ? <> <Button fullWidth variant="contained" type="button" onClick={() => togglePost()} >Click to hide this form</Button>
                 <br />
                 <br />
@@ -1149,7 +1148,7 @@ export default function CentralBar() {
                         <br />
                         <br />
                         {btnEnabled ? <Button fullWidth className='btn-publish' variant="contained" color="primary" type="button"
-                            onClick={() =>
+                            onClick={() => {
                                 dispatch({
                                     type: "create-post",
                                     data: {
@@ -1168,10 +1167,10 @@ export default function CentralBar() {
                                         callback: createNewPost,
                                         showPost:true,
                                     }
-                                })
+                                })}
                             }
                         >
-                            Publish
+                                Publish
                             </Button>
                             :
                             <Button fullWidth className='btn-disabled' variant="contained"  type="button" disabled >Publish</Button>
@@ -1182,8 +1181,8 @@ export default function CentralBar() {
         </>);
     }
 
-    function PostImages(props)
-    {
+    function PostImages(props){
+
         if (props.images.length == 1)
         {
             return (<div className='row'>
@@ -1428,11 +1427,12 @@ export default function CentralBar() {
     return (
         <div className="col-xs-12 col-sm-12 col-md-7 col-lg-5 col-xl-5 timeline-1">
             <div >
-                {profile.role === "guide" ? <ViewPost /> : null}
-                {
-                    isLoading ? <><SkeletonCard /><SkeletonCard /></> :
-                        actionsState.posts.length > 0 ? actionsState.posts.map((post, i) => <SinglePost key={i} post={post} />) : (<div><br /><br /><br /><h4 className="text-center">No post available yet.</h4></div>)
-                }
+                {IsCreatingPost ? <div className="new-post-creating"><CircularProgress /></div> : null}
+                        {profile.role === "guide" ? <ViewPost /> : null}
+                        {
+                            isLoading ? <><SkeletonCard /><SkeletonCard /></> :
+                                actionsState.posts.length > 0 ? actionsState.posts.map((post, i) => <SinglePost key={i} post={post} />) : (<div><br /><br /><br /><h4 className="text-center">No post available yet.</h4></div>)
+                        }
             </div>
         </div>
     );

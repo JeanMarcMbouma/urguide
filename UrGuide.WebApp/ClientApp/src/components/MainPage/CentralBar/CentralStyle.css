@@ -126,6 +126,22 @@
     padding:10px 0px 0px 12px;
 }
 
+.new-post-creating{
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99;
+    background-color: #000000;
+    opacity: .5;
+    padding-right: 1%;
+}
+
 .modal-backdrop {
     background-color:#f1f1f1;
     opacity:0.3;
