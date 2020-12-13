@@ -641,7 +641,8 @@ export default function CentralBar() {
             }
             catch (e) {
                 console.log(e);
-               
+                alert('Ooops,something went wrong.');
+                setCreatingPost(false);
             }  
 
         }
@@ -1425,7 +1426,7 @@ export default function CentralBar() {
     }
 
     return (
-        <div className="col-xs-12 col-sm-12 col-md-7 col-lg-5 col-xl-5 timeline-1">
+        <div className="col-xs-12 col-sm-12 col-md-7 col-lg-7 col-xl-7 pl-3">
             <div >
                 {IsCreatingPost ? <div className="new-post-creating"><CircularProgress /></div> : null}
                         {profile.role === "guide" ? <ViewPost /> : null}
