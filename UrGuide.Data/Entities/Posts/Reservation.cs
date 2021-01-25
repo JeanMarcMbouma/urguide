@@ -24,7 +24,6 @@ namespace UrGuide.Data.Entities.Posts
             Neutral = 0,
             Like = 2,
             DisLike = 4
-            
         }
     }
 }

@@ -28,6 +28,20 @@ namespace UrGuide.Data
             modelBuilder.ApplyConfiguration(new Configurations.PostConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.UserConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.AuditEventConfiguration());
+
+
+            modelBuilder.ApplyConfiguration(new Configurations.CampainConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.CountryConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.CurrencyConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.PaymentMethodConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.RegionConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.TimelineConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.TourConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.AuthorConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.SubscriptionConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.BookingConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.BalanceConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.ReviewConfiguration());
         }
     }
 }

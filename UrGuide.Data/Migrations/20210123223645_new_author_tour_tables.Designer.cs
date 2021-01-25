@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using UrGuide.Data;
@@ -10,9 +11,10 @@ using UrGuide.Data;
 namespace UrGuide.Data.Migrations
 {
     [DbContext(typeof(UrGuideContext))]
-    partial class UrGuideContextModelSnapshot : ModelSnapshot
+    [Migration("20210123223645_new_author_tour_tables")]
+    partial class new_author_tour_tables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -523,12 +525,9 @@ namespace UrGuide.Data.Migrations
             modelBuilder.Entity("UrGuide.Data.Entities.Tour.Review", b =>
                 {
                     b.Property<string>("ReviewId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)")
-                        .HasDefaultValueSql("NEWID()");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AuthorId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -538,9 +537,7 @@ namespace UrGuide.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(4000)")
-                        .HasMaxLength(4000);
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TourId")
                         .HasColumnType("nvarchar(450)");
@@ -554,7 +551,7 @@ namespace UrGuide.Data.Migrations
 
                     b.HasIndex("TourId");
 
-                    b.ToTable("reviews","ug");
+                    b.ToTable("Review");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Tour.Subscription", b =>
@@ -677,18 +674,15 @@ namespace UrGuide.Data.Migrations
             modelBuilder.Entity("UrGuide.Data.Entities.Users.Balance", b =>
                 {
                     b.Property<string>("BalanceId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)")
-                        .HasDefaultValueSql("NEWID()");
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<double>("Bonus")
-                        .HasColumnType("float");
+                    b.Property<decimal>("Bonus")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<double>("Coins")
-                        .HasColumnType("float");
+                    b.Property<decimal>("Coins")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("RegionId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -698,7 +692,7 @@ namespace UrGuide.Data.Migrations
 
                     b.HasIndex("RegionId");
 
-                    b.ToTable("author_balance","ug");
+                    b.ToTable("Balance");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Users.User", b =>
@@ -1197,9 +1191,7 @@ namespace UrGuide.Data.Migrations
                 {
                     b.HasOne("UrGuide.Data.Entities.Users.Author", "Author")
                         .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AuthorId");
 
                     b.HasOne("UrGuide.Data.Entities.Tour.Tour", null)
                         .WithMany("Reviews")
@@ -1467,9 +1459,7 @@ namespace UrGuide.Data.Migrations
                 {
                     b.HasOne("UrGuide.Data.Entities.Regions.Region", "Region")
                         .WithMany()
-                        .HasForeignKey("RegionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("RegionId");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Users.User", b =>

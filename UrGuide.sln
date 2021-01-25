@@ -21,12 +21,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UrGuide.Mobile.Android", "M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UrGuide.Mobile.iOS", "Mobile\UrGuide.Mobile\UrGuide.Mobile.iOS\UrGuide.Mobile.iOS.csproj", "{66E59310-784F-497C-BA82-245D4F5DB655}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UrGuide.Mobile", "Mobile\UrGuide.Mobile\UrGuide.Mobile\UrGuide.Mobile.csproj", "{E6378E17-68A0-432A-9CF4-79AC44BE357A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UrGuide.Mobile", "Mobile\UrGuide.Mobile\UrGuide.Mobile\UrGuide.Mobile.csproj", "{E6378E17-68A0-432A-9CF4-79AC44BE357A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6B0F2B49-8DEC-48C3-A4E7-34C9B4946FF4} = {6B0F2B49-8DEC-48C3-A4E7-34C9B4946FF4}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UrGuide.Core", "UrGuide.Core\UrGuide.Core.csproj", "{0EE1E95A-589B-4B42-83DF-20CBBCC66236}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UrGuide.Core", "UrGuide.Core\UrGuide.Core.csproj", "{0EE1E95A-589B-4B42-83DF-20CBBCC66236}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{388F28AF-E860-45D3-8130-15FBC400F354}"
+	ProjectSection(SolutionItems) = preProject
+		countries.json = countries.json
+		currencies.json = currencies.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
