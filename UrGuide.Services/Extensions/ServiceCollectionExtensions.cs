@@ -31,6 +31,7 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<Contracts.ILookupService, LookupService>();
             services.AddTransient<Contracts.IUserNotificationService, NotificationService>();
             services.AddTransient<Contracts.ITourRequestService, TourRequestService>();
+            services.AddTransient<Contracts.IDataSeedingService, Seeding.DataSeedingService>();
 
             // Validation
 

@@ -18,6 +18,8 @@ namespace UrGuide.Data
         public virtual DbSet<AuditEvent> AuditEvents { get; set; }
         public virtual DbSet<TourRequest> TourRequests { get; set; }
         public virtual DbSet<Region> Regions { get; set; }
+        public virtual DbSet<Country> Countries { get; set; }
+        public virtual DbSet<Currency> Currencies { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
