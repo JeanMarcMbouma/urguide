@@ -2,20 +2,93 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs/UrGuide
-/.vs
-/node_modules/react-select-country-list
-node_modules
-**/.vscode/launch.json
-**/.vscode/tasks.json
-bin
-BIN
-Bin
-obj
-OBJ
-Obj
+# Visual Studio directories and files
+/.vs/
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# .NET Core build artifacts
+project.lock.json
+project.fragment.lock.json
+artifacts/
+**/Properties/launchSettings.json
+
+# MSTest test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# Files built by Visual Studio
 *.cache
 *.FileListAbsolute.txt
+*.ilk
+*.meta
+*.obj
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# .NET Core
+.dotnet/
+
+# Node.js dependencies
+node_modules/
+/node_modules/react-select-country-list
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE directories and files
+**/.vscode/launch.json
+**/.vscode/tasks.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Application specific
 **/public/images/*.*
 **/public/thumb/*.*
 /.mfractor
+
+# Xamarin
+*.userprefs
+.mfractor/
