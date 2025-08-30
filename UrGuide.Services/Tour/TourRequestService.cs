@@ -19,7 +19,7 @@ using DataTourRequestStatus = UrGuide.Data.Entities.Tour.TourRequestStatus;
 
 namespace UrGuide.Services.Tour
 {
-    class TourRequestService : BaseService, ITourRequestService
+    public class TourRequestService : BaseService, ITourRequestService
     {
         public TourRequestService(UrGuideContext context,
                                   IUserContext userContext,
