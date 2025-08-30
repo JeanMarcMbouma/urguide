@@ -1,10 +1,11 @@
-﻿using IdentityServer4.Services;
+﻿using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View;
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,7 +50,15 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
             }
             
-            await HttpContext.SignInAsync(result.Data.Id, result.Data.UserName);
+            var claims = new List<System.Security.Claims.Claim>
+            {
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, result.Data.Id),
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, result.Data.UserName)
+            };
+            var identity = new System.Security.Claims.ClaimsIdentity(claims, "login");
+            var principal = new System.Security.Claims.ClaimsPrincipal(identity);
+            
+            await HttpContext.SignInAsync(principal);
             var context = InteractionService.GetAuthorizationContextAsync(returnUrl);
             if (context != null)
             {

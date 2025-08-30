@@ -1,7 +1,7 @@
 ﻿using IdentityModel;
-using IdentityServer4;
-using IdentityServer4.Models;
-using IdentityServer4.Services;
+using Duende.IdentityServer;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
@@ -16,13 +16,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using UrGuide.Shared.Configuration;
 using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Data;
 using UrGuide.WebApp.Entities;
 using UrGuide.WebApp.Services;
 using static IdentityModel.OidcConstants;
-using static IdentityServer4.Models.IdentityResources;
+using static Duende.IdentityServer.Models.IdentityResources;
 
 namespace UrGuide.WebApp.Extensions
 {
@@ -57,15 +58,61 @@ namespace UrGuide.WebApp.Extensions
             {
                 options.Authentication.CookieLifetime = TimeSpan.FromHours(2);
                 options.IssuerUri = applicationUri;
-                //options.UserInteraction.LogoutUrl = "/account/logout";
             })
-            .AddApiAuthorization<UrGuideUser, UrGuideAuthContext>(options =>
+            .AddInMemoryIdentityResources(GetIdentityResources())
+            .AddInMemoryApiScopes(GetApiScopes())
+            .AddInMemoryClients(GetClients(configuration, applicationUri))
+            .AddAspNetIdentity<UrGuideUser>()
+            .AddDeveloperSigningCredential();
+
+            services.AddScoped<IProfileService, ProfileService>();
+            services.AddScoped<IInstantMessagingService, InstantMessagingService>();
+
+            services.AddAuthentication()
+                .AddJwtBearer("Bearer", options =>
+                {
+                    options.Authority = applicationUri;
+                    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                    {
+                        ValidateAudience = false
+                    };
+                });
+            
+            services.AddSignalR();
+
+            services.AddSingleton<IUserIdProvider, UserIdProvider>();
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<JwtBearerOptions>, SignalRAuthPostConfigureOptions>()); 
+            return services;
+        }
+
+        private static IEnumerable<IdentityResource> GetIdentityResources()
+        {
+            return new IdentityResource[]
             {
-                options.Clients.Add(new Client
+                new IdentityResources.OpenId(),
+                new IdentityResources.Profile(),
+            };
+        }
+
+        private static IEnumerable<ApiScope> GetApiScopes()
+        {
+            return new ApiScope[]
+            {
+                new ApiScope("api1", "UrGuide API")
+            };
+        }
+
+        private static IEnumerable<Client> GetClients(IConfiguration configuration, string applicationUri)
+        {
+            string xamarin = configuration.GetValue<string>("Xamarin");
+            
+            return new Client[]
+            {
+                new Client
                 {
                     ClientName = "UrGuide.WebAPI",
                     ClientId = "UrGuide.WebAPI",
-                    AllowedGrantTypes = { GrantType.AuthorizationCode },
+                    AllowedGrantTypes = Duende.IdentityServer.Models.GrantTypes.Code,
                     AllowAccessTokensViaBrowser = true,
                     RequirePkce = true,
                     RequireClientSecret = false,
@@ -77,20 +124,18 @@ namespace UrGuide.WebApp.Extensions
                         $"{applicationUri}/swagger/" ,
                         $"https://localhost:5001/swagger/" ,
                     },
-
                     AllowedScopes =
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Profile
+                        IdentityServerConstants.StandardScopes.Profile,
+                        "api1"
                     }
-                });
-                string xamarin = configuration.GetValue<string>("Xamarin");
-                options.Clients.Add(new Client
+                },
+                new Client
                 {
                     ClientId = "xamarin",
                     ClientName = "UrGuide Xamarin OpenId Client",
-                    AllowedGrantTypes = { GrantType.AuthorizationCode },
-                    //Used to retrieve the access token on the back channel.
+                    AllowedGrantTypes = Duende.IdentityServer.Models.GrantTypes.Code,
                     ClientSecrets =
                     {
                         new Secret("secret".Sha256())
@@ -104,25 +149,13 @@ namespace UrGuide.WebApp.Extensions
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
-                        IdentityServerConstants.StandardScopes.OfflineAccess
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
+                        "api1"
                     },
-                    //Allow requesting refresh tokens for long lived API access
                     AllowOfflineAccess = true,
                     AllowAccessTokensViaBrowser = true
-                });
-            });
-
-            services.AddScoped<IProfileService, ProfileService>();
-            services.AddScoped<IInstantMessagingService, InstantMessagingService>();
-
-            services.AddAuthentication()
-                .AddIdentityServerJwt();
-            
-            services.AddSignalR();
-
-            services.AddSingleton<IUserIdProvider, UserIdProvider>();
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<JwtBearerOptions>, SignalRAuthPostConfigureOptions>()); 
-            return services;
+                }
+            };
         }
     }
 }

@@ -1,15 +1,14 @@
-﻿using IdentityServer4.EntityFramework.Options;
-using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
+﻿using Duende.IdentityServer.EntityFramework.Options;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using UrGuide.WebApp.Entities;
 
 namespace UrGuide.WebApp.Data
 {
-    public class UrGuideAuthContext : ApiAuthorizationDbContext<UrGuideUser>
+    public class UrGuideAuthContext : IdentityDbContext<UrGuideUser>
     {
-        public UrGuideAuthContext(DbContextOptions<UrGuideAuthContext> options,
-            IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
+        public UrGuideAuthContext(DbContextOptions<UrGuideAuthContext> options) : base(options)
         {
         }
     }

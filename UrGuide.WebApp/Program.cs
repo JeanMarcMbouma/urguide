@@ -3,43 +3,179 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
 using System;
 using NLog.Web;
+using UrGuide.WebApp.Data;
+using UrGuide.Services.Extensions;
+using UrGuide.WebApp.Extensions;
+using Microsoft.EntityFrameworkCore;
+using FluentValidation;
+using AspNetCoreRateLimit;
+using Microsoft.OpenApi.Models;
+using UrGuide.WebApp.Hubs;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Diagnostics;
+using UrGuide.WebApp.Models;
+using Duende.IdentityServer;
+using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
 
-namespace UrGuide.WebApp
+var logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+try
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
-            try
-            {
-                logger.Debug("init main");
-                CreateHostBuilder(args).Build().Run();
-            }
-            catch (Exception exception)
-            {
-                //NLog: catch setup errors
-                logger.Error(exception, "Stopped program because of exception");
-                throw;
-            }
-            finally
-            {
-                // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
-                NLog.LogManager.Shutdown();
-            }
-        }
+    logger.Debug("init main");
+    
+    var builder = WebApplication.CreateBuilder(args);
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
+    // Configure logging
+    builder.Logging.ClearProviders();
+    builder.Logging.SetMinimumLevel(LogLevel.Trace);
+    builder.Host.UseNLog();
+
+    // Add services to the container.
+    builder.Services.AddUrGuideAuthServices(builder.Configuration);
+    builder.Services.AddUrGuideServices(builder.Configuration);
+
+    // Configure rate limiting
+    builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
+    builder.Services.Configure<IpRateLimitPolicies>(builder.Configuration.GetSection("IpRateLimitPolicies"));
+    builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+    builder.Services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+
+    builder.Services.AddControllersWithViews(options => {
+        options.Filters.Add(typeof(UrGuide.WebApp.Filters.EnvelopResultFilter));
+        options.Filters.Add(typeof(UrGuide.WebApp.Filters.SaveChangeActionFilter));
+    });
+    
+    // FluentValidation is automatically configured via the UrGuide.Services registration
+    builder.Services.AddRazorPages();
+    
+    builder.Services.AddSwaggerGen(c =>
+    {
+        c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.OAuth2,
+            Flows = new OpenApiOAuthFlows
+            {
+                AuthorizationCode = new OpenApiOAuthFlow
                 {
-                    webBuilder.UseStartup<Startup>();
-                })
-              .ConfigureLogging(logging =>
-              {
-                  //logging.ClearProviders();
-                  logging.SetMinimumLevel(LogLevel.Trace);
-              })
-              .UseNLog();
+                    AuthorizationUrl = new Uri("/connect/authorize", UriKind.Relative),
+                    TokenUrl = new Uri("/connect/token", UriKind.Relative),
+                    Scopes = new Dictionary<string, string>
+                    {
+                        { IdentityServerConstants.StandardScopes.OpenId, "UrGuide Web Application" },
+                        { IdentityServerConstants.StandardScopes.Profile, "UrGuide Web Application" },
+                        { IdentityServerConstants.StandardScopes.OfflineAccess, "UrGuide Web Application" }
+                    }
+                }
+            }
+        });
+        c.OperationFilter<UrGuide.WebApp.Filters.AuthorizeCheckOperationFilter>();
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ur Guide API", Version = "v1" });
+    });
+    
+    // In production, the React files will be served from this directory
+    builder.Services.AddSpaStaticFiles(configuration =>
+    {
+        configuration.RootPath = "ClientApp/build";
+    });
+
+    builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+
+    var app = builder.Build();
+
+    // Configure the HTTP request pipeline.
+    app.UseExceptionHandler(options =>
+    {
+        options.Run(async (request) =>
+        {
+            var exceptionHandler = request.Features.Get<IExceptionHandlerFeature>();
+            if(exceptionHandler != null)
+            {
+                request.Response.StatusCode = (int)StatusCodes.Status500InternalServerError;
+                var errors = new List<string>();
+                if(app.Environment.IsDevelopment())
+                {
+                    errors.AddRange(new[] { exceptionHandler.Error.Message, exceptionHandler.Error.StackTrace });
+                } else
+                {
+                    errors.Add("An unexpected error has occured.");
+                }
+                var result = ErrorEnvelop.Create(errors);
+                await request.Response.WriteAsJsonAsync(result);
+            }
+        });
+    });
+
+    if (!app.Environment.IsDevelopment())
+    { 
+        app.UseHsts();
+        app.UseHttpsRedirection();
     }
+
+    // Database migration and seeding
+    using (var scope = app.Services.CreateScope())
+    {
+        var authContext = scope.ServiceProvider.GetRequiredService<UrGuideAuthContext>();
+        var dataContext = scope.ServiceProvider.GetRequiredService<UrGuide.Data.UrGuideContext>();
+        
+        authContext.Database.Migrate();
+        dataContext.Database.Migrate();
+
+        // Seed initial data
+        var seedingService = scope.ServiceProvider.GetRequiredService<UrGuide.Services.Contracts.IDataSeedingService>();
+        await seedingService.SeedDataAsync();
+    }
+
+    app.UseIpRateLimiting();
+
+    app.UseForwardedHeaders(new ForwardedHeadersOptions { 
+        ForwardedHeaders = ForwardedHeaders.XForwardedProto
+    });
+
+    app.UseStaticFiles();
+    app.UseSpaStaticFiles();
+
+    app.UseRouting();
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ur Guide API v1");
+        c.OAuthClientId("UrGuide.WebAPI");
+        c.OAuthAppName("UrGuide Swagger UI");
+        c.OAuthUsePkce();
+    });
+    app.UseAuthentication();
+    app.UseIdentityServer();
+    app.UseAuthorization();
+
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller}/{action=Index}/{id?}");
+    app.MapRazorPages();
+    app.MapHub<NotificationHub>("/notify");
+
+    app.UseSpa(spa =>
+    {
+        spa.Options.SourcePath = "ClientApp";
+        spa.Options.StartupTimeout = TimeSpan.FromMinutes(5);
+        if (app.Environment.IsDevelopment())
+        {
+            spa.UseReactDevelopmentServer(npmScript: "start");
+        }
+    });
+
+    app.Run();
+}
+catch (Exception exception)
+{
+    //NLog: catch setup errors
+    logger.Error(exception, "Stopped program because of exception");
+    throw;
+}
+finally
+{
+    // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
+    NLog.LogManager.Shutdown();
 }
