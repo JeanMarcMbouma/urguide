@@ -13,6 +13,7 @@ import AddCircleIcon from '@material-ui/icons/AddCircle';
 import AppsIcon from '@material-ui/icons/Apps';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import NotesIcon from '@material-ui/icons/Notes';
+import TimelineIcon from '@material-ui/icons/Timeline';
 import { FaRegCommentAlt } from 'react-icons/fa';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { setTimeout } from 'timers';
@@ -186,6 +187,17 @@ function RealUpperSection(props) {
                                                 </div>
                                         }
                                         {
+                                            dataContext.profileUrl === "/activity" ? <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center active-nav-col'>
+                                                <Link className="active-nav-link" style={{ textDecoration: `none` }} tag={Link} to={`/profile/activity`} color="primary" >
+                                                    <TimelineIcon fontSize="small" /> <span className='btn-title title-nav'>Activity</span>
+                                                </Link>
+                                            </div> : <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                                    <Link style={{ textDecoration: `none` }} tag={Link} to={`/profile/activity`} color="primary" >
+                                                        <TimelineIcon fontSize="small" /> <span className='btn-title title-nav'>Activity</span>
+                                                    </Link>
+                                                </div>
+                                        }
+                                        {
                                             dataContext.profileUrl === "/Galleries" ? <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center active-nav-col'>
                                                 <Link className="active-nav-link" style={{ textDecoration: `none` }} tag={Link} to={`/profile/galleries`} color="primary"  >
                                                     <AppsIcon fontSize="small" /> <span className='btn-title title-nav'>Galleries</span>
@@ -241,6 +253,17 @@ function RealUpperSection(props) {
                                 </div> : <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
                                         <Link style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}/posts`} color="primary" >
                                                         <NotesIcon fontSize="small" /> <span className='btn-title title-nav'>Posts</span>
+                                        </Link>
+                                    </div>
+                            }
+                            {
+                                dataContext.profileUrl === "/activity" ? <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center active-nav-col'>
+                                    <Link className="active-nav-link" style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}/activity`} color="primary" >
+                                                    <TimelineIcon fontSize="small" /> <span className='btn-title title-nav'>Activity</span>
+                                    </Link>
+                                </div> : <div className='col-2 col-md-2 col-lg-2 col-xl-2 nav-col text-center'>
+                                        <Link style={{ textDecoration: `none` }} tag={Link} to={`/g/${props.userId}/activity`} color="primary" >
+                                                        <TimelineIcon fontSize="small" /> <span className='btn-title title-nav'>Activity</span>
                                         </Link>
                                     </div>
                             }
