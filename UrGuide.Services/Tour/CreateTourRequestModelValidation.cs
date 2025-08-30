@@ -4,7 +4,7 @@ using UrGuide.Model.Tour;
 
 namespace UrGuide.Services.Tour
 {
-    class CreateTourRequestModelValidation : AbstractValidator<CreateTourRequestModel>
+    public class CreateTourRequestModelValidation : AbstractValidator<CreateTourRequestModel>
     {
         public CreateTourRequestModelValidation()
         {
