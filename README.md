@@ -1,83 +1,138 @@
-# Ur Guide
-Tourism facing app
+# UrGuide Tourism Platform
 
-Make yourself a Tourism guide at your ease and pace.
-# Work done 
+A comprehensive tourism web application that connects travelers with local guides, enabling authentic and personalized travel experiences.
 
-- [x] A user creates his/her profile
+## 🌟 Overview
 
-- [x] A user who opts to be a guide would have to answer to a questionnaire
-    
-- [x] A user (guide) would create a photo galery which could be used by other users when reviewing the offers
-- [x] A user (guide) would upload his/her profile picture and provide informations such as:
+UrGuide is a modern tourism platform built with .NET Core 3.1 backend, React SPA frontend, and Xamarin mobile apps. The platform allows users to create guide profiles, request tours, bid on services, and share experiences through a comprehensive review system.
 
-    - Date of birth, 
-    - Has he/she got a driving license? If so, provide the issuing year
-    - Sex
-    - City of residence
-    - Address (Show/hide to public)
-    - Short description
-    - Telephone number
-    - Country
-    
-- [x]  A user could bid for a tour
+**Make yourself a tourism guide at your ease and pace.**
 
-- [x]  A user could change the bid (increase or decrease)
+## 🏗️ Technology Stack
 
-- [x]  A user could reject or accept a proposal
+- **Backend**: ASP.NET Core 3.1 with Entity Framework Core
+- **Frontend**: React SPA with Material-UI components
+- **Mobile**: Xamarin.Forms (Android & iOS)
+- **Database**: SQL Server with LocalDB
+- **Authentication**: IdentityServer4
+- **Real-time Communication**: SignalR
+- **API Documentation**: Swagger/OpenAPI
 
-- [x]  A user could join a tour
+## ✅ Implemented Features
 
-- [x]  All actions are audited
+### 🔐 Authentication & User Management
+- [x] User registration and profile creation
+- [x] IdentityServer4 authentication system
+- [x] User account deletion
+- [x] Profile picture upload and management
 
-- [x]  A user can leave a positive/negative feedback about the tour via **5 Stars rating** and user comments
+### 👥 Guide System
+- [x] Guide registration with comprehensive questionnaire
+- [x] Guide profile with detailed information:
+  - Date of birth
+  - Driving license (with issuing year)
+  - Gender and contact information
+  - City of residence and address (show/hide to public)
+  - Personal description and telephone number
+  - Country information
+- [x] Photo gallery creation for guides
+- [x] Guide discovery and search functionality
 
-- [x]  A user could delete his/her account
+### 🎯 Tour & Bidding System
+- [x] Tour request creation and management
+- [x] Bidding system for tour services
+- [x] Bid modification (increase or decrease amounts)
+- [x] Proposal acceptance and rejection
+- [x] Tour participation and booking
 
-# Work in progress
+### ⭐ Review & Feedback System
+- [x] 5-star rating system for tours and guides
+- [x] Text-based feedback and reviews
+- [x] Email notifications for new feedback
+- [x] Comprehensive review display and management
 
-N/A
+### 🔔 Communication & Notifications
+- [x] Real-time notification system
+- [x] In-app messaging and alerts
+- [x] Email notification integration
+- [x] Activity tracking and user history
 
-# TODO
+### 📊 Administrative Features
+- [x] Complete action auditing system
+- [x] User activity tracking
+- [x] System monitoring and logging
 
-N/A
+## 🚧 Work in Progress
 
+Currently no features are actively in development. See the roadmap below for planned enhancements.
 
-## NICE TO HAVE
+## 📋 Roadmap & Future Features
 
-- [ ]  A user could download his/her data
+### 💳 Payment & Financial System
+- [ ] Integrated payment processing
+- [ ] Platform currency system (coins)
+- [ ] Fund withdrawal to bank accounts
+- [ ] Refund request system
+- [ ] Transaction history tracking
 
-- [ ]  A user could see his/her tour / bid / agreement history
+### 🎁 Gamification & Rewards
+- [ ] User loyalty program with discounts
+- [ ] Badge system (Silver, Gold, Platinum)
+- [ ] Built-in lottery system for free tours
+- [ ] Achievement tracking
 
-- [ ] A user could either agree to pay the tour guide via the platform or at an agreed location/time
+### 📈 Premium Features
+- [ ] Guide membership tiers:
+  - **Basic**: 2% platform fee, top 100 appearance, small group tours (<3 members)
+  - **Premium**: 5% platform fee, top 10 local search, unlimited group size
+- [ ] Monthly/quarterly/yearly subscription plans
+- [ ] Advanced search and visibility boosts
+- [ ] Personalized advertising system
 
-- [ ]  A user can request a refund after an agreed period (see policy)
+### 🔒 Security & Privacy
+- [ ] Two-factor authentication (2FA)
+- [ ] Social login (Google/Apple/Microsoft)
+- [ ] Data export functionality (GDPR compliance)
+- [ ] Account freeze/temporary suspension
+- [ ] Barcode authentication integration
 
-- [ ]  A user could buy some coins and later pay for the tours using the platform's currency
+### 📅 Advanced Scheduling
+- [ ] Calendar integration and sharing
+- [ ] Availability toggle system
+- [ ] Automated scheduling tools
+- [ ] Tour planning and routing
 
-- [ ]  A user could redraw the funds to a bank card, account once a week
+### 💰 Payment Integration
+- [ ] Google Pay/Apple Pay support
+- [ ] PayPal integration
+- [ ] Multiple payment method support
+- [ ] Secure payment processing
 
-- [ ]  A user receives a discount after N numbers of times he/she has used the service
+## 🛠️ Development Setup
 
-- [ ]  A user could get a free tour from the platform provided he wins the built-in lottery
+### Prerequisites
+- .NET Core 3.1 SDK
+- Node.js (with npm)
+- SQL Server LocalDB
 
-- [ ]  A user can win a badge i.e: Silver, Gold, Platinum
+### Installation
+1. Clone the repository
+2. Restore .NET packages: `dotnet restore`
+3. Install frontend dependencies: `cd UrGuide.WebApp/ClientApp && npm install --legacy-peer-deps`
+4. Build the project: `dotnet build UrGuide.WebApp/UrGuide.WebApp.csproj`
 
-- [ ]  A user could boost his/her search appearance by applying for a membership:
+### Running the Application
+- Backend: `dotnet run --project UrGuide.WebApp`
+- Frontend development: `cd UrGuide.WebApp/ClientApp && npm start`
 
-    - Basic (2% of gains go to the platform, Appears to the top 100, Organize small size group tours < 3 members, create a personalized Ad once a month, Schedule a tour per month)
-    - Premium (5% of gains go to the platform, Appears to the top 10 in local search, Organize unlimited size group tours, Create personalized Ads, create a commute, Schedule tours )
-    
-- [ ]  A user could apply to a monthly, quaterly or yearly subscription to either Basic or Premium plans  
+## 📱 Mobile Apps
 
-- [ ]  A user could use Google Pay/Apple Pay payment platform (PayPal ?)
+Native mobile applications are available for both Android and iOS platforms, built with Xamarin.Forms and sharing the same backend API.
 
-- [ ]  A user could see his/her transaction history
+## 🤝 Contributing
 
-- [ ]  A user could freeze their account for a specific period a time
+We welcome contributions! Please see our contributing guidelines and feel free to submit issues and pull requests.
 
-- [ ] A user can choose to toggle his availablity, share his calendar 
+## 📄 License
 
-- [ ]  A user can use a use a barcode / Google / Apple / Microsoft account to authenticate to the app
-
-- [ ]  2FA is required by default
+This project is licensed under the MIT License - see the LICENSE file for details.
