@@ -5,7 +5,7 @@ using DataTourRequestStatus = UrGuide.Data.Entities.Tour.TourRequestStatus;
 
 namespace UrGuide.Services.Tour
 {
-    class TourRequestMap : Profile
+    public class TourRequestMap : Profile
     {
         public TourRequestMap()
         {
