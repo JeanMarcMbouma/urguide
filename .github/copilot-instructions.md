@@ -7,10 +7,9 @@ Always reference these instructions first and fallback to search or bash command
 
 ### Initial Setup and Dependencies
 - Install .NET Core 3.1 SDK and runtime (required for building and running):
-  - `wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh`
-  - `chmod +x dotnet-install.sh`
-  - `./dotnet-install.sh --channel 3.1`
-  - `export PATH="$HOME/.dotnet:$PATH"`
+  - **Follow the official Microsoft installation instructions for .NET Core 3.1:**  
+    https://docs.microsoft.com/en-us/dotnet/core/install/
+  - *Do not download and execute installation scripts from the internet without verifying their integrity.*
 - Restore .NET packages: `dotnet restore` -- takes 65 seconds. NEVER CANCEL. Set timeout to 120+ seconds.
 - Install Node dependencies: `cd UrGuide.WebApp/ClientApp && npm install --legacy-peer-deps` -- takes 4.5 minutes. NEVER CANCEL. Set timeout to 10+ minutes.
 
