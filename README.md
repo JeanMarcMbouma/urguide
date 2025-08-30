@@ -12,7 +12,7 @@ UrGuide is a modern tourism platform built with .NET 8 backend, React 18 SPA fro
 
 - **Backend**: ASP.NET Core 8.0 with Entity Framework Core 8.0
 - **Frontend**: React 18 SPA with Material-UI v5 (@mui/material)
-- **Mobile**: Xamarin.Forms (Android & iOS)
+- **Mobile**: UrGuide.MAUI (.NET 8.0 MAUI) - *Migration in progress from Xamarin.Forms*
 - **Database**: SQL Server with LocalDB
 - **Authentication**: Duende IdentityServer 7.0
 - **Real-time Communication**: SignalR
@@ -29,6 +29,7 @@ UrGuide is a modern tourism platform built with .NET 8 backend, React 18 SPA fro
 - [x] **Observability**: Added OpenTelemetry, health checks, and distributed tracing
 - [x] **Frontend Modernization**: Upgraded to Material-UI v5, React Router v6, Bootstrap v5
 - [x] **Node.js Compatibility**: Resolved dependency conflicts for Node 20+ support
+- [x] **Mobile Migration**: Started migration from Xamarin.Forms to .NET MAUI (foundation complete)
 
 ### 🔐 Authentication & User Management
 - [x] User registration and profile creation
@@ -171,7 +172,14 @@ NODE_OPTIONS="--openssl-legacy-provider" npm test
 
 ## 📱 Mobile Apps
 
-Native mobile applications are available for both Android and iOS platforms, built with Xamarin.Forms and sharing the same backend API.
+Native mobile applications are available for both Android and iOS platforms. The project is currently migrating from Xamarin.Forms to .NET MAUI for improved performance and modern .NET 8 support.
+
+### Current Status
+- **Legacy**: Xamarin.Forms apps (Mobile/UrGuide.Mobile/)
+- **New**: .NET MAUI foundation (UrGuide.MAUI/) - Service layer migration complete
+- **Next Steps**: UI layer migration to MAUI
+
+See [MAUI_MIGRATION.md](./MAUI_MIGRATION.md) for detailed migration documentation.
 
 ## 🤝 Contributing
 
