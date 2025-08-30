@@ -4,7 +4,7 @@ using UrGuide.Data.Entities.Tour;
 
 namespace UrGuide.Data.Configurations
 {
-    class TourRequestConfiguration : IEntityTypeConfiguration<TourRequest>
+    public class TourRequestConfiguration : IEntityTypeConfiguration<TourRequest>
     {
         public void Configure(EntityTypeBuilder<TourRequest> builder)
         {
