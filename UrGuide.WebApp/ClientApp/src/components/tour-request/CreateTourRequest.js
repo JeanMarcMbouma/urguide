@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './CreateTourRequest.css';
-import { TourRequestClient, CreateTourRequestModel } from '../../api';
+import { TourRequestClient, CreateTourRequestModel, LookupClient } from '../../api';
 import { HttpClientFactory } from '../../httpclient';
 import { useAuthContext } from '../api-authorization/AuthService';
 
@@ -22,15 +22,21 @@ const CreateTourRequest = () => {
     const [submitMessage, setSubmitMessage] = useState('');
 
     useEffect(() => {
-        // Fetch available regions (this would be replaced with actual API call)
-        // For now, we'll use sample data
-        setRegions([
-            { regionId: '1', name: 'New York', currencyId: 'USD' },
-            { regionId: '2', name: 'London', currencyId: 'GBP' },
-            { regionId: '3', name: 'Paris', currencyId: 'EUR' },
-            { regionId: '4', name: 'Tokyo', currencyId: 'JPY' },
-            { regionId: '5', name: 'Sydney', currencyId: 'AUD' }
-        ]);
+        // Fetch available regions from the backend
+        const fetchRegions = async () => {
+            try {
+                const httpClient = HttpClientFactory.get(null);
+                const lookupClient = new LookupClient(null, httpClient);
+                const regionsData = await lookupClient.regions();
+                setRegions(regionsData || []);
+            } catch (error) {
+                console.error('Failed to fetch regions:', error);
+                // Fallback to empty array if API call fails
+                setRegions([]);
+            }
+        };
+
+        fetchRegions();
     }, []);
 
     const handleInputChange = (e) => {

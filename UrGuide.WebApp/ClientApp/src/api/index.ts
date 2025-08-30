@@ -2757,6 +2757,49 @@ export class LookupClient {
             });
         }
     }
+
+    /**
+     * @return Error
+     */
+    regions(): Promise<RegionModel[]> {
+        let url_ = this.baseUrl + "/Lookup/regions";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRegions(_response);
+        });
+    }
+
+    protected processRegions(response: Response): Promise<RegionModel[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultDatadefault)) {
+                resultdefault = [] as any;
+                for (let item of resultDatadefault)
+                    resultdefault!.push(RegionModel.fromJS(item));
+            }
+            return resultdefault;
+            });
+        }
+    }
 }
 
 export class NotificationsClient {
@@ -4343,6 +4386,50 @@ export interface ICategoryModel {
     name?: string | undefined;
     imageUrl?: string | undefined;
     stats?: number;
+}
+
+export class RegionModel implements IRegionModel {
+    regionId?: string | undefined;
+    name?: string | undefined;
+    currencyId?: string | undefined;
+
+    constructor(data?: IRegionModel) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.regionId = _data["regionId"];
+            this.name = _data["name"];
+            this.currencyId = _data["currencyId"];
+        }
+    }
+
+    static fromJS(data: any): RegionModel {
+        data = typeof data === 'object' ? data : {};
+        let result = new RegionModel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["regionId"] = this.regionId;
+        data["name"] = this.name;
+        data["currencyId"] = this.currencyId;
+        return data; 
+    }
+}
+
+export interface IRegionModel {
+    regionId?: string | undefined;
+    name?: string | undefined;
+    currencyId?: string | undefined;
 }
 
 export class UserInfo implements IUserInfo {

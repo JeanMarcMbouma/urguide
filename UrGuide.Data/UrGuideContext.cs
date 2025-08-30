@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using UrGuide.Data.Entities.Event;
 using UrGuide.Data.Entities.Posts;
+using UrGuide.Data.Entities.Regions;
 using UrGuide.Data.Entities.Shared;
 using UrGuide.Data.Entities.Tour;
 using UrGuide.Data.Entities.Users;
@@ -16,6 +17,7 @@ namespace UrGuide.Data
         public virtual DbSet<ImageCatalog> ImageCatalogs { get; set; }
         public virtual DbSet<AuditEvent> AuditEvents { get; set; }
         public virtual DbSet<TourRequest> TourRequests { get; set; }
+        public virtual DbSet<Region> Regions { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
