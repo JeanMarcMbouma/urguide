@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using UrGuide.ServiceDefaults;
 
 var logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
 try
@@ -27,6 +28,9 @@ try
     logger.Debug("init main");
     
     var builder = WebApplication.CreateBuilder(args);
+    
+    // Add Aspire service defaults
+    builder.AddServiceDefaults();
 
     // Configure logging
     builder.Logging.ClearProviders();
@@ -155,6 +159,8 @@ try
         pattern: "{controller}/{action=Index}/{id?}");
     app.MapRazorPages();
     app.MapHub<NotificationHub>("/notify");
+
+    app.MapDefaultEndpoints();
 
     app.UseSpa(spa =>
     {

@@ -71,6 +71,7 @@
   <ItemGroup>
     <ProjectReference Include="..\UrGuide.Services\UrGuide.Services.csproj" />
     <ProjectReference Include="..\UrGuide.Shared\UrGuide.Shared.csproj" />
+    <ProjectReference Include="..\UrGuide.ServiceDefaults\UrGuide.ServiceDefaults.csproj" />
   </ItemGroup>
 
   <ItemGroup>
