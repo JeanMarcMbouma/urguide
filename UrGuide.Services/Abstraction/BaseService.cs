@@ -13,7 +13,7 @@ using UrGuide.Shared.Contracts;
 
 namespace UrGuide.Services.Abstraction
 {
-    internal abstract class BaseService
+    public abstract class BaseService
     {
         protected BaseService(UrGuideContext context, IUserContext userContext)
         {
