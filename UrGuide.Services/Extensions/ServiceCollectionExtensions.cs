@@ -13,6 +13,7 @@ using UrGuide.Services.Lookup;
 using UrGuide.Services.Media;
 using UrGuide.Services.Posts;
 using UrGuide.Services.Shared;
+using UrGuide.Services.Tour;
 using UrGuide.Services.Users;
 
 namespace UrGuide.Services.Extensions
@@ -29,6 +30,7 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<Contracts.IImageService, ImageService>();
             services.AddTransient<Contracts.ILookupService, LookupService>();
             services.AddTransient<Contracts.IUserNotificationService, NotificationService>();
+            services.AddTransient<Contracts.ITourRequestService, TourRequestService>();
 
             // Validation
 
@@ -62,6 +64,9 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<IValidator<Model.Posts.SeatReservationModel>, SeatReservationModelValidator>();
             services.AddTransient<IValidator<SearchParameters>, SearchParametersValidator>();
             services.AddTransient<IValidator<PaginationParameters>, PaginationParameterValidator>();
+
+            // Tour Requests
+            services.AddTransient<IValidator<Model.Tour.CreateTourRequestModel>, CreateTourRequestModelValidation>();
 
             // Feedback
             services.AddTransient<IValidator<FeedbackModel>, FeedbackModelValidator>();

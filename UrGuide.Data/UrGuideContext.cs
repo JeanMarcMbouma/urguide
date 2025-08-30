@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using UrGuide.Data.Entities.Event;
 using UrGuide.Data.Entities.Posts;
 using UrGuide.Data.Entities.Shared;
+using UrGuide.Data.Entities.Tour;
 using UrGuide.Data.Entities.Users;
 
 namespace UrGuide.Data
@@ -14,6 +15,7 @@ namespace UrGuide.Data
         public virtual DbSet<Post> Posts { get; set; }
         public virtual DbSet<ImageCatalog> ImageCatalogs { get; set; }
         public virtual DbSet<AuditEvent> AuditEvents { get; set; }
+        public virtual DbSet<TourRequest> TourRequests { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
@@ -37,6 +39,7 @@ namespace UrGuide.Data
             modelBuilder.ApplyConfiguration(new Configurations.RegionConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.TimelineConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.TourConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.TourRequestConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.AuthorConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.SubscriptionConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.BookingConfiguration());
