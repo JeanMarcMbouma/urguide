@@ -3,6 +3,7 @@ import Posts from "./Posts";
 import Galleries from "./Galleries";
 import UpperSection from "./UpperSection";
 import Reviews from "./Reviews";
+import ActivityFeed from "./ActivityFeed";
 import {
     BrowserRouter as Router,
     Switch,
@@ -70,6 +71,9 @@ function ProfileLayout() {
                 </Route>
                 <Route path={`${path}/posts`}>
                     <Posts />
+                </Route>
+                <Route path={`${path}/activity`}>
+                    <ActivityFeed />
                 </Route>
                 <Route path={`${path}/galleries`}>
                     <Galleries />
