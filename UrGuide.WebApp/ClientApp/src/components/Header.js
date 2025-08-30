@@ -8,6 +8,7 @@ import NotificationsNoneOutlinedIcon
   from '@material-ui/icons/NotificationsNoneOutlined';
 import PersonIcon from '@material-ui/icons/Person';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
+import ExploreIcon from '@material-ui/icons/Explore';
 import {makeStyles} from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
@@ -199,13 +200,13 @@ export default function Header() {
                         </div>
                         <div className="col-8 col-sm-6 col-md-4 col-lg-4 centered-div"  >
                             <div className='row justify-content-end'>
-                                {dataContext.url === "/feed" ? <div className='col-3 col-md-3 col-lg-3 mid-2 text-center active-div'>
+                                {dataContext.url === "/feed" ? <div className='col-2 col-md-2 col-lg-2 mid-2 text-center active-div'>
                                     <Link to="/feed"  >
                                         <IconButton className="active-icon">
                                             <HomeOutlinedIcon fontSize="large" />
                                         </IconButton>
                                     </Link>
-                                </div> : <div className='col-3 col-md-3 col-lg-3 mid-2 text-center'>
+                                </div> : <div className='col-2 col-md-2 col-lg-2 mid-2 text-center'>
                                         <Link to="/feed"  >
                                             <IconButton>
                                                 <HomeOutlinedIcon fontSize="large" />
@@ -214,7 +215,7 @@ export default function Header() {
                                     </div>  }
                                
                                 {dataContext.url === "/discover" ?
-                                    <div className='col-3 col-md-3 col-lg-3 mid-2 text-center active-div'>
+                                    <div className='col-2 col-md-2 col-lg-2 mid-2 text-center active-div'>
                                         <Link to="/discover/nearme"  >
                                             <IconButton className="active-icon">
                                                 <SearchIcon fontSize="large" />
@@ -222,7 +223,7 @@ export default function Header() {
                                         </Link>
                                     </div>
                                     :
-                                   <div className='col-3 col-md-3 col-lg-3 mid-2 text-center'>
+                                   <div className='col-2 col-md-2 col-lg-2 mid-2 text-center'>
                                     <Link to="/discover/nearme"  >
                                         <IconButton >
                                             <SearchIcon fontSize="large" />
@@ -230,9 +231,28 @@ export default function Header() {
                                     </Link>
                                 </div>
                             }
+
+                                {dataContext.url === "/request-tour" ?
+                                    <div className='col-2 col-md-2 col-lg-2 mid-2 text-center active-div'>
+                                        <Link to="/request-tour"  >
+                                            <IconButton className="active-icon">
+                                                <ExploreIcon fontSize="large" />
+                                            </IconButton>
+                                        </Link>
+                                    </div>
+                                    :
+                                   <div className='col-2 col-md-2 col-lg-2 mid-2 text-center'>
+                                    <Link to="/request-tour"  >
+                                        <IconButton >
+                                            <ExploreIcon fontSize="large" />
+                                        </IconButton>
+                                    </Link>
+                                </div>
+                            }
+
                                 {dataContext.url === "/profile" ?
 
-                                    <div className='col-3 col-md-3 col-lg-3 mid-3 text-center active-div'>
+                                    <div className='col-2 col-md-2 col-lg-2 mid-3 text-center active-div'>
                                         {profile.role === "guide" ? <Link to="/profile"  >
                                             <IconButton className="active-icon"  >
                                                 <PersonIcon fontSize="large" />
@@ -244,7 +264,7 @@ export default function Header() {
                                             </Link>}
                                     </div>
                                     :
-                                    <div className='col-3 col-md-3 col-lg-3 mid-3 text-center'>
+                                    <div className='col-2 col-md-2 col-lg-2 mid-3 text-center'>
                                         {profile.role === "guide" ? <Link to="/profile"  >
                                             <IconButton>
                                                 <PersonIcon fontSize="large" />
@@ -261,7 +281,7 @@ export default function Header() {
 
 
                                 {dataContext.url === "/message" ?
-                                    <div className='col-3 col-md-3 col-lg-3 mid-3 text-center active-div'  >
+                                    <div className='col-2 col-md-2 col-lg-2 mid-3 text-center active-div'  >
                                         <Link to="/message">
                                             <IconButton className="active-icon" >
                                                 <MailOutlineIcon fontSize="large" />
@@ -271,7 +291,7 @@ export default function Header() {
 
                                     :
 
-                                 <div className='col-3 col-md-3 col-lg-3 mid-3 text-center'  >
+                                 <div className='col-2 col-md-2 col-lg-2 mid-3 text-center'  >
                                     <Link to="/message">
                                         <IconButton>
                                             <MailOutlineIcon fontSize="large" />

@@ -9,5 +9,6 @@ namespace UrGuide.Services.Contracts
     public interface ILookupService
     {
         Task<Result<IEnumerable<CategoryModel>>> GetCategoriesAsync(CancellationToken cancellationToken);
+        Task<Result<IEnumerable<RegionModel>>> GetRegionsAsync(CancellationToken cancellationToken);
     }
 }

@@ -1,0 +1,102 @@
+[
+  {
+    "name": "New York",
+    "countryCode": "US",
+    "currencyCode": "USD"
+  },
+  {
+    "name": "London",
+    "countryCode": "GB",
+    "currencyCode": "GBP"
+  },
+  {
+    "name": "Paris",
+    "countryCode": "FR",
+    "currencyCode": "EUR"
+  },
+  {
+    "name": "Tel Aviv",
+    "countryCode": "IL",
+    "currencyCode": "ILS"
+  },
+  {
+    "name": "Toronto",
+    "countryCode": "CA",
+    "currencyCode": "CAD"
+  },
+  {
+    "name": "Tokyo",
+    "countryCode": "JP",
+    "currencyCode": "JPY"
+  },
+  {
+    "name": "Sydney",
+    "countryCode": "AU",
+    "currencyCode": "AUD"
+  },
+  {
+    "name": "Berlin",
+    "countryCode": "DE",
+    "currencyCode": "EUR"
+  },
+  {
+    "name": "Rome",
+    "countryCode": "IT",
+    "currencyCode": "EUR"
+  },
+  {
+    "name": "Barcelona",
+    "countryCode": "ES",
+    "currencyCode": "EUR"
+  },
+  {
+    "name": "Amsterdam",
+    "countryCode": "NL",
+    "currencyCode": "EUR"
+  },
+  {
+    "name": "Vienna",
+    "countryCode": "AT",
+    "currencyCode": "EUR"
+  },
+  {
+    "name": "Prague",
+    "countryCode": "CZ",
+    "currencyCode": "CZK"
+  },
+  {
+    "name": "Stockholm",
+    "countryCode": "SE",
+    "currencyCode": "SEK"
+  },
+  {
+    "name": "Copenhagen",
+    "countryCode": "DK",
+    "currencyCode": "DKK"
+  },
+  {
+    "name": "Zurich",
+    "countryCode": "CH",
+    "currencyCode": "CHF"
+  },
+  {
+    "name": "Hong Kong",
+    "countryCode": "HK",
+    "currencyCode": "HKD"
+  },
+  {
+    "name": "Singapore",
+    "countryCode": "SG",
+    "currencyCode": "SGD"
+  },
+  {
+    "name": "Dubai",
+    "countryCode": "AE",
+    "currencyCode": "AED"
+  },
+  {
+    "name": "Mumbai",
+    "countryCode": "IN",
+    "currencyCode": "INR"
+  }
+]

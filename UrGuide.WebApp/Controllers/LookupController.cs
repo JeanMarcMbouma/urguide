@@ -34,6 +34,14 @@ namespace UrGuide.WebApp.Controllers
             return Ok(result.Data);
         }
 
+        [HttpGet("regions")]
+        [ProducesDefaultResponseType(typeof(IEnumerable<RegionModel>))]
+        public async Task<IActionResult> GetRegions(CancellationToken cancellationToken)
+        {
+            var result = await LookupService.GetRegionsAsync(cancellationToken);
+            return Ok(result.Data);
+        }
+
         [HttpGet("/users/{id}/info")]
         [ProducesDefaultResponseType(typeof(UserInfo))]
         public async Task<IActionResult> GetOne(string id, CancellationToken cancellationToken)

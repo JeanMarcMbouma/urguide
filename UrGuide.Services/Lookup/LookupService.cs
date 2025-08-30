@@ -33,5 +33,18 @@ namespace UrGuide.Services.Lookup
 
             return Result.Of(result);
         }
+
+        public async Task<Result<IEnumerable<RegionModel>>> GetRegionsAsync(CancellationToken cancellationToken)
+        {
+            var regions = await Context.Regions.AsNoTracking().ToListAsync(cancellationToken);
+            var result = regions.Select(r => new RegionModel
+            {
+                RegionId = r.RegionId,
+                Name = r.Name,
+                CurrencyId = r.CurrencyId
+            }).OrderBy(r => r.Name).AsEnumerable();
+
+            return Result.Of(result);
+        }
     }
 }

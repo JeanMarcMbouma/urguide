@@ -2757,6 +2757,49 @@ export class LookupClient {
             });
         }
     }
+
+    /**
+     * @return Error
+     */
+    regions(): Promise<RegionModel[]> {
+        let url_ = this.baseUrl + "/Lookup/regions";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRegions(_response);
+        });
+    }
+
+    protected processRegions(response: Response): Promise<RegionModel[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else {
+            return response.text().then((_responseText) => {
+            let resultdefault: any = null;
+            let resultDatadefault = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultDatadefault)) {
+                resultdefault = [] as any;
+                for (let item of resultDatadefault)
+                    resultdefault!.push(RegionModel.fromJS(item));
+            }
+            return resultdefault;
+            });
+        }
+    }
 }
 
 export class NotificationsClient {
@@ -4345,6 +4388,50 @@ export interface ICategoryModel {
     stats?: number;
 }
 
+export class RegionModel implements IRegionModel {
+    regionId?: string | undefined;
+    name?: string | undefined;
+    currencyId?: string | undefined;
+
+    constructor(data?: IRegionModel) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.regionId = _data["regionId"];
+            this.name = _data["name"];
+            this.currencyId = _data["currencyId"];
+        }
+    }
+
+    static fromJS(data: any): RegionModel {
+        data = typeof data === 'object' ? data : {};
+        let result = new RegionModel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["regionId"] = this.regionId;
+        data["name"] = this.name;
+        data["currencyId"] = this.currencyId;
+        return data; 
+    }
+}
+
+export interface IRegionModel {
+    regionId?: string | undefined;
+    name?: string | undefined;
+    currencyId?: string | undefined;
+}
+
 export class UserInfo implements IUserInfo {
     fullName?: string | undefined;
     firstName?: string | undefined;
@@ -4991,6 +5078,291 @@ export class UserReactionModel implements IUserReactionModel {
 export interface IUserReactionModel {
     postId?: string | undefined;
     like?: boolean;
+}
+
+export class TourRequestClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : <any>window;
+        this.baseUrl = baseUrl ? baseUrl : "";
+    }
+
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    createTourRequest(body: CreateTourRequestModel | undefined): Promise<TourRequestModel> {
+        let url_ = this.baseUrl + "/tour-requests";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCreateTourRequest(_response);
+        });
+    }
+
+    protected processCreateTourRequest(response: Response): Promise<TourRequestModel> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = TourRequestModel.fromJS(resultData201);
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TourRequestModel>(<any>null);
+    }
+
+    /**
+     * @return Success
+     */
+    getTourRequest(tourRequestId: string): Promise<TourRequestModel> {
+        let url_ = this.baseUrl + "/tour-requests/{tourRequestId}";
+        if (tourRequestId === undefined || tourRequestId === null)
+            throw new Error("The parameter 'tourRequestId' must be defined.");
+        url_ = url_.replace("{tourRequestId}", encodeURIComponent("" + tourRequestId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetTourRequest(_response);
+        });
+    }
+
+    protected processGetTourRequest(response: Response): Promise<TourRequestModel> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = TourRequestModel.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = StringErrorEnvelop.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = StringErrorEnvelop.fromJS(resultData500);
+            return throwException("Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TourRequestModel>(<any>null);
+    }
+}
+
+export class CreateTourRequestModel implements ICreateTourRequestModel {
+    title?: string | undefined;
+    description?: string | undefined;
+    preferredDate?: Date;
+    maxParticipants?: number;
+    maxBudget?: number;
+    tags?: string | undefined;
+    regionId?: string | undefined;
+
+    constructor(data?: ICreateTourRequestModel) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.title = _data["title"];
+            this.description = _data["description"];
+            this.preferredDate = _data["preferredDate"] ? new Date(_data["preferredDate"].toString()) : <any>undefined;
+            this.maxParticipants = _data["maxParticipants"];
+            this.maxBudget = _data["maxBudget"];
+            this.tags = _data["tags"];
+            this.regionId = _data["regionId"];
+        }
+    }
+
+    static fromJS(data: any): CreateTourRequestModel {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateTourRequestModel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["title"] = this.title;
+        data["description"] = this.description;
+        data["preferredDate"] = this.preferredDate ? this.preferredDate.toISOString() : <any>undefined;
+        data["maxParticipants"] = this.maxParticipants;
+        data["maxBudget"] = this.maxBudget;
+        data["tags"] = this.tags;
+        data["regionId"] = this.regionId;
+        return data; 
+    }
+}
+
+export interface ICreateTourRequestModel {
+    title?: string | undefined;
+    description?: string | undefined;
+    preferredDate?: Date;
+    maxParticipants?: number;
+    maxBudget?: number;
+    tags?: string | undefined;
+    regionId?: string | undefined;
+}
+
+export class TourRequestModel implements ITourRequestModel {
+    tourRequestId?: string | undefined;
+    title?: string | undefined;
+    description?: string | undefined;
+    preferredDate?: Date;
+    maxParticipants?: number;
+    maxBudget?: number;
+    tags?: string | undefined;
+    createdAt?: Date;
+    updatedAt?: Date;
+    status?: TourRequestStatus;
+    requesterId?: string | undefined;
+    requesterName?: string | undefined;
+    regionId?: string | undefined;
+    regionName?: string | undefined;
+
+    constructor(data?: ITourRequestModel) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.tourRequestId = _data["tourRequestId"];
+            this.title = _data["title"];
+            this.description = _data["description"];
+            this.preferredDate = _data["preferredDate"] ? new Date(_data["preferredDate"].toString()) : <any>undefined;
+            this.maxParticipants = _data["maxParticipants"];
+            this.maxBudget = _data["maxBudget"];
+            this.tags = _data["tags"];
+            this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : <any>undefined;
+            this.updatedAt = _data["updatedAt"] ? new Date(_data["updatedAt"].toString()) : <any>undefined;
+            this.status = _data["status"];
+            this.requesterId = _data["requesterId"];
+            this.requesterName = _data["requesterName"];
+            this.regionId = _data["regionId"];
+            this.regionName = _data["regionName"];
+        }
+    }
+
+    static fromJS(data: any): TourRequestModel {
+        data = typeof data === 'object' ? data : {};
+        let result = new TourRequestModel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["tourRequestId"] = this.tourRequestId;
+        data["title"] = this.title;
+        data["description"] = this.description;
+        data["preferredDate"] = this.preferredDate ? this.preferredDate.toISOString() : <any>undefined;
+        data["maxParticipants"] = this.maxParticipants;
+        data["maxBudget"] = this.maxBudget;
+        data["tags"] = this.tags;
+        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
+        data["updatedAt"] = this.updatedAt ? this.updatedAt.toISOString() : <any>undefined;
+        data["status"] = this.status;
+        data["requesterId"] = this.requesterId;
+        data["requesterName"] = this.requesterName;
+        data["regionId"] = this.regionId;
+        data["regionName"] = this.regionName;
+        return data; 
+    }
+}
+
+export interface ITourRequestModel {
+    tourRequestId?: string | undefined;
+    title?: string | undefined;
+    description?: string | undefined;
+    preferredDate?: Date;
+    maxParticipants?: number;
+    maxBudget?: number;
+    tags?: string | undefined;
+    createdAt?: Date;
+    updatedAt?: Date;
+    status?: TourRequestStatus;
+    requesterId?: string | undefined;
+    requesterName?: string | undefined;
+    regionId?: string | undefined;
+    regionName?: string | undefined;
+}
+
+export enum TourRequestStatus {
+    Open = 0,
+    InProgress = 1,
+    Fulfilled = 2,
+    Cancelled = 3,
+    Expired = 4,
 }
 
 export class ApiException extends Error {

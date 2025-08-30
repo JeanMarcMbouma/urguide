@@ -122,6 +122,10 @@ namespace UrGuide.WebApp
             serviceProvider.GetRequiredService<UrGuideAuthContext>().Database.Migrate();
             serviceProvider.GetRequiredService<UrGuide.Data.UrGuideContext>().Database.Migrate();
 
+            // Seed initial data
+            var seedingService = serviceProvider.GetRequiredService<UrGuide.Services.Contracts.IDataSeedingService>();
+            seedingService.SeedDataAsync().Wait();
+
             app.UseIpRateLimiting();
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions { 

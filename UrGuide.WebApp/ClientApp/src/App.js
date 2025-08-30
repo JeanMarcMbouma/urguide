@@ -28,6 +28,7 @@ import Message from './components/message/message';
 import Received from './components/message/received';
 import ForgetPassword from './components/confirmation/ForgetPassword';
 import ResetPassword from './components/confirmation/ResetPassword';
+import CreateTourRequest from './components/tour-request/CreateTourRequest';
 
 export default class App extends Component {
     constructor(props) {
@@ -65,12 +66,13 @@ export default class App extends Component {
                                 </RegisterLayout>
                             </Route>
 
-                            <Route path="/(feed|profile|account|message)">
+                            <Route path="/(feed|profile|account|message|request-tour)">
                                 <Layout>
                                     <Route path="/feed" component={Home} />
                                     <AuthRoute path="/profile" component={Profile} />
                                     <AuthRoute path="/message" component={Message} />
                                     <AuthRoute path="/account" component={ClientDetails} />
+                                    <AuthRoute path="/request-tour" component={CreateTourRequest} />
                                 </Layout>
                             </Route>
                             <Route path="/msg/:msgId">
