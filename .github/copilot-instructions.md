@@ -141,3 +141,10 @@ UrGuide.sln                 # Main solution file
 - **DO NOT attempt production React builds** - they fail due to TypeScript issues
 - **DO NOT attempt React dev server** - starts but fails to compile due to TypeScript issues
 - **Focus on .NET backend development and code review** for validation workflow
+
+## Documentation Requirements
+- **ALWAYS update README.md** after implementing new features or making significant changes
+- **Update the roadmap sections** in README.md when features move from planned to implemented
+- **Create GitHub issues** for new feature requests with appropriate labels (enhancement, feature, nice-to-have)
+- **Document breaking changes** and migration steps when updating dependencies or frameworks
+- **Keep the technology stack section current** when adding new libraries or changing versions
