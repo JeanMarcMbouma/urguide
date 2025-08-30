@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100" height="100" fill="#FF0266" rx="15"/>
+  <text x="50" y="70" text-anchor="middle" font-family="Arial" font-size="40" font-weight="bold" fill="white">UrGuide</text>
+</svg>

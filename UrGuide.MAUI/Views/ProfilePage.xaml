@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="UrGuide.MAUI.Views.ProfilePage"
+             Title="Profile"
+             x:DataType="vm:ProfileViewModel"
+             xmlns:vm="clr-namespace:UrGuide.MAUI.ViewModels">
+
+    <ScrollView>
+        <StackLayout Padding="20">
+            
+            <!-- Profile Header -->
+            <Grid Margin="0,20,0,30">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="100" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Avatar -->
+                <Frame Grid.Row="0"
+                       WidthRequest="100"
+                       HeightRequest="100"
+                       CornerRadius="50"
+                       HorizontalOptions="Center"
+                       Padding="0"
+                       BackgroundColor="{StaticResource Primary}">
+                    <Label Text="{Binding UserInitials}"
+                           FontSize="36"
+                           TextColor="White"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+                </Frame>
+
+                <!-- Name -->
+                <Label Grid.Row="1"
+                       Text="{Binding UserName}"
+                       Style="{StaticResource TextTitle}"
+                       HorizontalOptions="Center"
+                       Margin="0,15,0,5" />
+
+                <!-- Email -->
+                <Label Grid.Row="2"
+                       Text="{Binding Email}"
+                       Style="{StaticResource TextBody}"
+                       HorizontalOptions="Center" />
+            </Grid>
+
+            <!-- Stats -->
+            <Grid Margin="0,0,0,30">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackLayout Grid.Column="0" HorizontalOptions="Center">
+                    <Label Text="{Binding PostsCount}"
+                           Style="{StaticResource TextTitle}"
+                           HorizontalOptions="Center" />
+                    <Label Text="Posts"
+                           Style="{StaticResource TextBody}"
+                           HorizontalOptions="Center" />
+                </StackLayout>
+
+                <StackLayout Grid.Column="1" HorizontalOptions="Center">
+                    <Label Text="{Binding ReviewsCount}"
+                           Style="{StaticResource TextTitle}"
+                           HorizontalOptions="Center" />
+                    <Label Text="Reviews"
+                           Style="{StaticResource TextBody}"
+                           HorizontalOptions="Center" />
+                </StackLayout>
+
+                <StackLayout Grid.Column="2" HorizontalOptions="Center">
+                    <Label Text="{Binding Rating, StringFormat='{0:F1}'}"
+                           Style="{StaticResource TextTitle}"
+                           HorizontalOptions="Center" />
+                    <Label Text="Rating"
+                           Style="{StaticResource TextBody}"
+                           HorizontalOptions="Center" />
+                </StackLayout>
+            </Grid>
+
+            <!-- Menu Items -->
+            <StackLayout Spacing="1">
+                
+                <Button Text="Edit Profile"
+                        Command="{Binding EditProfileCommand}"
+                        BackgroundColor="{StaticResource LightSurface}"
+                        TextColor="{StaticResource Gray900}"
+                        Margin="0,0,0,10" />
+
+                <Button Text="Change Password"
+                        Command="{Binding ChangePasswordCommand}"
+                        BackgroundColor="{StaticResource LightSurface}"
+                        TextColor="{StaticResource Gray900}"
+                        Margin="0,0,0,10" />
+
+                <Button Text="Settings"
+                        Command="{Binding SettingsCommand}"
+                        BackgroundColor="{StaticResource LightSurface}"
+                        TextColor="{StaticResource Gray900}"
+                        Margin="0,0,0,10" />
+
+                <Button Text="Logout"
+                        Command="{Binding LogoutCommand}"
+                        BackgroundColor="{StaticResource Red}"
+                        TextColor="White"
+                        Margin="0,20,0,0" />
+
+            </StackLayout>
+
+        </StackLayout>
+    </ScrollView>
+</ContentPage>

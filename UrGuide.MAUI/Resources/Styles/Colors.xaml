@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Primary Colors -->
+    <Color x:Key="Primary">#FF0266</Color>
+    <Color x:Key="Secondary">#6200EE</Color>
+    <Color x:Key="Tertiary">#2B0B98</Color>
+    
+    <!-- Background Colors -->
+    <Color x:Key="White">White</Color>
+    <Color x:Key="Black">Black</Color>
+    <Color x:Key="Gray100">#E1E1E1</Color>
+    <Color x:Key="Gray200">#C8C8C8</Color>
+    <Color x:Key="Gray300">#ACACAC</Color>
+    <Color x:Key="Gray400">#919191</Color>
+    <Color x:Key="Gray500">#6E6E6E</Color>
+    <Color x:Key="Gray600">#404040</Color>
+    <Color x:Key="Gray900">#212121</Color>
+    <Color x:Key="Gray950">#141414</Color>
+
+    <!-- UrGuide Specific Colors -->
+    <Color x:Key="DarkSurface">#121212</Color>
+    <Color x:Key="LightSurface">#FAF8F9</Color>
+    <Color x:Key="AcrylicSurface">#E4E4E4</Color>
+    <Color x:Key="NeumorphismSurface">#F0F0F3</Color>
+    
+    <Color x:Key="DarkElevation2dp">#212121</Color>
+    <Color x:Key="DarkElevation4dp">#272727</Color>
+    <Color x:Key="DarkElevation8dp">#2D2D2D</Color>
+    
+    <Color x:Key="NavigationPrimary">#3F51B5</Color>
+    <Color x:Key="Blue">#008DA8</Color>
+    <Color x:Key="Red">#EE3524</Color>
+    <Color x:Key="Orange">#F6A01A</Color>
+
+</ResourceDictionary>
