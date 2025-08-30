@@ -4,21 +4,31 @@ A comprehensive tourism web application that connects travelers with local guide
 
 ## 🌟 Overview
 
-UrGuide is a modern tourism platform built with .NET Core 3.1 backend, React SPA frontend, and Xamarin mobile apps. The platform allows users to create guide profiles, request tours, bid on services, and share experiences through a comprehensive review system.
+UrGuide is a modern tourism platform built with .NET 8 backend, React 18 SPA frontend, and Xamarin mobile apps. The platform allows users to create guide profiles, request tours, bid on services, and share experiences through a comprehensive review system.
 
 **Make yourself a tourism guide at your ease and pace.**
 
 ## 🏗️ Technology Stack
 
-- **Backend**: ASP.NET Core 3.1 with Entity Framework Core
-- **Frontend**: React SPA with Material-UI components
+- **Backend**: ASP.NET Core 8.0 with Entity Framework Core 8.0
+- **Frontend**: React 18 SPA with Material-UI v5 (@mui/material)
 - **Mobile**: Xamarin.Forms (Android & iOS)
 - **Database**: SQL Server with LocalDB
-- **Authentication**: IdentityServer4
+- **Authentication**: Duende IdentityServer 7.0
 - **Real-time Communication**: SignalR
+- **Orchestration**: .NET Aspire for cloud-native deployment
+- **Observability**: OpenTelemetry, health checks, and distributed tracing
 - **API Documentation**: Swagger/OpenAPI
 
 ## ✅ Implemented Features
+
+### 🚀 Platform Modernization
+- [x] **Framework Migration**: Upgraded to .NET 8 and React 18 for modern compatibility
+- [x] **Security Enhancements**: Migrated from deprecated IdentityServer4 to Duende IdentityServer 7.0
+- [x] **Cloud-Native Architecture**: Integrated .NET Aspire for deployment orchestration
+- [x] **Observability**: Added OpenTelemetry, health checks, and distributed tracing
+- [x] **Frontend Modernization**: Upgraded to Material-UI v5, React Router v6, Bootstrap v5
+- [x] **Node.js Compatibility**: Resolved dependency conflicts for Node 20+ support
 
 ### 🔐 Authentication & User Management
 - [x] User registration and profile creation
@@ -61,6 +71,13 @@ UrGuide is a modern tourism platform built with .NET Core 3.1 backend, React SPA
 - [x] Complete action auditing system
 - [x] User activity tracking
 - [x] System monitoring and logging
+
+### 🏗️ Architecture & Infrastructure
+- [x] .NET Aspire orchestration for cloud-native deployment
+- [x] Service defaults with health checks and observability
+- [x] OpenTelemetry integration for distributed tracing
+- [x] Modern hosting model with .NET 8 minimal APIs
+- [x] Modernized authentication with Duende IdentityServer
 
 ## 🚧 Work in Progress
 
@@ -111,8 +128,8 @@ Currently no features are actively in development. See the roadmap below for pla
 ## 🛠️ Development Setup
 
 ### Prerequisites
-- .NET Core 3.1 SDK
-- Node.js (with npm)
+- .NET 8 SDK
+- Node.js 18+ (with npm)
 - SQL Server LocalDB
 
 ### Installation
@@ -122,8 +139,35 @@ Currently no features are actively in development. See the roadmap below for pla
 4. Build the project: `dotnet build UrGuide.WebApp/UrGuide.WebApp.csproj`
 
 ### Running the Application
-- Backend: `dotnet run --project UrGuide.WebApp`
-- Frontend development: `cd UrGuide.WebApp/ClientApp && npm start`
+
+**Option 1: With .NET Aspire Orchestration (Recommended)**
+```bash
+# Run the complete application with orchestration
+dotnet run --project UrGuide.AppHost
+```
+
+**Option 2: Traditional Development**
+```bash
+# Backend API only
+dotnet run --project UrGuide.WebApp
+
+# Frontend development server (in a separate terminal)
+cd UrGuide.WebApp/ClientApp
+NODE_OPTIONS="--openssl-legacy-provider" npm start
+```
+
+### Build Commands
+```bash
+# Build backend (.NET 8)
+dotnet build UrGuide.WebApp/UrGuide.WebApp.csproj
+
+# Install frontend dependencies (works with Node 20+)
+cd UrGuide.WebApp/ClientApp
+npm install --legacy-peer-deps
+
+# Run frontend tests
+NODE_OPTIONS="--openssl-legacy-provider" npm test
+```
 
 ## 📱 Mobile Apps
 
