@@ -1,9 +1,0 @@
-2025-09-04 06:22:57.8156 Info Registered target NLog.Targets.FileTarget(Name=allfile)
-2025-09-04 06:22:57.8342 Info Registered target NLog.Targets.FileTarget(Name=ownFile-web)
-2025-09-04 06:22:57.8578 Info NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 5.2.7.2287. Product version: 5.2.7+a1ef7cd83b5a6a172142a6850f0ced4e759a4b3b. GlobalAssemblyCache: False
-2025-09-04 06:22:57.8882 Info Validating config: TargetNames=allfile, ownFile-web, ConfigItems=45, FilePath=/home/runner/work/urguide/urguide/UrGuide.WebApp/bin/Debug/net8.0/nlog.config
-2025-09-04 06:22:57.9248 Info Configuration initialized.
-2025-09-04 06:23:01.3385 Info Validating config: TargetNames=allfile, ownFile-web, ConfigItems=45, FilePath=/home/runner/work/urguide/urguide/UrGuide.WebApp/bin/Debug/net8.0/nlog.config
-2025-09-04 06:23:02.4550 Info Shutdown() called. Logger closing...
-2025-09-04 06:23:02.4550 Info Closing old configuration.
-2025-09-04 06:23:02.4640 Info Logger has been closed down.
