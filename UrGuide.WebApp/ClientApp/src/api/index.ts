@@ -771,6 +771,24 @@ export class AccountClient {
         }
         return Promise.resolve<void>(<any>null);
     }
+
+    /**
+     * Download user data export
+     * @return User data export file
+     */
+    downloaddata(): Promise<Response> {
+        let url_ = this.baseUrl + "/Account/downloaddata";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_);
+    }
 }
 
 export class BidClient {
