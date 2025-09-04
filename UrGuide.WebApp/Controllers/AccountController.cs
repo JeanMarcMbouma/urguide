@@ -178,5 +178,26 @@ namespace UrGuide.WebApp.Controllers
                 return Redirect(returnUrl);
             return Ok();
         }
+
+        [Authorize]
+        [HttpGet("downloaddata")]
+        [ProducesDefaultResponseType(typeof(UserDataExport))]
+        public async Task<IActionResult> DownloadData(CancellationToken cancellationToken)
+        {
+            var result = await UserService.GetUserDataExportAsync(cancellationToken);
+            if (result.HasError)
+                return BadRequest(ErrorEnvelop.Create(result.Errors));
+
+            // Return the data as a JSON file download
+            var fileName = $"urguide_user_data_{DateTime.UtcNow:yyyyMMdd_HHmmss}.json";
+            var jsonContent = System.Text.Json.JsonSerializer.Serialize(result.Data, new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true,
+                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+            });
+            
+            var bytes = System.Text.Encoding.UTF8.GetBytes(jsonContent);
+            return File(bytes, "application/json", fileName);
+        }
     }
 }

@@ -41,6 +41,29 @@ function ClientProfile() {
 
     const [status, setStatus] = useState(0);
 
+    async function downloadUserData() {
+        try {
+            const client = HttpClientFactory.get(Client, user);
+            const response = await client.downloaddata();
+            
+            // Create a blob from the response
+            const blob = await response.blob();
+            
+            // Create a download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `urguide_user_data_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Failed to download user data:', error);
+            alert('Failed to download your data. Please try again.');
+        }
+    }
+
     async function editProfile(state) {
 
         const client = HttpClientFactory.get(Client, user);
@@ -213,6 +236,15 @@ function ClientProfile() {
                 >
                     Save Changes
               </Button>
+              <Button
+                    style={{ marginLeft: '10px' }}
+                    variant="outlined"
+                    color="secondary"
+                    type="button"
+                    onClick={downloadUserData}
+                >
+                    Download My Data
+              </Button>
             </form>
         </div>
 
@@ -238,6 +270,29 @@ function Profile() {
 
     const [status, setStatus] = useState(0);
     const { dataContext, dcReducer } = useDataContext();
+
+    async function downloadUserData() {
+        try {
+            const client = HttpClientFactory.get(Client, user);
+            const response = await client.downloaddata();
+            
+            // Create a blob from the response
+            const blob = await response.blob();
+            
+            // Create a download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `urguide_user_data_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Failed to download user data:', error);
+            alert('Failed to download your data. Please try again.');
+        }
+    }
 
     async function editProfile(state) {
 
@@ -531,6 +586,15 @@ function Profile() {
                         })}
                 >
                     Save Changes
+              </Button>
+              <Button
+                    style={{ marginLeft: '10px' }}
+                    variant="outlined"
+                    color="secondary"
+                    type="button"
+                    onClick={downloadUserData}
+                >
+                    Download My Data
               </Button>
             </form>
         </div>

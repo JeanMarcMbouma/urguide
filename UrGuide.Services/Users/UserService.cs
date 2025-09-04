@@ -18,6 +18,9 @@ using UrGuide.Services.Auditing.Command;
 using System.ComponentModel.DataAnnotations;
 using UrGuide.Core.Attributes;
 using UrGuide.Core;
+using System;
+using System.Collections.Generic;
+using UrGuide.Model.Shared;
 
 namespace UrGuide.Services.Users
 {
@@ -353,6 +356,165 @@ namespace UrGuide.Services.Users
                 searchParameters.PageNumber
                 , u => Mapper.Map<UserInfo>(u), cancellationToken);
             return Result.Of(users);
+        }
+
+        public async Task<Result<UserDataExport>> GetUserDataExportAsync(CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of<UserDataExport>().WithErrors(ErrorMessages.NotAuthenticated);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            try
+            {
+                var userId = UserContext.UserId;
+                
+                // Get user with all related data
+                var user = await Context.Users
+                    .Include(u => u.Attributes)
+                    .Include(u => u.Feedback).ThenInclude(f => f.Author)
+                    .Include(u => u.Notifications)
+                    .Include(u => u.ProfileImage)
+                    .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+                if (user == null)
+                    return Result.Of<UserDataExport>().WithErrors("User not found.");
+
+                // Get user's posts
+                var userPosts = await Context.Posts
+                    .Where(p => p.User.Id == userId)
+                    .Include(p => p.Feedback).ThenInclude(f => f.Author)
+                    .Include(p => p.BidHistories)
+                    .Include(p => p.Itineraries)
+                    .Include(p => p.Reservations)
+                    .Include(p => p.UserReactions)
+                    .ToListAsync(cancellationToken);
+
+                // Get user's galleries
+                var userGalleries = await Context.ImageCatalogs
+                    .Where(g => g.User.Id == userId)
+                    .Include(g => g.Images)
+                    .Include(g => g.Attributes)
+                    .ToListAsync(cancellationToken);
+
+                // Get user's tour requests
+                var userTourRequests = await Context.TourRequests
+                    .Where(tr => tr.RequesterId == userId)
+                    .Include(tr => tr.Region)
+                    .ToListAsync(cancellationToken);
+
+                // Get feedback given by user (on posts)
+                var givenFeedback = await Context.Posts
+                    .SelectMany(p => p.Feedback)
+                    .Where(f => f.Author.Id == userId)
+                    .Include(f => f.Author)
+                    .ToListAsync(cancellationToken);
+
+                // Get user's audit events/activity
+                var userActivity = await Context.AuditEvents
+                    .Where(e => e.UserId == userId)
+                    .OrderByDescending(e => e.Created)
+                    .ToListAsync(cancellationToken);
+
+                // Map user attributes to dictionary
+                var userAttributes = user.Attributes.ToDictionary(a => a.Name, a => a.Value);
+
+                // Create the export data
+                var exportData = new UserDataExport
+                {
+                    ExportDate = DateTime.UtcNow,
+                    Profile = Mapper.Map<UserInfo>(user),
+                    Attributes = userAttributes,
+                    GivenFeedback = givenFeedback.Select(f => Mapper.Map<AuthoredFeedback>(f)).ToList(),
+                    ReceivedFeedback = user.Feedback.Select(f => Mapper.Map<AuthoredFeedback>(f)).ToList(),
+                    Galleries = userGalleries.Select(g => new
+                    {
+                        Id = g.Id,
+                        Created = g.Created,
+                        LastUpdated = g.LastUpdated,
+                        Images = g.Images.Select(i => new { i.ImageUrl }).ToList(),
+                        Attributes = g.Attributes.ToDictionary(a => a.Name, a => a.Value),
+                        Location = g.Location != null ? new { Lat = g.Location.Y, Lng = g.Location.X } : null
+                    }).Cast<object>().ToList(),
+                    Posts = userPosts.Select(p => new
+                    {
+                        Id = p.Id,
+                        Text = p.Text,
+                        Description = p.Description,
+                        DateOfPublication = p.DateOfPublication,
+                        LastUpdated = p.LastUpdated,
+                        StartDate = p.StartDate,
+                        EndDate = p.EndDate,
+                        Cost = p.Cost,
+                        Tags = p.Tags,
+                        BidEnabled = p.BidEnabled,
+                        Rating = p.Rating,
+                        Reviews = p.Reviews,
+                        Likes = p.Likes,
+                        Dislikes = p.Dislikes,
+                        Feedback = p.Feedback.Select(f => new
+                        {
+                            Text = f.Text,
+                            Rating = f.Rating,
+                            Created = f.Created,
+                            AuthorName = f.Author?.FirstName + " " + f.Author?.LastName
+                        }).ToList(),
+                        BidHistory = p.BidHistories.Select(b => new
+                        {
+                            Value = b.Value,
+                            Created = b.Created
+                        }).ToList()
+                    }).Cast<object>().ToList(),
+                    Notifications = user.Notifications.Select(n => new
+                    {
+                        Id = n.Id,
+                        Content = n.Content,
+                        ReferenceLink = n.ReferenceLink,
+                        Created = n.Created,
+                        IsRead = n.Read,
+                        IsSystem = n.IsSystem
+                    }).Cast<object>().ToList(),
+                    ActivityHistory = userActivity.Select(a => new
+                    {
+                        EventCode = a.EventCode.ToString(),
+                        TimeStamp = a.Created,
+                        UserId = a.UserId,
+                        ReferenceId = a.ReferenceId
+                    }).Cast<object>().ToList(),
+                    TourRequests = userTourRequests.Select(tr => new
+                    {
+                        Id = tr.TourRequestId,
+                        Title = tr.Title,
+                        Description = tr.Description,
+                        MaxBudget = tr.MaxBudget,
+                        PreferredDate = tr.PreferredDate,
+                        MaxParticipants = tr.MaxParticipants,
+                        Tags = tr.Tags,
+                        Status = tr.Status.ToString(),
+                        Created = tr.CreatedAt,
+                        Updated = tr.UpdatedAt,
+                        Region = tr.Region?.Name
+                    }).Cast<object>().ToList(),
+                    Account = new AccountMetadata
+                    {
+                        UserId = user.Id,
+                        Email = user.Email,
+                        LastActivityDate = user.LastActivityDate,
+                        CreatedDate = userActivity.OrderBy(a => a.Created).FirstOrDefault()?.Created ?? DateTime.MinValue,
+                        IsGuide = userAttributes.ContainsKey(nameof(Data.Entities.Users.AttributeTypes.GuideOptIn)) && 
+                                 userAttributes[nameof(Data.Entities.Users.AttributeTypes.GuideOptIn)] == Constants.Yes,
+                        IsPremium = userAttributes.ContainsKey(nameof(Data.Entities.Users.AttributeTypes.Subscription)) && 
+                                   userAttributes[nameof(Data.Entities.Users.AttributeTypes.Subscription)] == nameof(Subscriptions.Premium)
+                    }
+                };
+
+                return Result.Of(exportData);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Failed to export user data: UserId: {0}", UserContext.UserId);
+                return Result.Of<UserDataExport>().WithErrors("Failed to export user data", e.Message);
+            }
         }
     }
 }
