@@ -49,8 +49,9 @@ public static class MauiProgram
     public static IServiceCollection ConfigureServices(IServiceCollection services)
     {
         // Services
-        services.AddSingleton<INavigationService, NavigationService>();
-        services.AddSingleton<IPostItemService, PostItemService>();
+        services.AddSingleton<UrGuide.MAUI.Contracts.INavigationService, NavigationService>();
+        services.AddSingleton<UrGuide.MAUI.Contracts.IPostItemService, PostItemService>();
+        services.AddSingleton<UrGuide.MAUI.Contracts.ITourRequestService, TourRequestService>();
         services.AddSingleton<IUserService, UserService>();
         services.AddSingleton<IPreferenceService, PreferenceService>();
         services.AddSingleton<IIdentityService, IdentityService>();
@@ -69,12 +70,18 @@ public static class MauiProgram
         services.AddScoped<ShellViewModel>();
         services.AddScoped<MainPageViewModel>();
         services.AddTransient<CreatePostViewModel>();
+        services.AddTransient<CreateTourRequestViewModel>();
+        services.AddScoped<MyTourRequestsViewModel>();
+        services.AddTransient<UpdateBudgetViewModel>();
 
         // Views
         services.AddTransient<Views.DiscoverPage>();
         services.AddTransient<Views.PostsPage>();
         services.AddTransient<Views.FavoritePage>();
         services.AddTransient<Views.ProfilePage>();
+        services.AddTransient<Views.CreateTourRequestPage>();
+        services.AddTransient<Views.MyTourRequestsPage>();
+        services.AddTransient<Views.UpdateBudgetPage>();
 
         // AutoMapper
         services.AddAutoMapper(typeof(PostProfile).Assembly);

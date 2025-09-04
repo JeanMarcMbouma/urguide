@@ -185,5 +185,69 @@ namespace UrGuide.Services.Tour
             await Context.SaveChangesAsync(cancellationToken);
             return Result.Of(true);
         }
+
+        public async Task<Result<TourRequestModel>> UpdateBudgetAsync(string tourRequestId, decimal newBudget, CancellationToken cancellationToken)
+        {
+            if (!UserContext.IsAuthenticated)
+                return Result.Of<TourRequestModel>().WithErrors(ErrorMessages.NotAuthenticated);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var tourRequest = await Context.Set<DataTourRequest>()
+                .Include(tr => tr.Requester)
+                .Include(tr => tr.Region)
+                .FirstOrDefaultAsync(tr => tr.TourRequestId == tourRequestId && tr.RequesterId == UserContext.UserId, cancellationToken);
+
+            if (tourRequest == null)
+                return Result.Of<TourRequestModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
+
+            if (tourRequest.Status != DataTourRequestStatus.Open)
+                return Result.Of<TourRequestModel>().WithErrors("Only open tour requests can have their budget updated");
+
+            if (newBudget <= 0)
+                return Result.Of<TourRequestModel>().WithErrors("Budget must be greater than zero");
+
+            if (newBudget < tourRequest.MaxBudget)
+                return Result.Of<TourRequestModel>().WithErrors("New budget must be greater than or equal to the current budget");
+
+            tourRequest.MaxBudget = newBudget;
+            tourRequest.UpdatedAt = DateTime.UtcNow;
+
+            await Context.SaveChangesAsync(cancellationToken);
+
+            // Notify guides in the region about the budget update
+            await NotifyGuidesAboutBudgetUpdateAsync(tourRequest, cancellationToken);
+
+            var result = Mapper.Map<TourRequestModel>(tourRequest);
+            return Result.Of(result);
+        }
+
+        private async Task NotifyGuidesAboutBudgetUpdateAsync(DataTourRequest tourRequest, CancellationToken cancellationToken)
+        {
+            try
+            {
+                // Find guides (authors) in the same region
+                var guidesInRegion = await Context.Users
+                    .Where(u => u.Attributes.Any(a => a.Name == "UserType" && a.Value == "Guide"))
+                    .Where(u => u.Attributes.Any(a => a.Name == "RegionId" && a.Value == tourRequest.RegionId))
+                    .Select(u => u.Id)
+                    .ToListAsync(cancellationToken);
+
+                var notificationContent = $"Budget updated for tour request: '{tourRequest.Title}'. New budget: ${tourRequest.MaxBudget:F2}";
+                var referenceLink = $"/tour-requests/{tourRequest.TourRequestId}";
+
+                foreach (var guideId in guidesInRegion)
+                {
+                    await NotificationService.SystemNotifyAsync(guideId, notificationContent, referenceLink);
+                }
+
+                Logger.LogInformation($"Notified {guidesInRegion.Count} guides about budget update for tour request {tourRequest.TourRequestId}");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to notify guides about budget update for tour request {TourRequestId}", tourRequest.TourRequestId);
+                // Don't fail the budget update if notification fails
+            }
+        }
     }
 }
