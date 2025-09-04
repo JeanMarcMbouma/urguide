@@ -14,8 +14,8 @@ Always reference these instructions first and fallback to search or bash command
 - Install Node dependencies: `cd UrGuide.WebApp/ClientApp && npm install --legacy-peer-deps` -- takes 138 seconds (fresh), 2 seconds (cached). NEVER CANCEL. Set timeout to 300+ seconds for fresh installs.
 
 ### Building the Project
-- Build .NET web project only: `dotnet build UrGuide.WebApp/UrGuide.WebApp.csproj` -- takes 247 seconds (4+ minutes). NEVER CANCEL. Set timeout to 300+ seconds.
-- DO NOT attempt to build the full solution (`dotnet build`) - fails due to missing Xamarin Android targets.
+- Build .NET web project: `dotnet build UrGuide.WebApp/UrGuide.WebApp.csproj` -- takes 247 seconds (4+ minutes). NEVER CANCEL. Set timeout to 300+ seconds.
+- Full solution build fails: `dotnet build` -- fails due to missing Aspire workload requirement for UrGuide.AppHost project.
 - DO NOT attempt React production build (`npm run build`) - fails due to incomplete Material-UI migration from @material-ui to @mui packages.
 - DO NOT attempt React dev server (`npm start`) - fails to compile due to incomplete Material-UI migration and React Router v6 breaking changes.
 - DO NOT attempt .NET Aspire AppHost (`dotnet run --project UrGuide.AppHost`) - requires compatible Aspire workload version.
@@ -53,7 +53,7 @@ Always reference these instructions first and fallback to search or bash command
 - **ESLint deprecated**: Uses deprecated ESLint 8.x with compatibility issues. Skip linting validation.
 
 ### .NET Issues  
-- **Full solution build fails**: Xamarin Android project missing targets. Build web project only: `dotnet build UrGuide.WebApp/UrGuide.WebApp.csproj`.
+- **Full solution build fails**: Missing Aspire workload for AppHost project. Build web project only: `dotnet build UrGuide.WebApp/UrGuide.WebApp.csproj`.
 - **Aspire workload compatibility**: .NET Aspire AppHost requires specific workload versions. Use `dotnet workload install aspire` but AppHost build may still fail.
 - **Database connectivity**: Uses SQL Server LocalDB connection strings. Application cannot run without Windows + SQL Server LocalDB or connection string modifications.
 - **Runtime platform**: Application will throw `System.PlatformNotSupportedException: LocalDB is not supported` on Linux/macOS.
@@ -82,11 +82,7 @@ UrGuide.sln                 # Main solution file
 ├── UrGuide.Model/         # Domain models and DTOs
 ├── UrGuide.Core/          # Core utilities and extensions
 ├── UrGuide.Shared/        # Shared code between projects
-├── UrGuide.MAUI/          # .NET MAUI mobile app (migration in progress)
-└── Mobile/                # Legacy Xamarin mobile applications
-    ├── UrGuide.Mobile/    # Shared mobile code
-    ├── UrGuide.Mobile.Android/
-    └── UrGuide.Mobile.iOS/
+├── UrGuide.MAUI/          # .NET MAUI mobile app
 ```
 
 ### Key Configuration Files
@@ -120,11 +116,11 @@ UrGuide.sln                 # Main solution file
 - **HTTP Client**: Fetch API with custom wrappers
 - **Authentication**: OIDC Client TS integration
 
-### Mobile (.NET MAUI + Legacy Xamarin)
-- **Modern**: .NET MAUI (UrGuide.MAUI) - migration in progress
-- **Legacy**: Xamarin.Forms shared project (Mobile/UrGuide.Mobile)
-- **Platforms**: Android and iOS native projects
+### Mobile (.NET MAUI)
+- **.NET MAUI**: Cross-platform mobile app (UrGuide.MAUI) 
+- **Platforms**: Android and iOS support
 - **API Client**: Auto-generated from OpenAPI specification
+- **Note**: Legacy Xamarin projects have been removed from the solution
 
 ## Development Workflow
 
@@ -152,7 +148,7 @@ UrGuide.sln                 # Main solution file
 ## Critical Reminders
 - **NEVER CANCEL long-running builds** - .NET build takes 4+ minutes (247 seconds), npm install takes 2+ minutes (138 seconds fresh). Set appropriate timeouts.
 - **ALWAYS use --legacy-peer-deps** for npm install commands
-- **DO NOT build full solution** - build web project only to avoid Xamarin errors
+- **USE web project build primarily** - `dotnet build UrGuide.WebApp/UrGuide.WebApp.csproj` for faster builds (full solution build fails due to missing Aspire workload)
 - **DO NOT attempt React builds/dev server/tests** - they all fail due to incomplete Material-UI migration
 - **DO NOT attempt to run the application** - requires SQL Server LocalDB not available on Linux
 - **FOCUS on .NET backend development and careful React code review** for validation workflow
