@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="UrGuide.MAUI.Views.CreateTourRequestPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:UrGuide.MAUI.ViewModels"
+             x:DataType="viewmodels:CreateTourRequestViewModel"
+             Title="Create Tour Request">
+    
+    <ScrollView>
+        <StackLayout Padding="16" Spacing="16">
+            
+            <!-- Title -->
+            <StackLayout>
+                <Label Text="Tour Title" FontAttributes="Bold" />
+                <Entry x:Name="TitleEntry" 
+                       Text="{Binding Title}" 
+                       Placeholder="e.g., Historical City Walking Tour"
+                       MaxLength="200" />
+            </StackLayout>
+
+            <!-- Description -->
+            <StackLayout>
+                <Label Text="Description" FontAttributes="Bold" />
+                <Editor x:Name="DescriptionEditor" 
+                        Text="{Binding Description}" 
+                        Placeholder="Describe what you'd like to see and do during your tour..."
+                        HeightRequest="100"
+                        MaxLength="1000" />
+            </StackLayout>
+
+            <!-- Region Selection -->
+            <StackLayout>
+                <Label Text="Location" FontAttributes="Bold" />
+                <Picker x:Name="RegionPicker" 
+                        ItemsSource="{Binding Regions}"
+                        SelectedItem="{Binding SelectedRegion}"
+                        ItemDisplayBinding="{Binding Name}"
+                        Title="Select a region" />
+            </StackLayout>
+
+            <!-- Date Selection -->
+            <StackLayout>
+                <Label Text="Preferred Date" FontAttributes="Bold" />
+                <DatePicker x:Name="PreferredDatePicker" 
+                           Date="{Binding PreferredDate}"
+                           MinimumDate="{x:Static x:DateTime.Today}" />
+            </StackLayout>
+
+            <!-- Max Participants -->
+            <StackLayout>
+                <Label Text="Maximum Participants" FontAttributes="Bold" />
+                <Entry x:Name="MaxParticipantsEntry" 
+                       Text="{Binding MaxParticipants}" 
+                       Keyboard="Numeric"
+                       Placeholder="1" />
+            </StackLayout>
+
+            <!-- Budget -->
+            <StackLayout>
+                <Label Text="Maximum Budget" FontAttributes="Bold" />
+                <Entry x:Name="MaxBudgetEntry" 
+                       Text="{Binding MaxBudget}" 
+                       Keyboard="Numeric"
+                       Placeholder="0.00" />
+            </StackLayout>
+
+            <!-- Tags -->
+            <StackLayout>
+                <Label Text="Tags (optional)" FontAttributes="Bold" />
+                <Entry x:Name="TagsEntry" 
+                       Text="{Binding Tags}" 
+                       Placeholder="e.g., museums, food, nightlife, photography"
+                       MaxLength="500" />
+                <Label Text="Separate tags with commas to help guides understand your interests" 
+                       FontSize="Small" 
+                       TextColor="Gray" />
+            </StackLayout>
+
+            <!-- Error Message -->
+            <Label Text="{Binding ErrorMessage}" 
+                   TextColor="Red" 
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource StringIsNotNullOrEmptyConverter}}" />
+
+            <!-- Create Button -->
+            <Button Text="Create Tour Request" 
+                    Command="{Binding CreateTourRequestCommand}"
+                    IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                    BackgroundColor="#007ACC"
+                    TextColor="White"
+                    HeightRequest="50" />
+
+            <!-- Loading Indicator -->
+            <ActivityIndicator IsRunning="{Binding IsLoading}" 
+                              IsVisible="{Binding IsLoading}"
+                              Color="#007ACC" />
+
+        </StackLayout>
+    </ScrollView>
+
+</ContentPage>

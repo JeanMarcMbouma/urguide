@@ -33,6 +33,11 @@ namespace UrGuide.Model.Tour
         public string RegionId { get; set; }
     }
 
+    public class UpdateBudgetModel
+    {
+        public decimal NewBudget { get; set; }
+    }
+
     public enum TourRequestStatus
     {
         Open = 0,

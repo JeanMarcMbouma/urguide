@@ -7,17 +7,6 @@ using UrGuide.Model.Results;
 
 namespace UrGuide.MAUI.Services;
 
-public interface INavigationService
-{
-    Task ConfirmAsync(Action<DialogResult> callback, string title = null, string message = null, string yesText = "Yes", string noText = "No", bool displayNoButton = true);
-    Task DisplayErrorAsync(string title = "Error", string message = "An unexpected error has occured", string yesText = "Ok");
-    Task PushAsync(object page, bool animated = true);
-    Task PushModalAsync(object modalPage, bool animated = true);
-    Task PopModalAsync(bool animated = true);
-    Task PushAsyncWithSharedTransition(object page, string groupId);
-    Task PopAsync();
-}
-
 public class NavigationService : INavigationService
 {
     public Task ConfirmAsync(Action<DialogResult> callback, string title = null, string message = null, string yesText = "Yes", string noText = "No", bool displayNoButton = true)
@@ -63,27 +52,6 @@ public class NavigationService : INavigationService
         // In a real MAUI implementation, this would show a modal
         return Task.CompletedTask;
     }
-}
-
-public interface IPostItemService
-{
-    IObservable<PostItem> Create(UrGuide.MAUI.Models.API.PostCreationModel post);
-    Task<Result<IEnumerable<Model.Lookup.CategoryModel>>> GetCategoriesAsync();
-    Task<Result<IEnumerable<PostItem>>> GetItemsAsync();
-    Task<IEnumerable<PostItem>> GetFavoriteAsync();
-    Task<Result<IEnumerable<DiscoverItem>>> SearchAsync(bool nearby, IEnumerable<string> categories = null, string searchTerm = null, int pageNumber = 1);
-    Task<Result<PostItem>> GetByIdAsync(string id);
-    Task<PageResult<Model.Shared.AuthoredFeedback>> GetPostFeedbackAsync(string id, int pageNumber = 1);
-    Task<Result<IEnumerable<Model.Posts.BidHistoryModel>>> GetBidHistoryAsync(string id);
-    Task ToggleFavorites(PostItem it);
-    Task SetUserReaction(PostItem it);
-    Task ToggleReservation(PostItem it);
-    Task<Result<Model.Shared.AuthoredFeedback>> SendFeedback(string postId, Model.Shared.FeedbackModel newFeedBack);
-    Task<PageResult<PostItem>> GetUserPosts(string userId, int pageNumber);
-    Task ShareItem(PostItem it);
-    Task<Result<bool>> Bid(string id, double bid);
-    Task<Result<string>> AcceptBid(string id);
-    Task<Result<string>> RejectBid(string id);
 }
 
 public class PostItemService : IPostItemService
@@ -219,4 +187,84 @@ public interface IFileService
 public class FileService : IFileService
 {
     // Placeholder for file service implementation
+}
+
+public class TourRequestService : ITourRequestService
+{
+    // Placeholder implementation for now
+    public Task<Result<bool>> CancelTourRequestAsync(string tourRequestId)
+    {
+        return Task.FromResult(new Result<bool>(true));
+    }
+
+    public Task<Result<TourRequestItem>> CreateTourRequestAsync(UrGuide.MAUI.Models.API.CreateTourRequestModel model)
+    {
+        // In a real implementation, this would call the backend API
+        var tourRequest = new TourRequestItem
+        {
+            TourRequestId = Guid.NewGuid().ToString(),
+            Title = model.Title,
+            Description = model.Description,
+            PreferredDate = model.PreferredDate,
+            MaxParticipants = model.MaxParticipants,
+            MaxBudget = model.MaxBudget,
+            Tags = model.Tags,
+            RegionId = model.RegionId,
+            Status = "Open",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            CanUpdateBudget = true,
+            CanCancel = true,
+            FormattedBudget = $"${model.MaxBudget:F2}",
+            FormattedDate = model.PreferredDate.ToString("MMM dd, yyyy")
+        };
+        
+        return Task.FromResult(new Result<TourRequestItem>(tourRequest));
+    }
+
+    public Task<Result<IEnumerable<TourRequestItem>>> GetMyTourRequestsAsync(int pageNumber = 1)
+    {
+        // Placeholder implementation
+        var tourRequests = new List<TourRequestItem>();
+        return Task.FromResult(new Result<IEnumerable<TourRequestItem>>(tourRequests));
+    }
+
+    public Task<Result<IEnumerable<UrGuide.MAUI.Models.API.RegionModel>>> GetRegionsAsync()
+    {
+        // Placeholder implementation - in real app would call backend
+        var regions = new List<UrGuide.MAUI.Models.API.RegionModel>
+        {
+            new() { RegionId = "1", Name = "Paris, France", CurrencyId = "EUR" },
+            new() { RegionId = "2", Name = "London, UK", CurrencyId = "GBP" },
+            new() { RegionId = "3", Name = "New York, USA", CurrencyId = "USD" },
+            new() { RegionId = "4", Name = "Tokyo, Japan", CurrencyId = "JPY" }
+        };
+        return Task.FromResult(new Result<IEnumerable<UrGuide.MAUI.Models.API.RegionModel>>(regions));
+    }
+
+    public Task<Result<TourRequestItem>> GetTourRequestByIdAsync(string tourRequestId)
+    {
+        // Placeholder implementation
+        var tourRequest = new TourRequestItem
+        {
+            TourRequestId = tourRequestId,
+            Title = "Sample Tour Request",
+            Description = "Sample description",
+            Status = "Open"
+        };
+        return Task.FromResult(new Result<TourRequestItem>(tourRequest));
+    }
+
+    public Task<Result<TourRequestItem>> UpdateBudgetAsync(string tourRequestId, decimal newBudget)
+    {
+        // Placeholder implementation
+        var tourRequest = new TourRequestItem
+        {
+            TourRequestId = tourRequestId,
+            MaxBudget = newBudget,
+            FormattedBudget = $"${newBudget:F2}",
+            UpdatedAt = DateTime.UtcNow
+        };
+        return Task.FromResult(new Result<TourRequestItem>(tourRequest));
+    }
 }

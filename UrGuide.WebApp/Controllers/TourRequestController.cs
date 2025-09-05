@@ -78,5 +78,16 @@ namespace UrGuide.WebApp.Controllers
             var result = await _tourRequestService.CancelTourRequestAsync(tourRequestId, cancellationToken);
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
+
+        [HttpPut("{tourRequestId}/budget")]
+        [ProducesResponseType(200, Type = typeof(TourRequestModel))]
+        public async Task<IActionResult> UpdateBudget(string tourRequestId, [FromBody] UpdateBudgetModel model, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ErrorEnvelop.Create(ModelState));
+
+            var result = await _tourRequestService.UpdateBudgetAsync(tourRequestId, model.NewBudget, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
     }
 }

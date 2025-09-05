@@ -16,5 +16,6 @@ namespace UrGuide.Services.Contracts
         Task<Result<PagedList<TourRequestModel>>> GetMyTourRequestsAsync(SearchParameters pagination, CancellationToken cancellationToken);
         Task<Result<PagedList<TourRequestModel>>> GetTourRequestsByRegionAsync(string regionId, SearchParameters pagination, CancellationToken cancellationToken);
         Task<Result<bool>> CancelTourRequestAsync(string tourRequestId, CancellationToken cancellationToken);
+        Task<Result<TourRequestModel>> UpdateBudgetAsync(string tourRequestId, decimal newBudget, CancellationToken cancellationToken);
     }
 }
