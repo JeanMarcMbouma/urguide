@@ -6,8 +6,6 @@
              x:DataType="vm:FavoriteViewModel"
              xmlns:vm="clr-namespace:UrGuide.MAUI.ViewModels"
              xmlns:models="clr-namespace:UrGuide.MAUI.Models">
-             x:DataType="vm:FavoriteViewModel"
-             xmlns:vm="clr-namespace:UrGuide.MAUI.ViewModels">
 
     <Grid>
         <!-- Favorites List -->

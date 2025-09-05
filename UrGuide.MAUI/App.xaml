@@ -2,6 +2,7 @@
 <Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:UrGuide.MAUI"
+             xmlns:converters="clr-namespace:UrGuide.MAUI.Converters"
              x:Class="UrGuide.MAUI.App">
     <Application.Resources>
         <ResourceDictionary>
@@ -9,6 +10,12 @@
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            
+            <!-- Value Converters -->
+            <converters:IsGreaterThanZeroConverter x:Key="IsGreaterThanZeroConverter" />
+            <converters:BudgetDifferenceConverter x:Key="BudgetDifferenceConverter" />
+            <converters:StringIsNotNullOrEmptyConverter x:Key="StringIsNotNullOrEmptyConverter" />
+            <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
             
             <!-- UrGuide Color Scheme -->
             <Color x:Key="PrimaryColor">#FF0266</Color>

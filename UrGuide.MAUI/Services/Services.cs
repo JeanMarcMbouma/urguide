@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UrGuide.MAUI.Contracts;
 using UrGuide.MAUI.Models;
 using UrGuide.Model.Results;
 
 namespace UrGuide.MAUI.Services;
 
-public class NavigationService : UrGuide.MAUI.Contracts.INavigationService
+public class NavigationService : INavigationService
 {
     public Task ConfirmAsync(Action<DialogResult> callback, string title = null, string message = null, string yesText = "Yes", string noText = "No", bool displayNoButton = true)
     {
@@ -53,7 +54,7 @@ public class NavigationService : UrGuide.MAUI.Contracts.INavigationService
     }
 }
 
-public class PostItemService : UrGuide.MAUI.Contracts.IPostItemService
+public class PostItemService : IPostItemService
 {
     public Task<Result<string>> AcceptBid(string id)
     {
@@ -188,7 +189,7 @@ public class FileService : IFileService
     // Placeholder for file service implementation
 }
 
-public class TourRequestService : UrGuide.MAUI.Contracts.ITourRequestService
+public class TourRequestService : ITourRequestService
 {
     // Placeholder implementation for now
     public Task<Result<bool>> CancelTourRequestAsync(string tourRequestId)

@@ -236,7 +236,7 @@ namespace UrGuide.MAUI.ViewModels
         private string tags = string.Empty;
 
         [ObservableProperty]
-        private string selectedRegionId = string.Empty;
+        private UrGuide.MAUI.Models.API.RegionModel selectedRegion;
 
         [ObservableProperty]
         private ObservableCollection<UrGuide.MAUI.Models.API.RegionModel> regions = new();
@@ -298,7 +298,7 @@ namespace UrGuide.MAUI.ViewModels
                     MaxParticipants = MaxParticipants,
                     MaxBudget = MaxBudget,
                     Tags = Tags,
-                    RegionId = SelectedRegionId
+                    RegionId = SelectedRegion?.RegionId ?? string.Empty
                 };
 
                 var result = await _tourRequestService.CreateTourRequestAsync(model);
@@ -311,7 +311,7 @@ namespace UrGuide.MAUI.ViewModels
                     MaxParticipants = 1;
                     MaxBudget = 0;
                     Tags = string.Empty;
-                    SelectedRegionId = string.Empty;
+                    SelectedRegion = null;
 
                     // Navigate back or show success message
                     await _navigationService.PopAsync();
@@ -336,14 +336,14 @@ namespace UrGuide.MAUI.ViewModels
             return !IsLoading &&
                    !string.IsNullOrWhiteSpace(Title) &&
                    !string.IsNullOrWhiteSpace(Description) &&
-                   !string.IsNullOrWhiteSpace(SelectedRegionId) &&
+                   SelectedRegion != null &&
                    MaxBudget > 0 &&
                    MaxParticipants > 0;
         }
 
         partial void OnTitleChanged(string value) => CreateTourRequestCommand.NotifyCanExecuteChanged();
         partial void OnDescriptionChanged(string value) => CreateTourRequestCommand.NotifyCanExecuteChanged();
-        partial void OnSelectedRegionIdChanged(string value) => CreateTourRequestCommand.NotifyCanExecuteChanged();
+        partial void OnSelectedRegionChanged(UrGuide.MAUI.Models.API.RegionModel value) => CreateTourRequestCommand.NotifyCanExecuteChanged();
         partial void OnMaxBudgetChanged(decimal value) => CreateTourRequestCommand.NotifyCanExecuteChanged();
         partial void OnMaxParticipantsChanged(int value) => CreateTourRequestCommand.NotifyCanExecuteChanged();
     }
@@ -412,9 +412,11 @@ namespace UrGuide.MAUI.ViewModels
         [RelayCommand]
         private async Task UpdateBudget(TourRequestItem tourRequest)
         {
-            // This would open a dialog or navigate to update budget page
-            // For now, just navigate to the page - in a real implementation, 
-            // we'd pass the tour request through a navigation parameter or shared state
+            // TODO: Implement proper parameter passing for UpdateBudgetPage
+            // Currently the UpdateBudgetViewModel expects a TourRequestItem parameter
+            // but the navigation system doesn't support parameter passing yet.
+            // This would need to be implemented with a proper navigation framework
+            // or shared state management.
             await _navigationService.PushAsync("UpdateBudgetPage");
         }
 

@@ -6,8 +6,6 @@
              x:DataType="vm:DiscoverViewModel"
              xmlns:vm="clr-namespace:UrGuide.MAUI.ViewModels"
              xmlns:models="clr-namespace:UrGuide.MAUI.Models">
-             x:DataType="vm:DiscoverViewModel"
-             xmlns:vm="clr-namespace:UrGuide.MAUI.ViewModels">
 
     <Grid>
         <Grid.RowDefinitions>

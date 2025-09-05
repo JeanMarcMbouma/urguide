@@ -33,7 +33,7 @@
                 <Label Text="Location" FontAttributes="Bold" />
                 <Picker x:Name="RegionPicker" 
                         ItemsSource="{Binding Regions}"
-                        SelectedItem="{Binding SelectedRegionId}"
+                        SelectedItem="{Binding SelectedRegion}"
                         ItemDisplayBinding="{Binding Name}"
                         Title="Select a region" />
             </StackLayout>
