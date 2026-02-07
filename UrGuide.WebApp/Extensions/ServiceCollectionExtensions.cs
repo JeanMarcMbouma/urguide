@@ -1,4 +1,4 @@
-﻿using IdentityModel;
+﻿using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
@@ -22,7 +22,7 @@ using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Data;
 using UrGuide.WebApp.Entities;
 using UrGuide.WebApp.Services;
-using static IdentityModel.OidcConstants;
+using static Duende.IdentityModel.OidcConstants;
 using static Duende.IdentityServer.Models.IdentityResources;
 
 namespace UrGuide.WebApp.Extensions

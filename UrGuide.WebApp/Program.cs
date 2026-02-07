@@ -9,7 +9,7 @@ using UrGuide.Services.Extensions;
 using UrGuide.WebApp.Extensions;
 using Microsoft.EntityFrameworkCore;
 using AspNetCoreRateLimit;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using UrGuide.WebApp.Hubs;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Diagnostics;
@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using Asp.Versioning;
 using System.Linq;
+using UrGuide.ServiceDefaults;
 
 var logger = LogManager.Setup().LoadConfigurationFromFile("nlog.config").GetCurrentClassLogger();
 try
@@ -29,10 +30,14 @@ try
     
     var builder = WebApplication.CreateBuilder(args);
 
-    // Configure logging
+    // Configure logging first before adding service defaults
     builder.Logging.ClearProviders();
     builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
     builder.Host.UseNLog();
+
+    // Add .NET Aspire service defaults (OpenTelemetry, health checks, service discovery, resilience)
+    // This must come after ClearProviders to ensure OpenTelemetry logging is not removed
+    builder.AddServiceDefaults();
 
     // Add services to the container.
     builder.Services.AddUrGuideAuthServices(builder.Configuration);
@@ -209,8 +214,8 @@ try
         pattern: "{controller}/{action=Index}/{id?}");
     app.MapHub<NotificationHub>("/notify");
     
-    // Map health checks endpoint
-    app.MapHealthChecks("/health");
+    // Map Aspire default endpoints (health checks at /health and /alive)
+    app.MapDefaultEndpoints();
 
     app.Run();
 }
