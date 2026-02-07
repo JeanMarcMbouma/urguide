@@ -1,0 +1,57 @@
+# Ignore git files
+.git
+.gitignore
+.gitattributes
+
+# Ignore build artifacts
+**/bin
+**/obj
+**/out
+**/publish
+
+# Ignore IDE files
+.vs
+.vscode
+.idea
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Ignore test results
+TestResults
+**/test-results
+
+# Ignore logs
+logs
+*.log
+
+# Ignore local environment files
+appsettings.Development.json
+appsettings.Local.json
+*.local.json
+
+# Ignore uploaded files
+wwwroot/uploads
+
+# Ignore NuGet packages
+*.nupkg
+*.snupkg
+.nuget
+
+# Ignore Docker files (don't copy into image)
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Ignore documentation and markdown
+*.md
+LICENSE
+
+# Ignore CI/CD files
+.github
+
+# Ignore temp files
+temp
+tmp
+*.tmp

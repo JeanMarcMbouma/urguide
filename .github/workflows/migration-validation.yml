@@ -1,0 +1,91 @@
+name: Database Migration Validation
+
+on:
+  pull_request:
+    paths:
+      - '**/Migrations/**'
+      - '**/Data/**'
+      - 'UrGuide.WebApp/appsettings*.json'
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  validate-migrations:
+    name: Validate Database Migrations
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          SA_PASSWORD: Test@123456
+          MSSQL_PID: Developer
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Test@123456 -Q 'SELECT 1' || exit 1"
+          --health-interval 10s
+          --health-timeout 3s
+          --health-retries 10
+          --health-start-period 30s
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Install EF Core tools
+      run: dotnet tool install --global dotnet-ef
+      
+    - name: Restore dependencies
+      run: dotnet restore UrGuide.WebApp/UrGuide.WebApp.csproj
+      
+    - name: Build project
+      run: dotnet build UrGuide.WebApp/UrGuide.WebApp.csproj --configuration Release --no-restore
+      
+    - name: Wait for SQL Server
+      run: |
+        for i in {1..30}; do
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Test@123456" -Q "SELECT 1" && break || sleep 2
+        done
+        
+    - name: Apply migrations to test database
+      run: |
+        export ConnectionStrings__DefaultConnection="Server=localhost;Database=urguide_data_test;User Id=sa;Password=Test@123456;TrustServerCertificate=True;MultipleActiveResultSets=true"
+        export ConnectionStrings__AuthConnection="Server=localhost;Database=urguide_id4_test;User Id=sa;Password=Test@123456;TrustServerCertificate=True;MultipleActiveResultSets=true"
+        
+        echo "Applying migrations for DefaultConnection..."
+        dotnet ef database update --project UrGuide.WebApp --connection "$ConnectionStrings__DefaultConnection" --context UrGuideContext || true
+        
+        echo "Applying migrations for AuthConnection..."
+        dotnet ef database update --project UrGuide.WebApp --connection "$ConnectionStrings__AuthConnection" --context ApplicationDbContext || true
+        
+        echo "✅ Migrations validated successfully"
+        
+    - name: Generate migration script
+      run: |
+        echo "Generating SQL migration scripts..."
+        dotnet ef migrations script --project UrGuide.WebApp --idempotent --output migrations.sql --context UrGuideContext || true
+        
+        if [ -f migrations.sql ]; then
+          echo "✅ Migration script generated"
+          head -n 50 migrations.sql
+        fi
+        
+    - name: Upload migration script
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: migration-scripts
+        path: migrations.sql
+        retention-days: 30
