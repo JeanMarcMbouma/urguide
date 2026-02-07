@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Services.Contracts;
 using UrGuide.WebApp.Entities;
+using Duende.IdentityModel;
 
 namespace UrGuide.WebApp.Services
 {
@@ -31,15 +32,15 @@ namespace UrGuide.WebApp.Services
             var claimPrincipal = await PrincipalFactory.CreateAsync(principal);
 
             context.IssuedClaims.AddRange(claimPrincipal.Claims);
-            SafeAddClaims(context, IdentityModel.JwtClaimTypes.BirthDate, result.Data.BirthDay)
-                .SafeAddClaims(context, IdentityModel.JwtClaimTypes.Picture, result.Data.ProfileImage)
-                .SafeAddClaims(context, IdentityModel.JwtClaimTypes.FamilyName, result.Data.LastName)
-                .SafeAddClaims(context, IdentityModel.JwtClaimTypes.GivenName, result.Data.FirstName)
-                .SafeAddClaims(context, IdentityModel.JwtClaimTypes.Gender, result.Data.Gender)
-                .SafeAddClaims(context, IdentityModel.JwtClaimTypes.Name, result.Data.FullName)
-                .SafeAddClaims(context, IdentityModel.JwtClaimTypes.Address, result.Data.Address)
+            SafeAddClaims(context, JwtClaimTypes.BirthDate, result.Data.BirthDay)
+                .SafeAddClaims(context, JwtClaimTypes.Picture, result.Data.ProfileImage)
+                .SafeAddClaims(context, JwtClaimTypes.FamilyName, result.Data.LastName)
+                .SafeAddClaims(context, JwtClaimTypes.GivenName, result.Data.FirstName)
+                .SafeAddClaims(context, JwtClaimTypes.Gender, result.Data.Gender)
+                .SafeAddClaims(context, JwtClaimTypes.Name, result.Data.FullName)
+                .SafeAddClaims(context, JwtClaimTypes.Address, result.Data.Address)
                 .SafeAddClaims(context, "country", result.Data.Country)
-                .SafeAddClaims(context, IdentityModel.JwtClaimTypes.Role, result.Data.IsGuide ? "guide" : "user");
+                .SafeAddClaims(context, JwtClaimTypes.Role, result.Data.IsGuide ? "guide" : "user");
 
         }
 

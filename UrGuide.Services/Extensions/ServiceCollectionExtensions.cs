@@ -72,7 +72,9 @@ namespace UrGuide.Services.Extensions
             // Feedback
             services.AddTransient<IValidator<FeedbackModel>, FeedbackModelValidator>();
 
-            services.AddAutoMapper(typeof(UserMap));
+            services.AddAutoMapper(config => {
+                config.AddMaps(typeof(UserMap).Assembly);
+            });
 
             services.AddMediatR(typeof(UserDeleteAccountCommand).Assembly);
 
