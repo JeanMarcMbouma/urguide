@@ -14,7 +14,7 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
 - **Database**: Entity Framework Core 10.0 with SQL Server
 - **Authentication**: Duende IdentityServer 7.4 with Duende.IdentityModel 8.0 (OAuth 2.0/OpenID Connect)
 - **Real-time Communication**: SignalR for notifications
-- **API Documentation**: Swagger/OpenAPI 3.1 (Swashbuckle.AspNetCore 10.1)
+- **API Documentation**: Swagger/OpenAPI 3.0 (Swashbuckle.AspNetCore 10.1)
 - **API Versioning**: Asp.Versioning.Mvc 8.1
 - **Validation**: FluentValidation 12.1
 - **Logging**: NLog 6.1 with structured logging
