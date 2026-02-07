@@ -1,0 +1,484 @@
+# UrGuide API - Outstanding Issues Catalog
+
+This document catalogues all outstanding feature requests and improvements for the UrGuide Tourism Platform API.
+
+## 🎯 High Priority Issues
+
+### 1. Payment Integration
+**Title:** Implement payment processing system  
+**Labels:** enhancement, high-priority, financial  
+**Description:**
+Integrate a payment processing system to handle tour payments, guide payouts, and platform fees.
+
+**Requirements:**
+- Stripe or PayPal integration
+- Support for multiple currencies
+- Transaction history tracking
+- Refund processing
+- Platform fee calculation (2% for Basic, 5% for Premium)
+- Secure payment data handling (PCI compliance)
+- Webhook handling for payment events
+
+**Acceptance Criteria:**
+- [ ] Users can make payments for tours
+- [ ] Guides can receive payouts
+- [ ] Platform automatically deducts fees
+- [ ] Refund requests can be processed
+- [ ] Transaction history is tracked
+- [ ] Payment webhooks are handled properly
+
+---
+
+### 2. Docker Containerization
+**Title:** Add Docker support for easy deployment  
+**Labels:** enhancement, DevOps, containerization  
+**Description:**
+Create Docker containers for the UrGuide API to simplify deployment and ensure consistency across environments.
+
+**Requirements:**
+- Dockerfile for the API
+- Docker Compose for local development (API + SQL Server)
+- Multi-stage builds for optimized image size
+- Environment variable configuration
+- Health check configuration
+- Volume mapping for logs and uploads
+
+**Acceptance Criteria:**
+- [ ] Dockerfile builds successfully
+- [ ] Docker Compose starts all services
+- [ ] API is accessible from containers
+- [ ] Database migrations run automatically
+- [ ] Environment variables configure the application
+- [ ] Documentation updated with Docker instructions
+
+---
+
+### 3. CI/CD Pipeline
+**Title:** Implement automated CI/CD pipeline  
+**Labels:** enhancement, DevOps, automation  
+**Description:**
+Set up continuous integration and deployment pipeline using GitHub Actions.
+
+**Requirements:**
+- Build and test on pull requests
+- Automated security scanning
+- Code quality checks
+- Automated deployment to staging/production
+- Database migration automation
+- Rollback capability
+
+**Acceptance Criteria:**
+- [ ] GitHub Actions workflow for CI
+- [ ] Automated testing on PRs
+- [ ] Security scanning (CodeQL, dependency check)
+- [ ] Automated deployment workflow
+- [ ] Database migration handling
+- [ ] Deployment notifications
+
+---
+
+## 🔒 Security & Authentication
+
+### 4. Two-Factor Authentication (2FA)
+**Title:** Add two-factor authentication support  
+**Labels:** enhancement, security, authentication  
+**Description:**
+Implement 2FA for enhanced account security using TOTP (Time-based One-Time Password).
+
+**Requirements:**
+- TOTP-based 2FA using authenticator apps
+- QR code generation for easy setup
+- Backup codes for account recovery
+- SMS-based 2FA (optional)
+- Enforce 2FA for admin accounts
+- API endpoints for 2FA management
+
+**Acceptance Criteria:**
+- [ ] Users can enable/disable 2FA
+- [ ] QR code generation works
+- [ ] Backup codes are generated
+- [ ] Login requires 2FA when enabled
+- [ ] API documentation updated
+
+---
+
+### 5. Social Login Integration
+**Title:** Add OAuth social login providers  
+**Labels:** enhancement, authentication, integration  
+**Description:**
+Enable users to sign in using Google, Apple, and Microsoft accounts.
+
+**Requirements:**
+- Google OAuth integration
+- Apple Sign-In integration
+- Microsoft OAuth integration
+- Account linking (social + email)
+- Profile data synchronization
+- Consent management
+
+**Acceptance Criteria:**
+- [ ] Users can sign in with Google
+- [ ] Users can sign in with Apple
+- [ ] Users can sign in with Microsoft
+- [ ] Social accounts can be linked
+- [ ] Profile data is synchronized
+- [ ] Documentation updated
+
+---
+
+## 📊 Monitoring & Observability
+
+### 6. Enhanced Monitoring and Observability
+**Title:** Implement comprehensive monitoring solution  
+**Labels:** enhancement, monitoring, observability  
+**Description:**
+Add advanced monitoring, metrics, and distributed tracing for production environments.
+
+**Requirements:**
+- Application Insights or similar APM
+- Prometheus metrics endpoint
+- Distributed tracing (OpenTelemetry)
+- Custom metrics for business events
+- Performance monitoring
+- Error tracking and alerting
+
+**Acceptance Criteria:**
+- [ ] APM is configured
+- [ ] Metrics endpoint is available
+- [ ] Distributed tracing works
+- [ ] Custom metrics are tracked
+- [ ] Alerts are configured
+- [ ] Dashboard is created
+
+---
+
+### 7. Structured Logging Enhancement
+**Title:** Enhance structured logging with correlation IDs  
+**Labels:** enhancement, logging, observability  
+**Description:**
+Improve logging with correlation IDs, structured data, and better log aggregation support.
+
+**Requirements:**
+- Correlation ID propagation
+- Structured logging with JSON output
+- Log aggregation support (Elasticsearch, Seq)
+- Performance logging
+- Security event logging
+- User activity logging
+
+**Acceptance Criteria:**
+- [ ] Correlation IDs are generated and propagated
+- [ ] Logs are in JSON format
+- [ ] Log aggregation is configured
+- [ ] Performance metrics are logged
+- [ ] Security events are logged
+- [ ] Documentation updated
+
+---
+
+## 🧪 Testing & Quality
+
+### 8. API Testing Suite
+**Title:** Create comprehensive API testing suite  
+**Labels:** enhancement, testing, quality  
+**Description:**
+Develop a complete testing suite for the API including unit, integration, and end-to-end tests.
+
+**Requirements:**
+- Unit tests for services and controllers
+- Integration tests for API endpoints
+- Database integration tests
+- Authentication/authorization tests
+- Performance tests
+- Test coverage reporting
+
+**Acceptance Criteria:**
+- [ ] Unit tests cover core logic
+- [ ] Integration tests cover all endpoints
+- [ ] Database tests are automated
+- [ ] Auth/authz tests are comprehensive
+- [ ] Performance benchmarks exist
+- [ ] Test coverage is >80%
+
+---
+
+## 🚀 Features & Enhancements
+
+### 9. API Rate Limiting Improvements
+**Title:** Enhance rate limiting with tiered limits  
+**Labels:** enhancement, performance, API  
+**Description:**
+Improve rate limiting to support different tiers based on user roles and subscription levels.
+
+**Requirements:**
+- Tiered rate limits (anonymous, authenticated, premium)
+- Rate limit headers in responses
+- Custom rate limits per endpoint
+- Rate limit analytics
+- Graceful degradation
+- Rate limit exemptions for internal services
+
+**Acceptance Criteria:**
+- [ ] Different limits for different user tiers
+- [ ] Rate limit headers are returned
+- [ ] Custom limits work per endpoint
+- [ ] Analytics track rate limit hits
+- [ ] Exemptions work for internal calls
+- [ ] Documentation updated
+
+---
+
+### 10. API Client SDK Generation
+**Title:** Generate client SDKs for popular languages  
+**Labels:** enhancement, developer-experience, SDK  
+**Description:**
+Automatically generate client SDKs for .NET, JavaScript/TypeScript, Python, and Java.
+
+**Requirements:**
+- OpenAPI spec generation
+- NSwag or similar SDK generator
+- .NET client SDK
+- TypeScript/JavaScript SDK
+- Python SDK
+- Java SDK
+- SDK documentation
+- SDK versioning
+
+**Acceptance Criteria:**
+- [ ] OpenAPI spec is complete
+- [ ] .NET SDK is generated
+- [ ] TypeScript SDK is generated
+- [ ] Python SDK is generated
+- [ ] Java SDK is generated
+- [ ] SDKs are published to package managers
+- [ ] Documentation is created
+
+---
+
+### 11. GDPR Compliance - Data Export
+**Title:** Implement GDPR-compliant data export functionality  
+**Labels:** enhancement, compliance, privacy  
+**Description:**
+Allow users to export all their personal data in machine-readable format for GDPR compliance.
+
+**Requirements:**
+- Export user profile data
+- Export activity history
+- Export reviews and feedback
+- Export tour history
+- JSON and CSV formats
+- Secure download mechanism
+- Email notification when export is ready
+
+**Acceptance Criteria:**
+- [ ] Users can request data export
+- [ ] All personal data is included
+- [ ] Export is in JSON/CSV format
+- [ ] Download link is secure
+- [ ] Email notification is sent
+- [ ] Export expires after 7 days
+
+---
+
+### 12. Advanced Search and Filtering
+**Title:** Implement advanced search with Elasticsearch  
+**Labels:** enhancement, search, performance  
+**Description:**
+Integrate Elasticsearch for advanced search capabilities with fuzzy matching, filters, and facets.
+
+**Requirements:**
+- Elasticsearch integration
+- Fuzzy search for guides and tours
+- Multi-field search
+- Filters (location, price, rating, etc.)
+- Faceted search results
+- Search analytics
+- Search suggestions/autocomplete
+
+**Acceptance Criteria:**
+- [ ] Elasticsearch is integrated
+- [ ] Fuzzy search works
+- [ ] Multi-field search is implemented
+- [ ] Filters work correctly
+- [ ] Facets are returned
+- [ ] Analytics track searches
+- [ ] Autocomplete suggestions work
+
+---
+
+## 📱 Mobile & Integration
+
+### 13. Mobile App Push Notifications
+**Title:** Add push notification support for mobile apps  
+**Labels:** enhancement, mobile, notifications  
+**Description:**
+Integrate Firebase Cloud Messaging (FCM) and Apple Push Notification Service (APNs) for mobile push notifications.
+
+**Requirements:**
+- FCM integration for Android
+- APNs integration for iOS
+- Device token registration API
+- Notification sending API
+- Notification templates
+- Delivery tracking
+- Opt-in/opt-out management
+
+**Acceptance Criteria:**
+- [ ] FCM is integrated
+- [ ] APNs is integrated
+- [ ] Device registration works
+- [ ] Notifications are delivered
+- [ ] Templates are configurable
+- [ ] Users can opt-out
+- [ ] Documentation updated
+
+---
+
+### 14. Webhook System
+**Title:** Implement webhooks for external integrations  
+**Labels:** enhancement, integration, webhooks  
+**Description:**
+Create a webhook system to notify external systems of important events.
+
+**Requirements:**
+- Webhook registration API
+- Event subscription management
+- Payload signing for security
+- Retry logic with exponential backoff
+- Webhook history and logs
+- Test webhook endpoint
+
+**Acceptance Criteria:**
+- [ ] Webhooks can be registered
+- [ ] Events trigger webhooks
+- [ ] Payloads are signed
+- [ ] Retries work correctly
+- [ ] History is logged
+- [ ] Test endpoint is available
+
+---
+
+## 📦 Infrastructure
+
+### 15. Redis Caching Integration
+**Title:** Add Redis for distributed caching  
+**Labels:** enhancement, performance, infrastructure  
+**Description:**
+Integrate Redis for distributed caching to improve performance and enable horizontal scaling.
+
+**Requirements:**
+- Redis integration
+- Cache-aside pattern implementation
+- Distributed session storage
+- Rate limiting with Redis
+- Cache invalidation strategy
+- Redis Sentinel for high availability
+
+**Acceptance Criteria:**
+- [ ] Redis is integrated
+- [ ] Caching works correctly
+- [ ] Sessions are distributed
+- [ ] Rate limiting uses Redis
+- [ ] Invalidation works
+- [ ] HA is configured
+
+---
+
+### 16. Message Queue Integration
+**Title:** Add message queue for asynchronous processing  
+**Labels:** enhancement, performance, async  
+**Description:**
+Integrate RabbitMQ or Azure Service Bus for asynchronous message processing.
+
+**Requirements:**
+- Message queue setup
+- Email sending via queue
+- Image processing via queue
+- Notification dispatch via queue
+- Dead letter queue handling
+- Monitoring and alerting
+
+**Acceptance Criteria:**
+- [ ] Message queue is configured
+- [ ] Emails are sent asynchronously
+- [ ] Images are processed in background
+- [ ] Notifications are queued
+- [ ] Dead letters are handled
+- [ ] Monitoring dashboard exists
+
+---
+
+## 📈 Analytics & Reporting
+
+### 17. Analytics Dashboard
+**Title:** Create analytics dashboard for administrators  
+**Labels:** enhancement, analytics, admin  
+**Description:**
+Build an analytics dashboard showing key metrics and trends.
+
+**Requirements:**
+- User registration trends
+- Tour booking statistics
+- Revenue metrics
+- Guide performance metrics
+- Popular destinations
+- Conversion funnels
+- Export capabilities
+
+**Acceptance Criteria:**
+- [ ] Dashboard displays key metrics
+- [ ] Trends are visualized
+- [ ] Filters work correctly
+- [ ] Data can be exported
+- [ ] Real-time updates
+- [ ] Mobile-friendly
+
+---
+
+## 🌍 Localization
+
+### 18. Multi-language Support
+**Title:** Add internationalization (i18n) support  
+**Labels:** enhancement, i18n, localization  
+**Description:**
+Implement multi-language support for API responses and error messages.
+
+**Requirements:**
+- Resource file structure
+- Accept-Language header support
+- Translated error messages
+- Translated email templates
+- Language detection
+- Admin UI for managing translations
+
+**Acceptance Criteria:**
+- [ ] Multiple languages supported
+- [ ] Accept-Language header works
+- [ ] Error messages are translated
+- [ ] Email templates are translated
+- [ ] Language detection works
+- [ ] Admin can manage translations
+
+---
+
+## Summary
+
+**Total Issues: 18**
+
+**By Priority:**
+- High Priority: 3
+- Medium Priority: 10
+- Nice to Have: 5
+
+**By Category:**
+- Security & Authentication: 2
+- Monitoring & Observability: 2
+- Testing & Quality: 1
+- Features & Enhancements: 5
+- Mobile & Integration: 2
+- Infrastructure: 2
+- Analytics & Reporting: 1
+- Localization: 1
+- DevOps: 2
+
+These issues will be created in the GitHub repository to track progress on the UrGuide API platform.

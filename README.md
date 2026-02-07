@@ -1,45 +1,48 @@
-# UrGuide Tourism Platform
+# UrGuide Tourism Platform API
 
-A comprehensive tourism web application that connects travelers with local guides, enabling authentic and personalized travel experiences.
+A comprehensive RESTful API for connecting travelers with local guides, enabling authentic and personalized travel experiences.
 
 ## 🌟 Overview
 
-UrGuide is a modern tourism platform built with .NET 8 backend, React 18 SPA frontend, and Xamarin mobile apps. The platform allows users to create guide profiles, request tours, bid on services, and share experiences through a comprehensive review system.
+UrGuide is a modern tourism API platform built with .NET 8. The API allows developers to integrate guide profiles, tour requests, bidding systems, and user review functionality into their applications.
 
 **Make yourself a tourism guide at your ease and pace.**
 
 ## 🏗️ Technology Stack
 
-- **Backend**: ASP.NET Core 8.0 with Entity Framework Core 8.0
-- **Frontend**: React 18 SPA with Material-UI v5 (@mui/material)
-- **Mobile**: UrGuide.MAUI (.NET 8.0 MAUI) - *Migration in progress from Xamarin.Forms*
-- **Database**: SQL Server with LocalDB
-- **Authentication**: Duende IdentityServer 7.0
-- **Real-time Communication**: SignalR
-- **Orchestration**: .NET Aspire for cloud-native deployment
-- **Observability**: OpenTelemetry, health checks, and distributed tracing
-- **API Documentation**: Swagger/OpenAPI
+- **Backend**: ASP.NET Core 8.0 Web API
+- **Database**: Entity Framework Core 8.0 with SQL Server
+- **Authentication**: Duende IdentityServer 7.0 with OAuth 2.0/OpenID Connect
+- **Real-time Communication**: SignalR for notifications
+- **API Documentation**: Swagger/OpenAPI 3.0
+- **API Versioning**: Asp.Versioning.Mvc 8.0
+- **Validation**: FluentValidation
+- **Logging**: NLog with structured logging
+- **Rate Limiting**: AspNetCoreRateLimit
+- **Email**: SendGrid integration
+- **Health Checks**: ASP.NET Core Health Checks with SQL Server monitoring
 
 ## ✅ Implemented Features
 
-### 🚀 Platform Modernization
-- [x] **Framework Migration**: Upgraded to .NET 8 and React 18 for modern compatibility
-- [x] **Security Enhancements**: Migrated from deprecated IdentityServer4 to Duende IdentityServer 7.0
-- [x] **Cloud-Native Architecture**: Integrated .NET Aspire for deployment orchestration
-- [x] **Observability**: Added OpenTelemetry, health checks, and distributed tracing
-- [x] **Frontend Modernization**: Upgraded to Material-UI v5, React Router v6, Bootstrap v5
-- [x] **Node.js Compatibility**: Resolved dependency conflicts for Node 20+ support
-- [x] **Mobile Migration**: Started migration from Xamarin.Forms to .NET MAUI (foundation complete)
+### 🚀 Platform Core
+- [x] **RESTful API Architecture**: Modern Web API with versioning support (v1.0)
+- [x] **API Versioning**: Support for URL segment, header, and query string versioning
+- [x] **Health Checks**: `/health` endpoint for monitoring database connectivity
+- [x] **CORS Support**: Configurable cross-origin resource sharing for client apps
+- [x] **Response Caching**: Built-in response and output caching
+- [x] **Rate Limiting**: Configurable IP-based rate limiting
 
 ### 🔐 Authentication & User Management
-- [x] User registration and profile creation
-- [x] IdentityServer4 authentication system
+- [x] User registration and profile creation via API
+- [x] OAuth 2.0 and OpenID Connect authentication
+- [x] JWT Bearer token authentication
 - [x] User account deletion
 - [x] Profile picture upload and management
+- [x] Secure API endpoints with role-based authorization
 
-### 👥 Guide System
+### 👥 Guide System API
 - [x] Guide registration with comprehensive questionnaire
-- [x] Guide profile with detailed information:
+- [x] Guide profile management with detailed information:
   - Date of birth
   - Driving license (with issuing year)
   - Gender and contact information
@@ -47,23 +50,23 @@ UrGuide is a modern tourism platform built with .NET 8 backend, React 18 SPA fro
   - Personal description and telephone number
   - Country information
 - [x] Photo gallery creation for guides
-- [x] Guide discovery and search functionality
+- [x] Guide discovery and search endpoints
 
-### 🎯 Tour & Bidding System
+### 🎯 Tour & Bidding System API
 - [x] Tour request creation and management
 - [x] Bidding system for tour services
 - [x] Bid modification (increase or decrease amounts)
 - [x] Proposal acceptance and rejection
 - [x] Tour participation and booking
 
-### ⭐ Review & Feedback System
+### ⭐ Review & Feedback System API
 - [x] 5-star rating system for tours and guides
 - [x] Text-based feedback and reviews
 - [x] Email notifications for new feedback
 - [x] Comprehensive review display and management
 
 ### 🔔 Communication & Notifications
-- [x] Real-time notification system
+- [x] Real-time notification system via SignalR Hub (`/notify`)
 - [x] In-app messaging and alerts
 - [x] Email notification integration
 - [x] Activity tracking and user history
@@ -73,18 +76,7 @@ UrGuide is a modern tourism platform built with .NET 8 backend, React 18 SPA fro
 - [x] User activity tracking
 - [x] System monitoring and logging
 
-### 🏗️ Architecture & Infrastructure
-- [x] .NET Aspire orchestration for cloud-native deployment
-- [x] Service defaults with health checks and observability
-- [x] OpenTelemetry integration for distributed tracing
-- [x] Modern hosting model with .NET 8 minimal APIs
-- [x] Modernized authentication with Duende IdentityServer
-
-## 🚧 Work in Progress
-
-Currently no features are actively in development. See the roadmap below for planned enhancements.
-
-## 📋 Roadmap & Future Features
+## 📋 API Roadmap & Future Features
 
 ### 💳 Payment & Financial System
 - [ ] Integrated payment processing
@@ -112,7 +104,7 @@ Currently no features are actively in development. See the roadmap below for pla
 - [ ] Social login (Google/Apple/Microsoft)
 - [ ] Data export functionality (GDPR compliance)
 - [ ] Account freeze/temporary suspension
-- [ ] Barcode authentication integration
+- [ ] Enhanced audit logging
 
 ### 📅 Advanced Scheduling
 - [ ] Calendar integration and sharing
@@ -130,61 +122,228 @@ Currently no features are actively in development. See the roadmap below for pla
 
 ### Prerequisites
 - .NET 8 SDK
-- Node.js 18+ (with npm)
-- SQL Server LocalDB
+- SQL Server or SQL Server LocalDB
+- A code editor (Visual Studio 2022, VS Code, or JetBrains Rider)
 
 ### Installation
-1. Clone the repository
-2. Restore .NET packages: `dotnet restore`
-3. Install frontend dependencies: `cd UrGuide.WebApp/ClientApp && npm install --legacy-peer-deps`
-4. Build the project: `dotnet build UrGuide.WebApp/UrGuide.WebApp.csproj`
 
-### Running the Application
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/JeanMarcMbouma/urguide.git
+   cd urguide
+   ```
 
-**Option 1: With .NET Aspire Orchestration (Recommended)**
+2. **Restore .NET packages**
+   ```bash
+   dotnet restore UrGuide.WebApp/UrGuide.WebApp.csproj
+   ```
+
+3. **Update database connection strings**
+   
+   Edit `UrGuide.WebApp/appsettings.json` and update the connection strings:
+   ```json
+   {
+     "ConnectionStrings": {
+       "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=urguide_data;Trusted_Connection=True;MultipleActiveResultSets=true",
+       "AuthConnection": "Server=(localdb)\\mssqllocaldb;Database=urguide_id4;Trusted_Connection=True;MultipleActiveResultSets=true"
+     }
+   }
+   ```
+
+4. **Run database migrations**
+   
+   The migrations will run automatically on application startup. Alternatively, run manually:
+   ```bash
+   dotnet ef database update --project UrGuide.WebApp
+   ```
+
+5. **Build the project**
+   ```bash
+   dotnet build UrGuide.WebApp/UrGuide.WebApp.csproj
+   ```
+
+### Running the API
+
+#### Development Mode
 ```bash
-# Run the complete application with orchestration
-dotnet run --project UrGuide.AppHost
-```
-
-**Option 2: Traditional Development**
-```bash
-# Backend API only
 dotnet run --project UrGuide.WebApp
-
-# Frontend development server (in a separate terminal)
-cd UrGuide.WebApp/ClientApp
-NODE_OPTIONS="--openssl-legacy-provider" npm start
 ```
 
-### Build Commands
+The API will be available at:
+- HTTP: `http://localhost:5000`
+- HTTPS: `https://localhost:5001`
+- Swagger UI: `https://localhost:5001/swagger`
+- Health Check: `https://localhost:5001/health`
+
+#### Production Mode
 ```bash
-# Build backend (.NET 8)
-dotnet build UrGuide.WebApp/UrGuide.WebApp.csproj
-
-# Install frontend dependencies (works with Node 20+)
-cd UrGuide.WebApp/ClientApp
-npm install --legacy-peer-deps
-
-# Run frontend tests
-NODE_OPTIONS="--openssl-legacy-provider" npm test
+dotnet run --project UrGuide.WebApp --configuration Release
 ```
 
-## 📱 Mobile Apps
+### API Documentation
 
-Native mobile applications are available for both Android and iOS platforms. The project is currently migrating from Xamarin.Forms to .NET MAUI for improved performance and modern .NET 8 support.
+Once the application is running, you can access the interactive API documentation at:
+- **Swagger UI**: `https://localhost:5001/swagger`
 
-### Current Status
-- **Legacy**: Xamarin.Forms apps (Mobile/UrGuide.Mobile/)
-- **New**: .NET MAUI foundation (UrGuide.MAUI/) - Service layer migration complete
-- **Next Steps**: UI layer migration to MAUI
+The Swagger UI provides:
+- Complete API endpoint documentation
+- Request/response schemas
+- Interactive API testing
+- OAuth 2.0 authentication flow
 
-See [MAUI_MIGRATION.md](./MAUI_MIGRATION.md) for detailed migration documentation.
+## 🔑 Authentication
+
+The API uses **OAuth 2.0** and **OpenID Connect** for authentication via Duende IdentityServer 7.0.
+
+### Authentication Flow
+
+1. **Obtain Access Token**
+   ```
+   POST /connect/token
+   Content-Type: application/x-www-form-urlencoded
+   
+   grant_type=password&
+   username=user@example.com&
+   password=YourPassword123!&
+   client_id=UrGuide.WebAPI&
+   scope=openid profile offline_access
+   ```
+
+2. **Use Access Token**
+   ```
+   GET /api/account/profile
+   Authorization: Bearer {access_token}
+   ```
+
+### API Versioning
+
+The API supports multiple versioning strategies:
+
+1. **URL Segment** (recommended):
+   ```
+   GET /api/v1/tours
+   ```
+
+2. **Header**:
+   ```
+   GET /api/tours
+   X-Api-Version: 1.0
+   ```
+
+3. **Query String**:
+   ```
+   GET /api/tours?api-version=1.0
+   ```
+
+### Rate Limiting
+
+The API implements IP-based rate limiting:
+- Default: 100 requests per 15 minutes per IP address
+- Configure in `appsettings.json` under `IpRateLimiting`
+
+### Health Checks
+
+Monitor the API and database health:
+```bash
+curl https://localhost:5001/health
+```
+
+Response:
+```json
+{
+  "status": "Healthy",
+  "totalDuration": "00:00:00.1234567",
+  "entries": {
+    "auth-db": {
+      "status": "Healthy",
+      "duration": "00:00:00.0567890"
+    },
+    "data-db": {
+      "status": "Healthy",
+      "duration": "00:00:00.0666777"
+    }
+  }
+}
+```
+
+## 📡 API Endpoints
+
+### Main Endpoint Categories
+
+- **`/api/account`** - User account management, registration, profile
+- **`/api/post`** - Tour posts and guide profiles
+- **`/api/bid`** - Bidding system for tours
+- **`/api/feedback`** - Reviews and ratings
+- **`/api/galleries`** - Photo galleries
+- **`/api/tourrequest`** - Tour request management
+- **`/api/lookup`** - Reference data (countries, cities, etc.)
+- **`/api/notification`** - Notification management
+- **`/api/activity`** - User activity tracking
+- **`/notify`** - SignalR Hub for real-time notifications
+
+For complete endpoint documentation, refer to the Swagger UI at `/swagger`.
+
+## 🐳 Docker Support
+
+_(Coming soon - see issues catalog)_
+
+## 🧪 Testing
+
+_(Coming soon - see issues catalog for API testing suite)_
+
+## 🚀 Deployment
+
+### Prerequisites
+- .NET 8 Runtime
+- SQL Server
+- HTTPS certificate (Let's Encrypt or other)
+
+### Publish the API
+```bash
+dotnet publish UrGuide.WebApp/UrGuide.WebApp.csproj -c Release -o ./publish
+```
+
+### Configure for Production
+1. Update `appsettings.Production.json` with production connection strings
+2. Configure HTTPS certificates
+3. Set up proper CORS origins
+4. Configure rate limiting for production traffic
+5. Update SendGrid API keys for email
+6. Configure Azure SignalR Service (optional, for scale-out)
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our contributing guidelines and feel free to submit issues and pull requests.
+We welcome contributions! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🐛 Issues & Feature Requests
+
+See the [Issues Catalog](https://github.com/JeanMarcMbouma/urguide/issues) for:
+- Payment integration
+- Enhanced security features
+- API rate limiting improvements
+- Monitoring and observability
+- API testing suite
+- Docker containerization
+- CI/CD pipeline
+- API client SDK generation
+
+## 📞 Support
+
+For questions and support:
+- Create an issue in the GitHub repository
+- Check the API documentation at `/swagger`
+- Review the codebase and inline documentation
+
+---
+
+**Built with ❤️ for the tourism community**
