@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 using UrGuide.Data.Entities.Event;
+using UrGuide.Data.Entities.Payments;
 using UrGuide.Data.Entities.Posts;
 using UrGuide.Data.Entities.Regions;
 using UrGuide.Data.Entities.Shared;
@@ -20,6 +21,13 @@ namespace UrGuide.Data
         public virtual DbSet<Region> Regions { get; set; }
         public virtual DbSet<Country> Countries { get; set; }
         public virtual DbSet<Currency> Currencies { get; set; }
+        
+        // Payment entities
+        public virtual DbSet<Payment> Payments { get; set; }
+        public virtual DbSet<PaymentTransaction> PaymentTransactions { get; set; }
+        public virtual DbSet<Payout> Payouts { get; set; }
+        public virtual DbSet<Refund> Refunds { get; set; }
+        public virtual DbSet<PlatformFee> PlatformFees { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
@@ -49,6 +57,13 @@ namespace UrGuide.Data
             modelBuilder.ApplyConfiguration(new Configurations.BookingConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.BalanceConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.ReviewConfiguration());
+            
+            // Payment configurations
+            modelBuilder.ApplyConfiguration(new Configurations.PaymentConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.PaymentTransactionConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.PayoutConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.RefundConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.PlatformFeeConfiguration());
         }
     }
 }
