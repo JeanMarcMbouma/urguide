@@ -11,6 +11,7 @@ using UrGuide.Services.Catalogs;
 using UrGuide.Services.Feedback;
 using UrGuide.Services.Lookup;
 using UrGuide.Services.Media;
+using UrGuide.Services.Payments;
 using UrGuide.Services.Posts;
 using UrGuide.Services.Shared;
 using UrGuide.Services.Tour;
@@ -32,6 +33,11 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<Contracts.IUserNotificationService, NotificationService>();
             services.AddTransient<Contracts.ITourRequestService, TourRequestService>();
             services.AddTransient<Contracts.IDataSeedingService, Seeding.DataSeedingService>();
+            
+            // Payment services
+            services.AddTransient<IPaymentService, PaymentService>();
+            services.AddTransient<IPayoutService, PayoutService>();
+            services.AddTransient<IRefundService, RefundService>();
 
             // Validation
 

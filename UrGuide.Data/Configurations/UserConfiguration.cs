@@ -16,6 +16,8 @@ namespace UrGuide.Data.Configurations
             builder.Property(x => x.FirstName).IsRequired().HasMaxLength(200).HasDefaultValue(Constants.NA);
             builder.Property(x => x.LastName).IsRequired().HasMaxLength(200).HasDefaultValue(Constants.NA);
             builder.Property(x => x.Email).IsRequired().HasMaxLength(255).HasDefaultValue(Constants.NA);
+            builder.Property(x => x.UserName).HasMaxLength(255);
+            builder.Property(x => x.StripeCustomerId).HasMaxLength(100);
             builder.Ignore(x => x.FullName);
             builder.Property(x => x.Location);
 
