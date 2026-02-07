@@ -2,12 +2,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
 using System;
+using NLog;
 using NLog.Web;
 using UrGuide.WebApp.Data;
 using UrGuide.Services.Extensions;
 using UrGuide.WebApp.Extensions;
 using Microsoft.EntityFrameworkCore;
-using FluentValidation;
 using AspNetCoreRateLimit;
 using Microsoft.OpenApi.Models;
 using UrGuide.WebApp.Hubs;
@@ -15,26 +15,23 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Diagnostics;
 using UrGuide.WebApp.Models;
 using Duende.IdentityServer;
-using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
-using UrGuide.ServiceDefaults;
+using Asp.Versioning;
+using System.Linq;
 
-var logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+var logger = LogManager.Setup().LoadConfigurationFromFile("nlog.config").GetCurrentClassLogger();
 try
 {
     logger.Debug("init main");
     
     var builder = WebApplication.CreateBuilder(args);
-    
-    // Add Aspire service defaults
-    builder.AddServiceDefaults();
 
     // Configure logging
     builder.Logging.ClearProviders();
-    builder.Logging.SetMinimumLevel(LogLevel.Trace);
+    builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
     builder.Host.UseNLog();
 
     // Add services to the container.
@@ -53,7 +50,49 @@ try
     });
     
     // FluentValidation is automatically configured via the UrGuide.Services registration
-    builder.Services.AddRazorPages();
+    
+    // Add API versioning
+    builder.Services.AddApiVersioning(options =>
+    {
+        options.DefaultApiVersion = new ApiVersion(1, 0);
+        options.AssumeDefaultVersionWhenUnspecified = true;
+        options.ReportApiVersions = true;
+        options.ApiVersionReader = ApiVersionReader.Combine(
+            new UrlSegmentApiVersionReader(),
+            new HeaderApiVersionReader("X-Api-Version"),
+            new QueryStringApiVersionReader("api-version")
+        );
+    }).AddApiExplorer(options =>
+    {
+        options.GroupNameFormat = "'v'VVV";
+        options.SubstituteApiVersionInUrl = true;
+    });
+    
+    // Add health checks
+    var authConn = builder.Configuration.GetSection("ConnectionStrings:AuthConnection").Value;
+    var dataConn = builder.Configuration.GetSection("ConnectionStrings:DefaultConnection").Value;
+    builder.Services.AddHealthChecks()
+        .AddSqlServer(authConn ?? "", name: "auth-db")
+        .AddSqlServer(dataConn ?? "", name: "data-db");
+    
+    // Add CORS policy for API consumers
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("ApiCorsPolicy", policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .WithExposedHeaders("X-Api-Version");
+        });
+    });
+    
+    // Add response caching
+    builder.Services.AddResponseCaching();
+    builder.Services.AddOutputCache(options =>
+    {
+        options.AddBasePolicy(policy => policy.Expire(TimeSpan.FromMinutes(10)));
+    });
     
     builder.Services.AddSwaggerGen(c =>
     {
@@ -68,21 +107,28 @@ try
                     TokenUrl = new Uri("/connect/token", UriKind.Relative),
                     Scopes = new Dictionary<string, string>
                     {
-                        { IdentityServerConstants.StandardScopes.OpenId, "UrGuide Web Application" },
-                        { IdentityServerConstants.StandardScopes.Profile, "UrGuide Web Application" },
-                        { IdentityServerConstants.StandardScopes.OfflineAccess, "UrGuide Web Application" }
+                        { IdentityServerConstants.StandardScopes.OpenId, "OpenID Connect" },
+                        { IdentityServerConstants.StandardScopes.Profile, "User Profile" },
+                        { IdentityServerConstants.StandardScopes.OfflineAccess, "Offline Access" }
                     }
                 }
             }
         });
         c.OperationFilter<UrGuide.WebApp.Filters.AuthorizeCheckOperationFilter>();
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ur Guide API", Version = "v1" });
-    });
-    
-    // In production, the React files will be served from this directory
-    builder.Services.AddSpaStaticFiles(configuration =>
-    {
-        configuration.RootPath = "ClientApp/build";
+        
+        // Configure Swagger to use API versioning
+        c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+        c.SwaggerDoc("v1", new OpenApiInfo 
+        { 
+            Title = "UrGuide API", 
+            Version = "v1",
+            Description = "UrGuide Tourism Platform API - Connect travelers with local guides",
+            Contact = new OpenApiContact
+            {
+                Name = "UrGuide Support",
+                Url = new Uri("https://github.com/JeanMarcMbouma/urguide")
+            }
+        });
     });
 
     builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
@@ -138,14 +184,18 @@ try
         ForwardedHeaders = ForwardedHeaders.XForwardedProto
     });
 
-    app.UseStaticFiles();
-    app.UseSpaStaticFiles();
+    // Add CORS middleware
+    app.UseCors("ApiCorsPolicy");
+    
+    // Add caching middleware
+    app.UseResponseCaching();
+    app.UseOutputCache();
 
     app.UseRouting();
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ur Guide API v1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "UrGuide API v1");
         c.OAuthClientId("UrGuide.WebAPI");
         c.OAuthAppName("UrGuide Swagger UI");
         c.OAuthUsePkce();
@@ -157,20 +207,10 @@ try
     app.MapControllerRoute(
         name: "default",
         pattern: "{controller}/{action=Index}/{id?}");
-    app.MapRazorPages();
     app.MapHub<NotificationHub>("/notify");
-
-    app.MapDefaultEndpoints();
-
-    app.UseSpa(spa =>
-    {
-        spa.Options.SourcePath = "ClientApp";
-        spa.Options.StartupTimeout = TimeSpan.FromMinutes(5);
-        if (app.Environment.IsDevelopment())
-        {
-            spa.UseReactDevelopmentServer(npmScript: "start");
-        }
-    });
+    
+    // Map health checks endpoint
+    app.MapHealthChecks("/health");
 
     app.Run();
 }

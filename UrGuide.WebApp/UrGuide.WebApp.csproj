@@ -2,20 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
     <IsPackable>false</IsPackable>
-    <SpaRoot>ClientApp\</SpaRoot>
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
     <LangVersion>12.0</LangVersion>
     <UserSecretsId>d216c234-b1d4-4e9e-be44-0c9a46cdacde</UserSecretsId>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="8.0.0" />
     <PackageReference Include="AspNetCoreRateLimit" Version="5.0.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.0" />
@@ -38,96 +35,10 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- Don't publish the SPA source files, but do show them in the project files list -->
-    <Compile Remove="ClientApp\public\js\**" />
-    <Compile Remove="ClientApp\src\components\material-ui-core\**" />
-    <Compile Remove="ClientApp\src\stylesheets\**" />
-    <Content Remove="$(SpaRoot)**" />
-    <Content Remove="ClientApp\public\js\**" />
-    <Content Remove="ClientApp\src\components\material-ui-core\**" />
-    <Content Remove="ClientApp\src\stylesheets\**" />
-    <EmbeddedResource Remove="ClientApp\public\js\**" />
-    <EmbeddedResource Remove="ClientApp\src\components\material-ui-core\**" />
-    <EmbeddedResource Remove="ClientApp\src\stylesheets\**" />
-    <None Remove="$(SpaRoot)**" />
-    <None Remove="ClientApp\public\js\**" />
-    <None Remove="ClientApp\src\components\material-ui-core\**" />
-    <None Remove="ClientApp\src\stylesheets\**" />
-    <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="ClientApp\src\api\ClientFactory.ts" />
-    <None Remove="ClientApp\src\components\api-authorization\AuthService.js" />
-    <None Remove="ClientApp\src\components\login\LoginReducer.ts" />
-    <None Remove="ClientApp\src\components\user\ModalTest.js" />
-    <None Remove="ClientApp\src\components\user\profile\ChangePasswordReducer.ts" />
-    <None Remove="ClientApp\src\components\user\profile\EditProfileReducer.js" />
-    <None Remove="ClientApp\src\helpers\fileHelpers.ts" />
-    <None Remove="ClientApp\src\hub\index.ts" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\UrGuide.Services\UrGuide.Services.csproj" />
     <ProjectReference Include="..\UrGuide.Shared\UrGuide.Shared.csproj" />
-    <ProjectReference Include="..\UrGuide.ServiceDefaults\UrGuide.ServiceDefaults.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="ClientApp\public\images\" />
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Areas\Identity\Pages\Account\Login.cshtml" />
-    <None Include="Areas\Identity\Pages\Account\Logout.cshtml" />
-    <None Include="Areas\Identity\Pages\Account\_ViewImports.cshtml" />
-    <None Include="Areas\Identity\Pages\_ViewImports.cshtml" />
-    <None Include="Areas\Identity\Pages\_ViewStart.cshtml" />
-    <None Include="Pages\Error.cshtml" />
-    <None Include="Pages\Shared\_CookieConsentPartial.cshtml" />
-    <None Include="Pages\Shared\_Layout.cshtml" />
-    <None Include="Pages\Shared\_LoginPartial.cshtml" />
-    <None Include="Pages\Shared\_ValidationScriptsPartial.cshtml" />
-    <None Include="Pages\_ViewImports.cshtml" />
-    <None Include="Pages\_ViewStart.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <TypeScriptCompile Include="ClientApp\src\components\user\profile\ChangePasswordReducer.ts" />
-    <TypeScriptCompile Include="ClientApp\src\components\user\profile\EditProfileReducer.js" />
-    <TypeScriptCompile Include="ClientApp\src\helpers\fileHelpers.ts" />
-    <TypeScriptCompile Include="ClientApp\src\httpclient\index.ts" />
-    <TypeScriptCompile Include="ClientApp\src\components\api-authorization\AuthService.js" />
-    <TypeScriptCompile Include="ClientApp\src\components\login\LoginReducer.ts" />
-    <TypeScriptCompile Include="ClientApp\src\hub\index.ts" />
-  </ItemGroup>
-
-  <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
-    <!-- Ensure Node.js is installed -->
-    <Exec Command="node --version" ContinueOnError="true">
-      <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
-    </Exec>
-    <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
-    <Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-  </Target>
-
-  <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
-    <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" />
-
-    <!-- Include the newly-built files in the publish output -->
-    <ItemGroup>
-      <DistFiles Include="$(SpaRoot)build\**" />
-      <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-        <RelativePath>%(DistFiles.Identity)</RelativePath>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </ResolvedFileToPublish>
-    </ItemGroup>
-  </Target>
 
 </Project>
