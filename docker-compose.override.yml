@@ -13,4 +13,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - DOTNET_USE_POLLING_FILE_WATCHER=true
+      # Load secrets from environment variables (set in .env file)
+      - IpStack__ApiKey=${IPSTACK_API_KEY}
+      - SENDGRID_URGUIDE_API_KEY=${SENDGRID_API_KEY}
+      - IdentityServer__Clients__Xamarin__ClientSecret=${XAMARIN_CLIENT_SECRET}
     command: dotnet watch run --project /src/UrGuide.WebApp/UrGuide.WebApp.csproj

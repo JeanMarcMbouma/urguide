@@ -105,6 +105,9 @@ namespace UrGuide.WebApp.Extensions
         private static IEnumerable<Client> GetClients(IConfiguration configuration, string applicationUri)
         {
             string xamarin = configuration.GetValue<string>("Xamarin");
+            // Read client secret from configuration (User Secrets or Azure Key Vault)
+            // Default to empty string if not configured to fail securely
+            string xamarinClientSecret = configuration.GetValue<string>("IdentityServer:Clients:Xamarin:ClientSecret") ?? "";
             
             return new Client[]
             {
@@ -138,7 +141,7 @@ namespace UrGuide.WebApp.Extensions
                     AllowedGrantTypes = Duende.IdentityServer.Models.GrantTypes.Code,
                     ClientSecrets =
                     {
-                        new Secret("secret".Sha256())
+                        new Secret(xamarinClientSecret.Sha256())
                     },
                     RedirectUris = { xamarin },
                     RequireConsent = false,
