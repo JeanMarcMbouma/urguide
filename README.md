@@ -20,6 +20,7 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
 - **Logging**: NLog 6.1 with structured logging
 - **Rate Limiting**: AspNetCoreRateLimit
 - **Email**: SendGrid integration
+- **Payments**: Stripe.net 48.0 for payment processing
 - **Health Checks**: ASP.NET Core Health Checks with SQL Server monitoring
 - **.NET Aspire**: Service defaults for OpenTelemetry, resilience, and service discovery
 - **OpenTelemetry**: Version 1.15.0 for distributed tracing, metrics, and logging
@@ -79,14 +80,25 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
 - [x] User activity tracking
 - [x] System monitoring and logging
 
+### 💳 Payment & Financial System
+- [x] Stripe payment integration for tour bookings
+- [x] Payment intent creation with automatic payment methods
+- [x] Platform fee calculation based on guide membership (2% for Basic, 5% for Premium)
+- [x] Guide payout system with balance tracking
+- [x] Full and partial refund processing
+- [x] Transaction history tracking for users
+- [x] Secure webhook handling for payment events
+- [x] PCI-compliant payment data handling (no card data storage)
+- [x] Multi-currency support
+- [x] Payment status tracking (pending, processing, succeeded, failed, refunded)
+
 ## 📋 API Roadmap & Future Features
 
-### 💳 Payment & Financial System
-- [ ] Integrated payment processing
+### 💳 Payment & Financial System (Enhanced)
 - [ ] Platform currency system (coins)
 - [ ] Fund withdrawal to bank accounts
-- [ ] Refund request system
-- [ ] Transaction history tracking
+- [ ] Automated payout scheduling
+- [ ] Advanced financial reporting
 
 ### 🎁 Gamification & Rewards
 - [ ] User loyalty program with discounts
@@ -153,6 +165,11 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
    
    # Set SendGrid API Key (optional, for email notifications)
    dotnet user-secrets set "SENDGRID_URGUIDE_API_KEY" "your-sendgrid-api-key"
+   
+   # Set Stripe API Keys (required for payment processing)
+   dotnet user-secrets set "Stripe:SecretKey" "sk_test_..."
+   dotnet user-secrets set "Stripe:PublishableKey" "pk_test_..."
+   dotnet user-secrets set "Stripe:WebhookSecret" "whsec_..."
    
    # Set Xamarin Client Secret (required for mobile app)
    dotnet user-secrets set "IdentityServer:Clients:Xamarin:ClientSecret" "your-secure-secret"
@@ -298,6 +315,10 @@ Response:
 - **`/api/feedback`** - Reviews and ratings
 - **`/api/galleries`** - Photo galleries
 - **`/api/tourrequest`** - Tour request management
+- **`/api/payment`** - Payment processing for tour bookings
+- **`/api/payout`** - Guide payout management
+- **`/api/refund`** - Refund request processing
+- **`/api/webhook`** - Stripe webhook events
 - **`/api/lookup`** - Reference data (countries, cities, etc.)
 - **`/api/notification`** - Notification management
 - **`/api/activity`** - User activity tracking
