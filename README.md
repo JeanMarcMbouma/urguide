@@ -4,33 +4,36 @@ A comprehensive RESTful API for connecting travelers with local guides, enabling
 
 ## 🌟 Overview
 
-UrGuide is a modern tourism API platform built with .NET 8. The API allows developers to integrate guide profiles, tour requests, bidding systems, and user review functionality into their applications.
+UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows developers to integrate guide profiles, tour requests, bidding systems, and user review functionality into their applications.
 
 **Make yourself a tourism guide at your ease and pace.**
 
 ## 🏗️ Technology Stack
 
-- **Backend**: ASP.NET Core 8.0 Web API
-- **Database**: Entity Framework Core 8.0 with SQL Server
-- **Authentication**: Duende IdentityServer 7.0 with OAuth 2.0/OpenID Connect
+- **Backend**: ASP.NET Core 10.0 Web API (.NET 10 LTS)
+- **Database**: Entity Framework Core 10.0 with SQL Server
+- **Authentication**: Duende IdentityServer 7.4 with Duende.IdentityModel 8.0 (OAuth 2.0/OpenID Connect)
 - **Real-time Communication**: SignalR for notifications
-- **API Documentation**: Swagger/OpenAPI 3.0
-- **API Versioning**: Asp.Versioning.Mvc 8.0
-- **Validation**: FluentValidation
-- **Logging**: NLog with structured logging
+- **API Documentation**: Swagger/OpenAPI 3.1 (Swashbuckle.AspNetCore 10.1)
+- **API Versioning**: Asp.Versioning.Mvc 8.1
+- **Validation**: FluentValidation 12.1
+- **Logging**: NLog 6.1 with structured logging
 - **Rate Limiting**: AspNetCoreRateLimit
 - **Email**: SendGrid integration
 - **Health Checks**: ASP.NET Core Health Checks with SQL Server monitoring
+- **.NET Aspire**: Service defaults for OpenTelemetry, resilience, and service discovery
+- **OpenTelemetry**: Version 1.15.0 for distributed tracing, metrics, and logging
 
 ## ✅ Implemented Features
 
 ### 🚀 Platform Core
 - [x] **RESTful API Architecture**: Modern Web API with versioning support (v1.0)
 - [x] **API Versioning**: Support for URL segment, header, and query string versioning
-- [x] **Health Checks**: `/health` endpoint for monitoring database connectivity
+- [x] **Health Checks**: `/health` and `/alive` endpoints for monitoring with .NET Aspire service defaults
 - [x] **CORS Support**: Configurable cross-origin resource sharing for client apps
 - [x] **Response Caching**: Built-in response and output caching
 - [x] **Rate Limiting**: Configurable IP-based rate limiting
+- [x] **.NET Aspire Integration**: OpenTelemetry observability, HTTP resilience patterns, and service discovery
 
 ### 🔐 Authentication & User Management
 - [x] User registration and profile creation via API
@@ -121,7 +124,7 @@ UrGuide is a modern tourism API platform built with .NET 8. The API allows devel
 ## 🛠️ Development Setup
 
 ### Prerequisites
-- .NET 8 SDK
+- .NET 10 SDK
 - SQL Server or SQL Server LocalDB
 - A code editor (Visual Studio 2022, VS Code, or JetBrains Rider)
 
@@ -402,7 +405,7 @@ The project includes automated GitHub Actions workflows:
 ### Manual Deployment
 
 #### Prerequisites
-- .NET 8 Runtime
+- .NET 10 Runtime
 - SQL Server
 - HTTPS certificate (Let's Encrypt or other)
 
