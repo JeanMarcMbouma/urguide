@@ -46,13 +46,25 @@ namespace UrGuide.WebApp.Extensions
             services.AddTransient<IAuthService, AuthService>();
             services.AddScoped<IUserContext, UserContext>();
             services.AddTransient<IIPStackService, IPStackService>();
+            services.AddScoped<ITwoFactorService, TwoFactorService>();
+            services.AddScoped<IPasskeyService, PasskeyService>();
+            
+            // Configure Fido2 for Passkey/WebAuthn support
+            string applicationUri = configuration.GetValue<string>("ApplicationUri") ?? "https://localhost:5001";
+            services.AddFido2(options =>
+            {
+                options.ServerDomain = new Uri(applicationUri).Host;
+                options.ServerName = "UrGuide";
+                options.Origins = new HashSet<string> { applicationUri };
+                options.TimestampDriftTolerance = 300000; // 5 minutes
+            });
+            
             services.AddDbContext<UrGuideAuthContext>(options =>
                 options.UseSqlServer(
                     configuration.GetConnectionString("Id4")));
 
             services.AddDefaultIdentity<UrGuideUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<UrGuideAuthContext>();
-            string applicationUri = configuration.GetValue<string>("ApplicationUri");
 
             services.AddIdentityServer(options =>
             {
