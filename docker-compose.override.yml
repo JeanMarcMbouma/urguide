@@ -1,0 +1,16 @@
+# Docker Compose override for development
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build
+    volumes:
+      - .:/src
+      - ~/.nuget/packages:/root/.nuget/packages
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
+    command: dotnet watch run --project /src/UrGuide.WebApp/UrGuide.WebApp.csproj

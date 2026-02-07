@@ -285,31 +285,155 @@ For complete endpoint documentation, refer to the Swagger UI at `/swagger`.
 
 ## 🐳 Docker Support
 
-_(Coming soon - see issues catalog)_
+The UrGuide API now supports Docker containerization for easy development and deployment.
+
+### Quick Start with Docker Compose
+
+1. **Start all services** (API + SQL Server):
+   ```bash
+   docker-compose up -d
+   ```
+
+2. **Access the API**:
+   - API: http://localhost:5000
+   - Swagger UI: http://localhost:5000/swagger
+   - Health Check: http://localhost:5000/health
+
+3. **View logs**:
+   ```bash
+   docker-compose logs -f api
+   ```
+
+4. **Stop all services**:
+   ```bash
+   docker-compose down
+   ```
+
+### Build Docker Image Manually
+
+```bash
+docker build -t urguide-api:latest .
+```
+
+### Run Docker Container
+
+```bash
+docker run -d \
+  -p 5000:80 \
+  -e ASPNETCORE_ENVIRONMENT=Production \
+  -e ConnectionStrings__DefaultConnection="your-connection-string" \
+  --name urguide-api \
+  urguide-api:latest
+```
+
+### Docker Compose Configuration
+
+The `docker-compose.yml` includes:
+- **SQL Server 2022**: Database server with persistent volumes
+- **UrGuide API**: The main application with health checks
+- **Automatic migrations**: Database migrations run on startup
+- **Volume mounts**: Persistent storage for uploads and logs
+
+### Development with Docker
+
+Use `docker-compose.override.yml` for development with hot reload:
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.override.yml up
+```
+
+This enables:
+- File watching and hot reload
+- Source code mounted as volumes
+- Development environment settings
 
 ## 🧪 Testing
 
-_(Coming soon - see issues catalog for API testing suite)_
+### Manual Testing
+
+Use the Swagger UI at `/swagger` for interactive API testing.
+
+### Automated Testing
+
+Test projects will be automatically detected and run by the CI/CD pipeline. Add test projects following this naming convention:
+- `UrGuide.*.Tests.csproj` for unit tests
+- `UrGuide.*.IntegrationTests.csproj` for integration tests
+
+_(Comprehensive API testing suite coming soon - see issues catalog)_
 
 ## 🚀 Deployment
 
-### Prerequisites
+### CI/CD Pipeline
+
+The project includes automated GitHub Actions workflows:
+
+#### 1. **Main CI/CD Pipeline** (`.github/workflows/dotnet-ci.yml`)
+- Triggers on push/PR to `main` or `develop` branches
+- Multi-stage pipeline:
+  - **Build & Test**: Compiles the application and runs tests
+  - **Code Quality**: CodeQL security scanning
+  - **Dependency Check**: Scans for vulnerable packages
+  - **Docker Build**: Builds and validates Docker images
+  - **Notifications**: Reports pipeline status
+
+#### 2. **Docker Publishing** (`.github/workflows/docker-publish.yml`)
+- Publishes Docker images to GitHub Container Registry
+- Automatic tagging with version numbers and git SHA
+- Triggered on pushes to `main` or version tags
+
+#### 3. **Migration Validation** (`.github/workflows/migration-validation.yml`)
+- Validates database migrations against SQL Server
+- Generates idempotent migration scripts
+- Triggers on changes to migration files
+
+### Manual Deployment
+
+#### Prerequisites
 - .NET 8 Runtime
 - SQL Server
 - HTTPS certificate (Let's Encrypt or other)
 
-### Publish the API
-```bash
-dotnet publish UrGuide.WebApp/UrGuide.WebApp.csproj -c Release -o ./publish
-```
+#### Using Docker (Recommended)
 
-### Configure for Production
-1. Update `appsettings.Production.json` with production connection strings
-2. Configure HTTPS certificates
-3. Set up proper CORS origins
-4. Configure rate limiting for production traffic
-5. Update SendGrid API keys for email
-6. Configure Azure SignalR Service (optional, for scale-out)
+1. **Pull the image**:
+   ```bash
+   docker pull ghcr.io/jeanmarcmbouma/urguide:latest
+   ```
+
+2. **Run with environment variables**:
+   ```bash
+   docker run -d \
+     -p 80:80 \
+     -e ConnectionStrings__DefaultConnection="Server=your-server;Database=urguide_data;..." \
+     -e ConnectionStrings__AuthConnection="Server=your-server;Database=urguide_id4;..." \
+     ghcr.io/jeanmarcmbouma/urguide:latest
+   ```
+
+#### Traditional Deployment
+
+1. **Publish the API**:
+   ```bash
+   dotnet publish UrGuide.WebApp/UrGuide.WebApp.csproj -c Release -o ./publish
+   ```
+
+2. **Configure for Production**:
+   - Update `appsettings.Production.json` with production connection strings
+   - Configure HTTPS certificates
+   - Set up proper CORS origins
+   - Configure rate limiting for production traffic
+   - Update SendGrid API keys for email
+   - Configure Azure SignalR Service (optional, for scale-out)
+
+3. **Apply database migrations**:
+   ```bash
+   dotnet ef database update --project UrGuide.WebApp
+   ```
+
+### Monitoring
+
+- **Health Checks**: `/health` endpoint monitors database connectivity
+- **Logs**: Structured logging with NLog (available in `/app/logs` in Docker)
+- **Metrics**: Built-in ASP.NET Core metrics and health checks
 
 ## 🤝 Contributing
 
@@ -333,8 +457,8 @@ See the [Issues Catalog](https://github.com/JeanMarcMbouma/urguide/issues) for:
 - API rate limiting improvements
 - Monitoring and observability
 - API testing suite
-- Docker containerization
-- CI/CD pipeline
+- ~~Docker containerization~~ ✅ **Implemented**
+- ~~CI/CD pipeline~~ ✅ **Implemented**
 - API client SDK generation
 
 ## 📞 Support
