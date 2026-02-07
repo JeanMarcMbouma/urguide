@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using Asp.Versioning;
 using System.Linq;
+using UrGuide.ServiceDefaults;
 
 var logger = LogManager.Setup().LoadConfigurationFromFile("nlog.config").GetCurrentClassLogger();
 try
@@ -28,6 +29,9 @@ try
     logger.Debug("init main");
     
     var builder = WebApplication.CreateBuilder(args);
+
+    // Add .NET Aspire service defaults (OpenTelemetry, health checks, service discovery, resilience)
+    builder.AddServiceDefaults();
 
     // Configure logging
     builder.Logging.ClearProviders();
@@ -209,8 +213,8 @@ try
         pattern: "{controller}/{action=Index}/{id?}");
     app.MapHub<NotificationHub>("/notify");
     
-    // Map health checks endpoint
-    app.MapHealthChecks("/health");
+    // Map Aspire default endpoints (health checks at /health and /alive)
+    app.MapDefaultEndpoints();
 
     app.Run();
 }
