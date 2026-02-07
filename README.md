@@ -13,6 +13,8 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
 - **Backend**: ASP.NET Core 10.0 Web API (.NET 10 LTS)
 - **Database**: Entity Framework Core 10.0 with SQL Server
 - **Authentication**: Duende IdentityServer 7.4 with Duende.IdentityModel 8.0 (OAuth 2.0/OpenID Connect)
+- **Two-Factor Authentication**: Custom TOTP implementation with QR code generation (QRCoder 1.4.3)
+- **Passkey/WebAuthn**: Fido2.AspNet 3.0.1 for passwordless authentication
 - **Real-time Communication**: SignalR for notifications
 - **API Documentation**: Swagger/OpenAPI 3.0 (Swashbuckle.AspNetCore 10.1)
 - **API Versioning**: Asp.Versioning.Mvc 8.1
@@ -43,6 +45,9 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
 - [x] User account deletion
 - [x] Profile picture upload and management
 - [x] Secure API endpoints with role-based authorization
+- [x] **Two-Factor Authentication (2FA)**: TOTP-based 2FA with Google Authenticator support
+- [x] **Passkey/WebAuthn Support**: Passwordless authentication using FIDO2 passkeys
+- [x] **Backup Codes**: Recovery codes for 2FA account access
 
 ### 👥 Guide System API
 - [x] Guide registration with comprehensive questionnaire
