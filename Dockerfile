@@ -52,7 +52,7 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD curl -f http://localhost/health || exit 1
 
-# Set user to non-root for security
-USER $APP_UID
+# Set user to non-root for security (using pre-defined app user in aspnet image)
+USER app
 
 ENTRYPOINT ["dotnet", "UrGuide.WebApp.dll"]

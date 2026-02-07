@@ -89,6 +89,14 @@ Thumbs.db
 **/public/thumb/*.*
 /.mfractor
 
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Docker
+docker-compose.override.local.yml
+
 # Xamarin
 *.userprefs
 .mfractor/

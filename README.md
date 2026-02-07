@@ -289,25 +289,38 @@ The UrGuide API now supports Docker containerization for easy development and de
 
 ### Quick Start with Docker Compose
 
-1. **Start all services** (API + SQL Server):
+1. **Configure environment variables**:
+   ```bash
+   cp .env.example .env
+   # Edit .env and set SQL_SA_PASSWORD to a strong password
+   ```
+
+2. **Start all services** (API + SQL Server):
    ```bash
    docker-compose up -d
    ```
 
-2. **Access the API**:
+3. **Access the API**:
    - API: http://localhost:5000
    - Swagger UI: http://localhost:5000/swagger
    - Health Check: http://localhost:5000/health
 
-3. **View logs**:
+4. **View logs**:
    ```bash
    docker-compose logs -f api
    ```
 
-4. **Stop all services**:
+5. **Stop all services**:
    ```bash
    docker-compose down
    ```
+
+### Security Note
+
+**IMPORTANT**: The `.env.example` file contains a default password for demonstration purposes. Always:
+- Copy `.env.example` to `.env` 
+- Change `SQL_SA_PASSWORD` to a strong, unique password
+- Never commit `.env` files to version control (already in .gitignore)
 
 ### Build Docker Image Manually
 

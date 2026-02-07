@@ -237,8 +237,8 @@ All workflows support manual triggering via GitHub Actions UI:
 
 ### Container Security
 - Multi-stage Docker builds minimize attack surface
-- Non-root user execution
-- Minimal base images (Alpine-based)
+- Non-root user execution (using pre-defined 'app' user)
+- Debian-based images for compatibility
 - Health checks for monitoring
 
 ## Performance Optimizations
