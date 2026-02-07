@@ -141,7 +141,26 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
    dotnet restore UrGuide.WebApp/UrGuide.WebApp.csproj
    ```
 
-3. **Update database connection strings**
+3. **Configure secrets (IMPORTANT)**
+   
+   **Never commit secrets to source control!** Use .NET User Secrets for local development:
+   
+   ```bash
+   cd UrGuide.WebApp
+   
+   # Set IPStack API Key (optional, for IP geolocation)
+   dotnet user-secrets set "IpStack:ApiKey" "your-ipstack-api-key"
+   
+   # Set SendGrid API Key (optional, for email notifications)
+   dotnet user-secrets set "SENDGRID_URGUIDE_API_KEY" "your-sendgrid-api-key"
+   
+   # Set Xamarin Client Secret (required for mobile app)
+   dotnet user-secrets set "IdentityServer:Clients:Xamarin:ClientSecret" "your-secure-secret"
+   ```
+   
+   📖 **For detailed secrets management instructions, see [SECRETS_MANAGEMENT.md](SECRETS_MANAGEMENT.md)**
+
+4. **Update database connection strings**
    
    Edit `UrGuide.WebApp/appsettings.json` and update the connection strings:
    ```json
@@ -153,14 +172,14 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
    }
    ```
 
-4. **Run database migrations**
+5. **Run database migrations**
    
    The migrations will run automatically on application startup. Alternatively, run manually:
    ```bash
    dotnet ef database update --project UrGuide.WebApp
    ```
 
-5. **Build the project**
+6. **Build the project**
    ```bash
    dotnet build UrGuide.WebApp/UrGuide.WebApp.csproj
    ```
@@ -295,8 +314,14 @@ The UrGuide API now supports Docker containerization for easy development and de
 1. **Configure environment variables**:
    ```bash
    cp .env.example .env
-   # Edit .env and set SQL_SA_PASSWORD to a strong password
+   # Edit .env and set all required secrets (see SECRETS_MANAGEMENT.md)
    ```
+   
+   **Required secrets** in `.env`:
+   - `SQL_SA_PASSWORD` - Strong database password
+   - `IPSTACK_API_KEY` - IPStack API key (optional)
+   - `SENDGRID_API_KEY` - SendGrid API key (optional)
+   - `XAMARIN_CLIENT_SECRET` - Client secret for mobile app
 
 2. **Start all services** (API + SQL Server):
    ```bash
@@ -320,10 +345,11 @@ The UrGuide API now supports Docker containerization for easy development and de
 
 ### Security Note
 
-**IMPORTANT**: The `.env.example` file contains a default password for demonstration purposes. Always:
+**IMPORTANT**: The `.env.example` file contains default/placeholder values for demonstration purposes. Always:
 - Copy `.env.example` to `.env` 
-- Change `SQL_SA_PASSWORD` to a strong, unique password
+- Change **ALL** secrets to strong, unique values
 - Never commit `.env` files to version control (already in .gitignore)
+- See [SECRETS_MANAGEMENT.md](SECRETS_MANAGEMENT.md) for detailed security guidance
 
 ### Build Docker Image Manually
 
@@ -450,6 +476,45 @@ The project includes automated GitHub Actions workflows:
 - **Health Checks**: `/health` endpoint monitors database connectivity
 - **Logs**: Structured logging with NLog (available in `/app/logs` in Docker)
 - **Metrics**: Built-in ASP.NET Core metrics and health checks
+
+## 🔒 Security & Secrets Management
+
+UrGuide implements robust security practices for managing sensitive configuration:
+
+### Secrets Management Strategy
+
+- **Local Development**: Use .NET User Secrets (never commit secrets to Git)
+- **Docker/Containers**: Use environment variables from `.env` files
+- **Production**: Azure Key Vault or Kubernetes Secrets for cloud deployments
+- **CI/CD**: GitHub Secrets for automated workflows
+
+### Quick Setup (Local Development)
+
+```bash
+cd UrGuide.WebApp
+
+# Configure required secrets
+dotnet user-secrets set "IpStack:ApiKey" "your-api-key"
+dotnet user-secrets set "SENDGRID_URGUIDE_API_KEY" "your-api-key"
+dotnet user-secrets set "IdentityServer:Clients:Xamarin:ClientSecret" "your-secret"
+```
+
+### Security Best Practices
+
+✅ **DO**:
+- Use User Secrets for local development
+- Rotate secrets regularly (every 30-90 days)
+- Use strong, randomly generated secrets
+- Store production secrets in Azure Key Vault
+- Use different secrets per environment
+
+❌ **DON'T**:
+- Commit secrets to source control
+- Share secrets via email or chat
+- Use default/example passwords in production
+- Reuse secrets across environments
+
+📖 **For complete documentation, see [SECRETS_MANAGEMENT.md](SECRETS_MANAGEMENT.md)**
 
 ## 🤝 Contributing
 

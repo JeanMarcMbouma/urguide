@@ -94,6 +94,10 @@ Thumbs.db
 .env.local
 .env.*.local
 
+# Secrets files (keep example files)
+secrets.json
+!secrets.json.example
+
 # Docker
 docker-compose.override.local.yml
 
