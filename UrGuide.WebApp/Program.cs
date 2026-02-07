@@ -7,7 +7,6 @@ using UrGuide.WebApp.Data;
 using UrGuide.Services.Extensions;
 using UrGuide.WebApp.Extensions;
 using Microsoft.EntityFrameworkCore;
-using FluentValidation;
 using AspNetCoreRateLimit;
 using Microsoft.OpenApi.Models;
 using UrGuide.WebApp.Hubs;
@@ -15,12 +14,10 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Diagnostics;
 using UrGuide.WebApp.Models;
 using Duende.IdentityServer;
-using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
-using UrGuide.ServiceDefaults;
 
 var logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
 try
@@ -28,9 +25,6 @@ try
     logger.Debug("init main");
     
     var builder = WebApplication.CreateBuilder(args);
-    
-    // Add Aspire service defaults
-    builder.AddServiceDefaults();
 
     // Configure logging
     builder.Logging.ClearProviders();
@@ -53,7 +47,6 @@ try
     });
     
     // FluentValidation is automatically configured via the UrGuide.Services registration
-    builder.Services.AddRazorPages();
     
     builder.Services.AddSwaggerGen(c =>
     {
@@ -76,13 +69,7 @@ try
             }
         });
         c.OperationFilter<UrGuide.WebApp.Filters.AuthorizeCheckOperationFilter>();
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ur Guide API", Version = "v1" });
-    });
-    
-    // In production, the React files will be served from this directory
-    builder.Services.AddSpaStaticFiles(configuration =>
-    {
-        configuration.RootPath = "ClientApp/build";
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "UrGuide API", Version = "v1" });
     });
 
     builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
@@ -138,14 +125,11 @@ try
         ForwardedHeaders = ForwardedHeaders.XForwardedProto
     });
 
-    app.UseStaticFiles();
-    app.UseSpaStaticFiles();
-
     app.UseRouting();
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ur Guide API v1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "UrGuide API v1");
         c.OAuthClientId("UrGuide.WebAPI");
         c.OAuthAppName("UrGuide Swagger UI");
         c.OAuthUsePkce();
@@ -157,20 +141,7 @@ try
     app.MapControllerRoute(
         name: "default",
         pattern: "{controller}/{action=Index}/{id?}");
-    app.MapRazorPages();
     app.MapHub<NotificationHub>("/notify");
-
-    app.MapDefaultEndpoints();
-
-    app.UseSpa(spa =>
-    {
-        spa.Options.SourcePath = "ClientApp";
-        spa.Options.StartupTimeout = TimeSpan.FromMinutes(5);
-        if (app.Environment.IsDevelopment())
-        {
-            spa.UseReactDevelopmentServer(npmScript: "start");
-        }
-    });
 
     app.Run();
 }

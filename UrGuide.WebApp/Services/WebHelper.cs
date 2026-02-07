@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.SpaServices.StaticFiles;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using UrGuide.Shared;
@@ -15,31 +13,17 @@ namespace UrGuide.WebApp.Services
     {
         private readonly IWebHostEnvironment _environment;
 
-        public WebHelper(IHttpContextAccessor httpContext, IWebHostEnvironment environment, IOptions<SpaStaticFilesOptions> spaOptions)
+        public WebHelper(IHttpContextAccessor httpContext, IWebHostEnvironment environment)
         {
             HC = httpContext ?? throw new ArgumentNullException(nameof(httpContext));
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
-            SpaOptions = spaOptions ?? throw new ArgumentNullException(nameof(spaOptions));
         }
         
         public IHttpContextAccessor HC { get; }
-        public IOptions<SpaStaticFilesOptions> SpaOptions { get; }
 
-        public string ImageDirectoryPath => Path.Combine(_environment.ContentRootPath,
-#if !DEBUG
-            SpaOptions.Value.RootPath
-#else
-            SpaOptions.Value.RootPath.Replace("build", "public")
-#endif
-            , "images");
+        public string ImageDirectoryPath => Path.Combine(_environment.ContentRootPath, "images");
 
-        public string ThumbImageDirectoryPath => Path.Combine(_environment.ContentRootPath,
-#if !DEBUG
-            SpaOptions.Value.RootPath
-#else
-            SpaOptions.Value.RootPath.Replace("build", "public")
-#endif
-            , "thumb");
+        public string ThumbImageDirectoryPath => Path.Combine(_environment.ContentRootPath, "thumb");
 
         public string ResolveImageUrl(string imageFileName)
         {
