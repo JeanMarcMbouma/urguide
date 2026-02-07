@@ -30,13 +30,14 @@ try
     
     var builder = WebApplication.CreateBuilder(args);
 
-    // Add .NET Aspire service defaults (OpenTelemetry, health checks, service discovery, resilience)
-    builder.AddServiceDefaults();
-
-    // Configure logging
+    // Configure logging first before adding service defaults
     builder.Logging.ClearProviders();
     builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
     builder.Host.UseNLog();
+
+    // Add .NET Aspire service defaults (OpenTelemetry, health checks, service discovery, resilience)
+    // This must come after ClearProviders to ensure OpenTelemetry logging is not removed
+    builder.AddServiceDefaults();
 
     // Add services to the container.
     builder.Services.AddUrGuideAuthServices(builder.Configuration);

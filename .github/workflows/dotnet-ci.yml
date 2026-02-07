@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  DOTNET_VERSION: '8.0.x'
+  DOTNET_VERSION: '10.0.x'
   BUILD_CONFIGURATION: 'Release'
   SOLUTION_PATH: 'UrGuide.sln'
   WEBAPP_PROJECT: 'UrGuide.WebApp/UrGuide.WebApp.csproj'
@@ -62,7 +62,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: webapp-build
-        path: ${{ github.workspace }}/UrGuide.WebApp/bin/${{ env.BUILD_CONFIGURATION }}/net8.0/
+        path: ${{ github.workspace }}/UrGuide.WebApp/bin/${{ env.BUILD_CONFIGURATION }}/net10.0/
         retention-days: 5
 
   code-quality:
