@@ -9,7 +9,7 @@ using UrGuide.Services.Extensions;
 using UrGuide.WebApp.Extensions;
 using Microsoft.EntityFrameworkCore;
 using AspNetCoreRateLimit;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using UrGuide.WebApp.Hubs;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Diagnostics;
