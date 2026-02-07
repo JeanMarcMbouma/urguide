@@ -1,5 +1,8 @@
+using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using UrGuide.Model.Payments;
 using UrGuide.Services.Payments;

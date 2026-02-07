@@ -1,3 +1,6 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Stripe;
@@ -11,7 +14,7 @@ namespace UrGuide.Services.Payments
     {
         private readonly UrGuideContext _context;
         private readonly IConfiguration _configuration;
-        private readonly PayoutService _stripePayoutService;
+        private readonly Stripe.PayoutService _stripePayoutService;
 
         public PayoutService(UrGuideContext context, IConfiguration configuration)
         {
@@ -46,7 +49,7 @@ namespace UrGuide.Services.Payments
             }
 
             // Create payout record
-            var payout = new Payout
+            var payout = new Data.Entities.Payments.Payout
             {
                 PayoutId = Guid.NewGuid().ToString(),
                 GuideId = guideId,
@@ -177,7 +180,7 @@ namespace UrGuide.Services.Payments
         {
             // Calculate total earnings from successful payments
             var totalEarnings = await _context.Payments
-                .Where(p => p.Booking.Tour.UserId == guideId && p.Status == PaymentStatus.Succeeded)
+                .Where(p => p.Booking.Tour.AuthorId == guideId && p.Status == PaymentStatus.Succeeded)
                 .SumAsync(p => p.GuidePayout);
 
             // Calculate total payouts

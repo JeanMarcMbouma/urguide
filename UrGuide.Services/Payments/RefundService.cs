@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Stripe;
@@ -11,7 +15,7 @@ namespace UrGuide.Services.Payments
     {
         private readonly UrGuideContext _context;
         private readonly IConfiguration _configuration;
-        private readonly RefundService _stripeRefundService;
+        private readonly Stripe.RefundService _stripeRefundService;
 
         public RefundService(UrGuideContext context, IConfiguration configuration)
         {
@@ -62,7 +66,7 @@ namespace UrGuide.Services.Payments
             }
 
             // Create refund record
-            var refund = new Refund
+            var refund = new Data.Entities.Payments.Refund
             {
                 RefundId = Guid.NewGuid().ToString(),
                 PaymentId = request.PaymentId,

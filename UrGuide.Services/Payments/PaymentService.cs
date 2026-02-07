@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Stripe;
@@ -35,8 +39,8 @@ namespace UrGuide.Services.Payments
             // Validate booking
             var booking = await _context.Set<Booking>()
                 .Include(b => b.Tour)
-                .Include(b => b.Author)
-                .ThenInclude(a => a.Subscription)
+                    .ThenInclude(t => t.Author)
+                    .ThenInclude(a => a.Subscription)
                 .FirstOrDefaultAsync(b => b.BookingId == request.BookingId);
 
             if (booking == null)
@@ -74,7 +78,7 @@ namespace UrGuide.Services.Payments
             }
 
             // Calculate platform fee based on guide's membership
-            var membership = booking.Author?.Subscription?.Membership ?? Membership.Basic;
+            var membership = booking.Tour?.Author?.Subscription?.Membership ?? Membership.Basic;
             var platformFee = PlatformFee.CalculateFee(request.Amount, membership);
             var guidePayout = request.Amount - platformFee;
 

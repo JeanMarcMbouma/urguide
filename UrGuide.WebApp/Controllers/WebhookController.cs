@@ -1,4 +1,9 @@
+using System;
+using System.IO;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Stripe;
 using UrGuide.Data.Entities.Payments;
 using UrGuide.Services.Payments;
@@ -48,27 +53,27 @@ namespace UrGuide.WebApp.Controllers
                 // Handle different event types
                 switch (stripeEvent.Type)
                 {
-                    case Events.PaymentIntentSucceeded:
+                    case "payment_intent.succeeded":
                         await HandlePaymentIntentSucceeded(stripeEvent);
                         break;
 
-                    case Events.PaymentIntentPaymentFailed:
+                    case "payment_intent.payment_failed":
                         await HandlePaymentIntentFailed(stripeEvent);
                         break;
 
-                    case Events.PaymentIntentCanceled:
+                    case "payment_intent.canceled":
                         await HandlePaymentIntentCanceled(stripeEvent);
                         break;
 
-                    case Events.ChargeRefunded:
+                    case "charge.refunded":
                         await HandleChargeRefunded(stripeEvent);
                         break;
 
-                    case Events.PayoutPaid:
+                    case "payout.paid":
                         await HandlePayoutPaid(stripeEvent);
                         break;
 
-                    case Events.PayoutFailed:
+                    case "payout.failed":
                         await HandlePayoutFailed(stripeEvent);
                         break;
 
@@ -134,7 +139,7 @@ namespace UrGuide.WebApp.Controllers
 
         private Task HandlePayoutPaid(Event stripeEvent)
         {
-            var payout = stripeEvent.Data.Object as Payout;
+            var payout = stripeEvent.Data.Object as Stripe.Payout;
             if (payout != null)
             {
                 _logger.LogInformation("Payout paid: {PayoutId}", payout.Id);
@@ -145,7 +150,7 @@ namespace UrGuide.WebApp.Controllers
 
         private Task HandlePayoutFailed(Event stripeEvent)
         {
-            var payout = stripeEvent.Data.Object as Payout;
+            var payout = stripeEvent.Data.Object as Stripe.Payout;
             if (payout != null)
             {
                 _logger.LogWarning("Payout failed: {PayoutId}", payout.Id);
