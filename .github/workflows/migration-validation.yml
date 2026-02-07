@@ -52,12 +52,6 @@ jobs:
       
     - name: Build project
       run: dotnet build UrGuide.WebApp/UrGuide.WebApp.csproj --configuration Release --no-restore
-      
-    - name: Wait for SQL Server
-      run: |
-        for i in {1..30}; do
-          /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Test@123456" -Q "SELECT 1" -C && break || sleep 2
-        done
         
     - name: Apply migrations to test database
       run: |
