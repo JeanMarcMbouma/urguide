@@ -63,10 +63,16 @@ public class SendNotificationConsumer : IConsumer<SendNotificationMessage>
             await _context.SaveChangesAsync();
 
             // Send real-time notification via SignalR
-            _ = _instantMessaging.Send(user.Id, _mapper.Map<Model.Users.Notification>(notification))
-                .ConfigureAwait(false);
-
-            _logger.LogInformation("Successfully sent notification to user {UserId}", message.UserId);
+            try
+            {
+                await _instantMessaging.Send(user.Id, _mapper.Map<Model.Users.Notification>(notification));
+                _logger.LogInformation("Successfully sent real-time notification to user {UserId}", message.UserId);
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail the message - notification is already saved to database
+                _logger.LogWarning(ex, "Failed to send real-time notification via SignalR for user {UserId}", message.UserId);
+            }
         }
         catch (Exception ex)
         {

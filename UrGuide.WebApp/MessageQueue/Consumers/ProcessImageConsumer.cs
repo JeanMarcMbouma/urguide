@@ -53,9 +53,16 @@ public class ProcessImageConsumer : IConsumer<ProcessImageMessage>
                         var imageUrl = _imageService.SaveAvatar(message.UserId, 
                             new Model.Shared.ImageFileModel { ImageBase64 = message.Base64Image });
                         
-                        // Note: ProfilePictureUrl may not be a property on the User entity
-                        // This would need to be stored in a related table or as a generic attribute
-                        _logger.LogInformation("Successfully processed avatar for user {UserId}", message.UserId);
+                        // NOTE: The avatar URL is generated but not automatically persisted to database.
+                        // The User entity in this codebase doesn't have a direct ProfilePictureUrl property.
+                        // Avatar images are stored on disk and referenced via the ImageUrl pattern.
+                        // Full implementation would require:
+                        // 1. Adding a ProfilePictureUrl property to User entity, OR
+                        // 2. Using generic attributes to store the URL, OR
+                        // 3. Creating a separate UserProfile table
+                        
+                        _logger.LogInformation("Successfully processed avatar for user {UserId}, URL: {ImageUrl}", 
+                            message.UserId, imageUrl);
                     }
                     break;
             }

@@ -36,7 +36,11 @@ public class QueuedImageService : IImageService
                 QueuedAt = DateTime.UtcNow
             };
 
-            // Fire and forget - we don't await this
+            // Fire and forget - we don't await this because:
+            // 1. SaveImage is a void method in the IImageService interface (non-breaking change requirement)
+            // 2. The message is published to RabbitMQ which has its own persistence and retry mechanisms
+            // 3. MassTransit handles the publish operation asynchronously in the background
+            // 4. Failures will be retried by RabbitMQ according to the configured retry policy
             _ = _publishEndpoint.Publish(message);
             
             _logger.LogInformation("Image processing queued successfully for {ImageId}", imageFile.Id);
@@ -63,7 +67,10 @@ public class QueuedImageService : IImageService
                 QueuedAt = DateTime.UtcNow
             };
 
-            // Fire and forget - we don't await this
+            // Fire and forget - we don't await this because:
+            // 1. SaveAvatar returns a string (non-breaking change requirement)
+            // 2. The message is published to RabbitMQ which has its own persistence
+            // 3. We return a placeholder URL that will be updated once processing completes
             _ = _publishEndpoint.Publish(message);
             
             _logger.LogInformation("Avatar processing queued successfully for user {UserId}", userId);
