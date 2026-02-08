@@ -13,6 +13,7 @@ using UrGuide.Model.Users;
 using UrGuide.Services.Contracts;
 using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Models;
+using UrGuide.WebApp.Attributes;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -42,6 +43,7 @@ namespace UrGuide.WebApp.Controllers
         }
 
         [HttpPost("/login")]
+        [RateLimit(5, "1m")] // Custom rate limit: 5 login attempts per minute
         public async Task<IActionResult> Login([FromBody] LoginModel model, CancellationToken cancellationToken, string returnUrl = null)
         {
             var result = await UserService.LoginAsync(model, cancellationToken);

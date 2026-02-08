@@ -49,6 +49,11 @@ try
     builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
     builder.Services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
 
+    // Configure tiered rate limiting
+    builder.Services.Configure<UrGuide.WebApp.RateLimiting.RateLimitOptions>(builder.Configuration.GetSection("TieredRateLimit"));
+    builder.Services.AddSingleton<UrGuide.WebApp.RateLimiting.IRateLimitAnalyticsService, UrGuide.WebApp.RateLimiting.RateLimitAnalyticsService>();
+    builder.Services.AddMemoryCache(); // Required for rate limiting cache
+
     builder.Services.AddControllersWithViews(options => {
         options.Filters.Add(typeof(UrGuide.WebApp.Filters.EnvelopResultFilter));
         options.Filters.Add(typeof(UrGuide.WebApp.Filters.SaveChangeActionFilter));
@@ -183,10 +188,11 @@ try
         await seedingService.SeedDataAsync();
     }
 
-    app.UseIpRateLimiting();
+    // Disable legacy IP rate limiting to avoid conflicts with tiered rate limiting
+    // app.UseIpRateLimiting();
 
     app.UseForwardedHeaders(new ForwardedHeadersOptions { 
-        ForwardedHeaders = ForwardedHeaders.XForwardedProto
+        ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
     });
 
     // Add CORS middleware
@@ -207,6 +213,10 @@ try
     });
     app.UseAuthentication();
     app.UseIdentityServer();
+    
+    // Add tiered rate limiting middleware after authentication and routing, before authorization
+    app.UseMiddleware<UrGuide.WebApp.RateLimiting.TieredRateLimitMiddleware>();
+    
     app.UseAuthorization();
 
     app.MapControllerRoute(

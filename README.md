@@ -20,7 +20,7 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
 - **API Versioning**: Asp.Versioning.Mvc 8.1
 - **Validation**: FluentValidation 12.1
 - **Logging**: NLog 6.1 with structured logging
-- **Rate Limiting**: AspNetCoreRateLimit
+- **Rate Limiting**: AspNetCoreRateLimit + Custom Tiered Rate Limiting (Anonymous, Authenticated, Premium)
 - **Email**: SendGrid integration
 - **Payments**: Stripe.net 48.0 for payment processing
 - **Health Checks**: ASP.NET Core Health Checks with SQL Server monitoring
@@ -36,6 +36,13 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
 - [x] **CORS Support**: Configurable cross-origin resource sharing for client apps
 - [x] **Response Caching**: Built-in response and output caching
 - [x] **Rate Limiting**: Configurable IP-based rate limiting
+- [x] **Tiered Rate Limiting**: Advanced rate limiting with user tier support (Anonymous, Authenticated, Premium)
+  - Different rate limits per user tier
+  - Custom rate limits per endpoint
+  - Rate limit headers in responses
+  - Analytics tracking
+  - Exemptions for internal services
+  - Graceful degradation
 - [x] **.NET Aspire Integration**: OpenTelemetry observability, HTTP resilience patterns, and service discovery
 
 ### 🔐 Authentication & User Management
@@ -281,9 +288,111 @@ The API supports multiple versioning strategies:
 
 ### Rate Limiting
 
-The API implements IP-based rate limiting:
-- Default: 100 requests per 15 minutes per IP address
-- Configure in `appsettings.json` under `IpRateLimiting`
+The API implements tiered rate limiting based on user authentication and subscription levels:
+
+#### Rate Limit Tiers
+
+1. **Anonymous Users** (not authenticated):
+   - Global: 10 requests per minute
+   - Sensitive endpoints (e.g., tour requests): 2 per hour
+   - Payment endpoints: 1 per hour
+
+2. **Authenticated Users** (basic subscription):
+   - Global: 60 requests per minute
+   - Tour requests: 10 per hour
+   - Payment endpoints: 5 per hour
+
+3. **Premium Users** (premium subscription):
+   - Global: 300 requests per minute
+   - Tour requests: 50 per hour
+   - Payment endpoints: 20 per hour
+
+#### Rate Limit Headers
+
+Every API response includes rate limit information:
+
+```http
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1709123456
+X-RateLimit-Tier: Authenticated
+```
+
+#### Rate Limit Response
+
+When rate limit is exceeded, the API returns HTTP 429:
+
+```json
+{
+  "error": "Rate limit exceeded",
+  "message": "Too many requests. Please try again later.",
+  "retryAfter": 60
+}
+```
+
+#### Custom Rate Limits per Endpoint
+
+Developers can apply custom rate limits using attributes:
+
+```csharp
+[RateLimit(5, "1m")]  // 5 requests per minute
+[HttpPost("/login")]
+public async Task<IActionResult> Login([FromBody] LoginModel model)
+{
+    // Login logic
+}
+```
+
+#### Rate Limit Exemptions
+
+Certain endpoints and IP addresses can be exempt from rate limiting:
+- Endpoints marked with `[RateLimitExempt]` attribute
+- Internal service IP addresses (configurable in `appsettings.json` under `TieredRateLimit.Exemptions`)
+
+**Note:** Health check endpoints (such as `/health` and `/alive`) are not automatically exempt. To exclude them from rate limiting:
+1. Apply `[RateLimitExempt]` to the corresponding controller actions, OR
+2. Add the endpoint paths to the `TieredRateLimit.Exemptions` array in configuration:
+   ```json
+   "TieredRateLimit": {
+     "Exemptions": ["127.0.0.1", "::1", "/health", "/alive"]
+   }
+   ```
+
+#### Configuration
+
+Rate limits are configured in `appsettings.json` under `TieredRateLimit`:
+
+```json
+{
+  "TieredRateLimit": {
+    "Enabled": true,
+    "EnableAnalytics": true,
+    "Policies": {
+      "Anonymous": { "Limit": 10, "Period": "1m" },
+      "Authenticated": { "Limit": 60, "Period": "1m" },
+      "Premium": { "Limit": 300, "Period": "1m" }
+    },
+    "EndpointPolicies": {
+      "POST:/tour-requests": {
+        "Anonymous": { "Limit": 2, "Period": "1h" },
+        "Authenticated": { "Limit": 10, "Period": "1h" },
+        "Premium": { "Limit": 50, "Period": "1h" }
+      }
+    },
+    "Exemptions": ["127.0.0.1", "::1"]
+  }
+}
+```
+
+#### Rate Limit Analytics
+
+The system tracks rate limit usage and violations for monitoring and optimization:
+- Request counts per tier
+- Violation tracking
+- User-specific statistics
+- Endpoint usage patterns
+
+**Note:** Legacy IP-based rate limiting (`IpRateLimitPolicies`) has been disabled to avoid conflicts with the new tiered rate limiting system. The tiered system provides more granular control and better user experience.
 
 ### Health Checks
 
@@ -561,7 +670,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 See the [Issues Catalog](https://github.com/JeanMarcMbouma/urguide/issues) for:
 - Payment integration
 - Enhanced security features
-- API rate limiting improvements
+- ~~API rate limiting improvements~~ ✅ **Implemented**
 - Monitoring and observability
 - API testing suite
 - ~~Docker containerization~~ ✅ **Implemented**
