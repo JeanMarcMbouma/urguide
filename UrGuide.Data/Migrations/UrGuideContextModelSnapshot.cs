@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using UrGuide.Data;
 
+#nullable disable
+
 namespace UrGuide.Data.Migrations
 {
     [DbContext(typeof(UrGuideContext))]
@@ -16,9 +18,13 @@ namespace UrGuide.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.5")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "10.0.2")
+                .HasAnnotation("Proxies:ChangeTracking", false)
+                .HasAnnotation("Proxies:CheckEquality", false)
+                .HasAnnotation("Proxies:LazyLoading", true)
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("UrGuide.Data.Entities.Event.AuditEvent", b =>
                 {
@@ -34,25 +40,323 @@ namespace UrGuide.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ReferenceId")
-                        .HasColumnType("nvarchar(500)")
-                        .HasMaxLength(500);
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(600)")
-                        .HasMaxLength(600);
+                        .HasMaxLength(600)
+                        .HasColumnType("nvarchar(600)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Audit_Events","ug");
+                    b.ToTable("Audit_Events", "ug");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Payments.Payment", b =>
+                {
+                    b.Property<string>("PaymentId")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("BookingId")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("GuidePayout")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Metadata")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("PaymentMethod")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PlatformFeeAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StripeCustomerId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("StripePaymentIntentId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("PaymentId");
+
+                    b.HasIndex("BookingId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("CurrencyCode");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("StripePaymentIntentId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("payments", "ug");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Payments.PaymentTransaction", b =>
+                {
+                    b.Property<string>("TransactionId")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Metadata")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("PaymentId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("StripeTransactionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("TransactionId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("PaymentId");
+
+                    b.HasIndex("Type");
+
+                    b.ToTable("payment_transactions", "ug");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Payments.Payout", b =>
+                {
+                    b.Property<string>("PayoutId")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("FailureReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("GuideId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StripeAccountId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("StripePayoutId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PayoutId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("GuideId");
+
+                    b.HasIndex("RequestedAt");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("payouts", "ug");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Payments.PlatformFee", b =>
+                {
+                    b.Property<string>("FeeId")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<int>("MembershipTier")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("Percentage")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("decimal(5,4)");
+
+                    b.HasKey("FeeId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("MembershipTier");
+
+                    b.HasIndex("PaymentId");
+
+                    b.ToTable("platform_fees", "ug");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Payments.Refund", b =>
+                {
+                    b.Property<string>("RefundId")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<string>("FailureReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("PaymentId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RequestedBy")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StripeRefundId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("RefundId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("PaymentId");
+
+                    b.HasIndex("RequestedAt");
+
+                    b.HasIndex("RequestedBy");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("refunds", "ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Posts.Category", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnName("CategoryId")
                         .HasColumnType("nvarchar(450)")
+                        .HasColumnName("CategoryId")
                         .HasDefaultValueSql("NEWID()");
 
                     b.Property<bool>("Archived")
@@ -70,14 +374,14 @@ namespace UrGuide.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnName("CategoryName")
+                        .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)")
-                        .HasMaxLength(200);
+                        .HasColumnName("CategoryName");
 
                     b.HasKey("Id")
                         .HasName("PK_Post_Categories");
 
-                    b.ToTable("Post_Categories","ug");
+                    b.ToTable("Post_Categories", "ug");
 
                     b.HasData(
                         new
@@ -140,8 +444,8 @@ namespace UrGuide.Data.Migrations
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnName("PostId")
                         .HasColumnType("nvarchar(450)")
+                        .HasColumnName("PostId")
                         .HasDefaultValueSql("NEWID()");
 
                     b.Property<int>("AllocatedSeats")
@@ -161,27 +465,26 @@ namespace UrGuide.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Cost")
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("DateOfPublication")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(2000)")
-                        .HasMaxLength(2000);
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<int>("Dislikes")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("EndDate")
-                        .IsRequired()
+                    b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("GeoLocation")
-                        .HasColumnType("nvarchar(400)")
-                        .HasMaxLength(400);
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
                     b.Property<int>("ItineraryCount")
                         .ValueGeneratedOnAdd()
@@ -189,8 +492,8 @@ namespace UrGuide.Data.Migrations
                         .HasDefaultValue(0);
 
                     b.Property<string>("LastBid")
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
@@ -216,20 +519,19 @@ namespace UrGuide.Data.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(0);
 
-                    b.Property<DateTime?>("StartDate")
-                        .IsRequired()
+                    b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Tags")
                         .IsRequired()
-                        .HasColumnType("nvarchar(500)")
-                        .HasMaxLength(500);
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnName("Title")
+                        .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)")
-                        .HasMaxLength(200);
+                        .HasColumnName("Title");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -243,49 +545,49 @@ namespace UrGuide.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Posts","ug");
+                    b.ToTable("Posts", "ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Regions.Country", b =>
                 {
                     b.Property<string>("Name")
-                        .HasColumnName("CountryId")
+                        .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)")
-                        .HasMaxLength(200);
+                        .HasColumnName("CountryId");
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(10)")
-                        .HasMaxLength(10);
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("DialCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(7)")
-                        .HasMaxLength(7);
+                        .HasMaxLength(7)
+                        .HasColumnType("nvarchar(7)");
 
                     b.HasKey("Name");
 
-                    b.ToTable("countries","ug");
+                    b.ToTable("countries", "ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Regions.Currency", b =>
                 {
                     b.Property<string>("Name")
-                        .HasColumnName("CurrencyId")
+                        .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)")
-                        .HasMaxLength(200);
+                        .HasColumnName("CurrencyId");
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(10)")
-                        .HasMaxLength(10);
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<int>("DecimalDigits")
                         .HasColumnType("int");
 
                     b.Property<string>("NamePlural")
-                        .HasColumnType("nvarchar(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("Rounding")
                         .HasColumnType("int");
@@ -298,7 +600,7 @@ namespace UrGuide.Data.Migrations
 
                     b.HasKey("Name");
 
-                    b.ToTable("currencies","ug");
+                    b.ToTable("currencies", "ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Regions.PaymentMethod", b =>
@@ -319,8 +621,8 @@ namespace UrGuide.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Secret")
                         .HasColumnType("nvarchar(max)");
@@ -333,7 +635,7 @@ namespace UrGuide.Data.Migrations
 
                     b.HasKey("PaymentMethodId");
 
-                    b.ToTable("payment_methods","ug");
+                    b.ToTable("payment_methods", "ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Regions.Region", b =>
@@ -352,8 +654,8 @@ namespace UrGuide.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("PaymentMethodId")
                         .HasColumnType("nvarchar(450)");
@@ -371,7 +673,7 @@ namespace UrGuide.Data.Migrations
 
                     b.HasIndex("TimelineId");
 
-                    b.ToTable("regions","ug");
+                    b.ToTable("regions", "ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Regions.Timeline", b =>
@@ -383,15 +685,15 @@ namespace UrGuide.Data.Migrations
 
                     b.HasKey("TimelineId");
 
-                    b.ToTable("region_timelines","ug");
+                    b.ToTable("region_timelines", "ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Shared.ImageCatalog", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnName("Image_CatalogId")
                         .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Image_CatalogId")
                         .HasDefaultValueSql("NEWID()");
 
                     b.Property<DateTime>("Created")
@@ -411,7 +713,7 @@ namespace UrGuide.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Image_Catalogs","ug");
+                    b.ToTable("Image_Catalogs", "ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Tour.Booking", b =>
@@ -468,7 +770,7 @@ namespace UrGuide.Data.Migrations
 
                     b.HasIndex("TourId1");
 
-                    b.ToTable("tour_booking","ug");
+                    b.ToTable("tour_booking", "ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Tour.Campain", b =>
@@ -486,20 +788,20 @@ namespace UrGuide.Data.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(4000)")
-                        .HasMaxLength(4000);
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("DescriptionSEO")
                         .IsRequired()
-                        .HasColumnType("nvarchar(4000)")
-                        .HasMaxLength(4000);
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<int>("DiscountPercentage")
                         .HasColumnType("int");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(2000)")
-                        .HasMaxLength(2000);
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<int>("Membership")
                         .HasColumnType("int");
@@ -517,7 +819,7 @@ namespace UrGuide.Data.Migrations
 
                     b.HasIndex("TimelineId");
 
-                    b.ToTable("campains","ug");
+                    b.ToTable("campains", "ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Tour.Review", b =>
@@ -539,8 +841,8 @@ namespace UrGuide.Data.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("nvarchar(4000)")
-                        .HasMaxLength(4000);
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("TourId")
                         .HasColumnType("nvarchar(450)");
@@ -554,7 +856,7 @@ namespace UrGuide.Data.Migrations
 
                     b.HasIndex("TourId");
 
-                    b.ToTable("reviews","ug");
+                    b.ToTable("reviews", "ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Tour.Subscription", b =>
@@ -596,7 +898,7 @@ namespace UrGuide.Data.Migrations
 
                     b.HasIndex("RegionId");
 
-                    b.ToTable("subscriptions","ug");
+                    b.ToTable("subscriptions", "ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Tour.Tour", b =>
@@ -615,8 +917,8 @@ namespace UrGuide.Data.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(4000)")
-                        .HasMaxLength(4000);
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("RegionId")
                         .IsRequired()
@@ -634,8 +936,8 @@ namespace UrGuide.Data.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -648,7 +950,67 @@ namespace UrGuide.Data.Migrations
 
                     b.HasIndex("TimelineId");
 
-                    b.ToTable("tours","ug");
+                    b.ToTable("tours", "ug");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Tour.TourRequest", b =>
+                {
+                    b.Property<string>("TourRequestId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(450)")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<decimal>("MaxBudget")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("MaxParticipants")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("PreferredDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RegionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RequesterId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Tags")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("TourRequestId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("RegionId");
+
+                    b.HasIndex("RequesterId");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("tour_requests", "ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Users.Author", b =>
@@ -671,7 +1033,7 @@ namespace UrGuide.Data.Migrations
 
                     b.HasIndex("SubscriptionId");
 
-                    b.ToTable("authors","ug");
+                    b.ToTable("authors", "ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Users.Balance", b =>
@@ -698,27 +1060,79 @@ namespace UrGuide.Data.Migrations
 
                     b.HasIndex("RegionId");
 
-                    b.ToTable("author_balance","ug");
+                    b.ToTable("author_balance", "ug");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Users.DataExportRequest", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DownloadToken")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FilePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<long?>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Format")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DownloadToken")
+                        .IsUnique()
+                        .HasFilter("[DownloadToken] IS NOT NULL");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DataExportRequests", "ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Users.User", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnName("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("UserId");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(255)")
                         .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
                         .HasDefaultValue("N/A");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(200)")
                         .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
                         .HasDefaultValue("N/A");
 
                     b.Property<DateTime>("LastActivityDate")
@@ -727,16 +1141,24 @@ namespace UrGuide.Data.Migrations
                     b.Property<string>("LastName")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(200)")
                         .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
                         .HasDefaultValue("N/A");
 
                     b.Property<Point>("Location")
                         .HasColumnType("geography");
 
+                    b.Property<string>("StripeCustomerId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Users","ug");
+                    b.ToTable("Users", "ug");
 
                     b.HasData(
                         new
@@ -744,6 +1166,84 @@ namespace UrGuide.Data.Migrations
                             Id = "00000000-0000-0000-0000-000000000000",
                             LastActivityDate = new DateTime(2020, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified)
                         });
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Payments.Payment", b =>
+                {
+                    b.HasOne("UrGuide.Data.Entities.Tour.Booking", "Booking")
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("UrGuide.Data.Entities.Regions.Currency", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyCode")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("UrGuide.Data.Entities.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+
+                    b.Navigation("Currency");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Payments.PaymentTransaction", b =>
+                {
+                    b.HasOne("UrGuide.Data.Entities.Payments.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Payment");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Payments.Payout", b =>
+                {
+                    b.HasOne("UrGuide.Data.Entities.Users.Author", "Guide")
+                        .WithMany()
+                        .HasForeignKey("GuideId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Guide");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Payments.PlatformFee", b =>
+                {
+                    b.HasOne("UrGuide.Data.Entities.Payments.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Payment");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Payments.Refund", b =>
+                {
+                    b.HasOne("UrGuide.Data.Entities.Payments.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("UrGuide.Data.Entities.Users.User", "RequestedByUser")
+                        .WithMany()
+                        .HasForeignKey("RequestedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Payment");
+
+                    b.Navigation("RequestedByUser");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Posts.Post", b =>
@@ -771,12 +1271,12 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("NewValue")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(200)")
-                                .HasMaxLength(200);
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
 
                             b1.Property<string>("OldValue")
-                                .HasColumnType("nvarchar(200)")
-                                .HasMaxLength(200);
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
 
                             b1.Property<string>("PostId")
                                 .IsRequired()
@@ -789,7 +1289,7 @@ namespace UrGuide.Data.Migrations
                             b1.HasIndex("PostId")
                                 .IsUnique();
 
-                            b1.ToTable("Post_Bids","ug");
+                            b1.ToTable("Post_Bids", "ug");
 
                             b1.HasOne("UrGuide.Data.Entities.Users.User", "Author")
                                 .WithMany()
@@ -798,6 +1298,8 @@ namespace UrGuide.Data.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("PostId");
+
+                            b1.Navigation("Author");
                         });
 
                     b.OwnsMany("UrGuide.Data.Entities.Posts.BidHistory", "BidHistories", b1 =>
@@ -819,8 +1321,8 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("Value")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(200)")
-                                .HasMaxLength(200);
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
 
                             b1.HasKey("Id");
 
@@ -828,7 +1330,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasIndex("PostId");
 
-                            b1.ToTable("Post_Bids_History","ug");
+                            b1.ToTable("Post_Bids_History", "ug");
 
                             b1.HasOne("UrGuide.Data.Entities.Users.User", "Author")
                                 .WithMany()
@@ -837,6 +1339,8 @@ namespace UrGuide.Data.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("PostId");
+
+                            b1.Navigation("Author");
                         });
 
                     b.OwnsMany("UrGuide.Data.Entities.Posts.Itinerary", "Itineraries", b1 =>
@@ -848,8 +1352,8 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("Description")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(500)")
-                                .HasMaxLength(500);
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
 
                             b1.Property<byte>("Ordinal")
                                 .HasColumnType("tinyint");
@@ -860,17 +1364,64 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("Title")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(100)")
-                                .HasMaxLength(100);
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
 
                             b1.HasKey("Id");
 
                             b1.HasIndex("PostId");
 
-                            b1.ToTable("Post_Itineraries","ug");
+                            b1.ToTable("Post_Itineraries", "ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("PostId");
+                        });
+
+                    b.OwnsMany("UrGuide.Data.Shared.Feedback", "Feedback", b1 =>
+                        {
+                            b1.Property<string>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("nvarchar(450)")
+                                .HasDefaultValueSql("NEWID()");
+
+                            b1.Property<DateTime>("Created")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<string>("FK_Post_Feedback_Users")
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<DateTime>("LastUpdated")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<string>("PostId")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<int>("Rating")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("Text")
+                                .IsRequired()
+                                .HasMaxLength(2000)
+                                .HasColumnType("nvarchar(2000)");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("FK_Post_Feedback_Users");
+
+                            b1.HasIndex("PostId");
+
+                            b1.ToTable("Post_Feedback", "ug");
+
+                            b1.HasOne("UrGuide.Data.Entities.Users.User", "Author")
+                                .WithMany()
+                                .HasForeignKey("FK_Post_Feedback_Users")
+                                .OnDelete(DeleteBehavior.Cascade);
+
+                            b1.WithOwner()
+                                .HasForeignKey("PostId");
+
+                            b1.Navigation("Author");
                         });
 
                     b.OwnsMany("UrGuide.Data.Entities.Posts.Reservation", "Reservations", b1 =>
@@ -897,7 +1448,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasIndex("UserId");
 
-                            b1.ToTable("Seat_Reservations","ug");
+                            b1.ToTable("Seat_Reservations", "ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("PostId");
@@ -933,7 +1484,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasIndex("UserId");
 
-                            b1.ToTable("Post_UserReactions","ug");
+                            b1.ToTable("Post_UserReactions", "ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("PostId");
@@ -945,50 +1496,21 @@ namespace UrGuide.Data.Migrations
                                 .IsRequired();
                         });
 
-                    b.OwnsMany("UrGuide.Data.Shared.Feedback", "Feedback", b1 =>
-                        {
-                            b1.Property<string>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("nvarchar(450)")
-                                .HasDefaultValueSql("NEWID()");
+                    b.Navigation("Bid");
 
-                            b1.Property<DateTime>("Created")
-                                .HasColumnType("datetime2");
+                    b.Navigation("BidHistories");
 
-                            b1.Property<string>("FK_Post_Feedback_Users")
-                                .HasColumnType("nvarchar(450)");
+                    b.Navigation("Catalog");
 
-                            b1.Property<DateTime>("LastUpdated")
-                                .HasColumnType("datetime2");
+                    b.Navigation("Feedback");
 
-                            b1.Property<string>("PostId")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(450)");
+                    b.Navigation("Itineraries");
 
-                            b1.Property<int>("Rating")
-                                .HasColumnType("int");
+                    b.Navigation("Reservations");
 
-                            b1.Property<string>("Text")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(2000)")
-                                .HasMaxLength(2000);
+                    b.Navigation("User");
 
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("FK_Post_Feedback_Users");
-
-                            b1.HasIndex("PostId");
-
-                            b1.ToTable("Post_Feedback","ug");
-
-                            b1.HasOne("UrGuide.Data.Entities.Users.User", "Author")
-                                .WithMany()
-                                .HasForeignKey("FK_Post_Feedback_Users")
-                                .OnDelete(DeleteBehavior.Cascade);
-
-                            b1.WithOwner()
-                                .HasForeignKey("PostId");
-                        });
+                    b.Navigation("UserReactions");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Regions.Region", b =>
@@ -1033,7 +1555,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasKey("RegionId");
 
-                            b1.ToTable("regions");
+                            b1.ToTable("regions", "ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("RegionId");
@@ -1055,11 +1577,23 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasKey("RegionId");
 
-                            b1.ToTable("regions");
+                            b1.ToTable("regions", "ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("RegionId");
                         });
+
+                    b.Navigation("Country");
+
+                    b.Navigation("Currency");
+
+                    b.Navigation("Flags");
+
+                    b.Navigation("PaymentMethod");
+
+                    b.Navigation("Stats");
+
+                    b.Navigation("Timeline");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Shared.ImageCatalog", b =>
@@ -1075,8 +1609,9 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("int")
-                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
 
                             b1.Property<string>("Name")
                                 .HasColumnType("nvarchar(max)");
@@ -1086,7 +1621,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasKey("ImageCatalogId", "Id");
 
-                            b1.ToTable("Image_Catalogs_Attributes");
+                            b1.ToTable("Image_Catalogs_Attributes", "ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("ImageCatalogId");
@@ -1101,8 +1636,8 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("ImageUrl")
                                 .IsRequired()
-                                .HasColumnName("FileBase64")
-                                .HasColumnType("nvarchar(max)");
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("FileBase64");
 
                             b1.Property<string>("Image_CatalogId")
                                 .IsRequired()
@@ -1117,7 +1652,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasIndex("Image_CatalogId");
 
-                            b1.ToTable("Image_Catalog_Files","ug");
+                            b1.ToTable("Image_Catalog_Files", "ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("Image_CatalogId");
@@ -1126,16 +1661,17 @@ namespace UrGuide.Data.Migrations
                                 {
                                     b2.Property<int>("Id")
                                         .ValueGeneratedOnAdd()
-                                        .HasColumnType("int")
-                                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                                        .HasColumnType("int");
+
+                                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b2.Property<int>("Id"));
 
                                     b2.Property<string>("FileId")
                                         .HasColumnType("nvarchar(450)");
 
                                     b2.Property<string>("Name")
                                         .IsRequired()
-                                        .HasColumnType("nvarchar(200)")
-                                        .HasMaxLength(200);
+                                        .HasMaxLength(200)
+                                        .HasColumnType("nvarchar(200)");
 
                                     b2.Property<string>("Value")
                                         .IsRequired()
@@ -1145,12 +1681,20 @@ namespace UrGuide.Data.Migrations
 
                                     b2.HasIndex("FileId");
 
-                                    b2.ToTable("File_Attributes","ug");
+                                    b2.ToTable("File_Attributes", "ug");
 
                                     b2.WithOwner()
                                         .HasForeignKey("FileId");
                                 });
+
+                            b1.Navigation("Attributes");
                         });
+
+                    b.Navigation("Attributes");
+
+                    b.Navigation("Images");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Tour.Booking", b =>
@@ -1178,6 +1722,14 @@ namespace UrGuide.Data.Migrations
                     b.HasOne("UrGuide.Data.Entities.Tour.Tour", null)
                         .WithMany("Bookings")
                         .HasForeignKey("TourId1");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Region");
+
+                    b.Navigation("Subscription");
+
+                    b.Navigation("Tour");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Tour.Campain", b =>
@@ -1191,6 +1743,8 @@ namespace UrGuide.Data.Migrations
                     b.HasOne("UrGuide.Data.Entities.Regions.Timeline", null)
                         .WithMany("Campains")
                         .HasForeignKey("TimelineId");
+
+                    b.Navigation("Region");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Tour.Review", b =>
@@ -1204,6 +1758,8 @@ namespace UrGuide.Data.Migrations
                     b.HasOne("UrGuide.Data.Entities.Tour.Tour", null)
                         .WithMany("Reviews")
                         .HasForeignKey("TourId");
+
+                    b.Navigation("Author");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Tour.Subscription", b =>
@@ -1228,12 +1784,12 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("CardHolderName")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(200)")
-                                .HasMaxLength(200);
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
 
                             b1.Property<string>("CardNumber")
-                                .HasColumnType("nvarchar(16)")
-                                .HasMaxLength(16);
+                                .HasMaxLength(16)
+                                .HasColumnType("nvarchar(16)");
 
                             b1.Property<byte>("ExpiryMonth")
                                 .HasColumnType("tinyint");
@@ -1243,11 +1799,17 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasKey("SubscriptionId");
 
-                            b1.ToTable("subscriptions");
+                            b1.ToTable("subscriptions", "ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("SubscriptionId");
                         });
+
+                    b.Navigation("Author");
+
+                    b.Navigation("CreditCard");
+
+                    b.Navigation("Region");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Tour.Tour", b =>
@@ -1277,13 +1839,13 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("Description")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(4000)")
-                                .HasMaxLength(4000);
+                                .HasMaxLength(4000)
+                                .HasColumnType("nvarchar(4000)");
 
                             b1.Property<string>("ImageUrl")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(2000)")
-                                .HasMaxLength(2000);
+                                .HasMaxLength(2000)
+                                .HasColumnType("nvarchar(2000)");
 
                             b1.Property<double?>("Latitude")
                                 .HasColumnType("float");
@@ -1293,8 +1855,8 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("Title")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(200)")
-                                .HasMaxLength(200);
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
 
                             b1.Property<string>("TourId")
                                 .IsRequired()
@@ -1304,7 +1866,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasIndex("TourId");
 
-                            b1.ToTable("tours_map_pins","ug");
+                            b1.ToTable("tours_map_pins", "ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("TourId");
@@ -1329,7 +1891,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasIndex("TourId");
 
-                            b1.ToTable("tour_reactions","ug");
+                            b1.ToTable("tour_reactions", "ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("TourId");
@@ -1360,7 +1922,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasKey("TourId");
 
-                            b1.ToTable("tours");
+                            b1.ToTable("tours", "ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("TourId");
@@ -1397,11 +1959,42 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasKey("TourId");
 
-                            b1.ToTable("tours");
+                            b1.ToTable("tours", "ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("TourId");
                         });
+
+                    b.Navigation("Author");
+
+                    b.Navigation("MapPins");
+
+                    b.Navigation("Reactions");
+
+                    b.Navigation("Region");
+
+                    b.Navigation("Schedule");
+
+                    b.Navigation("Stats");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Tour.TourRequest", b =>
+                {
+                    b.HasOne("UrGuide.Data.Entities.Regions.Region", "Region")
+                        .WithMany()
+                        .HasForeignKey("RegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UrGuide.Data.Entities.Users.User", "Requester")
+                        .WithMany()
+                        .HasForeignKey("RequesterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Region");
+
+                    b.Navigation("Requester");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Users.Author", b =>
@@ -1424,7 +2017,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasKey("AuthorId");
 
-                            b1.ToTable("authors");
+                            b1.ToTable("authors", "ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("AuthorId");
@@ -1440,27 +2033,35 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("FirstName")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(200)")
-                                .HasMaxLength(200);
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
 
                             b1.Property<string>("ImageUrl")
-                                .HasColumnType("nvarchar(2000)")
-                                .HasMaxLength(2000);
+                                .HasMaxLength(2000)
+                                .HasColumnType("nvarchar(2000)");
 
                             b1.Property<string>("PhoneNumber")
-                                .HasColumnType("nvarchar(20)")
-                                .HasMaxLength(20);
+                                .HasMaxLength(20)
+                                .HasColumnType("nvarchar(20)");
 
                             b1.Property<DateTime>("UpdatedAt")
                                 .HasColumnType("datetime2");
 
                             b1.HasKey("AuthorId");
 
-                            b1.ToTable("authors");
+                            b1.ToTable("authors", "ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("AuthorId");
                         });
+
+                    b.Navigation("Activity");
+
+                    b.Navigation("Balance");
+
+                    b.Navigation("ProfileInfo");
+
+                    b.Navigation("Subscription");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Users.Balance", b =>
@@ -1470,40 +2071,23 @@ namespace UrGuide.Data.Migrations
                         .HasForeignKey("RegionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Region");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Users.DataExportRequest", b =>
+                {
+                    b.HasOne("UrGuide.Data.Entities.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Users.User", b =>
                 {
-                    b.OwnsMany("UrGuide.Core.Attributes.GenericAttribute", "Attributes", b1 =>
-                        {
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int")
-                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(200)")
-                                .HasMaxLength(200);
-
-                            b1.Property<string>("UserId")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(450)");
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("UserId");
-
-                            b1.ToTable("User_Attributes","ug");
-
-                            b1.WithOwner()
-                                .HasForeignKey("UserId");
-                        });
-
                     b.OwnsOne("UrGuide.Data.Entities.Users.Image", "ProfileImage", b1 =>
                         {
                             b1.Property<string>("Id")
@@ -1513,8 +2097,8 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("ImageUrl")
                                 .IsRequired()
-                                .HasColumnName("ImageBase64")
-                                .HasColumnType("nvarchar(max)");
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("ImageBase64");
 
                             b1.Property<string>("UserId")
                                 .IsRequired()
@@ -1526,7 +2110,7 @@ namespace UrGuide.Data.Migrations
                             b1.HasIndex("UserId")
                                 .IsUnique();
 
-                            b1.ToTable("User_Images","ug");
+                            b1.ToTable("User_Images", "ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");
@@ -1541,8 +2125,8 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("Content")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(500)")
-                                .HasMaxLength(500);
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
 
                             b1.Property<DateTime>("Created")
                                 .HasColumnType("datetime2");
@@ -1557,8 +2141,8 @@ namespace UrGuide.Data.Migrations
                                 .HasColumnType("bit");
 
                             b1.Property<string>("ReferenceLink")
-                                .HasColumnType("nvarchar(1000)")
-                                .HasMaxLength(1000);
+                                .HasMaxLength(1000)
+                                .HasColumnType("nvarchar(1000)");
 
                             b1.Property<string>("UserId")
                                 .IsRequired()
@@ -1570,11 +2154,44 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasIndex("UserId");
 
-                            b1.ToTable("User_Notifications","ug");
+                            b1.ToTable("User_Notifications", "ug");
 
                             b1.HasOne("UrGuide.Data.Entities.Users.User", "Sender")
                                 .WithMany()
                                 .HasForeignKey("FK_User_Notification_Users");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+
+                            b1.Navigation("Sender");
+                        });
+
+                    b.OwnsMany("UrGuide.Core.Attributes.GenericAttribute", "Attributes", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
+
+                            b1.Property<string>("UserId")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("UserId");
+
+                            b1.ToTable("User_Attributes", "ug");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");
@@ -1601,8 +2218,8 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("Text")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(2000)")
-                                .HasMaxLength(2000);
+                                .HasMaxLength(2000)
+                                .HasColumnType("nvarchar(2000)");
 
                             b1.Property<string>("UserId")
                                 .IsRequired()
@@ -1615,7 +2232,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.HasIndex("UserId");
 
-                            b1.ToTable("User_Feedback","ug");
+                            b1.ToTable("User_Feedback", "ug");
 
                             b1.HasOne("UrGuide.Data.Entities.Users.User", "Author")
                                 .WithMany()
@@ -1623,7 +2240,41 @@ namespace UrGuide.Data.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");
+
+                            b1.Navigation("Author");
                         });
+
+                    b.Navigation("Attributes");
+
+                    b.Navigation("Feedback");
+
+                    b.Navigation("Notifications");
+
+                    b.Navigation("ProfileImage");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Regions.Country", b =>
+                {
+                    b.Navigation("Regions");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Regions.Timeline", b =>
+                {
+                    b.Navigation("Campains");
+
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Shared.ImageCatalog", b =>
+                {
+                    b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("UrGuide.Data.Entities.Tour.Tour", b =>
+                {
+                    b.Navigation("Bookings");
+
+                    b.Navigation("Reviews");
                 });
 #pragma warning restore 612, 618
         }
