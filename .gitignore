@@ -21,6 +21,9 @@ build/
 bld/
 [Bb]in/
 [Oo]bj/
+# Also exclude Windows-style bin paths
+**/bin\*/
+**/obj\*/
 
 # .NET Core build artifacts
 project.lock.json
