@@ -8,6 +8,7 @@ using UrGuide.Model;
 using UrGuide.Model.Shared;
 using UrGuide.Services.Auditing.Command;
 using UrGuide.Services.Catalogs;
+using UrGuide.Services.DataExport;
 using UrGuide.Services.Feedback;
 using UrGuide.Services.Lookup;
 using UrGuide.Services.Media;
@@ -38,6 +39,9 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<IPaymentService, PaymentService>();
             services.AddTransient<IPayoutService, PayoutService>();
             services.AddTransient<IRefundService, RefundService>();
+            
+            // Data export service
+            services.AddTransient<Contracts.IDataExportService, DataExport.DataExportService>();
 
             // Validation
 
