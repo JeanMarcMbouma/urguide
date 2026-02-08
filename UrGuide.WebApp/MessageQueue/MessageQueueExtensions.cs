@@ -1,8 +1,10 @@
 using System;
+using System.Linq;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
 using UrGuide.WebApp.MessageQueue.Consumers;
 using UrGuide.WebApp.MessageQueue.Services;
 using UrGuide.Shared.Contracts;
@@ -89,10 +91,47 @@ public static class MessageQueueExtensions
             });
         });
 
-        // Replace synchronous services with queued versions
+        // Replace synchronous services with queued versions using decorator pattern
         // Note: Consumers will resolve the concrete synchronous service, not the queued one
+        
+        // For IEmailService: simply replace with queued version (consumers use concrete EmailService)
         services.AddTransient<IEmailService, QueuedEmailService>();
-        services.AddTransient<QueuedNotificationService>();
+        
+        // For IUserNotificationService: manually implement decorator pattern
+        // Find the existing registration
+        var existingDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IUserNotificationService));
+        if (existingDescriptor != null)
+        {
+            // Remove the existing registration
+            services.Remove(existingDescriptor);
+            
+            // Register the inner service with a factory that creates the original implementation
+            services.Add(new ServiceDescriptor(
+                typeof(IUserNotificationService),
+                sp =>
+                {
+                    // Create the original service using its registered implementation
+                    IUserNotificationService innerService;
+                    if (existingDescriptor.ImplementationInstance != null)
+                    {
+                        innerService = (IUserNotificationService)existingDescriptor.ImplementationInstance;
+                    }
+                    else if (existingDescriptor.ImplementationFactory != null)
+                    {
+                        innerService = (IUserNotificationService)existingDescriptor.ImplementationFactory(sp);
+                    }
+                    else
+                    {
+                        innerService = (IUserNotificationService)ActivatorUtilities.CreateInstance(sp, existingDescriptor.ImplementationType!);
+                    }
+                    
+                    // Wrap it in the decorator
+                    var publishEndpoint = sp.GetRequiredService<IPublishEndpoint>();
+                    var logger = sp.GetRequiredService<ILogger<QueuedNotificationService>>();
+                    return new QueuedNotificationService(publishEndpoint, innerService, logger);
+                },
+                existingDescriptor.Lifetime));
+        }
 
         return services;
     }
