@@ -133,16 +133,12 @@ The docker-compose.yml includes:
 
 ## Known Limitations
 
-1. **Avatar URL Persistence**
-   - Avatar images are processed but URL is not automatically persisted to User entity
-   - Workarounds: Add ProfilePictureUrl property, use generic attributes, or create UserProfile table
-
-2. **Fire-and-Forget Pattern**
+1. **Fire-and-Forget Pattern**
    - `QueuedImageService` uses fire-and-forget for void/string return methods
    - Acceptable because RabbitMQ provides persistence and retry mechanisms
    - Breaking interface changes would be required for full async/await
 
-3. **Message Loss Risk**
+2. **Message Loss Risk**
    - Application termination before publish completes could lose messages
    - Mitigated by RabbitMQ persistence and MassTransit's reliable messaging
    - Consider application graceful shutdown handling for production

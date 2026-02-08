@@ -53,16 +53,29 @@ public class ProcessImageConsumer : IConsumer<ProcessImageMessage>
                         var imageUrl = _imageService.SaveAvatar(message.UserId, 
                             new Model.Shared.ImageFileModel { ImageBase64 = message.Base64Image });
                         
-                        // NOTE: The avatar URL is generated but not automatically persisted to database.
-                        // The User entity in this codebase doesn't have a direct ProfilePictureUrl property.
-                        // Avatar images are stored on disk and referenced via the ImageUrl pattern.
-                        // Full implementation would require:
-                        // 1. Adding a ProfilePictureUrl property to User entity, OR
-                        // 2. Using generic attributes to store the URL, OR
-                        // 3. Creating a separate UserProfile table
-                        
-                        _logger.LogInformation("Successfully processed avatar for user {UserId}, URL: {ImageUrl}", 
-                            message.UserId, imageUrl);
+                        // Update the user's ProfileImage in the database
+                        var user = await _context.Users.FindAsync(new[] { message.UserId });
+                        if (user != null)
+                        {
+                            if (user.ProfileImage == null)
+                            {
+                                user.ProfileImage = new UrGuide.Data.Entities.Users.Image
+                                {
+                                    ImageUrl = imageUrl
+                                };
+                            }
+                            else
+                            {
+                                user.ProfileImage.ImageUrl = imageUrl;
+                            }
+                            await _context.SaveChangesAsync();
+                            _logger.LogInformation("Successfully processed and persisted avatar for user {UserId}, URL: {ImageUrl}", 
+                                message.UserId, imageUrl);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("User {UserId} not found, avatar URL not persisted", message.UserId);
+                        }
                     }
                     break;
             }
