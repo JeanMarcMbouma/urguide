@@ -31,27 +31,21 @@ namespace UrGuide.Services.DataExport
             UrGuideContext context,
             IUserContext userContext,
             ILogger<DataExportService> logger,
-            IMapper mapper,
             IEmailService emailService,
-            IConfiguration configuration,
-            IWebHelper webHelper)
+            IConfiguration configuration)
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
             UserContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             EmailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            WebHelper = webHelper ?? throw new ArgumentNullException(nameof(webHelper));
         }
 
         public UrGuideContext Context { get; }
         public IUserContext UserContext { get; }
         public ILogger<DataExportService> Logger { get; }
-        public IMapper Mapper { get; }
         public IEmailService EmailService { get; }
         public IConfiguration Configuration { get; }
-        public IWebHelper WebHelper { get; }
 
         public async Task<Result<DataExportResponse>> RequestExportAsync(DataExportRequestModel request, CancellationToken cancellationToken)
         {
@@ -84,7 +78,7 @@ namespace UrGuide.Services.DataExport
                     Status = DataExportStatus.Pending,
                     Format = format,
                     RequestedAt = DateTime.UtcNow,
-                    ExpiresAt = DateTime.UtcNow.AddDays(ExpirationDays)
+                    ExpiresAt = DateTime.UtcNow.AddDays(ExpirationDays) // Will be updated on completion
                 };
 
                 Context.DataExportRequests.Add(exportRequest);
@@ -255,8 +249,11 @@ namespace UrGuide.Services.DataExport
         {
             try
             {
+                // Only expire completed or failed exports that have passed their expiration date
                 var expiredExports = await Context.DataExportRequests
-                    .Where(x => x.ExpiresAt < DateTime.UtcNow && x.Status != DataExportStatus.Expired)
+                    .Where(x => x.ExpiresAt < DateTime.UtcNow 
+                            && x.Status != DataExportStatus.Expired
+                            && (x.Status == DataExportStatus.Completed || x.Status == DataExportStatus.Failed))
                     .ToListAsync(cancellationToken);
 
                 if (!expiredExports.Any())
@@ -308,15 +305,9 @@ namespace UrGuide.Services.DataExport
             var exportPath = GetExportPath();
             Directory.CreateDirectory(exportPath);
 
-            string filePath;
-            if (exportRequest.Format == DataExportFormat.Json)
-            {
-                filePath = await GenerateJsonExportAsync(userData, exportPath, exportRequest.UserId, cancellationToken);
-            }
-            else
-            {
-                filePath = await GenerateCsvExportAsync(userData, exportPath, exportRequest.UserId, cancellationToken);
-            }
+            string filePath = exportRequest.Format == DataExportFormat.Json
+                ? await GenerateJsonExportAsync(userData, exportPath, exportRequest.UserId, cancellationToken)
+                : await GenerateCsvExportAsync(userData, exportPath, exportRequest.UserId, cancellationToken);
 
             // Generate secure download token
             var downloadToken = GenerateSecureToken();
@@ -324,6 +315,7 @@ namespace UrGuide.Services.DataExport
             // Update export request
             exportRequest.Status = DataExportStatus.Completed;
             exportRequest.CompletedAt = DateTime.UtcNow;
+            exportRequest.ExpiresAt = DateTime.UtcNow.AddDays(ExpirationDays); // Set expiry 7 days from completion
             exportRequest.FilePath = filePath;
             exportRequest.FileSizeBytes = new FileInfo(filePath).Length;
             exportRequest.DownloadToken = downloadToken;
@@ -497,8 +489,8 @@ namespace UrGuide.Services.DataExport
                 .Select(c => new
                 {
                     c.Id,
-                    Title = c.Attributes.FirstOrDefault(a => a.Name == "Title").Value ?? string.Empty,
-                    Description = c.Attributes.FirstOrDefault(a => a.Name == "Description").Value ?? string.Empty,
+                    Title = c.Attributes.FirstOrDefault(a => a.Name == "Title") != null ? c.Attributes.FirstOrDefault(a => a.Name == "Title").Value : string.Empty,
+                    Description = c.Attributes.FirstOrDefault(a => a.Name == "Description") != null ? c.Attributes.FirstOrDefault(a => a.Name == "Description").Value : string.Empty,
                     ImageCount = c.Images.Count,
                     c.Created
                 })
@@ -575,12 +567,12 @@ namespace UrGuide.Services.DataExport
             var filePath = Path.Combine(outputDir, "profile.csv");
             var csv = new StringBuilder();
             csv.AppendLine("Field,Value");
-            csv.AppendLine($"UserId,\"{userData.Account.UserId}\"");
-            csv.AppendLine($"Email,\"{userData.Account.Email}\"");
-            csv.AppendLine($"FirstName,\"{userData.Profile.FirstName}\"");
-            csv.AppendLine($"LastName,\"{userData.Profile.LastName}\"");
-            csv.AppendLine($"City,\"{userData.Profile.City}\"");
-            csv.AppendLine($"Country,\"{userData.Profile.Country}\"");
+            csv.AppendLine($"UserId,\"{EscapeCsv(userData.Account.UserId)}\"");
+            csv.AppendLine($"Email,\"{EscapeCsv(userData.Account.Email)}\"");
+            csv.AppendLine($"FirstName,\"{EscapeCsv(userData.Profile.FirstName)}\"");
+            csv.AppendLine($"LastName,\"{EscapeCsv(userData.Profile.LastName)}\"");
+            csv.AppendLine($"City,\"{EscapeCsv(userData.Profile.City)}\"");
+            csv.AppendLine($"Country,\"{EscapeCsv(userData.Profile.Country)}\"");
             csv.AppendLine($"Description,\"{EscapeCsv(userData.Profile.Description)}\"");
             csv.AppendLine($"IsGuide,\"{userData.Account.IsGuide}\"");
             csv.AppendLine($"IsPremium,\"{userData.Account.IsPremium}\"");

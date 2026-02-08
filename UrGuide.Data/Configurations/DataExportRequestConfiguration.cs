@@ -8,7 +8,7 @@ namespace UrGuide.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<DataExportRequest> builder)
         {
-            builder.ToTable("DataExportRequests");
+            builder.ToTable("DataExportRequests", Constants.Schema);
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id).HasMaxLength(128);
             
@@ -27,7 +27,9 @@ namespace UrGuide.Data.Configurations
                    .OnDelete(DeleteBehavior.Cascade);
             
             builder.HasIndex(x => x.UserId);
-            builder.HasIndex(x => x.DownloadToken).IsUnique(false);
+            builder.HasIndex(x => x.DownloadToken)
+                   .IsUnique()
+                   .HasFilter("[DownloadToken] IS NOT NULL");
             builder.HasIndex(x => x.Status);
             builder.HasIndex(x => x.ExpiresAt);
         }

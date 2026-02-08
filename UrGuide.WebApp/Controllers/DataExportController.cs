@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Model.Users;
@@ -82,6 +83,7 @@ namespace UrGuide.WebApp.Controllers
         [HttpGet("download/{token}")]
         [AllowAnonymous] // Allow anonymous access with secure token
         [ProducesResponseType(200)]
+        [ProducesResponseType(200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         public async Task<IActionResult> DownloadExport(string token, CancellationToken cancellationToken)
@@ -89,14 +91,20 @@ namespace UrGuide.WebApp.Controllers
             var result = await DataExportService.DownloadExportAsync(token, cancellationToken);
             
             if (result.HasError)
+            {
+                // Check if error indicates invalid token/not ready (BadRequest) vs not found
+                var errorMessage = result.Errors.FirstOrDefault() ?? string.Empty;
+                if (errorMessage.Contains("not ready") || errorMessage.Contains("invalid"))
+                    return BadRequest(ErrorEnvelop.Create(result.Errors));
                 return NotFound(ErrorEnvelop.Create(result.Errors));
+            }
 
-            var (filePath, fileName, fileSize) = result.Data;
+            var (filePath, fileName, _) = result.Data;
 
             // Determine content type
             var contentType = fileName.EndsWith(".json") ? "application/json" : "application/zip";
 
-            // Return file for download
+            // Return file for download - FileStreamResult will dispose the stream
             var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true);
             return File(fileStream, contentType, fileName);
         }
