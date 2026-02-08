@@ -314,25 +314,48 @@ Automatically generate client SDKs for .NET, JavaScript/TypeScript, Python, and 
 ### 11. GDPR Compliance - Data Export
 **Title:** Implement GDPR-compliant data export functionality  
 **Labels:** enhancement, compliance, privacy  
+**Status:** ✅ **COMPLETED**  
 **Description:**
 Allow users to export all their personal data in machine-readable format for GDPR compliance.
 
-**Requirements:**
-- Export user profile data
-- Export activity history
-- Export reviews and feedback
-- Export tour history
-- JSON and CSV formats
-- Secure download mechanism
-- Email notification when export is ready
+**Implemented:**
+- ✅ DataExportRequest entity for tracking export requests
+- ✅ Comprehensive data export service with JSON and CSV support
+- ✅ API endpoints for requesting, checking status, and downloading exports
+- ✅ Email notifications when export is ready
+- ✅ Secure download tokens with 7-day expiration
+- ✅ Background service for processing exports and cleanup
+- ✅ Database migration for DataExportRequests table
+
+**API Endpoints:**
+- `POST /api/dataexport/request` - Request data export (JSON or CSV format)
+- `GET /api/dataexport/status/{requestId}` - Check export status
+- `GET /api/dataexport/download/{token}` - Download export file (secure token-based)
+- `DELETE /api/dataexport/{requestId}` - Cancel pending export
+
+**Exported Data Includes:**
+- User profile information
+- Account metadata (email, creation date, last activity)
+- Activity history (audit events)
+- Given feedback/reviews
+- Received feedback/reviews
+- Tour posts
+- Tour requests
+- Bids on tours
+- Image galleries/catalogs
+- Notifications
+
+**Export Formats:**
+- **JSON**: Single JSON file with all user data
+- **CSV**: ZIP archive containing multiple CSV files for different data types
 
 **Acceptance Criteria:**
-- [ ] Users can request data export
-- [ ] All personal data is included
-- [ ] Export is in JSON/CSV format
-- [ ] Download link is secure
-- [ ] Email notification is sent
-- [ ] Export expires after 7 days
+- [x] Users can request data export
+- [x] All personal data is included
+- [x] Export is in JSON/CSV format
+- [x] Download link is secure (token-based)
+- [x] Email notification is sent
+- [x] Export expires after 7 days
 
 ---
 
@@ -522,26 +545,27 @@ Implement multi-language support for API responses and error messages.
 **Total Issues: 18**
 
 **By Status:**
-- ✅ Completed: 4 (Docker Containerization, CI/CD Pipeline, Payment Integration, Two-Factor Authentication)
+- ✅ Completed: 5 (Docker Containerization, CI/CD Pipeline, Payment Integration, Two-Factor Authentication, GDPR Data Export)
 - 🚧 In Progress: 0
-- 📋 Pending: 14
+- 📋 Pending: 13
 
 **By Priority:**
 - High Priority: 0 (All completed: Payment Integration ✅, 2FA ✅)
 - Medium Priority: 9
-- Nice to Have: 5
-- ✅ Completed: 4
+- Nice to Have: 4
+- ✅ Completed: 5
 
 **By Category:**
 - Security & Authentication: 2 (1 completed: 2FA ✅, 1 pending: Social Login)
 - Monitoring & Observability: 2
 - Testing & Quality: 1
-- Features & Enhancements: 5
+- Features & Enhancements: 5 (1 completed: GDPR Data Export ✅, 4 pending)
 - Mobile & Integration: 2
 - Infrastructure: 2
 - Analytics & Reporting: 1
 - Localization: 1
 - DevOps: 2 (✅ Both completed)
 - Financial: 1 (✅ Payment Integration completed)
+- Compliance: 1 (✅ GDPR Data Export completed)
 
 These issues will be created in the GitHub repository to track progress on the UrGuide API platform.
