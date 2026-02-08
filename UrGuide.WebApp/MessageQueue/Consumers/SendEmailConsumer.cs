@@ -3,19 +3,20 @@ using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using UrGuide.WebApp.MessageQueue.Messages;
-using UrGuide.Shared.Contracts;
+using UrGuide.WebApp.Services;
 
 namespace UrGuide.WebApp.MessageQueue.Consumers;
 
 /// <summary>
 /// Consumer for processing email messages from the queue
+/// Uses concrete EmailService to avoid circular dependency with QueuedEmailService
 /// </summary>
 public class SendEmailConsumer : IConsumer<SendEmailMessage>
 {
-    private readonly IEmailService _emailService;
+    private readonly EmailService _emailService;
     private readonly ILogger<SendEmailConsumer> _logger;
 
-    public SendEmailConsumer(IEmailService emailService, ILogger<SendEmailConsumer> logger)
+    public SendEmailConsumer(EmailService emailService, ILogger<SendEmailConsumer> logger)
     {
         _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));

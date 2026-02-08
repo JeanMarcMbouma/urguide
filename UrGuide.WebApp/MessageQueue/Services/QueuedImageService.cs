@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using UrGuide.WebApp.MessageQueue.Messages;
@@ -10,13 +11,16 @@ namespace UrGuide.WebApp.MessageQueue.Services;
 
 /// <summary>
 /// Queue-based image service that publishes image processing messages to the message queue
+/// Deletion operations are not queued and will throw NotSupportedException
 /// </summary>
 public class QueuedImageService : IImageService
 {
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<QueuedImageService> _logger;
 
-    public QueuedImageService(IPublishEndpoint publishEndpoint, ILogger<QueuedImageService> logger)
+    public QueuedImageService(
+        IPublishEndpoint publishEndpoint,
+        ILogger<QueuedImageService> logger)
     {
         _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -36,12 +40,15 @@ public class QueuedImageService : IImageService
                 QueuedAt = DateTime.UtcNow
             };
 
-            // Fire and forget - we don't await this because:
-            // 1. SaveImage is a void method in the IImageService interface (non-breaking change requirement)
-            // 2. The message is published to RabbitMQ which has its own persistence and retry mechanisms
-            // 3. MassTransit handles the publish operation asynchronously in the background
-            // 4. Failures will be retried by RabbitMQ according to the configured retry policy
-            _ = _publishEndpoint.Publish(message);
+            // Synchronously publish to ensure message is queued before method returns
+            // This avoids potential message loss on fire-and-forget
+            var publishTask = _publishEndpoint.Publish(message);
+            publishTask.Wait(TimeSpan.FromSeconds(5));
+            
+            if (!publishTask.IsCompleted)
+            {
+                _logger.LogWarning("Publish operation timed out for image {ImageId}", imageFile.Id);
+            }
             
             _logger.LogInformation("Image processing queued successfully for {ImageId}", imageFile.Id);
         }
@@ -67,11 +74,14 @@ public class QueuedImageService : IImageService
                 QueuedAt = DateTime.UtcNow
             };
 
-            // Fire and forget - we don't await this because:
-            // 1. SaveAvatar returns a string (non-breaking change requirement)
-            // 2. The message is published to RabbitMQ which has its own persistence
-            // 3. We return a placeholder URL that will be updated once processing completes
-            _ = _publishEndpoint.Publish(message);
+            // Synchronously publish and wait for a short timeout
+            var publishTask = _publishEndpoint.Publish(message);
+            var completed = publishTask.Wait(TimeSpan.FromSeconds(5));
+            
+            if (!completed)
+            {
+                _logger.LogWarning("Publish operation timed out for avatar processing for user {UserId}", userId);
+            }
             
             _logger.LogInformation("Avatar processing queued successfully for user {UserId}", userId);
             
@@ -87,15 +97,23 @@ public class QueuedImageService : IImageService
 
     public void DeleteImage(UrGuide.Data.Entities.Shared.Image image)
     {
-        // Image deletion is not queued as it needs to be immediate
-        _logger.LogWarning("DeleteImage called on QueuedImageService - not implemented for async processing");
-        throw new NotImplementedException("Image deletion should use the synchronous ImageService");
+        // Image deletion is not supported in queued mode - it must be immediate
+        // Code paths that delete images should check if queued services are enabled
+        // and use synchronous deletion if needed
+        _logger.LogError("DeleteImage called on QueuedImageService for image {ImageId} - operation not supported in queued mode", image?.Id);
+        throw new NotSupportedException(
+            "Image deletion is not supported in queued mode. " +
+            "Use synchronous ImageService for immediate deletion operations.");
     }
 
     public void DeleteImages(ICollection<UrGuide.Data.Entities.Shared.Image> images)
     {
-        // Image deletion is not queued as it needs to be immediate
-        _logger.LogWarning("DeleteImages called on QueuedImageService - not implemented for async processing");
-        throw new NotImplementedException("Image deletion should use the synchronous ImageService");
+        // Image deletion is not supported in queued mode - it must be immediate
+        // Code paths that delete images should check if queued services are enabled
+        // and use synchronous deletion if needed
+        _logger.LogError("DeleteImages called on QueuedImageService for {Count} images - operation not supported in queued mode", images?.Count ?? 0);
+        throw new NotSupportedException(
+            "Image deletion is not supported in queued mode. " +
+            "Use synchronous ImageService for immediate deletion operations.");
     }
 }

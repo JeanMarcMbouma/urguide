@@ -19,11 +19,24 @@ public static class MessageQueueExtensions
         this IServiceCollection services, 
         IConfiguration configuration)
     {
+        var useQueuedServices = configuration.GetValue<bool>("MessageQueue:UseQueuedServices", false);
+        
+        // Only configure MassTransit/RabbitMQ if queued services are enabled
+        if (!useQueuedServices)
+        {
+            return services;
+        }
+
         var rabbitMqHost = configuration.GetValue<string>("RabbitMQ:Host") ?? "localhost";
         var rabbitMqVirtualHost = configuration.GetValue<string>("RabbitMQ:VirtualHost") ?? "/";
         var rabbitMqUsername = configuration.GetValue<string>("RabbitMQ:Username") ?? "guest";
-        var rabbitMqPassword = configuration.GetValue<string>("RabbitMQ:Password") ?? "guest";
-        var useQueuedServices = configuration.GetValue<bool>("MessageQueue:UseQueuedServices", false);
+        var rabbitMqPassword = configuration.GetValue<string>("RabbitMQ:Password");
+        
+        if (string.IsNullOrEmpty(rabbitMqPassword))
+        {
+            throw new InvalidOperationException(
+                "RabbitMQ:Password must be configured via environment variables or user secrets when MessageQueue:UseQueuedServices is enabled.");
+        }
 
         // Add MassTransit with RabbitMQ
         services.AddMassTransit(x =>
@@ -41,14 +54,7 @@ public static class MessageQueueExtensions
                     h.Password(rabbitMqPassword);
                 });
 
-                // Configure retry policy
-                cfg.UseMessageRetry(r => r.Intervals(
-                    TimeSpan.FromSeconds(5),
-                    TimeSpan.FromSeconds(15),
-                    TimeSpan.FromSeconds(30)
-                ));
-
-                // Configure dead letter queue
+                // Configure receive endpoints with retry policies (no global retry to avoid stacking)
                 cfg.ReceiveEndpoint("email-queue", e =>
                 {
                     e.ConfigureConsumer<SendEmailConsumer>(context);
@@ -79,20 +85,14 @@ public static class MessageQueueExtensions
                     ));
                 });
 
-                cfg.ConfigureEndpoints(context);
+                // Do not call ConfigureEndpoints - we've explicitly configured all endpoints above
             });
         });
 
-        // Optionally replace synchronous services with queued versions
-        if (useQueuedServices)
-        {
-            // Replace IEmailService with QueuedEmailService
-            services.AddTransient<IEmailService, QueuedEmailService>();
-            
-            // Note: We keep the original services available for direct/synchronous use cases
-            // Register the queued notification service
-            services.AddTransient<QueuedNotificationService>();
-        }
+        // Replace synchronous services with queued versions
+        // Note: Consumers will resolve the concrete synchronous service, not the queued one
+        services.AddTransient<IEmailService, QueuedEmailService>();
+        services.AddTransient<QueuedNotificationService>();
 
         return services;
     }
@@ -101,10 +101,24 @@ public static class MessageQueueExtensions
         this IHealthChecksBuilder builder,
         IConfiguration configuration)
     {
+        var enableMonitoring = configuration.GetValue<bool>("MessageQueue:EnableMonitoring", false);
+        var useQueuedServices = configuration.GetValue<bool>("MessageQueue:UseQueuedServices", false);
+        
+        // Only add RabbitMQ health checks if queued services and monitoring are enabled
+        if (!useQueuedServices || !enableMonitoring)
+        {
+            return builder;
+        }
+
         var rabbitMqHost = configuration.GetValue<string>("RabbitMQ:Host") ?? "localhost";
         var rabbitMqVirtualHost = configuration.GetValue<string>("RabbitMQ:VirtualHost") ?? "/";
         var rabbitMqUsername = configuration.GetValue<string>("RabbitMQ:Username") ?? "guest";
-        var rabbitMqPassword = configuration.GetValue<string>("RabbitMQ:Password") ?? "guest";
+        var rabbitMqPassword = configuration.GetValue<string>("RabbitMQ:Password");
+
+        if (string.IsNullOrEmpty(rabbitMqPassword))
+        {
+            return builder; // Skip health check if no password configured
+        }
 
         // RabbitMQ health check using connection factory
         builder.AddRabbitMQ(
@@ -117,7 +131,7 @@ public static class MessageQueueExtensions
                     UserName = rabbitMqUsername,
                     Password = rabbitMqPassword
                 };
-                // RabbitMQ.Client 7.0 uses async methods
+                // Use synchronous connection creation to avoid blocking issues
                 return factory.CreateConnectionAsync().GetAwaiter().GetResult();
             },
             name: "rabbitmq",

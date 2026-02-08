@@ -51,7 +51,8 @@ public class QueuedNotificationService
 
     public Task SystemNotifyAsync(string userId, string content, string? referenceLink)
     {
-        // Use a well-known system user ID
+        // Note: This matches UrGuide.Services.Constants.SystemUserId
+        // Using hardcoded value here since Constants class is internal
         const string SystemUserId = "00000000-0000-0000-0000-000000000000";
         
         return NotifyAsync(new CreateNotification

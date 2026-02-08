@@ -41,41 +41,58 @@ public class ProcessImageConsumer : IConsumer<ProcessImageMessage>
             {
                 case ImageProcessingType.PostImage:
                 case ImageProcessingType.CatalogImage:
-                    // For post images, they should be processed directly by the ImageService
-                    // when they are created, not asynchronously.
-                    // This path would be used if we want to defer processing
-                    _logger.LogInformation("Post image processing deferred for {ImageId}", message.ImageId);
-                    break;
+                    // For post and catalog images, processing is expected to happen synchronously
+                    // when they are created. If messages of these types reach this consumer, it
+                    // indicates a misconfiguration or missing implementation of asynchronous
+                    // processing for these types.
+                    _logger.LogError(
+                        "Unsupported image processing type {ProcessingType} for image {ImageId} in {Consumer}. " +
+                        "Post and catalog images must be processed synchronously or have explicit async handling implemented.",
+                        message.ProcessingType,
+                        message.ImageId,
+                        nameof(ProcessImageConsumer));
+                    throw new NotSupportedException(
+                        $"Processing type '{message.ProcessingType}' is not supported by {nameof(ProcessImageConsumer)}.");
 
                 case ImageProcessingType.Avatar:
-                    if (!string.IsNullOrEmpty(message.UserId) && !string.IsNullOrEmpty(message.Base64Image))
+                    if (string.IsNullOrEmpty(message.UserId) || string.IsNullOrEmpty(message.Base64Image))
                     {
-                        var imageUrl = _imageService.SaveAvatar(message.UserId, 
-                            new Model.Shared.ImageFileModel { ImageBase64 = message.Base64Image });
-                        
-                        // Update the user's ProfileImage in the database
-                        var user = await _context.Users.FindAsync(new[] { message.UserId });
-                        if (user != null)
+                        _logger.LogWarning(
+                            "Invalid avatar processing message for ImageId {ImageId}: missing required fields (UserIdMissing={UserIdMissing}, Base64ImageMissing={Base64ImageMissing}). UserId: {UserId}",
+                            message.ImageId,
+                            string.IsNullOrEmpty(message.UserId),
+                            string.IsNullOrEmpty(message.Base64Image),
+                            message.UserId);
+                        // Throw to move message to error queue for investigation
+                        throw new InvalidOperationException(
+                            $"Invalid avatar processing message: UserId and Base64Image are required. ImageId: {message.ImageId}");
+                    }
+                    
+                    var imageUrl = _imageService.SaveAvatar(message.UserId, 
+                        new Model.Shared.ImageFileModel { ImageBase64 = message.Base64Image });
+                    
+                    // Update the user's ProfileImage in the database
+                    var user = await _context.Users.FindAsync(new[] { message.UserId });
+                    if (user != null)
+                    {
+                        if (user.ProfileImage == null)
                         {
-                            if (user.ProfileImage == null)
+                            user.ProfileImage = new UrGuide.Data.Entities.Users.Image
                             {
-                                user.ProfileImage = new UrGuide.Data.Entities.Users.Image
-                                {
-                                    ImageUrl = imageUrl
-                                };
-                            }
-                            else
-                            {
-                                user.ProfileImage.ImageUrl = imageUrl;
-                            }
-                            await _context.SaveChangesAsync();
-                            _logger.LogInformation("Successfully processed and persisted avatar for user {UserId}, URL: {ImageUrl}", 
-                                message.UserId, imageUrl);
+                                ImageUrl = imageUrl
+                            };
                         }
                         else
                         {
-                            _logger.LogWarning("User {UserId} not found, avatar URL not persisted", message.UserId);
+                            user.ProfileImage.ImageUrl = imageUrl;
                         }
+                        await _context.SaveChangesAsync();
+                        _logger.LogInformation("Successfully processed and persisted avatar for user {UserId}, URL: {ImageUrl}", 
+                            message.UserId, imageUrl);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("User {UserId} not found, avatar URL not persisted", message.UserId);
                     }
                     break;
             }
