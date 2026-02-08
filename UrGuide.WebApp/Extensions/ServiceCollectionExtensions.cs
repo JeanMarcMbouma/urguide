@@ -4,6 +4,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -58,6 +59,16 @@ namespace UrGuide.WebApp.Extensions
                 options.Origins = new HashSet<string> { applicationUri };
                 options.TimestampDriftTolerance = 300000; // 5 minutes
             });
+            
+            // Configure Data Protection for encrypting sensitive data (e.g., 2FA secrets)
+            // Keys are persisted to the file system for production use
+            // In production, consider using Azure Key Vault or other secure key storage
+            var dataProtectionPath = configuration.GetValue<string>("DataProtection:KeyPath") 
+                ?? System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "keys");
+            
+            services.AddDataProtection()
+                .SetApplicationName("UrGuide")
+                .PersistKeysToFileSystem(new System.IO.DirectoryInfo(dataProtectionPath));
             
             services.AddDbContext<UrGuideAuthContext>(options =>
                 options.UseSqlServer(
@@ -153,7 +164,7 @@ namespace UrGuide.WebApp.Extensions
                     AllowedGrantTypes = Duende.IdentityServer.Models.GrantTypes.Code,
                     ClientSecrets =
                     {
-                        new Secret(xamarinClientSecret.Sha256())
+                        new Duende.IdentityServer.Models.Secret(xamarinClientSecret.Sha256())
                     },
                     RedirectUris = { xamarin },
                     RequireConsent = false,

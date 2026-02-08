@@ -15,6 +15,7 @@
     <PackageReference Include="Duende.IdentityModel" Version="8.0.0" />
     <PackageReference Include="Fido2.AspNet" Version="3.0.1" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="10.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.2" />

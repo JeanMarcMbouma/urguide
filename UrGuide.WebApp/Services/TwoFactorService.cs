@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.DataProtection;
 using QRCoder;
 using System;
 using System.Collections.Generic;
@@ -25,12 +26,21 @@ namespace UrGuide.WebApp.Services
     public class TwoFactorService : ITwoFactorService
     {
         private readonly UserManager<UrGuideUser> _userManager;
+        private readonly IDataProtector _dataProtector;
         private const int BackupCodesCount = 10;
         private const int TotpWindow = 1; // Allow 1 step before/after current time
         
-        public TwoFactorService(UserManager<UrGuideUser> userManager)
+        public TwoFactorService(UserManager<UrGuideUser> userManager, IDataProtectionProvider dataProtectionProvider)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            
+            if (dataProtectionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(dataProtectionProvider));
+            }
+            
+            // Create a data protector with a specific purpose string for 2FA secrets
+            _dataProtector = dataProtectionProvider.CreateProtector("UrGuide.TwoFactorAuthentication.Secrets");
         }
         
         public async Task<(string secret, string qrCode, string manualKey)> GenerateQRCodeAsync(UrGuideUser user)
@@ -62,13 +72,24 @@ namespace UrGuide.WebApp.Services
                 return Task.FromResult(false);
             }
             
-            var isValid = ValidateTotpCode(user.TwoFactorSecret, code);
-            return Task.FromResult(isValid);
+            try
+            {
+                // Decrypt the stored secret before validating
+                var decryptedSecret = _dataProtector.Unprotect(user.TwoFactorSecret);
+                var isValid = ValidateTotpCode(decryptedSecret, code);
+                return Task.FromResult(isValid);
+            }
+            catch (CryptographicException)
+            {
+                // If decryption fails, the secret may be corrupted or tampered with
+                return Task.FromResult(false);
+            }
         }
         
         public async Task<bool> EnableTwoFactorAsync(UrGuideUser user, string secret)
         {
-            user.TwoFactorSecret = secret;
+            // Encrypt the secret before storing it in the database
+            user.TwoFactorSecret = _dataProtector.Protect(secret);
             user.TwoFactorEnabled = true;
             user.TwoFactorEnabledAt = DateTime.UtcNow;
             

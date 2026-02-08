@@ -10,6 +10,10 @@
 *.userosscache
 *.sln.docstates
 
+# Data Protection Keys (encryption keys should not be committed)
+keys/
+**/keys/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
