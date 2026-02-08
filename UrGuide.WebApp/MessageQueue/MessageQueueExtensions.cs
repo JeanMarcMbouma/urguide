@@ -97,35 +97,26 @@ public static class MessageQueueExtensions
         // For IEmailService: simply replace with queued version (consumers use concrete EmailService)
         services.AddTransient<IEmailService, QueuedEmailService>();
         
-        // For IUserNotificationService: manually implement decorator pattern
-        // Find the existing registration
+        // For IUserNotificationService: use decorator pattern without circular dependency
+        // Find the existing registration to capture its implementation type
         var existingDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IUserNotificationService));
-        if (existingDescriptor != null)
+        if (existingDescriptor != null && existingDescriptor.ImplementationType != null)
         {
-            // Remove the existing registration
+            var concreteType = existingDescriptor.ImplementationType;
+            
+            // Remove the existing interface registration
             services.Remove(existingDescriptor);
             
-            // Register the inner service with a factory that creates the original implementation
+            // Register the concrete type directly (this won't cause circular dependency)
+            services.Add(new ServiceDescriptor(concreteType, concreteType, existingDescriptor.Lifetime));
+            
+            // Register the decorator as IUserNotificationService
             services.Add(new ServiceDescriptor(
                 typeof(IUserNotificationService),
                 sp =>
                 {
-                    // Create the original service using its registered implementation
-                    IUserNotificationService innerService;
-                    if (existingDescriptor.ImplementationInstance != null)
-                    {
-                        innerService = (IUserNotificationService)existingDescriptor.ImplementationInstance;
-                    }
-                    else if (existingDescriptor.ImplementationFactory != null)
-                    {
-                        innerService = (IUserNotificationService)existingDescriptor.ImplementationFactory(sp);
-                    }
-                    else
-                    {
-                        innerService = (IUserNotificationService)ActivatorUtilities.CreateInstance(sp, existingDescriptor.ImplementationType!);
-                    }
-                    
-                    // Wrap it in the decorator
+                    // Resolve the concrete NotificationService (not via interface)
+                    var innerService = (IUserNotificationService)sp.GetRequiredService(concreteType);
                     var publishEndpoint = sp.GetRequiredService<IPublishEndpoint>();
                     var logger = sp.GetRequiredService<ILogger<QueuedNotificationService>>();
                     return new QueuedNotificationService(publishEndpoint, innerService, logger);
