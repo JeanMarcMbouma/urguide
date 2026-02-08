@@ -83,7 +83,6 @@ namespace UrGuide.WebApp.Controllers
         [HttpGet("download/{token}")]
         [AllowAnonymous] // Allow anonymous access with secure token
         [ProducesResponseType(200)]
-        [ProducesResponseType(200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         public async Task<IActionResult> DownloadExport(string token, CancellationToken cancellationToken)

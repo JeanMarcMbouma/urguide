@@ -252,7 +252,6 @@ namespace UrGuide.Services.DataExport
                 // Only expire completed or failed exports that have passed their expiration date
                 var expiredExports = await Context.DataExportRequests
                     .Where(x => x.ExpiresAt < DateTime.UtcNow 
-                            && x.Status != DataExportStatus.Expired
                             && (x.Status == DataExportStatus.Completed || x.Status == DataExportStatus.Failed))
                     .ToListAsync(cancellationToken);
 
@@ -483,18 +482,25 @@ namespace UrGuide.Services.DataExport
             export.Posts = posts.Cast<object>().ToList();
 
             // Get galleries/catalogs
-            var galleries = await Context.ImageCatalogs
+            var galleriesRaw = await Context.ImageCatalogs
                 .Include(c => c.Images)
+                .Include(c => c.Attributes)
                 .Where(c => c.User.Id == userId)
-                .Select(c => new
+                .ToListAsync(cancellationToken);
+
+            var galleries = galleriesRaw.Select(c =>
+            {
+                var titleAttr = c.Attributes.FirstOrDefault(a => a.Name == "Title");
+                var descAttr = c.Attributes.FirstOrDefault(a => a.Name == "Description");
+                return new
                 {
                     c.Id,
-                    Title = c.Attributes.FirstOrDefault(a => a.Name == "Title") != null ? c.Attributes.FirstOrDefault(a => a.Name == "Title").Value : string.Empty,
-                    Description = c.Attributes.FirstOrDefault(a => a.Name == "Description") != null ? c.Attributes.FirstOrDefault(a => a.Name == "Description").Value : string.Empty,
+                    Title = titleAttr?.Value ?? string.Empty,
+                    Description = descAttr?.Value ?? string.Empty,
                     ImageCount = c.Images.Count,
                     c.Created
-                })
-                .ToListAsync(cancellationToken);
+                };
+            }).ToList();
 
             export.Galleries = galleries.Cast<object>().ToList();
 
