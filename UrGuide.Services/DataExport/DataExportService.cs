@@ -372,9 +372,7 @@ namespace UrGuide.Services.DataExport
                     UserId = user.Id,
                     Email = user.Email,
                     LastActivityDate = user.LastActivityDate,
-                    CreatedDate = user.Attributes.FirstOrDefault(a => a.Name == "CreatedDate")?.Value != null 
-                        ? DateTime.Parse(user.Attributes.FirstOrDefault(a => a.Name == "CreatedDate").Value) 
-                        : DateTime.MinValue,
+                    CreatedDate = ParseDateAttribute(user.Attributes.FirstOrDefault(a => a.Name == "CreatedDate")?.Value),
                     IsGuide = user.Attributes.Any(a => a.Name == "IsGuide" && a.Value == "True"),
                     IsPremium = user.Attributes.Any(a => a.Name == "IsPremium" && a.Value == "True")
                 }
@@ -499,8 +497,8 @@ namespace UrGuide.Services.DataExport
                 .Select(c => new
                 {
                     c.Id,
-                    Title = c.Attributes.FirstOrDefault(a => a.Name == "Title").Value,
-                    Description = c.Attributes.FirstOrDefault(a => a.Name == "Description").Value,
+                    Title = c.Attributes.FirstOrDefault(a => a.Name == "Title").Value ?? string.Empty,
+                    Description = c.Attributes.FirstOrDefault(a => a.Name == "Description").Value ?? string.Empty,
                     ImageCount = c.Images.Count,
                     c.Created
                 })
@@ -809,6 +807,14 @@ Download your data using the secure link below. This link will expire on {expiry
                 return string.Empty;
 
             return value.Replace("\"", "\"\"");
+        }
+
+        private DateTime ParseDateAttribute(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return DateTime.MinValue;
+
+            return DateTime.TryParse(value, out var date) ? date : DateTime.MinValue;
         }
     }
 }
