@@ -49,6 +49,11 @@ try
     builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
     builder.Services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
 
+    // Configure tiered rate limiting
+    builder.Services.Configure<UrGuide.WebApp.RateLimiting.RateLimitOptions>(builder.Configuration.GetSection("TieredRateLimit"));
+    builder.Services.AddSingleton<UrGuide.WebApp.RateLimiting.IRateLimitAnalyticsService, UrGuide.WebApp.RateLimiting.RateLimitAnalyticsService>();
+    builder.Services.AddMemoryCache(); // Required for rate limiting cache
+
     builder.Services.AddControllersWithViews(options => {
         options.Filters.Add(typeof(UrGuide.WebApp.Filters.EnvelopResultFilter));
         options.Filters.Add(typeof(UrGuide.WebApp.Filters.SaveChangeActionFilter));
@@ -184,6 +189,10 @@ try
     }
 
     app.UseIpRateLimiting();
+    
+    // Add tiered rate limiting middleware (after authentication so we can access user claims)
+    // Note: This will be applied after UseAuthentication() is called below
+    // For now, we'll add it later in the pipeline after authentication
 
     app.UseForwardedHeaders(new ForwardedHeadersOptions { 
         ForwardedHeaders = ForwardedHeaders.XForwardedProto
@@ -208,6 +217,9 @@ try
     app.UseAuthentication();
     app.UseIdentityServer();
     app.UseAuthorization();
+    
+    // Add tiered rate limiting middleware after authentication
+    app.UseMiddleware<UrGuide.WebApp.RateLimiting.TieredRateLimitMiddleware>();
 
     app.MapControllerRoute(
         name: "default",
