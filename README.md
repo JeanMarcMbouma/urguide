@@ -347,9 +347,16 @@ public async Task<IActionResult> Login([FromBody] LoginModel model)
 
 Certain endpoints and IP addresses can be exempt from rate limiting:
 - Endpoints marked with `[RateLimitExempt]` attribute
-- Internal service IP addresses (configurable in `appsettings.json`)
+- Internal service IP addresses (configurable in `appsettings.json` under `TieredRateLimit.Exemptions`)
 
-**Note:** Health check endpoints (such as `/health` and `/alive`) are not automatically exempt. To exclude them from rate limiting, apply `[RateLimitExempt]` to the corresponding actions or add them to the exemptions list in configuration.
+**Note:** Health check endpoints (such as `/health` and `/alive`) are not automatically exempt. To exclude them from rate limiting:
+1. Apply `[RateLimitExempt]` to the corresponding controller actions, OR
+2. Add the endpoint paths to the `TieredRateLimit.Exemptions` array in configuration:
+   ```json
+   "TieredRateLimit": {
+     "Exemptions": ["127.0.0.1", "::1", "/health", "/alive"]
+   }
+   ```
 
 #### Configuration
 

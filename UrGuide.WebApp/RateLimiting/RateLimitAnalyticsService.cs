@@ -14,6 +14,9 @@ namespace UrGuide.WebApp.RateLimiting
     {
         private readonly ILogger<RateLimitAnalyticsService> _logger;
         private readonly ConcurrentDictionary<string, ConcurrentBag<RateLimitEvent>> _events = new();
+        
+        // Threshold for logging warnings (80% of limit)
+        private const double LoggingThresholdPercentage = 0.8;
 
         public RateLimitAnalyticsService(ILogger<RateLimitAnalyticsService> logger)
         {
@@ -38,7 +41,7 @@ namespace UrGuide.WebApp.RateLimiting
             events.Add(eventData);
 
             // Only log violations and warnings, not every hit
-            if (currentCount > limit * 0.8) // Log when approaching limit
+            if (currentCount > limit * LoggingThresholdPercentage) // Log when approaching limit
             {
                 _logger.LogInformation("Rate limit approaching: User={UserId}, Endpoint={Endpoint}, Tier={Tier}, Count={CurrentCount}/{Limit}",
                     userId ?? "anonymous", endpoint, tier, currentCount, limit);

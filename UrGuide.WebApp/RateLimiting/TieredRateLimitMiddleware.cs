@@ -69,9 +69,9 @@ namespace UrGuide.WebApp.RateLimiting
             }
 
             // Get the applicable policy - use route pattern to avoid per-ID buckets
-            var routePattern = (endpoint as RouteEndpoint)?.RoutePattern?.RawText;
-            var endpointKey = !string.IsNullOrEmpty(routePattern) 
-                ? $"{context.Request.Method}:{routePattern}"
+            var routePatternText = (endpoint as RouteEndpoint)?.RoutePattern?.RawText;
+            var endpointKey = !string.IsNullOrEmpty(routePatternText) 
+                ? $"{context.Request.Method}:{routePatternText}"
                 : $"{context.Request.Method}:{context.Request.Path}";
             var policy = GetApplicablePolicy(endpoint, endpointKey, tier);
 
@@ -299,8 +299,8 @@ namespace UrGuide.WebApp.RateLimiting
                 return 0;
             }
 
-            // Return the number of whole seconds remaining, rounded up
-            return (int)Math.Ceiling(remaining.TotalSeconds);
+            // Return the number of whole seconds remaining, rounded up (defensive max to handle edge cases)
+            return Math.Max(0, (int)Math.Ceiling(remaining.TotalSeconds));
         }
     }
 }
