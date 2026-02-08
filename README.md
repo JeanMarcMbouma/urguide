@@ -209,14 +209,28 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
    }
    ```
 
-5. **Run database migrations**
+5. **(Optional) Start RabbitMQ for message queue**
+   
+   If you want to use the message queue features, start RabbitMQ using Docker:
+   ```bash
+   docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management-alpine
+   ```
+   
+   Or use the provided docker-compose file:
+   ```bash
+   docker-compose up -d rabbitmq
+   ```
+   
+   RabbitMQ Management UI will be available at: `http://localhost:15672` (guest/guest)
+
+6. **Run database migrations**
    
    The migrations will run automatically on application startup. Alternatively, run manually:
    ```bash
    dotnet ef database update --project UrGuide.WebApp
    ```
 
-6. **Build the project**
+7. **Build the project**
    ```bash
    dotnet build UrGuide.WebApp/UrGuide.WebApp.csproj
    ```
@@ -233,6 +247,28 @@ The API will be available at:
 - HTTPS: `https://localhost:5001`
 - Swagger UI: `https://localhost:5001/swagger`
 - Health Check: `https://localhost:5001/health`
+
+#### Using Docker Compose
+
+Start all services (SQL Server, RabbitMQ, and the API):
+```bash
+docker-compose up -d
+```
+
+This will start:
+- SQL Server on port `1433`
+- RabbitMQ on ports `5672` (AMQP) and `15672` (Management UI)
+- UrGuide API on port `5000`
+
+Access services:
+- API: `http://localhost:5000`
+- API Health: `http://localhost:5000/health`
+- RabbitMQ Management: `http://localhost:15672` (guest/guest)
+
+Stop all services:
+```bash
+docker-compose down
+```
 
 #### Production Mode
 ```bash
