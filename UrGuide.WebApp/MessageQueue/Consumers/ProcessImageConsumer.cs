@@ -92,10 +92,6 @@ public class ProcessImageConsumer : IConsumer<ProcessImageMessage>
                     }
                     else
                     {
-                        _logger.LogWarning("User {UserId} not found, avatar URL not persisted", message.UserId);
-                    }
-                    else
-                    {
                         _logger.LogWarning(
                             "Invalid avatar processing message for ImageId {ImageId}: missing required fields (UserIdMissing={UserIdMissing}, Base64ImageMissing={Base64ImageMissing}). UserId: {UserId}",
                             message.ImageId,
