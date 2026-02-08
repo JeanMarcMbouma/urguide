@@ -73,8 +73,8 @@ namespace UrGuide.Services.DataExport
                     return Result.Of<DataExportResponse>().WithErrors("You already have a pending export request. Please wait for it to complete.");
                 }
 
-                // Parse format
-                var format = ParseFormat(request.Format);
+                // Use format directly from request (already an enum)
+                var format = request.Format;
 
                 // Create new export request
                 var exportRequest = new DataExportRequest
@@ -739,8 +739,8 @@ Download your data using the secure link below. This link will expire on {expiry
             var response = new DataExportResponse
             {
                 RequestId = request.Id,
-                Status = request.Status.ToString(),
-                Format = request.Format.ToString(),
+                Status = request.Status,
+                Format = request.Format,
                 RequestedAt = request.RequestedAt,
                 CompletedAt = request.CompletedAt,
                 ExpiresAt = request.ExpiresAt,
@@ -753,19 +753,6 @@ Download your data using the secure link below. This link will expire on {expiry
             }
 
             return response;
-        }
-
-        private DataExportFormat ParseFormat(string format)
-        {
-            if (string.IsNullOrWhiteSpace(format))
-                return DataExportFormat.Json;
-
-            return format.ToUpperInvariant() switch
-            {
-                "JSON" => DataExportFormat.Json,
-                "CSV" => DataExportFormat.Csv,
-                _ => DataExportFormat.Json
-            };
         }
 
         private string GetFileExtension(DataExportFormat format)

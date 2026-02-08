@@ -1,4 +1,5 @@
 using System;
+using UrGuide.Data.Entities.Users;
 
 namespace UrGuide.Model.Users
 {
@@ -10,7 +11,7 @@ namespace UrGuide.Model.Users
         /// <summary>
         /// Export format (JSON or CSV)
         /// </summary>
-        public string Format { get; set; } = "JSON";
+        public DataExportFormat Format { get; set; } = DataExportFormat.Json;
     }
     
     /// <summary>
@@ -26,12 +27,12 @@ namespace UrGuide.Model.Users
         /// <summary>
         /// Current status of the export
         /// </summary>
-        public string Status { get; set; }
+        public DataExportStatus Status { get; set; }
         
         /// <summary>
         /// Format of the export (JSON or CSV)
         /// </summary>
-        public string Format { get; set; }
+        public DataExportFormat Format { get; set; }
         
         /// <summary>
         /// When the export was requested
