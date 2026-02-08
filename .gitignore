@@ -28,9 +28,6 @@ bld/
 # Also exclude Windows-style bin paths
 **/bin\*/
 **/obj\*/
-# Exclude bin and obj folders with any path separators
-**/bin/**
-**/obj/**
 
 # .NET Core build artifacts
 project.lock.json
@@ -118,4 +115,3 @@ docker-compose.override.local.yml
 # IdentityServer signing keys
 tempkey.jwk
 *.jwk
-# Note: Build artifacts (bin/obj folders) are excluded via .gitignore

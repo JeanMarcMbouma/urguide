@@ -15,7 +15,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UrGuide.Core\UrGuide.Core.csproj" />
-    <ProjectReference Include="..\UrGuide.Model\UrGuide.Model.csproj" />
   </ItemGroup>
 
 </Project>

@@ -28,9 +28,6 @@ namespace UrGuide.Data
         public virtual DbSet<Payout> Payouts { get; set; }
         public virtual DbSet<Refund> Refunds { get; set; }
         public virtual DbSet<PlatformFee> PlatformFees { get; set; }
-        
-        // Data export entities
-        public virtual DbSet<DataExportRequest> DataExportRequests { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
@@ -67,9 +64,6 @@ namespace UrGuide.Data
             modelBuilder.ApplyConfiguration(new Configurations.PayoutConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.RefundConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PlatformFeeConfiguration());
-            
-            // Data export configurations
-            modelBuilder.ApplyConfiguration(new Configurations.DataExportRequestConfiguration());
         }
     }
 }
