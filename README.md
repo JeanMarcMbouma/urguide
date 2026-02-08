@@ -16,6 +16,7 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
 - **Two-Factor Authentication**: Custom TOTP implementation with QR code generation (QRCoder 1.4.3)
 - **Passkey/WebAuthn**: Fido2.AspNet 3.0.1 for passwordless authentication
 - **Real-time Communication**: SignalR for notifications
+- **Message Queue**: MassTransit 8.3.4 with RabbitMQ for asynchronous processing
 - **API Documentation**: Swagger/OpenAPI 3.0 (Swashbuckle.AspNetCore 10.1)
 - **API Versioning**: Asp.Versioning.Mvc 8.1
 - **Validation**: FluentValidation 12.1
@@ -86,6 +87,13 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
 - [x] In-app messaging and alerts
 - [x] Email notification integration
 - [x] Activity tracking and user history
+- [x] **Message Queue Integration**: Asynchronous processing infrastructure
+  - Email sending via queue
+  - Image processing via queue
+  - Notification dispatch via queue
+  - Configurable retry policies
+  - Dead letter queue handling
+  - RabbitMQ health monitoring
 
 ### 📊 Administrative Features
 - [x] Complete action auditing system
@@ -201,14 +209,28 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
    }
    ```
 
-5. **Run database migrations**
+5. **(Optional) Start RabbitMQ for message queue**
+   
+   If you want to use the message queue features, start RabbitMQ using Docker:
+   ```bash
+   docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management-alpine
+   ```
+   
+   Or use the provided docker-compose file:
+   ```bash
+   docker-compose up -d rabbitmq
+   ```
+   
+   RabbitMQ Management UI will be available at: `http://localhost:15672` (guest/guest)
+
+6. **Run database migrations**
    
    The migrations will run automatically on application startup. Alternatively, run manually:
    ```bash
    dotnet ef database update --project UrGuide.WebApp
    ```
 
-6. **Build the project**
+7. **Build the project**
    ```bash
    dotnet build UrGuide.WebApp/UrGuide.WebApp.csproj
    ```
@@ -225,6 +247,28 @@ The API will be available at:
 - HTTPS: `https://localhost:5001`
 - Swagger UI: `https://localhost:5001/swagger`
 - Health Check: `https://localhost:5001/health`
+
+#### Using Docker Compose
+
+Start all services (SQL Server, RabbitMQ, and the API):
+```bash
+docker-compose up -d
+```
+
+This will start:
+- SQL Server on port `1433`
+- RabbitMQ on ports `5672` (AMQP) and `15672` (Management UI)
+- UrGuide API on port `5000`
+
+Access services:
+- API: `http://localhost:5000`
+- API Health: `http://localhost:5000/health`
+- RabbitMQ Management: `http://localhost:15672` (guest/guest)
+
+Stop all services:
+```bash
+docker-compose down
+```
 
 #### Production Mode
 ```bash
@@ -393,6 +437,98 @@ The system tracks rate limit usage and violations for monitoring and optimizatio
 - Endpoint usage patterns
 
 **Note:** Legacy IP-based rate limiting (`IpRateLimitPolicies`) has been disabled to avoid conflicts with the new tiered rate limiting system. The tiered system provides more granular control and better user experience.
+
+### Message Queue Integration
+
+The API implements asynchronous message processing using **MassTransit 8.3.4** with **RabbitMQ** for improved scalability and reliability.
+
+#### Features
+
+- **Email Sending**: Emails are queued for asynchronous delivery
+- **Image Processing**: Image resizing and optimization happen in the background
+- **Notifications**: Real-time notifications are dispatched via queue
+- **Retry Policies**: Automatic retry with exponential backoff for failed messages
+- **Dead Letter Queue**: Failed messages are moved to dead letter queue for investigation
+- **Health Monitoring**: RabbitMQ connection health is monitored via `/health` endpoint
+
+#### Configuration
+
+Configure RabbitMQ connection in `appsettings.json`:
+
+```json
+{
+  "RabbitMQ": {
+    "Host": "localhost",
+    "VirtualHost": "/",
+    "Username": "guest",
+    "Password": "guest"
+  },
+  "MessageQueue": {
+    "UseQueuedServices": false,
+    "EnableMonitoring": true
+  }
+}
+```
+
+#### Enable Queued Services
+
+By default, message queue infrastructure is configured but services still run synchronously. To enable async processing, set `MessageQueue:UseQueuedServices` to `true`:
+
+```json
+{
+  "MessageQueue": {
+    "UseQueuedServices": true
+  }
+}
+```
+
+This will:
+- Queue all email sending operations
+- Queue image processing operations
+- Queue notification dispatch operations
+
+#### Retry Policies
+
+The message queue implements automatic retry with the following intervals:
+
+- **Email Queue**: 5s, 15s, 30s
+- **Image Processing Queue**: 10s, 30s, 60s
+- **Notification Queue**: 5s, 15s, 30s
+
+After all retries are exhausted, failed messages are moved to the dead letter queue for manual investigation.
+
+#### Monitoring
+
+RabbitMQ health is included in the health check endpoint:
+
+```bash
+curl https://localhost:5001/health
+```
+
+Response includes RabbitMQ status:
+```json
+{
+  "status": "Healthy",
+  "entries": {
+    "auth-db": { "status": "Healthy" },
+    "data-db": { "status": "Healthy" },
+    "rabbitmq": { 
+      "status": "Healthy",
+      "description": "RabbitMQ is connected"
+    }
+  }
+}
+```
+
+#### Message Consumers
+
+Three dedicated consumers process messages:
+
+1. **SendEmailConsumer**: Processes email sending via SendGrid
+2. **ProcessImageConsumer**: Handles image resizing and optimization
+3. **SendNotificationConsumer**: Dispatches real-time notifications via SignalR
+
+
 
 ### Health Checks
 

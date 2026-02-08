@@ -22,6 +22,28 @@ services:
       retries: 10
       start_period: 30s
 
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: urguide-rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS:-guest}
+    ports:
+      - "5672:5672"    # AMQP port
+      - "15672:15672"  # Management UI port
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - urguide-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
   # UrGuide API
   api:
     build:
@@ -33,10 +55,15 @@ services:
       - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=urguide_data;User Id=sa;Password=$${SQL_SA_PASSWORD:-YourStrong@Passw0rd};TrustServerCertificate=True;MultipleActiveResultSets=true
       - ConnectionStrings__AuthConnection=Server=sqlserver;Database=urguide_id4;User Id=sa;Password=$${SQL_SA_PASSWORD:-YourStrong@Passw0rd};TrustServerCertificate=True;MultipleActiveResultSets=true
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Username=${RABBITMQ_USER:-guest}
+      - RabbitMQ__Password=${RABBITMQ_PASS:-guest}
     ports:
       - "5000:80"
     depends_on:
       sqlserver:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     volumes:
       - ./wwwroot/uploads:/app/wwwroot/uploads
@@ -53,6 +80,8 @@ services:
 
 volumes:
   sqlserver-data:
+    driver: local
+  rabbitmq-data:
     driver: local
 
 networks:
