@@ -1,4 +1,5 @@
 using System;
+using UrGuide.Model.Users;
 
 namespace UrGuide.Data.Entities.Users
 {
@@ -15,20 +16,5 @@ namespace UrGuide.Data.Entities.Users
         public string DownloadToken { get; set; }
         public string FilePath { get; set; }
         public long? FileSizeBytes { get; set; }
-    }
-
-    public enum DataExportStatus
-    {
-        Pending = 0,
-        Processing = 1,
-        Completed = 2,
-        Failed = 3,
-        Expired = 4
-    }
-
-    public enum DataExportFormat
-    {
-        Json = 0,
-        Csv = 1
     }
 }

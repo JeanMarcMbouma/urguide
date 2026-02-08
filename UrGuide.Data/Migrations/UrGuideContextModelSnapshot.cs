@@ -1102,7 +1102,9 @@ namespace UrGuide.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DownloadToken");
+                    b.HasIndex("DownloadToken")
+                        .IsUnique()
+                        .HasFilter("[DownloadToken] IS NOT NULL");
 
                     b.HasIndex("ExpiresAt");
 
@@ -1110,7 +1112,7 @@ namespace UrGuide.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("DataExportRequests", (string)null);
+                    b.ToTable("DataExportRequests", "ug");
                 });
 
             modelBuilder.Entity("UrGuide.Data.Entities.Users.User", b =>

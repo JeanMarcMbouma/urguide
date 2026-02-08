@@ -598,7 +598,7 @@ namespace UrGuide.Services.DataExport
 
             foreach (dynamic activity in userData.ActivityHistory)
             {
-                csv.AppendLine($"\"{activity.EventCode}\",\"{activity.ReferenceId}\",\"{activity.Created:O}\"");
+                csv.AppendLine($"\"{EscapeCsv(activity.EventCode)}\",\"{EscapeCsv(activity.ReferenceId)}\",\"{activity.Created:O}\"");
             }
 
             await File.WriteAllTextAsync(filePath, csv.ToString(), cancellationToken);
@@ -630,7 +630,7 @@ namespace UrGuide.Services.DataExport
 
                 foreach (var feedback in userData.ReceivedFeedback)
                 {
-                    csv.AppendLine($"\"{EscapeCsv(feedback.Text)}\",{feedback.Rating},\"{feedback.AuthorFullName}\",\"{feedback.PublicationDate}\"");
+                    csv.AppendLine($"\"{EscapeCsv(feedback.Text)}\",{feedback.Rating},\"{EscapeCsv(feedback.AuthorFullName)}\",\"{feedback.PublicationDate}\"");
                 }
 
                 await File.WriteAllTextAsync(filePath, csv.ToString(), cancellationToken);
@@ -648,7 +648,7 @@ namespace UrGuide.Services.DataExport
 
                 foreach (dynamic post in userData.Posts)
                 {
-                    csv.AppendLine($"\"{post.Id}\",\"{EscapeCsv(post.Title)}\",\"{EscapeCsv(post.Description)}\",\"{post.Cost}\",\"{post.StartDate:O}\",\"{post.EndDate:O}\",{post.AllocatedSeats},{post.ReservedSeats},{post.Rating},{post.Reviews},{post.Likes},{post.Dislikes},\"{post.Tags}\",\"{post.DateOfPublication:O}\"");
+                    csv.AppendLine($"\"{post.Id}\",\"{EscapeCsv(post.Title)}\",\"{EscapeCsv(post.Description)}\",\"{post.Cost}\",\"{post.StartDate:O}\",\"{post.EndDate:O}\",{post.AllocatedSeats},{post.ReservedSeats},{post.Rating},{post.Reviews},{post.Likes},{post.Dislikes},\"{EscapeCsv(post.Tags)}\",\"{post.DateOfPublication:O}\"");
                 }
 
                 await File.WriteAllTextAsync(filePath, csv.ToString(), cancellationToken);
@@ -663,7 +663,7 @@ namespace UrGuide.Services.DataExport
 
                 foreach (dynamic request in userData.TourRequests)
                 {
-                    csv.AppendLine($"\"{request.TourRequestId}\",\"{EscapeCsv(request.Title)}\",\"{EscapeCsv(request.Description)}\",\"{request.PreferredDate:O}\",{request.MaxParticipants},{request.MaxBudget},\"{request.Tags}\",\"{request.Status}\",\"{request.Region}\",\"{request.CreatedAt:O}\"");
+                    csv.AppendLine($"\"{request.TourRequestId}\",\"{EscapeCsv(request.Title)}\",\"{EscapeCsv(request.Description)}\",\"{request.PreferredDate:O}\",{request.MaxParticipants},{request.MaxBudget},\"{EscapeCsv(request.Tags)}\",\"{EscapeCsv(request.Status)}\",\"{EscapeCsv(request.Region)}\",\"{request.CreatedAt:O}\"");
                 }
 
                 await File.WriteAllTextAsync(filePath, csv.ToString(), cancellationToken);

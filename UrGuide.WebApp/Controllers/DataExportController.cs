@@ -93,7 +93,8 @@ namespace UrGuide.WebApp.Controllers
             {
                 // Check if error indicates invalid token/not ready (BadRequest) vs not found
                 var errorMessage = result.Errors.FirstOrDefault() ?? string.Empty;
-                if (errorMessage.Contains("not ready") || errorMessage.Contains("invalid"))
+                if (errorMessage.Contains("not ready", StringComparison.OrdinalIgnoreCase) || 
+                    errorMessage.Contains("invalid", StringComparison.OrdinalIgnoreCase))
                     return BadRequest(ErrorEnvelop.Create(result.Errors));
                 return NotFound(ErrorEnvelop.Create(result.Errors));
             }
