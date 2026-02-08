@@ -5,8 +5,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Model.Search;
-using UrGuide.Services.Abstraction;
 using UrGuide.Services.Contracts;
+using UrGuide.Shared.Contracts;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -64,7 +64,7 @@ namespace UrGuide.WebApp.Controllers
                 _ = _searchAnalyticsService.TrackSearchAsync(
                     request.Query,
                     _userContext.UserId,
-                    result.Value.TotalHits,
+                    result.Data.TotalHits,
                     timeTaken,
                     request.Filters,
                     "posts",
@@ -72,7 +72,7 @@ namespace UrGuide.WebApp.Controllers
                     Request.Headers["User-Agent"].ToString(),
                     CancellationToken.None);
 
-                return Ok(result.Value);
+                return Ok(result.Data);
             }
             catch (Exception ex)
             {
@@ -114,7 +114,7 @@ namespace UrGuide.WebApp.Controllers
                 _ = _searchAnalyticsService.TrackSearchAsync(
                     request.Query,
                     _userContext.UserId,
-                    result.Value.TotalHits,
+                    result.Data.TotalHits,
                     timeTaken,
                     request.Filters,
                     "tours",
@@ -122,7 +122,7 @@ namespace UrGuide.WebApp.Controllers
                     Request.Headers["User-Agent"].ToString(),
                     CancellationToken.None);
 
-                return Ok(result.Value);
+                return Ok(result.Data);
             }
             catch (Exception ex)
             {
@@ -157,7 +157,7 @@ namespace UrGuide.WebApp.Controllers
                     return BadRequest(result.Errors);
                 }
 
-                return Ok(result.Value);
+                return Ok(result.Data);
             }
             catch (Exception ex)
             {
@@ -181,7 +181,7 @@ namespace UrGuide.WebApp.Controllers
             {
                 var result = await _elasticsearchService.HealthCheckAsync(cancellationToken);
 
-                if (result.Value)
+                if (result.Data)
                 {
                     return Ok(new { status = "healthy", message = "Elasticsearch is connected" });
                 }

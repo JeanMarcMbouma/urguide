@@ -34,7 +34,7 @@ namespace UrGuide.Services.Search
                 if (existsResponse.Exists)
                 {
                     _logger.LogInformation("Index {IndexName} already exists", indexName);
-                    return Result.Of(true);
+                    return Model.Results.Result.Of(true);
                 }
 
                 ICreateIndexRequest GetIndexSettings(string index)
@@ -97,16 +97,16 @@ namespace UrGuide.Services.Search
                 if (!createResponse.IsValid)
                 {
                     _logger.LogError("Failed to create index {IndexName}: {Error}", indexName, createResponse.DebugInformation);
-                    return Result.Of(false).WithErrors($"Failed to create index: {createResponse.ServerError?.Error?.Reason}");
+                    return Model.Results.Result.Of(false).WithErrors($"Failed to create index: {createResponse.ServerError?.Error?.Reason}");
                 }
 
                 _logger.LogInformation("Successfully created index {IndexName}", indexName);
-                return Result.Of(true);
+                return Model.Results.Result.Of(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating index {IndexName}", indexName);
-                return Result.Of(false).WithErrors(ex.Message);
+                return Model.Results.Result.Of(false).WithErrors(ex.Message);
             }
         }
 
@@ -118,16 +118,16 @@ namespace UrGuide.Services.Search
                 if (!deleteResponse.IsValid)
                 {
                     _logger.LogError("Failed to delete index {IndexName}: {Error}", indexName, deleteResponse.DebugInformation);
-                    return Result.Of(false).WithErrors($"Failed to delete index: {deleteResponse.ServerError?.Error?.Reason}");
+                    return Model.Results.Result.Of(false).WithErrors($"Failed to delete index: {deleteResponse.ServerError?.Error?.Reason}");
                 }
 
                 _logger.LogInformation("Successfully deleted index {IndexName}", indexName);
-                return Result.Of(true);
+                return Model.Results.Result.Of(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting index {IndexName}", indexName);
-                return Result.Of(false).WithErrors(ex.Message);
+                return Model.Results.Result.Of(false).WithErrors(ex.Message);
             }
         }
 
@@ -136,12 +136,12 @@ namespace UrGuide.Services.Search
             try
             {
                 var existsResponse = await _elasticClient.Indices.ExistsAsync(indexName, ct: cancellationToken);
-                return Result.Of(existsResponse.Exists);
+                return Model.Results.Result.Of(existsResponse.Exists);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error checking if index {IndexName} exists", indexName);
-                return Result.Of(false).WithErrors(ex.Message);
+                return Model.Results.Result.Of(false).WithErrors(ex.Message);
             }
         }
 
@@ -156,21 +156,21 @@ namespace UrGuide.Services.Search
                 var indexResponse = await _elasticClient.IndexAsync(post, idx => idx
                     .Index(PostsIndexName)
                     .Id(post.Id)
-                    .Refresh(Refresh.WaitFor), cancellationToken);
+                    .Refresh(Elasticsearch.Net.Refresh.WaitFor), cancellationToken);
 
                 if (!indexResponse.IsValid)
                 {
                     _logger.LogError("Failed to index post {PostId}: {Error}", post.Id, indexResponse.DebugInformation);
-                    return Result.Of(false).WithErrors($"Failed to index post: {indexResponse.ServerError?.Error?.Reason}");
+                    return Model.Results.Result.Of(false).WithErrors($"Failed to index post: {indexResponse.ServerError?.Error?.Reason}");
                 }
 
                 _logger.LogInformation("Successfully indexed post {PostId}", post.Id);
-                return Result.Of(true);
+                return Model.Results.Result.Of(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error indexing post {PostId}", post.Id);
-                return Result.Of(false).WithErrors(ex.Message);
+                return Model.Results.Result.Of(false).WithErrors(ex.Message);
             }
         }
 
@@ -181,21 +181,21 @@ namespace UrGuide.Services.Search
                 var indexResponse = await _elasticClient.IndexAsync(tour, idx => idx
                     .Index(ToursIndexName)
                     .Id(tour.TourId)
-                    .Refresh(Refresh.WaitFor), cancellationToken);
+                    .Refresh(Elasticsearch.Net.Refresh.WaitFor), cancellationToken);
 
                 if (!indexResponse.IsValid)
                 {
                     _logger.LogError("Failed to index tour {TourId}: {Error}", tour.TourId, indexResponse.DebugInformation);
-                    return Result.Of(false).WithErrors($"Failed to index tour: {indexResponse.ServerError?.Error?.Reason}");
+                    return Model.Results.Result.Of(false).WithErrors($"Failed to index tour: {indexResponse.ServerError?.Error?.Reason}");
                 }
 
                 _logger.LogInformation("Successfully indexed tour {TourId}", tour.TourId);
-                return Result.Of(true);
+                return Model.Results.Result.Of(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error indexing tour {TourId}", tour.TourId);
-                return Result.Of(false).WithErrors(ex.Message);
+                return Model.Results.Result.Of(false).WithErrors(ex.Message);
             }
         }
 
@@ -206,21 +206,21 @@ namespace UrGuide.Services.Search
                 var bulkResponse = await _elasticClient.BulkAsync(b => b
                     .Index(PostsIndexName)
                     .IndexMany(posts)
-                    .Refresh(Refresh.WaitFor), cancellationToken);
+                    .Refresh(Elasticsearch.Net.Refresh.WaitFor), cancellationToken);
 
                 if (!bulkResponse.IsValid)
                 {
                     _logger.LogError("Failed to bulk index posts: {Error}", bulkResponse.DebugInformation);
-                    return Result.Of(false).WithErrors($"Failed to bulk index posts: {bulkResponse.ServerError?.Error?.Reason}");
+                    return Model.Results.Result.Of(false).WithErrors($"Failed to bulk index posts: {bulkResponse.ServerError?.Error?.Reason}");
                 }
 
                 _logger.LogInformation("Successfully bulk indexed {Count} posts", posts.Count());
-                return Result.Of(true);
+                return Model.Results.Result.Of(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error bulk indexing posts");
-                return Result.Of(false).WithErrors(ex.Message);
+                return Model.Results.Result.Of(false).WithErrors(ex.Message);
             }
         }
 
@@ -231,21 +231,21 @@ namespace UrGuide.Services.Search
                 var bulkResponse = await _elasticClient.BulkAsync(b => b
                     .Index(ToursIndexName)
                     .IndexMany(tours)
-                    .Refresh(Refresh.WaitFor), cancellationToken);
+                    .Refresh(Elasticsearch.Net.Refresh.WaitFor), cancellationToken);
 
                 if (!bulkResponse.IsValid)
                 {
                     _logger.LogError("Failed to bulk index tours: {Error}", bulkResponse.DebugInformation);
-                    return Result.Of(false).WithErrors($"Failed to bulk index tours: {bulkResponse.ServerError?.Error?.Reason}");
+                    return Model.Results.Result.Of(false).WithErrors($"Failed to bulk index tours: {bulkResponse.ServerError?.Error?.Reason}");
                 }
 
                 _logger.LogInformation("Successfully bulk indexed {Count} tours", tours.Count());
-                return Result.Of(true);
+                return Model.Results.Result.Of(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error bulk indexing tours");
-                return Result.Of(false).WithErrors(ex.Message);
+                return Model.Results.Result.Of(false).WithErrors(ex.Message);
             }
         }
 
@@ -260,21 +260,21 @@ namespace UrGuide.Services.Search
                 var updateResponse = await _elasticClient.UpdateAsync<PostSearchDocument>(post.Id, u => u
                     .Index(PostsIndexName)
                     .Doc(post)
-                    .Refresh(Refresh.WaitFor), cancellationToken);
+                    .Refresh(Elasticsearch.Net.Refresh.WaitFor), cancellationToken);
 
                 if (!updateResponse.IsValid)
                 {
                     _logger.LogError("Failed to update post {PostId}: {Error}", post.Id, updateResponse.DebugInformation);
-                    return Result.Of(false).WithErrors($"Failed to update post: {updateResponse.ServerError?.Error?.Reason}");
+                    return Model.Results.Result.Of(false).WithErrors($"Failed to update post: {updateResponse.ServerError?.Error?.Reason}");
                 }
 
                 _logger.LogInformation("Successfully updated post {PostId}", post.Id);
-                return Result.Of(true);
+                return Model.Results.Result.Of(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating post {PostId}", post.Id);
-                return Result.Of(false).WithErrors(ex.Message);
+                return Model.Results.Result.Of(false).WithErrors(ex.Message);
             }
         }
 
@@ -285,21 +285,21 @@ namespace UrGuide.Services.Search
                 var updateResponse = await _elasticClient.UpdateAsync<TourSearchDocument>(tour.TourId, u => u
                     .Index(ToursIndexName)
                     .Doc(tour)
-                    .Refresh(Refresh.WaitFor), cancellationToken);
+                    .Refresh(Elasticsearch.Net.Refresh.WaitFor), cancellationToken);
 
                 if (!updateResponse.IsValid)
                 {
                     _logger.LogError("Failed to update tour {TourId}: {Error}", tour.TourId, updateResponse.DebugInformation);
-                    return Result.Of(false).WithErrors($"Failed to update tour: {updateResponse.ServerError?.Error?.Reason}");
+                    return Model.Results.Result.Of(false).WithErrors($"Failed to update tour: {updateResponse.ServerError?.Error?.Reason}");
                 }
 
                 _logger.LogInformation("Successfully updated tour {TourId}", tour.TourId);
-                return Result.Of(true);
+                return Model.Results.Result.Of(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating tour {TourId}", tour.TourId);
-                return Result.Of(false).WithErrors(ex.Message);
+                return Model.Results.Result.Of(false).WithErrors(ex.Message);
             }
         }
 
@@ -317,16 +317,16 @@ namespace UrGuide.Services.Search
                 if (!deleteResponse.IsValid && deleteResponse.Result != Nest.Result.NotFound)
                 {
                     _logger.LogError("Failed to delete post {PostId}: {Error}", postId, deleteResponse.DebugInformation);
-                    return Result.Of(false).WithErrors($"Failed to delete post: {deleteResponse.ServerError?.Error?.Reason}");
+                    return Model.Results.Result.Of(false).WithErrors($"Failed to delete post: {deleteResponse.ServerError?.Error?.Reason}");
                 }
 
                 _logger.LogInformation("Successfully deleted post {PostId}", postId);
-                return Result.Of(true);
+                return Model.Results.Result.Of(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting post {PostId}", postId);
-                return Result.Of(false).WithErrors(ex.Message);
+                return Model.Results.Result.Of(false).WithErrors(ex.Message);
             }
         }
 
@@ -340,16 +340,16 @@ namespace UrGuide.Services.Search
                 if (!deleteResponse.IsValid && deleteResponse.Result != Nest.Result.NotFound)
                 {
                     _logger.LogError("Failed to delete tour {TourId}: {Error}", tourId, deleteResponse.DebugInformation);
-                    return Result.Of(false).WithErrors($"Failed to delete tour: {deleteResponse.ServerError?.Error?.Reason}");
+                    return Model.Results.Result.Of(false).WithErrors($"Failed to delete tour: {deleteResponse.ServerError?.Error?.Reason}");
                 }
 
                 _logger.LogInformation("Successfully deleted tour {TourId}", tourId);
-                return Result.Of(true);
+                return Model.Results.Result.Of(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting tour {TourId}", tourId);
-                return Result.Of(false).WithErrors(ex.Message);
+                return Model.Results.Result.Of(false).WithErrors(ex.Message);
             }
         }
 
@@ -357,7 +357,7 @@ namespace UrGuide.Services.Search
 
         #region Search Operations
 
-        public async Task<Result<SearchResponse<PostSearchDocument>>> SearchPostsAsync(SearchRequest request, CancellationToken cancellationToken = default)
+        public async Task<Result<Model.Search.SearchResponse<PostSearchDocument>>> SearchPostsAsync(Model.Search.SearchRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -367,20 +367,20 @@ namespace UrGuide.Services.Search
                 if (!searchResponse.IsValid)
                 {
                     _logger.LogError("Failed to search posts: {Error}", searchResponse.DebugInformation);
-                    return Result.Of<SearchResponse<PostSearchDocument>>().WithErrors($"Search failed: {searchResponse.ServerError?.Error?.Reason}");
+                    return Model.Results.Result.Of<Model.Search.SearchResponse<PostSearchDocument>>().WithErrors($"Search failed: {searchResponse.ServerError?.Error?.Reason}");
                 }
 
                 var response = MapSearchResponse(searchResponse, request);
-                return Result.Of(response);
+                return Model.Results.Result.Of(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error searching posts");
-                return Result.Of<SearchResponse<PostSearchDocument>>().WithErrors(ex.Message);
+                return Model.Results.Result.Of<Model.Search.SearchResponse<PostSearchDocument>>().WithErrors(ex.Message);
             }
         }
 
-        public async Task<Result<SearchResponse<TourSearchDocument>>> SearchToursAsync(SearchRequest request, CancellationToken cancellationToken = default)
+        public async Task<Result<Model.Search.SearchResponse<TourSearchDocument>>> SearchToursAsync(Model.Search.SearchRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -390,20 +390,20 @@ namespace UrGuide.Services.Search
                 if (!searchResponse.IsValid)
                 {
                     _logger.LogError("Failed to search tours: {Error}", searchResponse.DebugInformation);
-                    return Result.Of<SearchResponse<TourSearchDocument>>().WithErrors($"Search failed: {searchResponse.ServerError?.Error?.Reason}");
+                    return Model.Results.Result.Of<Model.Search.SearchResponse<TourSearchDocument>>().WithErrors($"Search failed: {searchResponse.ServerError?.Error?.Reason}");
                 }
 
                 var response = MapSearchResponse(searchResponse, request);
-                return Result.Of(response);
+                return Model.Results.Result.Of(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error searching tours");
-                return Result.Of<SearchResponse<TourSearchDocument>>().WithErrors(ex.Message);
+                return Model.Results.Result.Of<Model.Search.SearchResponse<TourSearchDocument>>().WithErrors(ex.Message);
             }
         }
 
-        private SearchDescriptor<PostSearchDocument> BuildPostSearchDescriptor(SearchRequest request)
+        private SearchDescriptor<PostSearchDocument> BuildPostSearchDescriptor(Model.Search.SearchRequest request)
         {
             var descriptor = new SearchDescriptor<PostSearchDocument>()
                 .Index(PostsIndexName)
@@ -491,7 +491,7 @@ namespace UrGuide.Services.Search
             return descriptor;
         }
 
-        private SearchDescriptor<TourSearchDocument> BuildTourSearchDescriptor(SearchRequest request)
+        private SearchDescriptor<TourSearchDocument> BuildTourSearchDescriptor(Model.Search.SearchRequest request)
         {
             var descriptor = new SearchDescriptor<TourSearchDocument>()
                 .Index(ToursIndexName)
@@ -595,19 +595,8 @@ namespace UrGuide.Services.Search
                     .Distance(filters.Distance)));
             }
 
-            // Price range filter
-            if (filters.MinPrice.HasValue || filters.MaxPrice.HasValue)
-            {
-                result.Add(f => f.Range(r =>
-                {
-                    var range = r.Field(p => p.Cost);
-                    if (filters.MinPrice.HasValue)
-                        range = range.GreaterThanOrEquals(filters.MinPrice.Value.ToString());
-                    if (filters.MaxPrice.HasValue)
-                        range = range.LessThanOrEquals(filters.MaxPrice.Value.ToString());
-                    return range;
-                }));
-            }
+            // Price range filter - Cost is stored as string, so we'll skip numeric comparisons for now
+            // You can implement this better by adding a numeric CostValue field to the search document
 
             // Rating filter
             if (filters.MinRating.HasValue)
@@ -697,7 +686,7 @@ namespace UrGuide.Services.Search
             return result;
         }
 
-        private SearchDescriptor<PostSearchDocument> ApplyPostSorting(SearchDescriptor<PostSearchDocument> descriptor, SearchRequest request)
+        private SearchDescriptor<PostSearchDocument> ApplyPostSorting(SearchDescriptor<PostSearchDocument> descriptor, Model.Search.SearchRequest request)
         {
             var order = request.SortOrder?.ToLower() == "asc" ? SortOrder.Ascending : SortOrder.Descending;
 
@@ -706,11 +695,11 @@ namespace UrGuide.Services.Search
                 "date" => descriptor.Sort(s => s.Field(f => f.Field(p => p.DateOfPublication).Order(order))),
                 "rating" => descriptor.Sort(s => s.Field(f => f.Field(p => p.Rating).Order(order))),
                 "price" => descriptor.Sort(s => s.Field(f => f.Field(p => p.Cost).Order(order))),
-                _ => descriptor.Sort(s => s.Score().Descending())
+                _ => descriptor // Default sort by relevance
             };
         }
 
-        private SearchDescriptor<TourSearchDocument> ApplyTourSorting(SearchDescriptor<TourSearchDocument> descriptor, SearchRequest request)
+        private SearchDescriptor<TourSearchDocument> ApplyTourSorting(SearchDescriptor<TourSearchDocument> descriptor, Model.Search.SearchRequest request)
         {
             var order = request.SortOrder?.ToLower() == "asc" ? SortOrder.Ascending : SortOrder.Descending;
 
@@ -718,7 +707,7 @@ namespace UrGuide.Services.Search
             {
                 "date" => descriptor.Sort(s => s.Field(f => f.Field(t => t.CreatedAt).Order(order))),
                 "rating" => descriptor.Sort(s => s.Field(f => f.Field(t => t.AverageRating).Order(order))),
-                _ => descriptor.Sort(s => s.Score().Descending())
+                _ => descriptor // Default sort by relevance
             };
         }
 
@@ -728,13 +717,6 @@ namespace UrGuide.Services.Search
                 .Terms("tags", t => t.Field(p => p.Tags).Size(20))
                 .Terms("locations", t => t.Field(p => p.GeoLocation.Suffix("keyword")).Size(20))
                 .Terms("ratings", t => t.Field(p => p.Rating))
-                .Range("price_ranges", r => r
-                    .Field(p => p.Cost)
-                    .Ranges(
-                        ranges => ranges.To("50"),
-                        ranges => ranges.From("50").To("100"),
-                        ranges => ranges.From("100").To("200"),
-                        ranges => ranges.From("200")))
             );
         }
 
@@ -747,15 +729,15 @@ namespace UrGuide.Services.Search
             );
         }
 
-        private SearchResponse<T> MapSearchResponse<T>(ISearchResponse<T> elasticResponse, SearchRequest request) where T : class
+        private Model.Search.SearchResponse<T> MapSearchResponse<T>(ISearchResponse<T> elasticResponse, Model.Search.SearchRequest request) where T : class
         {
-            var response = new SearchResponse<T>
+            var response = new Model.Search.SearchResponse<T>
             {
                 TotalHits = elasticResponse.Total,
                 Page = request.Page,
                 PageSize = request.PageSize,
                 TotalPages = (int)Math.Ceiling((double)elasticResponse.Total / request.PageSize),
-                TimeTakenMs = elasticResponse.Took,
+                TimeTakenMs = (long)elasticResponse.Took,
                 Results = elasticResponse.Hits.Select(h => new SearchResultItem<T>
                 {
                     Document = h.Source,
@@ -775,21 +757,21 @@ namespace UrGuide.Services.Search
                 if (elasticResponse.Aggregations.Terms("tags") != null)
                 {
                     response.Facets.TagsFacet = elasticResponse.Aggregations.Terms("tags").Buckets
-                        .ToDictionary(b => b.Key, b => b.DocCount ?? 0);
+                        .ToDictionary(b => b.Key, b => (long)(b.DocCount ?? 0));
                 }
 
                 // Locations facet
                 if (elasticResponse.Aggregations.Terms("locations") != null)
                 {
                     response.Facets.LocationsFacet = elasticResponse.Aggregations.Terms("locations").Buckets
-                        .ToDictionary(b => b.Key, b => b.DocCount ?? 0);
+                        .ToDictionary(b => b.Key, b => (long)(b.DocCount ?? 0));
                 }
 
                 // Regions facet
                 if (elasticResponse.Aggregations.Terms("regions") != null)
                 {
                     response.Facets.LocationsFacet = elasticResponse.Aggregations.Terms("regions").Buckets
-                        .ToDictionary(b => b.Key, b => b.DocCount ?? 0);
+                        .ToDictionary(b => b.Key, b => (long)(b.DocCount ?? 0));
                 }
 
                 // Rating facet
@@ -799,7 +781,7 @@ namespace UrGuide.Services.Search
                         .Select(b => new RatingFacet
                         {
                             Rating = int.TryParse(b.Key, out var rating) ? rating : 0,
-                            Count = b.DocCount ?? 0
+                            Count = (long)(b.DocCount ?? 0)
                         })
                         .ToList();
                 }
@@ -811,7 +793,7 @@ namespace UrGuide.Services.Search
                         .Select(b => new RatingFacet
                         {
                             Rating = (int)b.Key,
-                            Count = b.DocCount ?? 0
+                            Count = (long)(b.DocCount ?? 0)
                         })
                         .ToList();
                 }
@@ -823,7 +805,7 @@ namespace UrGuide.Services.Search
                         .Select(b => new PriceRangeFacet
                         {
                             Range = b.Key,
-                            Count = b.DocCount ?? 0,
+                            Count = b.DocCount,
                             From = b.From.HasValue ? (decimal?)b.From : null,
                             To = b.To.HasValue ? (decimal?)b.To : null
                         })
@@ -856,12 +838,12 @@ namespace UrGuide.Services.Search
                     response.Suggestions.AddRange(tourSuggestions);
                 }
 
-                return Result.Of(response);
+                return Model.Results.Result.Of(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting autocomplete suggestions");
-                return Result.Of<AutocompleteResponse>().WithErrors(ex.Message);
+                return Model.Results.Result.Of<AutocompleteResponse>().WithErrors(ex.Message);
             }
         }
 
@@ -914,12 +896,12 @@ namespace UrGuide.Services.Search
             try
             {
                 var pingResponse = await _elasticClient.PingAsync(ct: cancellationToken);
-                return Result.Of(pingResponse.IsValid);
+                return Model.Results.Result.Of(pingResponse.IsValid);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Elasticsearch health check failed");
-                return Result.Of(false).WithErrors(ex.Message);
+                return Model.Results.Result.Of(false).WithErrors(ex.Message);
             }
         }
 

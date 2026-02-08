@@ -41,7 +41,7 @@ namespace UrGuide.Services.Search
             };
         }
 
-        public static TourSearchDocument ToSearchDocument(Tour tour)
+        public static TourSearchDocument ToSearchDocument(Data.Entities.Tour.Tour tour)
         {
             if (tour == null)
                 throw new ArgumentNullException(nameof(tour));
@@ -61,7 +61,7 @@ namespace UrGuide.Services.Search
                 CreatedAt = tour.CreatedAt,
                 UpdatedAt = tour.UpdatedAt,
                 AuthorId = tour.AuthorId,
-                AuthorName = tour.Author != null ? $"{tour.Author.FirstName} {tour.Author.LastName}".Trim() : null,
+                AuthorName = tour.Author?.ProfileInfo != null ? tour.Author.ProfileInfo.FirstName : null,
                 RegionId = tour.RegionId,
                 RegionName = tour.Region?.Name,
                 TotalReviews = totalReviews,
