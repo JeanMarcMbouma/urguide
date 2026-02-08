@@ -704,3 +704,4 @@ For questions and support:
 ---
 
 **Built with ❤️ for the tourism community**
+
