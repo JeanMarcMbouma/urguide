@@ -94,8 +94,20 @@ public static class MessageQueueExtensions
         // Replace synchronous services with queued versions using decorator pattern
         // Note: Consumers will resolve the concrete synchronous service, not the queued one
         
-        // For IEmailService: simply replace with queued version (consumers use concrete EmailService)
-        services.AddTransient<IEmailService, QueuedEmailService>();
+        // For IEmailService: Register concrete EmailService so consumers can inject it directly
+        // Find the existing IEmailService registration to get the concrete type
+        var emailServiceDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IEmailService));
+        if (emailServiceDescriptor != null && emailServiceDescriptor.ImplementationType != null)
+        {
+            var emailConcreteType = emailServiceDescriptor.ImplementationType;
+            
+            // Register the concrete EmailService type (for consumers)
+            services.Add(new ServiceDescriptor(emailConcreteType, emailConcreteType, emailServiceDescriptor.Lifetime));
+            
+            // Replace IEmailService with queued version
+            services.Remove(emailServiceDescriptor);
+            services.AddTransient<IEmailService, QueuedEmailService>();
+        }
         
         // For IUserNotificationService: use decorator pattern without circular dependency
         // Find the existing registration to capture its implementation type
