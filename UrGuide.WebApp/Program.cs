@@ -85,10 +85,12 @@ try
     // Add health checks
     var authConn = builder.Configuration.GetSection("ConnectionStrings:AuthConnection").Value;
     var dataConn = builder.Configuration.GetSection("ConnectionStrings:DefaultConnection").Value;
+    var elasticsearchUrl = builder.Configuration.GetSection("Elasticsearch:Url").Value ?? "http://localhost:9200";
     builder.Services.AddHealthChecks()
         .AddSqlServer(authConn ?? "", name: "auth-db")
         .AddSqlServer(dataConn ?? "", name: "data-db")
-        .AddMessageQueueHealthChecks(builder.Configuration);
+        .AddMessageQueueHealthChecks(builder.Configuration)
+        .AddElasticsearch(elasticsearchUrl, name: "elasticsearch");
     
     // Add CORS policy for API consumers
     builder.Services.AddCors(options =>

@@ -44,6 +44,29 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  # Elasticsearch for advanced search
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: urguide-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - urguide-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
   # UrGuide API
   api:
     build:
@@ -58,12 +81,15 @@ services:
       - RabbitMQ__Host=rabbitmq
       - RabbitMQ__Username=${RABBITMQ_USER:-guest}
       - RabbitMQ__Password=${RABBITMQ_PASS:-guest}
+      - Elasticsearch__Url=http://elasticsearch:9200
     ports:
       - "5000:80"
     depends_on:
       sqlserver:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
     volumes:
       - ./wwwroot/uploads:/app/wwwroot/uploads
@@ -82,6 +108,8 @@ volumes:
   sqlserver-data:
     driver: local
   rabbitmq-data:
+    driver: local
+  elasticsearch-data:
     driver: local
 
 networks:

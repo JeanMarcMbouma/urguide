@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using Elasticsearch.Net;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Nest;
+using System;
 using UrGuide.Model;
 using UrGuide.Model.Shared;
 using UrGuide.Services.Auditing.Command;
@@ -14,6 +17,7 @@ using UrGuide.Services.Lookup;
 using UrGuide.Services.Media;
 using UrGuide.Services.Payments;
 using UrGuide.Services.Posts;
+using UrGuide.Services.Search;
 using UrGuide.Services.Shared;
 using UrGuide.Services.Tour;
 using UrGuide.Services.Users;
@@ -42,6 +46,27 @@ namespace UrGuide.Services.Extensions
             
             // Data export service
             services.AddTransient<Contracts.IDataExportService, DataExport.DataExportService>();
+            
+            // Search services
+            services.AddTransient<Contracts.ISearchAnalyticsService, SearchAnalyticsService>();
+
+            // Elasticsearch
+            var elasticsearchUrl = configuration["Elasticsearch:Url"] ?? "http://localhost:9200";
+            var elasticsearchUsername = configuration["Elasticsearch:Username"];
+            var elasticsearchPassword = configuration["Elasticsearch:Password"];
+
+            var connectionPool = new SingleNodeConnectionPool(new Uri(elasticsearchUrl));
+            var connectionSettings = new ConnectionSettings(connectionPool)
+                .DefaultIndex(configuration["Elasticsearch:DefaultIndex"] ?? "urguide");
+
+            if (!string.IsNullOrEmpty(elasticsearchUsername) && !string.IsNullOrEmpty(elasticsearchPassword))
+            {
+                connectionSettings = connectionSettings.BasicAuthentication(elasticsearchUsername, elasticsearchPassword);
+            }
+
+            var elasticClient = new ElasticClient(connectionSettings);
+            services.AddSingleton<IElasticClient>(elasticClient);
+            services.AddTransient<Contracts.IElasticsearchService, ElasticsearchService>();
 
             // Validation
 
