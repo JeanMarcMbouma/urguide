@@ -37,8 +37,12 @@ namespace UrGuide.WebApp.RateLimiting
             var events = _events.GetOrAdd(key, _ => new ConcurrentBag<RateLimitEvent>());
             events.Add(eventData);
 
-            _logger.LogDebug("Rate limit hit recorded: User={UserId}, Endpoint={Endpoint}, Tier={Tier}, Count={CurrentCount}/{Limit}",
-                userId ?? "anonymous", endpoint, tier, currentCount, limit);
+            // Only log violations and warnings, not every hit
+            if (currentCount > limit * 0.8) // Log when approaching limit
+            {
+                _logger.LogInformation("Rate limit approaching: User={UserId}, Endpoint={Endpoint}, Tier={Tier}, Count={CurrentCount}/{Limit}",
+                    userId ?? "anonymous", endpoint, tier, currentCount, limit);
+            }
 
             // Clean up old events (keep last 24 hours)
             CleanupOldEvents(key);

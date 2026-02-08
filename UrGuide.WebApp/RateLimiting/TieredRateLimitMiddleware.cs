@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -67,8 +68,11 @@ namespace UrGuide.WebApp.RateLimiting
                 return;
             }
 
-            // Get the applicable policy
-            var endpointKey = $"{context.Request.Method}:{context.Request.Path}";
+            // Get the applicable policy - use route pattern to avoid per-ID buckets
+            var routePattern = (endpoint as RouteEndpoint)?.RoutePattern?.RawText;
+            var endpointKey = !string.IsNullOrEmpty(routePattern) 
+                ? $"{context.Request.Method}:{routePattern}"
+                : $"{context.Request.Method}:{context.Request.Path}";
             var policy = GetApplicablePolicy(endpoint, endpointKey, tier);
 
             if (policy == null)
@@ -82,31 +86,59 @@ namespace UrGuide.WebApp.RateLimiting
             var identifier = userId ?? ipAddress ?? "unknown";
             var cacheKey = $"ratelimit:{tier}:{identifier}:{endpointKey}";
             var lockKey = $"{cacheKey}:lock";
+            var resetKey = $"{cacheKey}:reset";
             var periodTimeSpan = policy.GetPeriodTimeSpan();
 
-            // Use a lock object for thread-safe counter increment
+            // Use a lock object with same expiration as counter to prevent memory leak
             var lockObj = _cache.GetOrCreate(lockKey, entry =>
             {
-                entry.Priority = CacheItemPriority.NeverRemove;
+                entry.AbsoluteExpirationRelativeToNow = periodTimeSpan;
                 return new object();
             });
 
             int currentCount;
+            DateTimeOffset resetTime;
             lock (lockObj)
             {
-                currentCount = _cache.GetOrCreate(cacheKey, entry =>
+                // Get or create reset time for this window
+                if (!_cache.TryGetValue(resetKey, out resetTime))
                 {
-                    entry.AbsoluteExpirationRelativeToNow = periodTimeSpan;
-                    return 0;
-                });
+                    resetTime = DateTimeOffset.UtcNow.Add(periodTimeSpan);
+                    _cache.Set(resetKey, resetTime, new MemoryCacheEntryOptions
+                    {
+                        AbsoluteExpiration = resetTime
+                    });
+                }
 
-                currentCount++;
-
-                // Update counter atomically
-                _cache.Set(cacheKey, currentCount, new MemoryCacheEntryOptions
+                // Check if window has expired
+                if (DateTimeOffset.UtcNow >= resetTime)
                 {
-                    AbsoluteExpirationRelativeToNow = periodTimeSpan
-                });
+                    // Reset the window
+                    currentCount = 1;
+                    resetTime = DateTimeOffset.UtcNow.Add(periodTimeSpan);
+                    _cache.Set(resetKey, resetTime, new MemoryCacheEntryOptions
+                    {
+                        AbsoluteExpiration = resetTime
+                    });
+                    _cache.Set(cacheKey, currentCount, new MemoryCacheEntryOptions
+                    {
+                        AbsoluteExpiration = resetTime
+                    });
+                }
+                else
+                {
+                    // Increment counter without changing expiration
+                    currentCount = _cache.GetOrCreate(cacheKey, entry =>
+                    {
+                        entry.AbsoluteExpiration = resetTime;
+                        return 0;
+                    });
+                    currentCount++;
+                    _cache.Set(cacheKey, currentCount, new MemoryCacheEntryOptions
+                    {
+                        AbsoluteExpiration = resetTime
+                    });
+                }
             }
 
             // Track analytics
@@ -128,7 +160,7 @@ namespace UrGuide.WebApp.RateLimiting
                     identifier, tier, endpointKey, currentCount, policy.Limit);
 
                 // Add rate limit headers
-                AddRateLimitHeaders(context, policy, currentCount, periodTimeSpan);
+                AddRateLimitHeaders(context, policy, currentCount, resetTime);
 
                 // Return 429 Too Many Requests
                 context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
@@ -136,13 +168,13 @@ namespace UrGuide.WebApp.RateLimiting
                 {
                     error = "Rate limit exceeded",
                     message = $"Too many requests. Please try again later.",
-                    retryAfter = GetRetryAfter(cacheKey, periodTimeSpan)
+                    retryAfter = GetRetryAfter(resetTime)
                 });
                 return;
             }
 
             // Add rate limit headers
-            AddRateLimitHeaders(context, policy, currentCount, periodTimeSpan);
+            AddRateLimitHeaders(context, policy, currentCount, resetTime);
 
             // Continue to next middleware
             await _next(context);
@@ -185,15 +217,9 @@ namespace UrGuide.WebApp.RateLimiting
 
         private string GetClientIpAddress(HttpContext context)
         {
-            var ipAddress = context.Connection.RemoteIpAddress?.ToString();
-            
-            // Check for forwarded IP (when behind a proxy)
-            if (context.Request.Headers.ContainsKey("X-Forwarded-For"))
-            {
-                ipAddress = context.Request.Headers["X-Forwarded-For"].FirstOrDefault()?.Split(',').FirstOrDefault()?.Trim();
-            }
-
-            return ipAddress;
+            // Rely on RemoteIpAddress, which will be populated correctly when
+            // ForwardedHeadersMiddleware is configured in the application
+            return context.Connection.RemoteIpAddress?.ToString();
         }
 
         private bool IsExempt(string userId, string ipAddress)
@@ -208,24 +234,27 @@ namespace UrGuide.WebApp.RateLimiting
 
         private RateLimitPolicy GetApplicablePolicy(Endpoint endpoint, string endpointKey, RateLimitTier tier)
         {
-            // Check for custom attribute on endpoint
-            var customAttribute = endpoint?.Metadata?.GetMetadata<RateLimitAttribute>();
-            if (customAttribute != null)
+            // Check for custom attributes on endpoint (supports multiple with tier matching)
+            var customAttributes = endpoint?.Metadata?.GetOrderedMetadata<RateLimitAttribute>();
+            if (customAttributes != null && customAttributes.Any())
             {
-                // If attribute specifies a tier and it doesn't match, skip
-                if (!string.IsNullOrEmpty(customAttribute.Tier) && 
-                    Enum.TryParse<RateLimitTier>(customAttribute.Tier, out var specifiedTier) && 
-                    specifiedTier != tier)
-                {
-                    // Fall through to check other policies
-                }
-                else
+                // First, try to find an attribute whose Tier matches the current tier
+                var matchingAttribute = customAttributes.FirstOrDefault(a =>
+                    !string.IsNullOrEmpty(a.Tier) &&
+                    Enum.TryParse<RateLimitTier>(a.Tier, out var specifiedTier) &&
+                    specifiedTier == tier);
+
+                // If no exact tier match, fall back to an attribute without a specified Tier
+                var applicableAttribute = matchingAttribute ?? customAttributes.FirstOrDefault(a =>
+                    string.IsNullOrEmpty(a.Tier));
+
+                if (applicableAttribute != null)
                 {
                     return new RateLimitPolicy
                     {
                         Tier = tier,
-                        Limit = customAttribute.Limit,
-                        Period = customAttribute.Period
+                        Limit = applicableAttribute.Limit,
+                        Period = applicableAttribute.Period
                     };
                 }
             }
@@ -250,21 +279,28 @@ namespace UrGuide.WebApp.RateLimiting
             return null;
         }
 
-        private void AddRateLimitHeaders(HttpContext context, RateLimitPolicy policy, int currentCount, TimeSpan periodTimeSpan)
+        private void AddRateLimitHeaders(HttpContext context, RateLimitPolicy policy, int currentCount, DateTimeOffset resetTime)
         {
             var remaining = Math.Max(0, policy.Limit - currentCount);
-            var resetTime = DateTimeOffset.UtcNow.Add(periodTimeSpan).ToUnixTimeSeconds();
 
             context.Response.Headers["X-RateLimit-Limit"] = policy.Limit.ToString();
             context.Response.Headers["X-RateLimit-Remaining"] = remaining.ToString();
-            context.Response.Headers["X-RateLimit-Reset"] = resetTime.ToString();
+            context.Response.Headers["X-RateLimit-Reset"] = resetTime.ToUnixTimeSeconds().ToString();
             context.Response.Headers["X-RateLimit-Tier"] = policy.Tier.ToString();
         }
 
-        private int GetRetryAfter(string cacheKey, TimeSpan periodTimeSpan)
+        private int GetRetryAfter(DateTimeOffset resetTime)
         {
-            // Return the number of seconds until the rate limit resets
-            return (int)periodTimeSpan.TotalSeconds;
+            var now = DateTimeOffset.UtcNow;
+            var remaining = resetTime - now;
+
+            if (remaining <= TimeSpan.Zero)
+            {
+                return 0;
+            }
+
+            // Return the number of whole seconds remaining, rounded up
+            return (int)Math.Ceiling(remaining.TotalSeconds);
         }
     }
 }

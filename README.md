@@ -346,9 +346,10 @@ public async Task<IActionResult> Login([FromBody] LoginModel model)
 #### Rate Limit Exemptions
 
 Certain endpoints and IP addresses can be exempt from rate limiting:
-- Health check endpoints
-- Internal service IP addresses (configurable in `appsettings.json`)
 - Endpoints marked with `[RateLimitExempt]` attribute
+- Internal service IP addresses (configurable in `appsettings.json`)
+
+**Note:** Health check endpoints (such as `/health` and `/alive`) are not automatically exempt. To exclude them from rate limiting, apply `[RateLimitExempt]` to the corresponding actions or add them to the exemptions list in configuration.
 
 #### Configuration
 
@@ -384,7 +385,7 @@ The system tracks rate limit usage and violations for monitoring and optimizatio
 - User-specific statistics
 - Endpoint usage patterns
 
-For legacy IP-based rate limiting configuration, see `IpRateLimiting` section in `appsettings.json`.
+**Note:** Legacy IP-based rate limiting (`IpRateLimitPolicies`) has been disabled to avoid conflicts with the new tiered rate limiting system. The tiered system provides more granular control and better user experience.
 
 ### Health Checks
 

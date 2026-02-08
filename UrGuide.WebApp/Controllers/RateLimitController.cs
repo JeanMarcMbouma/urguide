@@ -65,22 +65,5 @@ namespace UrGuide.WebApp.Controllers
                 message = "Rate limiting system is operational"
             });
         }
-
-        /// <summary>
-        /// Test endpoint with custom rate limit
-        /// </summary>
-        /// <returns>OK response</returns>
-        [HttpGet("test")]
-        [AllowAnonymous]
-        [RateLimit(3, "1m")] // Custom: 3 requests per minute
-        [ProducesResponseType(200)]
-        public IActionResult Test()
-        {
-            return Ok(new
-            {
-                message = "This endpoint has a custom rate limit of 3 requests per minute",
-                timestamp = DateTime.UtcNow
-            });
-        }
     }
 }

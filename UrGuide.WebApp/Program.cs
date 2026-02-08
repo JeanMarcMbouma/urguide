@@ -188,14 +188,11 @@ try
         await seedingService.SeedDataAsync();
     }
 
-    app.UseIpRateLimiting();
-    
-    // Add tiered rate limiting middleware (after authentication so we can access user claims)
-    // Note: This will be applied after UseAuthentication() is called below
-    // For now, we'll add it later in the pipeline after authentication
+    // Disable legacy IP rate limiting to avoid conflicts with tiered rate limiting
+    // app.UseIpRateLimiting();
 
     app.UseForwardedHeaders(new ForwardedHeadersOptions { 
-        ForwardedHeaders = ForwardedHeaders.XForwardedProto
+        ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
     });
 
     // Add CORS middleware
@@ -216,10 +213,11 @@ try
     });
     app.UseAuthentication();
     app.UseIdentityServer();
-    app.UseAuthorization();
     
-    // Add tiered rate limiting middleware after authentication
+    // Add tiered rate limiting middleware after authentication and routing, before authorization
     app.UseMiddleware<UrGuide.WebApp.RateLimiting.TieredRateLimitMiddleware>();
+    
+    app.UseAuthorization();
 
     app.MapControllerRoute(
         name: "default",
