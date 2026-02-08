@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UrGuide.WebApp.Data;
 
@@ -11,9 +12,11 @@ using UrGuide.WebApp.Data;
 namespace UrGuide.WebApp.Migrations
 {
     [DbContext(typeof(UrGuideAuthContext))]
-    partial class UrGuideAuthContextModelSnapshot : ModelSnapshot
+    [Migration("20260207230242_Add2FAAndPasskeySupport")]
+    partial class Add2FAAndPasskeySupport
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

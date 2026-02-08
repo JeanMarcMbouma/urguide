@@ -4,6 +4,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -46,13 +47,35 @@ namespace UrGuide.WebApp.Extensions
             services.AddTransient<IAuthService, AuthService>();
             services.AddScoped<IUserContext, UserContext>();
             services.AddTransient<IIPStackService, IPStackService>();
+            services.AddScoped<ITwoFactorService, TwoFactorService>();
+            services.AddScoped<IPasskeyService, PasskeyService>();
+            
+            // Configure Fido2 for Passkey/WebAuthn support
+            string applicationUri = configuration.GetValue<string>("ApplicationUri") ?? "https://localhost:5001";
+            services.AddFido2(options =>
+            {
+                options.ServerDomain = new Uri(applicationUri).Host;
+                options.ServerName = "UrGuide";
+                options.Origins = new HashSet<string> { applicationUri };
+                options.TimestampDriftTolerance = 300000; // 5 minutes
+            });
+            
+            // Configure Data Protection for encrypting sensitive data (e.g., 2FA secrets)
+            // Keys are persisted to the file system for production use
+            // In production, consider using Azure Key Vault or other secure key storage
+            var dataProtectionPath = configuration.GetValue<string>("DataProtection:KeyPath") 
+                ?? System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "keys");
+            
+            services.AddDataProtection()
+                .SetApplicationName("UrGuide")
+                .PersistKeysToFileSystem(new System.IO.DirectoryInfo(dataProtectionPath));
+            
             services.AddDbContext<UrGuideAuthContext>(options =>
                 options.UseSqlServer(
                     configuration.GetConnectionString("Id4")));
 
             services.AddDefaultIdentity<UrGuideUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<UrGuideAuthContext>();
-            string applicationUri = configuration.GetValue<string>("ApplicationUri");
 
             services.AddIdentityServer(options =>
             {
@@ -141,7 +164,7 @@ namespace UrGuide.WebApp.Extensions
                     AllowedGrantTypes = Duende.IdentityServer.Models.GrantTypes.Code,
                     ClientSecrets =
                     {
-                        new Secret(xamarinClientSecret.Sha256())
+                        new Duende.IdentityServer.Models.Secret(xamarinClientSecret.Sha256())
                     },
                     RedirectUris = { xamarin },
                     RequireConsent = false,

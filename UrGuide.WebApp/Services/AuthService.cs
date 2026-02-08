@@ -94,6 +94,11 @@ namespace UrGuide.WebApp.Services
             var result = await SignInManager.PasswordSignInAsync(login.UserName, login.Password, login.Persist, true);
             if (!result.Succeeded)
             {
+                // Check if 2FA is required
+                if (result.RequiresTwoFactor)
+                {
+                    return Result.Of<string>().WithErrors("2FA_REQUIRED");
+                }
                 return Result.Of<string>().WithErrors("Invalid login attempt.");
             }
             if (result.IsLockedOut)

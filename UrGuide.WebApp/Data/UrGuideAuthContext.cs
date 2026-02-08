@@ -11,5 +11,23 @@ namespace UrGuide.WebApp.Data
         public UrGuideAuthContext(DbContextOptions<UrGuideAuthContext> options) : base(options)
         {
         }
+        
+        public DbSet<PasskeyCredential> PasskeyCredentials { get; set; }
+        
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+            
+            // Configure PasskeyCredential entity
+            builder.Entity<PasskeyCredential>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.PasskeyCredentials)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.Property(e => e.FriendlyName).HasMaxLength(100);
+            });
+        }
     }
 }

@@ -10,6 +10,10 @@
 *.userosscache
 *.sln.docstates
 
+# Data Protection Keys (encryption keys should not be committed)
+keys/
+**/keys/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -21,6 +25,9 @@ build/
 bld/
 [Bb]in/
 [Oo]bj/
+# Also exclude Windows-style bin paths
+**/bin\*/
+**/obj\*/
 
 # .NET Core build artifacts
 project.lock.json
@@ -104,3 +111,7 @@ docker-compose.override.local.yml
 # Xamarin
 *.userprefs
 .mfractor/
+
+# IdentityServer signing keys
+tempkey.jwk
+*.jwk
