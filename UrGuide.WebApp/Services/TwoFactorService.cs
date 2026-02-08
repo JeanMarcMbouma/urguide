@@ -38,8 +38,12 @@ namespace UrGuide.WebApp.Services
             // Generate a random secret (Base32 encoded)
             var secret = GenerateSecret();
             
-            // Create the authenticator URI
-            var authenticatorUri = $"otpauth://totp/UrGuide:{user.Email}?secret={secret}&issuer=UrGuide&algorithm=SHA1&digits=6&period=30";
+            // Create the authenticator URI with properly URL-encoded components
+            var issuer = "UrGuide";
+            var encodedIssuer = Uri.EscapeDataString(issuer);
+            var encodedEmail = Uri.EscapeDataString(user?.Email ?? string.Empty);
+            var encodedSecret = Uri.EscapeDataString(secret);
+            var authenticatorUri = $"otpauth://totp/{encodedIssuer}:{encodedEmail}?secret={encodedSecret}&issuer={encodedIssuer}&algorithm=SHA1&digits=6&period=30";
             
             // Generate QR code
             using var qrGenerator = new QRCodeGenerator();
@@ -115,15 +119,40 @@ namespace UrGuide.WebApp.Services
                 return false;
             }
             
-            var hashedInput = HashBackupCode(code);
-            
-            if (hashedCodes.Contains(hashedInput))
+            // Check each stored hash (format: salt:hash)
+            foreach (var storedHash in hashedCodes.ToList())
             {
-                // Remove the used backup code
-                hashedCodes.Remove(hashedInput);
-                user.BackupCodes = JsonSerializer.Serialize(hashedCodes);
-                await _userManager.UpdateAsync(user);
-                return true;
+                var parts = storedHash.Split(':');
+                if (parts.Length != 2) continue;
+                
+                try
+                {
+                    var salt = Convert.FromBase64String(parts[0]);
+                    var expectedHash = Convert.FromBase64String(parts[1]);
+                    
+                    const int iterations = 100_000;
+                    const int keySize = 32;
+                    
+                    byte[] derivedKey;
+                    using (var pbkdf2 = new Rfc2898DeriveBytes(code, salt, iterations, HashAlgorithmName.SHA256))
+                    {
+                        derivedKey = pbkdf2.GetBytes(keySize);
+                    }
+                    
+                    if (derivedKey.SequenceEqual(expectedHash))
+                    {
+                        // Remove the used backup code
+                        hashedCodes.Remove(storedHash);
+                        user.BackupCodes = JsonSerializer.Serialize(hashedCodes);
+                        await _userManager.UpdateAsync(user);
+                        return true;
+                    }
+                }
+                catch
+                {
+                    // Invalid format, skip
+                    continue;
+                }
             }
             
             return false;
@@ -150,18 +179,35 @@ namespace UrGuide.WebApp.Services
         
         private string GenerateBackupCode()
         {
-            var bytes = new byte[4]; // 8 characters when hex encoded
+            // Use 10 random bytes (~80 bits) and Base32 encoding for higher-entropy, user-friendly codes
+            var bytes = new byte[10];
             using var rng = RandomNumberGenerator.Create();
             rng.GetBytes(bytes);
-            return Convert.ToHexString(bytes).ToLower();
+            return Base32Encode(bytes);
         }
         
         private string HashBackupCode(string code)
         {
-            using var sha256 = SHA256.Create();
-            var bytes = Encoding.UTF8.GetBytes(code);
-            var hash = sha256.ComputeHash(bytes);
-            return Convert.ToBase64String(hash);
+            // Derive a hash using PBKDF2 with a per-code random salt to resist offline brute-force
+            // Format stored value as: base64(salt) + ":" + base64(derivedKey)
+            var salt = new byte[16];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(salt);
+            }
+
+            const int iterations = 100_000;
+            const int keySize = 32; // 256-bit derived key
+
+            byte[] derivedKey;
+            using (var pbkdf2 = new Rfc2898DeriveBytes(code, salt, iterations, HashAlgorithmName.SHA256))
+            {
+                derivedKey = pbkdf2.GetBytes(keySize);
+            }
+
+            var saltB64 = Convert.ToBase64String(salt);
+            var hashB64 = Convert.ToBase64String(derivedKey);
+            return $"{saltB64}:{hashB64}";
         }
         
         private bool ValidateTotpCode(string secret, string code)
@@ -244,7 +290,18 @@ namespace UrGuide.WebApp.Services
         private static byte[] Base32Decode(string base32)
         {
             const string base32Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-            var bits = base32.ToUpper().TrimEnd('=').Select(c => base32Chars.IndexOf(c)).ToList();
+            var input = base32.ToUpper().TrimEnd('=');
+            
+            var bits = new List<int>();
+            foreach (var c in input)
+            {
+                var index = base32Chars.IndexOf(c);
+                if (index == -1)
+                {
+                    throw new ArgumentException($"Invalid Base32 character: {c}", nameof(base32));
+                }
+                bits.Add(index);
+            }
             
             var result = new List<byte>();
             int buffer = 0;

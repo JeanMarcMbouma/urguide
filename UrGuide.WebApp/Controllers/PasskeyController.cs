@@ -1,4 +1,5 @@
 using Fido2NetLib;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -21,15 +22,18 @@ namespace UrGuide.WebApp.Controllers
         private readonly IPasskeyService _passkeyService;
         private readonly UserManager<UrGuideUser> _userManager;
         private readonly IUserContext _userContext;
+        private readonly SignInManager<UrGuideUser> _signInManager;
         
         public PasskeyController(
             IPasskeyService passkeyService,
             UserManager<UrGuideUser> userManager,
-            IUserContext userContext)
+            IUserContext userContext,
+            SignInManager<UrGuideUser> signInManager)
         {
             _passkeyService = passkeyService ?? throw new ArgumentNullException(nameof(passkeyService));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
+            _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
         }
         
         /// <summary>
@@ -76,7 +80,7 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.Create("User not found"));
             }
             
-            var friendlyName = "Passkey"; // Could be passed from client
+            var friendlyName = request?.FriendlyName ?? "Passkey";
             var success = await _passkeyService.CompleteRegistrationAsync(user, request.AttestationResponse, friendlyName);
             
             if (!success)
@@ -121,7 +125,7 @@ namespace UrGuide.WebApp.Controllers
         }
         
         /// <summary>
-        /// Complete passkey login
+        /// Complete passkey login and sign in the user
         /// </summary>
         [HttpPost("login/complete")]
         [AllowAnonymous]
@@ -140,8 +144,9 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.Create("Failed to authenticate with passkey"));
             }
             
-            // TODO: Sign in the user using SignInManager
-            // For now, just return success
+            // Sign in the user
+            await _signInManager.SignInAsync(user, isPersistent: true);
+            
             var response = new PasskeyLoginCompleteResponse
             {
                 Success = true,

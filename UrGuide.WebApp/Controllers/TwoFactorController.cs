@@ -1,9 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using UrGuide.Shared.Contracts;
+using UrGuide.WebApp.Data;
 using UrGuide.WebApp.Entities;
 using UrGuide.WebApp.Models;
 using UrGuide.WebApp.Services;
@@ -20,15 +24,21 @@ namespace UrGuide.WebApp.Controllers
         private readonly ITwoFactorService _twoFactorService;
         private readonly UserManager<UrGuideUser> _userManager;
         private readonly IUserContext _userContext;
+        private readonly IMemoryCache _cache;
+        private readonly UrGuideAuthContext _context;
         
         public TwoFactorController(
             ITwoFactorService twoFactorService,
             UserManager<UrGuideUser> userManager,
-            IUserContext userContext)
+            IUserContext userContext,
+            IMemoryCache cache,
+            UrGuideAuthContext context)
         {
             _twoFactorService = twoFactorService ?? throw new ArgumentNullException(nameof(twoFactorService));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
         
         /// <summary>
@@ -44,12 +54,17 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.Create("User not found"));
             }
             
+            // Query passkey count from database
+            var passkeyCount = await _context.PasskeyCredentials
+                .Where(c => c.UserId == _userContext.UserId)
+                .CountAsync();
+            
             var response = new TwoFactorStatusResponse
             {
                 IsEnabled = user.TwoFactorEnabled,
                 EnabledAt = user.TwoFactorEnabledAt,
                 RemainingBackupCodes = _twoFactorService.GetRemainingBackupCodesCount(user),
-                PasskeyCount = user.PasskeyCredentials?.Count ?? 0
+                PasskeyCount = passkeyCount
             };
             
             return Ok(response);
@@ -74,6 +89,10 @@ namespace UrGuide.WebApp.Controllers
             }
             
             var (secret, qrCode, manualKey) = await _twoFactorService.GenerateQRCodeAsync(user);
+            
+            // Store secret in cache for verification (expires in 10 minutes)
+            var cacheKey = $"2fa_setup_{user.Id}";
+            _cache.Set(cacheKey, secret, TimeSpan.FromMinutes(10));
             
             var response = new Enable2FAResponse
             {
@@ -108,10 +127,12 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.Create("2FA is already enabled"));
             }
             
-            // Get secret from the enable call (stored temporarily)
-            // For this implementation, we'll use the request secret
-            // In production, you'd store this in a cache or session
-            var (secret, _, _) = await _twoFactorService.GenerateQRCodeAsync(user);
+            // Use the secret that was generated during the 2FA enable/setup call
+            var cacheKey = $"2fa_setup_{user.Id}";
+            if (!_cache.TryGetValue<string>(cacheKey, out var secret) || string.IsNullOrEmpty(secret))
+            {
+                return BadRequest(ErrorEnvelop.Create("2FA setup not initiated or has expired"));
+            }
             
             // Temporarily store secret for verification
             user.TwoFactorSecret = secret;
@@ -119,15 +140,19 @@ namespace UrGuide.WebApp.Controllers
             var isValid = await _twoFactorService.VerifyTotpCodeAsync(user, request.Code);
             if (!isValid)
             {
+                // Clear the pending secret on failure
                 user.TwoFactorSecret = null;
                 return BadRequest(ErrorEnvelop.Create("Invalid verification code"));
             }
             
-            // Enable 2FA
+            // Enable 2FA using the same secret that was used to generate the QR code
             await _twoFactorService.EnableTwoFactorAsync(user, secret);
             
             // Generate backup codes
             var backupCodes = await _twoFactorService.GenerateBackupCodesAsync(user);
+            
+            // Clean up cached secret
+            _cache.Remove(cacheKey);
             
             var response = new Verify2FASetupResponse
             {
@@ -194,11 +219,11 @@ namespace UrGuide.WebApp.Controllers
         }
         
         /// <summary>
-        /// Verify a 2FA code (for login or sensitive operations)
+        /// Verify a 2FA code (for authenticated users - e.g., sensitive operations)
+        /// Note: For initial login 2FA, use ASP.NET Identity's TwoFactorAuthenticatorSignInAsync
         /// </summary>
         [HttpPost("verify-code")]
         [ProducesResponseType(200)]
-        [AllowAnonymous]
         public async Task<IActionResult> VerifyCode([FromBody] Verify2FACodeRequest request)
         {
             if (string.IsNullOrEmpty(request.Code))
@@ -212,15 +237,9 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.Create("User not found"));
             }
             
-            bool isValid;
-            if (request.IsBackupCode)
-            {
-                isValid = await _twoFactorService.VerifyBackupCodeAsync(user, request.Code);
-            }
-            else
-            {
-                isValid = await _twoFactorService.VerifyTotpCodeAsync(user, request.Code);
-            }
+            bool isValid = request.IsBackupCode
+                ? await _twoFactorService.VerifyBackupCodeAsync(user, request.Code)
+                : await _twoFactorService.VerifyTotpCodeAsync(user, request.Code);
             
             if (!isValid)
             {

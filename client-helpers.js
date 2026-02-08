@@ -126,21 +126,34 @@ async function disable2FA(authToken) {
 // ============================================================================
 
 /**
- * Convert ArrayBuffer to Base64 string
+ * Convert ArrayBuffer to Base64URL string (WebAuthn compatible)
  */
-function arrayBufferToBase64(buffer) {
+function arrayBufferToBase64URL(buffer) {
     const bytes = new Uint8Array(buffer);
     let binary = '';
     for (let i = 0; i < bytes.byteLength; i++) {
         binary += String.fromCharCode(bytes[i]);
     }
-    return btoa(binary);
+    // Convert to base64 and then to base64url
+    return btoa(binary)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
 }
 
 /**
- * Convert Base64 string to ArrayBuffer
+ * Convert Base64URL string to ArrayBuffer (WebAuthn compatible)
  */
-function base64ToArrayBuffer(base64) {
+function base64URLToArrayBuffer(base64url) {
+    // Convert base64url to base64
+    let base64 = base64url
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+    
+    // Add padding if needed
+    const padding = (4 - (base64.length % 4)) % 4;
+    base64 += '='.repeat(padding);
+    
     const binary = atob(base64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) {
@@ -179,8 +192,8 @@ async function registerPasskey(authToken, friendlyName) {
         const { options } = await optionsResponse.json();
         
         // Convert base64 fields to ArrayBuffer
-        options.challenge = base64ToArrayBuffer(options.challenge);
-        options.user.id = base64ToArrayBuffer(options.user.id);
+        options.challenge = base64URLToArrayBuffer(options.challenge);
+        options.user.id = base64URLToArrayBuffer(options.user.id);
         
         // Step 2: Create credential using WebAuthn API
         const credential = await navigator.credentials.create({
@@ -190,11 +203,11 @@ async function registerPasskey(authToken, friendlyName) {
         // Step 3: Send attestation response to server
         const attestationResponse = {
             id: credential.id,
-            rawId: arrayBufferToBase64(credential.rawId),
+            rawId: arrayBufferToBase64URL(credential.rawId),
             type: credential.type,
             response: {
-                attestationObject: arrayBufferToBase64(credential.response.attestationObject),
-                clientDataJSON: arrayBufferToBase64(credential.response.clientDataJSON)
+                attestationObject: arrayBufferToBase64URL(credential.response.attestationObject),
+                clientDataJSON: arrayBufferToBase64URL(credential.response.clientDataJSON)
             }
         };
         
@@ -248,10 +261,10 @@ async function loginWithPasskey(userName) {
         const { options } = await optionsResponse.json();
         
         // Convert base64 fields to ArrayBuffer
-        options.challenge = base64ToArrayBuffer(options.challenge);
+        options.challenge = base64URLToArrayBuffer(options.challenge);
         options.allowCredentials = options.allowCredentials.map(cred => ({
             ...cred,
-            id: base64ToArrayBuffer(cred.id)
+            id: base64URLToArrayBuffer(cred.id)
         }));
         
         // Step 2: Get assertion using WebAuthn API
@@ -262,14 +275,14 @@ async function loginWithPasskey(userName) {
         // Step 3: Send assertion response to server
         const assertionResponse = {
             id: assertion.id,
-            rawId: arrayBufferToBase64(assertion.rawId),
+            rawId: arrayBufferToBase64URL(assertion.rawId),
             type: assertion.type,
             response: {
-                authenticatorData: arrayBufferToBase64(assertion.response.authenticatorData),
-                clientDataJSON: arrayBufferToBase64(assertion.response.clientDataJSON),
-                signature: arrayBufferToBase64(assertion.response.signature),
+                authenticatorData: arrayBufferToBase64URL(assertion.response.authenticatorData),
+                clientDataJSON: arrayBufferToBase64URL(assertion.response.clientDataJSON),
+                signature: arrayBufferToBase64URL(assertion.response.signature),
                 userHandle: assertion.response.userHandle ? 
-                    arrayBufferToBase64(assertion.response.userHandle) : null
+                    arrayBufferToBase64URL(assertion.response.userHandle) : null
             }
         };
         
@@ -340,53 +353,6 @@ async function deletePasskey(authToken, credentialId) {
     }
 }
 
-// ============================================================================
-// Example Usage
-// ============================================================================
-
-/**
- * Example: Complete 2FA setup flow
- */
-async function example2FASetup(authToken) {
-    try {
-        // Enable 2FA and get backup codes
-        const result = await enable2FA(authToken);
-        console.log('2FA enabled successfully!');
-        console.log('Backup codes:', result.backupCodes);
-        
-        // Later, verify a code
-        const code = prompt('Enter your 2FA code:');
-        const isValid = await verify2FACode(code, false, authToken);
-        console.log('Code valid:', isValid);
-    } catch (error) {
-        console.error('2FA setup failed:', error);
-    }
-}
-
-/**
- * Example: Register and use passkey
- */
-async function examplePasskeyFlow(authToken) {
-    try {
-        // Register a passkey
-        const registered = await registerPasskey(authToken, 'My Device');
-        if (registered) {
-            console.log('Passkey registered successfully!');
-        }
-        
-        // Later, login with passkey (no authToken needed)
-        const loginResult = await loginWithPasskey('user@example.com');
-        if (loginResult.success) {
-            console.log('Logged in with passkey! User ID:', loginResult.userId);
-        }
-        
-        // List all passkeys
-        const passkeys = await listPasskeys(authToken);
-        console.log('Registered passkeys:', passkeys);
-    } catch (error) {
-        console.error('Passkey flow failed:', error);
-    }
-}
 
 // Export functions for use in modules
 if (typeof module !== 'undefined' && module.exports) {
@@ -403,7 +369,7 @@ if (typeof module !== 'undefined' && module.exports) {
         deletePasskey,
         
         // Helper functions
-        arrayBufferToBase64,
-        base64ToArrayBuffer
+        arrayBufferToBase64URL,
+        base64URLToArrayBuffer
     };
 }

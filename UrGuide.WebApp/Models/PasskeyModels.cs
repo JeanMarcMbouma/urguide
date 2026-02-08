@@ -25,6 +25,7 @@ namespace UrGuide.WebApp.Models
     public class PasskeyRegistrationCompleteRequest
     {
         public AuthenticatorAttestationRawResponse AttestationResponse { get; set; }
+        public string FriendlyName { get; set; }
     }
     
     /// <summary>

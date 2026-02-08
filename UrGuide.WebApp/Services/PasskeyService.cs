@@ -2,6 +2,7 @@ using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,14 +29,14 @@ namespace UrGuide.WebApp.Services
         private readonly IFido2 _fido2;
         private readonly UrGuideAuthContext _context;
         private readonly UserManager<UrGuideUser> _userManager;
-        private readonly Dictionary<string, CredentialCreateOptions> _registrationOptions = new();
-        private readonly Dictionary<string, AssertionOptions> _assertionOptions = new();
+        private readonly IMemoryCache _cache;
         
-        public PasskeyService(IFido2 fido2, UrGuideAuthContext context, UserManager<UrGuideUser> userManager)
+        public PasskeyService(IFido2 fido2, UrGuideAuthContext context, UserManager<UrGuideUser> userManager, IMemoryCache cache)
         {
             _fido2 = fido2 ?? throw new ArgumentNullException(nameof(fido2));
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
         
         public async Task<CredentialCreateOptions> StartRegistrationAsync(UrGuideUser user, string friendlyName)
@@ -72,8 +73,9 @@ namespace UrGuide.WebApp.Services
                 exts
             );
             
-            // Store options for verification
-            _registrationOptions[user.Id] = options;
+            // Store options in cache for verification (expires in 5 minutes)
+            var cacheKey = $"passkey_reg_{user.Id}";
+            _cache.Set(cacheKey, options, TimeSpan.FromMinutes(5));
             
             return options;
         }
@@ -82,8 +84,9 @@ namespace UrGuide.WebApp.Services
         {
             try
             {
-                // Get stored options
-                if (!_registrationOptions.TryGetValue(user.Id, out var options))
+                // Get stored options from cache
+                var cacheKey = $"passkey_reg_{user.Id}";
+                if (!_cache.TryGetValue<CredentialCreateOptions>(cacheKey, out var options) || options == null)
                 {
                     return false;
                 }
@@ -121,8 +124,8 @@ namespace UrGuide.WebApp.Services
                 _context.PasskeyCredentials.Add(credential);
                 await _context.SaveChangesAsync();
                 
-                // Clean up stored options
-                _registrationOptions.Remove(user.Id);
+                // Clean up cached options
+                _cache.Remove(cacheKey);
                 
                 return true;
             }
@@ -165,8 +168,9 @@ namespace UrGuide.WebApp.Services
                 exts
             );
             
-            // Store options for verification
-            _assertionOptions[user.Id] = options;
+            // Store options in cache for verification (expires in 5 minutes)
+            var cacheKey = $"passkey_login_{user.Id}";
+            _cache.Set(cacheKey, options, TimeSpan.FromMinutes(5));
             
             return options;
         }
@@ -186,8 +190,9 @@ namespace UrGuide.WebApp.Services
                     return (false, null);
                 }
                 
-                // Get stored options
-                if (!_assertionOptions.TryGetValue(credential.UserId, out var options))
+                // Get stored options from cache
+                var cacheKey = $"passkey_login_{credential.UserId}";
+                if (!_cache.TryGetValue<AssertionOptions>(cacheKey, out var options) || options == null)
                 {
                     return (false, null);
                 }
@@ -200,9 +205,30 @@ namespace UrGuide.WebApp.Services
                     credential.SignatureCounter,
                     async (args, cancellationToken) =>
                     {
-                        // Verify user handle matches
-                        var userHandle = Encoding.UTF8.GetString(args.UserHandle);
-                        return userHandle == credential.UserId;
+                        // For non-discoverable credentials, UserHandle may be null
+                        if (args.UserHandle == null || args.UserHandle.Length == 0)
+                        {
+                            // Fall back to validating via credentialId lookup
+                            var userIdForCredential = await _context.PasskeyCredentials
+                                .AsNoTracking()
+                                .Where(c => c.CredentialId == args.CredentialId)
+                                .Select(c => c.UserId)
+                                .FirstOrDefaultAsync(cancellationToken);
+
+                            return userIdForCredential == credential.UserId;
+                        }
+
+                        try
+                        {
+                            // Verify user handle matches the stored user id
+                            var userHandle = Encoding.UTF8.GetString(args.UserHandle);
+                            return userHandle == credential.UserId;
+                        }
+                        catch (DecoderFallbackException)
+                        {
+                            // Invalid UTF-8 in user handle means verification fails
+                            return false;
+                        }
                     }
                 );
                 
@@ -216,8 +242,8 @@ namespace UrGuide.WebApp.Services
                 credential.LastUsedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
                 
-                // Clean up stored options
-                _assertionOptions.Remove(credential.UserId);
+                // Clean up cached options
+                _cache.Remove(cacheKey);
                 
                 return (true, credential.User);
             }

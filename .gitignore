@@ -104,3 +104,7 @@ docker-compose.override.local.yml
 # Xamarin
 *.userprefs
 .mfractor/
+
+# IdentityServer signing keys
+tempkey.jwk
+*.jwk
