@@ -147,6 +147,9 @@ try
     });
 
     builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+    
+    // Add background services
+    builder.Services.AddHostedService<UrGuide.WebApp.Services.DataExportBackgroundService>();
 
     var app = builder.Build();
 

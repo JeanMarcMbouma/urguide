@@ -568,11 +568,28 @@ Response:
 - **`/api/payment`** - Payment processing for tour bookings
 - **`/api/payout`** - Guide payout management
 - **`/api/refund`** - Refund request processing
+- **`/api/dataexport`** - GDPR-compliant user data export
 - **`/api/webhook`** - Stripe webhook events
 - **`/api/lookup`** - Reference data (countries, cities, etc.)
 - **`/api/notification`** - Notification management
 - **`/api/activity`** - User activity tracking
 - **`/notify`** - SignalR Hub for real-time notifications
+
+### GDPR Data Export
+
+The API provides GDPR-compliant data export functionality allowing users to export all their personal data:
+
+- **`POST /api/dataexport/request`** - Request a data export (JSON or CSV format)
+- **`GET /api/dataexport/status/{requestId}`** - Check the status of an export request
+- **`GET /api/dataexport/download/{token}`** - Download exported data using secure token
+- **`DELETE /api/dataexport/{requestId}`** - Cancel a pending export request
+
+**Features:**
+- Export includes profile, activity history, reviews, tours, bids, and more
+- Supports JSON (single file) and CSV (ZIP with multiple files) formats
+- Secure token-based downloads with 7-day expiration
+- Email notification when export is ready
+- Background processing for large exports
 
 For complete endpoint documentation, refer to the Swagger UI at `/swagger`.
 
@@ -823,3 +840,4 @@ For questions and support:
 ---
 
 **Built with ❤️ for the tourism community**
+
