@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using Asp.Versioning;
 using System.Linq;
 using UrGuide.ServiceDefaults;
+using UrGuide.WebApp.MessageQueue;
 
 var logger = LogManager.Setup().LoadConfigurationFromFile("nlog.config").GetCurrentClassLogger();
 try
@@ -78,12 +79,16 @@ try
         options.SubstituteApiVersionInUrl = true;
     });
     
+    // Add message queue
+    builder.Services.AddMessageQueue(builder.Configuration);
+    
     // Add health checks
     var authConn = builder.Configuration.GetSection("ConnectionStrings:AuthConnection").Value;
     var dataConn = builder.Configuration.GetSection("ConnectionStrings:DefaultConnection").Value;
     builder.Services.AddHealthChecks()
         .AddSqlServer(authConn ?? "", name: "auth-db")
-        .AddSqlServer(dataConn ?? "", name: "data-db");
+        .AddSqlServer(dataConn ?? "", name: "data-db")
+        .AddMessageQueueHealthChecks(builder.Configuration);
     
     // Add CORS policy for API consumers
     builder.Services.AddCors(options =>
