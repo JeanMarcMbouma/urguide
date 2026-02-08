@@ -116,7 +116,8 @@ namespace UrGuide.WebApp.RateLimiting
                 
                 if (recentEvents.Count < events.Count)
                 {
-                    _events[key] = new ConcurrentBag<RateLimitEvent>(recentEvents);
+                    var newBag = new ConcurrentBag<RateLimitEvent>(recentEvents);
+                    _events.TryUpdate(key, newBag, events);
                 }
             }
         }

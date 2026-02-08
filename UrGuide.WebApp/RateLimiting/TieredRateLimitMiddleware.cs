@@ -81,15 +81,33 @@ namespace UrGuide.WebApp.RateLimiting
             // Check rate limit
             var identifier = userId ?? ipAddress ?? "unknown";
             var cacheKey = $"ratelimit:{tier}:{identifier}:{endpointKey}";
+            var lockKey = $"{cacheKey}:lock";
             var periodTimeSpan = policy.GetPeriodTimeSpan();
 
-            var currentCount = _cache.GetOrCreate(cacheKey, entry =>
+            // Use a lock object for thread-safe counter increment
+            var lockObj = _cache.GetOrCreate(lockKey, entry =>
             {
-                entry.AbsoluteExpirationRelativeToNow = periodTimeSpan;
-                return 0;
+                entry.Priority = CacheItemPriority.NeverRemove;
+                return new object();
             });
 
-            currentCount++;
+            int currentCount;
+            lock (lockObj)
+            {
+                currentCount = _cache.GetOrCreate(cacheKey, entry =>
+                {
+                    entry.AbsoluteExpirationRelativeToNow = periodTimeSpan;
+                    return 0;
+                });
+
+                currentCount++;
+
+                // Update counter atomically
+                _cache.Set(cacheKey, currentCount, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = periodTimeSpan
+                });
+            }
 
             // Track analytics
             if (_options.EnableAnalytics)
@@ -122,12 +140,6 @@ namespace UrGuide.WebApp.RateLimiting
                 });
                 return;
             }
-
-            // Update counter
-            _cache.Set(cacheKey, currentCount, new MemoryCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = periodTimeSpan
-            });
 
             // Add rate limit headers
             AddRateLimitHeaders(context, policy, currentCount, periodTimeSpan);

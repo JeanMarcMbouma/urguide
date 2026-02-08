@@ -30,7 +30,13 @@ namespace UrGuide.WebApp.RateLimiting
             if (string.IsNullOrEmpty(Period))
                 return TimeSpan.FromMinutes(1);
 
-            var value = int.Parse(Period.Substring(0, Period.Length - 1));
+            if (Period.Length < 2)
+                return TimeSpan.FromMinutes(1);
+
+            var valueStr = Period.Substring(0, Period.Length - 1);
+            if (!int.TryParse(valueStr, out var value) || value <= 0)
+                return TimeSpan.FromMinutes(1);
+
             var unit = Period[Period.Length - 1];
 
             return unit switch
