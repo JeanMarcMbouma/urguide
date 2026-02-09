@@ -213,7 +213,7 @@ namespace UrGuide.WebApp.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
-        [ProducesResponseType(500)]
+        [ProducesResponseType(typeof(ErrorEnvelop<string>), 500)]
         public async Task<IActionResult> ReindexPosts(CancellationToken cancellationToken)
         {
             try
@@ -253,7 +253,7 @@ namespace UrGuide.WebApp.Controllers
                     if (result.HasError)
                     {
                         _logger.LogError("Failed to bulk index posts batch: {Errors}", string.Join(", ", result.Errors));
-                        return StatusCode(500, new { message = "Failed to re-index posts", errors = result.Errors });
+                        return StatusCode(500, ErrorEnvelop.Create(result.Errors));
                     }
                     
                     totalIndexed += posts.Count;
@@ -270,7 +270,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error re-indexing posts");
-                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+                return StatusCode(500, "Internal server error");
             }
         }
 
@@ -284,7 +284,7 @@ namespace UrGuide.WebApp.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
-        [ProducesResponseType(500)]
+        [ProducesResponseType(typeof(ErrorEnvelop<string>), 500)]
         public async Task<IActionResult> ReindexTours(CancellationToken cancellationToken)
         {
             try
@@ -328,7 +328,7 @@ namespace UrGuide.WebApp.Controllers
                     if (result.HasError)
                     {
                         _logger.LogError("Failed to bulk index tours batch: {Errors}", string.Join(", ", result.Errors));
-                        return StatusCode(500, new { message = "Failed to re-index tours", errors = result.Errors });
+                        return StatusCode(500, ErrorEnvelop.Create(result.Errors));
                     }
                     
                     totalIndexed += tours.Count;
@@ -345,7 +345,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error re-indexing tours");
-                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+                return StatusCode(500, "Internal server error");
             }
         }
     }
