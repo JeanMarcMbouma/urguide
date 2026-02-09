@@ -35,7 +35,8 @@ namespace UrGuide.Services.Posts
                            IEmailService emailService,
                            IImageService imageService,
                            IUserNotificationService notificationService,
-                           IMediator mediator) : base(context, userContext)
+                           IMediator mediator,
+                           IElasticsearchService elasticsearchService) : base(context, userContext)
         {
             CatalogService = catalogService ?? throw new ArgumentNullException(nameof(catalogService));
             Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
@@ -45,6 +46,7 @@ namespace UrGuide.Services.Posts
             ImageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
             NotificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
             Mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+            ElasticsearchService = elasticsearchService ?? throw new ArgumentNullException(nameof(elasticsearchService));
         }
 
         public ICatalogService CatalogService { get; }
@@ -55,6 +57,7 @@ namespace UrGuide.Services.Posts
         public IImageService ImageService { get; }
         public IUserNotificationService NotificationService { get; }
         public IMediator Mediator { get; }
+        public IElasticsearchService ElasticsearchService { get; }
 
         public async Task<Result<PostModel>> AcceptBidAsync(string postId, CancellationToken cancellationToken)
         {
@@ -166,6 +169,18 @@ New price: <em>{post.Bid.NewValue}</em>";
             }
             
             await Context.SaveChangesAsync(cancellationToken);
+            
+            // Index to Elasticsearch asynchronously
+            try
+            {
+                var searchDoc = Search.SearchDocumentMapper.ToSearchDocument(post);
+                _ = ElasticsearchService.IndexPostAsync(searchDoc, CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "Failed to index post {PostId} to Elasticsearch", post.Id);
+            }
+            
             return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
         }
 
@@ -180,6 +195,17 @@ New price: <em>{post.Bid.NewValue}</em>";
             await Context.SaveChangesAsync(cancellationToken);
             ImageService.DeleteImages(images);
             await Mediator.Send(new PostDeletedCommand(UserContext.UserId, id));
+            
+            // Delete from Elasticsearch asynchronously
+            try
+            {
+                _ = ElasticsearchService.DeletePostAsync(id, CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "Failed to delete post {PostId} from Elasticsearch", id);
+            }
+            
             return Result.Of(true);
         }
 
@@ -337,6 +363,18 @@ Your bid: <em>{value}</em>";
             post.LastUpdated = DateTime.UtcNow;
             await Mediator.Send(new PostEditedCommand(UserContext.UserId, model.Id));
             await Context.SaveChangesAsync(cancellationToken);
+            
+            // Update in Elasticsearch asynchronously
+            try
+            {
+                var searchDoc = Search.SearchDocumentMapper.ToSearchDocument(post);
+                _ = ElasticsearchService.UpdatePostAsync(searchDoc, CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "Failed to update post {PostId} in Elasticsearch", model.Id);
+            }
+            
             return Result.Of(true);
         }
 

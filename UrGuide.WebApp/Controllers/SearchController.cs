@@ -1,11 +1,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using UrGuide.Data;
 using UrGuide.Model.Search;
 using UrGuide.Services.Contracts;
+using UrGuide.Services.Search;
 using UrGuide.Shared.Contracts;
 
 namespace UrGuide.WebApp.Controllers
@@ -18,17 +22,20 @@ namespace UrGuide.WebApp.Controllers
         private readonly ISearchAnalyticsService _searchAnalyticsService;
         private readonly IUserContext _userContext;
         private readonly ILogger<SearchController> _logger;
+        private readonly UrGuideContext _context;
 
         public SearchController(
             IElasticsearchService elasticsearchService,
             ISearchAnalyticsService searchAnalyticsService,
             IUserContext userContext,
-            ILogger<SearchController> logger)
+            ILogger<SearchController> logger,
+            UrGuideContext context)
         {
             _elasticsearchService = elasticsearchService ?? throw new ArgumentNullException(nameof(elasticsearchService));
             _searchAnalyticsService = searchAnalyticsService ?? throw new ArgumentNullException(nameof(searchAnalyticsService));
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         /// <summary>
@@ -210,13 +217,38 @@ namespace UrGuide.WebApp.Controllers
         {
             try
             {
-                // This will be implemented in the data synchronization step
-                return Ok(new { message = "Re-indexing started. This is an async operation." });
+                _logger.LogInformation("Starting bulk re-indexing of posts");
+                
+                // Ensure index exists
+                await _elasticsearchService.CreateIndexAsync("urguide-posts", cancellationToken);
+                
+                // Fetch all posts from database
+                var posts = await _context.Posts
+                    .Include(p => p.User)
+                    .Include(p => p.Catalog)
+                    .ToListAsync(cancellationToken);
+                
+                _logger.LogInformation("Found {Count} posts to index", posts.Count);
+                
+                // Convert to search documents
+                var searchDocs = posts.Select(p => SearchDocumentMapper.ToSearchDocument(p)).ToList();
+                
+                // Bulk index
+                var result = await _elasticsearchService.BulkIndexPostsAsync(searchDocs, cancellationToken);
+                
+                if (result.HasError)
+                {
+                    _logger.LogError("Failed to bulk index posts: {Errors}", string.Join(", ", result.Errors));
+                    return StatusCode(500, new { message = "Failed to re-index posts", errors = result.Errors });
+                }
+                
+                _logger.LogInformation("Successfully re-indexed {Count} posts", posts.Count);
+                return Ok(new { message = $"Successfully re-indexed {posts.Count} posts" });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error re-indexing posts");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
             }
         }
 
@@ -235,13 +267,42 @@ namespace UrGuide.WebApp.Controllers
         {
             try
             {
-                // This will be implemented in the data synchronization step
-                return Ok(new { message = "Re-indexing started. This is an async operation." });
+                _logger.LogInformation("Starting bulk re-indexing of tours");
+                
+                // Ensure index exists
+                await _elasticsearchService.CreateIndexAsync("urguide-tours", cancellationToken);
+                
+                // Fetch all tours from database
+                var tours = await _context.Set<UrGuide.Data.Entities.Tour.Tour>()
+                    .Include(t => t.Author)
+                    .ThenInclude(a => a.ProfileInfo)
+                    .Include(t => t.Region)
+                    .Include(t => t.Reviews)
+                    .Include(t => t.Bookings)
+                    .Include(t => t.Reactions)
+                    .ToListAsync(cancellationToken);
+                
+                _logger.LogInformation("Found {Count} tours to index", tours.Count);
+                
+                // Convert to search documents
+                var searchDocs = tours.Select(t => SearchDocumentMapper.ToSearchDocument(t)).ToList();
+                
+                // Bulk index
+                var result = await _elasticsearchService.BulkIndexToursAsync(searchDocs, cancellationToken);
+                
+                if (result.HasError)
+                {
+                    _logger.LogError("Failed to bulk index tours: {Errors}", string.Join(", ", result.Errors));
+                    return StatusCode(500, new { message = "Failed to re-index tours", errors = result.Errors });
+                }
+                
+                _logger.LogInformation("Successfully re-indexed {Count} tours", tours.Count);
+                return Ok(new { message = $"Successfully re-indexed {tours.Count} tours" });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error re-indexing tours");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
             }
         }
     }
