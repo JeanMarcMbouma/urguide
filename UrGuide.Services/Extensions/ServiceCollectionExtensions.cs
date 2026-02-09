@@ -44,6 +44,10 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<IPayoutService, PayoutService>();
             services.AddTransient<IRefundService, RefundService>();
             
+            // Webhook services
+            services.AddTransient<Webhooks.IWebhookService, Webhooks.WebhookService>();
+            services.AddHttpClient(); // Required for webhook delivery
+            
             // Data export service
             services.AddTransient<Contracts.IDataExportService, DataExport.DataExportService>();
             
