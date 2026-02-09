@@ -31,6 +31,9 @@ bld/
 # Exclude bin and obj folders with any path separators
 **/bin/**
 **/obj/**
+# Exclude temp files
+**/c:\\temp/**
+**/temp/**
 
 # .NET Core build artifacts
 project.lock.json

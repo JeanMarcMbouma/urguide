@@ -362,26 +362,42 @@ Allow users to export all their personal data in machine-readable format for GDP
 ### 12. Advanced Search and Filtering
 **Title:** Implement advanced search with Elasticsearch  
 **Labels:** enhancement, search, performance  
+**Status:** ✅ **COMPLETED**  
 **Description:**
 Integrate Elasticsearch for advanced search capabilities with fuzzy matching, filters, and facets.
 
-**Requirements:**
-- Elasticsearch integration
-- Fuzzy search for guides and tours
-- Multi-field search
-- Filters (location, price, rating, etc.)
-- Faceted search results
-- Search analytics
-- Search suggestions/autocomplete
+**Implemented:**
+- ✅ Elasticsearch 8.11.0 integration with NEST 7.17.5 client
+- ✅ Docker Compose configuration for Elasticsearch service
+- ✅ Fuzzy search with configurable fuzziness (AUTO, 0-2)
+- ✅ Multi-field search across text, description, tags, and location
+- ✅ Advanced filters: location, geo-distance, price range, rating, date ranges, tags, seat availability
+- ✅ Faceted search with aggregations by tags, locations, and rating distribution
+- ✅ SearchAnalytics entity for tracking queries, results, timing, and user behavior
+- ✅ Autocomplete/suggestions with search-as-you-type functionality
+- ✅ Automatic indexing on Post create/update/delete operations
+- ✅ Bulk re-indexing endpoints for admin users
+- ✅ Health check integration for Elasticsearch connectivity
+
+**API Endpoints:**
+- `POST /api/search/posts` - Advanced post search with filters and facets
+- `POST /api/search/tours` - Advanced tour search
+- `POST /api/search/autocomplete` - Autocomplete suggestions
+- `GET /api/search/health` - Elasticsearch health check
+- `POST /api/search/admin/reindex/posts` - Bulk re-index all posts (admin only)
+- `POST /api/search/admin/reindex/tours` - Bulk re-index all tours (admin only)
+
+**Database Migration:**
+- `20260209081856_AddSearchAnalytics` - SearchAnalytics table with indexes
 
 **Acceptance Criteria:**
-- [ ] Elasticsearch is integrated
-- [ ] Fuzzy search works
-- [ ] Multi-field search is implemented
-- [ ] Filters work correctly
-- [ ] Facets are returned
-- [ ] Analytics track searches
-- [ ] Autocomplete suggestions work
+- [x] Elasticsearch is integrated
+- [x] Fuzzy search works
+- [x] Multi-field search is implemented
+- [x] Filters work correctly
+- [x] Facets are returned
+- [x] Analytics track searches
+- [x] Autocomplete suggestions work
 
 ---
 
@@ -567,21 +583,21 @@ Implement multi-language support for API responses and error messages.
 **Total Issues: 18**
 
 **By Status:**
-- ✅ Completed: 5 (Docker Containerization, CI/CD Pipeline, Payment Integration, Two-Factor Authentication, Message Queue Integration)
+- ✅ Completed: 6 (Docker Containerization, CI/CD Pipeline, Payment Integration, Two-Factor Authentication, GDPR Data Export, Message Queue Integration, Advanced Search & Filtering)
 - 🚧 In Progress: 0
-- 📋 Pending: 13
+- 📋 Pending: 12
 
 **By Priority:**
 - High Priority: 0 (All completed: Payment Integration ✅, 2FA ✅)
-- Medium Priority: 7
+- Medium Priority: 6
 - Nice to Have: 5
-- ✅ Completed: 5
+- ✅ Completed: 6
 
 **By Category:**
 - Security & Authentication: 2 (1 completed: 2FA ✅, 1 pending: Social Login)
 - Monitoring & Observability: 2
 - Testing & Quality: 1
-- Features & Enhancements: 5 (1 completed: GDPR Data Export ✅, 4 pending)
+- Features & Enhancements: 5 (2 completed: GDPR Data Export ✅, Advanced Search ✅, 3 pending)
 - Mobile & Integration: 2
 - Infrastructure: 2 (1 completed: Message Queue ✅, 1 pending: Redis Caching)
 - Analytics & Reporting: 1
@@ -589,5 +605,6 @@ Implement multi-language support for API responses and error messages.
 - DevOps: 2 (✅ Both completed)
 - Financial: 1 (✅ Payment Integration completed)
 - Compliance: 1 (✅ GDPR Data Export completed)
+- Search & Performance: 1 (✅ Advanced Search & Filtering completed)
 
 These issues will be created in the GitHub repository to track progress on the UrGuide API platform.
