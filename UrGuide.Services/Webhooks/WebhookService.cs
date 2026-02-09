@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Http;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Webhooks;
+using UrGuide.Model.Results;
 using UrGuide.Model.Webhooks;
 
 namespace UrGuide.Services.Webhooks
@@ -31,168 +32,228 @@ namespace UrGuide.Services.Webhooks
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<WebhookResponse> RegisterWebhookAsync(string userId, RegisterWebhookRequest request)
+        public async Task<Result<WebhookResponse>> RegisterWebhookAsync(string userId, RegisterWebhookRequest request)
         {
+            var result = Result.Of<WebhookResponse>();
+
             if (string.IsNullOrWhiteSpace(request.Url))
-                throw new ArgumentException("Webhook URL is required");
+                return result.WithErrors("Webhook URL is required");
 
             if (!Uri.TryCreate(request.Url, UriKind.Absolute, out var uri) || 
                 (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
-                throw new ArgumentException("Invalid webhook URL");
+                return result.WithErrors("Invalid webhook URL");
 
             if (request.Events == null || !request.Events.Any())
-                throw new ArgumentException("At least one event must be subscribed");
+                return result.WithErrors("At least one event must be subscribed");
 
-            var secret = GenerateSecret();
-            var webhook = new WebhookSubscription
+            try
             {
-                Id = Guid.NewGuid().ToString(),
-                UserId = userId,
-                Url = request.Url,
-                Secret = secret,
-                IsActive = true,
-                Description = request.Description ?? string.Empty,
-                Events = request.Events.Distinct().ToList(),
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                SuccessCount = 0,
-                FailureCount = 0
-            };
-
-            _context.WebhookSubscriptions.Add(webhook);
-            await _context.SaveChangesAsync();
-
-            _logger.LogInformation($"Webhook registered for user {userId}: {webhook.Id}");
-
-            return MapToResponse(webhook);
-        }
-
-        public async Task<List<WebhookResponse>> GetUserWebhooksAsync(string userId)
-        {
-            var webhooks = await _context.WebhookSubscriptions
-                .Where(w => w.UserId == userId)
-                .OrderByDescending(w => w.CreatedAt)
-                .ToListAsync();
-
-            return webhooks.Select(MapToResponse).ToList();
-        }
-
-        public async Task<WebhookResponse> GetWebhookAsync(string webhookId, string userId)
-        {
-            var webhook = await _context.WebhookSubscriptions
-                .FirstOrDefaultAsync(w => w.Id == webhookId && w.UserId == userId);
-
-            if (webhook == null)
-                throw new ArgumentException("Webhook not found");
-
-            return MapToResponse(webhook);
-        }
-
-        public async Task<WebhookResponse> UpdateWebhookAsync(string webhookId, string userId, UpdateWebhookRequest request)
-        {
-            var webhook = await _context.WebhookSubscriptions
-                .FirstOrDefaultAsync(w => w.Id == webhookId && w.UserId == userId);
-
-            if (webhook == null)
-                throw new ArgumentException("Webhook not found");
-
-            if (!string.IsNullOrWhiteSpace(request.Url))
-            {
-                if (!Uri.TryCreate(request.Url, UriKind.Absolute, out var uri) ||
-                    (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
-                    throw new ArgumentException("Invalid webhook URL");
-                webhook.Url = request.Url;
-            }
-
-            if (request.Description != null)
-                webhook.Description = request.Description;
-
-            if (request.Events != null && request.Events.Any())
-                webhook.Events = request.Events.Distinct().ToList();
-
-            if (request.IsActive.HasValue)
-                webhook.IsActive = request.IsActive.Value;
-
-            webhook.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            _logger.LogInformation($"Webhook updated: {webhookId}");
-
-            return MapToResponse(webhook);
-        }
-
-        public async Task<bool> DeleteWebhookAsync(string webhookId, string userId)
-        {
-            var webhook = await _context.WebhookSubscriptions
-                .FirstOrDefaultAsync(w => w.Id == webhookId && w.UserId == userId);
-
-            if (webhook == null)
-                return false;
-
-            _context.WebhookSubscriptions.Remove(webhook);
-            await _context.SaveChangesAsync();
-
-            _logger.LogInformation($"Webhook deleted: {webhookId}");
-
-            return true;
-        }
-
-        public async Task<List<WebhookDeliveryResponse>> GetWebhookDeliveriesAsync(string webhookId, string userId, int page = 1, int pageSize = 20)
-        {
-            // Verify webhook belongs to user
-            var webhook = await _context.WebhookSubscriptions
-                .FirstOrDefaultAsync(w => w.Id == webhookId && w.UserId == userId);
-
-            if (webhook == null)
-                throw new ArgumentException("Webhook not found");
-
-            var deliveries = await _context.WebhookDeliveries
-                .Where(d => d.WebhookSubscriptionId == webhookId)
-                .OrderByDescending(d => d.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(d => new WebhookDeliveryResponse
+                var secret = GenerateSecret();
+                var webhook = new WebhookSubscription
                 {
-                    Id = d.Id,
-                    WebhookSubscriptionId = d.WebhookSubscriptionId,
-                    Event = d.Event,
-                    Payload = d.Payload,
-                    Status = d.Status,
-                    AttemptCount = d.AttemptCount,
-                    MaxAttempts = d.MaxAttempts,
-                    CreatedAt = d.CreatedAt,
-                    DeliveredAt = d.DeliveredAt,
-                    NextRetryAt = d.NextRetryAt,
-                    ResponseStatusCode = d.ResponseStatusCode,
-                    ResponseBody = d.ResponseBody,
-                    ErrorMessage = d.ErrorMessage
-                })
-                .ToListAsync();
+                    Id = Guid.NewGuid().ToString(),
+                    UserId = userId,
+                    Url = request.Url,
+                    Secret = secret,
+                    IsActive = true,
+                    Description = request.Description ?? string.Empty,
+                    Events = request.Events.Distinct().ToList(),
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    SuccessCount = 0,
+                    FailureCount = 0
+                };
 
-            return deliveries;
+                _context.WebhookSubscriptions.Add(webhook);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Webhook registered for user {userId}: {webhook.Id}");
+
+                return Result.Of(MapToResponse(webhook));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error registering webhook");
+                return result.WithErrors("An error occurred while registering the webhook");
+            }
         }
 
-        public async Task<bool> TestWebhookAsync(string webhookId, string userId, TestWebhookRequest request)
+        public async Task<Result<List<WebhookResponse>>> GetUserWebhooksAsync(string userId)
         {
-            var webhook = await _context.WebhookSubscriptions
-                .FirstOrDefaultAsync(w => w.Id == webhookId && w.UserId == userId);
-
-            if (webhook == null)
-                throw new ArgumentException("Webhook not found");
-
-            var payload = new WebhookPayload
+            try
             {
-                EventId = Guid.NewGuid().ToString(),
-                Event = request.Event,
-                Timestamp = DateTime.UtcNow,
-                Data = request.SamplePayload ?? new { test = true, message = "This is a test webhook delivery" }
-            };
+                var webhooks = await _context.WebhookSubscriptions
+                    .Where(w => w.UserId == userId)
+                    .OrderByDescending(w => w.CreatedAt)
+                    .ToListAsync();
 
-            var delivery = await CreateDeliveryAsync(webhook, payload);
-            await DeliverWebhookAsync(delivery);
+                return Result.Of(webhooks.Select(MapToResponse).ToList());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving webhooks");
+                return Result.Of<List<WebhookResponse>>().WithErrors("An error occurred while retrieving webhooks");
+            }
+        }
 
-            return delivery.Status == WebhookDeliveryStatus.Delivered;
+        public async Task<Result<WebhookResponse>> GetWebhookAsync(string webhookId, string userId)
+        {
+            try
+            {
+                var webhook = await _context.WebhookSubscriptions
+                    .FirstOrDefaultAsync(w => w.Id == webhookId && w.UserId == userId);
+
+                if (webhook == null)
+                    return Result.Of<WebhookResponse>().WithErrors("Webhook not found");
+
+                return Result.Of(MapToResponse(webhook));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving webhook");
+                return Result.Of<WebhookResponse>().WithErrors("An error occurred while retrieving the webhook");
+            }
+        }
+
+        public async Task<Result<WebhookResponse>> UpdateWebhookAsync(string webhookId, string userId, UpdateWebhookRequest request)
+        {
+            var result = Result.Of<WebhookResponse>();
+
+            try
+            {
+                var webhook = await _context.WebhookSubscriptions
+                    .FirstOrDefaultAsync(w => w.Id == webhookId && w.UserId == userId);
+
+                if (webhook == null)
+                    return result.WithErrors("Webhook not found");
+
+                if (!string.IsNullOrWhiteSpace(request.Url))
+                {
+                    if (!Uri.TryCreate(request.Url, UriKind.Absolute, out var uri) ||
+                        (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+                        return result.WithErrors("Invalid webhook URL");
+                    webhook.Url = request.Url;
+                }
+
+                if (request.Description != null)
+                    webhook.Description = request.Description;
+
+                if (request.Events != null && request.Events.Any())
+                    webhook.Events = request.Events.Distinct().ToList();
+
+                if (request.IsActive.HasValue)
+                    webhook.IsActive = request.IsActive.Value;
+
+                webhook.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Webhook updated: {webhookId}");
+
+                return Result.Of(MapToResponse(webhook));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating webhook");
+                return result.WithErrors("An error occurred while updating the webhook");
+            }
+        }
+
+        public async Task<Result<bool>> DeleteWebhookAsync(string webhookId, string userId)
+        {
+            try
+            {
+                var webhook = await _context.WebhookSubscriptions
+                    .FirstOrDefaultAsync(w => w.Id == webhookId && w.UserId == userId);
+
+                if (webhook == null)
+                    return Result.Of(false).WithErrors("Webhook not found");
+
+                _context.WebhookSubscriptions.Remove(webhook);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Webhook deleted: {webhookId}");
+
+                return Result.Of(true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting webhook");
+                return Result.Of(false).WithErrors("An error occurred while deleting the webhook");
+            }
+        }
+
+        public async Task<Result<List<WebhookDeliveryResponse>>> GetWebhookDeliveriesAsync(string webhookId, string userId, int page = 1, int pageSize = 20)
+        {
+            try
+            {
+                // Verify webhook belongs to user
+                var webhook = await _context.WebhookSubscriptions
+                    .FirstOrDefaultAsync(w => w.Id == webhookId && w.UserId == userId);
+
+                if (webhook == null)
+                    return Result.Of<List<WebhookDeliveryResponse>>().WithErrors("Webhook not found");
+
+                var deliveries = await _context.WebhookDeliveries
+                    .Where(d => d.WebhookSubscriptionId == webhookId)
+                    .OrderByDescending(d => d.CreatedAt)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(d => new WebhookDeliveryResponse
+                    {
+                        Id = d.Id,
+                        WebhookSubscriptionId = d.WebhookSubscriptionId,
+                        Event = d.Event,
+                        Payload = d.Payload,
+                        Status = d.Status,
+                        AttemptCount = d.AttemptCount,
+                        MaxAttempts = d.MaxAttempts,
+                        CreatedAt = d.CreatedAt,
+                        DeliveredAt = d.DeliveredAt,
+                        NextRetryAt = d.NextRetryAt,
+                        ResponseStatusCode = d.ResponseStatusCode,
+                        ResponseBody = d.ResponseBody,
+                        ErrorMessage = d.ErrorMessage
+                    })
+                    .ToListAsync();
+
+                return Result.Of(deliveries);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving webhook deliveries");
+                return Result.Of<List<WebhookDeliveryResponse>>().WithErrors("An error occurred while retrieving webhook deliveries");
+            }
+        }
+
+        public async Task<Result<bool>> TestWebhookAsync(string webhookId, string userId, TestWebhookRequest request)
+        {
+            try
+            {
+                var webhook = await _context.WebhookSubscriptions
+                    .FirstOrDefaultAsync(w => w.Id == webhookId && w.UserId == userId);
+
+                if (webhook == null)
+                    return Result.Of(false).WithErrors("Webhook not found");
+
+                var payload = new WebhookPayload
+                {
+                    EventId = Guid.NewGuid().ToString(),
+                    Event = request.Event,
+                    Timestamp = DateTime.UtcNow,
+                    Data = request.SamplePayload ?? new { test = true, message = "This is a test webhook delivery" }
+                };
+
+                var delivery = await CreateDeliveryAsync(webhook, payload);
+                await DeliverWebhookAsync(delivery);
+
+                return Result.Of(delivery.Status == WebhookDeliveryStatus.Delivered);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error testing webhook");
+                return Result.Of(false).WithErrors("An error occurred while testing the webhook");
+            }
         }
 
         public async Task PublishEventAsync(WebhookEvent eventType, object data)
@@ -220,7 +281,6 @@ namespace UrGuide.Services.Webhooks
                 try
                 {
                     var delivery = await CreateDeliveryAsync(subscription, payload);
-                    // Fire and forget - actual delivery happens in background
                     _ = Task.Run(async () => await DeliverWebhookAsync(delivery));
                 }
                 catch (Exception ex)
@@ -316,7 +376,6 @@ namespace UrGuide.Services.Webhooks
 
                 if (delivery.Status != WebhookDeliveryStatus.Delivered && attempt < delivery.MaxAttempts)
                 {
-                    // Exponential backoff: 5s, 15s, 45s, 135s
                     var delaySeconds = Math.Pow(3, attempt) * 5;
                     delivery.NextRetryAt = DateTime.UtcNow.AddSeconds(delaySeconds);
                     await _context.SaveChangesAsync();
