@@ -11,6 +11,7 @@ using UrGuide.Model.Search;
 using UrGuide.Services.Contracts;
 using UrGuide.Services.Search;
 using UrGuide.Shared.Contracts;
+using UrGuide.WebApp.Models;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -46,7 +47,7 @@ namespace UrGuide.WebApp.Controllers
         /// <returns>Search results with facets and highlights</returns>
         [HttpPost("posts")]
         [ProducesResponseType(typeof(SearchResponse<PostSearchDocument>), 200)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType(typeof(ErrorEnvelop<string>), 400)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> SearchPosts([FromBody] SearchRequest request, CancellationToken cancellationToken)
         {
@@ -54,7 +55,7 @@ namespace UrGuide.WebApp.Controllers
             {
                 if (request == null)
                 {
-                    return BadRequest("Search request is required");
+                    return BadRequest(ErrorEnvelop.Create(new[] { "Search request is required" }));
                 }
 
                 var startTime = DateTime.UtcNow;
@@ -62,7 +63,7 @@ namespace UrGuide.WebApp.Controllers
 
                 if (result.HasError)
                 {
-                    return BadRequest(result.Errors);
+                    return BadRequest(ErrorEnvelop.Create(result.Errors));
                 }
 
                 var timeTaken = (long)(DateTime.UtcNow - startTime).TotalMilliseconds;
@@ -96,7 +97,7 @@ namespace UrGuide.WebApp.Controllers
         /// <returns>Search results with facets and highlights</returns>
         [HttpPost("tours")]
         [ProducesResponseType(typeof(SearchResponse<TourSearchDocument>), 200)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType(typeof(ErrorEnvelop<string>), 400)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> SearchTours([FromBody] SearchRequest request, CancellationToken cancellationToken)
         {
@@ -104,7 +105,7 @@ namespace UrGuide.WebApp.Controllers
             {
                 if (request == null)
                 {
-                    return BadRequest("Search request is required");
+                    return BadRequest(ErrorEnvelop.Create(new[] { "Search request is required" }));
                 }
 
                 var startTime = DateTime.UtcNow;
@@ -112,7 +113,7 @@ namespace UrGuide.WebApp.Controllers
 
                 if (result.HasError)
                 {
-                    return BadRequest(result.Errors);
+                    return BadRequest(ErrorEnvelop.Create(result.Errors));
                 }
 
                 var timeTaken = (long)(DateTime.UtcNow - startTime).TotalMilliseconds;
@@ -146,7 +147,7 @@ namespace UrGuide.WebApp.Controllers
         /// <returns>List of autocomplete suggestions</returns>
         [HttpPost("autocomplete")]
         [ProducesResponseType(typeof(AutocompleteResponse), 200)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType(typeof(ErrorEnvelop<string>), 400)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> Autocomplete([FromBody] AutocompleteRequest request, CancellationToken cancellationToken)
         {
@@ -154,14 +155,14 @@ namespace UrGuide.WebApp.Controllers
             {
                 if (request == null || string.IsNullOrWhiteSpace(request.Query))
                 {
-                    return BadRequest("Query is required");
+                    return BadRequest(ErrorEnvelop.Create(new[] { "Query is required" }));
                 }
 
                 var result = await _elasticsearchService.AutocompleteAsync(request, cancellationToken);
 
                 if (result.HasError)
                 {
-                    return BadRequest(result.Errors);
+                    return BadRequest(ErrorEnvelop.Create(result.Errors));
                 }
 
                 return Ok(result.Data);
