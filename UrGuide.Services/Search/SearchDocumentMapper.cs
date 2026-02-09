@@ -26,7 +26,7 @@ namespace UrGuide.Services.Search
                 Reviews = post.Reviews,
                 AllocatedSeats = post.AllocatedSeats,
                 ReservedSeats = post.ReservedSeats,
-                AvailableSeats = post.AllocatedSeats - post.ReservedSeats,
+                AvailableSeats = Math.Max(0, post.AllocatedSeats - post.ReservedSeats),
                 StartDate = post.StartDate,
                 EndDate = post.EndDate,
                 BidEnabled = post.BidEnabled,

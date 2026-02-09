@@ -67,8 +67,8 @@ namespace UrGuide.WebApp.Controllers
 
                 var timeTaken = (long)(DateTime.UtcNow - startTime).TotalMilliseconds;
 
-                // Track analytics asynchronously (fire and forget)
-                _ = _searchAnalyticsService.TrackSearchAsync(
+                // Track analytics (await to ensure DbContext is available)
+                await _searchAnalyticsService.TrackSearchAsync(
                     request.Query,
                     _userContext.UserId,
                     result.Data.TotalHits,
@@ -77,7 +77,7 @@ namespace UrGuide.WebApp.Controllers
                     "posts",
                     HttpContext.Connection.RemoteIpAddress?.ToString(),
                     Request.Headers["User-Agent"].ToString(),
-                    CancellationToken.None);
+                    cancellationToken);
 
                 return Ok(result.Data);
             }
@@ -117,8 +117,8 @@ namespace UrGuide.WebApp.Controllers
 
                 var timeTaken = (long)(DateTime.UtcNow - startTime).TotalMilliseconds;
 
-                // Track analytics asynchronously (fire and forget)
-                _ = _searchAnalyticsService.TrackSearchAsync(
+                // Track analytics (await to ensure DbContext is available)
+                await _searchAnalyticsService.TrackSearchAsync(
                     request.Query,
                     _userContext.UserId,
                     result.Data.TotalHits,
@@ -127,7 +127,7 @@ namespace UrGuide.WebApp.Controllers
                     "tours",
                     HttpContext.Connection.RemoteIpAddress?.ToString(),
                     Request.Headers["User-Agent"].ToString(),
-                    CancellationToken.None);
+                    cancellationToken);
 
                 return Ok(result.Data);
             }
@@ -198,7 +198,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Elasticsearch health check failed");
-                return StatusCode(503, new { status = "unhealthy", message = ex.Message });
+                return StatusCode(503, new { status = "unhealthy", message = "Elasticsearch is not available" });
             }
         }
 
@@ -222,28 +222,49 @@ namespace UrGuide.WebApp.Controllers
                 // Ensure index exists
                 await _elasticsearchService.CreateIndexAsync("urguide-posts", cancellationToken);
                 
-                // Fetch all posts from database
-                var posts = await _context.Posts
-                    .Include(p => p.User)
-                    .Include(p => p.Catalog)
-                    .ToListAsync(cancellationToken);
+                const int batchSize = 1000;
+                int skip = 0;
+                int totalIndexed = 0;
                 
-                _logger.LogInformation("Found {Count} posts to index", posts.Count);
-                
-                // Convert to search documents
-                var searchDocs = posts.Select(p => SearchDocumentMapper.ToSearchDocument(p)).ToList();
-                
-                // Bulk index
-                var result = await _elasticsearchService.BulkIndexPostsAsync(searchDocs, cancellationToken);
-                
-                if (result.HasError)
+                while (true)
                 {
-                    _logger.LogError("Failed to bulk index posts: {Errors}", string.Join(", ", result.Errors));
-                    return StatusCode(500, new { message = "Failed to re-index posts", errors = result.Errors });
+                    // Fetch posts in batches with AsNoTracking for better performance
+                    var posts = await _context.Posts
+                        .AsNoTracking()
+                        .Include(p => p.User)
+                        .Include(p => p.Catalog)
+                        .OrderBy(p => p.Id)
+                        .Skip(skip)
+                        .Take(batchSize)
+                        .ToListAsync(cancellationToken);
+                    
+                    if (!posts.Any())
+                        break;
+                    
+                    _logger.LogInformation("Processing batch: {Count} posts (total so far: {Total})", posts.Count, totalIndexed + posts.Count);
+                    
+                    // Convert to search documents
+                    var searchDocs = posts.Select(p => SearchDocumentMapper.ToSearchDocument(p)).ToList();
+                    
+                    // Bulk index
+                    var result = await _elasticsearchService.BulkIndexPostsAsync(searchDocs, cancellationToken);
+                    
+                    if (result.HasError)
+                    {
+                        _logger.LogError("Failed to bulk index posts batch: {Errors}", string.Join(", ", result.Errors));
+                        return StatusCode(500, new { message = "Failed to re-index posts", errors = result.Errors });
+                    }
+                    
+                    totalIndexed += posts.Count;
+                    skip += batchSize;
+                    
+                    // Break if we got fewer results than batch size (last batch)
+                    if (posts.Count < batchSize)
+                        break;
                 }
                 
-                _logger.LogInformation("Successfully re-indexed {Count} posts", posts.Count);
-                return Ok(new { message = $"Successfully re-indexed {posts.Count} posts" });
+                _logger.LogInformation("Successfully re-indexed {Count} posts", totalIndexed);
+                return Ok(new { message = $"Successfully re-indexed {totalIndexed} posts" });
             }
             catch (Exception ex)
             {
@@ -272,32 +293,53 @@ namespace UrGuide.WebApp.Controllers
                 // Ensure index exists
                 await _elasticsearchService.CreateIndexAsync("urguide-tours", cancellationToken);
                 
-                // Fetch all tours from database
-                var tours = await _context.Set<UrGuide.Data.Entities.Tour.Tour>()
-                    .Include(t => t.Author)
-                    .ThenInclude(a => a.ProfileInfo)
-                    .Include(t => t.Region)
-                    .Include(t => t.Reviews)
-                    .Include(t => t.Bookings)
-                    .Include(t => t.Reactions)
-                    .ToListAsync(cancellationToken);
+                const int batchSize = 500;
+                int skip = 0;
+                int totalIndexed = 0;
                 
-                _logger.LogInformation("Found {Count} tours to index", tours.Count);
-                
-                // Convert to search documents
-                var searchDocs = tours.Select(t => SearchDocumentMapper.ToSearchDocument(t)).ToList();
-                
-                // Bulk index
-                var result = await _elasticsearchService.BulkIndexToursAsync(searchDocs, cancellationToken);
-                
-                if (result.HasError)
+                while (true)
                 {
-                    _logger.LogError("Failed to bulk index tours: {Errors}", string.Join(", ", result.Errors));
-                    return StatusCode(500, new { message = "Failed to re-index tours", errors = result.Errors });
+                    // Fetch tours in batches with AsNoTracking for better performance
+                    var tours = await _context.Set<UrGuide.Data.Entities.Tour.Tour>()
+                        .AsNoTracking()
+                        .Include(t => t.Author)
+                        .ThenInclude(a => a.ProfileInfo)
+                        .Include(t => t.Region)
+                        .Include(t => t.Reviews)
+                        .Include(t => t.Bookings)
+                        .Include(t => t.Reactions)
+                        .OrderBy(t => t.TourId)
+                        .Skip(skip)
+                        .Take(batchSize)
+                        .ToListAsync(cancellationToken);
+                    
+                    if (!tours.Any())
+                        break;
+                    
+                    _logger.LogInformation("Processing batch: {Count} tours (total so far: {Total})", tours.Count, totalIndexed + tours.Count);
+                    
+                    // Convert to search documents
+                    var searchDocs = tours.Select(t => SearchDocumentMapper.ToSearchDocument(t)).ToList();
+                    
+                    // Bulk index
+                    var result = await _elasticsearchService.BulkIndexToursAsync(searchDocs, cancellationToken);
+                    
+                    if (result.HasError)
+                    {
+                        _logger.LogError("Failed to bulk index tours batch: {Errors}", string.Join(", ", result.Errors));
+                        return StatusCode(500, new { message = "Failed to re-index tours", errors = result.Errors });
+                    }
+                    
+                    totalIndexed += tours.Count;
+                    skip += batchSize;
+                    
+                    // Break if we got fewer results than batch size (last batch)
+                    if (tours.Count < batchSize)
+                        break;
                 }
                 
-                _logger.LogInformation("Successfully re-indexed {Count} tours", tours.Count);
-                return Ok(new { message = $"Successfully re-indexed {tours.Count} tours" });
+                _logger.LogInformation("Successfully re-indexed {Count} tours", totalIndexed);
+                return Ok(new { message = $"Successfully re-indexed {totalIndexed} tours" });
             }
             catch (Exception ex)
             {

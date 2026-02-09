@@ -57,7 +57,8 @@ namespace UrGuide.Services.Extensions
 
             var connectionPool = new SingleNodeConnectionPool(new Uri(elasticsearchUrl));
             var connectionSettings = new ConnectionSettings(connectionPool)
-                .DefaultIndex(configuration["Elasticsearch:DefaultIndex"] ?? "urguide");
+                .DefaultIndex(configuration["Elasticsearch:DefaultIndex"] ?? "urguide")
+                .EnableApiVersioningHeader(); // Enable compatibility with Elasticsearch 8.x
 
             if (!string.IsNullOrEmpty(elasticsearchUsername) && !string.IsNullOrEmpty(elasticsearchPassword))
             {

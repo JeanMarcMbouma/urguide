@@ -53,7 +53,8 @@ namespace UrGuide.Services.Search
                 _context.SearchAnalytics.Add(analytics);
                 await _context.SaveChangesAsync(cancellationToken);
 
-                _logger.LogInformation("Tracked search analytics for query: {Query}, results: {ResultsCount}", query, resultsCount);
+                _logger.LogDebug("Tracked search analytics: query length={QueryLength}, searchType={SearchType}, results={ResultsCount}", 
+                    query?.Length ?? 0, searchType, resultsCount);
                 return Result.Of(true);
             }
             catch (Exception ex)

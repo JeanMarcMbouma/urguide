@@ -155,8 +155,7 @@ namespace UrGuide.Services.Search
             {
                 var indexResponse = await _elasticClient.IndexAsync(post, idx => idx
                     .Index(PostsIndexName)
-                    .Id(post.Id)
-                    .Refresh(Elasticsearch.Net.Refresh.WaitFor), cancellationToken);
+                    .Id(post.Id), cancellationToken);
 
                 if (!indexResponse.IsValid)
                 {
@@ -180,8 +179,7 @@ namespace UrGuide.Services.Search
             {
                 var indexResponse = await _elasticClient.IndexAsync(tour, idx => idx
                     .Index(ToursIndexName)
-                    .Id(tour.TourId)
-                    .Refresh(Elasticsearch.Net.Refresh.WaitFor), cancellationToken);
+                    .Id(tour.TourId), cancellationToken);
 
                 if (!indexResponse.IsValid)
                 {
@@ -205,8 +203,7 @@ namespace UrGuide.Services.Search
             {
                 var bulkResponse = await _elasticClient.BulkAsync(b => b
                     .Index(PostsIndexName)
-                    .IndexMany(posts)
-                    .Refresh(Elasticsearch.Net.Refresh.WaitFor), cancellationToken);
+                    .IndexMany(posts), cancellationToken);
 
                 if (!bulkResponse.IsValid)
                 {
@@ -230,8 +227,7 @@ namespace UrGuide.Services.Search
             {
                 var bulkResponse = await _elasticClient.BulkAsync(b => b
                     .Index(ToursIndexName)
-                    .IndexMany(tours)
-                    .Refresh(Elasticsearch.Net.Refresh.WaitFor), cancellationToken);
+                    .IndexMany(tours), cancellationToken);
 
                 if (!bulkResponse.IsValid)
                 {
@@ -259,8 +255,7 @@ namespace UrGuide.Services.Search
             {
                 var updateResponse = await _elasticClient.UpdateAsync<PostSearchDocument>(post.Id, u => u
                     .Index(PostsIndexName)
-                    .Doc(post)
-                    .Refresh(Elasticsearch.Net.Refresh.WaitFor), cancellationToken);
+                    .Doc(post), cancellationToken);
 
                 if (!updateResponse.IsValid)
                 {
@@ -284,8 +279,7 @@ namespace UrGuide.Services.Search
             {
                 var updateResponse = await _elasticClient.UpdateAsync<TourSearchDocument>(tour.TourId, u => u
                     .Index(ToursIndexName)
-                    .Doc(tour)
-                    .Refresh(Elasticsearch.Net.Refresh.WaitFor), cancellationToken);
+                    .Doc(tour), cancellationToken);
 
                 if (!updateResponse.IsValid)
                 {
@@ -405,10 +399,14 @@ namespace UrGuide.Services.Search
 
         private SearchDescriptor<PostSearchDocument> BuildPostSearchDescriptor(Model.Search.SearchRequest request)
         {
+            // Validate pagination parameters
+            var page = Math.Max(1, request.Page);
+            var pageSize = Math.Clamp(request.PageSize, 1, 100);
+            
             var descriptor = new SearchDescriptor<PostSearchDocument>()
                 .Index(PostsIndexName)
-                .From((request.Page - 1) * request.PageSize)
-                .Size(request.PageSize)
+                .From((page - 1) * pageSize)
+                .Size(pageSize)
                 .TrackScores();
 
             // Build query
@@ -493,10 +491,14 @@ namespace UrGuide.Services.Search
 
         private SearchDescriptor<TourSearchDocument> BuildTourSearchDescriptor(Model.Search.SearchRequest request)
         {
+            // Validate pagination parameters
+            var page = Math.Max(1, request.Page);
+            var pageSize = Math.Clamp(request.PageSize, 1, 100);
+            
             var descriptor = new SearchDescriptor<TourSearchDocument>()
                 .Index(ToursIndexName)
-                .From((request.Page - 1) * request.PageSize)
-                .Size(request.PageSize)
+                .From((page - 1) * pageSize)
+                .Size(pageSize)
                 .TrackScores();
 
             // Build query
@@ -580,6 +582,10 @@ namespace UrGuide.Services.Search
         {
             var result = new List<Func<QueryContainerDescriptor<PostSearchDocument>, QueryContainer>>();
 
+            // Guard against null filters
+            if (filters == null)
+                return result;
+
             // Location filter
             if (!string.IsNullOrWhiteSpace(filters.Location))
             {
@@ -661,6 +667,10 @@ namespace UrGuide.Services.Search
         {
             var result = new List<Func<QueryContainerDescriptor<TourSearchDocument>, QueryContainer>>();
 
+            // Guard against null filters
+            if (filters == null)
+                return result;
+
             // Rating filter
             if (filters.MinRating.HasValue)
             {
@@ -715,7 +725,7 @@ namespace UrGuide.Services.Search
         {
             return descriptor.Aggregations(a => a
                 .Terms("tags", t => t.Field(p => p.Tags).Size(20))
-                .Terms("locations", t => t.Field(p => p.GeoLocation.Suffix("keyword")).Size(20))
+                .Terms("locations", t => t.Field(p => p.GeoLocation).Size(20))
                 .Terms("ratings", t => t.Field(p => p.Rating))
             );
         }
@@ -731,12 +741,15 @@ namespace UrGuide.Services.Search
 
         private Model.Search.SearchResponse<T> MapSearchResponse<T>(ISearchResponse<T> elasticResponse, Model.Search.SearchRequest request) where T : class
         {
+            // Validate pagination parameters
+            var pageSize = Math.Max(1, request.PageSize);
+            
             var response = new Model.Search.SearchResponse<T>
             {
                 TotalHits = elasticResponse.Total,
                 Page = request.Page,
-                PageSize = request.PageSize,
-                TotalPages = (int)Math.Ceiling((double)elasticResponse.Total / request.PageSize),
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling((double)elasticResponse.Total / pageSize),
                 TimeTakenMs = (long)elasticResponse.Took,
                 Results = elasticResponse.Hits.Select(h => new SearchResultItem<T>
                 {
