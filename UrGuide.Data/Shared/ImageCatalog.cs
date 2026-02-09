@@ -19,8 +19,8 @@ namespace UrGuide.Data.Entities.Shared
         public DateTime LastUpdated { get; set; }
         public virtual Users.User User { get; set; }
         public virtual Posts.Post Post { get; set; }
-        public virtual ICollection<Image> Images { get; protected set; }
-        public virtual ICollection<GenericAttribute> Attributes { get; protected set; }
+        public virtual ICollection<Image> Images { get; private set; }
+        public virtual ICollection<GenericAttribute> Attributes { get; private set; }
         public virtual Point Location { get; set; }
     }
 }

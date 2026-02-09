@@ -12,7 +12,7 @@ namespace UrGuide.Data.Entities.Shared
         public string Id { get; set; }
         public string ImageUrl { get; set; }
         public string MimeType { get; set; }
-        public virtual ICollection<GenericAttribute> Attributes { get; protected set; }
+        public virtual ICollection<GenericAttribute> Attributes { get; private set; }
 
         public static implicit operator string(Image image) => image.ImageUrl;
     }
