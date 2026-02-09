@@ -13,8 +13,8 @@ using UrGuide.Data;
 namespace UrGuide.Data.Migrations
 {
     [DbContext(typeof(UrGuideContext))]
-    [Migration("20260209081856_AddSearchAnalytics")]
-    partial class AddSearchAnalytics
+    [Migration("20260209183443_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
