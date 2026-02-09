@@ -4,6 +4,7 @@ using UrGuide.Data.Entities.Event;
 using UrGuide.Data.Entities.Payments;
 using UrGuide.Data.Entities.Posts;
 using UrGuide.Data.Entities.Regions;
+using UrGuide.Data.Entities.Search;
 using UrGuide.Data.Entities.Shared;
 using UrGuide.Data.Entities.Tour;
 using UrGuide.Data.Entities.Users;
@@ -31,6 +32,9 @@ namespace UrGuide.Data
         
         // Data export entities
         public virtual DbSet<DataExportRequest> DataExportRequests { get; set; }
+        
+        // Search entities
+        public virtual DbSet<SearchAnalytics> SearchAnalytics { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
@@ -70,6 +74,9 @@ namespace UrGuide.Data
             
             // Data export configurations
             modelBuilder.ApplyConfiguration(new Configurations.DataExportRequestConfiguration());
+            
+            // Search configurations
+            modelBuilder.ApplyConfiguration(new Configurations.SearchAnalyticsConfiguration());
         }
     }
 }

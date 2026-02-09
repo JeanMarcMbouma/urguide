@@ -95,6 +95,18 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
   - Dead letter queue handling
   - RabbitMQ health monitoring
 
+### 🔍 Advanced Search & Analytics
+- [x] **Elasticsearch Integration**: Advanced search capabilities with NEST 7.17.5 client
+- [x] **Fuzzy Search**: Configurable fuzziness (AUTO, 0-2) for typo-tolerant searches
+- [x] **Multi-field Search**: Query across text, description, tags, and location fields
+- [x] **Advanced Filters**: Location, geo-distance, price range, rating, date ranges, tags, seat availability
+- [x] **Faceted Search**: Aggregations by tags, locations, and rating distribution for drill-down navigation
+- [x] **Autocomplete/Suggestions**: Search-as-you-type functionality with configurable result limits
+- [x] **Search Analytics**: Track queries, results, timing, and user behavior
+- [x] **Automatic Sync**: Real-time indexing on Post create/update/delete operations
+- [x] **Bulk Re-indexing**: Admin endpoints for full data re-indexing
+- [x] **Docker Compose**: Elasticsearch 8.11.0 service with single-node configuration
+
 ### 📊 Administrative Features
 - [x] Complete action auditing system
 - [x] User activity tracking
