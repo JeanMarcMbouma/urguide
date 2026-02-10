@@ -8,6 +8,7 @@ using UrGuide.Data.Entities.Search;
 using UrGuide.Data.Entities.Shared;
 using UrGuide.Data.Entities.Tour;
 using UrGuide.Data.Entities.Users;
+using UrGuide.Data.Entities.Webhooks;
 
 namespace UrGuide.Data
 {
@@ -35,6 +36,10 @@ namespace UrGuide.Data
         
         // Search entities
         public virtual DbSet<SearchAnalytics> SearchAnalytics { get; set; }
+        
+        // Webhook entities
+        public virtual DbSet<WebhookSubscription> WebhookSubscriptions { get; set; }
+        public virtual DbSet<WebhookDelivery> WebhookDeliveries { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
@@ -77,6 +82,10 @@ namespace UrGuide.Data
             
             // Search configurations
             modelBuilder.ApplyConfiguration(new Configurations.SearchAnalyticsConfiguration());
+            
+            // Webhook configurations
+            modelBuilder.ApplyConfiguration(new Configurations.WebhookSubscriptionConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.WebhookDeliveryConfiguration());
         }
     }
 }

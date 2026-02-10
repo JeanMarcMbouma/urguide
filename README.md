@@ -124,6 +124,16 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
 - [x] Multi-currency support
 - [x] Payment status tracking (pending, processing, succeeded, failed, refunded)
 
+### 🔗 Integration & Webhooks
+- [x] **Webhook System**: External integration support with secure webhooks
+  - Webhook registration with custom URLs
+  - Support for 16 event types (payments, bookings, tours, users, reviews)
+  - HMAC-SHA256 payload signing for security
+  - Automatic retry with exponential backoff (5s, 15s, 45s, 135s)
+  - Comprehensive delivery history and logging
+  - Test webhook endpoint for validation
+  - Fire-and-forget publishing for non-blocking operations
+
 ## 📋 API Roadmap & Future Features
 
 ### 💳 Payment & Financial System (Enhanced)
@@ -582,10 +592,34 @@ Response:
 - **`/api/refund`** - Refund request processing
 - **`/api/dataexport`** - GDPR-compliant user data export
 - **`/api/webhook`** - Stripe webhook events
+- **`/api/webhook-management`** - Webhook registration and management for external integrations
 - **`/api/lookup`** - Reference data (countries, cities, etc.)
 - **`/api/notification`** - Notification management
 - **`/api/activity`** - User activity tracking
 - **`/notify`** - SignalR Hub for real-time notifications
+
+### Webhook Management
+
+The API provides a webhook system for external integrations, allowing third-party applications to receive real-time notifications of important events:
+
+- **`POST /api/webhook-management`** - Register a new webhook
+- **`GET /api/webhook-management`** - List all registered webhooks
+- **`GET /api/webhook-management/{id}`** - Get webhook details
+- **`PUT /api/webhook-management/{id}`** - Update a webhook
+- **`DELETE /api/webhook-management/{id}`** - Delete a webhook
+- **`GET /api/webhook-management/{id}/deliveries`** - Get webhook delivery history
+- **`POST /api/webhook-management/test`** - Test a webhook with sample payload
+
+**Features:**
+- Support for 16 event types: payments, bookings, tours, users, and reviews
+- HMAC-SHA256 payload signing for security verification
+- Automatic retry with exponential backoff (5 attempts)
+- Comprehensive delivery history and logging
+- Test endpoint for webhook validation
+
+**Documentation:**
+- [Webhook Integration Guide](WEBHOOK_INTEGRATION_GUIDE.md) - Complete API reference and security details
+- [Integration Examples](WEBHOOK_INTEGRATION_EXAMPLES.md) - Code examples for common integration scenarios
 
 ### GDPR Data Export
 
