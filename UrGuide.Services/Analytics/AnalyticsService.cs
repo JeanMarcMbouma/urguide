@@ -40,15 +40,13 @@ namespace UrGuide.Services.Analytics
 
                 var totalUsers = await usersQuery.CountAsync(cancellationToken);
 
-                // Note: Using LastActivityDate as a proxy for registration date
-                // Ideally, the User entity should have a CreatedAt field for accurate registration tracking
                 var newUsers = await usersQuery
-                    .Where(u => u.LastActivityDate >= startDate && u.LastActivityDate <= endDate)
+                    .Where(u => u.CreatedAt >= startDate && u.CreatedAt <= endDate)
                     .CountAsync(cancellationToken);
 
                 var previousPeriodStart = startDate.AddDays(-(endDate - startDate).TotalDays);
                 var previousPeriodUsers = await usersQuery
-                    .Where(u => u.LastActivityDate >= previousPeriodStart && u.LastActivityDate < startDate)
+                    .Where(u => u.CreatedAt >= previousPeriodStart && u.CreatedAt < startDate)
                     .CountAsync(cancellationToken);
 
                 var growthRate = previousPeriodUsers > 0 
@@ -496,10 +494,8 @@ namespace UrGuide.Services.Analytics
             {
                 var nextPeriod = GetNextPeriod(current, period);
                 
-                // Note: Using LastActivityDate as a proxy for registration date
-                // Ideally, the User entity should have a CreatedAt field
                 var count = await _context.Users
-                    .Where(u => u.LastActivityDate >= current && u.LastActivityDate < nextPeriod)
+                    .Where(u => u.CreatedAt >= current && u.CreatedAt < nextPeriod)
                     .CountAsync(cancellationToken);
 
                 cumulativeCount += count;

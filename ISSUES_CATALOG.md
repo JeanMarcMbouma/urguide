@@ -548,7 +548,7 @@ Implement RabbitMQ message queue for asynchronous processing of emails, images, 
 Build an analytics dashboard showing key metrics and trends.
 
 **Implemented:**
-- ✅ User registration trends with growth rate calculation
+- ✅ User registration trends with growth rate calculation (using CreatedAt field)
 - ✅ Tour booking statistics and completion rates
 - ✅ Revenue metrics with platform fees and payouts breakdown
 - ✅ Guide performance metrics with top performers
@@ -558,6 +558,7 @@ Build an analytics dashboard showing key metrics and trends.
 - ✅ Flexible date range filtering
 - ✅ Period grouping (hourly, daily, weekly, monthly, yearly)
 - ✅ Admin-only access with role-based authorization
+- ✅ Added CreatedAt field to User entity for accurate registration tracking
 
 **API Endpoints:**
 - `GET /api/analytics/dashboard` - Get complete dashboard with all metrics

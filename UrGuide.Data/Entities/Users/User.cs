@@ -21,6 +21,7 @@ namespace UrGuide.Data.Entities.Users
         public virtual ICollection<GenericAttribute> Attributes { get; protected set; }
         public virtual ICollection<Feedback> Feedback { get; protected set; }
         public virtual ICollection<Notification> Notifications { get; protected set; }
+        public DateTime CreatedAt { get; set; }
         public DateTime LastActivityDate { get; set; }
         public virtual Image ProfileImage { get; set; }
         public virtual Point Location { get; set; }
