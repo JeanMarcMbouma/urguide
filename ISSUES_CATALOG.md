@@ -273,7 +273,7 @@ Improve rate limiting to support different tiers based on user roles and subscri
 - ✅ Custom rate limits per endpoint
 - ✅ Rate limit analytics tracking
 - ✅ Graceful degradation
-- ✅ Rate limit exemptions for internal services (Internal tier = 99)
+- ✅ Rate limit exemptions for internal services
 - ✅ Distributed caching support for rate limit state
 - ✅ Middleware-based implementation (TieredRateLimitMiddleware)
 
@@ -626,7 +626,7 @@ Implement multi-language support for API responses and error messages.
 
 **By Category:**
 - Security & Authentication: 2 (1 completed: 2FA ✅, 1 pending: Social Login)
-- Monitoring & Observability: 2 (0 completed, 2 pending - OpenTelemetry partially implemented)
+- Monitoring & Observability: 2 (0 completed, 2 pending)
 - Testing & Quality: 1 (0 completed, 1 pending)
 - Features & Enhancements: 5 (3 completed: GDPR Data Export ✅, Advanced Search ✅, API Rate Limiting ✅, 2 pending)
 - Mobile & Integration: 2 (1 completed: Webhook System ✅, 1 pending: Push Notifications)
