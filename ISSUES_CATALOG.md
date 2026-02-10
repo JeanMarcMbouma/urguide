@@ -240,7 +240,7 @@ Improve logging with correlation IDs, structured data, and better log aggregatio
 **Description:**
 Create unit tests for all service classes, business logic, and utilities.
 
-**Note:** This issue replaces the original broad "API Testing Suite" (#8), which has been split into four focused testing issues: #8 (Unit), #18 (Integration), #36 (E2E), and #37 (Performance).
+**Note:** This issue is a refinement of the original "API Testing Suite" (#8), which had a broad scope covering all testing types. The original issue has been split into four focused issues for better tracking: #8 (Unit Testing), #18 (Integration Testing), #36 (E2E Testing), and #37 (Performance Testing).
 
 **Requirements:**
 - xUnit testing framework
@@ -1174,7 +1174,7 @@ Build a comprehensive API documentation portal with interactive examples.
 **Description:**
 Implement multi-language support for API responses and error messages.
 
-**Note:** This was originally issue #18 in the catalog, renumbered to #38 after testing issues were reorganized.
+**Note:** Renumbered from original #18 to #38 to maintain sequential ordering after the testing suite split created new issues #18 (Integration Testing), #36 (E2E Testing), and #37 (Performance Testing).
 
 **Requirements:**
 - Resource file structure
@@ -1242,12 +1242,17 @@ Implement multi-language support for API responses and error messages.
 7. **Real-time Chat** (#24) - Improve user communication
 8. **Calendar System** (#26) - Essential booking feature
 
-**Issue Breakdown:**
-- Original issues: #1-18 (with original #8 "API Testing Suite" split into #8, #18, #36, #37, and original #18 "Multi-language Support" renumbered to #38)
-- New frontend issues: #19-22
-- New infrastructure: #23 (CDN)
-- New enhancements: #24-35
-- Testing issues: #8, #18, #36-37 (from original #8 split)
-- Localization: #38 (renumbered from original #18)
+**Issue Numbering History:**
+- **Original catalog**: Issues #1-18
+- **Testing suite split**: Original #8 "API Testing Suite" was split into four focused issues:
+  - #8: Unit Testing Suite (refinement of original #8)
+  - #18: Integration Testing Suite (new)
+  - #36: E2E Testing Suite (new)
+  - #37: Performance and Load Testing (new)
+- **Renumbering**: Original #18 "Multi-language Support" renumbered to #38 to maintain sequential order
+- **New additions**: 
+  - Frontend issues: #19-22
+  - Infrastructure: #23 (CDN)
+  - Platform enhancements: #24-35
 
 These issues provide a comprehensive roadmap for building a complete tourism platform with robust backend API, user-facing applications, and essential supporting features.
