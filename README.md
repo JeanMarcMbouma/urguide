@@ -111,6 +111,16 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
 - [x] Complete action auditing system
 - [x] User activity tracking
 - [x] System monitoring and logging
+- [x] **Analytics Dashboard**: Comprehensive admin analytics with key metrics and trends
+  - User registration trends with growth rate calculation
+  - Tour booking statistics and completion rates
+  - Revenue metrics with platform fees and payouts
+  - Guide performance metrics with top performers
+  - Popular destinations by bookings and revenue
+  - Conversion funnel tracking (requests → bids → bookings → completions)
+  - Data export capabilities (JSON and CSV formats)
+  - Flexible date range filtering and period grouping (hourly, daily, weekly, monthly, yearly)
+  - Admin-only access with role-based authorization
 
 ### 💳 Payment & Financial System
 - [x] Stripe payment integration for tour bookings
@@ -591,6 +601,7 @@ Response:
 - **`/api/payout`** - Guide payout management
 - **`/api/refund`** - Refund request processing
 - **`/api/dataexport`** - GDPR-compliant user data export
+- **`/api/analytics`** - Admin analytics dashboard and reporting
 - **`/api/webhook`** - Stripe webhook events
 - **`/api/webhook-management`** - Webhook registration and management for external integrations
 - **`/api/lookup`** - Reference data (countries, cities, etc.)
@@ -620,6 +631,42 @@ The API provides a webhook system for external integrations, allowing third-part
 **Documentation:**
 - [Webhook Integration Guide](WEBHOOK_INTEGRATION_GUIDE.md) - Complete API reference and security details
 - [Integration Examples](WEBHOOK_INTEGRATION_EXAMPLES.md) - Code examples for common integration scenarios
+
+### Analytics Dashboard (Admin Only)
+
+The API provides comprehensive analytics endpoints for administrators to monitor platform performance and user behavior:
+
+- **`GET /api/analytics/dashboard`** - Get complete dashboard with all metrics
+- **`GET /api/analytics/user-registration-trends`** - User registration trends and growth
+- **`GET /api/analytics/tour-booking-statistics`** - Tour booking statistics and completion rates
+- **`GET /api/analytics/revenue-metrics`** - Revenue, fees, payouts, and refunds
+- **`GET /api/analytics/guide-performance`** - Guide performance metrics and top performers
+- **`GET /api/analytics/popular-destinations`** - Most popular destinations by bookings
+- **`GET /api/analytics/conversion-funnel`** - Conversion funnel from requests to completions
+- **`GET /api/analytics/export`** - Export analytics data in JSON or CSV format
+
+**Features:**
+- Flexible date range filtering (start/end dates)
+- Period grouping (hourly, daily, weekly, monthly, yearly)
+- Top N filtering for rankings (top guides, destinations)
+- JSON and CSV export formats
+- Admin-only access with role-based authorization
+- Real-time data aggregation from production database
+
+**Query Parameters:**
+- `startDate` - Start date for analytics (optional, defaults to 6 months ago)
+- `endDate` - End date for analytics (optional, defaults to now)
+- `period` - Period grouping: Hourly, Daily, Weekly, Monthly, Yearly (default: Daily)
+- `topN` - Number of top items to return for rankings (default: 10)
+- `format` - Export format: json or csv (default: json)
+
+**Dashboard Metrics:**
+- User registration trends with growth rates
+- Booking statistics by status (pending, completed, cancelled)
+- Revenue breakdown (total, fees, payouts, refunds)
+- Guide performance (total tours, bookings, revenue, ratings)
+- Popular destinations by bookings and revenue
+- Conversion funnel analysis (requests → bids → bookings → completions)
 
 ### GDPR Data Export
 
