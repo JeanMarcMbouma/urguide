@@ -240,6 +240,8 @@ Improve logging with correlation IDs, structured data, and better log aggregatio
 **Description:**
 Create unit tests for all service classes, business logic, and utilities.
 
+**Note:** This issue replaces the original broad "API Testing Suite" (#8), which has been split into four focused testing issues: #8 (Unit), #18 (Integration), #36 (E2E), and #37 (Performance).
+
 **Requirements:**
 - xUnit testing framework
 - Moq for mocking dependencies
@@ -1172,6 +1174,8 @@ Build a comprehensive API documentation portal with interactive examples.
 **Description:**
 Implement multi-language support for API responses and error messages.
 
+**Note:** This was originally issue #18 in the catalog, renumbered to #38 after testing issues were reorganized.
+
 **Requirements:**
 - Resource file structure
 - Accept-Language header support
@@ -1239,11 +1243,11 @@ Implement multi-language support for API responses and error messages.
 8. **Calendar System** (#26) - Essential booking feature
 
 **Issue Breakdown:**
-- Original issues: #1-17 (with #8 testing split into #8, #18, #36, #37)
+- Original issues: #1-18 (with original #8 "API Testing Suite" split into #8, #18, #36, #37, and original #18 "Multi-language Support" renumbered to #38)
 - New frontend issues: #19-22
 - New infrastructure: #23 (CDN)
 - New enhancements: #24-35
-- New testing: #36-37
-- Localization: #38
+- Testing issues: #8, #18, #36-37 (from original #8 split)
+- Localization: #38 (renumbered from original #18)
 
 These issues provide a comprehensive roadmap for building a complete tourism platform with robust backend API, user-facing applications, and essential supporting features.
