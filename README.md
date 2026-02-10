@@ -167,9 +167,9 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
 - [ ] Personalized advertising system
 
 ### 🔒 Security & Privacy
-- [ ] Two-factor authentication (2FA)
+- [x] Two-factor authentication (2FA) - TOTP and Passkey/WebAuthn support implemented
 - [ ] Social login (Google/Apple/Microsoft)
-- [ ] Data export functionality (GDPR compliance)
+- [x] Data export functionality (GDPR compliance) - JSON and CSV export implemented
 - [ ] Account freeze/temporary suspension
 - [ ] Enhanced audit logging
 
@@ -178,12 +178,6 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
 - [ ] Availability toggle system
 - [ ] Automated scheduling tools
 - [ ] Tour planning and routing
-
-### 💰 Payment Integration
-- [ ] Google Pay/Apple Pay support
-- [ ] PayPal integration
-- [ ] Multiple payment method support
-- [ ] Secure payment processing
 
 ## 🛠️ Development Setup
 
