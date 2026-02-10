@@ -21,6 +21,7 @@ using UrGuide.Services.Search;
 using UrGuide.Services.Shared;
 using UrGuide.Services.Tour;
 using UrGuide.Services.Users;
+using UrGuide.Services.Analytics;
 
 namespace UrGuide.Services.Extensions
 {
@@ -53,6 +54,9 @@ namespace UrGuide.Services.Extensions
             
             // Search services
             services.AddTransient<Contracts.ISearchAnalyticsService, SearchAnalyticsService>();
+            
+            // Analytics service
+            services.AddTransient<Contracts.IAnalyticsService, AnalyticsService>();
 
             // Elasticsearch
             var elasticsearchUrl = configuration["Elasticsearch:Url"] ?? "http://localhost:9200";
