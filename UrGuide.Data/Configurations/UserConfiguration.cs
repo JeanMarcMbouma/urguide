@@ -12,6 +12,7 @@ namespace UrGuide.Data.Configurations
             builder.ToTable("Users", Constants.Schema);
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id).HasColumnName("UserId").IsRequired();
+            builder.Property(x => x.CreatedAt).IsRequired().HasDefaultValueSql("GETUTCDATE()");
             builder.Property(x => x.LastActivityDate);
             builder.Property(x => x.FirstName).IsRequired().HasMaxLength(200).HasDefaultValue(Constants.NA);
             builder.Property(x => x.LastName).IsRequired().HasMaxLength(200).HasDefaultValue(Constants.NA);
@@ -67,6 +68,7 @@ namespace UrGuide.Data.Configurations
             var system = new User
             {
                 Id = systemUserId,
+                CreatedAt = new DateTime(2020, 1, 1, 12, 0, 0),
                 LastActivityDate = new DateTime(2020, 1, 1, 12, 0, 0)
             };
             builder.HasData(system);
