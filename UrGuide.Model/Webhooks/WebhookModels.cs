@@ -63,7 +63,6 @@ namespace UrGuide.Model.Webhooks
     {
         public string Id { get; set; }
         public string Url { get; set; }
-        public string Secret { get; set; }
         public bool IsActive { get; set; }
         public string Description { get; set; }
         public List<WebhookEvent> Events { get; set; }
@@ -72,6 +71,11 @@ namespace UrGuide.Model.Webhooks
         public DateTime? LastTriggeredAt { get; set; }
         public int SuccessCount { get; set; }
         public int FailureCount { get; set; }
+    }
+
+    public class WebhookCreatedResponse : WebhookResponse
+    {
+        public string Secret { get; set; }
     }
 
     public class WebhookDeliveryResponse

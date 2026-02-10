@@ -7,7 +7,7 @@ namespace UrGuide.Services.Webhooks
 {
     public interface IWebhookService
     {
-        Task<Result<WebhookResponse>> RegisterWebhookAsync(string userId, RegisterWebhookRequest request);
+        Task<Result<WebhookCreatedResponse>> RegisterWebhookAsync(string userId, RegisterWebhookRequest request);
         Task<Result<List<WebhookResponse>>> GetUserWebhooksAsync(string userId);
         Task<Result<WebhookResponse>> GetWebhookAsync(string webhookId, string userId);
         Task<Result<WebhookResponse>> UpdateWebhookAsync(string webhookId, string userId, UpdateWebhookRequest request);

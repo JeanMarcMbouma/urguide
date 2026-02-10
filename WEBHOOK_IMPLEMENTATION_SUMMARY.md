@@ -37,7 +37,7 @@ A comprehensive webhook system has been successfully implemented for the UrGuide
   - WebhookDeliveryResponse - Returns delivery history
   - TestWebhookRequest - For testing webhooks
   - WebhookPayload - Standard payload structure
-  - WebhookEvent enum - 14 event types across 5 categories
+  - WebhookEvent enum - 16 event types across 5 categories
   - WebhookDeliveryStatus enum - 5 delivery states
 
 #### 3. Service Layer
@@ -85,7 +85,7 @@ A comprehensive webhook system has been successfully implemented for the UrGuide
 
 #### Functionality
 ✅ Webhook CRUD operations  
-✅ Multi-event subscription (up to 14 event types)  
+✅ Multi-event subscription (up to 16 event types)  
 ✅ Active/inactive webhook toggle  
 ✅ Delivery history with pagination  
 ✅ Test webhook endpoint  
@@ -305,7 +305,7 @@ if (signature === expectedSignature) {
 
 4. **No Batch Delivery**: Each webhook is delivered individually. For high-volume events, batching could improve efficiency.
 
-5. **Synchronous Retries**: Retries use Task.Delay which blocks the thread. For production, consider a job queue.
+5. **Synchronous Retries**: Retries use Task.Delay and keep the delivery workflow open within the current request/Task.Run scope. For production, consider moving retries to a background job queue.
 
 ## Future Enhancements
 

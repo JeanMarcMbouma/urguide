@@ -112,10 +112,14 @@ function verifyWebhookSignature(payload, signature, secret) {
       .update(payload)
       .digest('hex');
   
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expectedSignature)
-  );
+  const signatureBuffer = Buffer.from(signature || '', 'utf8');
+  const expectedSignatureBuffer = Buffer.from(expectedSignature, 'utf8');
+
+  if (signatureBuffer.length !== expectedSignatureBuffer.length) {
+    return false;
+  }
+  
+  return crypto.timingSafeEqual(signatureBuffer, expectedSignatureBuffer);
 }
 ```
 

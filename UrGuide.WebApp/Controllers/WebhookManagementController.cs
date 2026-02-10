@@ -29,7 +29,7 @@ namespace UrGuide.WebApp.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(200, Type = typeof(WebhookResponse))]
+        [ProducesResponseType(200, Type = typeof(WebhookCreatedResponse))]
         public async Task<IActionResult> RegisterWebhook([FromBody] RegisterWebhookRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

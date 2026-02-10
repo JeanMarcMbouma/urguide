@@ -32,16 +32,16 @@ namespace UrGuide.Services.Webhooks
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<Result<WebhookResponse>> RegisterWebhookAsync(string userId, RegisterWebhookRequest request)
+        public async Task<Result<WebhookCreatedResponse>> RegisterWebhookAsync(string userId, RegisterWebhookRequest request)
         {
-            var result = Result.Of<WebhookResponse>();
+            var result = Result.Of<WebhookCreatedResponse>();
 
             if (string.IsNullOrWhiteSpace(request.Url))
                 return result.WithErrors("Webhook URL is required");
 
             if (!Uri.TryCreate(request.Url, UriKind.Absolute, out var uri) || 
-                (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
-                return result.WithErrors("Invalid webhook URL");
+                uri.Scheme != Uri.UriSchemeHttps)
+                return result.WithErrors("Invalid webhook URL. Only HTTPS is allowed.");
 
             if (request.Events == null || !request.Events.Any())
                 return result.WithErrors("At least one event must be subscribed");
@@ -69,7 +69,7 @@ namespace UrGuide.Services.Webhooks
 
                 _logger.LogInformation($"Webhook registered for user {userId}: {webhook.Id}");
 
-                return Result.Of(MapToResponse(webhook));
+                return Result.Of(MapToCreatedResponse(webhook));
             }
             catch (Exception ex)
             {
@@ -130,8 +130,8 @@ namespace UrGuide.Services.Webhooks
                 if (!string.IsNullOrWhiteSpace(request.Url))
                 {
                     if (!Uri.TryCreate(request.Url, UriKind.Absolute, out var uri) ||
-                        (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
-                        return result.WithErrors("Invalid webhook URL");
+                        uri.Scheme != Uri.UriSchemeHttps)
+                        return result.WithErrors("Invalid webhook URL. Only HTTPS is allowed.");
                     webhook.Url = request.Url;
                 }
 
@@ -258,9 +258,14 @@ namespace UrGuide.Services.Webhooks
 
         public async Task PublishEventAsync(WebhookEvent eventType, object data)
         {
-            var subscriptions = await _context.WebhookSubscriptions
-                .Where(w => w.IsActive && w.Events.Contains(eventType))
+            // Load active subscriptions into memory first (Events is JSON, cannot be queried directly in SQL)
+            var activeSubscriptions = await _context.WebhookSubscriptions
+                .Where(w => w.IsActive)
                 .ToListAsync();
+
+            var subscriptions = activeSubscriptions
+                .Where(w => w.Events != null && w.Events.Contains(eventType))
+                .ToList();
 
             if (!subscriptions.Any())
             {
@@ -340,7 +345,7 @@ namespace UrGuide.Services.Webhooks
                     using var httpClient = _httpClientFactory.CreateClient();
                     httpClient.Timeout = TimeSpan.FromSeconds(30);
 
-                    var request = new HttpRequestMessage(HttpMethod.Post, subscription.Url)
+                    using var request = new HttpRequestMessage(HttpMethod.Post, subscription.Url)
                     {
                         Content = new StringContent(delivery.Payload, Encoding.UTF8, "application/json")
                     };
@@ -350,7 +355,9 @@ namespace UrGuide.Services.Webhooks
 
                     var response = await httpClient.SendAsync(request);
                     delivery.ResponseStatusCode = (int)response.StatusCode;
-                    delivery.ResponseBody = await response.Content.ReadAsStringAsync();
+                    var responseBody = await response.Content.ReadAsStringAsync();
+                    // Truncate to fit database column limit (4000 chars)
+                    delivery.ResponseBody = responseBody.Length > 4000 ? responseBody.Substring(0, 4000) : responseBody;
 
                     if (response.IsSuccessStatusCode)
                     {
@@ -364,19 +371,23 @@ namespace UrGuide.Services.Webhooks
                     }
                     else
                     {
-                        delivery.ErrorMessage = $"HTTP {delivery.ResponseStatusCode}: {delivery.ResponseBody}";
+                        var errorMsg = $"HTTP {delivery.ResponseStatusCode}: {delivery.ResponseBody}";
+                        // Truncate to fit database column limit (2000 chars)
+                        delivery.ErrorMessage = errorMsg.Length > 2000 ? errorMsg.Substring(0, 2000) : errorMsg;
                         _logger.LogWarning($"Webhook delivery failed with status {delivery.ResponseStatusCode}: {delivery.Id}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    delivery.ErrorMessage = ex.Message;
+                    // Truncate exception message to fit database column limit (2000 chars)
+                    delivery.ErrorMessage = ex.Message.Length > 2000 ? ex.Message.Substring(0, 2000) : ex.Message;
                     _logger.LogError(ex, $"Error delivering webhook: {delivery.Id}");
                 }
 
                 if (delivery.Status != WebhookDeliveryStatus.Delivered && attempt < delivery.MaxAttempts)
                 {
-                    var delaySeconds = Math.Pow(3, attempt) * 5;
+                    // Exponential backoff: 5s, 15s, 45s, 135s (for attempts 1-4)
+                    var delaySeconds = Math.Pow(3, attempt - 1) * 5;
                     delivery.NextRetryAt = DateTime.UtcNow.AddSeconds(delaySeconds);
                     await _context.SaveChangesAsync();
 
@@ -421,6 +432,23 @@ namespace UrGuide.Services.Webhooks
         private WebhookResponse MapToResponse(WebhookSubscription webhook)
         {
             return new WebhookResponse
+            {
+                Id = webhook.Id,
+                Url = webhook.Url,
+                IsActive = webhook.IsActive,
+                Description = webhook.Description,
+                Events = webhook.Events,
+                CreatedAt = webhook.CreatedAt,
+                UpdatedAt = webhook.UpdatedAt,
+                LastTriggeredAt = webhook.LastTriggeredAt,
+                SuccessCount = webhook.SuccessCount,
+                FailureCount = webhook.FailureCount
+            };
+        }
+
+        private WebhookCreatedResponse MapToCreatedResponse(WebhookSubscription webhook)
+        {
+            return new WebhookCreatedResponse
             {
                 Id = webhook.Id,
                 Url = webhook.Url,

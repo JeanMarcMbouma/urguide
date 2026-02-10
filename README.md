@@ -127,7 +127,7 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
 ### 🔗 Integration & Webhooks
 - [x] **Webhook System**: External integration support with secure webhooks
   - Webhook registration with custom URLs
-  - Support for 14 event types (payments, bookings, tours, users, reviews)
+  - Support for 16 event types (payments, bookings, tours, users, reviews)
   - HMAC-SHA256 payload signing for security
   - Automatic retry with exponential backoff (5s, 15s, 45s, 135s)
   - Comprehensive delivery history and logging
@@ -611,7 +611,7 @@ The API provides a webhook system for external integrations, allowing third-part
 - **`POST /api/webhook-management/test`** - Test a webhook with sample payload
 
 **Features:**
-- Support for 14 event types: payments, bookings, tours, users, and reviews
+- Support for 16 event types: payments, bookings, tours, users, and reviews
 - HMAC-SHA256 payload signing for security verification
 - Automatic retry with exponential backoff (5 attempts)
 - Comprehensive delivery history and logging
