@@ -1174,7 +1174,7 @@ Build a comprehensive API documentation portal with interactive examples.
 **Description:**
 Implement multi-language support for API responses and error messages.
 
-**Note:** Renumbered from original #18 to #38 to maintain sequential ordering after the testing suite split created new issues #18 (Integration Testing), #36 (E2E Testing), and #37 (Performance Testing).
+**Note:** Renumbered from original #18 to #38 to maintain consecutive issue numbering after the testing suite split created new issues #18 (Integration Testing), #36 (E2E Testing), and #37 (Performance Testing).
 
 **Requirements:**
 - Resource file structure
