@@ -40,6 +40,8 @@ namespace UrGuide.Services.Analytics
 
                 var totalUsers = await usersQuery.CountAsync(cancellationToken);
 
+                // Note: Using LastActivityDate as a proxy for registration date
+                // Ideally, the User entity should have a CreatedAt field for accurate registration tracking
                 var newUsers = await usersQuery
                     .Where(u => u.LastActivityDate >= startDate && u.LastActivityDate <= endDate)
                     .CountAsync(cancellationToken);
@@ -207,7 +209,7 @@ namespace UrGuide.Services.Analytics
                     .Select(a => new
                     {
                         a.AuthorId,
-                        Name = a.ProfileInfo.FirstName,
+                        Name = a.ProfileInfo.FirstName ?? "Unknown Guide",
                         Rating = a.Rating,
                         TourCount = _context.Set<Data.Entities.Tour.Tour>().Count(t => t.AuthorId == a.AuthorId),
                         BookingCount = _context.Set<Booking>()
@@ -267,7 +269,6 @@ namespace UrGuide.Services.Analytics
                     .Include(b => b.Region)
                     .ThenInclude(r => r.Country)
                     .Include(b => b.Tour)
-                    .ThenInclude(t => t.Reviews)
                     .GroupBy(b => new 
                     { 
                         b.RegionId, 
@@ -282,12 +283,24 @@ namespace UrGuide.Services.Analytics
                         TourCount = g.Select(b => b.TourId).Distinct().Count(),
                         BookingCount = g.Count(),
                         Revenue = g.Sum(b => b.Amount),
-                        AverageRating = g.SelectMany(b => b.Tour.Reviews)
-                            .Any() ? g.SelectMany(b => b.Tour.Reviews).Average(r => (decimal)r.Rating) : 0
+                        // Calculate average rating separately to avoid N+1 queries
+                        AverageRating = 0
                     })
                     .OrderByDescending(d => d.BookingCount)
                     .Take(topN)
                     .ToListAsync(cancellationToken);
+
+                // Calculate average ratings in a separate query for better performance
+                foreach (var destination in destinations)
+                {
+                    var avgRating = await _context.Set<Data.Entities.Tour.Review>()
+                        .Where(r => r.Author.ProfileInfo != null && 
+                                   _context.Set<Data.Entities.Tour.Tour>()
+                                       .Any(t => t.AuthorId == r.Author.AuthorId && t.RegionId == destination.RegionId))
+                        .AverageAsync(r => (decimal?)r.Rating, cancellationToken);
+                    
+                    destination.AverageRating = avgRating ?? 0;
+                }
 
                 return Result.Of(new PopularDestinations
                 {
@@ -478,6 +491,9 @@ namespace UrGuide.Services.Analytics
             while (current <= endDate)
             {
                 var nextPeriod = GetNextPeriod(current, period);
+                
+                // Note: Using LastActivityDate as a proxy for registration date
+                // Ideally, the User entity should have a CreatedAt field
                 var count = await _context.Users
                     .Where(u => u.LastActivityDate >= current && u.LastActivityDate < nextPeriod)
                     .CountAsync(cancellationToken);
