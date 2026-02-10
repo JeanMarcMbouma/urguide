@@ -204,6 +204,8 @@ namespace UrGuide.Services.Analytics
                     .Where(a => a.Rating > 0)
                     .AverageAsync(a => (decimal)a.Rating, cancellationToken);
 
+                // Note: This query has N+1 characteristics - consider optimizing for large datasets
+                // by using separate grouped queries if performance becomes an issue
                 var topPerformers = await _context.Set<Data.Entities.Users.Author>()
                     .Include(a => a.ProfileInfo)
                     .Select(a => new
@@ -291,6 +293,8 @@ namespace UrGuide.Services.Analytics
                     .ToListAsync(cancellationToken);
 
                 // Calculate average ratings in a separate query for better performance
+                // Note: This still creates N queries where N = number of destinations
+                // For large datasets, consider batching this into a single query
                 foreach (var destination in destinations)
                 {
                     var avgRating = await _context.Set<Data.Entities.Tour.Review>()
