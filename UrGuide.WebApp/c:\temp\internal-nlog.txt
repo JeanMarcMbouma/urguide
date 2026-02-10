@@ -1,9 +1,0 @@
-2026-02-10 22:17:57.8330 Info Loading assembly name: NLog.Web.AspNetCore
-2026-02-10 22:17:57.8359 Info NLog.Web.AspNetCore, Version=6.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 6.1.1.1378. Product version: 6.1.1+ffbea2aee6cef3ff050c70c914774d28abd0d313. GlobalAssemblyCache: False
-2026-02-10 22:17:57.8945 Info Registered target NLog.Targets.FileTarget(Name=allfile)
-2026-02-10 22:17:57.8972 Info Registered target NLog.Targets.FileTarget(Name=ownFile-web)
-2026-02-10 22:17:57.9035 Info NLog, Version=6.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 6.1.0.4914. Product version: 6.1.0+5b1846554f5a8f98878ca64cce5a485ca3b8275c. GlobalAssemblyCache: False
-2026-02-10 22:17:57.9435 Info Configuration initialized: TargetNames=allfile, ownFile-web, ConfigItems=45, AutoReload=true, FilePath=/home/runner/work/urguide/urguide/UrGuide.WebApp/bin/Debug/net10.0/nlog.config
-2026-02-10 22:17:59.9172 Info LogFactory shutting down ...
-2026-02-10 22:17:59.9172 Info Closing old configuration.
-2026-02-10 22:17:59.9253 Info LogFactory shutdown completed.
