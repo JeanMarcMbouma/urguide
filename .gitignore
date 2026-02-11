@@ -123,3 +123,7 @@ docker-compose.override.local.yml
 tempkey.jwk
 *.jwk
 # Note: Build artifacts (bin/obj folders) are excluded via .gitignore
+
+# Temporary files and logs
+**/temp/
+internal-nlog.txt

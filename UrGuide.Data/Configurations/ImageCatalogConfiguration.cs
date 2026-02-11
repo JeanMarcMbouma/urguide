@@ -36,6 +36,7 @@ namespace UrGuide.Data.Configurations
                     a.Property(x => x.Name).IsRequired().HasMaxLength(200);
                     a.Property(x => x.Value).IsRequired();
                     a.HasKey("Id");
+                    a.HasIndex(x => x.Name).HasDatabaseName("IX_File_Attributes_Name");
                 });
             });
         }

@@ -46,21 +46,28 @@ namespace UrGuide.Services.Abstraction
             if (item == null)
                 return Result.Of(false).WithErrors($"Entity with the given id  '{id}' doesn't exists");
 
-            var genericAttributes = item.Attributes;
+            // Optimize: Use dictionary for O(1) lookups instead of O(n) FirstOrDefault in loop
+            // Group by Name to handle potential case-insensitive duplicates, taking the first occurrence
+            var attributeDict = item.Attributes
+                .GroupBy(a => a.Name, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+            
             foreach (var attribute in attributes)
             {
-                var attr = genericAttributes.FirstOrDefault(a => a.Name.Equals(attribute.Name, System.StringComparison.OrdinalIgnoreCase));
-                if (attr == null)
+                if (attributeDict.TryGetValue(attribute.Name, out var existingAttr))
                 {
-                    item.Attributes.Add(new GenericAttribute
-                    {
-                        Name = attribute.Name,
-                        Value = attribute.Value
-                    });
+                    existingAttr.Value = attribute.Value;
                 }
                 else
                 {
-                    attr.Value = attribute.Value;
+                    var newAttr = new GenericAttribute
+                    {
+                        Name = attribute.Name,
+                        Value = attribute.Value
+                    };
+                    item.Attributes.Add(newAttr);
+                    // Keep dictionary in sync with collection
+                    attributeDict[attribute.Name] = newAttr;
                 }
             }
             if (item is ILastUpdatableEntity entity)
@@ -86,27 +93,37 @@ namespace UrGuide.Services.Abstraction
             if (item == null)
                 return Result.Of(false).WithErrors($"Entity with the given id  '{id}' doesn't exists");
 
-            var genericAttributes = item.Attributes;
+            // Optimize: Use dictionary for O(1) lookups instead of O(n) FirstOrDefault in loop
+            // Group by Name to handle potential case-insensitive duplicates, taking the first occurrence
+            var attributeDict = item.Attributes
+                .GroupBy(a => a.Name, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+            
             foreach (var attribute in attributes)
             {
-                var attr = genericAttributes.FirstOrDefault(a => a.Name.Equals(attribute.Name, System.StringComparison.OrdinalIgnoreCase));
-                if (attr == null)
-                {
-                    item.Attributes.Add(new GenericAttribute
-                    {
-                        Name = attribute.Name,
-                        Value = attribute.Value
-                    });
-                }
-                else
+                if (attributeDict.TryGetValue(attribute.Name, out var existingAttr))
                 {
                     if(string.IsNullOrEmpty(attribute.Value))
                     {
-                        item.Attributes.Remove(attr);
-                    } else
-                    {
-                        attr.Value = attribute.Value;
+                        item.Attributes.Remove(existingAttr);
+                        // Keep dictionary in sync with collection
+                        attributeDict.Remove(attribute.Name);
                     }
+                    else
+                    {
+                        existingAttr.Value = attribute.Value;
+                    }
+                }
+                else
+                {
+                    var newAttr = new GenericAttribute
+                    {
+                        Name = attribute.Name,
+                        Value = attribute.Value
+                    };
+                    item.Attributes.Add(newAttr);
+                    // Keep dictionary in sync with collection
+                    attributeDict[attribute.Name] = newAttr;
                 }
             }
 
