@@ -47,7 +47,10 @@ namespace UrGuide.Services.Abstraction
                 return Result.Of(false).WithErrors($"Entity with the given id  '{id}' doesn't exists");
 
             // Optimize: Use dictionary for O(1) lookups instead of O(n) FirstOrDefault in loop
-            var attributeDict = item.Attributes.ToDictionary(a => a.Name, StringComparer.OrdinalIgnoreCase);
+            // Group by Name to handle potential case-insensitive duplicates, taking the first occurrence
+            var attributeDict = item.Attributes
+                .GroupBy(a => a.Name, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
             
             foreach (var attribute in attributes)
             {
@@ -57,11 +60,14 @@ namespace UrGuide.Services.Abstraction
                 }
                 else
                 {
-                    item.Attributes.Add(new GenericAttribute
+                    var newAttr = new GenericAttribute
                     {
                         Name = attribute.Name,
                         Value = attribute.Value
-                    });
+                    };
+                    item.Attributes.Add(newAttr);
+                    // Keep dictionary in sync with collection
+                    attributeDict[attribute.Name] = newAttr;
                 }
             }
             if (item is ILastUpdatableEntity entity)
@@ -88,7 +94,10 @@ namespace UrGuide.Services.Abstraction
                 return Result.Of(false).WithErrors($"Entity with the given id  '{id}' doesn't exists");
 
             // Optimize: Use dictionary for O(1) lookups instead of O(n) FirstOrDefault in loop
-            var attributeDict = item.Attributes.ToDictionary(a => a.Name, StringComparer.OrdinalIgnoreCase);
+            // Group by Name to handle potential case-insensitive duplicates, taking the first occurrence
+            var attributeDict = item.Attributes
+                .GroupBy(a => a.Name, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
             
             foreach (var attribute in attributes)
             {
@@ -97,18 +106,24 @@ namespace UrGuide.Services.Abstraction
                     if(string.IsNullOrEmpty(attribute.Value))
                     {
                         item.Attributes.Remove(existingAttr);
-                    } else
+                        // Keep dictionary in sync with collection
+                        attributeDict.Remove(attribute.Name);
+                    }
+                    else
                     {
                         existingAttr.Value = attribute.Value;
                     }
                 }
                 else
                 {
-                    item.Attributes.Add(new GenericAttribute
+                    var newAttr = new GenericAttribute
                     {
                         Name = attribute.Name,
                         Value = attribute.Value
-                    });
+                    };
+                    item.Attributes.Add(newAttr);
+                    // Keep dictionary in sync with collection
+                    attributeDict[attribute.Name] = newAttr;
                 }
             }
 
