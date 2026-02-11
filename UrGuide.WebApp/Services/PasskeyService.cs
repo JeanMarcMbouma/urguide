@@ -18,8 +18,8 @@ namespace UrGuide.WebApp.Services
     {
         Task<CredentialCreateOptions> StartRegistrationAsync(UrGuideUser user, string friendlyName);
         Task<bool> CompleteRegistrationAsync(UrGuideUser user, AuthenticatorAttestationRawResponse attestationResponse, string friendlyName);
-        Task<AssertionOptions> StartLoginAsync(string userName);
-        Task<(bool success, UrGuideUser user)> CompleteLoginAsync(AuthenticatorAssertionRawResponse assertionResponse);
+        Task<AssertionOptions?> StartLoginAsync(string userName);
+        Task<(bool success, UrGuideUser? user)> CompleteLoginAsync(AuthenticatorAssertionRawResponse assertionResponse);
         Task<List<PasskeyCredential>> GetUserPasskeysAsync(string userId);
         Task<bool> DeletePasskeyAsync(string userId, string credentialId);
     }
@@ -135,7 +135,7 @@ namespace UrGuide.WebApp.Services
             }
         }
         
-        public async Task<AssertionOptions> StartLoginAsync(string userName)
+        public async Task<AssertionOptions?> StartLoginAsync(string userName)
         {
             // Find user by username/email
             var user = await _userManager.FindByNameAsync(userName);
@@ -175,7 +175,7 @@ namespace UrGuide.WebApp.Services
             return options;
         }
         
-        public async Task<(bool success, UrGuideUser user)> CompleteLoginAsync(AuthenticatorAssertionRawResponse assertionResponse)
+        public async Task<(bool success, UrGuideUser? user)> CompleteLoginAsync(AuthenticatorAssertionRawResponse assertionResponse)
         {
             try
             {

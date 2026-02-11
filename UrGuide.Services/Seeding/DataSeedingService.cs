@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Regions;
 using UrGuide.Services.Contracts;
-using UrGuide.Services.Seeding;
 
 namespace UrGuide.Services.Seeding
 {
@@ -60,7 +59,7 @@ namespace UrGuide.Services.Seeding
             }
 
             var jsonContent = await File.ReadAllTextAsync(jsonPath);
-            var countryData = JsonConvert.DeserializeObject<List<dynamic>>(jsonContent);
+            var countryData = JsonConvert.DeserializeObject<List<dynamic>>(jsonContent) ?? [];
 
             foreach (var item in countryData)
             {
@@ -93,7 +92,7 @@ namespace UrGuide.Services.Seeding
             }
 
             var jsonContent = await File.ReadAllTextAsync(jsonPath);
-            var currencyData = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(jsonContent);
+            var currencyData = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(jsonContent) ?? [];
 
             foreach (var item in currencyData)
             {
@@ -130,7 +129,7 @@ namespace UrGuide.Services.Seeding
             }
 
             var jsonContent = await File.ReadAllTextAsync(jsonPath);
-            var regionData = JsonConvert.DeserializeObject<List<RegionSeedData>>(jsonContent);
+            var regionData = JsonConvert.DeserializeObject<List<RegionSeedData>>(jsonContent) ?? [];
 
             foreach (var item in regionData)
             {

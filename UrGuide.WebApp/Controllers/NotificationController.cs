@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using UrGuide.Core;
 using UrGuide.Model;
 using UrGuide.Model.Messages;
-using UrGuide.Model.Results;
 using UrGuide.Model.Users;
 using UrGuide.Services.Contracts;
 using UrGuide.Shared.Contracts;

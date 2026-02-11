@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Internal;
-using System.Linq;
+﻿using System.Linq;
 using UrGuide.Data.Entities.Posts;
 
 namespace UrGuide.Services.Posts

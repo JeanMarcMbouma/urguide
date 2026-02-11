@@ -21,7 +21,7 @@ namespace UrGuide.WebApp.Attributes
         /// <summary>
         /// Specific tier this limit applies to (optional)
         /// </summary>
-        public string Tier { get; set; }
+        public string? Tier { get; set; }
 
         public RateLimitAttribute(int limit, string period)
         {

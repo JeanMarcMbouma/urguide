@@ -5,6 +5,6 @@ namespace UrGuide.Shared.Contracts
 {
     public interface IIPStackService
     {
-        Task<IPStackInfo> GetAsync(IPAddress ip);
+        Task<IPStackInfo?> GetAsync(IPAddress ip);
     }
 }

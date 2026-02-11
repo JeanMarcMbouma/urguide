@@ -23,7 +23,7 @@ namespace UrGuide.WebApp.RateLimiting
             _logger = logger;
         }
 
-        public Task RecordHitAsync(string userId, string endpoint, RateLimitTier tier, int currentCount, int limit)
+        public Task RecordHitAsync(string? userId, string endpoint, RateLimitTier tier, int currentCount, int limit)
         {
             var eventData = new RateLimitEvent
             {
@@ -53,7 +53,7 @@ namespace UrGuide.WebApp.RateLimiting
             return Task.CompletedTask;
         }
 
-        public Task RecordViolationAsync(string userId, string endpoint, RateLimitTier tier)
+        public Task RecordViolationAsync(string? userId, string endpoint, RateLimitTier tier)
         {
             var eventData = new RateLimitEvent
             {
@@ -77,7 +77,7 @@ namespace UrGuide.WebApp.RateLimiting
             return Task.CompletedTask;
         }
 
-        public Task<RateLimitStatistics> GetStatisticsAsync(string userId, DateTime? from = null, DateTime? to = null)
+        public Task<RateLimitStatistics> GetStatisticsAsync(string? userId, DateTime? from = null, DateTime? to = null)
         {
             var key = GetKey(userId);
             var fromDate = from ?? DateTime.UtcNow.AddDays(-1);
@@ -109,9 +109,9 @@ namespace UrGuide.WebApp.RateLimiting
             });
         }
 
-        private string GetKey(string userId)
+        private string GetKey(string? userId)
         {
-            return userId ?? "anonymous";
+            return string.IsNullOrWhiteSpace(userId) ? "anonymous" : userId;
         }
 
         private void CleanupOldEvents(string key)
@@ -131,8 +131,8 @@ namespace UrGuide.WebApp.RateLimiting
 
         private class RateLimitEvent
         {
-            public string UserId { get; set; }
-            public string Endpoint { get; set; }
+            public string UserId { get; set; } = string.Empty;
+            public string Endpoint { get; set; } = string.Empty;
             public RateLimitTier Tier { get; set; }
             public DateTime Timestamp { get; set; }
             public bool IsViolation { get; set; }

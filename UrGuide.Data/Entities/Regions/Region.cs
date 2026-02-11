@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace UrGuide.Data.Entities.Regions
+﻿namespace UrGuide.Data.Entities.Regions
 {
     public class Region
     {

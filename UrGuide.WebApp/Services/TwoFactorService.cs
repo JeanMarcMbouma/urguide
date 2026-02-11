@@ -153,12 +153,8 @@ namespace UrGuide.WebApp.Services
                     
                     const int iterations = 100_000;
                     const int keySize = 32;
-                    
-                    byte[] derivedKey;
-                    using (var pbkdf2 = new Rfc2898DeriveBytes(code, salt, iterations, HashAlgorithmName.SHA256))
-                    {
-                        derivedKey = pbkdf2.GetBytes(keySize);
-                    }
+
+                    byte[] derivedKey = Rfc2898DeriveBytes.Pbkdf2(code, salt, iterations, HashAlgorithmName.SHA256, keySize);
                     
                     if (derivedKey.SequenceEqual(expectedHash))
                     {
@@ -220,11 +216,7 @@ namespace UrGuide.WebApp.Services
             const int iterations = 100_000;
             const int keySize = 32; // 256-bit derived key
 
-            byte[] derivedKey;
-            using (var pbkdf2 = new Rfc2898DeriveBytes(code, salt, iterations, HashAlgorithmName.SHA256))
-            {
-                derivedKey = pbkdf2.GetBytes(keySize);
-            }
+            byte[] derivedKey = Rfc2898DeriveBytes.Pbkdf2(code, salt, iterations, HashAlgorithmName.SHA256, keySize);
 
             var saltB64 = Convert.ToBase64String(salt);
             var hashB64 = Convert.ToBase64String(derivedKey);

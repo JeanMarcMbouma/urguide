@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Data;
-using UrGuide.Data.Entities.Posts;
 using UrGuide.Model.Lookup;
 using UrGuide.Model.Results;
 using UrGuide.Services.Contracts;

@@ -1,5 +1,4 @@
 using AutoMapper;
-using UrGuide.Services.Helpers;
 using DataTourRequest = UrGuide.Data.Entities.Tour.TourRequest;
 using DataTourRequestStatus = UrGuide.Data.Entities.Tour.TourRequestStatus;
 

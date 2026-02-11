@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -74,17 +73,22 @@ namespace UrGuide.WebApp.Services
         {
             var userManager = SignInManager.UserManager;
             var user = await userManager.FindByEmailAsync(emailConfirmation.Email);
+            if(user == null)
+            {
+                return Result.Of(false).WithErrors("Email confirmation failed");
+            }
             var result = await userManager.ConfirmEmailAsync(user, emailConfirmation.ConfirmationToken);
             if (result.Succeeded)
                 return Result.Of(true);
             return Result.Of(false).WithErrors("Email confirmation failed");
         }
 
-        public async Task DeleteAccountAsync(string userId)
+        public async ValueTask DeleteAccountAsync(string userId)
         {
             var userManager = SignInManager.UserManager;
             var user = await userManager.FindByIdAsync(userId);
-            await userManager.DeleteAsync(user);
+            if (user != null)
+                await userManager.DeleteAsync(user);
         }
 
         public async Task<Result<string>> LoginAsync(LoginModel login, CancellationToken cancellationToken)
@@ -106,7 +110,10 @@ namespace UrGuide.WebApp.Services
                 return Result.Of<string>().WithErrors("Your account has been locked out.");
             }
             var user = await SignInManager.UserManager.FindByNameAsync(login.UserName);
-            
+            if(user == null)
+            {
+                return Result.Of<string>().WithErrors("Invalid login attempt.");
+            }
             return Result.Of(user.Id);
         }
 

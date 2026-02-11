@@ -8,7 +8,7 @@ namespace UrGuide.WebApp.Models
     /// </summary>
     public class PasskeyRegistrationStartRequest
     {
-        public string FriendlyName { get; set; }
+        public string? FriendlyName { get; set; }
     }
     
     /// <summary>
@@ -16,7 +16,7 @@ namespace UrGuide.WebApp.Models
     /// </summary>
     public class PasskeyRegistrationStartResponse
     {
-        public CredentialCreateOptions Options { get; set; }
+        public CredentialCreateOptions Options { get; set; } = null!;
     }
     
     /// <summary>
@@ -24,8 +24,8 @@ namespace UrGuide.WebApp.Models
     /// </summary>
     public class PasskeyRegistrationCompleteRequest
     {
-        public AuthenticatorAttestationRawResponse AttestationResponse { get; set; }
-        public string FriendlyName { get; set; }
+        public AuthenticatorAttestationRawResponse? AttestationResponse { get; set; }
+        public string? FriendlyName { get; set; }
     }
     
     /// <summary>
@@ -34,7 +34,7 @@ namespace UrGuide.WebApp.Models
     public class PasskeyRegistrationCompleteResponse
     {
         public bool Success { get; set; }
-        public string CredentialId { get; set; }
+        public string CredentialId { get; set; } = string.Empty;
     }
     
     /// <summary>
@@ -42,7 +42,7 @@ namespace UrGuide.WebApp.Models
     /// </summary>
     public class PasskeyLoginStartRequest
     {
-        public string UserName { get; set; }
+        public string? UserName { get; set; }
     }
     
     /// <summary>
@@ -50,7 +50,7 @@ namespace UrGuide.WebApp.Models
     /// </summary>
     public class PasskeyLoginStartResponse
     {
-        public AssertionOptions Options { get; set; }
+        public AssertionOptions Options { get; set; } = null!;
     }
     
     /// <summary>
@@ -58,7 +58,7 @@ namespace UrGuide.WebApp.Models
     /// </summary>
     public class PasskeyLoginCompleteRequest
     {
-        public AuthenticatorAssertionRawResponse AssertionResponse { get; set; }
+        public AuthenticatorAssertionRawResponse? AssertionResponse { get; set; }
     }
     
     /// <summary>
@@ -67,7 +67,7 @@ namespace UrGuide.WebApp.Models
     public class PasskeyLoginCompleteResponse
     {
         public bool Success { get; set; }
-        public string UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
     }
     
     /// <summary>
@@ -75,8 +75,8 @@ namespace UrGuide.WebApp.Models
     /// </summary>
     public class PasskeyInfo
     {
-        public string Id { get; set; }
-        public string FriendlyName { get; set; }
+        public string Id { get; set; } = string.Empty;
+        public string FriendlyName { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime? LastUsedAt { get; set; }
     }

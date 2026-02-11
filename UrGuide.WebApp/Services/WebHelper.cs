@@ -48,12 +48,18 @@ namespace UrGuide.WebApp.Services
             }
 
             var p = new RouteValueDictionary(values);
-            var request = HC.HttpContext.Request;
+            var httpContext = HC.HttpContext ?? throw new InvalidOperationException("HttpContext is not available.");
+            var request = httpContext.Request;
             var baseUrl = $"{request.Scheme}://{request.Host}{request.PathBase}";
             foreach (var key in p.Keys)
             {
-                if (p[key] == null) continue;
-                uri = QueryHelpers.AddQueryString(uri, key, p[key].ToString());
+                var value = p[key]?.ToString();
+                if (string.IsNullOrEmpty(value))
+                {
+                    continue;
+                }
+
+                uri = QueryHelpers.AddQueryString(uri, key, value);
             }
             return $"{baseUrl}{uri}";
         }

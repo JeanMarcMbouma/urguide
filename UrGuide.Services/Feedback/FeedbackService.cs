@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using UrGuide.Core;
 using UrGuide.Core.Attributes;
 using UrGuide.Data;
-using UrGuide.Data.Entities.Posts;
-using UrGuide.Data.Shared;
 using UrGuide.Model;
 using UrGuide.Model.Results;
 using UrGuide.Model.Shared;
@@ -52,6 +50,8 @@ namespace UrGuide.Services.Feedback
             post.Reviews++;
             post.Rating = (int)Math.Ceiling(new[] { post.Rating, feedback.Rating }.Average());
             var author = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
+            if(author == null)
+                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
             string authorFirstName = author.FirstName;
 
             string postAuthorFirstName = post.User.FirstName;
@@ -111,6 +111,8 @@ Rating: {feedback.Rating} star(s).";
             int avg = firstRatingEver ? feedback.Rating : (int)Math.Ceiling(new[] { r, feedback.Rating }.Average());
             rating.Value = avg.ToString();
             var author = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
+            if (author == null)
+                return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
             string authorFirstName = author.FirstName;
 
             string userFirstName = user.FirstName;

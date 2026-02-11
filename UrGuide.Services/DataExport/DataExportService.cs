@@ -1,9 +1,7 @@
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -13,7 +11,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Users;
-using UrGuide.Model.Auditing;
 using UrGuide.Model.Messages;
 using UrGuide.Model.Results;
 using UrGuide.Model.Shared;
@@ -794,7 +791,7 @@ Download your data using the secure link below. This link will expire on {expiry
             return value.Replace("\"", "\"\"");
         }
 
-        private DateTime ParseDateAttribute(string value)
+        private static DateTime ParseDateAttribute(string? value)
         {
             if (string.IsNullOrEmpty(value))
                 return DateTime.MinValue;

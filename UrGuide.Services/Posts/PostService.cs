@@ -1,12 +1,10 @@
 ﻿using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Core;
@@ -264,7 +262,7 @@ New price: <em>{post.Bid.NewValue}</em>";
             try
             {
                 var user = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
-                var oldBid = post.Bid?.Author.Id;
+                var oldBid = post.Bid.Author?.Id;
 
                 post.NewBid(model.Value, user);
                 var author = post.User;
@@ -603,7 +601,7 @@ Post: <strong>{post.Text}</strong></br>
             return InternalSearch(userId, pagination, cancellationToken);
         }
 
-        private async Task<Result<PagedList<PostModel>>> InternalSearch(string userId, SearchParameters pagination, CancellationToken cancellationToken)
+        private async Task<Result<PagedList<PostModel>>> InternalSearch(string? userId, SearchParameters pagination, CancellationToken cancellationToken)
         {
             var geo = pagination.Nearby ? await IPStackService.GetLocationAsync(UserContext) : null;
             var where = pagination.Extra.Any() ? $"WHERE ({string.Join(" OR ", pagination.Extra.Select(x => $"Tags LIKE '%{x}%'"))})" : string.Empty;

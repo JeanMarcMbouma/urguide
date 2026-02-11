@@ -15,11 +15,9 @@ using UrGuide.Services.Extensions;
 using Microsoft.EntityFrameworkCore;
 using MediatR;
 using UrGuide.Services.Auditing.Command;
-using System.ComponentModel.DataAnnotations;
 using UrGuide.Core.Attributes;
 using UrGuide.Core;
 using System;
-using System.Collections.Generic;
 using UrGuide.Model.Shared;
 
 namespace UrGuide.Services.Users
@@ -73,6 +71,8 @@ namespace UrGuide.Services.Users
                 if (r.HasError)
                     return r;
                 var user = await Context.Users.FindAsync(new []{ UserContext.UserId }, cancellationToken);
+                if(user == null)
+                    return Result.Of(false).WithErrors("User not found.");
                 Context.Users.Remove(user);
                 await Context.SaveChangesAsync(cancellationToken);
                 await Mediator.Send(new UserDeleteAccountCommand(UserContext.UserId));
@@ -235,6 +235,8 @@ namespace UrGuide.Services.Users
 
             cancellationToken.ThrowIfCancellationRequested();
             var user = await Context.Users.FindAsync(new { UserContext.UserId }, cancellationToken);
+            if(user is null)
+                return Result.Of(false).WithErrors("User not found.");
             SetAttributesInternal(new []{ attribute }, user);
             return Result.Of(true);
         }
@@ -268,6 +270,8 @@ namespace UrGuide.Services.Users
             cancellationToken.ThrowIfCancellationRequested();
 
             var user = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
+            if(user == null)
+                return Result.Of(false).WithErrors("User not found.");
             if (updateGuide.ProfileImage != null)
             {
                 var imageUrl = ImageService.SaveAvatar(UserContext.UserId, new Model.Shared.ImageFileModel
@@ -331,6 +335,8 @@ namespace UrGuide.Services.Users
             cancellationToken.ThrowIfCancellationRequested();
 
             var user = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
+            if(user == null)
+                return Result.Of(false).WithErrors("User not found.");
             if (updateUser.ProfileImage != null)
             {
                 var imageUrl = ImageService.SaveAvatar(UserContext.UserId, new Model.Shared.ImageFileModel

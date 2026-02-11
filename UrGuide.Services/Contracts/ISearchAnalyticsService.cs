@@ -14,7 +14,7 @@ namespace UrGuide.Services.Contracts
             long timeTakenMs,
             SearchFilters filters,
             string searchType,
-            string ipAddress,
+            string? ipAddress,
             string userAgent,
             CancellationToken cancellationToken = default);
     }

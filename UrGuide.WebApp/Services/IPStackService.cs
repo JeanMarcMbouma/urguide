@@ -26,7 +26,7 @@ namespace UrGuide.WebApp.Services
         public IHttpClientFactory ClientFactory { get; }
         public ILogger<IPStackService> Logger { get; }
 
-        public async Task<IPStackInfo> GetAsync(IPAddress ip)
+        public async Task<IPStackInfo?> GetAsync(IPAddress ip)
         {
             var client = ClientFactory.CreateClient();
             client.BaseAddress = new Uri(Options.Value.Url);
@@ -36,7 +36,13 @@ namespace UrGuide.WebApp.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var dataString = await response.Content.ReadAsStringAsync();
-                    return JsonConvert.DeserializeObject<ApiResponse>(dataString);
+                    var result = JsonConvert.DeserializeObject<ApiResponse>(dataString);
+                    if (result == null)
+                    {
+                        return null;
+                    }
+
+                    return result;
                 }
             }
             catch (Exception e)
@@ -51,20 +57,25 @@ namespace UrGuide.WebApp.Services
             public double? Longitude { get; set; }
             public double? Latitude { get; set; }
             [JsonProperty("country_name")]
-            public string Country { get; set; }
-            public string City { get; set; }
-            public string ZipCode { get; set; }
+            public string Country { get; set; } = string.Empty;
+            public string City { get; set; } = string.Empty;
+            public string ZipCode { get; set; } = string.Empty;
 
-            public static implicit operator IPStackInfo(ApiResponse response)
+            public static implicit operator IPStackInfo?(ApiResponse response)
             { 
-                return response.Longitude.HasValue ? new IPStackInfo
+                if (response == null || !response.Longitude.HasValue || !response.Latitude.HasValue)
+                {
+                    return null;
+                }
+
+                return new IPStackInfo
                 {
                     City = response.City,
                     Country = response.Country,
                     Latitude = response.Latitude.Value,
                     Longitude = response.Longitude.Value,
                     ZipCode = response.ZipCode
-                } : null;
+                };
             }
         }
     }

@@ -5,8 +5,16 @@ namespace UrGuide.Services.Auditing.Abstraction
 {
     public abstract class BaseAuditCommand : IRequest
     {
-        public string UserId { get; set; }
-        public string ReferenceId { get; set; }
+
+        protected BaseAuditCommand(string userId, string? referenceId = null)
+        {
+            System.ArgumentException.ThrowIfNullOrEmpty(userId);
+            UserId = userId;
+            ReferenceId = referenceId;
+        }
+
+        public string UserId { get; }
+        public string? ReferenceId { get; }
         public abstract EventCodes EventCode { get; }
     }
 }

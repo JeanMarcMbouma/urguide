@@ -9,7 +9,7 @@ namespace UrGuide.WebApp.Models
     {
         public ErrorEnvelop(IEnumerable<T> errors)
         {
-            Errors = errors;
+            Errors = errors ?? Enumerable.Empty<T>();
         }
         public IEnumerable<T> Errors { get; }
 
@@ -20,6 +20,6 @@ namespace UrGuide.WebApp.Models
     {
         public static ErrorEnvelop<T> Create<T>(IEnumerable<T> errors) => new ErrorEnvelop<T>(errors);
         public static ErrorEnvelop<string> Create(IEnumerable<IdentityError> errors) => new ErrorEnvelop<string>(errors.Select(x => x.Description));
-        public static ErrorEnvelop<string> Create(ModelStateDictionary modelState) => new ErrorEnvelop<string>(modelState.SelectMany(x => x.Value.Errors.Select(y => y.ErrorMessage)));
+        public static ErrorEnvelop<string> Create(ModelStateDictionary modelState) => new ErrorEnvelop<string>(modelState.SelectMany(x => x.Value?.Errors.Select(y => y.ErrorMessage) ?? Enumerable.Empty<string>()));
     }
 }

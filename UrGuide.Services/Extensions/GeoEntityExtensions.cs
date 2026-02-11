@@ -29,7 +29,7 @@ namespace UrGuide.Services.Extensions
             }
         }
 
-        public static async Task<Point> GetLocationAsync(this IIPStackService iPStackService, IUserContext userContext)
+        public static async Task<Point?> GetLocationAsync(this IIPStackService iPStackService, IUserContext userContext)
         {
             if (userContext is null)
             {

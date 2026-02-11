@@ -1,5 +1,3 @@
-using Fido2NetLib;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -69,7 +67,7 @@ namespace UrGuide.WebApp.Controllers
         [ProducesResponseType(200, Type = typeof(PasskeyRegistrationCompleteResponse))]
         public async Task<IActionResult> CompleteRegistration([FromBody] PasskeyRegistrationCompleteRequest request)
         {
-            if (request?.AttestationResponse == null)
+            if (request is null || request.AttestationResponse == null)
             {
                 return BadRequest(ErrorEnvelop.Create("Invalid attestation response"));
             }
@@ -80,7 +78,7 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.Create("User not found"));
             }
             
-            var friendlyName = request?.FriendlyName ?? "Passkey";
+            var friendlyName = request.FriendlyName ?? "Passkey";
             var success = await _passkeyService.CompleteRegistrationAsync(user, request.AttestationResponse, friendlyName);
             
             if (!success)

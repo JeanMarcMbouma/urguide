@@ -1,4 +1,5 @@
-﻿using UrGuide.Data;
+﻿using System;
+using UrGuide.Data;
 using UrGuide.Data.Entities.Event;
 using UrGuide.Services.Auditing.Abstraction;
 
@@ -6,10 +7,9 @@ namespace UrGuide.Services.Auditing.Command
 {
     class PostCreatedCommand : BaseAuditCommand
     {
-        public PostCreatedCommand(string userId, string postId)
+        public PostCreatedCommand(string userId, string postId) : base(userId, referenceId: postId)
         {
-            UserId = userId ?? throw new System.ArgumentNullException(nameof(userId));
-            ReferenceId = postId ?? throw new System.ArgumentNullException(nameof(postId));
+            ArgumentException.ThrowIfNullOrEmpty(postId, nameof(postId));
         }
         public override EventCodes EventCode => EventCodes.CreatePost;
 

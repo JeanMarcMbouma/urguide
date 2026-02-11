@@ -55,7 +55,7 @@ namespace UrGuide.Services.Payments
                 throw new ArgumentException("User not found");
             }
 
-            string stripeCustomerId = null;
+            string? stripeCustomerId = null;
             if (string.IsNullOrEmpty(user.StripeCustomerId))
             {
                 var customerOptions = new CustomerCreateOptions

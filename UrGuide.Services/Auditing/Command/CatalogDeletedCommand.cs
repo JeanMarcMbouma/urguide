@@ -1,4 +1,5 @@
-﻿using UrGuide.Data;
+﻿using System;
+using UrGuide.Data;
 using UrGuide.Data.Entities.Event;
 using UrGuide.Services.Auditing.Abstraction;
 
@@ -6,10 +7,9 @@ namespace UrGuide.Services.Auditing.Command
 {
     class CatalogDeletedCommand : BaseAuditCommand
     {
-        public CatalogDeletedCommand(string userId, string catalogId)
+        public CatalogDeletedCommand(string userId, string catalogId) : base(userId, referenceId: catalogId)
         {
-            UserId = userId ?? throw new System.ArgumentNullException(nameof(userId));
-            ReferenceId = catalogId ?? throw new System.ArgumentNullException(nameof(catalogId));
+            ArgumentException.ThrowIfNullOrEmpty(catalogId, nameof(catalogId));
         }
         public override EventCodes EventCode => EventCodes.DeleteCatalog;
     }

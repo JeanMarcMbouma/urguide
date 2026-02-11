@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Collections.Generic;
-using System.Text;
 using UrGuide.Data.Entities.Tour;
 
 namespace UrGuide.Data.Configurations

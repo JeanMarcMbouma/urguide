@@ -15,9 +15,9 @@ namespace UrGuide.WebApp.Models
     /// </summary>
     public class Enable2FAResponse
     {
-        public string Secret { get; set; }
-        public string QRCodeBase64 { get; set; }
-        public string ManualEntryKey { get; set; }
+        public string Secret { get; set; } = string.Empty;
+        public string QRCodeBase64 { get; set; } = string.Empty;
+        public string ManualEntryKey { get; set; } = string.Empty;
     }
     
     /// <summary>
@@ -25,7 +25,7 @@ namespace UrGuide.WebApp.Models
     /// </summary>
     public class Verify2FASetupRequest
     {
-        public string Code { get; set; }
+        public string? Code { get; set; }
     }
     
     /// <summary>
@@ -34,7 +34,7 @@ namespace UrGuide.WebApp.Models
     public class Verify2FASetupResponse
     {
         public bool Success { get; set; }
-        public string[] BackupCodes { get; set; }
+        public string[] BackupCodes { get; set; } = Array.Empty<string>();
     }
     
     /// <summary>
@@ -42,7 +42,7 @@ namespace UrGuide.WebApp.Models
     /// </summary>
     public class Verify2FACodeRequest
     {
-        public string Code { get; set; }
+        public string? Code { get; set; }
         public bool IsBackupCode { get; set; }
     }
     
@@ -70,6 +70,6 @@ namespace UrGuide.WebApp.Models
     /// </summary>
     public class GenerateBackupCodesResponse
     {
-        public string[] BackupCodes { get; set; }
+        public string[] BackupCodes { get; set; } = Array.Empty<string>();
     }
 }

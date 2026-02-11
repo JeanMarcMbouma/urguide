@@ -167,7 +167,7 @@ try
                 var errors = new List<string>();
                 if(app.Environment.IsDevelopment())
                 {
-                    errors.AddRange(new[] { exceptionHandler.Error.Message, exceptionHandler.Error.StackTrace });
+                    errors.AddRange([exceptionHandler.Error.Message, exceptionHandler.Error.StackTrace ?? ""]);
                 } else
                 {
                     errors.Add("An unexpected error has occured.");

@@ -1,6 +1,4 @@
-﻿using UrGuide.Data.Entities.Shared;
-
-namespace UrGuide.Data.Entities.Tour
+﻿namespace UrGuide.Data.Entities.Tour
 {
     public class MapPin
     {

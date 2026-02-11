@@ -3,10 +3,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View;
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Model.Users;
@@ -36,7 +34,7 @@ namespace UrGuide.WebApp.Controllers
         public IIdentityServerInteractionService InteractionService { get; }
 
         [HttpGet("/login")]
-        public IActionResult Login(string returnUrl)
+        public IActionResult Login(string? returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
             return View();
@@ -44,7 +42,7 @@ namespace UrGuide.WebApp.Controllers
 
         [HttpPost("/login")]
         [RateLimit(5, "1m")] // Custom rate limit: 5 login attempts per minute
-        public async Task<IActionResult> Login([FromBody] LoginModel model, CancellationToken cancellationToken, string returnUrl = null)
+        public async Task<IActionResult> Login([FromBody] LoginModel model, CancellationToken cancellationToken, string? returnUrl = null)
         {
             var result = await UserService.LoginAsync(model, cancellationToken);
             if (result.HasError)
@@ -62,7 +60,7 @@ namespace UrGuide.WebApp.Controllers
             
             await HttpContext.SignInAsync(principal);
             var context = InteractionService.GetAuthorizationContextAsync(returnUrl);
-            if (context != null)
+            if (context != null && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
             }
@@ -72,7 +70,7 @@ namespace UrGuide.WebApp.Controllers
         [HttpPost("/register")]
         public async Task<IActionResult> Register([FromBody]CreateUserModel model,
             CancellationToken cancellationToken,
-            string returnUrl = null)
+            string? returnUrl = null)
         {
             var result = await UserService.RegisterUserAsync(model, cancellationToken);
             return !result.HasError ? Ok(returnUrl) : (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors));
@@ -81,7 +79,7 @@ namespace UrGuide.WebApp.Controllers
         [HttpPost("/newguide")]
         public async Task<IActionResult> NewGuide([FromBody]CreateGuideModel model,
             CancellationToken cancellationToken,
-            string returnUrl = null)
+            string? returnUrl = null)
         {
             var result = await UserService.RegisterGuideAsync(model, cancellationToken);
             return !result.HasError ? Ok(returnUrl) : (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors));
@@ -150,7 +148,7 @@ namespace UrGuide.WebApp.Controllers
 
         [Authorize]
         [HttpGet("logout")]
-        public async Task<IActionResult> Signout(string returnUrl = null)
+        public async Task<IActionResult> Signout(string? returnUrl = null)
         {
             await AuthService.SignOutAsync();
             await HttpContext.SignOutAsync();
@@ -161,22 +159,25 @@ namespace UrGuide.WebApp.Controllers
             else if (!string.IsNullOrEmpty(logoutId))
             {
                 var context = await InteractionService.GetLogoutContextAsync(logoutId);
-                returnUrl = context.PostLogoutRedirectUri;
-                return Redirect(returnUrl);
+                returnUrl = context?.PostLogoutRedirectUri;
+                if (!string.IsNullOrEmpty(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
             }
             return Ok();
         }
 
         [Authorize]
         [HttpGet("delete")]
-        public async Task<IActionResult> Delete(CancellationToken cancellationToken, string returnUrl = null)
+        public async Task<IActionResult> Delete(CancellationToken cancellationToken, string? returnUrl = null)
         {
             var r = await UserService.DeleteUserAccountAsync(cancellationToken);
             if (!r.HasError)
                 await HttpContext.SignOutAsync();
             else
                 return BadRequest(ErrorEnvelop.Create(r.Errors));
-            if (Url.IsLocalUrl(returnUrl))
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
             return Ok();
         }

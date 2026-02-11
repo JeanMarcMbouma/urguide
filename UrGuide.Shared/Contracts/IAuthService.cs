@@ -16,6 +16,6 @@ namespace UrGuide.Shared.Contracts
         Task<Result<bool>> ChangePasswordAsync(ChangePasswordModel model, CancellationToken cancellationToken);
         Task SignOutAsync();
         Task<Result<bool>> DeleteAccount();
-        Task DeleteAccountAsync(string userId);
+        ValueTask DeleteAccountAsync(string userId);
     }
 }

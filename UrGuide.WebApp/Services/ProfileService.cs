@@ -29,6 +29,11 @@ namespace UrGuide.WebApp.Services
         {
             var result = await UserService.GetUserAsync(context.Subject.GetSubjectId(), CancellationToken.None);
             var principal = await UserManager.FindByIdAsync(context.Subject.GetSubjectId());
+            if (result.HasError || result.Data == null || principal == null)
+            {
+                return;
+            }
+
             var claimPrincipal = await PrincipalFactory.CreateAsync(principal);
 
             context.IssuedClaims.AddRange(claimPrincipal.Claims);

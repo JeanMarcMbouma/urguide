@@ -12,10 +12,17 @@ namespace UrGuide.WebApp.Filters
             var result = await next();
             if (result.Exception == null || result.ExceptionHandled)
             {
-                DbContext dbContext = context.HttpContext.RequestServices.GetService<Data.UrGuideAuthContext>();
-                await dbContext.SaveChangesAsync();
-                dbContext = context.HttpContext.RequestServices.GetService<UrGuide.Data.UrGuideContext>();
-                await dbContext.SaveChangesAsync();
+                var authContext = context.HttpContext.RequestServices.GetService<Data.UrGuideAuthContext>();
+                if (authContext != null)
+                {
+                    await authContext.SaveChangesAsync();
+                }
+
+                var dataContext = context.HttpContext.RequestServices.GetService<UrGuide.Data.UrGuideContext>();
+                if (dataContext != null)
+                {
+                    await dataContext.SaveChangesAsync();
+                }
             }
         }
     }

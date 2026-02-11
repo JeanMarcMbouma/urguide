@@ -5,13 +5,8 @@ using UrGuide.Services.Auditing.Abstraction;
 
 namespace UrGuide.Services.Auditing.Command
 {
-    class UserLoggedInCommand : BaseAuditCommand
+    class UserLoggedInCommand(string userId) : BaseAuditCommand(userId)
     {
-        public UserLoggedInCommand(string userId)
-        {
-            UserId = userId ?? throw new ArgumentNullException(nameof(userId));
-        }
-
         public override EventCodes EventCode => EventCodes.Login;
     }
 

@@ -1,5 +1,4 @@
 using System;
-using UrGuide.Data.Entities.Users;
 
 namespace UrGuide.Data.Entities.Payments
 {

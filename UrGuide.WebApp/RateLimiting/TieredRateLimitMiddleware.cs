@@ -4,7 +4,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -48,7 +47,13 @@ namespace UrGuide.WebApp.RateLimiting
 
             // Check for exempt attribute on endpoint
             var endpoint = context.GetEndpoint();
-            if (endpoint?.Metadata?.GetMetadata<RateLimitExemptAttribute>() != null)
+            if (endpoint == null)
+            {
+                await _next(context);
+                return;
+            }
+
+            if (endpoint.Metadata?.GetMetadata<RateLimitExemptAttribute>() != null)
             {
                 _logger.LogDebug("Endpoint is exempt from rate limiting");
                 await _next(context);
@@ -94,7 +99,7 @@ namespace UrGuide.WebApp.RateLimiting
             {
                 entry.AbsoluteExpirationRelativeToNow = periodTimeSpan;
                 return new object();
-            });
+            })!;
 
             int currentCount;
             DateTimeOffset resetTime;
@@ -208,31 +213,32 @@ namespace UrGuide.WebApp.RateLimiting
             return RateLimitTier.Authenticated;
         }
 
-        private string GetUserId(HttpContext context)
+        private string? GetUserId(HttpContext context)
         {
             return context.User.Identity?.IsAuthenticated == true
                 ? context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                 : null;
         }
 
-        private string GetClientIpAddress(HttpContext context)
+        private string? GetClientIpAddress(HttpContext context)
         {
             // Rely on RemoteIpAddress, which will be populated correctly when
             // ForwardedHeadersMiddleware is configured in the application
             return context.Connection.RemoteIpAddress?.ToString();
         }
 
-        private bool IsExempt(string userId, string ipAddress)
+        private bool IsExempt(string? userId, string? ipAddress)
         {
             if (_options.Exemptions == null || !_options.Exemptions.Any())
             {
                 return false;
             }
 
-            return _options.Exemptions.Contains(userId) || _options.Exemptions.Contains(ipAddress);
+            return (!string.IsNullOrEmpty(userId) && _options.Exemptions.Contains(userId))
+                || (!string.IsNullOrEmpty(ipAddress) && _options.Exemptions.Contains(ipAddress));
         }
 
-        private RateLimitPolicy GetApplicablePolicy(Endpoint endpoint, string endpointKey, RateLimitTier tier)
+        private RateLimitPolicy? GetApplicablePolicy(Endpoint endpoint, string endpointKey, RateLimitTier tier)
         {
             // Check for custom attributes on endpoint (supports multiple with tier matching)
             var customAttributes = endpoint?.Metadata?.GetOrderedMetadata<RateLimitAttribute>();

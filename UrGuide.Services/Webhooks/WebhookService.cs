@@ -8,7 +8,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Http;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Webhooks;
 using UrGuide.Model.Results;

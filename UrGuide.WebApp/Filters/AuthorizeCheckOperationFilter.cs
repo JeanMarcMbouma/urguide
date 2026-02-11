@@ -3,7 +3,6 @@ using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Collections.Generic;
 using System.Linq;
-using static Duende.IdentityModel.OidcConstants;
 
 namespace UrGuide.WebApp.Filters
 {
@@ -12,15 +11,16 @@ namespace UrGuide.WebApp.Filters
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             // Check for authorize attribute
-            var hasAuthorize = (context.MethodInfo.DeclaringType.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any() ||
+            var declaringType = context.MethodInfo.DeclaringType;
+            var hasAuthorize = ((declaringType?.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any() ?? false) ||
                                context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any())
                                && !context.MethodInfo.GetCustomAttributes(true).OfType<AllowAnonymousAttribute>().Any();
 
             if (!hasAuthorize) return;
 
-            operation.Responses.TryAdd("401", new OpenApiResponse { Description = "Unauthorized" });
-            operation.Responses.TryAdd("403", new OpenApiResponse { Description = "Forbidden" });
-            
+            operation.Responses?.TryAdd("401", new OpenApiResponse { Description = "Unauthorized" });
+            operation.Responses?.TryAdd("403", new OpenApiResponse { Description = "Forbidden" });
+
             var oAuthScheme = new OpenApiSecuritySchemeReference("oauth2", context.Document);
 
             operation.Security = new List<OpenApiSecurityRequirement>

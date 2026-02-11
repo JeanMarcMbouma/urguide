@@ -6,7 +6,6 @@ using UrGuide.Core;
 using UrGuide.Model;
 using UrGuide.Model.Tour;
 using UrGuide.Services.Contracts;
-using UrGuide.WebApp.Extensions;
 using UrGuide.WebApp.Models;
 
 namespace UrGuide.WebApp.Controllers

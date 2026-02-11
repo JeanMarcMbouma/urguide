@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.SignalR;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.SignalR;
 
 namespace UrGuide.WebApp.Hubs
 {

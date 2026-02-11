@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using UrGuide.Data.Entities.Posts;
 using UrGuide.Data.Entities.Regions;
-using UrGuide.Data.Shared;
 
 namespace UrGuide.Data.Entities.Tour
 {

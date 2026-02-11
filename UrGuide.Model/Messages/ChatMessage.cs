@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace UrGuide.Model.Messages
+﻿namespace UrGuide.Model.Messages
 {
     public class ChatMessage
     {

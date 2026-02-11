@@ -3,13 +3,11 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Core;
 using UrGuide.Data;
-using UrGuide.Data.Entities.Users;
 using UrGuide.Model;
 using UrGuide.Model.Results;
 using UrGuide.Model.Users;
@@ -75,7 +73,7 @@ namespace UrGuide.Services.Users
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
-            var user = await Context.Users.FirstOrDefaultAsync(u =>  u.Id == UserContext.UserId, cancellationToken);
+            var user = await Context.Users.FirstOrDefaultAsync(u => u.Id == UserContext.UserId, cancellationToken);
             var notification = user?.Notifications.SingleOrDefault(n => n.Id == notificationId);
             if (notification == null)
                 return Result.Of(false).WithErrors(ErrorMessages.NotFoundEntityForKey);
@@ -86,9 +84,14 @@ namespace UrGuide.Services.Users
         public async Task NotifyAsync(CreateNotification createNotification)
         {
             var result = Validator.Validate(createNotification);
-            if(result.IsValid)
+            if (result.IsValid)
             {
                 var user = await Context.Users.FindAsync(new[] { createNotification.UserId });
+                if (user == null)
+                {
+                    Logger.LogWarning("Notification failed: User with id {UserId} not found", createNotification.UserId);
+                    return;
+                }
                 var sender = await Context.Users.FindAsync(new[] { createNotification.AuthorId });
                 var notification = new Data.Entities.Users.Notification
                 {
@@ -104,10 +107,10 @@ namespace UrGuide.Services.Users
                 _ = InstantMessaging.Send(user.Id, Mapper.Map<Model.Users.Notification>(notification)).ConfigureAwait(false);
                 return;
             }
-            Logger.LogWarning("Notification failed", string.Join(Environment.NewLine, result.Errors.Select(x => x.ErrorMessage)));
+            Logger.LogWarning("Notification failed: {Errors}", string.Join(Environment.NewLine, result.Errors.Select(x => x.ErrorMessage)));
         }
 
-        public Task SystemNotifyAsync(string userId, string content, string referenceLink)
+        public Task SystemNotifyAsync(string userId, string content, string? referenceLink)
         {
             return NotifyAsync(new CreateNotification
             {

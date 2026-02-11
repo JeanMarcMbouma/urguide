@@ -8,23 +8,23 @@ namespace UrGuide.WebApp.Entities
     public class PasskeyCredential
     {
         public string Id { get; set; } = Guid.NewGuid().ToString();
-        public string UserId { get; set; }
-        public UrGuideUser User { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        public UrGuideUser User { get; set; } = null!;
         
         /// <summary>
         /// The credential ID from the authenticator
         /// </summary>
-        public byte[] CredentialId { get; set; }
+        public byte[] CredentialId { get; set; } = Array.Empty<byte>();
         
         /// <summary>
         /// The public key from the authenticator
         /// </summary>
-        public byte[] PublicKey { get; set; }
+        public byte[] PublicKey { get; set; } = Array.Empty<byte>();
         
         /// <summary>
         /// The credential descriptor in JSON format
         /// </summary>
-        public string CredentialDescriptor { get; set; }
+        public string CredentialDescriptor { get; set; } = string.Empty;
         
         /// <summary>
         /// Counter value for replay protection
@@ -34,7 +34,7 @@ namespace UrGuide.WebApp.Entities
         /// <summary>
         /// Friendly name for the credential (e.g., "iPhone", "YubiKey")
         /// </summary>
-        public string FriendlyName { get; set; }
+        public string FriendlyName { get; set; } = string.Empty;
         
         /// <summary>
         /// When the credential was registered
@@ -49,6 +49,6 @@ namespace UrGuide.WebApp.Entities
         /// <summary>
         /// Authenticator Attestation GUID (AAGUID)
         /// </summary>
-        public byte[] AaGuid { get; set; }
+        public byte[] AaGuid { get; set; } = Array.Empty<byte>();
     }
 }

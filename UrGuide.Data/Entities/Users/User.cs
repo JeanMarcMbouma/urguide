@@ -1,7 +1,6 @@
 ﻿using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UrGuide.Core.Attributes;
 using UrGuide.Core.Contracts;
 using UrGuide.Data.Entities.Contracts;

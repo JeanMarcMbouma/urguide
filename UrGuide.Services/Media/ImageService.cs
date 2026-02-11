@@ -66,9 +66,13 @@ namespace UrGuide.Services.Media
 
         private void EnsureImagePathExists()
         {
-            if (!Directory.GetParent(WebHelper.ImageDirectoryPath).Exists)
+            if(string.IsNullOrWhiteSpace(WebHelper.ImageDirectoryPath))
             {
-                Directory.CreateDirectory(Directory.GetParent(WebHelper.ImageDirectoryPath).FullName);
+                throw new InvalidOperationException("Image directory path is not configured.");
+            }
+            if (Directory.GetParent(WebHelper.ImageDirectoryPath)?.Exists == true)
+            {
+                Directory.CreateDirectory(Directory.GetParent(WebHelper.ImageDirectoryPath)!.FullName);
             }
             if (!Directory.Exists(WebHelper.ImageDirectoryPath))
             {
@@ -81,7 +85,7 @@ namespace UrGuide.Services.Media
             }
         }
 
-        public string SaveAvatar(string userId, ImageFileModel imageFile = null)
+        public string SaveAvatar(string userId, ImageFileModel? imageFile = null)
         {
             ValidateImage(imageFile?.ImageBase64, out string base64String);
             var base64Image = Convert.FromBase64String(base64String);
@@ -95,7 +99,7 @@ namespace UrGuide.Services.Media
             return WebHelper.ResolveImageUrl(imageFileName);
         }
 
-        private static void ValidateImage(string imageBase64, out string image, string defaultImage = Constants.UnknownImage)
+        private static void ValidateImage(string? imageBase64, out string image, string defaultImage = Constants.UnknownImage)
         {
             var img = (imageBase64 ?? string.Empty).Split(',');
             image = defaultImage.Split(',')[1];

@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using UrGuide.Data.Entities.Event;
 using UrGuide.Model.Auditing;
 using UrGuide.Services.Helpers;

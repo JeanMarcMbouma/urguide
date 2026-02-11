@@ -29,7 +29,7 @@ namespace UrGuide.Services.Search
             long timeTakenMs,
             SearchFilters filters,
             string searchType,
-            string ipAddress,
+            string? ipAddress,
             string userAgent,
             CancellationToken cancellationToken = default)
         {

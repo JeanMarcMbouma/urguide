@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using UrGuide.Data.Entities.Posts;
-using UrGuide.Data.Entities.Tour;
 using UrGuide.Model.Search;
 
 namespace UrGuide.Services.Search
@@ -48,7 +47,7 @@ namespace UrGuide.Services.Search
 
             var totalReviews = tour.Reviews?.Count ?? 0;
             var averageRating = totalReviews > 0
-                ? tour.Reviews.Average(r => r.Rating)
+                ? tour.Reviews!.Average(r => r.Rating)
                 : 0;
 
             return new TourSearchDocument

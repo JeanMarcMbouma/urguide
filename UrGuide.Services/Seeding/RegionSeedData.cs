@@ -2,8 +2,8 @@ namespace UrGuide.Services.Seeding
 {
     public class RegionSeedData
     {
-        public string Name { get; set; }
-        public string CountryCode { get; set; }
-        public string CurrencyCode { get; set; }
+        public required string Name { get; set; }
+        public required string CountryCode { get; set; }
+        public required string CurrencyCode { get; set; }
     }
 }

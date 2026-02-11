@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Elasticsearch.Net;
+﻿using Elasticsearch.Net;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +10,6 @@ using UrGuide.Model;
 using UrGuide.Model.Shared;
 using UrGuide.Services.Auditing.Command;
 using UrGuide.Services.Catalogs;
-using UrGuide.Services.DataExport;
 using UrGuide.Services.Feedback;
 using UrGuide.Services.Lookup;
 using UrGuide.Services.Media;

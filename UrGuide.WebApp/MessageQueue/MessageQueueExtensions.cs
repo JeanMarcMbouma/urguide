@@ -3,7 +3,6 @@ using System.Linq;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using UrGuide.WebApp.MessageQueue.Consumers;
 using UrGuide.WebApp.MessageQueue.Services;

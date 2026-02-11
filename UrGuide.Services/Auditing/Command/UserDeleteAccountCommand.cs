@@ -5,13 +5,8 @@ using UrGuide.Services.Auditing.Abstraction;
 
 namespace UrGuide.Services.Auditing.Command
 {
-    class UserDeleteAccountCommand : BaseAuditCommand
+    class UserDeleteAccountCommand(string userId) : BaseAuditCommand(userId)
     {
-        public UserDeleteAccountCommand(string userId)
-        {
-            UserId = userId ?? throw new ArgumentNullException(nameof(userId));
-        }
-
         public override EventCodes EventCode => EventCodes.DeleteAccount;
     }
 

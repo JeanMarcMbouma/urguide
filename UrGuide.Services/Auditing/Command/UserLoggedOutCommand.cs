@@ -1,20 +1,12 @@
-﻿using MediatR;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Event;
 using UrGuide.Services.Auditing.Abstraction;
 
 namespace UrGuide.Services.Auditing.Command
 {
-    public class UserLoggedOutCommand : BaseAuditCommand
+    public class UserLoggedOutCommand(string userId) : BaseAuditCommand(userId)
     {
-        public UserLoggedOutCommand(string userId)
-        {
-            UserId = userId ?? throw new ArgumentNullException(nameof(userId));
-        }
-
         public override EventCodes EventCode => EventCodes.Logout;
     }
 
