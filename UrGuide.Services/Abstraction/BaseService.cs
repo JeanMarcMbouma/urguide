@@ -46,21 +46,22 @@ namespace UrGuide.Services.Abstraction
             if (item == null)
                 return Result.Of(false).WithErrors($"Entity with the given id  '{id}' doesn't exists");
 
-            var genericAttributes = item.Attributes;
+            // Optimize: Use dictionary for O(1) lookups instead of O(n) FirstOrDefault in loop
+            var attributeDict = item.Attributes.ToDictionary(a => a.Name, StringComparer.OrdinalIgnoreCase);
+            
             foreach (var attribute in attributes)
             {
-                var attr = genericAttributes.FirstOrDefault(a => a.Name.Equals(attribute.Name, System.StringComparison.OrdinalIgnoreCase));
-                if (attr == null)
+                if (attributeDict.TryGetValue(attribute.Name, out var existingAttr))
+                {
+                    existingAttr.Value = attribute.Value;
+                }
+                else
                 {
                     item.Attributes.Add(new GenericAttribute
                     {
                         Name = attribute.Name,
                         Value = attribute.Value
                     });
-                }
-                else
-                {
-                    attr.Value = attribute.Value;
                 }
             }
             if (item is ILastUpdatableEntity entity)
@@ -86,27 +87,28 @@ namespace UrGuide.Services.Abstraction
             if (item == null)
                 return Result.Of(false).WithErrors($"Entity with the given id  '{id}' doesn't exists");
 
-            var genericAttributes = item.Attributes;
+            // Optimize: Use dictionary for O(1) lookups instead of O(n) FirstOrDefault in loop
+            var attributeDict = item.Attributes.ToDictionary(a => a.Name, StringComparer.OrdinalIgnoreCase);
+            
             foreach (var attribute in attributes)
             {
-                var attr = genericAttributes.FirstOrDefault(a => a.Name.Equals(attribute.Name, System.StringComparison.OrdinalIgnoreCase));
-                if (attr == null)
+                if (attributeDict.TryGetValue(attribute.Name, out var existingAttr))
+                {
+                    if(string.IsNullOrEmpty(attribute.Value))
+                    {
+                        item.Attributes.Remove(existingAttr);
+                    } else
+                    {
+                        existingAttr.Value = attribute.Value;
+                    }
+                }
+                else
                 {
                     item.Attributes.Add(new GenericAttribute
                     {
                         Name = attribute.Name,
                         Value = attribute.Value
                     });
-                }
-                else
-                {
-                    if(string.IsNullOrEmpty(attribute.Value))
-                    {
-                        item.Attributes.Remove(attr);
-                    } else
-                    {
-                        attr.Value = attribute.Value;
-                    }
                 }
             }
 
