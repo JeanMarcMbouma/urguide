@@ -56,7 +56,16 @@ namespace UrGuide.Services.Abstraction
             {
                 if (attributeDict.TryGetValue(attribute.Name, out var existingAttr))
                 {
-                    existingAttr.Value = attribute.Value;
+                    if (string.IsNullOrEmpty(attribute.Value))
+                    {
+                        item.Attributes.Remove(existingAttr);
+                        // Keep dictionary in sync with collection
+                        attributeDict.Remove(attribute.Name);
+                    }
+                    else
+                    {
+                        existingAttr.Value = attribute.Value;
+                    }
                 }
                 else
                 {
