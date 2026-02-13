@@ -127,3 +127,4 @@ tempkey.jwk
 # Temporary files and logs
 **/temp/
 internal-nlog.txt
+UrGuide.WebApp/ctempinternal-nlog.txt
