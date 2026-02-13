@@ -8,6 +8,18 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
 
 **Make yourself a tourism guide at your ease and pace.**
 
+## 📚 Documentation
+
+Comprehensive documentation is available in the [`docs/`](docs/) directory:
+
+- **[Guides](docs/guides/)** - User and integration guides (2FA, Webhooks, etc.)
+- **[Implementation](docs/implementation/)** - Technical architecture and implementation details
+- **[CI/CD](docs/cicd/)** - Continuous integration and deployment documentation
+- **[Security](docs/security/)** - Security audits and best practices
+- **[Planning](docs/planning/)** - Feature requests and roadmap
+
+📖 [View complete documentation index →](docs/README.md)
+
 ## 🏗️ Technology Stack
 
 - **Backend**: ASP.NET Core 10.0 Web API (.NET 10 LTS)
@@ -221,7 +233,7 @@ UrGuide is a modern tourism API platform built with .NET 10 LTS. The API allows 
    dotnet user-secrets set "IdentityServer:Clients:Xamarin:ClientSecret" "your-secure-secret"
    ```
    
-   📖 **For detailed secrets management instructions, see [SECRETS_MANAGEMENT.md](SECRETS_MANAGEMENT.md)**
+   📖 **For detailed secrets management instructions, see the [Security & Secrets Management](#-security--secrets-management) section below.**
 
 4. **Update database connection strings**
    
@@ -623,8 +635,8 @@ The API provides a webhook system for external integrations, allowing third-part
 - Test endpoint for webhook validation
 
 **Documentation:**
-- [Webhook Integration Guide](WEBHOOK_INTEGRATION_GUIDE.md) - Complete API reference and security details
-- [Integration Examples](WEBHOOK_INTEGRATION_EXAMPLES.md) - Code examples for common integration scenarios
+- [Webhook Integration Guide](docs/guides/WEBHOOK_INTEGRATION_GUIDE.md) - Complete API reference and security details
+- [Integration Examples](docs/guides/WEBHOOK_INTEGRATION_EXAMPLES.md) - Code examples for common integration scenarios
 
 ### Analytics Dashboard (Admin Only)
 
@@ -689,7 +701,7 @@ The UrGuide API now supports Docker containerization for easy development and de
 1. **Configure environment variables**:
    ```bash
    cp .env.example .env
-   # Edit .env and set all required secrets (see SECRETS_MANAGEMENT.md)
+   # Edit .env and set all required secrets (see Security & Secrets Management section)
    ```
    
    **Required secrets** in `.env`:
@@ -724,7 +736,7 @@ The UrGuide API now supports Docker containerization for easy development and de
 - Copy `.env.example` to `.env` 
 - Change **ALL** secrets to strong, unique values
 - Never commit `.env` files to version control (already in .gitignore)
-- See [SECRETS_MANAGEMENT.md](SECRETS_MANAGEMENT.md) for detailed security guidance
+- See the [Security & Secrets Management](#-security--secrets-management) section for detailed security guidance
 
 ### Build Docker Image Manually
 
@@ -889,7 +901,7 @@ dotnet user-secrets set "IdentityServer:Clients:Xamarin:ClientSecret" "your-secr
 - Use default/example passwords in production
 - Reuse secrets across environments
 
-📖 **For complete documentation, see [SECRETS_MANAGEMENT.md](SECRETS_MANAGEMENT.md)**
+📖 **For complete security guidance, see the [Security Audit Report](docs/security/SECURITY_AUDIT_REPORT.md)**
 
 ## 🤝 Contributing
 
