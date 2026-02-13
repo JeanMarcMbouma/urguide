@@ -11,6 +11,27 @@ namespace UrGuide.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
+                name: "BookingId",
+                schema: "ug",
+                table: "payments",
+                type: "nvarchar(450)",
+                maxLength: 450,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(50)",
+                oldMaxLength: 50,
+                oldNullable: true);
+            migrationBuilder.AlterColumn<string>(
+                name: "CurrencyCode",
+                schema: "ug",
+                table: "payments",
+                type: "nvarchar(200)",
+                maxLength: 200,
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(3)",
+                oldMaxLength: 3);
+            migrationBuilder.AlterColumn<string>(
                 name: "UserId",
                 schema: "ug",
                 table: "User_Notifications",
@@ -156,6 +177,27 @@ namespace UrGuide.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterColumn<string>(
+                name: "BookingId",
+                schema: "ug",
+                table: "payments",
+                type: "nvarchar(50)",
+                maxLength: 50,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(450)",
+                oldMaxLength: 450,
+                oldNullable: true);
+            migrationBuilder.AlterColumn<string>(
+                name: "CurrencyCode",
+                schema: "ug",
+                table: "payments",
+                type: "nvarchar(3)",
+                maxLength: 3,
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(200)",
+                oldMaxLength: 200);
             migrationBuilder.AlterColumn<string>(
                 name: "UserId",
                 schema: "ug",

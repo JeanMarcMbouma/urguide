@@ -64,16 +64,16 @@ namespace UrGuide.Data.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("BookingId")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CurrencyCode")
                         .IsRequired()
-                        .HasMaxLength(3)
-                        .HasColumnType("nvarchar(3)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)

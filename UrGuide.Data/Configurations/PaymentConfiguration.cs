@@ -21,14 +21,14 @@ namespace UrGuide.Data.Configurations
                 .IsRequired();
 
             builder.Property(p => p.BookingId)
-                .HasMaxLength(50);
+                .HasMaxLength(450);
 
             builder.Property(p => p.Amount)
                 .HasPrecision(18, 2)
                 .IsRequired();
 
             builder.Property(p => p.CurrencyCode)
-                .HasMaxLength(3)
+                .HasMaxLength(Constants.TitleMaxLength)
                 .IsRequired();
 
             builder.Property(p => p.Status)
