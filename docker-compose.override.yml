@@ -18,3 +18,17 @@ services:
       - SENDGRID_URGUIDE_API_KEY=${SENDGRID_API_KEY}
       - IdentityServer__Clients__Xamarin__ClientSecret=${XAMARIN_CLIENT_SECRET}
     command: dotnet watch run --project /src/UrGuide.WebApp/UrGuide.WebApp.csproj
+
+  # Admin Dashboard development with hot reload
+  admin-dashboard:
+    build:
+      context: ./admin-dashboard
+      dockerfile: Dockerfile.dev
+      target: development
+    volumes:
+      - ./admin-dashboard:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    command: npm run dev -- --host

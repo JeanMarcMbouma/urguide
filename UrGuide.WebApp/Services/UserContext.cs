@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
+using System.Linq;
 using UrGuide.Shared.Contracts;
 using Microsoft.AspNetCore.Authentication;
 using System.Threading.Tasks;
@@ -71,6 +72,11 @@ namespace UrGuide.WebApp.Services
                 else if (!string.IsNullOrEmpty(result))
                     //remove port
                     result = result.Split(':').FirstOrDefault();
+
+                if (string.IsNullOrWhiteSpace(result))
+                {
+                    return IPAddress.Loopback;
+                }
 
                 return IPAddress.Parse(result);
             }

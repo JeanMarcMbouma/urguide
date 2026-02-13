@@ -120,9 +120,12 @@ namespace UrGuide.Services.Extensions
 
             services.AddMediatR(typeof(UserDeleteAccountCommand).Assembly);
 
+            var dataConnectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? configuration.GetConnectionString("Data");
+
             services.AddDbContext<Data.UrGuideContext>(options =>
                 options.UseSqlServer(
-                    configuration.GetConnectionString("Data"), options => options.UseNetTopologySuite())
+                    dataConnectionString, options => options.UseNetTopologySuite())
                 .UseLazyLoadingProxies());
 
             return services;

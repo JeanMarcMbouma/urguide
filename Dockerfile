@@ -36,9 +36,10 @@ RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 # Copy published application
 COPY --from=publish /app/publish .
 
-# Create directories for uploads and logs
+# Create directories and set permissions for non-root user
 RUN mkdir -p /app/wwwroot/uploads /app/logs && \
-    chmod -R 755 /app/wwwroot/uploads /app/logs
+  chown -R app:app /app && \
+  chmod -R 755 /app/wwwroot/uploads /app/logs
 
 # Set environment variables
 ENV ASPNETCORE_URLS=http://+:80 \

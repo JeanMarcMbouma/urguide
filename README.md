@@ -69,7 +69,28 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 - [x] **Passkey/WebAuthn Support**: Passwordless authentication using FIDO2 passkeys
 - [x] **Backup Codes**: Recovery codes for 2FA account access
 
-### 👥 Guide System API
+### �️ Admin Dashboard
+- [x] **Modern Admin Interface**: React 18 + TypeScript + Vite with Material-UI v6
+- [x] **Admin Authentication**: Secure login with 2FA integration and role-based access
+- [x] **User Management**: Complete CRUD operations for user accounts
+  - Paginated user list with advanced search and filtering
+  - User detail pages with profile information and statistics
+  - Account actions: Suspend, activate, and delete users
+  - Role assignment and management
+  - User activity audit trail with timestamps and IP tracking
+- [x] **Admin APIs**: RESTful endpoints with `[Authorize(Roles = "Admin")]` protection
+  - GET `/api/admin/users` - Paginated user list with search
+  - GET `/api/admin/users/{id}` - User details
+  - POST `/api/admin/users/{id}/suspend` - Suspend account
+  - POST `/api/admin/users/{id}/activate` - Activate account
+  - DELETE `/api/admin/users/{id}` - Delete user
+  - PUT `/api/admin/users/roles` - Update user roles
+  - GET `/api/admin/users/{id}/activity` - Activity log
+  - GET `/api/admin/roles` - List available roles
+- [x] **Real-time Updates**: TanStack Query for efficient server state management
+- [x] **Responsive Design**: Mobile-friendly with MUI's responsive components
+
+### �👥 Guide System API
 - [x] Guide registration with comprehensive questionnaire
 - [x] Guide profile management with detailed information:
   - Date of birth
@@ -694,72 +715,100 @@ For complete endpoint documentation, refer to the Swagger UI at `/swagger`.
 
 ## 🐳 Docker Support
 
-The UrGuide API now supports Docker containerization for easy development and deployment.
+The UrGuide platform supports full Docker containerization with orchestrated services.
 
 ### Quick Start with Docker Compose
 
-1. **Configure environment variables**:
-   ```bash
-   cp .env.example .env
-   # Edit .env and set all required secrets (see Security & Secrets Management section)
-   ```
-   
-   **Required secrets** in `.env`:
-   - `SQL_SA_PASSWORD` - Strong database password
-   - `IPSTACK_API_KEY` - IPStack API key (optional)
-   - `SENDGRID_API_KEY` - SendGrid API key (optional)
-   - `XAMARIN_CLIENT_SECRET` - Client secret for mobile app
-
-2. **Start all services** (API + SQL Server):
-   ```bash
-   docker-compose up -d
-   ```
-
-3. **Access the API**:
-   - API: http://localhost:5000
-   - Swagger UI: http://localhost:5000/swagger
-   - Health Check: http://localhost:5000/health
-
-4. **View logs**:
-   ```bash
-   docker-compose logs -f api
-   ```
-
-5. **Stop all services**:
-   ```bash
-   docker-compose down
-   ```
-
-### Security Note
-
-**IMPORTANT**: The `.env.example` file contains default/placeholder values for demonstration purposes. Always:
-- Copy `.env.example` to `.env` 
-- Change **ALL** secrets to strong, unique values
-- Never commit `.env` files to version control (already in .gitignore)
-- See the [Security & Secrets Management](#-security--secrets-management) section for detailed security guidance
-
-### Build Docker Image Manually
-
 ```bash
-docker build -t urguide-api:latest .
+# 1. Start all services (API + Admin Dashboard + Databases)
+docker-compose up -d
+
+# 2. Wait for health checks (30-60 seconds)
+docker-compose ps
+
+# 3. Access applications:
+# - API: http://localhost:5000
+# - Admin Dashboard: http://localhost:3001
+# - Swagger: http://localhost:5000/swagger
+# - RabbitMQ UI: http://localhost:15672
 ```
 
-### Run Docker Container
+**📖 See [DOCKER_QUICKSTART.md](DOCKER_QUICKSTART.md) for comprehensive Docker guide**
+
+### Services Included
+
+The `docker-compose.yml` orchestrates **5 containers**:
+- **SQL Server 2022** - Database with persistent volumes
+- **RabbitMQ 3** - Message broker with management UI
+- **Elasticsearch 8.11** - Advanced search engine
+- **UrGuide API** - .NET 10 backend application
+- **Admin Dashboard** - React 18 + Nginx frontend
+
+### Environment Configuration
+
+Create a `.env` file for secrets and configuration:
+```bash
+cp .env.example .env
+# Edit .env with your API keys and passwords
+```
+
+**Required secrets** in `.env`:
+- `SQL_SA_PASSWORD` - Strong database password
+- `RABBITMQ_USER` / `RABBITMQ_PASS` - Message broker credentials  
+- `IPSTACK_API_KEY` - IPStack API key (optional)
+- `SENDGRID_API_KEY` - SendGrid API key (optional)
+- `XAMARIN_CLIENT_SECRET` - Client secret for mobile app
+
+**IMPORTANT**: Never commit `.env` files to version control (already in .gitignore).
+See the [Security & Secrets Management](#-security--secrets-management) section for detailed guidance.
+
+### Development Mode with Hot Reload
 
 ```bash
-docker run -d \
-  -p 5000:80 \
-  -e ASPNETCORE_ENVIRONMENT=Production \
-  -e ConnectionStrings__DefaultConnection="your-connection-string" \
-  --name urguide-api \
-  urguide-api:latest
+# Start with development overrides (auto-reload on code changes)
+docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+### Build Images Manually
+
+```bash
+# Build all services
+docker-compose build
+
+# Build specific service
+docker-compose build admin-dashboard
+
+# Build without cache (clean build)
+docker-compose build --no-cache
+```
+
+### Individual Service Management
+
+```bash
+# Start only API + Databases
+docker-compose up -d sqlserver rabbitmq elasticsearch api
+
+# Start only Admin Dashboard (requires API)
+docker-compose up -d api admin-dashboard
+
+# Restart specific service
+docker-compose restart admin-dashboard
 ```
 
 ### Docker Compose Configuration
 
 The `docker-compose.yml` includes:
 - **SQL Server 2022**: Database server with persistent volumes
-- **UrGuide API**: The main application with health checks
+- **RabbitMQ 3**: Message broker with management UI
+- **Elasticsearch 8.11**: Advanced search engine
+- **UrGuide API**: The main .NET 10 application with health checks
+- **Admin Dashboard**: React 18 admin interface with Nginx
 - **Automatic migrations**: Database migrations run on startup
 - **Volume mounts**: Persistent storage for uploads and logs
 
@@ -776,6 +825,27 @@ This enables:
 - Source code mounted as volumes
 - Development environment settings
 
+### Admin Dashboard in Docker
+
+The admin dashboard runs as a separate container with Nginx:
+
+```bash
+# Start admin dashboard container
+docker-compose up -d admin-dashboard
+
+# Access at http://localhost:3001
+# API proxy configured internally
+```
+
+Features:
+- Multi-stage build (Node.js build → Nginx runtime)
+- Production-optimized React bundle
+- Automatic API proxy to backend
+- Health checks and auto-restart
+- ~25MB final image size
+
+See [admin-dashboard/DOCKER.md](admin-dashboard/DOCKER.md) for comprehensive Docker documentation.
+
 ## 🧪 Testing
 
 ### Manual Testing
@@ -790,7 +860,85 @@ Test projects will be automatically detected and run by the CI/CD pipeline. Add 
 
 _(Comprehensive API testing suite coming soon - see issues catalog)_
 
-## 🚀 Deployment
+## � Admin Dashboard Development
+
+The admin dashboard is a separate React 18 + TypeScript + Vite application located in the `admin-dashboard/` directory.
+
+### Prerequisites
+- Node.js 18+ and npm
+- UrGuide API running on `https://localhost:5001`
+
+### Setup and Run
+
+```bash
+# Navigate to admin dashboard
+cd admin-dashboard
+
+# Install dependencies (already done if you followed setup)
+npm install
+
+# Start development server
+npm run dev
+
+# Access dashboard at http://localhost:3001
+```
+
+### Available Commands
+
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Build production bundle (output to `dist/`)
+- `npm run preview` - Preview production build locally
+- `npm run lint` - Run ESLint for code quality
+
+### Features
+
+- **User Management**: Search, filter, suspend, activate, delete users
+- **Role Management**: Assign and update user roles (User, Guide, Admin)
+- **Activity Monitoring**: View user activity logs with timestamps and IP tracking
+- **Admin Authentication**: Secure login with 2FA integration
+- **Responsive Design**: Mobile-friendly Material-UI interface
+- **Real-time Updates**: TanStack Query for efficient data synchronization
+
+### Technology Stack
+
+- **React 18.3** - Modern React with hooks
+- **TypeScript 5.7** - Type-safe development
+- **Vite 6.0** - Fast build tool and dev server
+- **Material-UI v6** - Enterprise-ready component library
+- **MUI X Data Grid** - Advanced table with pagination, sorting, filtering
+- **TanStack Query v5** - Server state management
+- **React Router v6** - Client-side routing
+- **Axios** - HTTP client for API calls
+
+### API Integration
+
+The dashboard communicates with the backend admin API endpoints:
+
+```typescript
+// Example: Get users with search
+GET /api/admin/users?PageNumber=1&PageSize=20&Term=john
+
+// Example: Suspend user
+POST /api/admin/users/{userId}/suspend?durationDays=7
+
+// Example: Update roles
+PUT /api/admin/users/roles
+Body: { "userId": "...", "roles": ["User", "Guide"] }
+```
+
+See [Admin API Documentation](docs/implementation/ADMIN_API_DOCUMENTATION.md) for complete API reference.
+
+### Production Build
+
+```bash
+cd admin-dashboard
+npm run build
+
+# Output will be in admin-dashboard/dist/
+# Can be deployed to any static hosting or embedded in ASP.NET Core wwwroot
+```
+
+## �🚀 Deployment
 
 ### CI/CD Pipeline
 

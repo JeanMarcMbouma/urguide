@@ -4,6 +4,7 @@ using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -56,6 +57,7 @@ namespace UrGuide.WebApp.Extensions
             services.AddTransient<IIPStackService, IPStackService>();
             services.AddScoped<ITwoFactorService, TwoFactorService>();
             services.AddScoped<IPasskeyService, PasskeyService>();
+            services.AddScoped<UrGuide.Services.Contracts.IAdminService, AdminService>();
 
             // Configure Fido2 for Passkey/WebAuthn support
             string applicationUri = configuration.GetValue<string>("ApplicationUri") ?? "https://localhost:5001";
@@ -77,11 +79,14 @@ namespace UrGuide.WebApp.Extensions
                 .SetApplicationName("UrGuide")
                 .PersistKeysToFileSystem(new System.IO.DirectoryInfo(dataProtectionPath));
 
+            var authConnectionString = configuration.GetConnectionString("AuthConnection")
+                ?? configuration.GetConnectionString("Id4");
+
             services.AddDbContext<UrGuideAuthContext>(options =>
-                options.UseSqlServer(
-                    configuration.GetConnectionString("Id4")));
+                options.UseSqlServer(authConnectionString));
 
             services.AddDefaultIdentity<UrGuideUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<UrGuideAuthContext>();
 
             services.AddIdentityServer(options =>
