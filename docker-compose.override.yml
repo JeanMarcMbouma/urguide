@@ -26,6 +26,8 @@ services:
       context: ./admin-dashboard
       dockerfile: Dockerfile.dev
       target: development
+    ports:
+      - "3002:3001"
     volumes:
       - ./admin-dashboard:/app
       - /app/node_modules
@@ -33,3 +35,9 @@ services:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
     command: npm run dev -- --host
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
