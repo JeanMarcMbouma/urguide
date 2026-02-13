@@ -160,3 +160,10 @@ UrGuide.sln                 # Main solution file
 - **Create GitHub issues** for new feature requests with appropriate labels (enhancement, feature, nice-to-have)
 - **Document breaking changes** and migration steps when updating dependencies or frameworks
 - **Keep the technology stack section current** when adding new libraries or changing versions
+- **Organized documentation structure**: All documentation is in the `docs/` directory:
+  - `docs/guides/` - User and integration guides (2FA, Webhooks, etc.)
+  - `docs/implementation/` - Technical architecture and implementation details
+  - `docs/cicd/` - Continuous integration and deployment documentation
+  - `docs/security/` - Security audits and best practices
+  - `docs/planning/` - Feature requests and roadmap (ISSUES_CATALOG.md)
+- **Update docs/README.md** when adding new documentation files to maintain the index
