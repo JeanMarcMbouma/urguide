@@ -158,26 +158,87 @@ Implement 2FA for enhanced account security using TOTP (Time-based One-Time Pass
 
 ---
 
-### 5. Social Login Integration
-**Title:** Add OAuth social login providers  
+### 5. Social Login Integration - Google OAuth
+**Title:** Add Google OAuth login provider  
 **Labels:** enhancement, authentication, integration  
 **Description:**
-Enable users to sign in using Google, Apple, and Microsoft accounts.
+Enable users to sign in using Google accounts with automatic profile synchronization.
 
 **Requirements:**
-- Google OAuth integration
-- Apple Sign-In integration
-- Microsoft OAuth integration
-- Account linking (social + email)
-- Profile data synchronization
+- Google OAuth 2.0 integration
+- Automatic account creation/linking
+- Profile data sync (email, name, avatar)
+- Scopes configuration
 - Consent management
 
 **Acceptance Criteria:**
 - [ ] Users can sign in with Google
+- [ ] Accounts are auto-linked
+- [ ] Profile data synced correctly
+- [ ] Documentation updated
+
+---
+
+### 5b. Social Login Integration - Apple Sign-In
+**Title:** Add Apple Sign-In provider  
+**Labels:** enhancement, authentication, integration  
+**Description:**
+Enable users to sign in using Apple accounts with email privacy protection support.
+
+**Requirements:**
+- Apple Sign-In integration
+- Email privacy relay support
+- Automatic account creation/linking
+- Profile data sync
+- iOS/web compatibility
+
+**Acceptance Criteria:**
 - [ ] Users can sign in with Apple
+- [ ] Email privacy relay works
+- [ ] Accounts are auto-linked
+- [ ] Works on iOS and web
+- [ ] Documentation updated
+
+---
+
+### 5c. Social Login Integration - Microsoft OAuth
+**Title:** Add Microsoft OAuth login provider  
+**Labels:** enhancement, authentication, integration  
+**Description:**
+Enable users to sign in using Microsoft/Outlook accounts.
+
+**Requirements:**
+- Microsoft OAuth 2.0 integration
+- Azure AD compatibility
+- Automatic account creation/linking
+- Profile data sync
+- Work/personal account support
+
+**Acceptance Criteria:**
 - [ ] Users can sign in with Microsoft
-- [ ] Social accounts can be linked
-- [ ] Profile data is synchronized
+- [ ] Accounts are auto-linked
+- [ ] Both personal and work accounts supported
+- [ ] Documentation updated
+
+---
+
+### 5d. Social Account Linking
+**Title:** Implement account linking for social providers  
+**Labels:** enhancement, authentication  
+**Description:**
+Allow users to link and unlink social provider accounts to existing email accounts.
+
+**Requirements:**
+- Link social account to existing account
+- Unlink social accounts
+- Conflict resolution (email already registered)
+- Account merge functionality
+- Audit logging
+
+**Acceptance Criteria:**
+- [ ] Users can link/unlink providers
+- [ ] Conflicts handled gracefully
+- [ ] Audit trail maintained
 - [ ] Documentation updated
 
 ---
@@ -514,28 +575,70 @@ Integrate Elasticsearch for advanced search capabilities with fuzzy matching, fi
 
 ## 📱 Mobile & Integration
 
-### 13. Mobile App Push Notifications
-**Title:** Add push notification support for mobile apps  
+### 13. Mobile App Push Notifications - Android (FCM)
+**Title:** Add Firebase Cloud Messaging (FCM) for Android push notifications  
 **Labels:** enhancement, mobile, notifications  
 **Description:**
-Integrate Firebase Cloud Messaging (FCM) and Apple Push Notification Service (APNs) for mobile push notifications.
+Integrate Firebase Cloud Messaging for Android push notifications with device token management.
 
 **Requirements:**
 - FCM integration for Android
-- APNs integration for iOS
 - Device token registration API
 - Notification sending API
-- Notification templates
 - Delivery tracking
 - Opt-in/opt-out management
 
 **Acceptance Criteria:**
 - [ ] FCM is integrated
+- [ ] Device registration works
+- [ ] Notifications are delivered to Android
+- [ ] Users can opt-out
+- [ ] Delivery tracking works
+
+---
+
+### 13b. Mobile App Push Notifications - iOS (APNs)
+**Title:** Add Apple Push Notification Service (APNs) for iOS push notifications  
+**Labels:** enhancement, mobile, notifications  
+**Description:**
+Integrate Apple Push Notification Service for iOS push notifications with device token management.
+
+**Requirements:**
+- APNs integration for iOS
+- Device token registration API
+- Notification sending API
+- Delivery tracking
+- Opt-in/opt-out management
+- Certificate/key management
+
+**Acceptance Criteria:**
 - [ ] APNs is integrated
 - [ ] Device registration works
-- [ ] Notifications are delivered
-- [ ] Templates are configurable
+- [ ] Notifications are delivered to iOS
 - [ ] Users can opt-out
+- [ ] Delivery tracking works
+
+---
+
+### 13c. Push Notification Templates
+**Title:** Create reusable push notification templates  
+**Labels:** enhancement, mobile, notifications  
+**Description:**
+Implement notification template system for consistent messaging across FCM and APNs.
+
+**Requirements:**
+- Template creation and management
+- Variable substitution
+- Admin template editor
+- Template versioning
+- Multi-language support
+- A/B testing support
+
+**Acceptance Criteria:**
+- [ ] Templates can be created/edited
+- [ ] Variables work correctly
+- [ ] Multi-language templates
+- [ ] Templates versioned
 - [ ] Documentation updated
 
 ---
@@ -693,115 +796,299 @@ Build an analytics dashboard showing key metrics and trends.
 
 ## 🎨 Frontend & User Interface
 
-### 19. Admin Dashboard Web Application
-**Title:** Build comprehensive admin dashboard  
+### 19. Admin Dashboard - Authentication & User Management
+**Title:** Build admin authentication and user management interface  
 **Labels:** enhancement, frontend, admin, high-priority  
 **Description:**
-Create a modern web-based admin dashboard for platform management and monitoring.
+Implement admin authentication, authorization, and user management interface with search, filtering, and user actions.
 
-**Technology Choice:**
-- React 18+ with TypeScript (recommended) OR Vue 3 with TypeScript
-- UI Framework: Material-UI (MUI) for React OR Vuetify for Vue
-- State Management: Redux Toolkit (React) OR Pinia (Vue)
-- API Client: Auto-generated from OpenAPI spec
-- Charts: Recharts or Chart.js
+**Technology Stack:**
+- React 18+ with TypeScript OR Vue 3 with TypeScript
+- Material-UI (MUI) OR Vuetify
+- Redux Toolkit (React) OR Pinia (Vue)
 
-**Core Features:**
-- User management (view, edit, suspend, delete users)
-- Guide approval and verification workflow
-- Tour post moderation and management
-- Payment and transaction monitoring
-- Analytics dashboard integration
-- Webhook management interface
-- System health and monitoring
-- Audit log viewer
-- Content moderation tools
-- Platform configuration management
+**Features:**
+- Admin login and 2FA verification
+- User list with pagination and search
+- User detail pages (view profile, activity, history)
+- User actions (edit, suspend, activate, delete)
+- Role assignment
+- Bulk user actions
 
 **Acceptance Criteria:**
-- [ ] Admin authentication and authorization
-- [ ] User management interface
-- [ ] Guide verification workflow
-- [ ] Tour post moderation
-- [ ] Financial dashboard with charts
-- [ ] Real-time notifications via SignalR
-- [ ] Responsive design (mobile-friendly)
-- [ ] Role-based access control (Super Admin, Admin, Moderator)
-- [ ] Audit trail for all admin actions
+- [ ] Admin authentication works
+- [ ] User list displays correctly
+- [ ] Search and filtering work
+- [ ] User actions functional
+- [ ] Role-based visibility
 
 ---
 
-### 20. Public-Facing Website (Tourist Platform)
-**Title:** Build main tourist-facing web application  
+### 19b. Admin Dashboard - Guide Verification & Tour Moderation
+**Title:** Build guide verification workflow and tour post moderation interface  
+**Labels:** enhancement, frontend, admin  
+**Description:**
+Implement guide approval workflow and tour post moderation tools with approval queues.
+
+**Features:**
+- Pending guide approvals queue
+- Guide verification checklist
+- Document review (ID, certifications)
+- Tour post moderation queue
+- Content violation detection UI
+- Approval/rejection workflow
+- Messaging to guides/users
+
+**Acceptance Criteria:**
+- [ ] Pending guides displayed
+- [ ] Approval workflow works
+- [ ] Document review interface
+- [ ] Moderation queue functional
+- [ ] Messaging system works
+
+---
+
+### 19c. Admin Dashboard - Financial Monitoring & Analytics
+**Title:** Build financial dashboard and analytics integration  
+**Labels:** enhancement, frontend, admin  
+**Description:**
+Create comprehensive financial dashboard with analytics charts, transaction monitoring, and revenue metrics.
+
+**Features:**
+- Transaction list with filtering
+- Revenue metrics and charts
+- Platform fees breakdown
+- Payout history and requests
+- Refund tracking
+- Analytics dashboard integration
+- Export reports (PDF, CSV)
+
+**Acceptance Criteria:**
+- [ ] Transaction monitoring works
+- [ ] Charts display correctly
+- [ ] Filters functional
+- [ ] Report export works
+- [ ] Real-time updates
+
+---
+
+### 19d. Admin Dashboard - System Monitoring & Configuration
+**Title:** Build system health monitoring and platform configuration interface  
+**Labels:** enhancement, frontend, admin  
+**Description:**
+Implement system health dashboard, audit log viewer, and platform settings management.
+
+**Features:**
+- System health status
+- Service availability monitoring
+- Audit log viewer with filtering
+- Webhook management interface
+- Platform settings/configuration
+- Feature toggles
+- Log aggregation viewer
+
+**Acceptance Criteria:**
+- [ ] Health dashboard displays
+- [ ] Audit logs searchable
+- [ ] Settings editable
+- [ ] Webhook management works
+- [ ] Real-time health updates
+
+---
+
+### 20. Tourist Website - Discovery & Search
+**Title:** Build guide and tour discovery interface with search and filtering  
 **Labels:** enhancement, frontend, website, high-priority  
 **Description:**
-Create the main public website for tourists to discover guides, request tours, and manage bookings.
+Implement homepage, guide discovery, advanced search, and filtering interface for tourists.
 
-**Technology Choice:**
-- React 18+ with TypeScript (recommended) OR Vue 3 with TypeScript
-- UI Framework: Material-UI (MUI) or Tailwind CSS
-- Routing: React Router v6 OR Vue Router
-- State Management: Redux Toolkit OR Pinia
-- Map Integration: Google Maps or Mapbox
-- Real-time: SignalR client integration
+**Technology Stack:**
+- React 18+ with TypeScript OR Vue 3 with TypeScript
+- Material-UI (MUI) or Tailwind CSS
+- Elasticsearch integration (API-driven)
+- Map library: Google Maps or Mapbox
 
-**Core Features:**
-- Homepage with featured guides and destinations
-- Guide discovery and search (with Elasticsearch integration)
-- Advanced filtering (location, price, rating, availability)
-- Guide profile pages with reviews and galleries
-- Tour request creation and management
-- Bidding system interface
-- Booking management
-- User profile and settings
-- Payment interface (Stripe Elements)
-- Review and rating system
-- Real-time notifications
-- Multi-currency support
-- Responsive design (mobile-first)
+**Features:**
+- Featured guides and destinations homepage
+- Guide search with Elasticsearch integration
+- Advanced filtering (location, price, rating, languages, specialties)
+- Guide profile pages with galleries and reviews
+- Map view with location markers
+- Search history and saved guides
+- Multi-currency display
 
 **Acceptance Criteria:**
-- [ ] User registration and login (OAuth + 2FA)
-- [ ] Guide search and discovery
-- [ ] Tour request workflow
-- [ ] Bidding interface
-- [ ] Secure payment processing
-- [ ] Booking management
-- [ ] Review system
-- [ ] Real-time notifications
-- [ ] Mobile-responsive design
-- [ ] SEO optimization
-- [ ] Performance optimized (lazy loading, code splitting)
+- [ ] Homepage displays featured content
+- [ ] Search functionality works
+- [ ] Filters work correctly
+- [ ] Map view displays
+- [ ] Profile pages render
+- [ ] Mobile responsive
 
 ---
 
-### 21. Guide Portal Web Application
-**Title:** Build dedicated guide management portal  
-**Labels:** enhancement, frontend, guide-portal  
+### 20b. Tourist Website - Tour Booking & Bidding
+**Title:** Build tour request creation and bidding interface  
+**Labels:** enhancement, frontend, website  
 **Description:**
-Create a dedicated portal for guides to manage their profiles, respond to bids, and track earnings.
+Implement tour request workflow, bidding interface, and booking management for tourists.
 
-**Core Features:**
-- Guide registration and onboarding
-- Profile management with photo galleries
-- Tour request inbox
-- Bidding interface (create, edit, track bids)
-- Booking calendar and availability management
-- Earnings dashboard with payout requests
-- Review and rating management
-- Client communication interface
-- Tour history and statistics
-- Performance analytics
+**Features:**
+- Tour request creation form
+- Request status tracking
+- Bid list and comparison
+- Bid acceptance/rejection
+- Booking confirmation
+- Itinerary review
+- Calendar integration
 
 **Acceptance Criteria:**
-- [ ] Guide onboarding flow
-- [ ] Profile and gallery management
-- [ ] Bid management interface
-- [ ] Calendar integration
-- [ ] Financial dashboard
-- [ ] Real-time notifications
-- [ ] Mobile-responsive design
-- [ ] Performance metrics
+- [ ] Request creation works
+- [ ] Bids display correctly
+- [ ] Booking workflow functional
+- [ ] Calendar integration works
+
+---
+
+### 20c. Tourist Website - Payment & User Profile
+**Title:** Build payment interface and user profile management  
+**Labels:** enhancement, frontend, website  
+**Description:**
+Implement Stripe payment interface, user profile, settings, and account management.
+
+**Features:**
+- Stripe payment form integration
+- User profile page
+- Account settings
+- Notification preferences
+- Payment history
+- Address/preferences management
+- Account security (change password, 2FA)
+
+**Acceptance Criteria:**
+- [ ] Payment form works
+- [ ] Profile editable
+- [ ] Settings functional
+- [ ] 2FA setup accessible
+- [ ] Payment history displays
+
+---
+
+### 20d. Tourist Website - Reviews & Communication
+**Title:** Build review system and real-time notifications  
+**Labels:** enhancement, frontend, website  
+**Description:**
+Implement review/rating submission, notifications, and communication features.
+
+**Features:**
+- Review form with photos
+- Rating display and distribution
+- Notification center
+- Real-time notifications via SignalR
+- Review responses from guides
+- Notification preferences
+
+**Acceptance Criteria:**
+- [ ] Review submission works
+- [ ] Ratings display correctly
+- [ ] Notifications receive in real-time
+- [ ] Review responses functional
+
+---
+
+### 21. Guide Portal - Registration & Profile Management
+**Title:** Build guide registration, onboarding, and profile management  
+**Labels:** enhancement, frontend, guide-portal  
+**Description:**
+Implement guide registration flow, profile setup, photo gallery management, and verification process.
+
+**Features:**
+- Guide registration form
+- KYC/identity verification flow
+- Profile information management
+- Photo gallery management
+- Specialization and skill tags
+- Language proficiencies
+- Pricing setup
+- Insurance/credentials upload
+
+**Acceptance Criteria:**
+- [ ] Registration flow complete
+- [ ] KYC process functional
+- [ ] Profile editable
+- [ ] Gallery upload works
+- [ ] Tags/specializations editable
+
+---
+
+### 21b. Guide Portal - Tour Management & Bidding
+**Title:** Build tour request management and bidding interface  
+**Labels:** enhancement, frontend, guide-portal  
+**Description:**
+Implement tour request inbox, bid creation/management, and availability calendar.
+
+**Features:**
+- Tour request inbox
+- Request filtering and search
+- Bid creation form
+- Bid management (edit, withdraw)
+- Availability calendar
+- Block dates functionality
+- Recurring availability patterns
+- Booking calendar integration
+
+**Acceptance Criteria:**
+- [ ] Request inbox displays
+- [ ] Bid creation works
+- [ ] Calendar functional
+- [ ] Availability patterns work
+
+---
+
+### 21c. Guide Portal - Earnings & Payouts
+**Title:** Build earnings dashboard and payout management  
+**Labels:** enhancement, frontend, guide-portal  
+**Description:**
+Implement earnings tracking, financial dashboard, and payout request management.
+
+**Features:**
+- Earnings dashboard with charts
+- Monthly/yearly earnings breakdown
+- Transaction history
+- Refund tracking
+- Payout requests
+- Available balance display
+- Payment method management
+- Tax documents/1099 generation
+
+**Acceptance Criteria:**
+- [ ] Dashboard displays earnings
+- [ ] Charts render correctly
+- [ ] Payout requests functional
+- [ ] Transaction history accurate
+
+---
+
+### 21d. Guide Portal - Reviews & Communication
+**Title:** Build review management and client communication interface  
+**Labels:** enhancement, frontend, guide-portal  
+**Description:**
+Implement review display, responses, client messaging, and performance analytics.
+
+**Features:**
+- Reviews and ratings display
+- Review response capability
+- Client messaging interface
+- Tour history and statistics
+- Performance metrics and trends
+- Client feedback analytics
+- Response time tracking
+
+**Acceptance Criteria:**
+- [ ] Reviews display correctly
+- [ ] Response system works
+- [ ] Messaging functional
+- [ ] Analytics display correctly
 
 ---
 
@@ -1196,63 +1483,67 @@ Implement multi-language support for API responses and error messages.
 
 ## Summary
 
-**Total Issues: 38**
+**Total Issues: 47** (increased from 38 due to complex issue breakdown)
 
 **By Status:**
 - ✅ Completed: 10 (Docker Containerization, CI/CD Pipeline, Payment Integration, Two-Factor Authentication, GDPR Data Export, Message Queue Integration, Advanced Search & Filtering, Webhook System, Analytics Dashboard, API Rate Limiting Improvements)
 - 🚧 In Progress: 0
-- 📋 Pending: 28
+- 📋 Pending: 37
 
 **By Priority:**
-- High Priority: 4 (Payment Integration ✅, 2FA ✅, Admin Dashboard 📋, Backup & DR 📋)
-- Medium Priority: 18
-- Nice to Have: 17
+- High Priority: 6 (Payment Integration ✅, 2FA ✅, Admin Dashboard (19-19d) 📋, Tourist Website (20-20d) 📋, Backup & DR 📋)
+- Medium Priority: 25
+- Nice to Have: 16
 - ✅ Completed: 10
 
 **By Category:**
-- **Frontend & UI**: 4 new issues (#19-22: Admin Dashboard, Tourist Website, Guide Portal, PWA Features)
+- **Frontend & UI**: 13 issues (Admin Dashboard 19-19d, Tourist Website 20-20d, Guide Portal 21-21d, PWA Features 22)
 - **Testing & Quality**: 4 issues (#8, #18, #36-37: Unit, Integration, E2E, Performance Tests)
-- **Security & Authentication**: 2 (1 completed: 2FA ✅, 1 pending: Social Login)
+- **Security & Authentication**: 5 (1 completed: 2FA ✅, 4 pending: Google OAuth 5, Apple OAuth 5b, Microsoft OAuth 5c, Account Linking 5d)
 - **Monitoring & Observability**: 2 (0 completed, 2 pending)
-- **Features & Enhancements**: 5 (3 completed: GDPR Data Export ✅, Advanced Search ✅, API Rate Limiting ✅, 2 pending)
-- **Mobile & Integration**: 2 (1 completed: Webhook System ✅, 1 pending: Push Notifications)
+- **Features & Enhancements**: 5 (3 completed, 2 pending)
+- **Mobile & Integration**: 5 (1 completed: Webhook System ✅, 4 pending: FCM 13, APNs 13b, Notification Templates 13c, expanded from 13)
 - **Infrastructure**: 4 (1 completed: Message Queue ✅, 3 pending: Redis Caching, CDN, Backup & DR)
 - **Analytics & Reporting**: 2 (1 completed: Analytics Dashboard ✅, 1 pending: Advanced Reporting)
-- **Communication**: 2 new issues (#24, #31: Real-time Chat, Email Templates)
-- **Content Management**: 2 new issues (#25, #27: Review Moderation, Tour Templates)
-- **Platform Growth**: 1 new issue (#28: Referral System)
-- **Media Management**: 1 new issue (#29: Advanced Image Management)
-- **Support & Dispute**: 1 new issue (#30: Dispute Resolution)
-- **AI & Recommendations**: 1 new issue (#32: Tour Recommendation Engine)
-- **Scheduling**: 1 new issue (#26: Booking Calendar)
-- **Documentation**: 1 new issue (#35: API Documentation Portal)
+- **Communication**: 2 (Real-time Chat 24, Email Templates 31)
+- **Content Management**: 2 (Review Moderation 25, Tour Templates 27)
+- **Platform Growth**: 1 (Referral System 28)
+- **Media Management**: 1 (Advanced Image Management 29)
+- **Support & Dispute**: 1 (Dispute Resolution 30)
+- **AI & Recommendations**: 1 (Tour Recommendation Engine 32)
+- **Scheduling**: 1 (Booking Calendar 26)
+- **Documentation**: 1 (API Documentation Portal 35)
 - **Localization**: 1 (#38: Multi-language Support - pending)
 - **DevOps**: 2 (✅ Both completed)
 - **Financial**: 1 (✅ Payment Integration completed)
 - **Compliance**: 1 (✅ GDPR Data Export completed)
-- **Search & Performance**: 2 (1 completed: Advanced Search ✅, 1 pending: CDN)
+
+**Complex Issues Breakdown:**
+- **Issue #5 (Social Login)** split into 4 issues: Google OAuth (5), Apple OAuth (5b), Microsoft OAuth (5c), Account Linking (5d)
+- **Issue #13 (Push Notifications)** split into 3 issues: Android/FCM (13), iOS/APNs (13b), Templates (13c)
+- **Issue #19 (Admin Dashboard)** split into 4 issues: Authentication & Users (19), Guide Verification (19b), Financial Monitoring (19c), System Monitoring (19d)
+- **Issue #20 (Tourist Website)** split into 4 issues: Discovery & Search (20), Booking & Bidding (20b), Payment & Profile (20c), Reviews & Communication (20d)
+- **Issue #21 (Guide Portal)** split into 4 issues: Registration & Profile (21), Tour & Bidding (21b), Earnings (21c), Reviews & Communication (21d)
 
 **Priority Recommendations:**
-1. **Admin Dashboard** (#19) - Critical for platform management
-2. **Tourist Website** (#20) - Core user-facing application
-3. **Unit Testing Suite** (#8) - Essential for code quality
-4. **Integration Testing** (#18) - Ensure API reliability
-5. **Backup & DR** (#34) - Protect platform data
-6. **Guide Portal** (#21) - Enable guide onboarding
+1. **Admin Dashboard** (#19-19d) - Critical for platform management (4 focused issues)
+2. **Tourist Website** (#20-20d) - Core user-facing application (4 focused issues)
+3. **Guide Portal** (#21-21d) - Enable guide onboarding (4 focused issues)
+4. **Unit Testing Suite** (#8) - Essential for code quality
+5. **Integration Testing** (#18) - Ensure API reliability
+6. **Backup & DR** (#34) - Protect platform data
 7. **Real-time Chat** (#24) - Improve user communication
 8. **Calendar System** (#26) - Essential booking feature
 
-**Issue Numbering History:**
-- **Original catalog**: Issues #1-18
-- **Testing suite split**: Original #8 "API Testing Suite" was split into four focused issues:
-  - #8: Unit Testing Suite (refinement of original #8)
-  - #18: Integration Testing Suite (new)
-  - #36: E2E Testing Suite (new)
-  - #37: Performance and Load Testing (new)
-- **Renumbering**: Original #18 "Multi-language Support" renumbered to #38 to maintain sequential order
-- **New additions**: 
-  - Frontend issues: #19-22
-  - Infrastructure: #23 (CDN)
-  - Platform enhancements: #24-35
+**Issue Numbering:**
+- **Original**: Issues #1-18
+- **Testing suite split**: Original #8 split into #8 (Unit), #18 (Integration), #36 (E2E), #37 (Performance)
+- **New complex breakdowns**:
+  - Social Login: #5, #5b, #5c, #5d
+  - Push Notifications: #13, #13b, #13c
+  - Admin Dashboard: #19, #19b, #19c, #19d
+  - Tourist Website: #20, #20b, #20c, #20d
+  - Guide Portal: #21, #21b, #21c, #21d
+- **Existing issues**: #22-35, #38 (no changes to numbering)
 
-These issues provide a comprehensive roadmap for building a complete tourism platform with robust backend API, user-facing applications, and essential supporting features.
+These refined issues provide a more manageable roadmap with focused, achievable deliverables for building the complete tourism platform.
