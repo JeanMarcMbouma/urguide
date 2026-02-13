@@ -13,8 +13,8 @@ using UrGuide.Data;
 namespace UrGuide.Data.Migrations
 {
     [DbContext(typeof(UrGuideContext))]
-    [Migration("20260213183354_FixUserIdLength")]
-    partial class FixUserIdLength
+    [Migration("20260213184554_AlignUserIdLengths")]
+    partial class AlignUserIdLengths
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -537,7 +537,7 @@ namespace UrGuide.Data.Migrations
                         .HasColumnName("Title");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id")
                         .HasName("PK_Posts");
@@ -765,7 +765,7 @@ namespace UrGuide.Data.Migrations
                         .HasColumnType("geography");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id")
                         .HasName("PK_Image_Catalogs");
@@ -787,7 +787,7 @@ namespace UrGuide.Data.Migrations
 
                     b.Property<string>("AuthorId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -1042,7 +1042,7 @@ namespace UrGuide.Data.Migrations
 
                     b.Property<string>("RequesterId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -1156,8 +1156,8 @@ namespace UrGuide.Data.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -1177,8 +1177,7 @@ namespace UrGuide.Data.Migrations
             modelBuilder.Entity("UrGuide.Data.Entities.Users.User", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("UserId");
 
                     b.Property<DateTime>("CreatedAt")
@@ -1461,7 +1460,7 @@ namespace UrGuide.Data.Migrations
                                 .HasDefaultValueSql("NEWID()");
 
                             b1.Property<string>("FK_Post_Bids_Users")
-                                .HasColumnType("nvarchar(128)");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.Property<DateTime>("LastUpdated")
                                 .HasColumnType("datetime2");
@@ -1510,7 +1509,7 @@ namespace UrGuide.Data.Migrations
                                 .HasColumnType("datetime2");
 
                             b1.Property<string>("FK_Post_Bids_History_Users")
-                                .HasColumnType("nvarchar(128)");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.Property<string>("PostId")
                                 .IsRequired()
@@ -1585,7 +1584,7 @@ namespace UrGuide.Data.Migrations
                                 .HasColumnType("datetime2");
 
                             b1.Property<string>("FK_Post_Feedback_Users")
-                                .HasColumnType("nvarchar(128)");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.Property<DateTime>("LastUpdated")
                                 .HasColumnType("datetime2");
@@ -1637,7 +1636,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("UserId")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(128)");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.HasKey("Id");
 
@@ -1673,7 +1672,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("UserId")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(128)");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.HasKey("Id");
 
@@ -2302,7 +2301,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("UserId")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(128)");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.HasKey("Id")
                                 .HasName("PK_User_Images");
@@ -2332,7 +2331,7 @@ namespace UrGuide.Data.Migrations
                                 .HasColumnType("datetime2");
 
                             b1.Property<string>("FK_User_Notification_Users")
-                                .HasColumnType("nvarchar(128)");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.Property<bool>("IsSystem")
                                 .HasColumnType("bit");
@@ -2346,7 +2345,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("UserId")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(128)");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.HasKey("Id");
 
@@ -2381,7 +2380,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("UserId")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(128)");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
@@ -2411,7 +2410,7 @@ namespace UrGuide.Data.Migrations
                                 .HasColumnType("datetime2");
 
                             b1.Property<string>("FK_User_Feedback_Users")
-                                .HasColumnType("nvarchar(128)");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.Property<DateTime>("LastUpdated")
                                 .HasColumnType("datetime2");
@@ -2426,7 +2425,7 @@ namespace UrGuide.Data.Migrations
 
                             b1.Property<string>("UserId")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(128)");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.HasKey("Id")
                                 .HasName("PK_User_Feedback");

@@ -12,7 +12,7 @@ namespace UrGuide.Data.Configurations
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id).HasMaxLength(128);
             
-            builder.Property(x => x.UserId).HasMaxLength(128).IsRequired();
+            builder.Property(x => x.UserId).HasMaxLength(450).IsRequired();
             builder.Property(x => x.Status).IsRequired();
             builder.Property(x => x.Format).IsRequired();
             builder.Property(x => x.RequestedAt).IsRequired();

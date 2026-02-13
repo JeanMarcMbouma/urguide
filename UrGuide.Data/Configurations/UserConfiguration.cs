@@ -13,7 +13,6 @@ namespace UrGuide.Data.Configurations
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id)
                 .HasColumnName("UserId")
-                .HasMaxLength(128)
                 .IsRequired();
             builder.Property(x => x.CreatedAt).IsRequired().HasDefaultValueSql("GETUTCDATE()");
             builder.Property(x => x.LastActivityDate);
