@@ -128,3 +128,4 @@ tempkey.jwk
 **/temp/
 internal-nlog.txt
 UrGuide.WebApp/ctempinternal-nlog.txt
+**/UrGuide.WebApp/images/*.*

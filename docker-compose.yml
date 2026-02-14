@@ -76,8 +76,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
+      - ApplicationUri=${APPLICATION_URI:-http://localhost:5000}
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=urguide_data;User Id=sa;Password=${SQL_SA_PASSWORD:-YourStrong@Passw0rd};TrustServerCertificate=True;MultipleActiveResultSets=true
       - ConnectionStrings__AuthConnection=Server=sqlserver;Database=urguide_id4;User Id=sa;Password=${SQL_SA_PASSWORD:-YourStrong@Passw0rd};TrustServerCertificate=True;MultipleActiveResultSets=true
+      - IdentityServer__Clients__AdminDashboard__ClientSecret=${ADMIN_DASHBOARD_CLIENT_SECRET}
       - RabbitMQ__Host=rabbitmq
       - RabbitMQ__Username=${RABBITMQ_USER:-guest}
       - RabbitMQ__Password=${RABBITMQ_PASS:-guest}

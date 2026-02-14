@@ -178,8 +178,11 @@ docker exec urguide-admin-dashboard cat /var/log/nginx/error.log
 ### Build-time Variables (Optional)
 Add to `admin-dashboard/.env`:
 ```bash
-# API URL (already proxied via nginx)
-VITE_API_URL=/api
+# Vite dev proxy target (Docker dev)
+VITE_API_TARGET=http://api:80
+
+# Local dev outside Docker
+VITE_API_TARGET=http://localhost:5000
 
 # Other config...
 ```

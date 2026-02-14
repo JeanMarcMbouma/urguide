@@ -1,9 +1,14 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UrGuide.Core.Attributes;
+using UrGuide.Data;
+using UrGuide.Data.Entities.Users;
 using UrGuide.WebApp.Entities;
 
 namespace UrGuide.WebApp.Services
@@ -20,17 +25,20 @@ namespace UrGuide.WebApp.Services
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AdminSeedingService> _logger;
+        private readonly UrGuideContext _dataContext;
 
         public AdminSeedingService(
             UserManager<UrGuideUser> userManager,
             RoleManager<IdentityRole> roleManager,
             IConfiguration configuration,
-            ILogger<AdminSeedingService> logger)
+            ILogger<AdminSeedingService> logger,
+            UrGuideContext dataContext)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
             _logger = logger;
+            _dataContext = dataContext;
         }
 
         public async Task SeedDefaultAdminAsync()
@@ -84,6 +92,12 @@ namespace UrGuide.WebApp.Services
                             _logger.LogInformation("Added Admin role to existing user {Email}", email);
                         }
                     }
+                    await EnsureDataUserAsync(
+                        existingUser.Id,
+                        existingUser.UserName ?? string.Empty,
+                        existingUser.Email ?? string.Empty,
+                        existingUser.FirstName ?? string.Empty,
+                        existingUser.LastName ?? string.Empty);
                     return;
                 }
 
@@ -116,6 +130,8 @@ namespace UrGuide.WebApp.Services
                     return;
                 }
 
+                await EnsureDataUserAsync(adminUser.Id, adminUser.UserName, adminUser.Email, adminUser.FirstName, adminUser.LastName);
+
                 _logger.LogInformation("Successfully created admin user: {Email}", email);
             }
             catch (Exception ex)
@@ -123,6 +139,43 @@ namespace UrGuide.WebApp.Services
                 _logger.LogError(ex, "Error occurred while seeding admin user");
                 throw;
             }
+        }
+
+        private async Task EnsureDataUserAsync(string userId, string userName, string email, string firstName, string lastName)
+        {
+            var exists = await _dataContext.Users.AnyAsync(u => u.Id == userId);
+            if (exists)
+            {
+                return;
+            }
+
+            var dataUser = new User
+            {
+                Id = userId,
+                Email = email ?? string.Empty,
+                UserName = userName ?? string.Empty,
+                FirstName = string.IsNullOrWhiteSpace(firstName) ? "Admin" : firstName,
+                LastName = string.IsNullOrWhiteSpace(lastName) ? "User" : lastName,
+                CreatedAt = DateTime.UtcNow,
+                LastActivityDate = DateTime.UtcNow,
+                ProfileImage = new Image { ImageUrl = "default.png" }
+            };
+
+            dataUser.Attributes.Add(new GenericAttribute
+            {
+                Name = nameof(AttributeTypes.UserName),
+                Value = userName ?? string.Empty
+            });
+
+            dataUser.Attributes.Add(new GenericAttribute
+            {
+                Name = nameof(AttributeTypes.Gender),
+                Value = "Unknown"
+            });
+
+            _dataContext.Users.Add(dataUser);
+            await _dataContext.SaveChangesAsync();
+            _logger.LogInformation("Linked admin user created in data context: {UserId}", userId);
         }
     }
 }

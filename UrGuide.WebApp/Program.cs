@@ -44,6 +44,9 @@ try
     builder.Services.AddUrGuideAuthServices(builder.Configuration);
     builder.Services.AddUrGuideServices(builder.Configuration);
 
+    // Add HttpClient for calling IdentityServer token endpoint
+    builder.Services.AddHttpClient();
+
     // Configure rate limiting
     builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
     builder.Services.Configure<IpRateLimitPolicies>(builder.Configuration.GetSection("IpRateLimitPolicies"));

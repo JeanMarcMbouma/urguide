@@ -84,10 +84,34 @@ See [DOCKER.md](DOCKER.md) for comprehensive Docker documentation.
 
 The dashboard integrates with UrGuide's existing authentication system:
 
-1. **Admin Login** - OAuth 2.0/OpenID Connect with Duende IdentityServer
-2. **JWT Bearer Tokens** - Stored in localStorage/sessionStorage
-3. **2FA Verification** - TOTP integration with existing 2FA system
+1. **Admin Login** - Uses `/api/auth/login` endpoint with email/username and password
+2. **JWT Bearer Tokens** - Generated server-side and stored in localStorage
+   - Custom symmetric key-based JWT tokens for admin API authentication
+   - Fallback to development key if `Jwt:Key` not configured (secure random key required for production)
+   - Configurable expiration time via `Jwt:ExpiresInHours` (default: 8 hours)
+3. **2FA Verification** - TOTP integration with existing 2FA system (if enabled on admin account)
 4. **Role-based Access** - Requires `Admin` role claim in JWT token
+5. **Token Refresh** - Tokens expire after configured time; users must re-authenticate
+
+### JWT Configuration (Backend)
+
+Configure JWT settings in `appsettings.json` or via environment variables:
+
+```json
+{
+  "Jwt": {
+    "Key": "your-secure-random-jwt-key-minimum-32-characters",
+    "ExpiresInHours": 8
+  }
+}
+```
+
+**Environment Variables** (for Docker):
+- `JWT__KEY` - Secure random key for JWT token generation (use `openssl rand -base64 32` to generate)
+- `JWT__EXPIRESINHOUHS` - Token expiration in hours
+- `ADMIN_DASHBOARD_CLIENT_SECRET` - IdentityServer client secret (use `openssl rand -base64 32` to generate)
+
+**SECURITY**: Never commit JWT keys or client secrets to source control! Use Azure Key Vault (production) or User Secrets (development).
 
 ## 📡 API Integration
 

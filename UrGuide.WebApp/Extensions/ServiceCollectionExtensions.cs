@@ -1,6 +1,7 @@
 ﻿using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
+using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
@@ -59,6 +60,7 @@ namespace UrGuide.WebApp.Extensions
             services.AddScoped<IPasskeyService, PasskeyService>();
             services.AddScoped<UrGuide.Services.Contracts.IAdminService, AdminService>();
             services.AddScoped<IAdminSeedingService, AdminSeedingService>();
+            services.AddScoped<IJwtTokenService, JwtTokenService>();
 
             // Configure Fido2 for Passkey/WebAuthn support
             string applicationUri = configuration.GetValue<string>("ApplicationUri") ?? "https://localhost:5001";
@@ -104,14 +106,28 @@ namespace UrGuide.WebApp.Extensions
             services.AddScoped<IProfileService, ProfileService>();
             services.AddScoped<IInstantMessagingService, InstantMessagingService>();
 
+            // Configure JWT authentication to support both IdentityServer tokens and custom JWT tokens
+            var jwtKey = configuration.GetValue<string>("Jwt:Key");
+            if (string.IsNullOrEmpty(jwtKey))
+            {
+                jwtKey = $"UrGuide_JWT_Secret_Key_{applicationUri}_Development_Only";
+            }
+
             services.AddAuthentication()
                 .AddJwtBearer("Bearer", options =>
                 {
                     options.Authority = applicationUri;
                     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                     {
-                        ValidateAudience = false
+                        ValidateAudience = false,
+                        ValidateIssuer = false // Allow both IdentityServer and custom JWT tokens
                     };
+                    
+                    // Also validate custom JWT tokens with symmetric key
+                    options.TokenValidationParameters.ValidateIssuerSigningKey = true;
+                    options.TokenValidationParameters.IssuerSigningKey = 
+                        new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                            System.Text.Encoding.UTF8.GetBytes(jwtKey));
                 });
 
             services.AddSignalR();
@@ -135,6 +151,9 @@ namespace UrGuide.WebApp.Extensions
             return new ApiScope[]
             {
                 new ApiScope("api1", "UrGuide API")
+                {
+                    UserClaims = { JwtClaimTypes.Role, JwtClaimTypes.Name, JwtClaimTypes.Email }
+                }
             };
         }
 
@@ -169,6 +188,31 @@ namespace UrGuide.WebApp.Extensions
                         IdentityServerConstants.StandardScopes.Profile,
                         "api1"
                     }
+                },
+                new Client
+                {
+                    ClientId = configuration.GetValue<string>("IdentityServer:Clients:AdminDashboard:ClientId") ?? "admin-dashboard",
+                    ClientName = "UrGuide Admin Dashboard",
+                    AllowedGrantTypes = Duende.IdentityServer.Models.GrantTypes.ResourceOwnerPassword,
+                    ClientSecrets =
+                    {
+                        new Duende.IdentityServer.Models.Secret(
+                            (configuration.GetValue<string>("IdentityServer:Clients:AdminDashboard:ClientSecret") 
+                            ?? throw new InvalidOperationException("Admin dashboard client secret must be configured")).Sha256())
+                    },
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
+                        "api1"
+                    },
+                    AllowOfflineAccess = true, // Enable refresh tokens
+                    AccessTokenLifetime = 28800, // 8 hours (matches JWT config)
+                    RefreshTokenUsage = Duende.IdentityServer.Models.TokenUsage.ReUse,
+                    RefreshTokenExpiration = Duende.IdentityServer.Models.TokenExpiration.Sliding,
+                    SlidingRefreshTokenLifetime = 604800, // 7 days
+                    AlwaysIncludeUserClaimsInIdToken = true
                 },
                 new Client
                 {

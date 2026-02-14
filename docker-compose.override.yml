@@ -13,6 +13,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
+      - ApplicationUri=${APPLICATION_URI:-http://localhost:5000}
       - DOTNET_USE_POLLING_FILE_WATCHER=true
       # Load secrets from environment variables (set in .env file)
       - IpStack__ApiKey=${IPSTACK_API_KEY}
@@ -24,6 +25,7 @@ services:
       - Seeding__AdminPassword=${ADMIN_PASSWORD:-Admin123!}
       - Seeding__AdminFirstName=${ADMIN_FIRST_NAME:-Admin}
       - Seeding__AdminLastName=${ADMIN_LAST_NAME:-User}
+      - IdentityServer__Clients__AdminDashboard__ClientSecret=${ADMIN_DASHBOARD_CLIENT_SECRET:-dev-admin-dashboard-secret-change-in-production}
     command: dotnet watch run --no-launch-profile --project /src/UrGuide.WebApp/UrGuide.WebApp.csproj
 
   # Admin Dashboard development with hot reload
@@ -40,6 +42,7 @@ services:
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
+      - VITE_API_TARGET=http://api:80
     command: npm run dev -- --host
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/"]

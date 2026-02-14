@@ -47,6 +47,12 @@ namespace UrGuide.WebApp.Services
                 .SafeAddClaims(context, "country", result.Data.Country)
                 .SafeAddClaims(context, JwtClaimTypes.Role, result.Data.IsGuide ? "guide" : "user");
 
+            // Add ASP.NET Identity roles (Admin, etc.) to the token
+            var roles = await UserManager.GetRolesAsync(principal);
+            foreach (var role in roles)
+            {
+                context.IssuedClaims.Add(new Claim(JwtClaimTypes.Role, role));
+            }
         }
 
         public async Task IsActiveAsync(IsActiveContext context)

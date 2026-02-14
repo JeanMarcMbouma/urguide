@@ -757,10 +757,34 @@ cp .env.example .env
 - `RABBITMQ_USER` / `RABBITMQ_PASS` - Message broker credentials  
 - `IPSTACK_API_KEY` - IPStack API key (optional)
 - `SENDGRID_API_KEY` - SendGrid API key (optional)
+**Required Environment Variables:**
+- `SQL_SA_PASSWORD` - SQL Server SA password (minimum 8 characters, complexity required)
+- `IPSTACK_API_KEY` - IPStack API key for geolocation
+- `SENDGRID_API_KEY` - SendGrid API key for emails
 - `XAMARIN_CLIENT_SECRET` - Client secret for mobile app
+- `ADMIN_DASHBOARD_CLIENT_SECRET` - Client secret for admin dashboard (generate with `openssl rand -base64 32`)
+- `SEED_ADMIN_ENABLED` - Enable automatic admin user provisioning (true/false)
+- `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_FIRST_NAME`, `ADMIN_LAST_NAME` - Admin credentials
+- `JWT__KEY` - Secure random key for JWT token generation (optional, auto-generated if not set)
+- `JWT__EXPIRESINHOUHS` - JWT token expiration in hours (default: 8)
 
 **IMPORTANT**: Never commit `.env` files to version control (already in .gitignore).
+**SECURITY**: Generate all secrets using `openssl rand -base64 32` or similar secure random generators.
 See the [Security & Secrets Management](#-security--secrets-management) section for detailed guidance.
+
+### JWT Token Authentication
+
+The admin dashboard uses JWT Bearer tokens for API authentication:
+
+- **Login Endpoint**: `POST /api/auth/login` returns a JWT token
+- **Token Storage**: Stored in localStorage on the client
+- **Token Claims**: Includes user ID, email, username, and roles
+- **Token Validation**: Symmetric key-based validation (HS256 algorithm)
+- **Configuration**: Set `JWT__KEY` environment variable for production (use `openssl rand -base64 32`)
+- **Expiration**: Configurable via `JWT__EXPIRESINHOUHS` (default: 8 hours)
+
+**Development**: If no JWT key is configured, a development key is auto-generated (insecure for production).
+**Production**: Always configure a secure, randomly generated JWT key via environment variables or Azure Key Vault.
 
 ### Development Mode with Hot Reload
 
@@ -774,6 +798,10 @@ docker-compose logs -f
 # Stop services
 docker-compose down
 ```
+
+Admin dashboard dev proxy target can be configured with `VITE_API_TARGET`.
+- Docker dev default: `http://api:80` (set in `docker-compose.override.yml`)
+- Local dev default: `http://localhost:5000`
 
 ### Build Images Manually
 

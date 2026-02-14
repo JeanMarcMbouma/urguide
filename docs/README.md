@@ -15,6 +15,7 @@ User and integration guides for working with UrGuide features.
 Technical implementation summaries and architecture documentation.
 
 - [**Admin API Documentation**](implementation/ADMIN_API_DOCUMENTATION.md) - Admin dashboard backend API reference and implementation guide
+- [**JWT Authentication**](implementation/JWT_AUTHENTICATION.md) - JWT token generation and validation for admin dashboard API
 - [**Issue #19 Implementation Summary**](implementation/ISSUE_19_IMPLEMENTATION_SUMMARY.md) - Complete implementation details for admin dashboard
 - [**Message Queue Implementation**](implementation/MESSAGE_QUEUE_IMPLEMENTATION.md) - MassTransit + RabbitMQ async processing
 - [**Webhook Implementation Summary**](implementation/WEBHOOK_IMPLEMENTATION_SUMMARY.md) - Webhook system architecture and features

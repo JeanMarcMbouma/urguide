@@ -2,9 +2,14 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Model.Users;
@@ -12,6 +17,8 @@ using UrGuide.Services.Contracts;
 using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Models;
 using UrGuide.WebApp.Attributes;
+using UrGuide.WebApp.Services;
+using UrGuide.WebApp.Entities;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -22,16 +29,31 @@ namespace UrGuide.WebApp.Controllers
     public class AccountController : Controller
     {
 
-        public AccountController(IUserService userService, IAuthService authService, IIdentityServerInteractionService interactionService)
+        public AccountController(
+            IUserService userService, 
+            IAuthService authService, 
+            IIdentityServerInteractionService interactionService,
+            IJwtTokenService jwtTokenService,
+            UserManager<UrGuideUser> userManager,
+            IConfiguration configuration,
+            IHttpClientFactory httpClientFactory)
         {
             UserService = userService ?? throw new ArgumentNullException(nameof(userService));
             AuthService = authService ?? throw new ArgumentNullException(nameof(authService));
             InteractionService = interactionService ?? throw new ArgumentNullException(nameof(interactionService));
+            JwtTokenService = jwtTokenService ?? throw new ArgumentNullException(nameof(jwtTokenService));
+            UserManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            HttpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         }
 
         public IUserService UserService { get; }
         public IAuthService AuthService { get; }
         public IIdentityServerInteractionService InteractionService { get; }
+        public IJwtTokenService JwtTokenService { get; }
+        public UserManager<UrGuideUser> UserManager { get; }
+        public IConfiguration Configuration { get; }
+        public IHttpClientFactory HttpClientFactory { get; }
 
         [HttpGet("/login")]
         public IActionResult Login(string? returnUrl)
@@ -208,47 +230,178 @@ namespace UrGuide.WebApp.Controllers
         // ===================================================
 
         /// <summary>
-        /// API endpoint for admin dashboard login
+        /// API endpoint for admin dashboard login - Uses IdentityServer token endpoint
         /// </summary>
         [HttpPost("/api/auth/login")]
         [RateLimit(5, "1m")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
-        public async Task<IActionResult> ApiLogin([FromBody] LoginModel model, CancellationToken cancellationToken)
+        public async Task<IActionResult> ApiLogin([FromBody] AdminLoginRequest request, CancellationToken cancellationToken)
         {
-            var result = await UserService.LoginAsync(model, cancellationToken);
-            if (result.HasError)
+            var userName = request?.UserName ?? request?.Email;
+            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(request?.Password))
             {
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+                return BadRequest(ErrorEnvelop.Create("Username/email and password are required"));
             }
 
-            // Get additional user details
-            var userDetails = await UserService.GetUserAsync(result.Data.Id, cancellationToken);
-
-            // Create authentication claims
-            var claims = new List<System.Security.Claims.Claim>
+            try
             {
-                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, result.Data.Id),
-                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, result.Data.UserName)
-            };
+                // Use current request's base URL since IdentityServer is in the same process
+                // This ensures it works in all environments (localhost:5000, Docker, production)
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+                var tokenEndpoint = $"{baseUrl}/connect/token";
 
-            var identity = new System.Security.Claims.ClaimsIdentity(claims, "ApiLogin");
-            var principal = new System.Security.Claims.ClaimsPrincipal(identity);
+                // Get admin dashboard client credentials from configuration
+                var clientId = Configuration.GetValue<string>("IdentityServer:Clients:AdminDashboard:ClientId") ?? "admin-dashboard";
+                var clientSecret = Configuration.GetValue<string>("IdentityServer:Clients:AdminDashboard:ClientSecret")
+                    ?? throw new InvalidOperationException("Admin dashboard client secret not configured. Set IdentityServer:Clients:AdminDashboard:ClientSecret in configuration.");
 
-            await HttpContext.SignInAsync(principal);
-
-            return Ok(new
-            {
-                accessToken = "cookie-based-auth", // Using cookie authentication
-                user = new
+                // Call IdentityServer token endpoint with Resource Owner Password Credentials grant
+                using var httpClient = HttpClientFactory.CreateClient();
+                var tokenRequest = new FormUrlEncodedContent(new Dictionary<string, string>
                 {
-                    id = result.Data.Id,
-                    email = model.UserName, // UserName is typically email
-                    userName = result.Data.UserName,
-                    firstName = userDetails.HasError ? "" : userDetails.Data.FirstName,
-                    lastName = userDetails.HasError ? "" : userDetails.Data.LastName
+                    ["client_id"] = clientId,
+                    ["client_secret"] = clientSecret,
+                    ["grant_type"] = "password",
+                    ["username"] = userName,
+                    ["password"] = request.Password,
+                    ["scope"] = "openid profile api1 offline_access"
+                });
+
+                var response = await httpClient.PostAsync(tokenEndpoint, tokenRequest, cancellationToken);
+                var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    // Parse error response
+                    var errorResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent);
+                    var errorMessage = errorResponse?.ContainsKey("error_description") == true
+                        ? errorResponse["error_description"]?.ToString() ?? "Invalid credentials"
+                        : "Invalid credentials";
+                    
+                    return BadRequest(ErrorEnvelop.Create(errorMessage));
                 }
-            });
+
+                // Parse successful token response
+                var tokenResponse = JsonSerializer.Deserialize<IdentityServerTokenResponse>(responseContent);
+                
+                if (tokenResponse == null || string.IsNullOrEmpty(tokenResponse.AccessToken))
+                {
+                    return BadRequest(ErrorEnvelop.Create("Failed to obtain access token"));
+                }
+
+                // Get user details for the response
+                var loginModel = new LoginModel { UserName = userName, Password = request.Password };
+                var loginResult = await UserService.LoginAsync(loginModel, cancellationToken);
+                
+                if (loginResult.HasError)
+                {
+                    return BadRequest(ErrorEnvelop.Create(loginResult.Errors));
+                }
+
+                var userDetails = await UserService.GetUserAsync(loginResult.Data.Id, cancellationToken);
+                var user = await UserManager.FindByIdAsync(loginResult.Data.Id);
+                var roles = user != null ? await UserManager.GetRolesAsync(user) : new List<string>();
+
+                // Return IdentityServer token with user info
+                return Ok(new
+                {
+                    accessToken = tokenResponse.AccessToken,
+                    refreshToken = tokenResponse.RefreshToken,
+                    expiresIn = tokenResponse.ExpiresIn,
+                    tokenType = tokenResponse.TokenType,
+                    user = new
+                    {
+                        id = loginResult.Data.Id,
+                        email = userName,
+                        userName = loginResult.Data.UserName,
+                        firstName = userDetails.HasError ? "" : userDetails.Data.FirstName,
+                        lastName = userDetails.HasError ? "" : userDetails.Data.LastName,
+                        roles = roles
+                    }
+                });
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(500, ErrorEnvelop.Create($"Failed to communicate with authentication server: {ex.Message}"));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ErrorEnvelop.Create($"Authentication failed: {ex.Message}"));
+            }
+        }
+
+        /// <summary>
+        /// API endpoint to refresh access token using refresh token
+        /// </summary>
+        [HttpPost("/api/auth/refresh")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(request?.RefreshToken))
+            {
+                return BadRequest(ErrorEnvelop.Create("Refresh token is required"));
+            }
+
+            try
+            {
+                // Use current request's base URL since IdentityServer is in the same process
+                // This ensures it works in all environments (localhost:5000, Docker, production)
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+                var tokenEndpoint = $"{baseUrl}/connect/token";
+
+                // Get admin dashboard client credentials from configuration
+                var clientId = Configuration.GetValue<string>("IdentityServer:Clients:AdminDashboard:ClientId") ?? "admin-dashboard";
+                var clientSecret = Configuration.GetValue<string>("IdentityServer:Clients:AdminDashboard:ClientSecret")
+                    ?? throw new InvalidOperationException("Admin dashboard client secret not configured. Set IdentityServer:Clients:AdminDashboard:ClientSecret in configuration.");
+
+                // Call IdentityServer token endpoint with refresh token grant
+                using var httpClient = HttpClientFactory.CreateClient();
+                var tokenRequest = new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["client_id"] = clientId,
+                    ["client_secret"] = clientSecret,
+                    ["grant_type"] = "refresh_token",
+                    ["refresh_token"] = request.RefreshToken
+                });
+
+                var response = await httpClient.PostAsync(tokenEndpoint, tokenRequest, cancellationToken);
+                var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent);
+                    var errorMessage = errorResponse?.ContainsKey("error_description") == true
+                        ? errorResponse["error_description"]?.ToString() ?? "Invalid refresh token"
+                        : "Invalid refresh token";
+                    
+                    return BadRequest(ErrorEnvelop.Create(errorMessage));
+                }
+
+                var tokenResponse = JsonSerializer.Deserialize<IdentityServerTokenResponse>(responseContent);
+                
+                if (tokenResponse == null || string.IsNullOrEmpty(tokenResponse.AccessToken))
+                {
+                    return BadRequest(ErrorEnvelop.Create("Failed to obtain access token"));
+                }
+
+                return Ok(new
+                {
+                    accessToken = tokenResponse.AccessToken,
+                    refreshToken = tokenResponse.RefreshToken,
+                    expiresIn = tokenResponse.ExpiresIn,
+                    tokenType = tokenResponse.TokenType
+                });
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(500, ErrorEnvelop.Create($"Failed to communicate with authentication server: {ex.Message}"));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ErrorEnvelop.Create($"Token refresh failed: {ex.Message}"));
+            }
         }
 
         /// <summary>
