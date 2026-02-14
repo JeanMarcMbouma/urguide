@@ -82,6 +82,12 @@ services:
       - RabbitMQ__Username=${RABBITMQ_USER:-guest}
       - RabbitMQ__Password=${RABBITMQ_PASS:-guest}
       - Elasticsearch__Url=http://elasticsearch:9200
+      # Admin user provisioning from .env file
+      - Seeding__SeedDefaultAdmin=${SEED_ADMIN_ENABLED:-false}
+      - Seeding__AdminEmail=${ADMIN_EMAIL:-admin@urguide.local}
+      - Seeding__AdminPassword=${ADMIN_PASSWORD:-Admin123!}
+      - Seeding__AdminFirstName=${ADMIN_FIRST_NAME:-Admin}
+      - Seeding__AdminLastName=${ADMIN_LAST_NAME:-User}
     ports:
       - "5000:80"
     depends_on:

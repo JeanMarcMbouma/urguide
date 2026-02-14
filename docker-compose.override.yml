@@ -18,6 +18,12 @@ services:
       - IpStack__ApiKey=${IPSTACK_API_KEY}
       - SENDGRID_URGUIDE_API_KEY=${SENDGRID_API_KEY}
       - IdentityServer__Clients__Xamarin__ClientSecret=${XAMARIN_CLIENT_SECRET}
+      # Admin user provisioning from .env file (overrides appsettings)
+      - Seeding__SeedDefaultAdmin=${SEED_ADMIN_ENABLED:-true}
+      - Seeding__AdminEmail=${ADMIN_EMAIL:-admin@urguide.local}
+      - Seeding__AdminPassword=${ADMIN_PASSWORD:-Admin123!}
+      - Seeding__AdminFirstName=${ADMIN_FIRST_NAME:-Admin}
+      - Seeding__AdminLastName=${ADMIN_LAST_NAME:-User}
     command: dotnet watch run --no-launch-profile --project /src/UrGuide.WebApp/UrGuide.WebApp.csproj
 
   # Admin Dashboard development with hot reload

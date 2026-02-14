@@ -44,15 +44,52 @@ docker-compose ps
 ```bash
 # 1. Create .env file for secrets
 cp .env.example .env
-# Edit .env with your API keys
+# Edit .env with your API keys and admin credentials
 
-# 2. Start with development override
+# 2. Configure admin user provisioning (optional)
+# Edit .env file:
+#   SEED_ADMIN_ENABLED=true
+#   ADMIN_EMAIL=admin@urguide.local
+#   ADMIN_PASSWORD=Admin123!
+#   ADMIN_FIRST_NAME=Admin
+#   ADMIN_LAST_NAME=User
+
+# 3. Start with development override
 docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
 
-# 3. Code changes auto-reload
+# 4. Code changes auto-reload
 # - .NET: dotnet watch (backend)
 # - React: Vite HMR (admin dashboard)
 ```
+
+### 👤 Admin User Auto-Provisioning
+
+When running with Docker Compose, the system can automatically create an admin user on startup using environment variables from your `.env` file.
+
+**Configuration in `.env`**:
+```bash
+# Enable/disable admin provisioning
+SEED_ADMIN_ENABLED=true
+
+# Admin credentials (change these!)
+ADMIN_EMAIL=admin@urguide.local
+ADMIN_PASSWORD=Admin123!
+ADMIN_FIRST_NAME=Admin
+ADMIN_LAST_NAME=User
+```
+
+**How it works**:
+1. Environment variables override `appsettings.json` values
+2. On first startup, admin user is created automatically
+3. Subsequent startups detect existing user (no duplicates)
+4. Admin role is assigned automatically
+
+**Login after provisioning**:
+- URL: http://localhost:3001
+- Email: Value from `ADMIN_EMAIL` in `.env`
+- Password: Value from `ADMIN_PASSWORD` in `.env`
+
+⚠️ **Remember**: Change the default password after first login!
 
 ## 🎯 Individual Services
 
@@ -257,13 +294,31 @@ SQL_SA_PASSWORD=YourVeryStrong@Password123!
 RABBITMQ_USER=admin
 RABBITMQ_PASS=SuperSecurePassword456!
 
+# Admin user credentials (change these!)
+SEED_ADMIN_ENABLED=true
+ADMIN_EMAIL=admin@yourcompany.com
+ADMIN_PASSWORD=VerySecureP@ssw0rd789!
+ADMIN_FIRST_NAME=John
+ADMIN_LAST_NAME=Doe
+
 # Or use environment variables
 export SQL_SA_PASSWORD="..."
 export RABBITMQ_USER="..."
 export RABBITMQ_PASS="..."
+export ADMIN_EMAIL="..."
+export ADMIN_PASSWORD="..."
 
 docker-compose up -d
 ```
+
+**Admin User Security Best Practices**:
+- ✅ Use strong passwords (12+ characters, mixed case, numbers, symbols)
+- ✅ Change default password immediately after first login
+- ✅ Use unique email addresses (not shared accounts)
+- ✅ Enable 2FA after logging in
+- ✅ Disable auto-provisioning in production (`SEED_ADMIN_ENABLED=false`)
+- ✅ Store `.env` file securely (never commit to git)
+- ✅ Use secrets management in production (Azure Key Vault, AWS Secrets Manager)
 
 ### HTTPS Configuration
 
@@ -297,10 +352,16 @@ docker run --rm -v urguide_sqlserver-data:/data -v $(pwd):/backup \
 # Restore database volume
 docker run --rm -v urguide_sqlserver-data:/data -v $(pwd):/backup \
   alpine tar xzf /backup/sqlserver-backup.tar.gz -C /
-```
+- [ ] Admin user created: Check API logs for "Successfully created admin user"
+- [ ] Admin login works: Login at http://localhost:3001 with credentials from `.env`
 
-## 🎓 Learn More
+---
 
+**Ready to go! 🎉** Access admin dashboard at http://localhost:3001
+
+**Admin Credentials** (from `.env`):
+- Email: Value from `ADMIN_EMAIL`
+- Password: Value from `ADMIN_PASSWORD`
 - [Admin Dashboard Docker Documentation](admin-dashboard/DOCKER.md)
 - [Docker Compose Reference](https://docs.docker.com/compose/)
 - [UrGuide Main README](README.md)

@@ -15,7 +15,7 @@ namespace UrGuide.WebApp.Controllers
 
 
     [ApiController]
-    [Route("posts")]
+    [Route("api/posts")]
     [Authorize]
     [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
     [ProducesResponseType(500, Type = typeof(ErrorEnvelop<string>))]

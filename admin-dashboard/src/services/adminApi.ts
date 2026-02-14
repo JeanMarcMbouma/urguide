@@ -115,8 +115,49 @@ class AdminApiService {
     const { data } = await this.api.get<string[]>('/roles');
     return data;
   }
+
+  // Get pending guides for verification
+  async getPendingGuides(pageNumber: number = 1): Promise<any> {
+    const { data } = await this.api.get('/guides/pending', {
+      params: { PageNumber: pageNumber, PageSize: 10 }
+    });
+    return data;
+  }
+
+  // Get guide verification details
+  async getGuideVerificationDetail(userId: string): Promise<any> {
+    const { data } = await this.api.get(`/guides/${userId}/verification`);
+    return data;
+  }
+
+  // Process guide verification (approve/reject)
+  async processGuideVerification(model: any): Promise<any> {
+    const { data } = await this.api.post('/guides/verification', model);
+    return data;
+  }
+
+  // Get pending tours for moderation
+  async getPendingTours(pageNumber: number = 1): Promise<any> {
+    const { data } = await this.api.get('/tours/pending', {
+      params: { PageNumber: pageNumber, PageSize: 10 }
+    });
+    return data;
+  }
+
+  // Get tour moderation details
+  async getTourModerationDetail(postId: string): Promise<any> {
+    const { data } = await this.api.get(`/tours/${postId}/moderation`);
+    return data;
+  }
+
+  // Process tour moderation (approve/reject)
+  async processTourModeration(model: any): Promise<any> {
+    const { data } = await this.api.post('/tours/moderation', model);
+    return data;
+  }
 }
 
 // Export singleton instance
 export const adminApi = new AdminApiService();
+export const adminService = adminApi;
 export default adminApi;

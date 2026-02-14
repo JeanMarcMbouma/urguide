@@ -18,7 +18,7 @@ namespace UrGuide.WebApp.Controllers
     [ApiController]
     [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
     [ProducesResponseType(500, Type = typeof(ErrorEnvelop<string>))]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class AccountController : Controller
     {
 
@@ -201,6 +201,102 @@ namespace UrGuide.WebApp.Controllers
             
             var bytes = System.Text.Encoding.UTF8.GetBytes(jsonContent);
             return File(bytes, "application/json", fileName);
+        }
+
+        // ===================================================
+        // API-style Auth Endpoints for Admin Dashboard
+        // ===================================================
+
+        /// <summary>
+        /// API endpoint for admin dashboard login
+        /// </summary>
+        [HttpPost("/api/auth/login")]
+        [RateLimit(5, "1m")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
+        public async Task<IActionResult> ApiLogin([FromBody] LoginModel model, CancellationToken cancellationToken)
+        {
+            var result = await UserService.LoginAsync(model, cancellationToken);
+            if (result.HasError)
+            {
+                return BadRequest(ErrorEnvelop.Create(result.Errors));
+            }
+
+            // Get additional user details
+            var userDetails = await UserService.GetUserAsync(result.Data.Id, cancellationToken);
+
+            // Create authentication claims
+            var claims = new List<System.Security.Claims.Claim>
+            {
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, result.Data.Id),
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, result.Data.UserName)
+            };
+
+            var identity = new System.Security.Claims.ClaimsIdentity(claims, "ApiLogin");
+            var principal = new System.Security.Claims.ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(principal);
+
+            return Ok(new
+            {
+                accessToken = "cookie-based-auth", // Using cookie authentication
+                user = new
+                {
+                    id = result.Data.Id,
+                    email = model.UserName, // UserName is typically email
+                    userName = result.Data.UserName,
+                    firstName = userDetails.HasError ? "" : userDetails.Data.FirstName,
+                    lastName = userDetails.HasError ? "" : userDetails.Data.LastName
+                }
+            });
+        }
+
+        /// <summary>
+        /// API endpoint to get current authenticated user info
+        /// </summary>
+        [HttpGet("/api/auth/me")]
+        [Authorize]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(401)]
+        public async Task<IActionResult> GetCurrentUserInfo(CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var result = await UserService.GetUserAsync(userId, cancellationToken);
+            if (result.HasError || result.Data == null)
+            {
+                return BadRequest(ErrorEnvelop.Create(result.Errors));
+            }
+
+            return Ok(new
+            {
+                id = result.Data.Id,
+                email = userName ?? "", // UserName is typically email
+                userName = result.Data.UserName,
+                firstName = result.Data.FirstName,
+                lastName = result.Data.LastName,
+                roles = new[] { "Admin" } // Simplified - in production, get actual roles
+            });
+        }
+
+        /// <summary>
+        /// API endpoint for 2FA verification (placeholder for future implementation)
+        /// </summary>
+        [HttpPost("/api/auth/verify-2fa")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
+        public async Task<IActionResult> VerifyTwoFactor([FromBody] dynamic request, CancellationToken cancellationToken)
+        {
+            // Placeholder for 2FA verification
+            // This would need to be implemented based on your 2FA requirements
+            await Task.CompletedTask;
+            return BadRequest(ErrorEnvelop.Create("2FA verification not yet implemented for admin dashboard"));
         }
     }
 }

@@ -11,7 +11,7 @@ using UrGuide.WebApp.Models;
 
 namespace UrGuide.WebApp.Controllers
 {
-    [Route("bid")]
+    [Route("api/bid")]
     [ApiController]
     [Authorize]
     [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]

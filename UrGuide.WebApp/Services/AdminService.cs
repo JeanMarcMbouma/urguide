@@ -353,5 +353,308 @@ namespace UrGuide.WebApp.Services
                 return Result.Of<List<string>>().WithErrors("Failed to retrieve roles");
             }
         }
+
+        public async Task<Result<PagedList<PendingGuideVerification>>> GetPendingGuidesAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
+        {
+            try
+            {
+                // Get all guides (users with IsGuide = true)
+                var query = _userManager.Users.Where(u => u.IsGuide);
+
+                var totalCount = await query.CountAsync(cancellationToken);
+
+                const int pageSize = 10;
+                var guides = await query
+                    .OrderByDescending(u => u.Id)
+                    .Skip((paginationParameters.PageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync(cancellationToken);
+
+                var pendingGuides = new List<PendingGuideVerification>();
+
+                foreach (var guide in guides)
+                {
+                    var user = await _context.Users
+                        .Include(u => u.Attributes)
+                        .Include(u => u.ProfileImage)
+                        .FirstOrDefaultAsync(u => u.Id == guide.Id, cancellationToken);
+                    
+                    var postCount = await _context.Posts.CountAsync(p => p.User.Id == guide.Id, cancellationToken);
+                    
+                    // Extract attributes
+                    var attributes = user?.Attributes?.ToList() ?? new List<UrGuide.Core.Attributes.GenericAttribute>();
+                    var descriptionAttr = attributes.FirstOrDefault(a => a.Name == "Description");
+                    var cityAttr = attributes.FirstOrDefault(a => a.Name == "City");
+                    var countryAttr = attributes.FirstOrDefault(a => a.Name == "Country");
+                    var addressAttr = attributes.FirstOrDefault(a => a.Name == "Address");
+                    var genderAttr = attributes.FirstOrDefault(a => a.Name == "Gender");
+                    var dobAttr = attributes.FirstOrDefault(a => a.Name == "DateOfBirth");
+
+                    pendingGuides.Add(new PendingGuideVerification
+                    {
+                        UserId = guide.Id,
+                        Email = guide.Email ?? "",
+                        FullName = $"{guide.FirstName} {guide.LastName}",
+                        PhoneNumber = guide.PhoneNumber,
+                        ProfileImage = user?.ProfileImage?.ImageUrl ?? "",
+                        Description = descriptionAttr?.Value ?? "",
+                        Address = addressAttr?.Value ?? "",
+                        City = cityAttr?.Value ?? "",
+                        Country = countryAttr?.Value ?? "",
+                        Gender = genderAttr?.Value ?? "",
+                        DateOfBirth = dobAttr != null && DateTime.TryParse(dobAttr.Value, out var dob) ? dob : null,
+                        RegisteredAt = user?.CreatedAt ?? DateTime.UtcNow,
+                        Status = GuideVerificationStatus.Pending,
+                        TourCount = postCount,
+                        Documents = new string[] { } // No documents table currently
+                    });
+                }
+
+                var pagedList = PagedList.Of(pendingGuides, paginationParameters.PageNumber);
+                return Result.Of(pagedList);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting pending guides");
+                return Result.Of<PagedList<PendingGuideVerification>>().WithErrors("Failed to retrieve pending guides");
+            }
+        }
+
+        public async Task<Result<GuideVerificationDetail>> GetGuideVerificationDetailAsync(string userId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var guide = await _userManager.FindByIdAsync(userId);
+                if (guide == null || !guide.IsGuide)
+                    return Result.Of<GuideVerificationDetail>().WithErrors("Guide not found");
+
+                var user = await _context.Users
+                    .Include(u => u.Attributes)
+                    .Include(u => u.ProfileImage)
+                    .Include(u => u.Feedback)
+                    .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+                    
+                var postCount = await _context.Posts.CountAsync(p => p.User.Id == userId, cancellationToken);
+
+                // Extract attributes
+                var attributes = user?.Attributes?.ToList() ?? new List<UrGuide.Core.Attributes.GenericAttribute>();
+                var descriptionAttr = attributes.FirstOrDefault(a => a.Name == "Description");
+                var cityAttr = attributes.FirstOrDefault(a => a.Name == "City");
+                var countryAttr = attributes.FirstOrDefault(a => a.Name == "Country");
+                var addressAttr = attributes.FirstOrDefault(a => a.Name == "Address");
+                var genderAttr = attributes.FirstOrDefault(a => a.Name == "Gender");
+                var dobAttr = attributes.FirstOrDefault(a => a.Name == "DateOfBirth");
+
+                // Calculate average rating from feedback
+                var feedbacks = user?.Feedback?.ToList() ?? new List<UrGuide.Data.Shared.Feedback>();
+                var avgRating = feedbacks.Any() ? feedbacks.Average(f => f.Rating) : 0;
+                var reviewCount = feedbacks.Count;
+
+                var detail = new GuideVerificationDetail
+                {
+                    UserId = userId,
+                    Email = guide.Email ?? "",
+                    FullName = $"{guide.FirstName} {guide.LastName}",
+                    PhoneNumber = guide.PhoneNumber,
+                    ProfileImage = user?.ProfileImage?.ImageUrl ?? "",
+                    Description = descriptionAttr?.Value ?? "",
+                    Address = addressAttr?.Value ?? "",
+                    City = cityAttr?.Value ?? "",
+                    Country = countryAttr?.Value ?? "",
+                    Gender = genderAttr?.Value ?? "",
+                    DateOfBirth = dobAttr != null && DateTime.TryParse(dobAttr.Value, out var dob) ? dob : null,
+                    RegisteredAt = user?.CreatedAt ?? DateTime.UtcNow,
+                    Status = GuideVerificationStatus.Pending,
+                    TourCount = postCount,
+                    AverageRating = (decimal)avgRating,
+                    ReviewCount = reviewCount,
+                    Checklist = new VerificationChecklist
+                    {
+                        ProfileComplete = !string.IsNullOrEmpty(descriptionAttr?.Value),
+                        IdentityDocumentProvided = false, // No documents table
+                        ContactVerified = guide.EmailConfirmed && !string.IsNullOrEmpty(guide.PhoneNumber),
+                        BackgroundCheckPassed = false,
+                        ProfileDescriptionAdequate = descriptionAttr?.Value?.Length >= 100
+                    },
+                    Documents = new GuideDocument[] { } // No documents table currently
+                };
+
+                return Result.Of(detail);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting guide verification detail for {UserId}", userId);
+                return Result.Of<GuideVerificationDetail>().WithErrors("Failed to retrieve guide details");
+            }
+        }
+
+        public async Task<Result<bool>> ProcessGuideVerificationAsync(GuideVerificationDecisionModel model, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var guide = await _userManager.FindByIdAsync(model.UserId);
+                if (guide == null || !guide.IsGuide)
+                    return Result.Of(false).WithErrors("Guide not found");
+
+                // In a full implementation, you would:
+                // 1. Update verification status in a separate table
+                // 2. Send notification to the guide
+                // 3. Log the admin action
+
+                if (model.Approve)
+                {
+                    // Add "VerifiedGuide" role if it exists
+                    if (await _roleManager.RoleExistsAsync("VerifiedGuide"))
+                    {
+                        await _userManager.AddToRoleAsync(guide, "VerifiedGuide");
+                    }
+                    _logger.LogInformation("Guide {UserId} approved by admin {AdminId}", model.UserId, _userContext.UserId);
+                }
+                else
+                {
+                    // Rejection logic
+                    _logger.LogInformation("Guide {UserId} rejected by admin {AdminId}. Reason: {Reason}", 
+                        model.UserId, _userContext.UserId, model.Reason);
+                }
+
+                return Result.Of(true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing guide verification for {UserId}", model.UserId);
+                return Result.Of(false).WithErrors("Failed to process guide verification");
+            }
+        }
+
+        public async Task<Result<PagedList<PendingTourModeration>>> GetPendingToursAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
+        {
+            try
+            {
+                // Get all posts for moderation
+                var query = _context.Posts.Include(p => p.User).AsQueryable();
+
+                var totalCount = await query.CountAsync(cancellationToken);
+
+                const int pageSize = 10;
+                var posts = await query
+                    .OrderByDescending(p => p.DateOfPublication)
+                    .Skip((paginationParameters.PageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync(cancellationToken);
+
+                var pendingTours = posts.Select(post => new PendingTourModeration
+                {
+                    PostId = post.Id,
+                    Title = post.Text ?? "Untitled",
+                    Description = post.Description ?? "",
+                    GuideId = post.User?.Id ?? "",
+                    GuideName = post.User != null ? $"{post.User.FirstName} {post.User.LastName}" : "Unknown",
+                    CreatedAt = post.DateOfPublication,
+                    StartDate = post.StartDate,
+                    EndDate = post.EndDate,
+                    Location = post.GeoLocation ?? "",
+                    Cost = decimal.TryParse(post.Cost, out var cost) ? cost : 0,
+                    Status = TourModerationStatus.PendingReview,
+                    Tags = post.Tags?.Split(',', StringSplitOptions.RemoveEmptyEntries) ?? new string[] { },
+                    Images = new string[] { }, // No direct image array
+                    ReportCount = 0 // No reports table currently
+                }).ToList();
+
+                var pagedList = PagedList.Of(pendingTours, paginationParameters.PageNumber);
+                return Result.Of(pagedList);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting pending tours");
+                return Result.Of<PagedList<PendingTourModeration>>().WithErrors("Failed to retrieve pending tours");
+            }
+        }
+
+        public async Task<Result<TourModerationDetail>> GetTourModerationDetailAsync(string postId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var post = await _context.Posts
+                    .Include(p => p.User)
+                    .Include(p => p.Itineraries)
+                    .Include(p => p.Reservations)
+                    .Include(p => p.BidHistories)
+                    .FirstOrDefaultAsync(p => p.Id == postId, cancellationToken);
+
+                if (post == null)
+                    return Result.Of<TourModerationDetail>().WithErrors("Tour post not found");
+
+                var bidCount = post.BidHistories?.Count ?? 0;
+
+                var detail = new TourModerationDetail
+                {
+                    PostId = post.Id,
+                    Title = post.Text ?? "Untitled",
+                    Description = post.Description ?? "",
+                    GuideId = post.User?.Id ?? "",
+                    GuideName = post.User != null ? $"{post.User.FirstName} {post.User.LastName}" : "Unknown",
+                    GuideEmail = post.User?.Email ?? "",
+                    CreatedAt = post.DateOfPublication,
+                    StartDate = post.StartDate,
+                    EndDate = post.EndDate,
+                    Location = post.GeoLocation ?? "",
+                    Cost = decimal.TryParse(post.Cost, out var cost) ? cost : 0,
+                    Status = TourModerationStatus.PendingReview,
+                    Tags = post.Tags?.Split(',', StringSplitOptions.RemoveEmptyEntries) ?? new string[] { },
+                    Images = new string[] { },
+                    BidCount = bidCount,
+                    ReservationCount = post.Reservations?.Count ?? 0,
+                    ReportCount = 0,
+                    Itinerary = post.Itineraries?.Select(i => i.Description ?? "").ToArray() ?? new string[] { },
+                    Violations = new ContentViolation[] { } // No violations table currently
+                };
+
+                return Result.Of(detail);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting tour moderation detail for {PostId}", postId);
+                return Result.Of<TourModerationDetail>().WithErrors("Failed to retrieve tour details");
+            }
+        }
+
+        public async Task<Result<bool>> ProcessTourModerationAsync(TourModerationDecisionModel model, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var post = await _context.Posts
+                    .Include(p => p.User)
+                    .FirstOrDefaultAsync(p => p.Id == model.PostId, cancellationToken);
+
+                if (post == null)
+                    return Result.Of(false).WithErrors("Tour post not found");
+
+                // In a full implementation, you would:
+                // 1. Update moderation status in a separate table or add a status field to Post
+                // 2. Send notification to the guide if requested
+                // 3. Log the admin action
+                // 4. If rejected, optionally hide/delete the post
+
+                if (model.Approve)
+                {
+                    _logger.LogInformation("Tour post {PostId} approved by admin {AdminId}", model.PostId, _userContext.UserId);
+                }
+                else
+                {
+                    _logger.LogInformation("Tour post {PostId} rejected by admin {AdminId}. Reason: {Reason}", 
+                        model.PostId, _userContext.UserId, model.Reason);
+                    
+                    // Optionally, you could delete or hide the post here
+                    // For now, we'll just log it
+                }
+
+                return Result.Of(true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing tour moderation for {PostId}", model.PostId);
+                return Result.Of(false).WithErrors("Failed to process tour moderation");
+            }
+        }
     }
 }

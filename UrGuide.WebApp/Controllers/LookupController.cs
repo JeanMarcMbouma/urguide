@@ -13,7 +13,7 @@ using UrGuide.WebApp.Models;
 namespace UrGuide.WebApp.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ProducesResponseType(500, Type = typeof(ErrorEnvelop<string>))]
     public class LookupController : Controller
     {

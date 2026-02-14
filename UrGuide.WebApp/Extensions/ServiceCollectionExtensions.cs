@@ -58,6 +58,7 @@ namespace UrGuide.WebApp.Extensions
             services.AddScoped<ITwoFactorService, TwoFactorService>();
             services.AddScoped<IPasskeyService, PasskeyService>();
             services.AddScoped<UrGuide.Services.Contracts.IAdminService, AdminService>();
+            services.AddScoped<IAdminSeedingService, AdminSeedingService>();
 
             // Configure Fido2 for Passkey/WebAuthn support
             string applicationUri = configuration.GetValue<string>("ApplicationUri") ?? "https://localhost:5001";

@@ -177,5 +177,117 @@ namespace UrGuide.WebApp.Controllers
 
             return Ok(result.Data);
         }
+
+        /// <summary>
+        /// Get pending guides awaiting verification
+        /// </summary>
+        /// <param name="paginationParameters">Pagination parameters</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Paginated list of pending guides</returns>
+        [HttpGet("guides/pending")]
+        [ProducesResponseType(200, Type = typeof(PagedList<PendingGuideVerification>))]
+        public async Task<IActionResult> GetPendingGuides([FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.GetPendingGuidesAsync(paginationParameters, cancellationToken);
+
+            if (result.HasError)
+                return BadRequest(ErrorEnvelop.Create(result.Errors));
+
+            return Ok(result.Data);
+        }
+
+        /// <summary>
+        /// Get detailed guide verification information
+        /// </summary>
+        /// <param name="userId">User ID of the guide</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Detailed guide verification info</returns>
+        [HttpGet("guides/{userId}/verification")]
+        [ProducesResponseType(200, Type = typeof(GuideVerificationDetail))]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> GetGuideVerificationDetail(string userId, CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.GetGuideVerificationDetailAsync(userId, cancellationToken);
+
+            if (result.HasError)
+                return NotFound(ErrorEnvelop.Create(result.Errors));
+
+            return Ok(result.Data);
+        }
+
+        /// <summary>
+        /// Approve or reject guide verification
+        /// </summary>
+        /// <param name="model">Guide verification decision</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Success status</returns>
+        [HttpPost("guides/verification")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> ProcessGuideVerification([FromBody] GuideVerificationDecisionModel model, CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.ProcessGuideVerificationAsync(model, cancellationToken);
+
+            if (result.HasError)
+                return BadRequest(ErrorEnvelop.Create(result.Errors));
+
+            var action = model.Approve ? "approved" : "rejected";
+            return Ok(new { message = $"Guide verification {action}", userId = model.UserId });
+        }
+
+        /// <summary>
+        /// Get pending tour posts awaiting moderation
+        /// </summary>
+        /// <param name="paginationParameters">Pagination parameters</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Paginated list of pending tours</returns>
+        [HttpGet("tours/pending")]
+        [ProducesResponseType(200, Type = typeof(PagedList<PendingTourModeration>))]
+        public async Task<IActionResult> GetPendingTours([FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.GetPendingToursAsync(paginationParameters, cancellationToken);
+
+            if (result.HasError)
+                return BadRequest(ErrorEnvelop.Create(result.Errors));
+
+            return Ok(result.Data);
+        }
+
+        /// <summary>
+        /// Get detailed tour moderation information
+        /// </summary>
+        /// <param name="postId">Post ID of the tour</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Detailed tour moderation info</returns>
+        [HttpGet("tours/{postId}/moderation")]
+        [ProducesResponseType(200, Type = typeof(TourModerationDetail))]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> GetTourModerationDetail(string postId, CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.GetTourModerationDetailAsync(postId, cancellationToken);
+
+            if (result.HasError)
+                return NotFound(ErrorEnvelop.Create(result.Errors));
+
+            return Ok(result.Data);
+        }
+
+        /// <summary>
+        /// Approve or reject tour post
+        /// </summary>
+        /// <param name="model">Tour moderation decision</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Success status</returns>
+        [HttpPost("tours/moderation")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> ProcessTourModeration([FromBody] TourModerationDecisionModel model, CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.ProcessTourModerationAsync(model, cancellationToken);
+
+            if (result.HasError)
+                return BadRequest(ErrorEnvelop.Create(result.Errors));
+
+            var action = model.Approve ? "approved" : "rejected";
+            return Ok(new { message = $"Tour post {action}", postId = model.PostId });
+        }
     }
 }

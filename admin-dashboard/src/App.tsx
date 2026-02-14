@@ -7,6 +7,10 @@ import Dashboard from './pages/Dashboard';
 import UserList from './pages/UserList';
 import UserDetail from './pages/UserDetail';
 import ActivityLog from './pages/ActivityLog';
+import GuideVerification from './pages/GuideVerification';
+import GuideVerificationDetail from './pages/GuideVerificationDetail';
+import TourModeration from './pages/TourModeration';
+import TourModerationDetail from './pages/TourModerationDetail';
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -45,6 +49,10 @@ function App() {
         <Route path="users" element={<UserList />} />
         <Route path="users/:userId" element={<UserDetail />} />
         <Route path="users/:userId/activity" element={<ActivityLog />} />
+        <Route path="guides/verification" element={<GuideVerification />} />
+        <Route path="guides/:userId/verification" element={<GuideVerificationDetail />} />
+        <Route path="tours/moderation" element={<TourModeration />} />
+        <Route path="tours/:postId/moderation" element={<TourModerationDetail />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

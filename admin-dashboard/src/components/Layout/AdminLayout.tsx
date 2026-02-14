@@ -23,6 +23,8 @@ import {
   People as PeopleIcon,
   ExitToApp as LogoutIcon,
   AccountCircle,
+  VerifiedUser as VerifiedUserIcon,
+  TourOutlined as TourIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -54,6 +56,8 @@ const AdminLayout = () => {
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Users', icon: <PeopleIcon />, path: '/users' },
+    { text: 'Guide Verification', icon: <VerifiedUserIcon />, path: '/guides/verification' },
+    { text: 'Tour Moderation', icon: <TourIcon />, path: '/tours/moderation' },
   ];
 
   const drawer = (

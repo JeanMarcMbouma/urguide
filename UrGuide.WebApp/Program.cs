@@ -196,6 +196,13 @@ try
         // Seed initial data
         var seedingService = scope.ServiceProvider.GetRequiredService<UrGuide.Services.Contracts.IDataSeedingService>();
         await seedingService.SeedDataAsync();
+        
+        // Seed admin user (if enabled in Development)
+        if (app.Environment.IsDevelopment())
+        {
+            var adminSeedingService = scope.ServiceProvider.GetRequiredService<UrGuide.WebApp.Services.IAdminSeedingService>();
+            await adminSeedingService.SeedDefaultAdminAsync();
+        }
     }
 
     // Disable legacy IP rate limiting to avoid conflicts with tiered rate limiting

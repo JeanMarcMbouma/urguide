@@ -52,5 +52,35 @@ namespace UrGuide.Services.Contracts
         /// Get all available roles in the system
         /// </summary>
         Task<Result<List<string>>> GetAllRolesAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Get pending guides awaiting verification
+        /// </summary>
+        Task<Result<PagedList<PendingGuideVerification>>> GetPendingGuidesAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Get detailed guide verification information
+        /// </summary>
+        Task<Result<GuideVerificationDetail>> GetGuideVerificationDetailAsync(string userId, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Approve or reject guide verification
+        /// </summary>
+        Task<Result<bool>> ProcessGuideVerificationAsync(GuideVerificationDecisionModel model, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Get pending tour posts awaiting moderation
+        /// </summary>
+        Task<Result<PagedList<PendingTourModeration>>> GetPendingToursAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Get detailed tour moderation information
+        /// </summary>
+        Task<Result<TourModerationDetail>> GetTourModerationDetailAsync(string postId, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Approve or reject tour post
+        /// </summary>
+        Task<Result<bool>> ProcessTourModerationAsync(TourModerationDecisionModel model, CancellationToken cancellationToken);
     }
 }
