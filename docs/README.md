@@ -30,6 +30,7 @@ Continuous Integration and Deployment documentation.
 ### 🔒 Security
 Security documentation, audits, and best practices.
 
+- [**Secrets Management Guide**](security/SECRETS_MANAGEMENT.md) - Complete guide for managing credentials, API keys, and secrets securely
 - [**Security Audit Report**](security/SECURITY_AUDIT_REPORT.md) - Secrets management implementation audit
 
 ### 📋 Planning

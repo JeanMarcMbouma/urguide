@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -405,6 +406,84 @@ namespace UrGuide.WebApp.Controllers
         }
 
         /// <summary>
+        /// API endpoint for direct JWT token generation (Swagger/Testing)
+        /// Generates a JWT token directly for authorized users
+        /// </summary>
+        [HttpPost("/api/auth/token")]
+        [RateLimit(5, "1m")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
+        public async Task<IActionResult> GetJwtToken([FromBody] AdminLoginRequest request, CancellationToken cancellationToken)
+        {
+            var userName = request?.UserName ?? request?.Email;
+            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(request?.Password))
+            {
+                return BadRequest(ErrorEnvelop.Create("Username/email and password are required"));
+            }
+
+            try
+            {
+                // Validate credentials
+                var user = await UserManager.FindByNameAsync(userName) 
+                    ?? await UserManager.FindByEmailAsync(userName);
+                
+                if (user == null)
+                {
+                    return BadRequest(ErrorEnvelop.Create("Invalid credentials"));
+                }
+
+                // Check password
+                var passwordValid = await UserManager.CheckPasswordAsync(user, request.Password);
+                if (!passwordValid)
+                {
+                    return BadRequest(ErrorEnvelop.Create("Invalid credentials"));
+                }
+
+                // Get user roles
+                var roles = await UserManager.GetRolesAsync(user);
+                var claims = new List<System.Security.Claims.Claim>
+                {
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, user.Id),
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.UserName ?? ""),
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Email, user.Email ?? ""),
+                    new System.Security.Claims.Claim("role", string.Join(",", roles))
+                };
+
+                // Add individual role claims
+                foreach (var role in roles)
+                {
+                    claims.Add(new System.Security.Claims.Claim("role", role));
+                }
+
+                // Generate JWT token using JwtTokenService
+                var token = JwtTokenService.GenerateToken(user.Id, user.UserName ?? "", user.Email ?? "", roles.ToList());
+
+                // Get user details
+                var userDetails = await UserService.GetUserAsync(user.Id, cancellationToken);
+
+                return Ok(new
+                {
+                    accessToken = token,
+                    tokenType = "Bearer",
+                    expiresIn = 28800, // 8 hours in seconds
+                    user = new
+                    {
+                        id = user.Id,
+                        email = user.Email,
+                        userName = user.UserName,
+                        firstName = userDetails.HasError ? "" : userDetails.Data.FirstName,
+                        lastName = userDetails.HasError ? "" : userDetails.Data.LastName,
+                        roles = roles.ToArray()
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ErrorEnvelop.Create($"Token generation failed: {ex.Message}"));
+            }
+        }
+
+        /// <summary>
         /// API endpoint to get current authenticated user info
         /// </summary>
         [HttpGet("/api/auth/me")]
@@ -413,8 +492,10 @@ namespace UrGuide.WebApp.Controllers
         [ProducesResponseType(401)]
         public async Task<IActionResult> GetCurrentUserInfo(CancellationToken cancellationToken)
         {
+            // Claims are transformed automatically in JWT bearer configuration
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
             
             if (string.IsNullOrEmpty(userId))
             {
@@ -427,14 +508,17 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
             }
 
+            // Get roles from standard claim type (transformed from JWT "role" claims)
+            var roles = User.FindAll(System.Security.Claims.ClaimTypes.Role).Select(c => c.Value).ToArray();
+
             return Ok(new
             {
                 id = result.Data.Id,
-                email = userName ?? "", // UserName is typically email
+                email = email ?? userName ?? "",
                 userName = result.Data.UserName,
                 firstName = result.Data.FirstName,
                 lastName = result.Data.LastName,
-                roles = new[] { "Admin" } // Simplified - in production, get actual roles
+                roles = roles
             });
         }
 

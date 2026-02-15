@@ -20,6 +20,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UrGuide.Shared.Configuration;
 using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Data;
@@ -101,6 +102,7 @@ namespace UrGuide.WebApp.Extensions
             .AddInMemoryApiScopes(GetApiScopes())
             .AddInMemoryClients(GetClients(configuration, applicationUri))
             .AddAspNetIdentity<UrGuideUser>()
+            .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
             .AddDeveloperSigningCredential();
 
             services.AddScoped<IProfileService, ProfileService>();
@@ -113,21 +115,58 @@ namespace UrGuide.WebApp.Extensions
                 jwtKey = $"UrGuide_JWT_Secret_Key_{applicationUri}_Development_Only";
             }
 
-            services.AddAuthentication()
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "Bearer";
+                options.DefaultChallengeScheme = "Bearer";
+                options.DefaultScheme = "Bearer";
+            })
                 .AddJwtBearer("Bearer", options =>
                 {
                     options.Authority = applicationUri;
+                    
+                    // Allow HTTP for development (localhost)
+                    // In production, always use HTTPS
+                    if (applicationUri.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
+                    {
+                        options.RequireHttpsMetadata = false;
+                    }
+                    
                     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                     {
                         ValidateAudience = false,
-                        ValidateIssuer = false // Allow both IdentityServer and custom JWT tokens
+                        ValidateIssuer = true,
+                        ValidIssuer = applicationUri,
+                        
+                        // Map JWT claim names to standard ASP.NET claim types
+                        NameClaimType = "name",
+                        RoleClaimType = "role"
                     };
                     
-                    // Also validate custom JWT tokens with symmetric key
-                    options.TokenValidationParameters.ValidateIssuerSigningKey = true;
-                    options.TokenValidationParameters.IssuerSigningKey = 
-                        new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-                            System.Text.Encoding.UTF8.GetBytes(jwtKey));
+                    // Transform JWT claims to standard ClaimTypes for consistent usage
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnTokenValidated = context =>
+                        {
+                            if (context.Principal?.Identity is System.Security.Claims.ClaimsIdentity identity)
+                            {
+                                // Map "sub" to NameIdentifier
+                                var subClaim = identity.FindFirst("sub");
+                                if (subClaim != null && !identity.HasClaim(System.Security.Claims.ClaimTypes.NameIdentifier, subClaim.Value))
+                                {
+                                    identity.AddClaim(new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, subClaim.Value));
+                                }
+
+                                // Map "email" to Email
+                                var emailClaim = identity.FindFirst("email");
+                                if (emailClaim != null && !identity.HasClaim(System.Security.Claims.ClaimTypes.Email, emailClaim.Value))
+                                {
+                                    identity.AddClaim(new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Email, emailClaim.Value));
+                                }
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
             services.AddSignalR();

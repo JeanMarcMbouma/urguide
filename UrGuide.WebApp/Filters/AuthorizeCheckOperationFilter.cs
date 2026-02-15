@@ -22,12 +22,20 @@ namespace UrGuide.WebApp.Filters
             operation.Responses?.TryAdd("403", new OpenApiResponse { Description = "Forbidden" });
 
             var oAuthScheme = new OpenApiSecuritySchemeReference("oauth2", context.Document);
+            
+            // Also add Bearer scheme for direct token testing
+            var bearerScheme = new OpenApiSecuritySchemeReference("Bearer", context.Document);
 
+            // Add both OAuth2 and Bearer to the security requirements
             operation.Security = new List<OpenApiSecurityRequirement>
                 {
                     new OpenApiSecurityRequirement
                     {
                         [ oAuthScheme ] = new List<string> { "openid", "profile", "offline_access" }
+                    },
+                    new OpenApiSecurityRequirement
+                    {
+                        [ bearerScheme ] = new List<string> { }
                     }
                 };
         }

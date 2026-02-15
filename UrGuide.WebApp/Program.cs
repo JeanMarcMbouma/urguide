@@ -116,6 +116,7 @@ try
     
     builder.Services.AddSwaggerGen(c =>
     {
+        // OAuth2 configuration for Authorization Code flow
         c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
         {
             Type = SecuritySchemeType.OAuth2,
@@ -134,6 +135,18 @@ try
                 }
             }
         });
+
+        // JWT Bearer token configuration - allows pasting token directly
+        c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            Scheme = "Bearer",
+            BearerFormat = "JWT",
+            Description = "Paste your JWT token here. You can get a token from POST /api/auth/token endpoint.",
+            In = ParameterLocation.Header
+        });
+
         c.OperationFilter<UrGuide.WebApp.Filters.AuthorizeCheckOperationFilter>();
         
         // Configure Swagger to use API versioning

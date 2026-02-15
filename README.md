@@ -234,20 +234,33 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 
 3. **Configure secrets (IMPORTANT)**
    
-   **Never commit secrets to source control!** Use .NET User Secrets for local development:
+   **⚠️ SECURITY: Never commit secrets to source control!**
    
+   For detailed instructions on managing secrets securely, see **[SECRETS_MANAGEMENT.md](./docs/security/SECRETS_MANAGEMENT.md)**
+   
+   **Quick Start for Docker:**
+   ```bash
+   # Copy the example file
+   cp .env.example .env
+   
+   # Edit .env with your actual values
+   # The .env file is in .gitignore and will NOT be committed
+   nano .env  # or use your preferred editor
+   ```
+   
+   **Quick Start for Windows (LocalDB):**
    ```bash
    cd UrGuide.WebApp
    
-   # Set IPStack API Key (optional, for IP geolocation)
+   # Set required secrets
+   dotnet user-secrets set "IdentityServer:Clients:AdminDashboard:ClientSecret" "$(openssl rand -base64 32)"
+   dotnet user-secrets set "Jwt:Key" "$(openssl rand -base64 32)"
+   
+   # Set optional API keys
    dotnet user-secrets set "IpStack:ApiKey" "your-ipstack-api-key"
-   
-   # Set SendGrid API Key (optional, for email notifications)
    dotnet user-secrets set "SENDGRID_URGUIDE_API_KEY" "your-sendgrid-api-key"
-   
-   # Set Stripe API Keys (required for payment processing)
    dotnet user-secrets set "Stripe:SecretKey" "sk_test_..."
-   dotnet user-secrets set "Stripe:PublishableKey" "pk_test_..."
+   ```
    dotnet user-secrets set "Stripe:WebhookSecret" "whsec_..."
    
    # Set Xamarin Client Secret (required for mobile app)
@@ -746,6 +759,8 @@ The `docker-compose.yml` orchestrates **5 containers**:
 
 ### Environment Configuration
 
+**⚠️ SECURITY:** See **[SECRETS_MANAGEMENT.md](./docs/security/SECRETS_MANAGEMENT.md)** for complete security guidelines.
+
 Create a `.env` file for secrets and configuration:
 ```bash
 cp .env.example .env
@@ -754,7 +769,14 @@ cp .env.example .env
 
 **Required secrets** in `.env`:
 - `SQL_SA_PASSWORD` - Strong database password
-- `RABBITMQ_USER` / `RABBITMQ_PASS` - Message broker credentials  
+- `ADMIN_DASHBOARD_CLIENT_SECRET` - OAuth2 client secret for admin dashboard
+- `ADMIN_PASSWORD` - Default admin user password
+
+**Optional but recommended**:
+- `IPSTACK_API_KEY` - For IP geolocation
+- `SENDGRID_API_KEY` - For email notifications
+- `STRIPE_SECRET_KEY` - For payment processing
+- `JWT__KEY` - Custom JWT secret (auto-generated if not set)  
 - `IPSTACK_API_KEY` - IPStack API key (optional)
 - `SENDGRID_API_KEY` - SendGrid API key (optional)
 **Required Environment Variables:**
