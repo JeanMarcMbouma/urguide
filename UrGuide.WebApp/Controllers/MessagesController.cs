@@ -105,11 +105,10 @@ namespace UrGuide.WebApp.Controllers
                     IsRead = false,
                 };
 
-                if (!_messages.ContainsKey(request.ConversationId))
-                    _messages.TryAdd(request.ConversationId, new List<MessageItem>());
-
-                lock (_messages[request.ConversationId])
-                    _messages[request.ConversationId].Add(msg);
+                // Use GetOrAdd to atomically create the list, then lock it for the append
+                var list = _messages.GetOrAdd(request.ConversationId, _ => new List<MessageItem>());
+                lock (list)
+                    list.Add(msg);
 
                 // Update conversation summary
                 if (_conversations.TryGetValue(request.ConversationId, out var convo))

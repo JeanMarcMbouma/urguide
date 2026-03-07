@@ -279,6 +279,7 @@ export interface PaymentMethod {
 
 // Review types – matches backend AuthoredFeedback
 export interface AuthoredFeedback {
+  id?: string;
   text: string;
   rating: number;
   publicationDate: string;

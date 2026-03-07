@@ -223,8 +223,8 @@ class GuideApiService {
     );
 
     // Map AuthoredFeedback → Review
-    const items: Review[] = (data.items ?? []).map((fb, idx) => ({
-      id: `review-${idx}-${fb.authorId}`,
+    const items: Review[] = (data.items ?? []).map((fb) => ({
+      id: fb.id ?? `${fb.authorId}-${fb.publicationDate}`,
       touristId: fb.authorId,
       touristName: fb.authorFullName,
       touristAvatar: fb.authorImage ?? '',

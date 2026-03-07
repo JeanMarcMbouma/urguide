@@ -32,7 +32,7 @@ namespace UrGuide.WebApp.Models
     public class RecurringPatternRequest
     {
         [Required]
-        [RegularExpression("weekly|monthly")]
+        [RegularExpression("^(weekly|monthly)$")]
         public string Type { get; set; }
 
         public int? DayOfWeek { get; set; }

@@ -9,6 +9,7 @@ namespace UrGuide.Services.Feedback
         public FeedbackMap()
         {
             CreateMap<Data.Shared.Feedback, AuthoredFeedback>()
+                .ForMember(x => x.Id, y => y.MapFrom(x => x.Id))
                 .ForMember(x => x.AuthorFullName, y => y.MapFrom(x => x.Author.FullName))
                 .ForMember(x => x.AuthorId, y => y.MapFrom(x => x.Author.Id))
                 .ForMember(x => x.AuthorImage, y => y.MapFrom(x => x.Author.ProfileImage.ImageUrl))
