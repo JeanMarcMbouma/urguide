@@ -57,5 +57,14 @@ namespace UrGuide.WebApp.Controllers
             var result = await FeedbackService.GetPostFeedback(postId, pagination, cancellationToken);
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
+
+        [HttpPost("feedback/{feedbackId}/respond")]
+        [ProducesDefaultResponseType(typeof(bool))]
+        public IActionResult RespondToFeedback(string feedbackId, [FromBody] FeedbackResponseModel response)
+        {
+            // Store guide response (in production, persist to DB)
+            FeedbackResponseStore.Responses[feedbackId] = response.Response;
+            return Ok(true);
+        }
     }
 }
