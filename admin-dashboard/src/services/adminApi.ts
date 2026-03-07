@@ -21,6 +21,7 @@ import type {
 
 class AdminApiService {
   private api: AxiosInstance;
+  private analyticsApi: AxiosInstance;
 
   constructor() {
     this.api = axios.create({
@@ -30,30 +31,37 @@ class AdminApiService {
       },
     });
 
-    // Request interceptor to add auth token
-    this.api.interceptors.request.use(
-      (config) => {
-        const token = localStorage.getItem('adminToken');
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
+    this.analyticsApi = axios.create({
+      baseURL: '/api/analytics',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      (error) => Promise.reject(error)
-    );
+    });
+
+    const authInterceptor = (config: import('axios').InternalAxiosRequestConfig) => {
+      const token = localStorage.getItem('adminToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    };
+    const authErrorHandler = (error: unknown) => Promise.reject(error);
+
+    const responseErrorHandler = (error: AxiosError<ApiResult<unknown>>) => {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('adminToken');
+        window.location.href = '/login';
+      }
+      return Promise.reject(error);
+    };
+
+    // Request interceptor to add auth token
+    this.api.interceptors.request.use(authInterceptor, authErrorHandler);
+    this.analyticsApi.interceptors.request.use(authInterceptor, authErrorHandler);
 
     // Response interceptor for error handling
-    this.api.interceptors.response.use(
-      (response) => response,
-      (error: AxiosError<ApiResult<unknown>>) => {
-        if (error.response?.status === 401) {
-          // Unauthorized - redirect to login
-          localStorage.removeItem('adminToken');
-          window.location.href = '/login';
-        }
-        return Promise.reject(error);
-      }
-    );
+    this.api.interceptors.response.use((r) => r, responseErrorHandler);
+    this.analyticsApi.interceptors.response.use((r) => r, responseErrorHandler);
   }
 
   // Get all users with pagination and search
@@ -213,10 +221,7 @@ class AdminApiService {
 
   // Get revenue metrics from analytics endpoint
   async getRevenueMetrics(startDate?: string, endDate?: string): Promise<RevenueMetrics> {
-    const analyticsApi = axios.create({ baseURL: '/api/analytics' });
-    const token = localStorage.getItem('adminToken');
-    const { data } = await analyticsApi.get<RevenueMetrics>('/revenue-metrics', {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    const { data } = await this.analyticsApi.get<RevenueMetrics>('/revenue-metrics', {
       params: { startDate, endDate },
     });
     return data;
@@ -224,10 +229,7 @@ class AdminApiService {
 
   // Get full analytics dashboard summary
   async getAnalyticsDashboard(startDate?: string, endDate?: string): Promise<DashboardSummary> {
-    const analyticsApi = axios.create({ baseURL: '/api/analytics' });
-    const token = localStorage.getItem('adminToken');
-    const { data } = await analyticsApi.get<DashboardSummary>('/dashboard', {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    const { data } = await this.analyticsApi.get<DashboardSummary>('/dashboard', {
       params: { startDate, endDate },
     });
     return data;
@@ -235,10 +237,7 @@ class AdminApiService {
 
   // Export analytics data (returns a Blob)
   async exportAnalyticsData(format: 'csv' | 'json' = 'csv', startDate?: string, endDate?: string): Promise<Blob> {
-    const analyticsApi = axios.create({ baseURL: '/api/analytics' });
-    const token = localStorage.getItem('adminToken');
-    const response = await analyticsApi.get('/export', {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    const response = await this.analyticsApi.get('/export', {
       params: { format, startDate, endDate },
       responseType: 'blob',
     });

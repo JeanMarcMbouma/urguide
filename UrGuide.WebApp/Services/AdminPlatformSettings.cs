@@ -46,7 +46,18 @@ namespace UrGuide.WebApp.Services
         {
             lock (_lock)
             {
-                _settings = newSettings;
+                _settings = new PlatformSettings
+                {
+                    MaintenanceMode = newSettings.MaintenanceMode,
+                    RegistrationEnabled = newSettings.RegistrationEnabled,
+                    GuideApplicationsEnabled = newSettings.GuideApplicationsEnabled,
+                    TourBookingEnabled = newSettings.TourBookingEnabled,
+                    PaymentsEnabled = newSettings.PaymentsEnabled,
+                    EmailNotificationsEnabled = newSettings.EmailNotificationsEnabled,
+                    PlatformFeePercentage = newSettings.PlatformFeePercentage,
+                    MaxImagesPerPost = newSettings.MaxImagesPerPost,
+                    MinBookingDaysAdvance = newSettings.MinBookingDaysAdvance
+                };
             }
         }
     }

@@ -143,7 +143,7 @@ export default function SystemMonitoring() {
   // Sync fetched settings into local edit state once
   useEffect(() => {
     if (settings && !localSettings) setLocalSettings(settings);
-  }, [settings]);
+  }, [settings, localSettings]);
 
   const updateSettingsMutation = useMutation({
     mutationFn: (s: PlatformSettings) => adminApi.updatePlatformSettings(s),

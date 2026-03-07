@@ -869,7 +869,7 @@ namespace UrGuide.WebApp.Services
             }
             services.Add(identityService);
 
-            var overallStatus = services.TrueForAll(s => s.Status == "Healthy") ? "Healthy" : "Degraded";
+            var overallStatus = services.Count > 0 && services.TrueForAll(s => s.Status == "Healthy") ? "Healthy" : "Degraded";
 
             return Result.Of(new SystemHealthStatus
             {
