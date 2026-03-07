@@ -52,7 +52,7 @@ const Verification = () => {
   const [uploadingType, setUploadingType] = useState<string | null>(null);
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, string>>({});
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-  const overallStatus = 'not_submitted';
+  const [overallStatus, setOverallStatus] = useState<string>('not_submitted');
 
   const showAlert = (type: 'success' | 'error', message: string) => {
     setAlert({ type, message });
@@ -71,6 +71,7 @@ const Verification = () => {
           fileName: file.name,
         });
         setUploadedDocs((prev) => ({ ...prev, [documentType]: file.name }));
+        if (overallStatus === 'not_submitted') setOverallStatus('pending');
         showAlert('success', `${documentType.replace(/_/g, ' ')} uploaded successfully.`);
       } catch {
         showAlert('error', 'Failed to upload document. Please try again.');

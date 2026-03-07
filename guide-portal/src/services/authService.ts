@@ -56,6 +56,9 @@ class AuthService {
     return !!this.getToken();
   }
 
+  // Client-side role check for UI gating only. The JWT signature is NOT verified
+  // here — the backend enforces authorization on every request. Do not rely on
+  // this method for security-sensitive decisions.
   hasGuideRole(): boolean {
     const token = this.getToken();
     if (!token) return false;

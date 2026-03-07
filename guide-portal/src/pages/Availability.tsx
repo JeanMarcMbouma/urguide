@@ -26,6 +26,7 @@ import {
 } from '@mui/icons-material';
 import { guideApi } from '../services/guideApi';
 
+// Zero-indexed to match JavaScript's Date.getDay() convention (0 = Sunday).
 const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',

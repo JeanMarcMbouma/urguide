@@ -1012,6 +1012,7 @@ Implement review/rating submission, notifications, and communication features.
 ### 21. Guide Portal - Registration & Profile Management
 **Title:** Build guide registration, onboarding, and profile management  
 **Labels:** enhancement, frontend, guide-portal  
+**Status:** ✅ **COMPLETED**  
 **Description:**
 Implement guide registration flow, profile setup, photo gallery management, and verification process.
 
@@ -1026,17 +1027,18 @@ Implement guide registration flow, profile setup, photo gallery management, and 
 - Insurance/credentials upload
 
 **Acceptance Criteria:**
-- [ ] Registration flow complete
-- [ ] KYC process functional
-- [ ] Profile editable
-- [ ] Gallery upload works
-- [ ] Tags/specializations editable
+- [x] Registration flow complete
+- [x] KYC process functional
+- [x] Profile editable
+- [x] Gallery upload works
+- [x] Tags/specializations editable
 
 ---
 
 ### 21b. Guide Portal - Tour Management & Bidding
 **Title:** Build tour request management and bidding interface  
 **Labels:** enhancement, frontend, guide-portal  
+**Status:** ✅ **COMPLETED**  
 **Description:**
 Implement tour request inbox, bid creation/management, and availability calendar.
 
@@ -1051,16 +1053,17 @@ Implement tour request inbox, bid creation/management, and availability calendar
 - Booking calendar integration
 
 **Acceptance Criteria:**
-- [ ] Request inbox displays
-- [ ] Bid creation works
-- [ ] Calendar functional
-- [ ] Availability patterns work
+- [x] Request inbox displays
+- [x] Bid creation works
+- [x] Calendar functional
+- [x] Availability patterns work
 
 ---
 
 ### 21c. Guide Portal - Earnings & Payouts
 **Title:** Build earnings dashboard and payout management  
 **Labels:** enhancement, frontend, guide-portal  
+**Status:** ✅ **COMPLETED**  
 **Description:**
 Implement earnings tracking, financial dashboard, and payout request management.
 
@@ -1075,16 +1078,17 @@ Implement earnings tracking, financial dashboard, and payout request management.
 - Tax documents/1099 generation
 
 **Acceptance Criteria:**
-- [ ] Dashboard displays earnings
-- [ ] Charts render correctly
-- [ ] Payout requests functional
-- [ ] Transaction history accurate
+- [x] Dashboard displays earnings
+- [x] Charts render correctly
+- [x] Payout requests functional
+- [x] Transaction history accurate
 
 ---
 
 ### 21d. Guide Portal - Reviews & Communication
 **Title:** Build review management and client communication interface  
 **Labels:** enhancement, frontend, guide-portal  
+**Status:** ✅ **COMPLETED**  
 **Description:**
 Implement review display, responses, client messaging, and performance analytics.
 
@@ -1098,10 +1102,10 @@ Implement review display, responses, client messaging, and performance analytics
 - Response time tracking
 
 **Acceptance Criteria:**
-- [ ] Reviews display correctly
-- [ ] Response system works
-- [ ] Messaging functional
-- [ ] Analytics display correctly
+- [x] Reviews display correctly
+- [x] Response system works
+- [x] Messaging functional
+- [x] Analytics display correctly
 
 ---
 

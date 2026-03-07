@@ -30,7 +30,7 @@ import {
 } from '@mui/icons-material';
 import type { TourRequest } from '../types/guide.types';
 
-const STATUS_OPTIONS = ['all', 'pending', 'accepted', 'rejected'];
+const TOUR_REQUEST_STATUS_OPTIONS = ['all', 'pending', 'accepted', 'rejected'];
 
 const statusColors: Record<string, 'default' | 'warning' | 'success' | 'error'> = {
   pending: 'warning',
@@ -117,7 +117,7 @@ const TourRequests = () => {
                 label="Status"
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
-                {STATUS_OPTIONS.map((s) => (
+                {TOUR_REQUEST_STATUS_OPTIONS.map((s) => (
                   <MenuItem key={s} value={s}>
                     {s.charAt(0).toUpperCase() + s.slice(1)}
                   </MenuItem>

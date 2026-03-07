@@ -33,7 +33,7 @@ import { guideApi } from '../services/guideApi';
 import type { Bid, CreateBidRequest, UpdateBidRequest } from '../types/guide.types';
 import ConfirmDialog from '../components/shared/ConfirmDialog';
 
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD'];
+const SUPPORTED_CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD'];
 
 const statusColors: Record<string, 'default' | 'warning' | 'success' | 'error' | 'info'> = {
   pending: 'warning',
@@ -234,7 +234,7 @@ const BidManagement = () => {
                 label="Currency"
                 onChange={(e) => setCreateForm((f) => ({ ...f, currency: e.target.value }))}
               >
-                {CURRENCIES.map((c) => (
+                {SUPPORTED_CURRENCIES.map((c) => (
                   <MenuItem key={c} value={c}>{c}</MenuItem>
                 ))}
               </Select>
