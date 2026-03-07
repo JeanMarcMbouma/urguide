@@ -683,9 +683,10 @@ namespace UrGuide.WebApp.Services
                 var totalCount = await query.CountAsync(cancellationToken);
 
                 var pageSize = parameters.PageSize > 0 ? parameters.PageSize : 20;
+                var page = Math.Max(1, parameters.PageNumber);
                 var items = await query
                     .OrderByDescending(p => p.CreatedAt)
-                    .Skip((parameters.PageNumber - 1) * pageSize)
+                    .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .Select(p => new AdminTransactionItem
                     {
@@ -708,7 +709,7 @@ namespace UrGuide.WebApp.Services
                 {
                     Items = items,
                     TotalCount = totalCount,
-                    PageNumber = parameters.PageNumber,
+                    PageNumber = page,
                     PageSize = pageSize
                 });
             }
@@ -740,9 +741,10 @@ namespace UrGuide.WebApp.Services
                 var totalCount = await query.CountAsync(cancellationToken);
 
                 var pageSize = parameters.PageSize > 0 ? parameters.PageSize : 20;
+                var page = Math.Max(1, parameters.PageNumber);
                 var items = await query
                     .OrderByDescending(p => p.RequestedAt)
-                    .Skip((parameters.PageNumber - 1) * pageSize)
+                    .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .Select(p => new AdminPayoutItem
                     {
@@ -762,7 +764,7 @@ namespace UrGuide.WebApp.Services
                 {
                     Items = items,
                     TotalCount = totalCount,
-                    PageNumber = parameters.PageNumber,
+                    PageNumber = page,
                     PageSize = pageSize
                 });
             }
@@ -792,9 +794,10 @@ namespace UrGuide.WebApp.Services
                 var totalCount = await query.CountAsync(cancellationToken);
 
                 var pageSize = parameters.PageSize > 0 ? parameters.PageSize : 20;
+                var page = Math.Max(1, parameters.PageNumber);
                 var items = await query
                     .OrderByDescending(r => r.RequestedAt)
-                    .Skip((parameters.PageNumber - 1) * pageSize)
+                    .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .Select(r => new AdminRefundItem
                     {
@@ -814,7 +817,7 @@ namespace UrGuide.WebApp.Services
                 {
                     Items = items,
                     TotalCount = totalCount,
-                    PageNumber = parameters.PageNumber,
+                    PageNumber = page,
                     PageSize = pageSize
                 });
             }
@@ -836,16 +839,25 @@ namespace UrGuide.WebApp.Services
             try
             {
                 var sw = System.Diagnostics.Stopwatch.StartNew();
-                await _context.Database.CanConnectAsync(cancellationToken);
+                var canConnect = await _context.Database.CanConnectAsync(cancellationToken);
                 sw.Stop();
-                dbService.Status = "Healthy";
-                dbService.Message = "Connected";
+                if (canConnect)
+                {
+                    dbService.Status = "Healthy";
+                    dbService.Message = "Connected";
+                }
+                else
+                {
+                    dbService.Status = "Unhealthy";
+                    dbService.Message = "Cannot connect to database";
+                }
                 dbService.ResponseTimeMs = sw.ElapsedMilliseconds;
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Database health check failed");
                 dbService.Status = "Unhealthy";
-                dbService.Message = ex.Message;
+                dbService.Message = "Database connection check failed";
                 dbService.ResponseTimeMs = -1;
             }
             services.Add(dbService);
@@ -863,13 +875,22 @@ namespace UrGuide.WebApp.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Identity health check failed");
                 identityService.Status = "Unhealthy";
-                identityService.Message = ex.Message;
+                identityService.Message = "Identity store check failed";
                 identityService.ResponseTimeMs = -1;
             }
             services.Add(identityService);
 
-            var overallStatus = services.Count > 0 && services.TrueForAll(s => s.Status == "Healthy") ? "Healthy" : "Degraded";
+            string overallStatus;
+            if (services.Count == 0)
+                overallStatus = "Unknown";
+            else if (services.Exists(s => s.Status == "Unhealthy"))
+                overallStatus = "Unhealthy";
+            else if (services.TrueForAll(s => s.Status == "Healthy"))
+                overallStatus = "Healthy";
+            else
+                overallStatus = "Degraded";
 
             return Result.Of(new SystemHealthStatus
             {
@@ -901,11 +922,12 @@ namespace UrGuide.WebApp.Services
                 var totalCount = await query.CountAsync(cancellationToken);
 
                 var pageSize = parameters.PageSize > 0 ? parameters.PageSize : 50;
+                var page = Math.Max(1, parameters.PageNumber);
 
                 // Fetch audit events and join with user email
                 var events = await query
                     .OrderByDescending(e => e.Created)
-                    .Skip((parameters.PageNumber - 1) * pageSize)
+                    .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .ToListAsync(cancellationToken);
 
@@ -930,7 +952,7 @@ namespace UrGuide.WebApp.Services
                 {
                     Items = items,
                     TotalCount = totalCount,
-                    PageNumber = parameters.PageNumber,
+                    PageNumber = page,
                     PageSize = pageSize
                 });
             }
@@ -952,9 +974,10 @@ namespace UrGuide.WebApp.Services
                 var totalCount = await query.CountAsync(cancellationToken);
 
                 const int pageSize = 20;
+                var page = Math.Max(1, parameters.PageNumber);
                 var items = await query
                     .OrderByDescending(w => w.CreatedAt)
-                    .Skip((parameters.PageNumber - 1) * pageSize)
+                    .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .Select(w => new AdminWebhookItem
                     {
@@ -975,7 +998,7 @@ namespace UrGuide.WebApp.Services
                 {
                     Items = items,
                     TotalCount = totalCount,
-                    PageNumber = parameters.PageNumber,
+                    PageNumber = page,
                     PageSize = pageSize
                 });
             }
@@ -995,6 +1018,18 @@ namespace UrGuide.WebApp.Services
         {
             try
             {
+                var errors = new System.Collections.Generic.List<string>();
+
+                if (settings.PlatformFeePercentage < 0 || settings.PlatformFeePercentage > 100)
+                    errors.Add("PlatformFeePercentage must be between 0 and 100.");
+                if (settings.MaxImagesPerPost <= 0)
+                    errors.Add("MaxImagesPerPost must be greater than 0.");
+                if (settings.MinBookingDaysAdvance < 0)
+                    errors.Add("MinBookingDaysAdvance must be 0 or greater.");
+
+                if (errors.Count > 0)
+                    return Task.FromResult(Result.Of(false).WithErrors(errors.ToArray()));
+
                 _platformSettings.Update(settings);
                 _logger.LogInformation("Platform settings updated by admin {AdminId}", _userContext.UserId);
                 return Task.FromResult(Result.Of(true));

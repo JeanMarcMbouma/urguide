@@ -170,7 +170,8 @@ export default function FinancialDashboard() {
       a.href = url;
       a.download = `financial-report-${new Date().toISOString().slice(0, 10)}.${format}`;
       a.click();
-      window.URL.revokeObjectURL(url);
+      // Defer revoking so the browser has time to initiate the download
+      setTimeout(() => window.URL.revokeObjectURL(url), 100);
     } catch {
       // Export unavailable — handled gracefully
     } finally {
@@ -275,7 +276,13 @@ export default function FinancialDashboard() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                   <YAxis tickFormatter={(v) => `$${v}`} width={70} />
-                  <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                  <Tooltip
+                    formatter={(value) => {
+                      const numericValue = typeof value === 'number' ? value : Number(value);
+                      const safeValue = Number.isFinite(numericValue) ? numericValue : 0;
+                      return formatCurrency(safeValue);
+                    }}
+                  />
                   <Legend />
                   <Line type="monotone" dataKey="Revenue" stroke="#1976d2" strokeWidth={2} dot={false} />
                   <Line type="monotone" dataKey="Platform Fees" stroke="#2e7d32" strokeWidth={2} dot={false} />
