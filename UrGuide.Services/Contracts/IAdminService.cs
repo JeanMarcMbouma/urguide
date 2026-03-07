@@ -82,5 +82,49 @@ namespace UrGuide.Services.Contracts
         /// Approve or reject tour post
         /// </summary>
         Task<Result<bool>> ProcessTourModerationAsync(TourModerationDecisionModel model, CancellationToken cancellationToken);
+
+        // ── Financial Monitoring ──────────────────────────────────────────────
+
+        /// <summary>
+        /// Get paginated list of all payment transactions with optional filtering
+        /// </summary>
+        Task<Result<AdminTransactionListResponse>> GetAllTransactionsAsync(FinancialFilterParameters parameters, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Get paginated list of all guide payout requests with optional filtering
+        /// </summary>
+        Task<Result<AdminPayoutListResponse>> GetAllPayoutsAsync(FinancialFilterParameters parameters, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Get paginated list of all refund requests with optional filtering
+        /// </summary>
+        Task<Result<AdminRefundListResponse>> GetAllRefundsAsync(FinancialFilterParameters parameters, CancellationToken cancellationToken);
+
+        // ── System Monitoring ─────────────────────────────────────────────────
+
+        /// <summary>
+        /// Get system health status (database, storage, external services)
+        /// </summary>
+        Task<Result<SystemHealthStatus>> GetSystemHealthAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Get paginated list of all audit log events with optional filtering
+        /// </summary>
+        Task<Result<AdminAuditLogResponse>> GetAllAuditLogsAsync(AuditLogFilterParameters parameters, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Get paginated list of all registered webhook subscriptions
+        /// </summary>
+        Task<Result<AdminWebhookListResponse>> GetAllWebhooksAsync(PaginationParameters parameters, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Get current platform settings / feature toggles
+        /// </summary>
+        Task<Result<PlatformSettings>> GetPlatformSettingsAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Update platform settings / feature toggles
+        /// </summary>
+        Task<Result<bool>> UpdatePlatformSettingsAsync(PlatformSettings settings, CancellationToken cancellationToken);
     }
 }

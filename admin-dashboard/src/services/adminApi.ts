@@ -6,10 +6,22 @@ import type {
   PagedResult,
   SearchParameters,
   ApiResult,
+  AdminTransactionListResponse,
+  AdminPayoutListResponse,
+  AdminRefundListResponse,
+  FinancialFilterParameters,
+  RevenueMetrics,
+  DashboardSummary,
+  SystemHealthStatus,
+  AdminAuditLogResponse,
+  AdminWebhookListResponse,
+  PlatformSettings,
+  AuditLogFilterParameters,
 } from '../types/admin.types';
 
 class AdminApiService {
   private api: AxiosInstance;
+  private analyticsApi: AxiosInstance;
 
   constructor() {
     this.api = axios.create({
@@ -19,30 +31,37 @@ class AdminApiService {
       },
     });
 
-    // Request interceptor to add auth token
-    this.api.interceptors.request.use(
-      (config) => {
-        const token = localStorage.getItem('adminToken');
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
+    this.analyticsApi = axios.create({
+      baseURL: '/api/analytics',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      (error) => Promise.reject(error)
-    );
+    });
+
+    const authInterceptor = (config: import('axios').InternalAxiosRequestConfig) => {
+      const token = localStorage.getItem('adminToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    };
+    const authErrorHandler = (error: unknown) => Promise.reject(error);
+
+    const responseErrorHandler = (error: AxiosError<ApiResult<unknown>>) => {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('adminToken');
+        window.location.href = '/login';
+      }
+      return Promise.reject(error);
+    };
+
+    // Request interceptor to add auth token
+    this.api.interceptors.request.use(authInterceptor, authErrorHandler);
+    this.analyticsApi.interceptors.request.use(authInterceptor, authErrorHandler);
 
     // Response interceptor for error handling
-    this.api.interceptors.response.use(
-      (response) => response,
-      (error: AxiosError<ApiResult<unknown>>) => {
-        if (error.response?.status === 401) {
-          // Unauthorized - redirect to login
-          localStorage.removeItem('adminToken');
-          window.location.href = '/login';
-        }
-        return Promise.reject(error);
-      }
-    );
+    this.api.interceptors.response.use((r) => r, responseErrorHandler);
+    this.analyticsApi.interceptors.response.use((r) => r, responseErrorHandler);
   }
 
   // Get all users with pagination and search
@@ -153,6 +172,118 @@ class AdminApiService {
   // Process tour moderation (approve/reject)
   async processTourModeration(model: any): Promise<any> {
     const { data } = await this.api.post('/tours/moderation', model);
+    return data;
+  }
+
+  // ── Financial Monitoring ────────────────────────────────────────────────────
+
+  // Get all transactions (admin view)
+  async getTransactions(params?: FinancialFilterParameters): Promise<AdminTransactionListResponse> {
+    const { data } = await this.api.get<AdminTransactionListResponse>('/financial/transactions', {
+      params: {
+        PageNumber: params?.pageNumber || 1,
+        PageSize: params?.pageSize || 20,
+        StartDate: params?.startDate,
+        EndDate: params?.endDate,
+        Status: params?.status,
+      },
+    });
+    return data;
+  }
+
+  // Get all payouts (admin view)
+  async getPayouts(params?: FinancialFilterParameters): Promise<AdminPayoutListResponse> {
+    const { data } = await this.api.get<AdminPayoutListResponse>('/financial/payouts', {
+      params: {
+        PageNumber: params?.pageNumber || 1,
+        PageSize: params?.pageSize || 20,
+        StartDate: params?.startDate,
+        EndDate: params?.endDate,
+        Status: params?.status,
+      },
+    });
+    return data;
+  }
+
+  // Get all refunds (admin view)
+  async getRefunds(params?: FinancialFilterParameters): Promise<AdminRefundListResponse> {
+    const { data } = await this.api.get<AdminRefundListResponse>('/financial/refunds', {
+      params: {
+        PageNumber: params?.pageNumber || 1,
+        PageSize: params?.pageSize || 20,
+        StartDate: params?.startDate,
+        EndDate: params?.endDate,
+        Status: params?.status,
+      },
+    });
+    return data;
+  }
+
+  // Get revenue metrics from analytics endpoint
+  async getRevenueMetrics(startDate?: string, endDate?: string): Promise<RevenueMetrics> {
+    const { data } = await this.analyticsApi.get<RevenueMetrics>('/revenue-metrics', {
+      params: { startDate, endDate },
+    });
+    return data;
+  }
+
+  // Get full analytics dashboard summary
+  async getAnalyticsDashboard(startDate?: string, endDate?: string): Promise<DashboardSummary> {
+    const { data } = await this.analyticsApi.get<DashboardSummary>('/dashboard', {
+      params: { startDate, endDate },
+    });
+    return data;
+  }
+
+  // Export analytics data (returns a Blob)
+  async exportAnalyticsData(format: 'csv' | 'json' = 'csv', startDate?: string, endDate?: string): Promise<Blob> {
+    const response = await this.analyticsApi.get('/export', {
+      params: { format, startDate, endDate },
+      responseType: 'blob',
+    });
+    return response.data;
+  }
+
+  // ── System Monitoring ───────────────────────────────────────────────────────
+
+  // Get system health status
+  async getSystemHealth(): Promise<SystemHealthStatus> {
+    const { data } = await this.api.get<SystemHealthStatus>('/system/health');
+    return data;
+  }
+
+  // Get all audit log events
+  async getAuditLogs(params?: AuditLogFilterParameters): Promise<AdminAuditLogResponse> {
+    const { data } = await this.api.get<AdminAuditLogResponse>('/system/audit-logs', {
+      params: {
+        PageNumber: params?.pageNumber || 1,
+        PageSize: params?.pageSize || 50,
+        UserId: params?.userId,
+        StartDate: params?.startDate,
+        EndDate: params?.endDate,
+        EventCode: params?.eventCode,
+      },
+    });
+    return data;
+  }
+
+  // Get all webhook subscriptions
+  async getWebhooks(pageNumber: number = 1): Promise<AdminWebhookListResponse> {
+    const { data } = await this.api.get<AdminWebhookListResponse>('/system/webhooks', {
+      params: { PageNumber: pageNumber, PageSize: 20 },
+    });
+    return data;
+  }
+
+  // Get platform settings
+  async getPlatformSettings(): Promise<PlatformSettings> {
+    const { data } = await this.api.get<PlatformSettings>('/system/settings');
+    return data;
+  }
+
+  // Update platform settings
+  async updatePlatformSettings(settings: PlatformSettings): Promise<ApiResult<void>> {
+    const { data } = await this.api.put<ApiResult<void>>('/system/settings', settings);
     return data;
   }
 }

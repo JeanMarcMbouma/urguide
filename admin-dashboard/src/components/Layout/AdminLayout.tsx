@@ -25,6 +25,8 @@ import {
   AccountCircle,
   VerifiedUser as VerifiedUserIcon,
   TourOutlined as TourIcon,
+  AttachMoney as FinancialIcon,
+  Monitor as SystemIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -58,6 +60,8 @@ const AdminLayout = () => {
     { text: 'Users', icon: <PeopleIcon />, path: '/users' },
     { text: 'Guide Verification', icon: <VerifiedUserIcon />, path: '/guides/verification' },
     { text: 'Tour Moderation', icon: <TourIcon />, path: '/tours/moderation' },
+    { text: 'Financial', icon: <FinancialIcon />, path: '/financial' },
+    { text: 'System', icon: <SystemIcon />, path: '/system' },
   ];
 
   const drawer = (

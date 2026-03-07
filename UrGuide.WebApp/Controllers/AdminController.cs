@@ -289,5 +289,129 @@ namespace UrGuide.WebApp.Controllers
             var action = model.Approve ? "approved" : "rejected";
             return Ok(new { message = $"Tour post {action}", postId = model.PostId });
         }
+
+        // ── Financial Monitoring ──────────────────────────────────────────────
+
+        /// <summary>
+        /// Get all payment transactions with optional date and status filtering
+        /// </summary>
+        [HttpGet("financial/transactions")]
+        [ProducesResponseType(200, Type = typeof(AdminTransactionListResponse))]
+        public async Task<IActionResult> GetAllTransactions([FromQuery] FinancialFilterParameters parameters, CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.GetAllTransactionsAsync(parameters, cancellationToken);
+
+            if (result.HasError)
+                return BadRequest(ErrorEnvelop.Create(result.Errors));
+
+            return Ok(result.Data);
+        }
+
+        /// <summary>
+        /// Get all guide payout requests with optional date and status filtering
+        /// </summary>
+        [HttpGet("financial/payouts")]
+        [ProducesResponseType(200, Type = typeof(AdminPayoutListResponse))]
+        public async Task<IActionResult> GetAllPayouts([FromQuery] FinancialFilterParameters parameters, CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.GetAllPayoutsAsync(parameters, cancellationToken);
+
+            if (result.HasError)
+                return BadRequest(ErrorEnvelop.Create(result.Errors));
+
+            return Ok(result.Data);
+        }
+
+        /// <summary>
+        /// Get all refund requests with optional date and status filtering
+        /// </summary>
+        [HttpGet("financial/refunds")]
+        [ProducesResponseType(200, Type = typeof(AdminRefundListResponse))]
+        public async Task<IActionResult> GetAllRefunds([FromQuery] FinancialFilterParameters parameters, CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.GetAllRefundsAsync(parameters, cancellationToken);
+
+            if (result.HasError)
+                return BadRequest(ErrorEnvelop.Create(result.Errors));
+
+            return Ok(result.Data);
+        }
+
+        // ── System Monitoring ─────────────────────────────────────────────────
+
+        /// <summary>
+        /// Get system health status for all platform services
+        /// </summary>
+        [HttpGet("system/health")]
+        [ProducesResponseType(200, Type = typeof(SystemHealthStatus))]
+        public async Task<IActionResult> GetSystemHealth(CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.GetSystemHealthAsync(cancellationToken);
+
+            if (result.HasError)
+                return BadRequest(ErrorEnvelop.Create(result.Errors));
+
+            return Ok(result.Data);
+        }
+
+        /// <summary>
+        /// Get all platform audit log events with optional filtering
+        /// </summary>
+        [HttpGet("system/audit-logs")]
+        [ProducesResponseType(200, Type = typeof(AdminAuditLogResponse))]
+        public async Task<IActionResult> GetAuditLogs([FromQuery] AuditLogFilterParameters parameters, CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.GetAllAuditLogsAsync(parameters, cancellationToken);
+
+            if (result.HasError)
+                return BadRequest(ErrorEnvelop.Create(result.Errors));
+
+            return Ok(result.Data);
+        }
+
+        /// <summary>
+        /// Get all registered webhook subscriptions
+        /// </summary>
+        [HttpGet("system/webhooks")]
+        [ProducesResponseType(200, Type = typeof(AdminWebhookListResponse))]
+        public async Task<IActionResult> GetAllWebhooks([FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.GetAllWebhooksAsync(paginationParameters, cancellationToken);
+
+            if (result.HasError)
+                return BadRequest(ErrorEnvelop.Create(result.Errors));
+
+            return Ok(result.Data);
+        }
+
+        /// <summary>
+        /// Get current platform settings and feature toggles
+        /// </summary>
+        [HttpGet("system/settings")]
+        [ProducesResponseType(200, Type = typeof(PlatformSettings))]
+        public async Task<IActionResult> GetPlatformSettings(CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.GetPlatformSettingsAsync(cancellationToken);
+
+            if (result.HasError)
+                return BadRequest(ErrorEnvelop.Create(result.Errors));
+
+            return Ok(result.Data);
+        }
+
+        /// <summary>
+        /// Update platform settings and feature toggles
+        /// </summary>
+        [HttpPut("system/settings")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> UpdatePlatformSettings([FromBody] PlatformSettings settings, CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.UpdatePlatformSettingsAsync(settings, cancellationToken);
+
+            if (result.HasError)
+                return BadRequest(ErrorEnvelop.Create(result.Errors));
+
+            return Ok(new { message = "Platform settings updated successfully" });
+        }
     }
 }

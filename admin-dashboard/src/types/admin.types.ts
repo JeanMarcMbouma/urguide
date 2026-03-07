@@ -96,3 +96,180 @@ export interface ConfirmDialogProps {
   onCancel: () => void;
   severity?: 'warning' | 'error' | 'info';
 }
+
+// ── Financial Monitoring types ────────────────────────────────────────────────
+
+export interface AdminTransactionItem {
+  paymentId: string;
+  userId: string;
+  userEmail: string;
+  bookingId: string;
+  amount: number;
+  currencyCode: string;
+  status: string;
+  paymentMethod: string;
+  description: string;
+  platformFeeAmount: number;
+  guidePayout: number;
+  createdAt: string;
+}
+
+export interface AdminTransactionListResponse {
+  items: AdminTransactionItem[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+}
+
+export interface AdminPayoutItem {
+  payoutId: string;
+  guideId: string;
+  guideName: string;
+  amount: number;
+  currencyCode: string;
+  status: string;
+  requestedAt: string;
+  processedAt: string | null;
+  failureReason: string | null;
+}
+
+export interface AdminPayoutListResponse {
+  items: AdminPayoutItem[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+}
+
+export interface AdminRefundItem {
+  refundId: string;
+  paymentId: string;
+  amount: number;
+  currencyCode: string;
+  status: string;
+  reason: string;
+  requestedBy: string;
+  requestedAt: string;
+  processedAt: string | null;
+}
+
+export interface AdminRefundListResponse {
+  items: AdminRefundItem[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+}
+
+export interface FinancialFilterParameters {
+  pageNumber?: number;
+  pageSize?: number;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+}
+
+// ── Analytics types ───────────────────────────────────────────────────────────
+
+export interface RevenueDataPoint {
+  date: string;
+  amount: number;
+  platformFees: number;
+  transactionCount: number;
+}
+
+export interface RevenueMetrics {
+  totalRevenue: number;
+  platformFees: number;
+  guidePayout: number;
+  refundedAmount: number;
+  netRevenue: number;
+  transactionCount: number;
+  averageTransactionValue: number;
+  trendData: RevenueDataPoint[];
+}
+
+export interface DashboardSummary {
+  revenue: RevenueMetrics;
+  userTrends: {
+    totalUsers: number;
+    newUsersInPeriod: number;
+    growthRate: number;
+  };
+  bookingStats: {
+    totalBookings: number;
+    completedBookings: number;
+    cancelledBookings: number;
+    completionRate: number;
+  };
+}
+
+// ── System Monitoring types ───────────────────────────────────────────────────
+
+export interface ServiceHealthItem {
+  serviceName: string;
+  status: string;
+  message: string;
+  responseTimeMs: number;
+}
+
+export interface SystemHealthStatus {
+  overallStatus: string;
+  checkedAt: string;
+  services: ServiceHealthItem[];
+}
+
+export interface AdminAuditLogItem {
+  id: string;
+  eventCode: string;
+  userId: string;
+  userEmail: string;
+  referenceId: string;
+  created: string;
+}
+
+export interface AdminAuditLogResponse {
+  items: AdminAuditLogItem[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+}
+
+export interface AdminWebhookItem {
+  id: string;
+  userId: string;
+  userEmail: string;
+  url: string;
+  isActive: boolean;
+  description: string;
+  successCount: number;
+  failureCount: number;
+  createdAt: string;
+  lastTriggeredAt: string | null;
+}
+
+export interface AdminWebhookListResponse {
+  items: AdminWebhookItem[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+}
+
+export interface PlatformSettings {
+  maintenanceMode: boolean;
+  registrationEnabled: boolean;
+  guideApplicationsEnabled: boolean;
+  tourBookingEnabled: boolean;
+  paymentsEnabled: boolean;
+  emailNotificationsEnabled: boolean;
+  platformFeePercentage: number;
+  maxImagesPerPost: number;
+  minBookingDaysAdvance: number;
+}
+
+export interface AuditLogFilterParameters {
+  pageNumber?: number;
+  pageSize?: number;
+  userId?: string;
+  startDate?: string;
+  endDate?: string;
+  eventCode?: string;
+}
