@@ -11,6 +11,8 @@ import GuideVerification from './pages/GuideVerification';
 import GuideVerificationDetail from './pages/GuideVerificationDetail';
 import TourModeration from './pages/TourModeration';
 import TourModerationDetail from './pages/TourModerationDetail';
+import FinancialDashboard from './pages/FinancialDashboard';
+import SystemMonitoring from './pages/SystemMonitoring';
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -53,6 +55,8 @@ function App() {
         <Route path="guides/:userId/verification" element={<GuideVerificationDetail />} />
         <Route path="tours/moderation" element={<TourModeration />} />
         <Route path="tours/:postId/moderation" element={<TourModerationDetail />} />
+        <Route path="financial" element={<FinancialDashboard />} />
+        <Route path="system" element={<SystemMonitoring />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

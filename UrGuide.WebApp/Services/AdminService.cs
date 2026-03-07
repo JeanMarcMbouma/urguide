@@ -27,19 +27,22 @@ namespace UrGuide.WebApp.Services
         private readonly UrGuideContext _context;
         private readonly IUserContext _userContext;
         private readonly ILogger<AdminService> _logger;
+        private readonly AdminPlatformSettings _platformSettings;
 
         public AdminService(
             UserManager<UrGuideUser> userManager,
             RoleManager<IdentityRole> roleManager,
             UrGuideContext context,
             IUserContext userContext,
-            ILogger<AdminService> logger)
+            ILogger<AdminService> logger,
+            AdminPlatformSettings platformSettings)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _platformSettings = platformSettings ?? throw new ArgumentNullException(nameof(platformSettings));
         }
 
         public async Task<Result<PagedList<AdminUserInfo>>> GetAllUsersAsync(SearchParameters searchParameters, CancellationToken cancellationToken)
@@ -654,6 +657,352 @@ namespace UrGuide.WebApp.Services
             {
                 _logger.LogError(ex, "Error processing tour moderation for {PostId}", model.PostId);
                 return Result.Of(false).WithErrors("Failed to process tour moderation");
+            }
+        }
+
+        // ── Financial Monitoring ──────────────────────────────────────────────
+
+        public async Task<Result<AdminTransactionListResponse>> GetAllTransactionsAsync(FinancialFilterParameters parameters, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var query = _context.Payments
+                    .Include(p => p.User)
+                    .AsQueryable();
+
+                if (parameters.StartDate.HasValue)
+                    query = query.Where(p => p.CreatedAt >= parameters.StartDate.Value);
+
+                if (parameters.EndDate.HasValue)
+                    query = query.Where(p => p.CreatedAt <= parameters.EndDate.Value);
+
+                if (!string.IsNullOrWhiteSpace(parameters.Status) &&
+                    Enum.TryParse<UrGuide.Data.Entities.Payments.PaymentStatus>(parameters.Status, true, out var status))
+                    query = query.Where(p => p.Status == status);
+
+                var totalCount = await query.CountAsync(cancellationToken);
+
+                var pageSize = parameters.PageSize > 0 ? parameters.PageSize : 20;
+                var items = await query
+                    .OrderByDescending(p => p.CreatedAt)
+                    .Skip((parameters.PageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(p => new AdminTransactionItem
+                    {
+                        PaymentId = p.PaymentId,
+                        UserId = p.UserId,
+                        UserEmail = p.User != null ? p.User.Email : string.Empty,
+                        BookingId = p.BookingId,
+                        Amount = p.Amount,
+                        CurrencyCode = p.CurrencyCode,
+                        Status = p.Status.ToString(),
+                        PaymentMethod = p.PaymentMethod.ToString(),
+                        Description = p.Description,
+                        PlatformFeeAmount = p.PlatformFeeAmount,
+                        GuidePayout = p.GuidePayout,
+                        CreatedAt = p.CreatedAt
+                    })
+                    .ToListAsync(cancellationToken);
+
+                return Result.Of(new AdminTransactionListResponse
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = parameters.PageNumber,
+                    PageSize = pageSize
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving admin transaction list");
+                return Result.Of<AdminTransactionListResponse>().WithErrors("Failed to retrieve transactions");
+            }
+        }
+
+        public async Task<Result<AdminPayoutListResponse>> GetAllPayoutsAsync(FinancialFilterParameters parameters, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var query = _context.Payouts
+                    .Include(p => p.Guide)
+                    .AsQueryable();
+
+                if (parameters.StartDate.HasValue)
+                    query = query.Where(p => p.RequestedAt >= parameters.StartDate.Value);
+
+                if (parameters.EndDate.HasValue)
+                    query = query.Where(p => p.RequestedAt <= parameters.EndDate.Value);
+
+                if (!string.IsNullOrWhiteSpace(parameters.Status) &&
+                    Enum.TryParse<UrGuide.Data.Entities.Payments.PayoutStatus>(parameters.Status, true, out var status))
+                    query = query.Where(p => p.Status == status);
+
+                var totalCount = await query.CountAsync(cancellationToken);
+
+                var pageSize = parameters.PageSize > 0 ? parameters.PageSize : 20;
+                var items = await query
+                    .OrderByDescending(p => p.RequestedAt)
+                    .Skip((parameters.PageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(p => new AdminPayoutItem
+                    {
+                        PayoutId = p.PayoutId,
+                        GuideId = p.GuideId,
+                        GuideName = p.Guide != null && p.Guide.ProfileInfo != null ? p.Guide.ProfileInfo.FirstName : string.Empty,
+                        Amount = p.Amount,
+                        CurrencyCode = p.CurrencyCode,
+                        Status = p.Status.ToString(),
+                        RequestedAt = p.RequestedAt,
+                        ProcessedAt = p.ProcessedAt,
+                        FailureReason = p.FailureReason
+                    })
+                    .ToListAsync(cancellationToken);
+
+                return Result.Of(new AdminPayoutListResponse
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = parameters.PageNumber,
+                    PageSize = pageSize
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving admin payout list");
+                return Result.Of<AdminPayoutListResponse>().WithErrors("Failed to retrieve payouts");
+            }
+        }
+
+        public async Task<Result<AdminRefundListResponse>> GetAllRefundsAsync(FinancialFilterParameters parameters, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var query = _context.Refunds.AsQueryable();
+
+                if (parameters.StartDate.HasValue)
+                    query = query.Where(r => r.RequestedAt >= parameters.StartDate.Value);
+
+                if (parameters.EndDate.HasValue)
+                    query = query.Where(r => r.RequestedAt <= parameters.EndDate.Value);
+
+                if (!string.IsNullOrWhiteSpace(parameters.Status) &&
+                    Enum.TryParse<UrGuide.Data.Entities.Payments.RefundStatus>(parameters.Status, true, out var status))
+                    query = query.Where(r => r.Status == status);
+
+                var totalCount = await query.CountAsync(cancellationToken);
+
+                var pageSize = parameters.PageSize > 0 ? parameters.PageSize : 20;
+                var items = await query
+                    .OrderByDescending(r => r.RequestedAt)
+                    .Skip((parameters.PageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(r => new AdminRefundItem
+                    {
+                        RefundId = r.RefundId,
+                        PaymentId = r.PaymentId,
+                        Amount = r.Amount,
+                        CurrencyCode = r.CurrencyCode,
+                        Status = r.Status.ToString(),
+                        Reason = r.Reason,
+                        RequestedBy = r.RequestedBy,
+                        RequestedAt = r.RequestedAt,
+                        ProcessedAt = r.ProcessedAt
+                    })
+                    .ToListAsync(cancellationToken);
+
+                return Result.Of(new AdminRefundListResponse
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = parameters.PageNumber,
+                    PageSize = pageSize
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving admin refund list");
+                return Result.Of<AdminRefundListResponse>().WithErrors("Failed to retrieve refunds");
+            }
+        }
+
+        // ── System Monitoring ─────────────────────────────────────────────────
+
+        public async Task<Result<SystemHealthStatus>> GetSystemHealthAsync(CancellationToken cancellationToken)
+        {
+            var services = new System.Collections.Generic.List<ServiceHealthItem>();
+
+            // Check database connectivity
+            var dbService = new ServiceHealthItem { ServiceName = "Database" };
+            try
+            {
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+                await _context.Database.CanConnectAsync(cancellationToken);
+                sw.Stop();
+                dbService.Status = "Healthy";
+                dbService.Message = "Connected";
+                dbService.ResponseTimeMs = sw.ElapsedMilliseconds;
+            }
+            catch (Exception ex)
+            {
+                dbService.Status = "Unhealthy";
+                dbService.Message = ex.Message;
+                dbService.ResponseTimeMs = -1;
+            }
+            services.Add(dbService);
+
+            // Check user store (Identity)
+            var identityService = new ServiceHealthItem { ServiceName = "Identity" };
+            try
+            {
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+                _ = await _userManager.Users.AnyAsync(cancellationToken);
+                sw.Stop();
+                identityService.Status = "Healthy";
+                identityService.Message = "User store accessible";
+                identityService.ResponseTimeMs = sw.ElapsedMilliseconds;
+            }
+            catch (Exception ex)
+            {
+                identityService.Status = "Unhealthy";
+                identityService.Message = ex.Message;
+                identityService.ResponseTimeMs = -1;
+            }
+            services.Add(identityService);
+
+            var overallStatus = services.TrueForAll(s => s.Status == "Healthy") ? "Healthy" : "Degraded";
+
+            return Result.Of(new SystemHealthStatus
+            {
+                OverallStatus = overallStatus,
+                CheckedAt = DateTime.UtcNow,
+                Services = services
+            });
+        }
+
+        public async Task<Result<AdminAuditLogResponse>> GetAllAuditLogsAsync(AuditLogFilterParameters parameters, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var query = _context.AuditEvents.AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(parameters.UserId))
+                    query = query.Where(e => e.UserId == parameters.UserId);
+
+                if (parameters.StartDate.HasValue)
+                    query = query.Where(e => e.Created >= parameters.StartDate.Value);
+
+                if (parameters.EndDate.HasValue)
+                    query = query.Where(e => e.Created <= parameters.EndDate.Value);
+
+                if (!string.IsNullOrWhiteSpace(parameters.EventCode) &&
+                    Enum.TryParse<UrGuide.Data.Entities.Event.EventCodes>(parameters.EventCode, true, out var eventCode))
+                    query = query.Where(e => e.EventCode == eventCode);
+
+                var totalCount = await query.CountAsync(cancellationToken);
+
+                var pageSize = parameters.PageSize > 0 ? parameters.PageSize : 50;
+
+                // Fetch audit events and join with user email
+                var events = await query
+                    .OrderByDescending(e => e.Created)
+                    .Skip((parameters.PageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync(cancellationToken);
+
+                var userIds = events.Select(e => e.UserId).Distinct().ToList();
+                var users = await _userManager.Users
+                    .Where(u => userIds.Contains(u.Id))
+                    .Select(u => new { u.Id, u.Email })
+                    .ToListAsync(cancellationToken);
+                var userEmailMap = users.ToDictionary(u => u.Id, u => u.Email ?? string.Empty);
+
+                var items = events.Select(e => new AdminAuditLogItem
+                {
+                    Id = e.Id,
+                    EventCode = e.EventCode.ToString(),
+                    UserId = e.UserId,
+                    UserEmail = e.UserId != null && userEmailMap.TryGetValue(e.UserId, out var email) ? email : string.Empty,
+                    ReferenceId = e.ReferenceId,
+                    Created = e.Created
+                }).ToList();
+
+                return Result.Of(new AdminAuditLogResponse
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = parameters.PageNumber,
+                    PageSize = pageSize
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving audit logs");
+                return Result.Of<AdminAuditLogResponse>().WithErrors("Failed to retrieve audit logs");
+            }
+        }
+
+        public async Task<Result<AdminWebhookListResponse>> GetAllWebhooksAsync(PaginationParameters parameters, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var query = _context.WebhookSubscriptions
+                    .Include(w => w.User)
+                    .AsQueryable();
+
+                var totalCount = await query.CountAsync(cancellationToken);
+
+                const int pageSize = 20;
+                var items = await query
+                    .OrderByDescending(w => w.CreatedAt)
+                    .Skip((parameters.PageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(w => new AdminWebhookItem
+                    {
+                        Id = w.Id,
+                        UserId = w.UserId,
+                        UserEmail = w.User != null ? w.User.Email : string.Empty,
+                        Url = w.Url,
+                        IsActive = w.IsActive,
+                        Description = w.Description,
+                        SuccessCount = w.SuccessCount,
+                        FailureCount = w.FailureCount,
+                        CreatedAt = w.CreatedAt,
+                        LastTriggeredAt = w.LastTriggeredAt
+                    })
+                    .ToListAsync(cancellationToken);
+
+                return Result.Of(new AdminWebhookListResponse
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = parameters.PageNumber,
+                    PageSize = pageSize
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving webhooks for admin");
+                return Result.Of<AdminWebhookListResponse>().WithErrors("Failed to retrieve webhooks");
+            }
+        }
+
+        public Task<Result<PlatformSettings>> GetPlatformSettingsAsync(CancellationToken cancellationToken)
+        {
+            return Task.FromResult(Result.Of(_platformSettings.Get()));
+        }
+
+        public Task<Result<bool>> UpdatePlatformSettingsAsync(PlatformSettings settings, CancellationToken cancellationToken)
+        {
+            try
+            {
+                _platformSettings.Update(settings);
+                _logger.LogInformation("Platform settings updated by admin {AdminId}", _userContext.UserId);
+                return Task.FromResult(Result.Of(true));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating platform settings");
+                return Task.FromResult(Result.Of(false).WithErrors("Failed to update platform settings"));
             }
         }
     }

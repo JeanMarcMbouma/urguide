@@ -6,6 +6,17 @@ import type {
   PagedResult,
   SearchParameters,
   ApiResult,
+  AdminTransactionListResponse,
+  AdminPayoutListResponse,
+  AdminRefundListResponse,
+  FinancialFilterParameters,
+  RevenueMetrics,
+  DashboardSummary,
+  SystemHealthStatus,
+  AdminAuditLogResponse,
+  AdminWebhookListResponse,
+  PlatformSettings,
+  AuditLogFilterParameters,
 } from '../types/admin.types';
 
 class AdminApiService {
@@ -153,6 +164,127 @@ class AdminApiService {
   // Process tour moderation (approve/reject)
   async processTourModeration(model: any): Promise<any> {
     const { data } = await this.api.post('/tours/moderation', model);
+    return data;
+  }
+
+  // ── Financial Monitoring ────────────────────────────────────────────────────
+
+  // Get all transactions (admin view)
+  async getTransactions(params?: FinancialFilterParameters): Promise<AdminTransactionListResponse> {
+    const { data } = await this.api.get<AdminTransactionListResponse>('/financial/transactions', {
+      params: {
+        PageNumber: params?.pageNumber || 1,
+        PageSize: params?.pageSize || 20,
+        StartDate: params?.startDate,
+        EndDate: params?.endDate,
+        Status: params?.status,
+      },
+    });
+    return data;
+  }
+
+  // Get all payouts (admin view)
+  async getPayouts(params?: FinancialFilterParameters): Promise<AdminPayoutListResponse> {
+    const { data } = await this.api.get<AdminPayoutListResponse>('/financial/payouts', {
+      params: {
+        PageNumber: params?.pageNumber || 1,
+        PageSize: params?.pageSize || 20,
+        StartDate: params?.startDate,
+        EndDate: params?.endDate,
+        Status: params?.status,
+      },
+    });
+    return data;
+  }
+
+  // Get all refunds (admin view)
+  async getRefunds(params?: FinancialFilterParameters): Promise<AdminRefundListResponse> {
+    const { data } = await this.api.get<AdminRefundListResponse>('/financial/refunds', {
+      params: {
+        PageNumber: params?.pageNumber || 1,
+        PageSize: params?.pageSize || 20,
+        StartDate: params?.startDate,
+        EndDate: params?.endDate,
+        Status: params?.status,
+      },
+    });
+    return data;
+  }
+
+  // Get revenue metrics from analytics endpoint
+  async getRevenueMetrics(startDate?: string, endDate?: string): Promise<RevenueMetrics> {
+    const analyticsApi = axios.create({ baseURL: '/api/analytics' });
+    const token = localStorage.getItem('adminToken');
+    const { data } = await analyticsApi.get<RevenueMetrics>('/revenue-metrics', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      params: { startDate, endDate },
+    });
+    return data;
+  }
+
+  // Get full analytics dashboard summary
+  async getAnalyticsDashboard(startDate?: string, endDate?: string): Promise<DashboardSummary> {
+    const analyticsApi = axios.create({ baseURL: '/api/analytics' });
+    const token = localStorage.getItem('adminToken');
+    const { data } = await analyticsApi.get<DashboardSummary>('/dashboard', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      params: { startDate, endDate },
+    });
+    return data;
+  }
+
+  // Export analytics data (returns a Blob)
+  async exportAnalyticsData(format: 'csv' | 'json' = 'csv', startDate?: string, endDate?: string): Promise<Blob> {
+    const analyticsApi = axios.create({ baseURL: '/api/analytics' });
+    const token = localStorage.getItem('adminToken');
+    const response = await analyticsApi.get('/export', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      params: { format, startDate, endDate },
+      responseType: 'blob',
+    });
+    return response.data;
+  }
+
+  // ── System Monitoring ───────────────────────────────────────────────────────
+
+  // Get system health status
+  async getSystemHealth(): Promise<SystemHealthStatus> {
+    const { data } = await this.api.get<SystemHealthStatus>('/system/health');
+    return data;
+  }
+
+  // Get all audit log events
+  async getAuditLogs(params?: AuditLogFilterParameters): Promise<AdminAuditLogResponse> {
+    const { data } = await this.api.get<AdminAuditLogResponse>('/system/audit-logs', {
+      params: {
+        PageNumber: params?.pageNumber || 1,
+        PageSize: params?.pageSize || 50,
+        UserId: params?.userId,
+        StartDate: params?.startDate,
+        EndDate: params?.endDate,
+        EventCode: params?.eventCode,
+      },
+    });
+    return data;
+  }
+
+  // Get all webhook subscriptions
+  async getWebhooks(pageNumber: number = 1): Promise<AdminWebhookListResponse> {
+    const { data } = await this.api.get<AdminWebhookListResponse>('/system/webhooks', {
+      params: { PageNumber: pageNumber, PageSize: 20 },
+    });
+    return data;
+  }
+
+  // Get platform settings
+  async getPlatformSettings(): Promise<PlatformSettings> {
+    const { data } = await this.api.get<PlatformSettings>('/system/settings');
+    return data;
+  }
+
+  // Update platform settings
+  async updatePlatformSettings(settings: PlatformSettings): Promise<ApiResult<void>> {
+    const { data } = await this.api.put<ApiResult<void>>('/system/settings', settings);
     return data;
   }
 }
