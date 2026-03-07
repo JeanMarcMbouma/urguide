@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -16,17 +16,22 @@ import {
   Alert,
   Grid,
   Chip,
+  CircularProgress,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
   AddPhotoAlternate as AddPhotoIcon,
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { guideApi } from '../services/guideApi';
+import { useAuth } from '../hooks/useAuth';
 import type { Gallery as GalleryType, GalleryItem } from '../types/guide.types';
 import ConfirmDialog from '../components/shared/ConfirmDialog';
 
 const Gallery = () => {
+  const { t } = useTranslation();
+  const { user } = useAuth();
   const [galleries, setGalleries] = useState<GalleryType[]>([]);
   const [selectedGallery, setSelectedGallery] = useState<GalleryType | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
@@ -34,26 +39,33 @@ const Gallery = () => {
   const [newGalleryDesc, setNewGalleryDesc] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<{ type: 'gallery' | 'image'; id: string; catalogId?: string } | null>(null);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   const showAlert = (type: 'success' | 'error', message: string) => {
     setAlert({ type, message });
     setTimeout(() => setAlert(null), 4000);
   };
 
+  useEffect(() => {
+    if (!user?.id) return;
+    guideApi.getGalleries(user.id)
+      .then(setGalleries)
+      .catch(() => setLoadError(t('gallery.loadError')))
+      .finally(() => setLoading(false));
+  }, [user?.id, t]);
+
   const handleCreateGallery = async () => {
     if (!newGalleryName.trim()) return;
     try {
-      const created = await guideApi.createGallery({
-        name: newGalleryName,
-        description: newGalleryDesc,
-      });
+      const created = await guideApi.createGallery({ name: newGalleryName, description: newGalleryDesc });
       setGalleries((prev) => [...prev, created]);
       setCreateOpen(false);
       setNewGalleryName('');
       setNewGalleryDesc('');
-      showAlert('success', 'Gallery created successfully.');
+      showAlert('success', t('gallery.createSuccess'));
     } catch {
-      showAlert('error', 'Failed to create gallery.');
+      showAlert('error', t('gallery.createError'));
     }
   };
 
@@ -62,9 +74,9 @@ const Gallery = () => {
       await guideApi.deleteGallery(catalogId);
       setGalleries((prev) => prev.filter((g) => g.id !== catalogId));
       if (selectedGallery?.id === catalogId) setSelectedGallery(null);
-      showAlert('success', 'Gallery deleted.');
+      showAlert('success', t('gallery.deleteSuccess'));
     } catch {
-      showAlert('error', 'Failed to delete gallery.');
+      showAlert('error', t('gallery.createError'));
     }
   };
 
@@ -73,23 +85,13 @@ const Gallery = () => {
     reader.onload = async () => {
       const base64 = (reader.result as string).split(',')[1];
       try {
-        const item = await guideApi.addImageToGallery(catalogId, {
-          fileBase64: base64,
-          fileName: file.name,
-        });
-        setGalleries((prev) =>
-          prev.map((g) =>
-            g.id === catalogId ? { ...g, images: [...g.images, item] } : g
-          )
-        );
-        if (selectedGallery?.id === catalogId) {
-          setSelectedGallery((prev) =>
-            prev ? { ...prev, images: [...prev.images, item] } : prev
-          );
-        }
-        showAlert('success', 'Image uploaded successfully.');
+        const item = await guideApi.addImageToGallery(catalogId, { fileBase64: base64, fileName: file.name });
+        const updater = (g: GalleryType) => g.id === catalogId ? { ...g, images: [...g.images, item] } : g;
+        setGalleries((prev) => prev.map(updater));
+        if (selectedGallery?.id === catalogId) setSelectedGallery((prev) => prev ? updater(prev) : prev);
+        showAlert('success', t('gallery.createSuccess'));
       } catch {
-        showAlert('error', 'Failed to upload image.');
+        showAlert('error', t('gallery.uploadError'));
       }
     };
     reader.readAsDataURL(file);
@@ -99,46 +101,43 @@ const Gallery = () => {
     try {
       await guideApi.removeImageFromGallery(catalogId, imageId);
       const updater = (g: GalleryType) =>
-        g.id === catalogId
-          ? { ...g, images: g.images.filter((img: GalleryItem) => img.id !== imageId) }
-          : g;
+        g.id === catalogId ? { ...g, images: g.images.filter((img: GalleryItem) => img.id !== imageId) } : g;
       setGalleries((prev) => prev.map(updater));
-      if (selectedGallery?.id === catalogId) {
-        setSelectedGallery((prev) => (prev ? updater(prev) : prev));
-      }
-      showAlert('success', 'Image removed.');
+      if (selectedGallery?.id === catalogId) setSelectedGallery((prev) => prev ? updater(prev) : prev);
+      showAlert('success', t('gallery.deleteSuccess'));
     } catch {
-      showAlert('error', 'Failed to remove image.');
+      showAlert('error', t('gallery.removeImageError'));
     }
   };
 
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">Photo Gallery</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Box>
+          <Typography variant="h4">{t('gallery.title')}</Typography>
+          <Typography variant="body1" color="text.secondary">{t('gallery.subtitle')}</Typography>
+        </Box>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateOpen(true)}>
-          New Gallery
+          {t('gallery.createGallery')}
         </Button>
       </Box>
 
-      {alert && (
-        <Alert severity={alert.type} sx={{ mb: 2 }}>
-          {alert.message}
-        </Alert>
-      )}
+      {loadError && <Alert severity="error" sx={{ mb: 2 }}>{loadError}</Alert>}
+      {alert && <Alert severity={alert.type} sx={{ mb: 2 }}>{alert.message}</Alert>}
 
       {galleries.length === 0 ? (
         <Paper elevation={2} sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="body1" color="text.secondary">
-            No galleries yet. Create your first gallery to showcase your tours.
-          </Typography>
-          <Button
-            variant="outlined"
-            startIcon={<AddIcon />}
-            sx={{ mt: 2 }}
-            onClick={() => setCreateOpen(true)}
-          >
-            Create Gallery
+          <Typography variant="body1" color="text.secondary">{t('gallery.noGalleries')}</Typography>
+          <Button variant="outlined" startIcon={<AddIcon />} sx={{ mt: 2 }} onClick={() => setCreateOpen(true)}>
+            {t('gallery.createGallery')}
           </Button>
         </Paper>
       ) : (
@@ -151,23 +150,12 @@ const Gallery = () => {
                 onClick={() => setSelectedGallery(gallery)}
               >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="h6" noWrap>
-                    {gallery.name}
-                  </Typography>
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setConfirmDelete({ type: 'gallery', id: gallery.id });
-                    }}
-                  >
+                  <Typography variant="h6" noWrap>{gallery.name}</Typography>
+                  <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); setConfirmDelete({ type: 'gallery', id: gallery.id }); }}>
                     <DeleteIcon />
                   </IconButton>
                 </Box>
-                <Typography variant="body2" color="text.secondary" noWrap>
-                  {gallery.description}
-                </Typography>
+                <Typography variant="body2" color="text.secondary" noWrap>{gallery.description}</Typography>
                 <Chip label={`${gallery.images.length} images`} size="small" sx={{ mt: 1 }} />
               </Paper>
             </Grid>
@@ -179,27 +167,17 @@ const Gallery = () => {
         <Paper elevation={2} sx={{ p: 3, mt: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">{selectedGallery.name}</Typography>
-            <Button
-              variant="outlined"
-              startIcon={<AddPhotoIcon />}
-              component="label"
-            >
-              Upload Image
-              <input
-                type="file"
-                hidden
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleUploadImage(selectedGallery.id, file);
-                }}
-              />
+            <Button variant="outlined" startIcon={<AddPhotoIcon />} component="label">
+              {t('gallery.addImage')}
+              <input type="file" hidden accept="image/*" onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleUploadImage(selectedGallery.id, file);
+                e.target.value = '';
+              }} />
             </Button>
           </Box>
           {selectedGallery.images.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
-              No images yet. Upload photos to this gallery.
-            </Typography>
+            <Typography variant="body2" color="text.secondary">{t('gallery.noImages')}</Typography>
           ) : (
             <ImageList cols={3} rowHeight={164}>
               {selectedGallery.images.map((img) => (
@@ -208,17 +186,8 @@ const Gallery = () => {
                   <ImageListItemBar
                     title={img.title || img.description}
                     actionIcon={
-                      <IconButton
-                        size="small"
-                        sx={{ color: 'white' }}
-                        onClick={() =>
-                          setConfirmDelete({
-                            type: 'image',
-                            id: img.id,
-                            catalogId: selectedGallery.id,
-                          })
-                        }
-                      >
+                      <IconButton size="small" sx={{ color: 'white' }}
+                        onClick={() => setConfirmDelete({ type: 'image', id: img.id, catalogId: selectedGallery.id })}>
                         <DeleteIcon />
                       </IconButton>
                     }
@@ -230,53 +199,32 @@ const Gallery = () => {
         </Paper>
       )}
 
-      {/* Create Gallery Dialog */}
       <Dialog open={createOpen} onClose={() => setCreateOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Create New Gallery</DialogTitle>
+        <DialogTitle>{t('gallery.createGallery')}</DialogTitle>
         <DialogContent>
-          <TextField
-            autoFocus
-            fullWidth
-            label="Gallery Name"
-            value={newGalleryName}
-            onChange={(e) => setNewGalleryName(e.target.value)}
-            sx={{ mt: 1, mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Description"
-            multiline
-            rows={3}
-            value={newGalleryDesc}
-            onChange={(e) => setNewGalleryDesc(e.target.value)}
-          />
+          <TextField autoFocus fullWidth label={t('gallery.galleryName')} value={newGalleryName}
+            onChange={(e) => setNewGalleryName(e.target.value)} sx={{ mt: 1, mb: 2 }} />
+          <TextField fullWidth label={t('gallery.description')} multiline rows={3}
+            value={newGalleryDesc} onChange={(e) => setNewGalleryDesc(e.target.value)} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreateOpen(false)}>Cancel</Button>
+          <Button onClick={() => setCreateOpen(false)}>{t('gallery.cancel')}</Button>
           <Button variant="contained" onClick={handleCreateGallery} disabled={!newGalleryName.trim()}>
-            Create
+            {t('gallery.create')}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Confirm Delete Dialog */}
       <ConfirmDialog
         open={!!confirmDelete}
-        title={confirmDelete?.type === 'gallery' ? 'Delete Gallery' : 'Remove Image'}
-        message={
-          confirmDelete?.type === 'gallery'
-            ? 'Are you sure you want to delete this gallery and all its images?'
-            : 'Are you sure you want to remove this image?'
-        }
-        confirmText="Delete"
+        title={confirmDelete?.type === 'gallery' ? t('gallery.deleteGallery') : t('gallery.addImage')}
+        message={t('gallery.confirmDelete')}
+        confirmText={t('common.delete')}
         severity="error"
         onConfirm={() => {
           if (!confirmDelete) return;
-          if (confirmDelete.type === 'gallery') {
-            handleDeleteGallery(confirmDelete.id);
-          } else if (confirmDelete.catalogId) {
-            handleRemoveImage(confirmDelete.catalogId, confirmDelete.id);
-          }
+          if (confirmDelete.type === 'gallery') handleDeleteGallery(confirmDelete.id);
+          else if (confirmDelete.catalogId) handleRemoveImage(confirmDelete.catalogId, confirmDelete.id);
           setConfirmDelete(null);
         }}
         onCancel={() => setConfirmDelete(null)}

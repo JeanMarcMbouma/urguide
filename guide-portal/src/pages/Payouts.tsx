@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
   Typography,
   Grid,
-  Button,
   Table,
   TableBody,
   TableCell,
@@ -12,264 +11,188 @@ import {
   TableHead,
   TableRow,
   Chip,
+  Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
+  CircularProgress,
   Alert,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  IconButton,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  AccountBalanceWallet as WalletIcon,
-  Delete as DeleteIcon,
-  Star as StarIcon,
-} from '@mui/icons-material';
-import type { PayoutItem, PaymentMethod } from '../types/guide.types';
+import { Add as AddIcon } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
+import { guideApi } from '../services/guideApi';
+import { useAuth } from '../hooks/useAuth';
+import type { PayoutItem } from '../types/guide.types';
 
-const statusColors: Record<string, 'success' | 'warning' | 'error' | 'default' | 'info'> = {
-  completed: 'success',
+const statusColors: Record<string, 'default' | 'warning' | 'success' | 'error'> = {
   pending: 'warning',
-  processing: 'info',
+  completed: 'success',
+  processed: 'success',
   failed: 'error',
 };
 
-const SAMPLE_PAYOUTS: PayoutItem[] = [
-  {
-    payoutId: 'p1',
-    guideId: 'g1',
-    amount: 500,
-    currencyCode: 'USD',
-    status: 'completed',
-    requestedAt: '2024-03-05T10:00:00Z',
-    processedAt: '2024-03-07T10:00:00Z',
-    paymentMethod: 'bank_transfer',
-  },
-  {
-    payoutId: 'p2',
-    guideId: 'g1',
-    amount: 350,
-    currencyCode: 'USD',
-    status: 'pending',
-    requestedAt: '2024-03-20T10:00:00Z',
-    paymentMethod: 'paypal',
-  },
-];
-
-const SAMPLE_METHODS: PaymentMethod[] = [
-  { id: 'm1', type: 'bank_transfer', details: 'Bank **** 4321', isDefault: true, createdAt: '2024-01-01' },
-  { id: 'm2', type: 'paypal', details: 'guide@example.com', isDefault: false, createdAt: '2024-02-01' },
-];
-
 const Payouts = () => {
-  const [payouts] = useState<PayoutItem[]>(SAMPLE_PAYOUTS);
-  const [methods, setMethods] = useState<PaymentMethod[]>(SAMPLE_METHODS);
+  const { t } = useTranslation();
+  const { user } = useAuth();
+  const [payouts, setPayouts] = useState<PayoutItem[]>([]);
+  const [balance, setBalance] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [requestOpen, setRequestOpen] = useState(false);
-  const [amount, setAmount] = useState('');
-  const [selectedMethod, setSelectedMethod] = useState('m1');
+  const [amountStr, setAmountStr] = useState('');
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-  const availableBalance = 1230;
 
   const showAlert = (type: 'success' | 'error', message: string) => {
     setAlert({ type, message });
     setTimeout(() => setAlert(null), 4000);
   };
 
+  useEffect(() => {
+    if (!user?.id) return;
+    const load = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const [bal, payoutResp] = await Promise.all([
+          guideApi.getAvailableBalance(user.id),
+          guideApi.getPayouts(user.id),
+        ]);
+        setBalance(bal);
+        setPayouts(payoutResp.payouts ?? []);
+      } catch {
+        setError(t('payouts.loadError'));
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [user?.id, t]);
+
   const handleRequestPayout = async () => {
-    const amountNum = Number(amount);
-    if (!amountNum || amountNum <= 0 || amountNum > availableBalance) {
-      showAlert('error', 'Please enter a valid amount within your available balance.');
+    if (!user?.id) return;
+    const amount = parseFloat(amountStr);
+    if (isNaN(amount) || amount <= 0 || amount > balance) {
+      showAlert('error', t('payouts.invalidAmount'));
       return;
     }
     try {
-      // In production, call guideApi.createPayout(...)
+      const created = await guideApi.createPayout({ guideId: user.id, amount, currencyCode: 'USD' });
+      setPayouts((prev) => [created, ...prev]);
+      setBalance((prev) => prev - amount);
       setRequestOpen(false);
-      setAmount('');
-      showAlert('success', `Payout of $${amount} requested successfully.`);
+      setAmountStr('');
+      showAlert('success', t('payouts.requestSuccess'));
     } catch {
-      showAlert('error', 'Failed to request payout.');
+      showAlert('error', t('payouts.requestError'));
     }
   };
 
-  const handleRemoveMethod = (id: string) => {
-    setMethods((prev) => prev.filter((m) => m.id !== id));
-  };
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+        <CircularProgress />
+        <Typography sx={{ ml: 2 }}>{t('payouts.loading')}</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        Payouts
+        {t('payouts.title')}
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Manage your payout requests and payment methods.
+        {t('payouts.subtitle')}
       </Typography>
 
-      {alert && (
-        <Alert severity={alert.type} sx={{ mb: 2 }}>
-          {alert.message}
-        </Alert>
-      )}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {alert && <Alert severity={alert.type} sx={{ mb: 2 }}>{alert.message}</Alert>}
 
-      <Grid container spacing={3}>
-        {/* Available Balance Card */}
-        <Grid item xs={12} md={4}>
-          <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
-            <WalletIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-            <Typography variant="body2" color="text.secondary">
-              Available Balance
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid item xs={12} sm={6} md={4}>
+          <Paper elevation={2} sx={{ p: 3 }}>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              {t('payouts.availableBalance')}
             </Typography>
-            <Typography variant="h3" fontWeight="bold" color="primary.main">
-              ${availableBalance.toLocaleString()}
+            <Typography variant="h4" fontWeight="bold" sx={{ color: '#00796b' }}>
+              ${balance.toFixed(2)}
             </Typography>
             <Button
               variant="contained"
-              sx={{ mt: 2 }}
+              startIcon={<AddIcon />}
               onClick={() => setRequestOpen(true)}
-              fullWidth
+              sx={{ mt: 2 }}
+              disabled={balance <= 0}
             >
-              Request Payout
+              {t('payouts.requestPayout')}
             </Button>
-          </Paper>
-        </Grid>
-
-        {/* Payment Methods */}
-        <Grid item xs={12} md={8}>
-          <Paper elevation={2} sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-              <Typography variant="h6">Payment Methods</Typography>
-              <Button startIcon={<AddIcon />} size="small">
-                Add Method
-              </Button>
-            </Box>
-            <Divider sx={{ mb: 1 }} />
-            <List dense>
-              {methods.map((method) => (
-                <ListItem key={method.id}>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {method.details}
-                        {method.isDefault && (
-                          <Chip
-                            icon={<StarIcon />}
-                            label="Default"
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                          />
-                        )}
-                      </Box>
-                    }
-                    secondary={method.type.replace(/_/g, ' ')}
-                  />
-                  <ListItemSecondaryAction>
-                    <IconButton
-                      edge="end"
-                      size="small"
-                      color="error"
-                      onClick={() => handleRemoveMethod(method.id)}
-                      disabled={method.isDefault}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </ListItem>
-              ))}
-            </List>
-          </Paper>
-        </Grid>
-
-        {/* Payout History */}
-        <Grid item xs={12}>
-          <Paper elevation={2} sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Payout History
-            </Typography>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Date Requested</TableCell>
-                    <TableCell align="right">Amount</TableCell>
-                    <TableCell>Payment Method</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Processed At</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {payouts.map((payout) => (
-                    <TableRow key={payout.payoutId}>
-                      <TableCell>{new Date(payout.requestedAt).toLocaleDateString()}</TableCell>
-                      <TableCell align="right">
-                        {payout.currencyCode} {payout.amount.toLocaleString()}
-                      </TableCell>
-                      <TableCell>{payout.paymentMethod.replace(/_/g, ' ')}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={payout.status}
-                          color={statusColors[payout.status] ?? 'default'}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        {payout.processedAt
-                          ? new Date(payout.processedAt).toLocaleDateString()
-                          : '—'}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
           </Paper>
         </Grid>
       </Grid>
 
-      {/* Request Payout Dialog */}
-      <Dialog open={requestOpen} onClose={() => setRequestOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Request Payout</DialogTitle>
+      <Paper elevation={2} sx={{ p: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          {t('payouts.payoutHistory')}
+        </Typography>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>{t('payouts.dateRequested')}</TableCell>
+                <TableCell align="right">{t('payouts.amount')}</TableCell>
+                <TableCell>{t('payouts.status')}</TableCell>
+                <TableCell>{t('payouts.processedAt')}</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {payouts.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">
+                    <Typography color="text.secondary">{t('payouts.noPayouts')}</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                payouts.map((p) => (
+                  <TableRow key={p.payoutId}>
+                    <TableCell>{new Date(p.requestedAt).toLocaleDateString()}</TableCell>
+                    <TableCell align="right">
+                      {p.currencyCode} {p.amount.toFixed(2)}
+                    </TableCell>
+                    <TableCell>
+                      <Chip label={p.status} color={statusColors[p.status] ?? 'default'} size="small" />
+                    </TableCell>
+                    <TableCell>
+                      {p.processedAt ? new Date(p.processedAt).toLocaleDateString() : '—'}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+
+      <Dialog open={requestOpen} onClose={() => setRequestOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>{t('payouts.requestPayoutTitle')}</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Available balance: <strong>${availableBalance.toLocaleString()}</strong>
+            {t('payouts.availableBalance')}: ${balance.toFixed(2)}
           </Typography>
           <TextField
             fullWidth
-            label="Amount (USD)"
+            label={t('payouts.amountLabel')}
             type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            inputProps={{ min: 1, max: availableBalance }}
-            sx={{ mb: 2 }}
+            value={amountStr}
+            onChange={(e) => setAmountStr(e.target.value)}
+            inputProps={{ min: 1, max: balance, step: 0.01 }}
           />
-          <FormControl fullWidth>
-            <InputLabel>Payment Method</InputLabel>
-            <Select
-              value={selectedMethod}
-              label="Payment Method"
-              onChange={(e) => setSelectedMethod(e.target.value)}
-            >
-              {methods.map((m) => (
-                <MenuItem key={m.id} value={m.id}>
-                  {m.details} ({m.type.replace(/_/g, ' ')})
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setRequestOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleRequestPayout} disabled={!amount}>
-            Request Payout
+          <Button onClick={() => setRequestOpen(false)}>{t('payouts.cancel')}</Button>
+          <Button variant="contained" onClick={handleRequestPayout}>
+            {t('payouts.submit')}
           </Button>
         </DialogActions>
       </Dialog>

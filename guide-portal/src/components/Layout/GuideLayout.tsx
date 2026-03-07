@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -16,6 +16,8 @@ import {
   Avatar,
   Menu,
   MenuItem,
+  Select,
+  FormControl,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -33,63 +35,75 @@ import {
   BarChart as BarChartIcon,
   ExitToApp as LogoutIcon,
   AccountCircle,
+  Language as LanguageIcon,
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n';
 import { useAuth } from '../../hooks/useAuth';
 
 const drawerWidth = 240;
 
+const LANGUAGES: { code: string; label: string }[] = [
+  { code: 'en', label: 'English' },
+  { code: 'fr', label: 'Français' },
+  { code: 'es', label: 'Español' },
+  { code: 'de', label: 'Deutsch' },
+  { code: 'ar', label: 'العربية' },
+];
+
 const GuideLayout = () => {
+  const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [currentLang, setCurrentLang] = useState(i18n.language?.split('-')[0] ?? 'en');
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
+  // Sync direction for RTL languages
+  useEffect(() => {
+    document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = currentLang;
+  }, [currentLang]);
+
+  const handleLanguageChange = (lang: string) => {
+    i18n.changeLanguage(lang);
+    setCurrentLang(lang);
   };
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = async () => {
-    handleMenuClose();
-    await logout();
-  };
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
+  const handleLogout = async () => { handleMenuClose(); await logout(); };
 
   const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-    { text: 'Profile', icon: <PersonIcon />, path: '/profile' },
-    { text: 'Gallery', icon: <PhotoLibraryIcon />, path: '/gallery' },
-    { text: 'Verification', icon: <VerifiedUserIcon />, path: '/verification' },
-    { text: 'Tour Requests', icon: <ExploreIcon />, path: '/tours' },
-    { text: 'Bids', icon: <GavelIcon />, path: '/bids' },
-    { text: 'Availability', icon: <EventIcon />, path: '/availability' },
-    { text: 'Earnings', icon: <AttachMoneyIcon />, path: '/earnings' },
-    { text: 'Payouts', icon: <AccountBalanceWalletIcon />, path: '/payouts' },
-    { text: 'Reviews', icon: <StarIcon />, path: '/reviews' },
-    { text: 'Messages', icon: <MessageIcon />, path: '/messages' },
-    { text: 'Analytics', icon: <BarChartIcon />, path: '/analytics' },
+    { textKey: 'nav.dashboard', icon: <DashboardIcon />, path: '/dashboard' },
+    { textKey: 'nav.profile', icon: <PersonIcon />, path: '/profile' },
+    { textKey: 'nav.gallery', icon: <PhotoLibraryIcon />, path: '/gallery' },
+    { textKey: 'nav.verification', icon: <VerifiedUserIcon />, path: '/verification' },
+    { textKey: 'nav.tourRequests', icon: <ExploreIcon />, path: '/tours' },
+    { textKey: 'nav.bids', icon: <GavelIcon />, path: '/bids' },
+    { textKey: 'nav.availability', icon: <EventIcon />, path: '/availability' },
+    { textKey: 'nav.earnings', icon: <AttachMoneyIcon />, path: '/earnings' },
+    { textKey: 'nav.payouts', icon: <AccountBalanceWalletIcon />, path: '/payouts' },
+    { textKey: 'nav.reviews', icon: <StarIcon />, path: '/reviews' },
+    { textKey: 'nav.messages', icon: <MessageIcon />, path: '/messages' },
+    { textKey: 'nav.analytics', icon: <BarChartIcon />, path: '/analytics' },
   ];
 
   const drawer = (
     <div>
       <Toolbar>
         <Typography variant="h6" noWrap component="div">
-          UrGuide Guide Portal
+          {t('layout.portalTitle')}
         </Typography>
       </Toolbar>
       <Divider />
       <List>
         {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
+          <ListItem key={item.textKey} disablePadding>
             <ListItemButton onClick={() => navigate(item.path)}>
               <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+              <ListItemText primary={t(item.textKey as Parameters<typeof t>[0])} />
             </ListItemButton>
           </ListItem>
         ))}
@@ -117,8 +131,26 @@ const GuideLayout = () => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Guide Portal
+            {t('layout.dashboardTitle')}
           </Typography>
+
+          {/* Language Switcher */}
+          <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
+            <LanguageIcon sx={{ mr: 0.5, opacity: 0.85 }} fontSize="small" />
+            <FormControl size="small" variant="standard">
+              <Select
+                value={currentLang}
+                onChange={(e) => handleLanguageChange(e.target.value)}
+                disableUnderline
+                sx={{ color: 'inherit', '& .MuiSelect-icon': { color: 'inherit' }, fontSize: 14 }}
+              >
+                {LANGUAGES.map((l) => (
+                  <MenuItem key={l.code} value={l.code}>{l.label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
           <IconButton color="inherit" onClick={handleMenuOpen}>
             <Avatar sx={{ width: 32, height: 32 }}>
               {user?.firstName?.[0] || <AccountCircle />}
@@ -128,10 +160,7 @@ const GuideLayout = () => {
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right',
-            }}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           >
             <MenuItem disabled>
               <Typography variant="body2">{user?.email || 'Guide User'}</Typography>
@@ -141,15 +170,13 @@ const GuideLayout = () => {
               <ListItemIcon>
                 <LogoutIcon fontSize="small" />
               </ListItemIcon>
-              Logout
+              {t('nav.logout')}
             </MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-      >
+
+      <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
         <Drawer
           variant="temporary"
           open={mobileOpen}
@@ -173,6 +200,7 @@ const GuideLayout = () => {
           {drawer}
         </Drawer>
       </Box>
+
       <Box
         component="main"
         sx={{

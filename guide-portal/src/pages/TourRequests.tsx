@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -21,6 +21,9 @@ import {
   DialogContent,
   DialogContentText,
   Pagination,
+  CircularProgress,
+  Alert,
+  InputAdornment,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -28,6 +31,8 @@ import {
   AttachMoney as MoneyIcon,
   CalendarToday as CalendarIcon,
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
+import { guideApi } from '../services/guideApi';
 import type { TourRequest } from '../types/guide.types';
 
 const TOUR_REQUEST_STATUS_OPTIONS = ['all', 'pending', 'accepted', 'rejected'];
@@ -38,63 +43,61 @@ const statusColors: Record<string, 'default' | 'warning' | 'success' | 'error'> 
   rejected: 'error',
 };
 
-const SAMPLE_REQUESTS: TourRequest[] = [
-  {
-    id: '1',
-    touristId: 't1',
-    touristName: 'Alice Johnson',
-    touristAvatar: '',
-    title: 'Cultural Tour of Old City',
-    description: 'Looking for a knowledgeable guide to explore the historic old city district including local markets and heritage sites.',
-    destination: 'Rome, Italy',
-    startDate: '2024-03-15',
-    endDate: '2024-03-17',
-    groupSize: 4,
-    budget: 350,
-    status: 'pending',
-    createdAt: '2024-02-20T10:00:00Z',
-  },
-  {
-    id: '2',
-    touristId: 't2',
-    touristName: 'Bob Martinez',
-    touristAvatar: '',
-    title: 'Food & Wine Experience',
-    description: 'Wine tasting and authentic local cuisine tour for a group of food enthusiasts.',
-    destination: 'Tuscany, Italy',
-    startDate: '2024-04-01',
-    endDate: '2024-04-02',
-    groupSize: 6,
-    budget: 500,
-    status: 'pending',
-    createdAt: '2024-02-21T09:00:00Z',
-  },
-];
-
 const TourRequests = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const [requests, setRequests] = useState<TourRequest[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [detailRequest, setDetailRequest] = useState<TourRequest | null>(null);
   const [page, setPage] = useState(1);
 
-  const filtered = SAMPLE_REQUESTS.filter((r) => {
-    const matchesSearch =
-      !searchTerm ||
-      r.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.touristName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const result = await guideApi.getTourRequests({ status: statusFilter, searchTerm }, page);
+      setRequests(result.items ?? []);
+      setTotalCount(result.totalCount ?? 0);
+    } catch {
+      setError(t('tourRequests.loadError'));
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter, searchTerm, page, t]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const displayName = (r: TourRequest) =>
+    r.requesterName ?? r.touristName ?? '';
+
+  const destination = (r: TourRequest) =>
+    r.regionName ?? r.destination ?? '';
+
+  const budget = (r: TourRequest) =>
+    r.maxBudget ?? r.budget ?? 0;
+
+  const groupSize = (r: TourRequest) =>
+    r.maxParticipants ?? r.groupSize ?? 0;
+
+  const dateDisplay = (r: TourRequest) => {
+    if (r.preferredDate) return r.preferredDate;
+    if (r.startDate) return `${r.startDate}${r.endDate ? ` – ${r.endDate}` : ''}`;
+    return '—';
+  };
 
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        Tour Request Inbox
+        {t('tourRequests.title')}
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Browse and respond to tour requests from tourists.
+        {t('tourRequests.subtitle')}
       </Typography>
 
       <Paper elevation={2} sx={{ p: 2, mb: 3 }}>
@@ -102,24 +105,30 @@ const TourRequests = () => {
           <Grid item xs={12} sm={7}>
             <TextField
               fullWidth
-              placeholder="Search by title, destination, or tourist..."
+              placeholder={t('tourRequests.search')}
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{ startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} /> }}
+              onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: 'text.secondary' }} />
+                  </InputAdornment>
+                ),
+              }}
               size="small"
             />
           </Grid>
           <Grid item xs={12} sm={5}>
             <FormControl fullWidth size="small">
-              <InputLabel>Status</InputLabel>
+              <InputLabel>{t('tourRequests.status')}</InputLabel>
               <Select
                 value={statusFilter}
-                label="Status"
-                onChange={(e) => setStatusFilter(e.target.value)}
+                label={t('tourRequests.status')}
+                onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
               >
                 {TOUR_REQUEST_STATUS_OPTIONS.map((s) => (
                   <MenuItem key={s} value={s}>
-                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                    {t(`tourRequests.${s}` as const) ?? s.charAt(0).toUpperCase() + s.slice(1)}
                   </MenuItem>
                 ))}
               </Select>
@@ -128,84 +137,102 @@ const TourRequests = () => {
         </Grid>
       </Paper>
 
-      <Grid container spacing={2}>
-        {filtered.map((request) => (
-          <Grid item xs={12} md={6} key={request.id}>
-            <Card elevation={2}>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Avatar src={request.touristAvatar}>{request.touristName[0]}</Avatar>
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      {request.touristName}
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress />
+          <Typography sx={{ ml: 2 }}>{t('tourRequests.loading')}</Typography>
+        </Box>
+      ) : error ? (
+        <Alert severity="error">{error}</Alert>
+      ) : (
+        <>
+          <Grid container spacing={2}>
+            {requests.map((request) => (
+              <Grid item xs={12} md={6} key={request.id}>
+                <Card elevation={2}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Avatar src={request.touristAvatar}>{displayName(request)[0] ?? '?'}</Avatar>
+                        <Typography variant="subtitle1" fontWeight="bold">
+                          {displayName(request)}
+                        </Typography>
+                      </Box>
+                      <Chip
+                        label={request.status}
+                        color={statusColors[request.status] ?? 'default'}
+                        size="small"
+                      />
+                    </Box>
+                    <Typography variant="h6" gutterBottom>
+                      {request.title}
                     </Typography>
-                  </Box>
-                  <Chip
-                    label={request.status}
-                    color={statusColors[request.status] ?? 'default'}
-                    size="small"
-                  />
-                </Box>
-                <Typography variant="h6" gutterBottom>
-                  {request.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  {request.description.substring(0, 100)}...
-                </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <CalendarIcon fontSize="small" color="action" />
-                    <Typography variant="body2">
-                      {request.startDate} – {request.endDate}
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      {request.description.substring(0, 120)}{request.description.length > 120 ? '...' : ''}
                     </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <GroupIcon fontSize="small" color="action" />
-                    <Typography variant="body2">{request.groupSize} people</Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <MoneyIcon fontSize="small" color="action" />
-                    <Typography variant="body2">Budget: ${request.budget}</Typography>
-                  </Box>
-                </Box>
-              </CardContent>
-              <CardActions>
-                <Button size="small" onClick={() => setDetailRequest(request)}>
-                  View Details
-                </Button>
-                {request.status === 'pending' && (
-                  <Button
-                    size="small"
-                    variant="contained"
-                    onClick={() => navigate(`/bids?requestId=${request.id}`)}
-                  >
-                    Place Bid
-                  </Button>
-                )}
-              </CardActions>
-            </Card>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <CalendarIcon fontSize="small" color="action" />
+                        <Typography variant="body2">{dateDisplay(request)}</Typography>
+                      </Box>
+                      {groupSize(request) > 0 && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <GroupIcon fontSize="small" color="action" />
+                          <Typography variant="body2">{groupSize(request)} {t('tourRequests.people')}</Typography>
+                        </Box>
+                      )}
+                      {budget(request) > 0 && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <MoneyIcon fontSize="small" color="action" />
+                          <Typography variant="body2">{t('tourRequests.budget')}: ${budget(request)}</Typography>
+                        </Box>
+                      )}
+                      {destination(request) && (
+                        <Typography variant="body2" color="text.secondary">
+                          📍 {destination(request)}
+                        </Typography>
+                      )}
+                    </Box>
+                  </CardContent>
+                  <CardActions>
+                    <Button size="small" onClick={() => setDetailRequest(request)}>
+                      {t('tourRequests.viewDetails')}
+                    </Button>
+                    {request.status === 'pending' && (
+                      <Button
+                        size="small"
+                        variant="contained"
+                        onClick={() => navigate(`/bids?requestId=${request.id}`)}
+                      >
+                        {t('tourRequests.placeBid')}
+                      </Button>
+                    )}
+                  </CardActions>
+                </Card>
+              </Grid>
+            ))}
+            {requests.length === 0 && (
+              <Grid item xs={12}>
+                <Paper elevation={1} sx={{ p: 4, textAlign: 'center' }}>
+                  <Typography color="text.secondary">{t('tourRequests.noRequests')}</Typography>
+                </Paper>
+              </Grid>
+            )}
           </Grid>
-        ))}
-        {filtered.length === 0 && (
-          <Grid item xs={12}>
-            <Paper elevation={1} sx={{ p: 4, textAlign: 'center' }}>
-              <Typography color="text.secondary">No tour requests found.</Typography>
-            </Paper>
-          </Grid>
-        )}
-      </Grid>
 
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-        <Pagination count={3} page={page} onChange={(_, v) => setPage(v)} color="primary" />
-      </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+            <Pagination
+              count={Math.ceil(totalCount / 10) || 1}
+              page={page}
+              onChange={(_, v) => setPage(v)}
+              color="primary"
+            />
+          </Box>
+        </>
+      )}
 
       {/* Detail Dialog */}
-      <Dialog
-        open={!!detailRequest}
-        onClose={() => setDetailRequest(null)}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={!!detailRequest} onClose={() => setDetailRequest(null)} maxWidth="sm" fullWidth>
         {detailRequest && (
           <>
             <DialogTitle>{detailRequest.title}</DialogTitle>
@@ -215,26 +242,34 @@ const TourRequests = () => {
                   {detailRequest.description}
                 </Typography>
                 <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  {destination(detailRequest) && (
+                    <Typography variant="body2">
+                      <strong>{t('tourRequests.destination')}:</strong> {destination(detailRequest)}
+                    </Typography>
+                  )}
                   <Typography variant="body2">
-                    <strong>Destination:</strong> {detailRequest.destination}
+                    <strong>{t('tourRequests.dates')}:</strong> {dateDisplay(detailRequest)}
                   </Typography>
-                  <Typography variant="body2">
-                    <strong>Dates:</strong> {detailRequest.startDate} – {detailRequest.endDate}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Group Size:</strong> {detailRequest.groupSize} people
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Budget:</strong> ${detailRequest.budget}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Tourist:</strong> {detailRequest.touristName}
-                  </Typography>
+                  {groupSize(detailRequest) > 0 && (
+                    <Typography variant="body2">
+                      <strong>{t('tourRequests.groupSize')}:</strong> {groupSize(detailRequest)} {t('tourRequests.people')}
+                    </Typography>
+                  )}
+                  {budget(detailRequest) > 0 && (
+                    <Typography variant="body2">
+                      <strong>{t('tourRequests.budget')}:</strong> ${budget(detailRequest)}
+                    </Typography>
+                  )}
+                  {displayName(detailRequest) && (
+                    <Typography variant="body2">
+                      <strong>{t('tourRequests.tourist')}:</strong> {displayName(detailRequest)}
+                    </Typography>
+                  )}
                 </Box>
               </DialogContentText>
             </DialogContent>
             <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-              <Button onClick={() => setDetailRequest(null)}>Close</Button>
+              <Button onClick={() => setDetailRequest(null)}>{t('tourRequests.close')}</Button>
               {detailRequest.status === 'pending' && (
                 <Button
                   variant="contained"
@@ -243,7 +278,7 @@ const TourRequests = () => {
                     setDetailRequest(null);
                   }}
                 >
-                  Place Bid
+                  {t('tourRequests.placeBid')}
                 </Button>
               )}
             </Box>

@@ -23,42 +23,40 @@ export interface User {
   roles: string[];
 }
 
-// Guide Profile types
+// Guide Profile types – matches backend User model from GET /getdetails
 export interface GuideProfile {
   id: string;
-  userId: string;
   firstName: string;
   lastName: string;
-  email: string;
+  city: string;
+  country: string;
+  address: string;
+  description: string;
   phoneNumber: string;
-  bio: string;
-  specializations: string[];
-  languages: string[];
-  pricePerHour: number;
-  pricePerDay: number;
-  yearsExperience: number;
-  isVerified: boolean;
-  verificationStatus: string;
-  profileImageUrl: string;
-  coverImageUrl: string;
+  profileImage: string;
   rating: number;
-  reviewCount: number;
-  location: string;
-  createdAt: string;
-}
-
-export interface UpdateGuideProfileRequest {
-  firstName?: string;
-  lastName?: string;
+  isGuide: boolean;
+  // extended fields kept for UI use
   email?: string;
-  phoneNumber?: string;
-  bio?: string;
   specializations?: string[];
   languages?: string[];
   pricePerHour?: number;
   pricePerDay?: number;
-  yearsExperience?: number;
-  location?: string;
+}
+
+// Matches backend UpdateGuideModel for POST /updateguide
+export interface UpdateGuideProfileRequest {
+  id: string;
+  firstName: string;
+  lastName: string;
+  address: string;
+  country: string;
+  city: string;
+  gender?: string;
+  phone: string;
+  birthDay?: string;
+  description: string;
+  profileImage?: string;
 }
 
 // Verification / KYC types
@@ -66,7 +64,7 @@ export interface VerificationDocument {
   id: string;
   type: string;
   fileName: string;
-  fileUrl: string;
+  fileUrl?: string;
   uploadedAt: string;
   status: string;
 }
@@ -75,9 +73,9 @@ export interface KycVerificationStatus {
   guideId: string;
   overallStatus: string;
   documents: VerificationDocument[];
-  submittedAt: string;
-  reviewedAt: string;
-  notes: string;
+  submittedAt?: string;
+  reviewedAt?: string;
+  notes?: string;
 }
 
 export interface SubmitVerificationRequest {
@@ -91,9 +89,9 @@ export interface GalleryItem {
   id: string;
   catalogId: string;
   imageUrl: string;
-  thumbnailUrl: string;
-  title: string;
-  description: string;
+  thumbnailUrl?: string;
+  title?: string;
+  description?: string;
   uploadedAt: string;
 }
 
@@ -111,21 +109,30 @@ export interface CreateGalleryRequest {
   description: string;
 }
 
-// Tour Request types
+// Tour Request types – matches backend TourRequestModel
 export interface TourRequest {
+  // Normalized id used by frontend (maps from tourRequestId)
   id: string;
-  touristId: string;
-  touristName: string;
-  touristAvatar: string;
+  tourRequestId?: string;
   title: string;
   description: string;
-  destination: string;
-  startDate: string;
-  endDate: string;
-  groupSize: number;
-  budget: number;
+  preferredDate?: string;
+  maxParticipants?: number;
+  maxBudget?: number;
   status: string;
-  createdAt: string;
+  requesterId?: string;
+  requesterName?: string;
+  regionName?: string;
+  // Legacy fields kept for compatibility
+  touristId?: string;
+  touristName?: string;
+  touristAvatar?: string;
+  destination?: string;
+  startDate?: string;
+  endDate?: string;
+  groupSize?: number;
+  budget?: number;
+  createdAt?: string;
 }
 
 export interface TourRequestFilters {
@@ -167,12 +174,12 @@ export interface BidHistory {
   totalCount: number;
 }
 
-// Availability types
+// Availability types – matches backend AvailabilitySlot
 export interface AvailabilitySlot {
-  id: string;
-  guideId: string;
+  id?: string;
+  guideId?: string;
   date: string;
-  isAvailable: boolean;
+  isAvailable?: boolean;
   isBlocked: boolean;
   blockReason?: string;
   recurringPattern?: string;
@@ -215,18 +222,28 @@ export interface MonthlyEarnings {
   refundedAmount: number;
 }
 
+// TransactionItem – matches backend TransactionItem
 export interface TransactionItem {
-  id: string;
+  transactionId?: string;
+  id?: string;
   type: string;
   description: string;
   amount: number;
-  currency: string;
+  currencyCode?: string;
+  currency?: string;
   status: string;
-  date: string;
-  relatedTourId?: string;
+  createdAt?: string;
+  date?: string;
 }
 
-// Payout types
+export interface TransactionHistoryResponse {
+  transactions: TransactionItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}
+
+// Payout types – matches backend PayoutResponse
 export interface PayoutItem {
   payoutId: string;
   guideId: string;
@@ -236,14 +253,20 @@ export interface PayoutItem {
   requestedAt: string;
   processedAt?: string;
   failureReason?: string;
-  paymentMethod: string;
+  paymentMethod?: string;
+}
+
+export interface PayoutListResponse {
+  payouts: PayoutItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
 }
 
 export interface CreatePayoutRequest {
   guideId: string;
   amount: number;
   currencyCode: string;
-  paymentMethod: string;
 }
 
 export interface PaymentMethod {
@@ -254,7 +277,18 @@ export interface PaymentMethod {
   createdAt: string;
 }
 
-// Review types
+// Review types – matches backend AuthoredFeedback
+export interface AuthoredFeedback {
+  text: string;
+  rating: number;
+  publicationDate: string;
+  authorId: string;
+  authorImage?: string;
+  authorFullName: string;
+  guideResponse?: string;
+}
+
+// Mapped review type for UI
 export interface Review {
   id: string;
   touristId: string;
@@ -264,8 +298,8 @@ export interface Review {
   comment: string;
   guideResponse?: string;
   createdAt: string;
-  tourId: string;
-  tourTitle: string;
+  tourId?: string;
+  tourTitle?: string;
 }
 
 export interface ReviewFilters {
@@ -285,12 +319,15 @@ export interface ReviewStats {
   ratingDistribution: Record<number, number>;
 }
 
-// Message types
+// Message types – matches backend ConversationSummary / MessageItem
 export interface Conversation {
   id: string;
-  touristId: string;
-  touristName: string;
-  touristAvatar: string;
+  participantId?: string;
+  participantName?: string;
+  // Legacy fields
+  touristId?: string;
+  touristName?: string;
+  touristAvatar?: string;
   lastMessage: string;
   lastMessageAt: string;
   unreadCount: number;
@@ -309,6 +346,14 @@ export interface Message {
 export interface SendMessageRequest {
   conversationId: string;
   content: string;
+}
+
+// Dashboard stats – matches backend GET /api/guide/dashboard
+export interface GuideDashboard {
+  availableBalance: number;
+  averageRating: number;
+  reviewCount: number;
+  openTourRequests: number;
 }
 
 // Analytics types
@@ -333,11 +378,11 @@ export type AnalyticsPeriod = 'week' | 'month' | 'year';
 // Shared generic types
 export interface PagedResult<T> {
   items: T[];
-  pageNumber: number;
-  pageSize: number;
+  pageNumber?: number;
+  pageSize?: number;
   totalCount: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
+  hasNextPage?: boolean;
+  hasPreviousPage?: boolean;
 }
 
 export interface ApiResult<T> {

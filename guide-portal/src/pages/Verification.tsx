@@ -1,193 +1,192 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
   Typography,
+  Grid,
+  Button,
+  Chip,
   Stepper,
   Step,
   StepLabel,
-  Button,
-  Chip,
   Alert,
-  Grid,
-  Divider,
-  LinearProgress,
+  CircularProgress,
 } from '@mui/material';
 import {
   CloudUpload as UploadIcon,
   CheckCircle as CheckIcon,
-  HourglassEmpty as PendingIcon,
-  Cancel as RejectedIcon,
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { guideApi } from '../services/guideApi';
+import type { KycVerificationStatus, VerificationDocument } from '../types/guide.types';
 
 const DOCUMENT_TYPES = [
-  {
-    type: 'government_id',
-    label: 'Government ID',
-    description: 'Passport, national ID, or driver\'s license',
-  },
-  {
-    type: 'proof_of_address',
-    label: 'Proof of Address',
-    description: 'Utility bill or bank statement (not older than 3 months)',
-  },
-  {
-    type: 'credentials',
-    label: 'Credentials / Insurance',
-    description: 'Professional certifications, guide license, or insurance documents',
-  },
+  { key: 'GovernmentId', labelKey: 'verification.governmentId', descKey: 'verification.governmentIdDesc' },
+  { key: 'ProofOfAddress', labelKey: 'verification.proofOfAddress', descKey: 'verification.proofOfAddressDesc' },
+  { key: 'Credentials', labelKey: 'verification.credentials', descKey: 'verification.credentialsDesc' },
 ];
 
-const verificationSteps = ['Submit ID', 'Submit Proof of Address', 'Under Review'];
-
-const statusConfig: Record<string, { label: string; color: 'success' | 'warning' | 'error' | 'default'; icon: React.ReactNode }> = {
-  verified: { label: 'Verified', color: 'success', icon: <CheckIcon /> },
-  pending: { label: 'Under Review', color: 'warning', icon: <PendingIcon /> },
-  rejected: { label: 'Rejected', color: 'error', icon: <RejectedIcon /> },
-  not_submitted: { label: 'Not Submitted', color: 'default', icon: <PendingIcon /> },
+const statusColor = (s: string): 'default' | 'warning' | 'success' | 'error' => {
+  if (s === 'Verified' || s === 'approved') return 'success';
+  if (s === 'Rejected' || s === 'rejected') return 'error';
+  if (s === 'Pending' || s === 'pending' || s === 'under_review') return 'warning';
+  return 'default';
 };
 
 const Verification = () => {
-  const [uploadingType, setUploadingType] = useState<string | null>(null);
-  const [uploadedDocs, setUploadedDocs] = useState<Record<string, string>>({});
+  const { t } = useTranslation();
+  const [status, setStatus] = useState<KycVerificationStatus | null>(null);
+  const [uploadedDocs, setUploadedDocs] = useState<VerificationDocument[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-  const [overallStatus, setOverallStatus] = useState<string>('not_submitted');
 
   const showAlert = (type: 'success' | 'error', message: string) => {
     setAlert({ type, message });
-    setTimeout(() => setAlert(null), 4000);
+    setTimeout(() => setAlert(null), 5000);
   };
 
-  const handleFileUpload = async (documentType: string, file: File) => {
-    setUploadingType(documentType);
+  useEffect(() => {
+    guideApi
+      .getVerificationStatus()
+      .then((s) => {
+        setStatus(s);
+        setUploadedDocs(s.documents ?? []);
+      })
+      .catch(() => setError(t('verification.loading')))
+      .finally(() => setLoading(false));
+  }, [t]);
+
+  const handleFileUpload = async (docType: string, file: File) => {
     const reader = new FileReader();
     reader.onload = async () => {
       const base64 = (reader.result as string).split(',')[1];
       try {
-        await guideApi.submitVerificationDocument('me', {
-          documentType,
+        const doc = await guideApi.submitVerificationDocument({
+          documentType: docType,
           fileBase64: base64,
           fileName: file.name,
         });
-        setUploadedDocs((prev) => ({ ...prev, [documentType]: file.name }));
-        if (overallStatus === 'not_submitted') setOverallStatus('pending');
-        showAlert('success', `${documentType.replace(/_/g, ' ')} uploaded successfully.`);
+        setUploadedDocs((prev) => {
+          const filtered = prev.filter((d) => d.type !== docType);
+          return [...filtered, doc];
+        });
+        showAlert('success', `${file.name} ${t('verification.uploadSuccess')}`);
       } catch {
-        showAlert('error', 'Failed to upload document. Please try again.');
-      } finally {
-        setUploadingType(null);
+        showAlert('error', t('verification.uploadError'));
       }
     };
     reader.readAsDataURL(file);
   };
 
-  const status = statusConfig[overallStatus] ?? statusConfig['not_submitted'];
-  const activeStep = Object.keys(uploadedDocs).length >= 2 ? 2 : Object.keys(uploadedDocs).length;
+  const getDocStatus = (docType: string) =>
+    uploadedDocs.find((d) => d.type === docType);
+
+  const overallStatus = status?.overallStatus ?? 'NotSubmitted';
+  const activeStep = (() => {
+    if (overallStatus === 'Verified') return 3;
+    if (overallStatus === 'Pending' || overallStatus === 'under_review') return 2;
+    if (uploadedDocs.length > 0) return 1;
+    return 0;
+  })();
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+        <CircularProgress />
+        <Typography sx={{ ml: 2 }}>{t('verification.loading')}</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Identity Verification (KYC)
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Complete your identity verification to unlock full guide features and receive payouts.
-      </Typography>
+      <Typography variant="h4" gutterBottom>{t('verification.title')}</Typography>
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>{t('verification.subtitle')}</Typography>
 
-      {alert && (
-        <Alert severity={alert.type} sx={{ mb: 2 }}>
-          {alert.message}
-        </Alert>
-      )}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {alert && <Alert severity={alert.type} sx={{ mb: 2 }}>{alert.message}</Alert>}
+
+      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6">{t('verification.verificationStatus')}</Typography>
+          <Chip
+            label={t(`verification.status${overallStatus}` as Parameters<typeof t>[0]) ?? overallStatus}
+            color={statusColor(overallStatus)}
+          />
+        </Box>
+        <Stepper activeStep={activeStep}>
+          <Step><StepLabel>{t('verification.stepSubmitId')}</StepLabel></Step>
+          <Step><StepLabel>{t('verification.stepProofAddress')}</StepLabel></Step>
+          <Step><StepLabel>{t('verification.stepUnderReview')}</StepLabel></Step>
+        </Stepper>
+      </Paper>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
-          <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-              <Typography variant="h6">Verification Status</Typography>
-              <Chip
-                icon={status.icon as React.ReactElement}
-                label={status.label}
-                color={status.color}
-                variant="outlined"
-              />
-            </Box>
-            <Stepper activeStep={activeStep} sx={{ mb: 3 }}>
-              {verificationSteps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-          </Paper>
-
-          {DOCUMENT_TYPES.map((doc) => (
-            <Paper key={doc.type} elevation={2} sx={{ p: 3, mb: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                <Box>
-                  <Typography variant="h6">{doc.label}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {doc.description}
-                  </Typography>
-                </Box>
-                {uploadedDocs[doc.type] && (
-                  <Chip label="Uploaded" color="success" size="small" icon={<CheckIcon />} />
-                )}
-              </Box>
-
-              {uploadingType === doc.type && <LinearProgress sx={{ mb: 1 }} />}
-
-              {uploadedDocs[doc.type] ? (
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  File: {uploadedDocs[doc.type]}
+        {DOCUMENT_TYPES.map((dt) => {
+          const doc = getDocStatus(dt.key);
+          return (
+            <Grid item xs={12} md={4} key={dt.key}>
+              <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
+                <Typography variant="h6" gutterBottom>{t(dt.labelKey as Parameters<typeof t>[0])}</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  {t(dt.descKey as Parameters<typeof t>[0])}
                 </Typography>
-              ) : (
-                <Button
-                  variant="outlined"
-                  startIcon={<UploadIcon />}
-                  component="label"
-                  disabled={uploadingType !== null}
-                  sx={{ mt: 1 }}
-                >
-                  Upload {doc.label}
-                  <input
-                    type="file"
-                    hidden
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleFileUpload(doc.type, file);
-                    }}
-                  />
-                </Button>
-              )}
-            </Paper>
-          ))}
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Paper elevation={2} sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Requirements
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            <Typography variant="body2" gutterBottom>
-              <strong>Accepted formats:</strong> PDF, JPG, PNG
-            </Typography>
-            <Typography variant="body2" gutterBottom>
-              <strong>Maximum file size:</strong> 10 MB
-            </Typography>
-            <Typography variant="body2" gutterBottom>
-              <strong>Review time:</strong> 2–5 business days
-            </Typography>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="body2" color="text.secondary">
-              Documents must be clear, legible, and unexpired. All personal information must match
-              your profile details exactly.
-            </Typography>
-          </Paper>
-        </Grid>
+                {doc ? (
+                  <Box>
+                    <Chip
+                      icon={<CheckIcon />}
+                      label={`${t('verification.uploaded')}: ${doc.fileName}`}
+                      color={statusColor(doc.status)}
+                      size="small"
+                      sx={{ mb: 1 }}
+                    />
+                  </Box>
+                ) : (
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    startIcon={<UploadIcon />}
+                    fullWidth
+                  >
+                    {t('verification.upload')}
+                    <input
+                      type="file"
+                      hidden
+                      accept="image/*,application/pdf"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload(dt.key, file);
+                        e.target.value = '';
+                      }}
+                    />
+                  </Button>
+                )}
+              </Paper>
+            </Grid>
+          );
+        })}
       </Grid>
+
+      <Paper elevation={2} sx={{ p: 3, mt: 3 }}>
+        <Typography variant="h6" gutterBottom>{t('verification.requirements')}</Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={4}>
+            <Typography variant="body2" color="text.secondary">{t('verification.acceptedFormats')}: JPG, PNG, PDF</Typography>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Typography variant="body2" color="text.secondary">{t('verification.maxFileSize')}: 10 MB</Typography>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Typography variant="body2" color="text.secondary">
+              {t('verification.reviewTime')}: {t('verification.reviewTimeValue')}
+            </Typography>
+          </Grid>
+        </Grid>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          {t('verification.documentNote')}
+        </Typography>
+      </Paper>
     </Box>
   );
 };

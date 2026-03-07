@@ -13,25 +13,21 @@ import type {
   TourRequestFilters,
   Bid,
   CreateBidRequest,
-  UpdateBidRequest,
   BidHistory,
   AvailabilitySlot,
   BlockDatesRequest,
   RecurringPattern,
-  EarningsSummary,
-  EarningsDataPoint,
-  MonthlyEarnings,
-  TransactionItem,
+  TransactionHistoryResponse,
   PayoutItem,
+  PayoutListResponse,
   CreatePayoutRequest,
-  PaymentMethod,
   Review,
+  AuthoredFeedback,
   ReviewFilters,
-  SubmitReviewResponseRequest,
-  ReviewStats,
   Conversation,
   Message,
   SendMessageRequest,
+  GuideDashboard,
   PerformanceMetrics,
   TourStatistics,
   AnalyticsPeriod,
@@ -39,55 +35,58 @@ import type {
 } from '../types/guide.types';
 
 class GuideApiService {
-  private guidesBase = '/api/guides';
-  private apiBase = '/api';
-
   private authHeader() {
     const token = authService.getToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
-  // Profile (Issue #172)
-  async getProfile(guideId: string): Promise<GuideProfile> {
-    const { data } = await axios.get<GuideProfile>(`${this.guidesBase}/${guideId}/profile`, {
+  // ── Dashboard ──────────────────────────────────────────────────────────────
+  async getDashboard(): Promise<GuideDashboard> {
+    const { data } = await axios.get<GuideDashboard>('/api/guide/dashboard', {
       headers: this.authHeader(),
     });
     return data;
   }
 
-  async updateProfile(guideId: string, request: UpdateGuideProfileRequest): Promise<GuideProfile> {
-    const { data } = await axios.put<GuideProfile>(
-      `${this.guidesBase}/${guideId}/profile`,
-      request,
-      { headers: this.authHeader() }
-    );
+  // ── Profile ────────────────────────────────────────────────────────────────
+  async getProfile(): Promise<GuideProfile> {
+    const { data } = await axios.get<GuideProfile>('/getdetails', {
+      headers: this.authHeader(),
+    });
     return data;
   }
 
-  // Gallery (Issue #172)
+  async updateProfile(request: UpdateGuideProfileRequest): Promise<GuideProfile> {
+    const { data } = await axios.post<GuideProfile>('/updateguide', request, {
+      headers: this.authHeader(),
+    });
+    return data;
+  }
+
+  // ── Gallery ────────────────────────────────────────────────────────────────
   async getGalleries(userId: string): Promise<Gallery[]> {
-    const { data } = await axios.get<Gallery[]>(`${this.guidesBase}/${userId}/catalogs`, {
+    const { data } = await axios.get<Gallery[]>(`/api/catalogs/${userId}/all`, {
       headers: this.authHeader(),
     });
     return data;
   }
 
   async getGallery(catalogId: string): Promise<Gallery> {
-    const { data } = await axios.get<Gallery>(`${this.guidesBase}/catalogs/${catalogId}`, {
+    const { data } = await axios.get<Gallery>(`/api/catalogs/${catalogId}/retrieve`, {
       headers: this.authHeader(),
     });
     return data;
   }
 
   async createGallery(request: CreateGalleryRequest): Promise<Gallery> {
-    const { data } = await axios.post<Gallery>(`${this.guidesBase}/catalogs`, request, {
+    const { data } = await axios.post<Gallery>('/api/catalogs/create', request, {
       headers: this.authHeader(),
     });
     return data;
   }
 
   async deleteGallery(catalogId: string): Promise<void> {
-    await axios.delete(`${this.guidesBase}/catalogs/${catalogId}`, {
+    await axios.delete(`/api/catalogs/${catalogId}/remove`, {
       headers: this.authHeader(),
     });
   }
@@ -96,8 +95,8 @@ class GuideApiService {
     catalogId: string,
     imageFile: { fileBase64: string; fileName: string; description?: string }
   ): Promise<GalleryItem> {
-    const { data } = await axios.post<GalleryItem>(
-      `${this.guidesBase}/catalogs/${catalogId}/images`,
+    const { data } = await axios.put<GalleryItem>(
+      `/api/catalogs/update/${catalogId}/addimage`,
       imageFile,
       { headers: this.authHeader() }
     );
@@ -105,236 +104,194 @@ class GuideApiService {
   }
 
   async removeImageFromGallery(catalogId: string, imageId: string): Promise<void> {
-    await axios.delete(`${this.guidesBase}/catalogs/${catalogId}/images/${imageId}`, {
-      headers: this.authHeader(),
-    });
-  }
-
-  // KYC Verification (Issue #172)
-  async getVerificationStatus(guideId: string): Promise<KycVerificationStatus> {
-    const { data } = await axios.get<KycVerificationStatus>(
-      `${this.guidesBase}/${guideId}/verification`,
+    await axios.put(
+      `/api/catalogs/update/${catalogId}/images/${imageId}/remove`,
+      {},
       { headers: this.authHeader() }
     );
+  }
+
+  // ── KYC Verification ───────────────────────────────────────────────────────
+  async getVerificationStatus(): Promise<KycVerificationStatus> {
+    const { data } = await axios.get<KycVerificationStatus>('/api/guide-verification/status', {
+      headers: this.authHeader(),
+    });
     return data;
   }
 
   async submitVerificationDocument(
-    guideId: string,
     request: SubmitVerificationRequest
   ): Promise<VerificationDocument> {
     const { data } = await axios.post<VerificationDocument>(
-      `${this.guidesBase}/${guideId}/verification/documents`,
+      '/api/guide-verification/documents',
       request,
       { headers: this.authHeader() }
     );
     return data;
   }
 
-  // Tour Requests (Issue #173)
+  // ── Tour Requests ──────────────────────────────────────────────────────────
   async getTourRequests(
     filters?: TourRequestFilters,
     page = 1
   ): Promise<PagedResult<TourRequest>> {
-    const { data } = await axios.get<PagedResult<TourRequest>>(`${this.apiBase}/posts`, {
+    const params: Record<string, unknown> = { PageNumber: page, PageSize: 10 };
+    if (filters?.status && filters.status !== 'all') params.Status = filters.status;
+    if (filters?.searchTerm) params.SearchTerm = filters.searchTerm;
+
+    const { data } = await axios.get<PagedResult<TourRequest>>('/api/tour-requests', {
       headers: this.authHeader(),
-      params: { ...filters, page, pageSize: 10 },
+      params,
     });
-    return data;
+    // Normalise id
+    const items = (data.items ?? []).map((r) => ({
+      ...r,
+      id: r.id ?? (r as TourRequest & { tourRequestId?: string }).tourRequestId ?? '',
+    }));
+    return { ...data, items };
   }
 
   async getTourRequest(requestId: string): Promise<TourRequest> {
-    const { data } = await axios.get<TourRequest>(`${this.apiBase}/posts/${requestId}`, {
+    const { data } = await axios.get<TourRequest>(`/api/tour-requests/${requestId}`, {
       headers: this.authHeader(),
     });
-    return data;
+    return { ...data, id: data.id ?? (data as TourRequest & { tourRequestId?: string }).tourRequestId ?? requestId };
   }
 
-  // Bids (Issue #173)
+  // ── Bids ───────────────────────────────────────────────────────────────────
   async createBid(request: CreateBidRequest): Promise<Bid> {
-    const { data } = await axios.post<Bid>(`${this.apiBase}/bids`, request, {
+    const { data } = await axios.post<Bid>(`/api/bid/${request.postId}/newbid`, request, {
       headers: this.authHeader(),
-    });
-    return data;
-  }
-
-  async updateBid(request: UpdateBidRequest): Promise<Bid> {
-    const { data } = await axios.put<Bid>(`${this.apiBase}/bids/${request.bidId}`, request, {
-      headers: this.authHeader(),
-    });
-    return data;
-  }
-
-  async withdrawBid(bidId: string): Promise<void> {
-    await axios.delete(`${this.apiBase}/bids/${bidId}`, {
-      headers: this.authHeader(),
-    });
-  }
-
-  async getMyBids(page = 1): Promise<PagedResult<Bid>> {
-    const { data } = await axios.get<PagedResult<Bid>>(`${this.apiBase}/bids/my`, {
-      headers: this.authHeader(),
-      params: { page, pageSize: 10 },
     });
     return data;
   }
 
   async getBidHistory(postId: string): Promise<BidHistory> {
-    const { data } = await axios.get<BidHistory>(`${this.apiBase}/bids/post/${postId}`, {
-      headers: this.authHeader(),
-    });
-    return data;
-  }
-
-  // Availability (Issue #173)
-  async getAvailability(
-    guideId: string,
-    startDate: string,
-    endDate: string
-  ): Promise<AvailabilitySlot[]> {
-    const { data } = await axios.get<AvailabilitySlot[]>(
-      `${this.guidesBase}/${guideId}/availability`,
-      { headers: this.authHeader(), params: { startDate, endDate } }
+    const { data } = await axios.post<BidHistory>(
+      `/api/bid/${postId}/history`,
+      {},
+      { headers: this.authHeader() }
     );
     return data;
   }
 
-  async blockDates(guideId: string, request: BlockDatesRequest): Promise<void> {
-    await axios.post(`${this.guidesBase}/${guideId}/availability/block`, request, {
+  // ── Transactions / Earnings ────────────────────────────────────────────────
+  async getTransactions(page = 1, pageSize = 10): Promise<TransactionHistoryResponse> {
+    const { data } = await axios.get<TransactionHistoryResponse>('/api/payment/transactions', {
+      headers: this.authHeader(),
+      params: { page, pageSize },
+    });
+    return data;
+  }
+
+  // ── Payouts ────────────────────────────────────────────────────────────────
+  async createPayout(request: CreatePayoutRequest): Promise<PayoutItem> {
+    const { data } = await axios.post<PayoutItem>('/api/payout', request, {
+      headers: this.authHeader(),
+    });
+    return data;
+  }
+
+  async getPayouts(guideId: string, page = 1, pageSize = 10): Promise<PayoutListResponse> {
+    const { data } = await axios.get<PayoutListResponse>(`/api/payout/guide/${guideId}`, {
+      headers: this.authHeader(),
+      params: { page, pageSize },
+    });
+    return data;
+  }
+
+  async getAvailableBalance(guideId: string): Promise<number> {
+    const { data } = await axios.get<{ guideId: string; availableBalance: number }>(
+      `/api/payout/guide/${guideId}/balance`,
+      { headers: this.authHeader() }
+    );
+    return data.availableBalance;
+  }
+
+  // ── Reviews ────────────────────────────────────────────────────────────────
+  async getReviews(
+    userId: string,
+    filters?: ReviewFilters,
+    page = 1
+  ): Promise<PagedResult<Review>> {
+    const params: Record<string, unknown> = { PageNumber: page };
+    if (filters?.rating) params.rating = filters.rating;
+
+    const { data } = await axios.get<PagedResult<AuthoredFeedback>>(
+      `/feedback/users/${userId}`,
+      { headers: this.authHeader(), params }
+    );
+
+    // Map AuthoredFeedback → Review
+    const items: Review[] = (data.items ?? []).map((fb, idx) => ({
+      id: `review-${idx}-${fb.authorId}`,
+      touristId: fb.authorId,
+      touristName: fb.authorFullName,
+      touristAvatar: fb.authorImage ?? '',
+      rating: fb.rating,
+      comment: fb.text,
+      guideResponse: fb.guideResponse,
+      createdAt: fb.publicationDate,
+    }));
+
+    return { ...data, items };
+  }
+
+  async submitReviewResponse(feedbackId: string, response: string): Promise<void> {
+    await axios.post(
+      `/feedback/${feedbackId}/respond`,
+      { response },
+      { headers: this.authHeader() }
+    );
+  }
+
+  // ── Availability ───────────────────────────────────────────────────────────
+  async getAvailability(startDate: string, endDate: string): Promise<AvailabilitySlot[]> {
+    const { data } = await axios.get<{ slots: AvailabilitySlot[]; startDate: string; endDate: string }>(
+      '/api/availability',
+      { headers: this.authHeader(), params: { startDate, endDate } }
+    );
+    return data.slots ?? [];
+  }
+
+  async blockDates(request: BlockDatesRequest): Promise<void> {
+    await axios.post('/api/availability/block', request, {
       headers: this.authHeader(),
     });
   }
 
-  async unblockDates(guideId: string, startDate: string, endDate: string): Promise<void> {
-    await axios.delete(`${this.guidesBase}/${guideId}/availability/block`, {
+  async unblockDates(startDate: string, endDate: string): Promise<void> {
+    await axios.delete('/api/availability/block', {
       headers: this.authHeader(),
       params: { startDate, endDate },
     });
   }
 
-  async setRecurringPattern(guideId: string, pattern: RecurringPattern): Promise<void> {
-    await axios.post(`${this.guidesBase}/${guideId}/availability/recurring`, pattern, {
+  async setRecurringPattern(pattern: RecurringPattern): Promise<void> {
+    await axios.post('/api/availability/recurring', pattern, {
       headers: this.authHeader(),
     });
   }
 
-  // Earnings (Issue #174)
-  async getEarningsSummary(guideId: string): Promise<EarningsSummary> {
-    const { data } = await axios.get<EarningsSummary>(
-      `${this.guidesBase}/${guideId}/earnings/summary`,
-      { headers: this.authHeader() }
-    );
-    return data;
-  }
-
-  async getEarningsTrend(
-    guideId: string,
-    period: AnalyticsPeriod
-  ): Promise<EarningsDataPoint[]> {
-    const { data } = await axios.get<EarningsDataPoint[]>(
-      `${this.guidesBase}/${guideId}/earnings/trend`,
-      { headers: this.authHeader(), params: { period } }
-    );
-    return data;
-  }
-
-  async getMonthlyEarnings(guideId: string, year: number): Promise<MonthlyEarnings[]> {
-    const { data } = await axios.get<MonthlyEarnings[]>(
-      `${this.guidesBase}/${guideId}/earnings/monthly`,
-      { headers: this.authHeader(), params: { year } }
-    );
-    return data;
-  }
-
-  async getTransactions(guideId: string, page = 1): Promise<PagedResult<TransactionItem>> {
-    const { data } = await axios.get<PagedResult<TransactionItem>>(
-      `${this.guidesBase}/${guideId}/transactions`,
-      { headers: this.authHeader(), params: { page, pageSize: 10 } }
-    );
-    return data;
-  }
-
-  // Payouts (Issue #174)
-  async getPayouts(guideId: string, page = 1): Promise<PagedResult<PayoutItem>> {
-    const { data } = await axios.get<PagedResult<PayoutItem>>(
-      `${this.guidesBase}/${guideId}/payouts`,
-      { headers: this.authHeader(), params: { page, pageSize: 10 } }
-    );
-    return data;
-  }
-
-  async getAvailableBalance(guideId: string): Promise<number> {
-    const { data } = await axios.get<{ balance: number }>(
-      `${this.guidesBase}/${guideId}/payouts/balance`,
-      { headers: this.authHeader() }
-    );
-    return data.balance;
-  }
-
-  async createPayout(request: CreatePayoutRequest): Promise<PayoutItem> {
-    const { data } = await axios.post<PayoutItem>(`${this.guidesBase}/payouts`, request, {
-      headers: this.authHeader(),
-    });
-    return data;
-  }
-
-  async getPaymentMethods(guideId: string): Promise<PaymentMethod[]> {
-    const { data } = await axios.get<PaymentMethod[]>(
-      `${this.guidesBase}/${guideId}/payment-methods`,
-      { headers: this.authHeader() }
-    );
-    return data;
-  }
-
-  // Reviews (Issue #175)
-  async getReviews(
-    guideId: string,
-    filters?: ReviewFilters,
-    page = 1
-  ): Promise<PagedResult<Review>> {
-    const { data } = await axios.get<PagedResult<Review>>(
-      `${this.guidesBase}/${guideId}/reviews`,
-      { headers: this.authHeader(), params: { ...filters, page, pageSize: 10 } }
-    );
-    return data;
-  }
-
-  async getReviewStats(guideId: string): Promise<ReviewStats> {
-    const { data } = await axios.get<ReviewStats>(
-      `${this.guidesBase}/${guideId}/reviews/stats`,
-      { headers: this.authHeader() }
-    );
-    return data;
-  }
-
-  async submitReviewResponse(request: SubmitReviewResponseRequest): Promise<Review> {
-    const { data } = await axios.post<Review>(
-      `${this.apiBase}/reviews/${request.reviewId}/response`,
-      { response: request.response },
-      { headers: this.authHeader() }
-    );
-    return data;
-  }
-
-  // Messages (Issue #175)
-  async getConversations(page = 1): Promise<PagedResult<Conversation>> {
+  // ── Messages ───────────────────────────────────────────────────────────────
+  async getConversations(page = 1, pageSize = 20): Promise<PagedResult<Conversation>> {
     const { data } = await axios.get<PagedResult<Conversation>>(
-      `${this.apiBase}/messages/conversations`,
-      { headers: this.authHeader(), params: { page, pageSize: 20 } }
+      '/api/messages/conversations',
+      { headers: this.authHeader(), params: { page, pageSize } }
     );
     return data;
   }
 
-  async getMessages(conversationId: string, page = 1): Promise<PagedResult<Message>> {
+  async getMessages(conversationId: string, page = 1, pageSize = 50): Promise<PagedResult<Message>> {
     const { data } = await axios.get<PagedResult<Message>>(
-      `${this.apiBase}/messages/conversations/${conversationId}`,
-      { headers: this.authHeader(), params: { page, pageSize: 50 } }
+      `/api/messages/conversations/${conversationId}`,
+      { headers: this.authHeader(), params: { page, pageSize } }
     );
     return data;
   }
 
   async sendMessage(request: SendMessageRequest): Promise<Message> {
-    const { data } = await axios.post<Message>(`${this.apiBase}/messages`, request, {
+    const { data } = await axios.post<Message>('/api/messages', request, {
       headers: this.authHeader(),
     });
     return data;
@@ -342,30 +299,32 @@ class GuideApiService {
 
   async markConversationRead(conversationId: string): Promise<void> {
     await axios.put(
-      `${this.apiBase}/messages/conversations/${conversationId}/read`,
+      `/api/messages/conversations/${conversationId}/read`,
       {},
       { headers: this.authHeader() }
     );
   }
 
-  // Analytics (Issue #175)
-  async getPerformanceMetrics(
-    guideId: string,
-    period: AnalyticsPeriod
-  ): Promise<PerformanceMetrics> {
-    const { data } = await axios.get<PerformanceMetrics>(
-      `${this.guidesBase}/${guideId}/analytics/performance`,
-      { headers: this.authHeader(), params: { period } }
-    );
-    return data;
+  // ── Analytics (reuses dashboard; guide-specific analytics not yet available) ─
+  async getPerformanceMetrics(_guideId: string, _period: AnalyticsPeriod): Promise<PerformanceMetrics> {
+    // Return placeholder until a dedicated analytics endpoint is available
+    return {
+      responseRate: 0,
+      responseTimeAvg: 0,
+      completionRate: 0,
+      cancellationRate: 0,
+      repeatClientRate: 0,
+    };
   }
 
-  async getTourStatistics(guideId: string): Promise<TourStatistics> {
-    const { data } = await axios.get<TourStatistics>(
-      `${this.guidesBase}/${guideId}/analytics/tours`,
-      { headers: this.authHeader() }
-    );
-    return data;
+  async getTourStatistics(_guideId: string): Promise<TourStatistics> {
+    return {
+      totalTours: 0,
+      completedTours: 0,
+      cancelledTours: 0,
+      averageDuration: 0,
+      topDestinations: [],
+    };
   }
 }
 

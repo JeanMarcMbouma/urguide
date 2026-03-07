@@ -1,97 +1,101 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
   Typography,
   Grid,
-  Select,
-  MenuItem,
   FormControl,
   InputLabel,
-  Chip,
+  Select,
+  MenuItem,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from 'recharts';
-import type { AnalyticsPeriod } from '../types/guide.types';
 
-const responseTimeTrend = [
-  { date: 'Jan', avgHours: 3.2 },
-  { date: 'Feb', avgHours: 2.8 },
-  { date: 'Mar', avgHours: 1.9 },
-  { date: 'Apr', avgHours: 2.4 },
-  { date: 'May', avgHours: 1.5 },
-  { date: 'Jun', avgHours: 1.2 },
-];
+import { useTranslation } from 'react-i18next';
+import { guideApi } from '../services/guideApi';
+import { useAuth } from '../hooks/useAuth';
+import type { AnalyticsPeriod, GuideDashboard } from '../types/guide.types';
 
-const ratingDistributionData = [
-  { rating: '1★', count: 0 },
-  { rating: '2★', count: 1 },
-  { rating: '3★', count: 3 },
-  { rating: '4★', count: 10 },
-  { rating: '5★', count: 28 },
-];
-
-const performanceMetrics = [
-  { label: 'Response Rate', value: '97%', description: 'Percentage of requests responded to' },
-  { label: 'Avg Response Time', value: '1.2h', description: 'Average time to first response' },
-  { label: 'Completion Rate', value: '94%', description: 'Tours completed as scheduled' },
-  { label: 'Cancellation Rate', value: '4%', description: 'Tours cancelled by guide' },
-  { label: 'Repeat Client Rate', value: '22%', description: 'Clients who booked more than once' },
-];
-
-const TOP_DESTINATIONS = ['Rome, Italy', 'Tuscany, Italy', 'Florence, Italy', 'Amalfi Coast'];
+interface MetricCard {
+  titleKey: string;
+  descKey: string;
+  value: string;
+  color: string;
+}
 
 const Analytics = () => {
+  const { t } = useTranslation();
+  const { user } = useAuth();
   const [period, setPeriod] = useState<AnalyticsPeriod>('month');
+  const [dashboard, setDashboard] = useState<GuideDashboard | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!user?.id) return;
+    setLoading(true);
+    setError('');
+    Promise.all([
+      guideApi.getDashboard(),
+      guideApi.getPerformanceMetrics(user.id, period),
+    ])
+      .then(([dash]) => setDashboard(dash))
+      .catch(() => setError(t('analytics.loadError')))
+      .finally(() => setLoading(false));
+  }, [user?.id, period, t]);
+
+  const metrics: MetricCard[] = [
+    { titleKey: 'analytics.averageRating', descKey: 'analytics.completionRateDesc', value: dashboard ? `${dashboard.averageRating.toFixed(1)} ★` : '—', color: '#f57c00' },
+    { titleKey: 'analytics.reviewCount', descKey: 'analytics.repeatClientRateDesc', value: dashboard ? String(dashboard.reviewCount) : '—', color: '#1976d2' },
+    { titleKey: 'analytics.pendingRequests', descKey: 'analytics.responseRateDesc', value: dashboard ? String(dashboard.openTourRequests) : '—', color: '#00796b' },
+    { titleKey: 'earnings.availableBalance', descKey: 'analytics.cancellationRateDesc', value: dashboard ? `$${dashboard.availableBalance.toFixed(2)}` : '—', color: '#388e3c' },
+  ];
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+        <CircularProgress />
+        <Typography sx={{ ml: 2 }}>{t('analytics.loading')}</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Box>
-          <Typography variant="h4" gutterBottom>
-            Analytics
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Performance metrics and insights about your guide activity.
-          </Typography>
+          <Typography variant="h4">{t('analytics.title')}</Typography>
+          <Typography variant="body1" color="text.secondary">{t('analytics.subtitle')}</Typography>
         </Box>
         <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>Period</InputLabel>
+          <InputLabel>{t('analytics.period')}</InputLabel>
           <Select
             value={period}
-            label="Period"
+            label={t('analytics.period')}
             onChange={(e) => setPeriod(e.target.value as AnalyticsPeriod)}
           >
-            <MenuItem value="week">Week</MenuItem>
-            <MenuItem value="month">Month</MenuItem>
-            <MenuItem value="year">Year</MenuItem>
+            <MenuItem value="week">{t('analytics.week')}</MenuItem>
+            <MenuItem value="month">{t('analytics.month')}</MenuItem>
+            <MenuItem value="year">{t('analytics.year')}</MenuItem>
           </Select>
         </FormControl>
       </Box>
 
-      {/* Performance Metrics Cards */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        {performanceMetrics.map((metric) => (
-          <Grid item xs={12} sm={6} md={4} lg={2.4} key={metric.label}>
-            <Paper elevation={2} sx={{ p: 2, textAlign: 'center' }}>
-              <Typography variant="h4" fontWeight="bold" color="primary.main">
-                {metric.value}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        {metrics.map((m) => (
+          <Grid item xs={12} sm={6} md={3} key={m.titleKey}>
+            <Paper elevation={2} sx={{ p: 3 }}>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                {t(m.titleKey as Parameters<typeof t>[0])}
               </Typography>
-              <Typography variant="body2" fontWeight="bold" gutterBottom>
-                {metric.label}
+              <Typography variant="h4" fontWeight="bold" sx={{ color: m.color }}>
+                {m.value}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {metric.description}
+                {t(m.descKey as Parameters<typeof t>[0])}
               </Typography>
             </Paper>
           </Grid>
@@ -99,83 +103,20 @@ const Analytics = () => {
       </Grid>
 
       <Grid container spacing={3}>
-        {/* Tour Statistics */}
-        <Grid item xs={12} md={5}>
+        <Grid item xs={12} md={6}>
           <Paper elevation={2} sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Tour Statistics
+            <Typography variant="h6" gutterBottom>{t('analytics.responseTimeTrend')}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 6 }}>
+              {t('analytics.loading')}…
             </Typography>
-            <Grid container spacing={2} sx={{ mb: 2 }}>
-              {[
-                { label: 'Total Tours', value: 42 },
-                { label: 'Completed', value: 40 },
-                { label: 'Cancelled', value: 2 },
-                { label: 'Avg Duration', value: '6.5h' },
-              ].map((stat) => (
-                <Grid item xs={6} key={stat.label}>
-                  <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRadius: 1, textAlign: 'center' }}>
-                    <Typography variant="h5" fontWeight="bold">
-                      {stat.value}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {stat.label}
-                    </Typography>
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
-            <Typography variant="body2" fontWeight="bold" gutterBottom>
-              Top Destinations
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {TOP_DESTINATIONS.map((dest) => (
-                <Chip key={dest} label={dest} size="small" variant="outlined" color="primary" />
-              ))}
-            </Box>
           </Paper>
         </Grid>
-
-        {/* Response Time Trend */}
-        <Grid item xs={12} md={7}>
+        <Grid item xs={12} md={6}>
           <Paper elevation={2} sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Average Response Time Trend (hours)
+            <Typography variant="h6" gutterBottom>{t('analytics.ratingDistribution')}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 6 }}>
+              {t('analytics.loading')}…
             </Typography>
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={responseTimeTrend}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis unit="h" />
-                <Tooltip formatter={(v) => `${v}h`} />
-                <Line
-                  type="monotone"
-                  dataKey="avgHours"
-                  stroke="#00796b"
-                  strokeWidth={2}
-                  dot={{ r: 4 }}
-                  name="Avg Response Time"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </Paper>
-        </Grid>
-
-        {/* Client Feedback Distribution */}
-        <Grid item xs={12}>
-          <Paper elevation={2} sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Client Feedback – Rating Distribution
-            </Typography>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={ratingDistributionData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="rating" />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="count" fill="#00796b" name="Number of Reviews" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
           </Paper>
         </Grid>
       </Grid>

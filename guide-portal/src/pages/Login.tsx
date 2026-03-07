@@ -11,9 +11,11 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { LockOutlined as LockIcon } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 
 const Login = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [twoFactorCode, setTwoFactorCode] = useState('');
@@ -28,10 +30,8 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-
     try {
       const result = await login(email, password);
-
       if (result.requiresTwoFactor && result.userId) {
         setRequiresTwoFactor(true);
         setUserId(result.userId);
@@ -40,7 +40,7 @@ const Login = () => {
       }
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
-      setError(axiosErr.response?.data?.message || 'Invalid credentials');
+      setError(axiosErr.response?.data?.message || t('login.invalidCredentials'));
     } finally {
       setIsLoading(false);
     }
@@ -50,13 +50,12 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-
     try {
       await verifyTwoFactor(userId, twoFactorCode);
       navigate('/dashboard');
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
-      setError(axiosErr.response?.data?.message || 'Invalid 2FA code');
+      setError(axiosErr.response?.data?.message || t('login.invalidTwoFaCode'));
     } finally {
       setIsLoading(false);
     }
@@ -64,42 +63,21 @@ const Login = () => {
 
   return (
     <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
+      <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Box
-              sx={{
-                bgcolor: 'primary.main',
-                color: 'white',
-                borderRadius: '50%',
-                p: 2,
-                mb: 2,
-              }}
-            >
+            <Box sx={{ bgcolor: 'primary.main', color: 'white', borderRadius: '50%', p: 2, mb: 2 }}>
               <LockIcon />
             </Box>
             <Typography component="h1" variant="h5" gutterBottom>
-              Guide Portal Login
+              {t('login.title')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              {requiresTwoFactor
-                ? 'Enter your 2FA verification code'
-                : 'Sign in to UrGuide Guide Portal'}
+              {requiresTwoFactor ? t('login.twoFactorSubtitle') : t('login.subtitle')}
             </Typography>
           </Box>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
           {!requiresTwoFactor ? (
             <Box component="form" onSubmit={handleLogin} noValidate>
@@ -108,7 +86,7 @@ const Login = () => {
                 required
                 fullWidth
                 id="email"
-                label="Email Address"
+                label={t('login.email')}
                 name="email"
                 autoComplete="email"
                 autoFocus
@@ -120,7 +98,7 @@ const Login = () => {
                 required
                 fullWidth
                 name="password"
-                label="Password"
+                label={t('login.password')}
                 type="password"
                 id="password"
                 autoComplete="current-password"
@@ -134,7 +112,7 @@ const Login = () => {
                 sx={{ mt: 3, mb: 2 }}
                 disabled={isLoading || !email || !password}
               >
-                {isLoading ? <CircularProgress size={24} /> : 'Sign In'}
+                {isLoading ? <CircularProgress size={24} /> : t('login.signIn')}
               </Button>
             </Box>
           ) : (
@@ -144,7 +122,7 @@ const Login = () => {
                 required
                 fullWidth
                 id="twoFactorCode"
-                label="2FA Code"
+                label={t('login.twoFaCode')}
                 name="twoFactorCode"
                 autoFocus
                 value={twoFactorCode}
@@ -158,18 +136,14 @@ const Login = () => {
                 sx={{ mt: 3, mb: 2 }}
                 disabled={isLoading || twoFactorCode.length !== 6}
               >
-                {isLoading ? <CircularProgress size={24} /> : 'Verify'}
+                {isLoading ? <CircularProgress size={24} /> : t('login.verify')}
               </Button>
               <Button
                 fullWidth
                 variant="text"
-                onClick={() => {
-                  setRequiresTwoFactor(false);
-                  setTwoFactorCode('');
-                  setError('');
-                }}
+                onClick={() => { setRequiresTwoFactor(false); setTwoFactorCode(''); setError(''); }}
               >
-                Back to Login
+                {t('login.backToLogin')}
               </Button>
             </Box>
           )}

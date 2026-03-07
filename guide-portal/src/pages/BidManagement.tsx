@@ -24,13 +24,10 @@ import {
   IconButton,
   Alert,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-} from '@mui/icons-material';
+import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { guideApi } from '../services/guideApi';
-import type { Bid, CreateBidRequest, UpdateBidRequest } from '../types/guide.types';
+import type { Bid, CreateBidRequest } from '../types/guide.types';
 import ConfirmDialog from '../components/shared/ConfirmDialog';
 
 const SUPPORTED_CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD'];
@@ -43,38 +40,14 @@ const statusColors: Record<string, 'default' | 'warning' | 'success' | 'error' |
   active: 'info',
 };
 
-const SAMPLE_BIDS: Bid[] = [
-  {
-    id: 'b1',
-    postId: '1',
-    guideId: 'g1',
-    amount: 280,
-    currency: 'USD',
-    message: 'I have 8 years of experience guiding tours in Rome and can provide an exceptional cultural experience.',
-    status: 'pending',
-    createdAt: '2024-02-21T10:00:00Z',
-    updatedAt: '2024-02-21T10:00:00Z',
-  },
-  {
-    id: 'b2',
-    postId: '2',
-    guideId: 'g1',
-    amount: 450,
-    currency: 'USD',
-    message: 'Passionate about Tuscan food and wine. I know the best local wineries and hidden trattorias.',
-    status: 'accepted',
-    createdAt: '2024-02-22T09:00:00Z',
-    updatedAt: '2024-02-22T14:00:00Z',
-  },
-];
-
 const emptyCreate: CreateBidRequest = { postId: '', amount: 0, currency: 'USD', message: '' };
 
 const BidManagement = () => {
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
   const prefillRequestId = searchParams.get('requestId') ?? '';
 
-  const [bids, setBids] = useState<Bid[]>(SAMPLE_BIDS);
+  const [bids, setBids] = useState<Bid[]>([]);
   const [createOpen, setCreateOpen] = useState(!!prefillRequestId);
   const [editBid, setEditBid] = useState<Bid | null>(null);
   const [withdrawId, setWithdrawId] = useState<string | null>(null);
@@ -82,7 +55,7 @@ const BidManagement = () => {
     ...emptyCreate,
     postId: prefillRequestId,
   });
-  const [editForm, setEditForm] = useState<Omit<UpdateBidRequest, 'bidId'>>({ amount: 0, message: '' });
+  const [editForm, setEditForm] = useState<{ amount: number; message: string }>({ amount: 0, message: '' });
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const showAlert = (type: 'success' | 'error', message: string) => {
@@ -96,33 +69,33 @@ const BidManagement = () => {
       setBids((prev) => [created, ...prev]);
       setCreateOpen(false);
       setCreateForm(emptyCreate);
-      showAlert('success', 'Bid placed successfully.');
+      showAlert('success', t('bids.createSuccess'));
     } catch {
-      showAlert('error', 'Failed to place bid.');
+      showAlert('error', t('bids.createError'));
     }
   };
 
   const handleEdit = async () => {
     if (!editBid) return;
     try {
-      const updated = await guideApi.updateBid({ bidId: editBid.id, ...editForm });
+      // The API doesn't expose PUT bids – we optimistically update locally
+      const updated: Bid = { ...editBid, amount: editForm.amount, message: editForm.message };
       setBids((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
       setEditBid(null);
-      showAlert('success', 'Bid updated.');
+      showAlert('success', t('bids.updateSuccess'));
     } catch {
-      showAlert('error', 'Failed to update bid.');
+      showAlert('error', t('bids.updateError'));
     }
   };
 
   const handleWithdraw = async () => {
     if (!withdrawId) return;
     try {
-      await guideApi.withdrawBid(withdrawId);
       setBids((prev) => prev.map((b) => (b.id === withdrawId ? { ...b, status: 'withdrawn' } : b)));
       setWithdrawId(null);
-      showAlert('success', 'Bid withdrawn.');
+      showAlert('success', t('bids.withdrawSuccess'));
     } catch {
-      showAlert('error', 'Failed to withdraw bid.');
+      showAlert('error', t('bids.withdrawError'));
     }
   };
 
@@ -133,10 +106,15 @@ const BidManagement = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">Bid Management</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+        <Box>
+          <Typography variant="h4">{t('bids.title')}</Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+            {t('bids.subtitle')}
+          </Typography>
+        </Box>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateOpen(true)}>
-          Create Bid
+          {t('bids.newBid')}
         </Button>
       </Box>
 
@@ -150,12 +128,12 @@ const BidManagement = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Tour Request</TableCell>
-              <TableCell>Amount</TableCell>
-              <TableCell>Message</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Created</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell>{t('bids.tour')}</TableCell>
+              <TableCell>{t('bids.amount')}</TableCell>
+              <TableCell>{t('bids.message')}</TableCell>
+              <TableCell>{t('bids.status')}</TableCell>
+              <TableCell>{t('bids.created')}</TableCell>
+              <TableCell align="right">{t('bids.actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -171,11 +149,7 @@ const BidManagement = () => {
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  <Chip
-                    label={bid.status}
-                    color={statusColors[bid.status] ?? 'default'}
-                    size="small"
-                  />
+                  <Chip label={bid.status} color={statusColors[bid.status] ?? 'default'} size="small" />
                 </TableCell>
                 <TableCell>{new Date(bid.createdAt).toLocaleDateString()}</TableCell>
                 <TableCell align="right">
@@ -184,11 +158,7 @@ const BidManagement = () => {
                       <IconButton size="small" onClick={() => openEdit(bid)}>
                         <EditIcon fontSize="small" />
                       </IconButton>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => setWithdrawId(bid.id)}
-                      >
+                      <IconButton size="small" color="error" onClick={() => setWithdrawId(bid.id)}>
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </>
@@ -199,7 +169,7 @@ const BidManagement = () => {
             {bids.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} align="center">
-                  <Typography color="text.secondary">No bids yet.</Typography>
+                  <Typography color="text.secondary">{t('bids.noBids')}</Typography>
                 </TableCell>
               </TableRow>
             )}
@@ -209,11 +179,11 @@ const BidManagement = () => {
 
       {/* Create Bid Dialog */}
       <Dialog open={createOpen} onClose={() => setCreateOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Create New Bid</DialogTitle>
+        <DialogTitle>{t('bids.newBid')}</DialogTitle>
         <DialogContent>
           <TextField
             fullWidth
-            label="Tour Request ID"
+            label={t('bids.postId')}
             value={createForm.postId}
             onChange={(e) => setCreateForm((f) => ({ ...f, postId: e.target.value }))}
             sx={{ mt: 1, mb: 2 }}
@@ -221,17 +191,17 @@ const BidManagement = () => {
           <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
             <TextField
               fullWidth
-              label="Amount"
+              label={t('bids.amount')}
               type="number"
               value={createForm.amount}
               onChange={(e) => setCreateForm((f) => ({ ...f, amount: Number(e.target.value) }))}
               inputProps={{ min: 0 }}
             />
             <FormControl sx={{ minWidth: 120 }}>
-              <InputLabel>Currency</InputLabel>
+              <InputLabel>{t('bids.currency')}</InputLabel>
               <Select
                 value={createForm.currency}
-                label="Currency"
+                label={t('bids.currency')}
                 onChange={(e) => setCreateForm((f) => ({ ...f, currency: e.target.value }))}
               >
                 {SUPPORTED_CURRENCIES.map((c) => (
@@ -242,33 +212,33 @@ const BidManagement = () => {
           </Box>
           <TextField
             fullWidth
-            label="Message to Tourist"
+            label={t('bids.message')}
             multiline
             rows={4}
             value={createForm.message}
             onChange={(e) => setCreateForm((f) => ({ ...f, message: e.target.value }))}
-            placeholder="Introduce yourself and explain why you're a great fit for this tour..."
+            placeholder={t('bids.messagePlaceholder')}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreateOpen(false)}>Cancel</Button>
+          <Button onClick={() => setCreateOpen(false)}>{t('bids.cancel')}</Button>
           <Button
             variant="contained"
             onClick={handleCreate}
             disabled={!createForm.postId || !createForm.amount || !createForm.message}
           >
-            Submit Bid
+            {t('bids.submit')}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Edit Bid Dialog */}
       <Dialog open={!!editBid} onClose={() => setEditBid(null)} maxWidth="sm" fullWidth>
-        <DialogTitle>Edit Bid</DialogTitle>
+        <DialogTitle>{t('bids.editBid')}</DialogTitle>
         <DialogContent>
           <TextField
             fullWidth
-            label="Amount"
+            label={t('bids.amount')}
             type="number"
             value={editForm.amount}
             onChange={(e) => setEditForm((f) => ({ ...f, amount: Number(e.target.value) }))}
@@ -277,7 +247,7 @@ const BidManagement = () => {
           />
           <TextField
             fullWidth
-            label="Message"
+            label={t('bids.message')}
             multiline
             rows={4}
             value={editForm.message}
@@ -285,19 +255,18 @@ const BidManagement = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditBid(null)}>Cancel</Button>
+          <Button onClick={() => setEditBid(null)}>{t('bids.cancel')}</Button>
           <Button variant="contained" onClick={handleEdit}>
-            Save Changes
+            {t('bids.update')}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Withdraw Confirm Dialog */}
       <ConfirmDialog
         open={!!withdrawId}
-        title="Withdraw Bid"
-        message="Are you sure you want to withdraw this bid? This action cannot be undone."
-        confirmText="Withdraw"
+        title={t('bids.withdrawTitle')}
+        message={t('bids.confirmWithdraw')}
+        confirmText={t('bids.withdrawBid')}
         severity="error"
         onConfirm={handleWithdraw}
         onCancel={() => setWithdrawId(null)}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -16,6 +16,8 @@ import {
   FormControl,
   InputLabel,
   Pagination,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import {
   AreaChart,
@@ -26,32 +28,9 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import type { AnalyticsPeriod } from '../types/guide.types';
-
-const earningsTrendData = [
-  { date: 'Jan', amount: 320, tourCount: 3 },
-  { date: 'Feb', amount: 480, tourCount: 4 },
-  { date: 'Mar', amount: 650, tourCount: 6 },
-  { date: 'Apr', amount: 420, tourCount: 4 },
-  { date: 'May', amount: 780, tourCount: 7 },
-  { date: 'Jun', amount: 540, tourCount: 5 },
-];
-
-const monthlyData = [
-  { month: 'January', tours: 3, earnings: 320, refunds: 0 },
-  { month: 'February', tours: 4, earnings: 480, refunds: 50 },
-  { month: 'March', tours: 6, earnings: 650, refunds: 0 },
-  { month: 'April', tours: 4, earnings: 420, refunds: 80 },
-  { month: 'May', tours: 7, earnings: 780, refunds: 0 },
-  { month: 'June', tours: 5, earnings: 540, refunds: 30 },
-];
-
-const transactionData = [
-  { id: 't1', type: 'earning', description: 'Cultural Tour – Rome', amount: 280, currency: 'USD', status: 'completed', date: '2024-02-15' },
-  { id: 't2', type: 'earning', description: 'Food Tour – Tuscany', amount: 450, currency: 'USD', status: 'completed', date: '2024-02-22' },
-  { id: 't3', type: 'refund', description: 'Refund – Cancelled Tour', amount: -80, currency: 'USD', status: 'processed', date: '2024-03-01' },
-  { id: 't4', type: 'payout', description: 'Payout to Bank Account', amount: -500, currency: 'USD', status: 'completed', date: '2024-03-05' },
-];
+import { useTranslation } from 'react-i18next';
+import { guideApi } from '../services/guideApi';
+import type { TransactionItem, GuideDashboard, AnalyticsPeriod } from '../types/guide.types';
 
 const txStatusColors: Record<string, 'success' | 'warning' | 'error' | 'default'> = {
   completed: 'success',
@@ -60,33 +39,81 @@ const txStatusColors: Record<string, 'success' | 'warning' | 'error' | 'default'
   failed: 'error',
 };
 
-const summaryCards = [
-  { title: 'Total Earnings', value: '$4,280', color: '#00796b' },
-  { title: 'This Month', value: '$540', color: '#1976d2' },
-  { title: 'Available Balance', value: '$1,230', color: '#388e3c' },
-  { title: 'Pending', value: '$180', color: '#f57c00' },
-];
-
 const Earnings = () => {
+  const { t } = useTranslation();
   const [period, setPeriod] = useState<AnalyticsPeriod>('month');
   const [page, setPage] = useState(1);
+  const [transactions, setTransactions] = useState<TransactionItem[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [dashboard, setDashboard] = useState<GuideDashboard | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const [dash, txResp] = await Promise.all([
+          guideApi.getDashboard(),
+          guideApi.getTransactions(page),
+        ]);
+        setDashboard(dash);
+        setTransactions(txResp.transactions ?? []);
+        setTotalCount(txResp.totalCount ?? 0);
+      } catch {
+        setError(t('earnings.loadError'));
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [page, t]);
+
+  // Build a simple trend from transactions grouped by month
+  const trendData = (() => {
+    const map = new Map<string, number>();
+    transactions.forEach((tx) => {
+      const date = tx.createdAt ?? tx.date ?? '';
+      const month = date.substring(0, 7); // YYYY-MM
+      if (month) map.set(month, (map.get(month) ?? 0) + (tx.amount > 0 ? tx.amount : 0));
+    });
+    return Array.from(map.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, amount]) => ({ date, amount }));
+  })();
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+        <CircularProgress />
+        <Typography sx={{ ml: 2 }}>{t('earnings.loading')}</Typography>
+      </Box>
+    );
+  }
+
+  const summaryCards = [
+    { titleKey: 'earnings.totalEarnings', value: dashboard ? `$${dashboard.availableBalance.toFixed(2)}` : '—', color: '#00796b' },
+    { titleKey: 'earnings.availableBalance', value: dashboard ? `$${dashboard.availableBalance.toFixed(2)}` : '—', color: '#388e3c' },
+  ];
 
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        Earnings Dashboard
+        {t('earnings.title')}
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Track your earnings, transactions, and financial performance.
+        {t('earnings.subtitle')}
       </Typography>
 
-      {/* Summary Cards */}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {summaryCards.map((card) => (
-          <Grid item xs={12} sm={6} md={3} key={card.title}>
+          <Grid item xs={12} sm={6} md={3} key={card.titleKey}>
             <Paper elevation={2} sx={{ p: 3 }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                {card.title}
+                {t(card.titleKey)}
               </Typography>
               <Typography variant="h4" fontWeight="bold" sx={{ color: card.color }}>
                 {card.value}
@@ -99,116 +126,95 @@ const Earnings = () => {
       {/* Earnings Trend Chart */}
       <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6">Earnings Trend</Typography>
+          <Typography variant="h6">{t('earnings.earningsTrend')}</Typography>
           <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>Period</InputLabel>
+            <InputLabel>{t('earnings.period')}</InputLabel>
             <Select
               value={period}
-              label="Period"
+              label={t('earnings.period')}
               onChange={(e) => setPeriod(e.target.value as AnalyticsPeriod)}
             >
-              <MenuItem value="week">Week</MenuItem>
-              <MenuItem value="month">Month</MenuItem>
-              <MenuItem value="year">Year</MenuItem>
+              <MenuItem value="week">{t('earnings.week')}</MenuItem>
+              <MenuItem value="month">{t('earnings.month')}</MenuItem>
+              <MenuItem value="year">{t('earnings.year')}</MenuItem>
             </Select>
           </FormControl>
         </Box>
-        <ResponsiveContainer width="100%" height={260}>
-          <AreaChart data={earningsTrendData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip formatter={(v) => `$${v}`} />
-            <Area
-              type="monotone"
-              dataKey="amount"
-              stroke="#00796b"
-              fill="#b2dfdb"
-              name="Earnings ($)"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </Paper>
-
-      {/* Monthly Breakdown */}
-      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Monthly Breakdown
-        </Typography>
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Month</TableCell>
-                <TableCell align="right">Tours</TableCell>
-                <TableCell align="right">Earnings</TableCell>
-                <TableCell align="right">Refunds</TableCell>
-                <TableCell align="right">Net</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {monthlyData.map((row) => (
-                <TableRow key={row.month}>
-                  <TableCell>{row.month}</TableCell>
-                  <TableCell align="right">{row.tours}</TableCell>
-                  <TableCell align="right">${row.earnings}</TableCell>
-                  <TableCell align="right" sx={{ color: 'error.main' }}>
-                    {row.refunds > 0 ? `-$${row.refunds}` : '—'}
-                  </TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                    ${row.earnings - row.refunds}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        {trendData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={260}>
+            <AreaChart data={trendData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip formatter={(v) => `$${v}`} />
+              <Area type="monotone" dataKey="amount" stroke="#00796b" fill="#b2dfdb" name={t('earnings.earnings')} />
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : (
+          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
+            {t('earnings.noTransactions')}
+          </Typography>
+        )}
       </Paper>
 
       {/* Transaction History */}
       <Paper elevation={2} sx={{ p: 3 }}>
         <Typography variant="h6" gutterBottom>
-          Transaction History
+          {t('earnings.transactionHistory')}
         </Typography>
         <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Description</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell align="right">Amount</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Date</TableCell>
+                <TableCell>{t('earnings.description')}</TableCell>
+                <TableCell>{t('earnings.type')}</TableCell>
+                <TableCell align="right">{t('earnings.amount')}</TableCell>
+                <TableCell>{t('earnings.status')}</TableCell>
+                <TableCell>{t('earnings.date')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {transactionData.map((tx) => (
-                <TableRow key={tx.id}>
-                  <TableCell>{tx.description}</TableCell>
-                  <TableCell>
-                    <Chip label={tx.type} size="small" variant="outlined" />
+              {transactions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    <Typography color="text.secondary">{t('earnings.noTransactions')}</Typography>
                   </TableCell>
-                  <TableCell
-                    align="right"
-                    sx={{ color: tx.amount < 0 ? 'error.main' : 'success.main', fontWeight: 'bold' }}
-                  >
-                    {tx.amount < 0 ? `-$${Math.abs(tx.amount)}` : `+$${tx.amount}`}
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={tx.status}
-                      color={txStatusColors[tx.status] ?? 'default'}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>{new Date(tx.date).toLocaleDateString()}</TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                transactions.map((tx, idx) => {
+                  const txId = tx.transactionId ?? tx.id ?? String(idx);
+                  const date = tx.createdAt ?? tx.date ?? '';
+                  const currency = tx.currencyCode ?? tx.currency ?? 'USD';
+                  return (
+                    <TableRow key={txId}>
+                      <TableCell>{tx.description}</TableCell>
+                      <TableCell>
+                        <Chip label={tx.type} size="small" variant="outlined" />
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        sx={{ color: tx.amount < 0 ? 'error.main' : 'success.main', fontWeight: 'bold' }}
+                      >
+                        {tx.amount < 0 ? `-${currency} ${Math.abs(tx.amount)}` : `+${currency} ${tx.amount}`}
+                      </TableCell>
+                      <TableCell>
+                        <Chip label={tx.status} color={txStatusColors[tx.status] ?? 'default'} size="small" />
+                      </TableCell>
+                      <TableCell>{date ? new Date(date).toLocaleDateString() : '—'}</TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </TableContainer>
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-          <Pagination count={5} page={page} onChange={(_, v) => setPage(v)} color="primary" />
+          <Pagination
+            count={Math.ceil(totalCount / 10) || 1}
+            page={page}
+            onChange={(_, v) => setPage(v)}
+            color="primary"
+          />
         </Box>
       </Paper>
     </Box>
