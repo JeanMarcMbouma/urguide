@@ -1,11 +1,16 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using UrGuide.Data;
+using UrGuide.Data.Entities.Tour;
 using UrGuide.WebApp.Models;
 
 namespace UrGuide.WebApp.Controllers
@@ -17,25 +22,20 @@ namespace UrGuide.WebApp.Controllers
     [ProducesResponseType(500)]
     public class AvailabilityController : ControllerBase
     {
+        private readonly UrGuideContext _context;
         private readonly ILogger<AvailabilityController> _logger;
         private const string DateFormat = "yyyy-MM-dd";
 
-        // In-memory storage per guide (in production this would be persisted to DB)
-        private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, bool>> _blockedDates = new();
-        private static readonly ConcurrentDictionary<string, RecurringPatternRequest> _recurringPatterns = new();
-
-        public AvailabilityController(ILogger<AvailabilityController> logger)
+        public AvailabilityController(UrGuideContext context, ILogger<AvailabilityController> logger)
         {
+            _context = context;
             _logger = logger;
         }
 
         private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
 
-        /// <summary>
-        /// Get availability slots for a date range
-        /// </summary>
         [HttpGet]
-        public IActionResult GetAvailability([FromQuery] string startDate, [FromQuery] string endDate)
+        public async Task<IActionResult> GetAvailability([FromQuery] string startDate, [FromQuery] string endDate, CancellationToken cancellationToken)
         {
             try
             {
@@ -46,37 +46,40 @@ namespace UrGuide.WebApp.Controllers
                     !DateTime.TryParseExact(endDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var end))
                     return BadRequest(new { error = "Invalid date format. Use yyyy-MM-dd." });
 
-                var slots = new List<AvailabilitySlot>();
-                var blocked = _blockedDates.TryGetValue(guideId, out var set) ? set : new ConcurrentDictionary<string, bool>();
-                var pattern = _recurringPatterns.TryGetValue(guideId, out var p) ? p : null;
+                var blockedDatesList = await _context.GuideBlockedDates
+                    .Where(d => d.GuideId == guideId && d.Date >= start && d.Date <= end)
+                    .Select(d => d.Date)
+                    .ToListAsync(cancellationToken);
 
+                var blockedDates = new HashSet<DateTime>(blockedDatesList);
+
+                var pattern = await _context.GuideRecurringPatterns
+                    .FirstOrDefaultAsync(p => p.GuideId == guideId, cancellationToken);
+
+                var slots = new List<AvailabilitySlot>();
                 for (var date = start; date <= end; date = date.AddDays(1))
                 {
-                    var dateStr = date.ToString(DateFormat);
-                    bool isBlocked = blocked.ContainsKey(dateStr);
+                    bool isBlocked = blockedDates.Contains(date.Date);
 
-                    // Apply recurring pattern
                     if (!isBlocked && pattern != null)
                     {
-                        DateTime patternEnd = DateTime.MaxValue;
-                        if (pattern.EndDate != null)
-                            DateTime.TryParseExact(pattern.EndDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out patternEnd);
-
+                        var patternEnd = pattern.EndDate ?? DateTime.MaxValue;
                         if (date <= patternEnd)
                         {
-                            if (pattern.Type == "weekly" && pattern.DayOfWeek.HasValue && (int)date.DayOfWeek == pattern.DayOfWeek.Value)
+                            if (pattern.PatternType == "weekly" && pattern.DayOfWeek.HasValue && (int)date.DayOfWeek == pattern.DayOfWeek.Value)
                                 isBlocked = true;
-                            else if (pattern.Type == "monthly" && pattern.DayOfMonth.HasValue && date.Day == pattern.DayOfMonth.Value)
+                            else if (pattern.PatternType == "monthly" && pattern.DayOfMonth.HasValue && date.Day == pattern.DayOfMonth.Value)
                                 isBlocked = true;
                         }
                     }
 
                     slots.Add(new AvailabilitySlot
                     {
-                        Date = dateStr,
+                        Date = date.ToString(DateFormat),
                         IsBlocked = isBlocked,
-                        RecurringPattern = isBlocked && pattern != null ? pattern.Type : null,
-                    });                }
+                        RecurringPattern = isBlocked && pattern != null ? pattern.PatternType : null,
+                    });
+                }
 
                 return Ok(new AvailabilityResponse { Slots = slots, StartDate = startDate, EndDate = endDate });
             }
@@ -87,11 +90,8 @@ namespace UrGuide.WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Block a range of dates
-        /// </summary>
         [HttpPost("block")]
-        public IActionResult BlockDates([FromBody] BlockDatesRequest request)
+        public async Task<IActionResult> BlockDates([FromBody] BlockDatesRequest request, CancellationToken cancellationToken)
         {
             try
             {
@@ -102,10 +102,35 @@ namespace UrGuide.WebApp.Controllers
                     !DateTime.TryParseExact(request.EndDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var end))
                     return BadRequest(new { error = "Invalid date format." });
 
-                var guideBlocked = _blockedDates.GetOrAdd(guideId, _ => new ConcurrentDictionary<string, bool>());
+                var existingDatesList = await _context.GuideBlockedDates
+                    .Where(d => d.GuideId == guideId && d.Date >= start && d.Date <= end)
+                    .Select(d => d.Date)
+                    .ToListAsync(cancellationToken);
 
+                var existingDates = new HashSet<DateTime>(existingDatesList);
+
+                var now = DateTime.UtcNow;
+                var toAdd = new List<GuideBlockedDate>();
                 for (var date = start; date <= end; date = date.AddDays(1))
-                    guideBlocked[date.ToString(DateFormat)] = true;
+                {
+                    if (!existingDates.Contains(date.Date))
+                    {
+                        toAdd.Add(new GuideBlockedDate
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            GuideId = guideId,
+                            Date = date.Date,
+                            Reason = request.Reason,
+                            CreatedAt = now,
+                        });
+                    }
+                }
+
+                if (toAdd.Count > 0)
+                {
+                    await _context.GuideBlockedDates.AddRangeAsync(toAdd, cancellationToken);
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
 
                 return Ok(new { message = "Dates blocked successfully." });
             }
@@ -116,11 +141,8 @@ namespace UrGuide.WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Unblock a range of dates
-        /// </summary>
         [HttpDelete("block")]
-        public IActionResult UnblockDates([FromQuery] string startDate, [FromQuery] string endDate)
+        public async Task<IActionResult> UnblockDates([FromQuery] string startDate, [FromQuery] string endDate, CancellationToken cancellationToken)
         {
             try
             {
@@ -131,10 +153,14 @@ namespace UrGuide.WebApp.Controllers
                     !DateTime.TryParseExact(endDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var end))
                     return BadRequest(new { error = "Invalid date format." });
 
-                if (_blockedDates.TryGetValue(guideId, out var blockedSet))
+                var toRemove = await _context.GuideBlockedDates
+                    .Where(d => d.GuideId == guideId && d.Date >= start && d.Date <= end)
+                    .ToListAsync(cancellationToken);
+
+                if (toRemove.Count > 0)
                 {
-                    for (var date = start; date <= end; date = date.AddDays(1))
-                        blockedSet.TryRemove(date.ToString(DateFormat), out _);
+                    _context.GuideBlockedDates.RemoveRange(toRemove);
+                    await _context.SaveChangesAsync(cancellationToken);
                 }
 
                 return Ok(new { message = "Dates unblocked successfully." });
@@ -146,11 +172,8 @@ namespace UrGuide.WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Set recurring availability pattern
-        /// </summary>
         [HttpPost("recurring")]
-        public IActionResult SetRecurringPattern([FromBody] RecurringPatternRequest request)
+        public async Task<IActionResult> SetRecurringPattern([FromBody] RecurringPatternRequest request, CancellationToken cancellationToken)
         {
             try
             {
@@ -160,7 +183,38 @@ namespace UrGuide.WebApp.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                _recurringPatterns[guideId] = request;
+                var existing = await _context.GuideRecurringPatterns
+                    .FirstOrDefaultAsync(p => p.GuideId == guideId, cancellationToken);
+
+                var now = DateTime.UtcNow;
+                DateTime? parsedEndDate = null;
+                if (request.EndDate != null && DateTime.TryParseExact(request.EndDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var ed))
+                    parsedEndDate = ed;
+
+                if (existing != null)
+                {
+                    existing.PatternType = request.Type;
+                    existing.DayOfWeek = request.DayOfWeek;
+                    existing.DayOfMonth = request.DayOfMonth;
+                    existing.EndDate = parsedEndDate;
+                    existing.UpdatedAt = now;
+                }
+                else
+                {
+                    await _context.GuideRecurringPatterns.AddAsync(new GuideRecurringPattern
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        GuideId = guideId,
+                        PatternType = request.Type,
+                        DayOfWeek = request.DayOfWeek,
+                        DayOfMonth = request.DayOfMonth,
+                        EndDate = parsedEndDate,
+                        CreatedAt = now,
+                        UpdatedAt = now,
+                    }, cancellationToken);
+                }
+
+                await _context.SaveChangesAsync(cancellationToken);
                 return Ok(new { message = "Recurring pattern set successfully." });
             }
             catch (Exception ex)
@@ -170,16 +224,30 @@ namespace UrGuide.WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Clear recurring availability pattern
-        /// </summary>
         [HttpDelete("recurring")]
-        public IActionResult ClearRecurringPattern()
+        public async Task<IActionResult> ClearRecurringPattern(CancellationToken cancellationToken)
         {
-            var guideId = GetUserId();
-            if (string.IsNullOrEmpty(guideId)) return Unauthorized();
-            _recurringPatterns.TryRemove(guideId, out _);
-            return Ok(new { message = "Recurring pattern cleared." });
+            try
+            {
+                var guideId = GetUserId();
+                if (string.IsNullOrEmpty(guideId)) return Unauthorized();
+
+                var existing = await _context.GuideRecurringPatterns
+                    .FirstOrDefaultAsync(p => p.GuideId == guideId, cancellationToken);
+
+                if (existing != null)
+                {
+                    _context.GuideRecurringPatterns.Remove(existing);
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+
+                return Ok(new { message = "Recurring pattern cleared." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error clearing recurring pattern");
+                return StatusCode(500, new { error = "An error occurred" });
+            }
         }
     }
 }

@@ -41,6 +41,14 @@ namespace UrGuide.Data
         public virtual DbSet<WebhookSubscription> WebhookSubscriptions { get; set; }
         public virtual DbSet<WebhookDelivery> WebhookDeliveries { get; set; }
 
+        // Guide availability entities
+        public virtual DbSet<GuideBlockedDate> GuideBlockedDates { get; set; }
+        public virtual DbSet<GuideRecurringPattern> GuideRecurringPatterns { get; set; }
+
+        // Guide verification entities
+        public virtual DbSet<GuideVerificationSubmission> GuideVerificationSubmissions { get; set; }
+        public virtual DbSet<GuideVerificationDocument> GuideVerificationDocuments { get; set; }
+
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
         }
@@ -86,6 +94,14 @@ namespace UrGuide.Data
             // Webhook configurations
             modelBuilder.ApplyConfiguration(new Configurations.WebhookSubscriptionConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.WebhookDeliveryConfiguration());
+
+            // Guide availability configurations
+            modelBuilder.ApplyConfiguration(new Configurations.GuideBlockedDateConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.GuideRecurringPatternConfiguration());
+
+            // Guide verification configurations
+            modelBuilder.ApplyConfiguration(new Configurations.GuideVerificationSubmissionConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.GuideVerificationDocumentConfiguration());
         }
     }
 }
