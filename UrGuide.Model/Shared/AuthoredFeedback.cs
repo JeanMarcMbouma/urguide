@@ -9,5 +9,6 @@
         public string AuthorId { get; set; }
         public string AuthorImage { get; set; }
         public string AuthorFullName { get; set; }
+        public string GuideResponse { get; set; }
     }
 }

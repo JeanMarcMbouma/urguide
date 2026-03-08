@@ -15,6 +15,7 @@ namespace UrGuide.Services.Feedback
                 .ForMember(x => x.AuthorImage, y => y.MapFrom(x => x.Author.ProfileImage.ImageUrl))
                 .ForMember(x => x.Text, y => y.MapFrom(x => x.Text))
                 .ForMember(x => x.Rating, y => y.MapFrom(x => x.Rating))
+                .ForMember(x => x.GuideResponse, y => y.MapFrom(x => x.GuideResponse))
                 .ForMember(x => x.PublicationDate, y => y.MapFrom(x => DateTimeHelper.GetDateTime(x.Created, System.DateTimeKind.Local)));
         }
     }

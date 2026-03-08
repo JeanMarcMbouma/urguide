@@ -81,6 +81,7 @@ namespace UrGuide.Data.Configurations
                 b.HasKey(x => x.Id);
                 b.Property(x => x.Id).HasDefaultValueSql(Constants.GuidFn);
                 b.Property(x => x.Text).IsRequired().HasMaxLength(2000);
+                b.Property(x => x.GuideResponse).HasMaxLength(2000);
                 b.Property(x => x.Created).IsRequired();
                 b.Property(x => x.Rating).IsRequired();
                 b.HasOne(x => x.Author).WithMany().HasForeignKey("FK_Post_Feedback_Users").OnDelete(DeleteBehavior.Cascade);

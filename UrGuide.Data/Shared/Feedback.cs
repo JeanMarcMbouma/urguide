@@ -8,6 +8,7 @@ namespace UrGuide.Data.Shared
         public string Text { get; set; }
         public virtual Entities.Users.User Author { get; set; }
         public int Rating { get; set; }
+        public string GuideResponse { get; set; }
         public DateTime Created { get; set; } = DateTime.UtcNow;
         public DateTime LastUpdated { get; set; }
     }

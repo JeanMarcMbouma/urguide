@@ -60,11 +60,10 @@ namespace UrGuide.WebApp.Controllers
 
         [HttpPost("feedback/{feedbackId}/respond")]
         [ProducesDefaultResponseType(typeof(bool))]
-        public IActionResult RespondToFeedback(string feedbackId, [FromBody] FeedbackResponseModel response)
+        public async Task<IActionResult> RespondToFeedback(string feedbackId, [FromBody] FeedbackResponseModel response, CancellationToken cancellationToken)
         {
-            // Store guide response (in production, persist to DB)
-            FeedbackResponseStore.Responses[feedbackId] = response.Response;
-            return Ok(true);
+            var result = await FeedbackService.RespondToFeedbackAsync(feedbackId, response.Response, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
     }
 }
