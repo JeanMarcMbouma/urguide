@@ -161,5 +161,39 @@ Rating: {feedback.Rating} star(s).";
             return Result.Of(PagedList.Of(user.Feedback.OrderByDescending(f => f.Created).AsEnumerable(),
                 paginationParameters.PageNumber, f => Mapper.Map<AuthoredFeedback>(f)));
         }
+
+        public async Task<Result<bool>> RespondToFeedbackAsync(string feedbackId, string guideResponse, CancellationToken cancellationToken)
+        {
+            // Search in user feedback — the feedback subject must be the current user
+            var user = await Context.Users
+                .FirstOrDefaultAsync(u => u.Feedback.Any(f => f.Id == feedbackId), cancellationToken);
+            if (user != null)
+            {
+                if (user.Id != UserContext.UserId)
+                    return Result.Of(false).WithErrors(ErrorMessages.NotAuthorized);
+                var feedback = user.Feedback.First(f => f.Id == feedbackId);
+                feedback.GuideResponse = guideResponse;
+                feedback.LastUpdated = DateTime.UtcNow;
+                await Context.SaveChangesAsync(cancellationToken);
+                return Result.Of(true);
+            }
+
+            // Search in post feedback — the post owner must be the current user
+            var post = await Context.Posts
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.Feedback.Any(f => f.Id == feedbackId), cancellationToken);
+            if (post != null)
+            {
+                if (post.User?.Id != UserContext.UserId)
+                    return Result.Of(false).WithErrors(ErrorMessages.NotAuthorized);
+                var feedback = post.Feedback.First(f => f.Id == feedbackId);
+                feedback.GuideResponse = guideResponse;
+                feedback.LastUpdated = DateTime.UtcNow;
+                await Context.SaveChangesAsync(cancellationToken);
+                return Result.Of(true);
+            }
+
+            return Result.Of(false).WithErrors(ErrorMessages.NotFoundEntityForKey);
+        }
     }
 }

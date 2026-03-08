@@ -57,5 +57,13 @@ namespace UrGuide.WebApp.Controllers
             var result = await FeedbackService.GetPostFeedback(postId, pagination, cancellationToken);
             return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
         }
+
+        [HttpPost("feedback/{feedbackId}/respond")]
+        [ProducesDefaultResponseType(typeof(bool))]
+        public async Task<IActionResult> RespondToFeedback(string feedbackId, [FromBody] FeedbackResponseModel response, CancellationToken cancellationToken)
+        {
+            var result = await FeedbackService.RespondToFeedbackAsync(feedbackId, response.Response, cancellationToken);
+            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+        }
     }
 }

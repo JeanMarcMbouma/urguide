@@ -13,5 +13,6 @@ namespace UrGuide.Services.Contracts
         Task<Result<bool>> AddUserFeedbackAsync(string userId, FeedbackModel feedback, CancellationToken cancellationToken);
         Task<Result<PagedList<AuthoredFeedback>>> GetPostFeedback(string postId, PaginationParameters paginationParameters , CancellationToken cancellationToken);
         Task<Result<PagedList<AuthoredFeedback>>> GetUserFeedback(string userId, PaginationParameters paginationParameters, CancellationToken cancellationToken);
+        Task<Result<bool>> RespondToFeedbackAsync(string feedbackId, string guideResponse, CancellationToken cancellationToken);
     }
 }

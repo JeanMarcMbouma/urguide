@@ -393,6 +393,9 @@ namespace UrGuide.WebApp.Services
                     var genderAttr = attributes.FirstOrDefault(a => a.Name == "Gender");
                     var dobAttr = attributes.FirstOrDefault(a => a.Name == "DateOfBirth");
 
+                    var submission = await _context.GuideVerificationSubmissions
+                        .FirstOrDefaultAsync(s => s.GuideId == guide.Id, cancellationToken);
+
                     pendingGuides.Add(new PendingGuideVerification
                     {
                         UserId = guide.Id,
@@ -407,9 +410,9 @@ namespace UrGuide.WebApp.Services
                         Gender = genderAttr?.Value ?? "",
                         DateOfBirth = dobAttr != null && DateTime.TryParse(dobAttr.Value, out var dob) ? dob : null,
                         RegisteredAt = user?.CreatedAt ?? DateTime.UtcNow,
-                        Status = GuideVerificationStatus.Pending,
+                        Status = submission != null ? (GuideVerificationStatus)submission.Status : GuideVerificationStatus.Pending,
                         TourCount = postCount,
-                        Documents = new string[] { } // No documents table currently
+                        Documents = new string[] { }
                     });
                 }
 
@@ -453,6 +456,19 @@ namespace UrGuide.WebApp.Services
                 var avgRating = feedbacks.Any() ? feedbacks.Average(f => f.Rating) : 0;
                 var reviewCount = feedbacks.Count;
 
+                var submission = await _context.GuideVerificationSubmissions
+                    .Include(s => s.Documents)
+                    .FirstOrDefaultAsync(s => s.GuideId == userId, cancellationToken);
+
+                var submissionDocuments = submission?.Documents.Select(d => new GuideDocument
+                {
+                    DocumentId = d.Id,
+                    DocumentType = d.DocumentType,
+                    DocumentUrl = d.FileName,
+                    UploadedAt = d.UploadedAt,
+                    Verified = d.Status == 1,
+                }).ToArray() ?? new GuideDocument[] { };
+
                 var detail = new GuideVerificationDetail
                 {
                     UserId = userId,
@@ -467,19 +483,19 @@ namespace UrGuide.WebApp.Services
                     Gender = genderAttr?.Value ?? "",
                     DateOfBirth = dobAttr != null && DateTime.TryParse(dobAttr.Value, out var dob) ? dob : null,
                     RegisteredAt = user?.CreatedAt ?? DateTime.UtcNow,
-                    Status = GuideVerificationStatus.Pending,
+                    Status = submission != null ? (GuideVerificationStatus)submission.Status : GuideVerificationStatus.Pending,
                     TourCount = postCount,
                     AverageRating = (decimal)avgRating,
                     ReviewCount = reviewCount,
                     Checklist = new VerificationChecklist
                     {
                         ProfileComplete = !string.IsNullOrEmpty(descriptionAttr?.Value),
-                        IdentityDocumentProvided = false, // No documents table
+                        IdentityDocumentProvided = submissionDocuments.Length > 0,
                         ContactVerified = guide.EmailConfirmed && !string.IsNullOrEmpty(guide.PhoneNumber),
                         BackgroundCheckPassed = false,
                         ProfileDescriptionAdequate = descriptionAttr?.Value?.Length >= 100
                     },
-                    Documents = new GuideDocument[] { } // No documents table currently
+                    Documents = submissionDocuments
                 };
 
                 return Result.Of(detail);
@@ -511,12 +527,70 @@ namespace UrGuide.WebApp.Services
                     {
                         await _userManager.AddToRoleAsync(guide, "VerifiedGuide");
                     }
+
+                    // Persist approval to verification submission
+                    var submission = await _context.GuideVerificationSubmissions
+                        .FirstOrDefaultAsync(s => s.GuideId == model.UserId, cancellationToken);
+                    var now = DateTime.UtcNow;
+                    if (submission != null)
+                    {
+                        submission.Status = (int)Model.Admin.GuideVerificationStatus.Approved;
+                        submission.ReviewedAt = now;
+                        submission.ReviewedByAdminId = _userContext.UserId;
+                        submission.AdminNotes = model.AdminNotes;
+                        submission.UpdatedAt = now;
+                    }
+                    else
+                    {
+                        await _context.GuideVerificationSubmissions.AddAsync(new UrGuide.Data.Entities.Users.GuideVerificationSubmission
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            GuideId = model.UserId,
+                            Status = (int)Model.Admin.GuideVerificationStatus.Approved,
+                            SubmittedAt = now,
+                            ReviewedAt = now,
+                            ReviewedByAdminId = _userContext.UserId,
+                            AdminNotes = model.AdminNotes,
+                            CreatedAt = now,
+                            UpdatedAt = now,
+                        }, cancellationToken);
+                    }
+                    await _context.SaveChangesAsync(cancellationToken);
                     _logger.LogInformation("Guide {UserId} approved by admin {AdminId}", model.UserId, _userContext.UserId);
                 }
                 else
                 {
-                    // Rejection logic
-                    _logger.LogInformation("Guide {UserId} rejected by admin {AdminId}. Reason: {Reason}", 
+                    // Persist rejection to verification submission
+                    var submission = await _context.GuideVerificationSubmissions
+                        .FirstOrDefaultAsync(s => s.GuideId == model.UserId, cancellationToken);
+                    var now = DateTime.UtcNow;
+                    if (submission != null)
+                    {
+                        submission.Status = (int)Model.Admin.GuideVerificationStatus.Rejected;
+                        submission.ReviewedAt = now;
+                        submission.ReviewedByAdminId = _userContext.UserId;
+                        submission.RejectionReason = model.Reason;
+                        submission.AdminNotes = model.AdminNotes;
+                        submission.UpdatedAt = now;
+                    }
+                    else
+                    {
+                        await _context.GuideVerificationSubmissions.AddAsync(new UrGuide.Data.Entities.Users.GuideVerificationSubmission
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            GuideId = model.UserId,
+                            Status = (int)Model.Admin.GuideVerificationStatus.Rejected,
+                            SubmittedAt = now,
+                            ReviewedAt = now,
+                            ReviewedByAdminId = _userContext.UserId,
+                            RejectionReason = model.Reason,
+                            AdminNotes = model.AdminNotes,
+                            CreatedAt = now,
+                            UpdatedAt = now,
+                        }, cancellationToken);
+                    }
+                    await _context.SaveChangesAsync(cancellationToken);
+                    _logger.LogInformation("Guide {UserId} rejected by admin {AdminId}. Reason: {Reason}",
                         model.UserId, _userContext.UserId, model.Reason);
                 }
 
