@@ -47,7 +47,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetOne(string id, CancellationToken cancellationToken)
         {
             var result = await UserService.GetUserInfo(id, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpGet("/users/search")]
@@ -55,7 +55,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetUsers([FromQuery]SearchParameters searchParameters, CancellationToken cancellationToken)
         {
             var result = await UserService.GetUsersAsync(searchParameters, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
     }
 }

@@ -70,7 +70,7 @@ namespace UrGuide.WebApp.Controllers
             var result = await UserService.LoginAsync(model, cancellationToken);
             if (result.IsError)
             {
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
             }
             
             var claims = new List<System.Security.Claims.Claim>
@@ -96,7 +96,7 @@ namespace UrGuide.WebApp.Controllers
             string? returnUrl = null)
         {
             var result = await UserService.RegisterUserAsync(model, cancellationToken);
-            return !result.IsError ? Ok(returnUrl) : (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors));
+            return !result.IsError ? Ok(returnUrl) : (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
         }
 
         [HttpPost("/newguide")]
@@ -105,7 +105,7 @@ namespace UrGuide.WebApp.Controllers
             string? returnUrl = null)
         {
             var result = await UserService.RegisterGuideAsync(model, cancellationToken);
-            return !result.IsError ? Ok(returnUrl) : (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors));
+            return !result.IsError ? Ok(returnUrl) : (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
         }
 
         [HttpGet("confirmEmail")]
@@ -128,7 +128,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> ResetPassord([FromBody]ResetPasswordModel model,
             CancellationToken cancellationToken) {
             var result = await AuthService.ResetPasswordAsync(model, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok();
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok();
         }
 
         [Authorize]
@@ -137,7 +137,7 @@ namespace UrGuide.WebApp.Controllers
             CancellationToken cancellationToken)
         {
             var result = await AuthService.ChangePasswordAsync(model, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok();
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok();
         }
 
         [Authorize]
@@ -146,7 +146,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetDetails(CancellationToken cancellationToken)
         {
             var result = await UserService.GetDetailsAsync(cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [Authorize]
@@ -156,7 +156,7 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await UserService.UpdateGuideAsync(model, cancellationToken);
 
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [Authorize]
@@ -166,7 +166,7 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await UserService.UpdateUserAsync(model, cancellationToken);
 
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [Authorize]
@@ -199,7 +199,7 @@ namespace UrGuide.WebApp.Controllers
             if (!r.IsError)
                 await HttpContext.SignOutAsync();
             else
-                return BadRequest(ErrorEnvelop.Create(r.Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(r.Errors));
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
             return Ok();
@@ -212,7 +212,7 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await UserService.GetUserDataExportAsync(cancellationToken);
             if (result.IsError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             // Return the data as a JSON file download
             var fileName = $"urguide_user_data_{DateTime.UtcNow:yyyyMMdd_HHmmss}.json";
@@ -297,7 +297,7 @@ namespace UrGuide.WebApp.Controllers
                 
                 if (loginResult.IsError)
                 {
-                    return BadRequest(ErrorEnvelop.Create(loginResult.Errors));
+                    return BadRequest(ErrorEnvelop.CreateFromOutcome(loginResult.Errors));
                 }
 
                 var userDetails = await UserService.GetUserAsync(loginResult.Value.Id, cancellationToken);
@@ -505,7 +505,7 @@ namespace UrGuide.WebApp.Controllers
             var result = await UserService.GetUserAsync(userId, cancellationToken);
             if (result.IsError || result.Value == null)
             {
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
             }
 
             // Get roles from standard claim type (transformed from JWT "role" claims)

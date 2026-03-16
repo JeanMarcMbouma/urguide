@@ -20,7 +20,7 @@ namespace UrGuide.Services.Auditing.Abstraction
             return Task.CompletedTask;
         }
 
-        public Task Handle(T request, CancellationToken cancellationToken)
+        public async Task Handle(T request, CancellationToken cancellationToken)
         {
             Context.AuditEvents.Add(new Data.Entities.Event.AuditEvent
             {
@@ -28,7 +28,8 @@ namespace UrGuide.Services.Auditing.Abstraction
                 EventCode = request.EventCode,
                 ReferenceId = request.ReferenceId
             });
-            return Task.CompletedTask;
+            await HandleInternal(request, cancellationToken);
+            await Context.SaveChangesAsync(cancellationToken);
         }
     }
 }

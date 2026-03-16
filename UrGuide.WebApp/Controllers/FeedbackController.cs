@@ -28,7 +28,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> PostFeedback(string postId, [FromBody]FeedbackModel feedback, CancellationToken cancellationToken)
         {
             var result = await FeedbackService.AddPostFeedbackAsync(postId, feedback, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpPost("users/{userId}/feedback")]
@@ -36,7 +36,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> UserFeedback(string userId, [FromBody]FeedbackModel feedback, CancellationToken cancellationToken)
         {
             var result = await FeedbackService.AddUserFeedbackAsync(userId, feedback, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpGet("feedback/users/{userId}")]
@@ -45,7 +45,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetUserFeedback(string userId, [FromQuery][Bind(nameof(PaginationParameters.PageNumber))]PaginationParameters pagination, CancellationToken cancellationToken)
         {
             var result = await FeedbackService.GetUserFeedback(userId, pagination, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
 
@@ -55,7 +55,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetPostFeedback(string postId, [FromQuery][Bind(nameof(PaginationParameters.PageNumber))]PaginationParameters pagination, CancellationToken cancellationToken)
         {
             var result = await FeedbackService.GetPostFeedback(postId, pagination, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpPost("feedback/{feedbackId}/respond")]
@@ -63,7 +63,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> RespondToFeedback(string feedbackId, [FromBody] FeedbackResponseModel response, CancellationToken cancellationToken)
         {
             var result = await FeedbackService.RespondToFeedbackAsync(feedbackId, response.Response, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
     }
 }

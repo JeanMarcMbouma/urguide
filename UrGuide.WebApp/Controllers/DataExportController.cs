@@ -44,7 +44,7 @@ namespace UrGuide.WebApp.Controllers
             var result = await DataExportService.RequestExportAsync(request, cancellationToken);
             
             if (result.IsError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             return Ok(result.Value);
         }
@@ -66,7 +66,7 @@ namespace UrGuide.WebApp.Controllers
             var result = await DataExportService.GetExportStatusAsync(requestId, cancellationToken);
             
             if (result.IsError)
-                return NotFound(ErrorEnvelop.Create(result.Errors));
+                return NotFound(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             return Ok(result.Value);
         }
@@ -95,8 +95,8 @@ namespace UrGuide.WebApp.Controllers
                 var errorMessage = result.Errors.FirstOrDefault()?.ToString() ?? string.Empty;
                 if (errorMessage.Contains("not ready", StringComparison.OrdinalIgnoreCase) || 
                     errorMessage.Contains("invalid", StringComparison.OrdinalIgnoreCase))
-                    return BadRequest(ErrorEnvelop.Create(result.Errors));
-                return NotFound(ErrorEnvelop.Create(result.Errors));
+                    return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
+                return NotFound(ErrorEnvelop.CreateFromOutcome(result.Errors));
             }
 
             var (filePath, fileName, _) = result.Value;
@@ -128,7 +128,7 @@ namespace UrGuide.WebApp.Controllers
             var result = await DataExportService.CancelExportAsync(requestId, cancellationToken);
             
             if (result.IsError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             return Ok(new { message = "Export request cancelled successfully" });
         }

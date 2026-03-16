@@ -38,7 +38,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> Get(string userId, CancellationToken cancellationToken)
         {
             var result = await CatalogService.GetCatalogsAsync(userId ?? UserContext.UserId, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         // GET: api/Gallery
@@ -48,7 +48,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
             var result = await CatalogService.GetCatalogsAsync(cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpGet("{catalogId}/retrieve")]
@@ -57,7 +57,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetById(string catalogId, CancellationToken cancellationToken)
         {
             var result = await CatalogService.GetCatalogAsync(catalogId, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         // PUT: api/Gallery/5
@@ -71,7 +71,7 @@ namespace UrGuide.WebApp.Controllers
                 new Model.SetAttribute { Name = nameof(model.Name), Value = model.Name },
                 new Model.SetAttribute { Name = nameof(model.Description), Value = model.Description }
             }, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpPut("update/{catalogId}/images/{imageId}/remove")]
@@ -81,7 +81,7 @@ namespace UrGuide.WebApp.Controllers
                 imageId 
             }, cancellationToken);
             if (result.IsError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
             return await GetById(catalogId, cancellationToken);
         }
 
@@ -91,7 +91,7 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await CatalogService.AddImageToCatalogAsync(catalogId, imageFile, cancellationToken);
             if (result.IsError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
             return Ok(result.Value);
         }
 
@@ -101,7 +101,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> Create([FromBody]Model.Catalogs.CreateImageCatalogModel model, CancellationToken cancellationToken)
         {
             var result = await CatalogService.CreateCatalogAsync(model, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         // DELETE: api/Galleries/5
@@ -109,7 +109,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> Delete(string catalogId, CancellationToken cancellationToken)
         {
             var result = await CatalogService.RemoveCatalogAsync(catalogId, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
     }
 }

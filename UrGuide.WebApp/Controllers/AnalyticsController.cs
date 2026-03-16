@@ -54,7 +54,7 @@ namespace UrGuide.WebApp.Controllers
             var result = await _analyticsService.GetUserRegistrationTrendsAsync(dateRange, cancellationToken);
 
             if (result.IsError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             return Ok(result.Value);
         }
@@ -85,7 +85,7 @@ namespace UrGuide.WebApp.Controllers
             var result = await _analyticsService.GetTourBookingStatisticsAsync(dateRange, cancellationToken);
 
             if (result.IsError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             return Ok(result.Value);
         }
@@ -116,7 +116,7 @@ namespace UrGuide.WebApp.Controllers
             var result = await _analyticsService.GetRevenueMetricsAsync(dateRange, cancellationToken);
 
             if (result.IsError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             return Ok(result.Value);
         }
@@ -149,7 +149,7 @@ namespace UrGuide.WebApp.Controllers
             var result = await _analyticsService.GetGuidePerformanceMetricsAsync(dateRange, topN, cancellationToken);
 
             if (result.IsError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             return Ok(result.Value);
         }
@@ -182,7 +182,7 @@ namespace UrGuide.WebApp.Controllers
             var result = await _analyticsService.GetPopularDestinationsAsync(dateRange, topN, cancellationToken);
 
             if (result.IsError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             return Ok(result.Value);
         }
@@ -213,7 +213,7 @@ namespace UrGuide.WebApp.Controllers
             var result = await _analyticsService.GetConversionFunnelAsync(dateRange, cancellationToken);
 
             if (result.IsError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             return Ok(result.Value);
         }
@@ -244,7 +244,7 @@ namespace UrGuide.WebApp.Controllers
             var result = await _analyticsService.GetDashboardSummaryAsync(dateRange, cancellationToken);
 
             if (result.IsError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             return Ok(result.Value);
         }
@@ -277,7 +277,7 @@ namespace UrGuide.WebApp.Controllers
             var result = await _analyticsService.ExportDashboardDataAsync(dateRange, format, cancellationToken);
 
             if (result.IsError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             var contentType = format.Equals("csv", StringComparison.OrdinalIgnoreCase)
                 ? "text/csv"

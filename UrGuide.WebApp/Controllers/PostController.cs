@@ -33,7 +33,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetOwn(SearchParameters pagination, CancellationToken cancellationToken)
         {
             var result = await _postService.GetOwnPostsAsync(pagination, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpPost("{userId}/all")]
@@ -42,7 +42,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetUsersPosts(string userId, SearchParameters pagination, CancellationToken cancellationToken)
         {
             var result = await _postService.GetPostsByUserId(userId, pagination, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpPost("search")]
@@ -51,7 +51,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> SearchPost([FromBody]SearchParameters pagination, CancellationToken cancellationToken)
         {
             var result = await _postService.GetPostsAsync(pagination, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpGet("last10")]
@@ -60,7 +60,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
             var result = await _postService.GetLast10PostsAsync(cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpGet("last100")]
@@ -69,7 +69,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> Last100(CancellationToken cancellationToken)
         {
             var result = await _postService.GetLast100PostsAsync(cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpGet("top10")]
@@ -78,7 +78,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> Top10(CancellationToken cancellationToken)
         {
             var result = await _postService.GetTop10PostsAsync(cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpGet("{postId}/retrieve")]
@@ -87,7 +87,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetOne(string postId, CancellationToken cancellationToken)
         {
             var result = await _postService.GetByIdAsync(postId, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpGet("top100")]
@@ -96,7 +96,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> Top100(CancellationToken cancellationToken)
         {
             var result = await _postService.GetTop100PostsAsync(cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpPost("create")]
@@ -104,7 +104,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> Create([FromBody]PostCreationModel model, CancellationToken cancellationToken)
         {
             var result = await _postService.CreatePostAsync(model, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
 
@@ -117,7 +117,7 @@ namespace UrGuide.WebApp.Controllers
             }
 
             var result = await _postService.UpdatePostAsync(model, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
 
@@ -125,7 +125,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> DeletePost(string postId, CancellationToken cancellationToken)
         {
             var result = await _postService.DeletePostAsync(postId, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpGet("{postId}/itineraries")]
@@ -134,7 +134,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetItineraries(string postId, CancellationToken cancellationToken)
         {
             var result = await _postService.GetItinerariesAsync(postId, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpPost("{postId}/makereservation")]
@@ -143,7 +143,7 @@ namespace UrGuide.WebApp.Controllers
             if (seatReservation.PostId != postId)
                 return BadRequest();
             var result = await _postService.ReserveSeatsAsync(seatReservation, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpPut("{postId}/editreservation")]
@@ -152,14 +152,14 @@ namespace UrGuide.WebApp.Controllers
             if (seatReservation.PostId != postId)
                 return BadRequest();
             var result = await _postService.ReserveSeatsAsync(seatReservation, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpPost("{postId}/cancelreservation")]
         public async Task<IActionResult> CancelReservation(string postId, CancellationToken cancellationToken)
         {
             var result = await _postService.CancelReservationAsync(postId, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
 
         [HttpPost("{postId}/reaction")]
@@ -168,7 +168,7 @@ namespace UrGuide.WebApp.Controllers
             if (userReaction.PostId != postId)
                 return BadRequest();
             var result = await _postService.RecordUserReactionAsync(userReaction, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
         }
     }
 }

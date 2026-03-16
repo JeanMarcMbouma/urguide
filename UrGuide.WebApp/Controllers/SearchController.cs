@@ -63,7 +63,7 @@ namespace UrGuide.WebApp.Controllers
 
                 if (result.IsError)
                 {
-                    return BadRequest(ErrorEnvelop.Create(result.Errors));
+                    return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
                 }
 
                 var timeTaken = (long)(DateTime.UtcNow - startTime).TotalMilliseconds;
@@ -113,7 +113,7 @@ namespace UrGuide.WebApp.Controllers
 
                 if (result.IsError)
                 {
-                    return BadRequest(ErrorEnvelop.Create(result.Errors));
+                    return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
                 }
 
                 var timeTaken = (long)(DateTime.UtcNow - startTime).TotalMilliseconds;
@@ -162,7 +162,7 @@ namespace UrGuide.WebApp.Controllers
 
                 if (result.IsError)
                 {
-                    return BadRequest(ErrorEnvelop.Create(result.Errors));
+                    return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
                 }
 
                 return Ok(result.Value);
@@ -253,7 +253,7 @@ namespace UrGuide.WebApp.Controllers
                     if (result.IsError)
                     {
                         _logger.LogError("Failed to bulk index posts batch: {Errors}", string.Join(", ", result.Errors));
-                        return StatusCode(500, ErrorEnvelop.Create(result.Errors));
+                        return StatusCode(500, ErrorEnvelop.CreateFromOutcome(result.Errors));
                     }
                     
                     totalIndexed += posts.Count;
@@ -328,7 +328,7 @@ namespace UrGuide.WebApp.Controllers
                     if (result.IsError)
                     {
                         _logger.LogError("Failed to bulk index tours batch: {Errors}", string.Join(", ", result.Errors));
-                        return StatusCode(500, ErrorEnvelop.Create(result.Errors));
+                        return StatusCode(500, ErrorEnvelop.CreateFromOutcome(result.Errors));
                     }
                     
                     totalIndexed += tours.Count;

@@ -16,7 +16,10 @@ namespace UrGuide.Model.Results
     {
         public static Outcome<T> WithErrors<T>(this Outcome<T> outcome, params string[] errors)
         {
-            return Outcome<T>.FromErrors(errors.Cast<object>().ToList());
+            var allErrors = outcome.IsError
+                ? outcome.Errors.Concat(errors.Cast<object>()).ToList()
+                : errors.Cast<object>().ToList();
+            return Outcome<T>.FromErrors(allErrors);
         }
 
         public static Outcome<T> Combine<T, TSource>(this Outcome<T> outcome, Outcome<TSource> other)
