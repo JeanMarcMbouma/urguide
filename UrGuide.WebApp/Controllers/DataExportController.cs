@@ -43,10 +43,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await DataExportService.RequestExportAsync(request, cancellationToken);
             
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -65,10 +65,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await DataExportService.GetExportStatusAsync(requestId, cancellationToken);
             
-            if (result.HasError)
+            if (result.IsError)
                 return NotFound(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -89,17 +89,17 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await DataExportService.DownloadExportAsync(token, cancellationToken);
             
-            if (result.HasError)
+            if (result.IsError)
             {
                 // Check if error indicates invalid token/not ready (BadRequest) vs not found
-                var errorMessage = result.Errors.FirstOrDefault() ?? string.Empty;
+                var errorMessage = result.Errors.FirstOrDefault()?.ToString() ?? string.Empty;
                 if (errorMessage.Contains("not ready", StringComparison.OrdinalIgnoreCase) || 
                     errorMessage.Contains("invalid", StringComparison.OrdinalIgnoreCase))
                     return BadRequest(ErrorEnvelop.Create(result.Errors));
                 return NotFound(ErrorEnvelop.Create(result.Errors));
             }
 
-            var (filePath, fileName, _) = result.Data;
+            var (filePath, fileName, _) = result.Value;
 
             // Determine content type
             var contentType = fileName.EndsWith(".json") ? "application/json" : "application/zip";
@@ -127,7 +127,7 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await DataExportService.CancelExportAsync(requestId, cancellationToken);
             
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
             return Ok(new { message = "Export request cancelled successfully" });

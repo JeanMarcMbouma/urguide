@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using BbQ.Outcome;
 using System;
 using System.Text.Json;
 using System.Threading;
@@ -22,7 +23,7 @@ namespace UrGuide.Services.Search
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<Result<bool>> TrackSearchAsync(
+        public async Task<Outcome<bool>> TrackSearchAsync(
             string query,
             string userId,
             long resultsCount,

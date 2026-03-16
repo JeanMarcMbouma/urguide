@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
-using MediatR;
+using BbQ.Cqrs;
+using BbQ.Outcome;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Linq;
@@ -37,7 +38,7 @@ namespace UrGuide.WebApp.Services
         public HttpContext HttpContext { get; }
         public IMediator Mediator { get; }
 
-        public async Task<Result<bool>> ChangePasswordAsync(ChangePasswordModel model, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> ChangePasswordAsync(ChangePasswordModel model, CancellationToken cancellationToken)
         {
             var userManager = SignInManager.UserManager;
             var user = await userManager.FindByEmailAsync(model.Email);
@@ -69,7 +70,7 @@ namespace UrGuide.WebApp.Services
             return Result.Of(false).WithErrors("Failed to change a user's password");
         }
 
-        public async Task<Result<bool>> ConfirmEmailAsync(EmailConfirmationModel emailConfirmation, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> ConfirmEmailAsync(EmailConfirmationModel emailConfirmation, CancellationToken cancellationToken)
         {
             var userManager = SignInManager.UserManager;
             var user = await userManager.FindByEmailAsync(emailConfirmation.Email);
@@ -91,7 +92,7 @@ namespace UrGuide.WebApp.Services
                 await userManager.DeleteAsync(user);
         }
 
-        public async Task<Result<string>> LoginAsync(LoginModel login, CancellationToken cancellationToken)
+        public async Task<Outcome<string>> LoginAsync(LoginModel login, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -117,7 +118,7 @@ namespace UrGuide.WebApp.Services
             return Result.Of(user.Id);
         }
 
-        public async Task<Result<(string userId, string confirmationToken)>> RegisterGuideAsync(CreateGuideModel createGuide, CancellationToken cancellationToken)
+        public async Task<Outcome<(string userId, string confirmationToken)>> RegisterGuideAsync(CreateGuideModel createGuide, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var userManager = SignInManager.UserManager;
@@ -151,7 +152,7 @@ namespace UrGuide.WebApp.Services
             return Result.Of((user.Id, emailConfirmationToken));
         }
 
-        public async Task<Result<(string userId, string confirmationToken)>> RegisterUserAsync(CreateUserModel createUser, CancellationToken cancellationToken)
+        public async Task<Outcome<(string userId, string confirmationToken)>> RegisterUserAsync(CreateUserModel createUser, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var userManager = SignInManager.UserManager;
@@ -183,7 +184,7 @@ namespace UrGuide.WebApp.Services
             return Result.Of((user.Id, emailConfirmationToken));
         }
 
-        public async Task<Result<bool>> RequestPasswordResetAsync(PasswordResetRequestModel passwordResetRequest, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> RequestPasswordResetAsync(PasswordResetRequestModel passwordResetRequest, CancellationToken cancellationToken)
         {
             var userManager = SignInManager.UserManager;
             var user = await userManager.FindByEmailAsync(passwordResetRequest.Email).ConfigureAwait(false);
@@ -210,7 +211,7 @@ namespace UrGuide.WebApp.Services
             return Result.Of(false).WithErrors("Failed to generate a password reset token");
         }
 
-        public async Task<Result<bool>> ResetPasswordAsync(ResetPasswordModel resetPasswordModel, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> ResetPasswordAsync(ResetPasswordModel resetPasswordModel, CancellationToken cancellationToken)
         {
             var userManager = SignInManager.UserManager;
 
@@ -233,7 +234,7 @@ namespace UrGuide.WebApp.Services
             return Result.Of(false).WithErrors("Failed to reset your password");
         }
 
-        public async Task<Result<bool>> DeleteAccount()
+        public async Task<Outcome<bool>> DeleteAccount()
         {
             var userManager = SignInManager.UserManager;
             var user = await userManager.FindByIdAsync(UserContext.UserId);
@@ -247,7 +248,7 @@ namespace UrGuide.WebApp.Services
 
         public async Task SignOutAsync()
         {
-            await Mediator.Send(new UserLoggedOutCommand(UserContext.UserId));
+            await Mediator.Send(new UserLoggedOutCommand(UserContext.UserId), default);
         }
     }
 }

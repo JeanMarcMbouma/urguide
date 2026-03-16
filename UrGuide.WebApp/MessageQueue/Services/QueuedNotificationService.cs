@@ -1,4 +1,5 @@
 using System;
+using BbQ.Outcome;
 using System.Threading;
 using System.Threading.Tasks;
 using MassTransit;
@@ -78,22 +79,22 @@ public class QueuedNotificationService : IUserNotificationService
     // Read operations are delegated to the synchronous service
     // These operations don't benefit from queuing and need immediate results
 
-    public Task<Result<bool>> MarkAsReadAsync(string notificationId, CancellationToken cancellationToken)
+    public Task<Outcome<bool>> MarkAsReadAsync(string notificationId, CancellationToken cancellationToken)
     {
         return _synchronousNotificationService.MarkAsReadAsync(notificationId, cancellationToken);
     }
 
-    public Task<Result<Notification>> GetNotificationAsync(string notificationId, CancellationToken cancellationToken)
+    public Task<Outcome<Notification>> GetNotificationAsync(string notificationId, CancellationToken cancellationToken)
     {
         return _synchronousNotificationService.GetNotificationAsync(notificationId, cancellationToken);
     }
 
-    public Task<Result<PagedList<Notification>>> GetUnreadAsync(PaginationParameters pagination, CancellationToken cancellationToken)
+    public Task<Outcome<PagedList<Notification>>> GetUnreadAsync(PaginationParameters pagination, CancellationToken cancellationToken)
     {
         return _synchronousNotificationService.GetUnreadAsync(pagination, cancellationToken);
     }
 
-    public Task<Result<PagedList<Notification>>> GetAllAsync(PaginationParameters pagination, CancellationToken cancellationToken)
+    public Task<Outcome<PagedList<Notification>>> GetAllAsync(PaginationParameters pagination, CancellationToken cancellationToken)
     {
         return _synchronousNotificationService.GetAllAsync(pagination, cancellationToken);
     }

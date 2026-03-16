@@ -1,5 +1,6 @@
-﻿using MediatR;
+﻿using BbQ.Cqrs;
 using Microsoft.EntityFrameworkCore;
+using BbQ.Outcome;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -53,7 +54,7 @@ namespace UrGuide.Services.Posts
         public IMediator Mediator { get; }
         public IElasticsearchService ElasticsearchService { get; }
 
-        public async Task<Result<PostModel>> AcceptBidAsync(string postId, CancellationToken cancellationToken)
+        public async Task<Outcome<PostModel>> AcceptBidAsync(string postId, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
@@ -105,7 +106,7 @@ New price: <em>{post.Bid.NewValue}</em>";
             await NotificationService.SystemNotifyAsync(authorId, content, $"/post/{post.Id}/shot/{post.Catalog.Images.FirstOrDefault()?.Id}");
         }
 
-        public async Task<Result<PostModel>> CreatePostAsync(PostCreationModel model, CancellationToken cancellationToken)
+        public async Task<Outcome<PostModel>> CreatePostAsync(PostCreationModel model, CancellationToken cancellationToken)
         {
             var user = await Context.Users.FindAsync(new[] { UserContext.UserId }, cancellationToken);
             var post = new Post
@@ -131,7 +132,7 @@ New price: <em>{post.Bid.NewValue}</em>";
                 Name = model.Description,
                 Files = model.Images.Union(extFiles).ToList()
             }, cancellationToken);
-            if (result.HasError)
+            if (result.IsError)
                 return Result.Of<PostModel>().WithErrors("Failed to create a post").Combine(result);
 
             post.Tags = string.Join(",",model.Categories);
@@ -156,7 +157,7 @@ New price: <em>{post.Bid.NewValue}</em>";
 
             Context.Posts.Add(post);
             await Context.SaveChangesAsync(cancellationToken);
-            await Mediator.Send(new PostCreatedCommand(UserContext.UserId, post.Id));
+            await Mediator.Send(new PostCreatedCommand(UserContext.UserId, post.Id), cancellationToken);
             foreach (var image in post.Catalog.Images)
             {
                 ImageService.SaveImage(image);
@@ -178,7 +179,7 @@ New price: <em>{post.Bid.NewValue}</em>";
             return Result.Of(PostMapper.ToPostModel(PostVisitor.Visit(post, UserContext.UserId)));
         }
 
-        public async Task<Result<bool>> DeletePostAsync(string id, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> DeletePostAsync(string id, CancellationToken cancellationToken)
         {
             var post = await Context.Posts.Where(x => x.User.Id == UserContext.UserId && x.Id == id)
                 .FirstOrDefaultAsync(cancellationToken);
@@ -188,7 +189,7 @@ New price: <em>{post.Bid.NewValue}</em>";
             Context.Posts.Remove(post);
             await Context.SaveChangesAsync(cancellationToken);
             ImageService.DeleteImages(images);
-            await Mediator.Send(new PostDeletedCommand(UserContext.UserId, id));
+            await Mediator.Send(new PostDeletedCommand(UserContext.UserId, id), cancellationToken);
             
             // Delete from Elasticsearch asynchronously
             try
@@ -203,7 +204,7 @@ New price: <em>{post.Bid.NewValue}</em>";
             return Result.Of(true);
         }
 
-        public async Task<Result<IEnumerable<ItineraryModel>>> GetItinerariesAsync(string postId, CancellationToken cancellationToken)
+        public async Task<Outcome<IEnumerable<ItineraryModel>>> GetItinerariesAsync(string postId, CancellationToken cancellationToken)
         {
             var post = await Context.Posts.Include(x => x.Itineraries)
                 .FirstOrDefaultAsync(p => p.Id == postId, cancellationToken);
@@ -212,12 +213,12 @@ New price: <em>{post.Bid.NewValue}</em>";
             return Result.Of(post.Itineraries.Select(PostMapper.ToItineraryModel).AsEnumerable());
         }
 
-        public Task<Result<IEnumerable<PostModel>>> GetLast10PostsAsync(CancellationToken cancellationToken)
+        public Task<Outcome<IEnumerable<PostModel>>> GetLast10PostsAsync(CancellationToken cancellationToken)
         {
             return GetPagedData(0, 10, cancellationToken);
         }
 
-        private async Task<Result<IEnumerable<PostModel>>> GetPagedData(int offset, int size, CancellationToken cancellationToken)
+        private async Task<Outcome<IEnumerable<PostModel>>> GetPagedData(int offset, int size, CancellationToken cancellationToken)
         {
             var geo = await IPStackService.GetLocationAsync(UserContext);
             var posts = await Context.Posts
@@ -230,13 +231,13 @@ New price: <em>{post.Bid.NewValue}</em>";
             return Result.Of(PostVisitor.Visit(posts, UserContext.UserId).Select(PostMapper.ToPostModel));
         }
 
-        public Task<Result<IEnumerable<PostModel>>> GetLast100PostsAsync(CancellationToken cancellationToken)
+        public Task<Outcome<IEnumerable<PostModel>>> GetLast100PostsAsync(CancellationToken cancellationToken)
         {
             return GetPagedData(0, 100, cancellationToken);
         }
 
 
-        public async Task<Result<PostModel>> OpenBidAsync(BidModel model, CancellationToken cancellationToken)
+        public async Task<Outcome<PostModel>> OpenBidAsync(BidModel model, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
@@ -301,7 +302,7 @@ New price: <em>{post.Bid.NewValue}</em>");
             }
         }
 
-        public async Task<Result<PostModel>> RejectBidAsync(string postId, CancellationToken cancellationToken)
+        public async Task<Outcome<PostModel>> RejectBidAsync(string postId, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotAuthenticated);
@@ -346,7 +347,7 @@ Your bid: <em>{value}</em>";
             }
         }
 
-        public async Task<Result<bool>> UpdatePostAsync(PostUpdateModel model, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> UpdatePostAsync(PostUpdateModel model, CancellationToken cancellationToken)
         {
             var post = await Context.Posts.Where(x => x.User.Id == UserContext.UserId && x.Id == model.Id)
                .FirstOrDefaultAsync(cancellationToken);
@@ -355,7 +356,7 @@ Your bid: <em>{value}</em>";
             post.Text = model.Text;
             post.Description = model.Description;
             post.LastUpdated = DateTime.UtcNow;
-            await Mediator.Send(new PostEditedCommand(UserContext.UserId, model.Id));
+            await Mediator.Send(new PostEditedCommand(UserContext.UserId, model.Id), cancellationToken);
             await Context.SaveChangesAsync(cancellationToken);
             
             // Update in Elasticsearch asynchronously
@@ -372,7 +373,7 @@ Your bid: <em>{value}</em>";
             return Result.Of(true);
         }
 
-        public async Task<Result<IEnumerable<BidHistoryModel>>> GetBidHistoryAsync(string postId, CancellationToken cancellationToken)
+        public async Task<Outcome<IEnumerable<BidHistoryModel>>> GetBidHistoryAsync(string postId, CancellationToken cancellationToken)
         {
             var post = await Context.Posts.Include(p => p.BidHistories).Where(x => x.Id == postId)
                .FirstOrDefaultAsync(cancellationToken);
@@ -382,17 +383,17 @@ Your bid: <em>{value}</em>";
             return Result.Of(post.BidHistories.OrderByDescending(x => x.Created).Select(PostMapper.ToBidHistoryModel).AsEnumerable());
         }
 
-        public Task<Result<IEnumerable<PostModel>>> GetTop10PostsAsync(CancellationToken cancellationToken)
+        public Task<Outcome<IEnumerable<PostModel>>> GetTop10PostsAsync(CancellationToken cancellationToken)
         {
             return GetTopPagedData(0, 10, cancellationToken);
         }
 
-        public Task<Result<IEnumerable<PostModel>>> GetTop100PostsAsync(CancellationToken cancellationToken)
+        public Task<Outcome<IEnumerable<PostModel>>> GetTop100PostsAsync(CancellationToken cancellationToken)
         {
             return GetTopPagedData(0, 100, cancellationToken);
         }
 
-        private async Task<Result<IEnumerable<PostModel>>> GetTopPagedData(int offset, int size, CancellationToken cancellationToken)
+        private async Task<Outcome<IEnumerable<PostModel>>> GetTopPagedData(int offset, int size, CancellationToken cancellationToken)
         {
             var geo = await IPStackService.GetLocationAsync(UserContext);
             var posts = await Context.Posts
@@ -406,7 +407,7 @@ Your bid: <em>{value}</em>";
             return Result.Of(PostVisitor.Visit(posts, UserContext.UserId).Select(PostMapper.ToPostModel));
         }
 
-        public async Task<Result<bool>> ReserveSeatsAsync(SeatReservationModel seatReservation, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> ReserveSeatsAsync(SeatReservationModel seatReservation, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
@@ -450,7 +451,7 @@ Seats: {seatReservation.Seats}";
             return Result.Of(true);
         }
 
-        public async Task<Result<bool>> UpdateSeatReservationAsync(SeatReservationModel seatReservation, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> UpdateSeatReservationAsync(SeatReservationModel seatReservation, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
@@ -494,7 +495,7 @@ Title: {post.Text}";
             return Result.Of(true);
         }
 
-        public async Task<Result<bool>> CancelReservationAsync(string postId, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> CancelReservationAsync(string postId, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
@@ -537,7 +538,7 @@ Post: <strong>{post.Text}</strong></br>
             return Result.Of(true);
         }
 
-        public async Task<Result<bool>> RecordUserReactionAsync(UserReactionModel userReaction, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> RecordUserReactionAsync(UserReactionModel userReaction, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
@@ -574,7 +575,7 @@ Post: <strong>{post.Text}</strong></br>
             return Result.Of(true);
         }
 
-        public async Task<Result<PostModel>> GetByIdAsync(string postId, CancellationToken cancellationToken)
+        public async Task<Outcome<PostModel>> GetByIdAsync(string postId, CancellationToken cancellationToken)
         {
             var post = await Context.Posts
                 .Include(x => x.Bid)
@@ -587,17 +588,17 @@ Post: <strong>{post.Text}</strong></br>
             return Result.Of(PostMapper.ToPostModel(PostVisitor.Visit(post, UserContext.UserId)));
         }
 
-        public Task<Result<PagedList<PostModel>>> GetOwnPostsAsync(SearchParameters pagination, CancellationToken cancellationToken)
+        public Task<Outcome<PagedList<PostModel>>> GetOwnPostsAsync(SearchParameters pagination, CancellationToken cancellationToken)
         {
             return GetPostsByUserId(UserContext.UserId, pagination, cancellationToken);
         }
 
-        public Task<Result<PagedList<PostModel>>> GetPostsByUserId(string userId, SearchParameters pagination, CancellationToken cancellationToken)
+        public Task<Outcome<PagedList<PostModel>>> GetPostsByUserId(string userId, SearchParameters pagination, CancellationToken cancellationToken)
         {
             return InternalSearch(userId, pagination, cancellationToken);
         }
 
-        private async Task<Result<PagedList<PostModel>>> InternalSearch(string? userId, SearchParameters pagination, CancellationToken cancellationToken)
+        private async Task<Outcome<PagedList<PostModel>>> InternalSearch(string? userId, SearchParameters pagination, CancellationToken cancellationToken)
         {
             var geo = pagination.Nearby ? await IPStackService.GetLocationAsync(UserContext) : null;
             var where = pagination.Extra.Any() ? $"WHERE ({string.Join(" OR ", pagination.Extra.Select(x => $"Tags LIKE '%{x}%'"))})" : string.Empty;
@@ -617,7 +618,7 @@ Post: <strong>{post.Text}</strong></br>
             return Result.Of(pagedResult);
         }
 
-        public Task<Result<PagedList<PostModel>>> GetPostsAsync(SearchParameters pagination, CancellationToken cancellationToken)
+        public Task<Outcome<PagedList<PostModel>>> GetPostsAsync(SearchParameters pagination, CancellationToken cancellationToken)
         {
             return InternalSearch(null, pagination, cancellationToken);
         }

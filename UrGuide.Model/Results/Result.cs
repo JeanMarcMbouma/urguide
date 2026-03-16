@@ -1,43 +1,34 @@
-﻿using System;
+﻿using BbQ.Outcome;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace UrGuide.Model.Results
 {
-    public abstract class Result
+    public static class Result
     {
-        public static Result<TResult> Of<TResult>(TResult data = default) => new Result<TResult>(data);
+        public static Outcome<TResult> Of<TResult>(TResult data = default) => Outcome<TResult>.From(data);
         public struct EmptyStruct { }
-        public static Result<EmptyStruct> Empty = Of(new EmptyStruct());
+        public static Outcome<EmptyStruct> Empty => Of(new EmptyStruct());
     }
-    public class Result<T> : Result
+
+    public static class OutcomeResultExtensions
     {
-        public Result(T data)
+        public static Outcome<T> WithErrors<T>(this Outcome<T> outcome, params string[] errors)
         {
-            Data = data;
-            Errors = new List<string>();
+            return Outcome<T>.FromErrors(errors.Cast<object>().ToList());
         }
 
-        public T Data { get; }
-        public bool HasError => Errors.Any();
-        public ICollection<string> Errors { get; }
-
-        public Result<T> WithErrors(params string[] errors)
+        public static Outcome<T> Combine<T, TSource>(this Outcome<T> outcome, Outcome<TSource> other)
         {
-            Array.ForEach(errors, Errors.Add);
-            return this;
-        }
-
-        public Result<T> Combine<TSource>(Result<TSource> other)
-        {
-            if(other.HasError)
+            if (other.IsError)
             {
-                foreach (var error in other.Errors)
-                {
-                    Errors.Add(error);
-                }
+                var allErrors = outcome.IsError
+                    ? outcome.Errors.Concat(other.Errors).ToList()
+                    : other.Errors.ToList();
+                return Outcome<T>.FromErrors(allErrors);
             }
-            return this;
+            return outcome;
         }
     }
 }

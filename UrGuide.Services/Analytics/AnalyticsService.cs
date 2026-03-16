@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using BbQ.Outcome;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -27,7 +28,7 @@ namespace UrGuide.Services.Analytics
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<Result<UserRegistrationTrends>> GetUserRegistrationTrendsAsync(
+        public async Task<Outcome<UserRegistrationTrends>> GetUserRegistrationTrendsAsync(
             AnalyticsDateRange dateRange, 
             CancellationToken cancellationToken)
         {
@@ -70,7 +71,7 @@ namespace UrGuide.Services.Analytics
             }
         }
 
-        public async Task<Result<TourBookingStatistics>> GetTourBookingStatisticsAsync(
+        public async Task<Outcome<TourBookingStatistics>> GetTourBookingStatisticsAsync(
             AnalyticsDateRange dateRange, 
             CancellationToken cancellationToken)
         {
@@ -124,7 +125,7 @@ namespace UrGuide.Services.Analytics
             }
         }
 
-        public async Task<Result<RevenueMetrics>> GetRevenueMetricsAsync(
+        public async Task<Outcome<RevenueMetrics>> GetRevenueMetricsAsync(
             AnalyticsDateRange dateRange, 
             CancellationToken cancellationToken)
         {
@@ -182,7 +183,7 @@ namespace UrGuide.Services.Analytics
             }
         }
 
-        public async Task<Result<GuidePerformanceMetrics>> GetGuidePerformanceMetricsAsync(
+        public async Task<Outcome<GuidePerformanceMetrics>> GetGuidePerformanceMetricsAsync(
             AnalyticsDateRange dateRange, 
             int topN, 
             CancellationToken cancellationToken)
@@ -254,7 +255,7 @@ namespace UrGuide.Services.Analytics
             }
         }
 
-        public async Task<Result<PopularDestinations>> GetPopularDestinationsAsync(
+        public async Task<Outcome<PopularDestinations>> GetPopularDestinationsAsync(
             AnalyticsDateRange dateRange, 
             int topN, 
             CancellationToken cancellationToken)
@@ -316,7 +317,7 @@ namespace UrGuide.Services.Analytics
             }
         }
 
-        public async Task<Result<ConversionFunnel>> GetConversionFunnelAsync(
+        public async Task<Outcome<ConversionFunnel>> GetConversionFunnelAsync(
             AnalyticsDateRange dateRange, 
             CancellationToken cancellationToken)
         {
@@ -387,7 +388,7 @@ namespace UrGuide.Services.Analytics
             }
         }
 
-        public async Task<Result<DashboardSummary>> GetDashboardSummaryAsync(
+        public async Task<Outcome<DashboardSummary>> GetDashboardSummaryAsync(
             AnalyticsDateRange dateRange, 
             CancellationToken cancellationToken)
         {
@@ -415,20 +416,20 @@ namespace UrGuide.Services.Analytics
                 var destinations = await destinationsTask;
                 var funnel = await funnelTask;
 
-                if (userTrends.HasError || bookingStats.HasError || revenue.HasError || 
-                    guideMetrics.HasError || destinations.HasError || funnel.HasError)
+                if (userTrends.IsError || bookingStats.IsError || revenue.IsError || 
+                    guideMetrics.IsError || destinations.IsError || funnel.IsError)
                 {
                     return Result.Of<DashboardSummary>().WithErrors("Failed to retrieve dashboard summary");
                 }
 
                 return Result.Of(new DashboardSummary
                 {
-                    UserTrends = userTrends.Data,
-                    BookingStats = bookingStats.Data,
-                    Revenue = revenue.Data,
-                    GuideMetrics = guideMetrics.Data,
-                    Destinations = destinations.Data,
-                    Funnel = funnel.Data
+                    UserTrends = userTrends.Value,
+                    BookingStats = bookingStats.Value,
+                    Revenue = revenue.Value,
+                    GuideMetrics = guideMetrics.Value,
+                    Destinations = destinations.Value,
+                    Funnel = funnel.Value
                 });
             }
             catch (Exception ex)
@@ -438,7 +439,7 @@ namespace UrGuide.Services.Analytics
             }
         }
 
-        public async Task<Result<byte[]>> ExportDashboardDataAsync(
+        public async Task<Outcome<byte[]>> ExportDashboardDataAsync(
             AnalyticsDateRange dateRange, 
             string format, 
             CancellationToken cancellationToken)
@@ -447,7 +448,7 @@ namespace UrGuide.Services.Analytics
             {
                 var summaryResult = await GetDashboardSummaryAsync(dateRange, cancellationToken);
                 
-                if (summaryResult.HasError)
+                if (summaryResult.IsError)
                 {
                     return Result.Of<byte[]>().WithErrors("Failed to retrieve dashboard data for export");
                 }
@@ -456,7 +457,7 @@ namespace UrGuide.Services.Analytics
 
                 if (format.Equals("json", StringComparison.OrdinalIgnoreCase))
                 {
-                    var json = JsonSerializer.Serialize(summaryResult.Data, new JsonSerializerOptions
+                    var json = JsonSerializer.Serialize(summaryResult.Value, new JsonSerializerOptions
                     {
                         WriteIndented = true
                     });
@@ -464,7 +465,7 @@ namespace UrGuide.Services.Analytics
                 }
                 else if (format.Equals("csv", StringComparison.OrdinalIgnoreCase))
                 {
-                    exportData = Encoding.UTF8.GetBytes(GenerateCsvExport(summaryResult.Data));
+                    exportData = Encoding.UTF8.GetBytes(GenerateCsvExport(summaryResult.Value));
                 }
                 else
                 {

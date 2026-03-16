@@ -42,10 +42,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetAllUsersAsync(searchParameters, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -61,10 +61,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetUserDetailAsync(userId, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return NotFound(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.SuspendUserAsync(userId, durationDays, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
             return Ok(new { message = $"User suspended for {durationDays} days", userId });
@@ -99,7 +99,7 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.ActivateUserAsync(userId, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
             return Ok(new { message = "User activated successfully", userId });
@@ -118,7 +118,7 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.DeleteUserAsync(userId, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
             return Ok(new { message = "User deleted successfully", userId });
@@ -136,7 +136,7 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.UpdateUserRolesAsync(model, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
             return Ok(new { message = "User roles updated successfully", model.UserId, roles = model.Roles });
@@ -155,10 +155,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetUserActivityAsync(userId, paginationParameters, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -172,10 +172,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetAllRolesAsync(cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -190,10 +190,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetPendingGuidesAsync(paginationParameters, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -209,10 +209,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetGuideVerificationDetailAsync(userId, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return NotFound(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -227,7 +227,7 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.ProcessGuideVerificationAsync(model, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
             var action = model.Approve ? "approved" : "rejected";
@@ -246,10 +246,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetPendingToursAsync(paginationParameters, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -265,10 +265,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetTourModerationDetailAsync(postId, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return NotFound(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -283,7 +283,7 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.ProcessTourModerationAsync(model, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
             var action = model.Approve ? "approved" : "rejected";
@@ -301,10 +301,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetAllTransactionsAsync(parameters, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -316,10 +316,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetAllPayoutsAsync(parameters, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -331,10 +331,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetAllRefundsAsync(parameters, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         // ── System Monitoring ─────────────────────────────────────────────────
@@ -348,10 +348,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetSystemHealthAsync(cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -363,10 +363,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetAllAuditLogsAsync(parameters, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -378,10 +378,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetAllWebhooksAsync(paginationParameters, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -393,10 +393,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetPlatformSettingsAsync(cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -408,7 +408,7 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.UpdatePlatformSettingsAsync(settings, cancellationToken);
 
-            if (result.HasError)
+            if (result.IsError)
                 return BadRequest(ErrorEnvelop.Create(result.Errors));
 
             return Ok(new { message = "Platform settings updated successfully" });

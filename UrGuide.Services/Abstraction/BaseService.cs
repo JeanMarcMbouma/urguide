@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
+using BbQ.Outcome;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,17 +25,17 @@ namespace UrGuide.Services.Abstraction
         public UrGuideContext Context { get; }
         public IUserContext UserContext { get; }
 
-        public Task<Result<bool>> SetAttributeAsync<TInput>(string id, SetAttribute attribute, CancellationToken cancellationToken) where TInput : class, IAttributeEnabledEntity
+        public Task<Outcome<bool>> SetAttributeAsync<TInput>(string id, SetAttribute attribute, CancellationToken cancellationToken) where TInput : class, IAttributeEnabledEntity
         {
             return SetAttributesAsync<TInput>(id, new[] { attribute }, cancellationToken);
         }
 
-        public Task<Result<bool>> SetAttributeRestrictedToUserAsync<TInput>(string id, SetAttribute attribute, CancellationToken cancellationToken) where TInput : class, IAttributeEnabledEntity, IUserOwnedEntity
+        public Task<Outcome<bool>> SetAttributeRestrictedToUserAsync<TInput>(string id, SetAttribute attribute, CancellationToken cancellationToken) where TInput : class, IAttributeEnabledEntity, IUserOwnedEntity
         {
             return SetAttributesRestrictedToUserAsync<TInput>(id, new[] { attribute }, cancellationToken);
         }
 
-        public async Task<Result<bool>> SetAttributesAsync<TInput>(string id, SetAttribute[] attributes, CancellationToken cancellationToken) where TInput: class, IAttributeEnabledEntity
+        public async Task<Outcome<bool>> SetAttributesAsync<TInput>(string id, SetAttribute[] attributes, CancellationToken cancellationToken) where TInput: class, IAttributeEnabledEntity
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
@@ -88,7 +89,7 @@ namespace UrGuide.Services.Abstraction
             return Result.Of(true);
         }
 
-        public async Task<Result<bool>> SetAttributesRestrictedToUserAsync<TInput>(string id, SetAttribute[] attributes, CancellationToken cancellationToken) where TInput : class, IUserOwnedEntity, IAttributeEnabledEntity
+        public async Task<Outcome<bool>> SetAttributesRestrictedToUserAsync<TInput>(string id, SetAttribute[] attributes, CancellationToken cancellationToken) where TInput : class, IUserOwnedEntity, IAttributeEnabledEntity
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);

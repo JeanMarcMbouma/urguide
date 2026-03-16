@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using BbQ.Outcome;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -45,7 +46,7 @@ namespace UrGuide.WebApp.Services
             _platformSettings = platformSettings ?? throw new ArgumentNullException(nameof(platformSettings));
         }
 
-        public async Task<Result<PagedList<AdminUserInfo>>> GetAllUsersAsync(SearchParameters searchParameters, CancellationToken cancellationToken)
+        public async Task<Outcome<PagedList<AdminUserInfo>>> GetAllUsersAsync(SearchParameters searchParameters, CancellationToken cancellationToken)
         {
             try
             {
@@ -111,7 +112,7 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public async Task<Result<AdminUserInfo>> GetUserDetailAsync(string userId, CancellationToken cancellationToken)
+        public async Task<Outcome<AdminUserInfo>> GetUserDetailAsync(string userId, CancellationToken cancellationToken)
         {
             try
             {
@@ -150,7 +151,7 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public async Task<Result<bool>> SuspendUserAsync(string userId, int durationDays, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> SuspendUserAsync(string userId, int durationDays, CancellationToken cancellationToken)
         {
             try
             {
@@ -187,7 +188,7 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public async Task<Result<bool>> ActivateUserAsync(string userId, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> ActivateUserAsync(string userId, CancellationToken cancellationToken)
         {
             try
             {
@@ -219,7 +220,7 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public async Task<Result<bool>> DeleteUserAsync(string userId, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> DeleteUserAsync(string userId, CancellationToken cancellationToken)
         {
             try
             {
@@ -251,7 +252,7 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public async Task<Result<bool>> UpdateUserRolesAsync(UpdateUserRolesModel model, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> UpdateUserRolesAsync(UpdateUserRolesModel model, CancellationToken cancellationToken)
         {
             try
             {
@@ -305,7 +306,7 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public async Task<Result<PagedList<UserActivityModel>>> GetUserActivityAsync(string userId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
+        public async Task<Outcome<PagedList<UserActivityModel>>> GetUserActivityAsync(string userId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
         {
             try
             {
@@ -340,7 +341,7 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public async Task<Result<List<string>>> GetAllRolesAsync(CancellationToken cancellationToken)
+        public async Task<Outcome<List<string>>> GetAllRolesAsync(CancellationToken cancellationToken)
         {
             try
             {
@@ -357,7 +358,7 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public async Task<Result<PagedList<PendingGuideVerification>>> GetPendingGuidesAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
+        public async Task<Outcome<PagedList<PendingGuideVerification>>> GetPendingGuidesAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
         {
             try
             {
@@ -426,7 +427,7 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public async Task<Result<GuideVerificationDetail>> GetGuideVerificationDetailAsync(string userId, CancellationToken cancellationToken)
+        public async Task<Outcome<GuideVerificationDetail>> GetGuideVerificationDetailAsync(string userId, CancellationToken cancellationToken)
         {
             try
             {
@@ -507,7 +508,7 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public async Task<Result<bool>> ProcessGuideVerificationAsync(GuideVerificationDecisionModel model, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> ProcessGuideVerificationAsync(GuideVerificationDecisionModel model, CancellationToken cancellationToken)
         {
             try
             {
@@ -603,7 +604,7 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public async Task<Result<PagedList<PendingTourModeration>>> GetPendingToursAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
+        public async Task<Outcome<PagedList<PendingTourModeration>>> GetPendingToursAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
         {
             try
             {
@@ -647,7 +648,7 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public async Task<Result<TourModerationDetail>> GetTourModerationDetailAsync(string postId, CancellationToken cancellationToken)
+        public async Task<Outcome<TourModerationDetail>> GetTourModerationDetailAsync(string postId, CancellationToken cancellationToken)
         {
             try
             {
@@ -695,7 +696,7 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public async Task<Result<bool>> ProcessTourModerationAsync(TourModerationDecisionModel model, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> ProcessTourModerationAsync(TourModerationDecisionModel model, CancellationToken cancellationToken)
         {
             try
             {
@@ -736,7 +737,7 @@ namespace UrGuide.WebApp.Services
 
         // ── Financial Monitoring ──────────────────────────────────────────────
 
-        public async Task<Result<AdminTransactionListResponse>> GetAllTransactionsAsync(FinancialFilterParameters parameters, CancellationToken cancellationToken)
+        public async Task<Outcome<AdminTransactionListResponse>> GetAllTransactionsAsync(FinancialFilterParameters parameters, CancellationToken cancellationToken)
         {
             try
             {
@@ -794,7 +795,7 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public async Task<Result<AdminPayoutListResponse>> GetAllPayoutsAsync(FinancialFilterParameters parameters, CancellationToken cancellationToken)
+        public async Task<Outcome<AdminPayoutListResponse>> GetAllPayoutsAsync(FinancialFilterParameters parameters, CancellationToken cancellationToken)
         {
             try
             {
@@ -849,7 +850,7 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public async Task<Result<AdminRefundListResponse>> GetAllRefundsAsync(FinancialFilterParameters parameters, CancellationToken cancellationToken)
+        public async Task<Outcome<AdminRefundListResponse>> GetAllRefundsAsync(FinancialFilterParameters parameters, CancellationToken cancellationToken)
         {
             try
             {
@@ -904,7 +905,7 @@ namespace UrGuide.WebApp.Services
 
         // ── System Monitoring ─────────────────────────────────────────────────
 
-        public async Task<Result<SystemHealthStatus>> GetSystemHealthAsync(CancellationToken cancellationToken)
+        public async Task<Outcome<SystemHealthStatus>> GetSystemHealthAsync(CancellationToken cancellationToken)
         {
             var services = new System.Collections.Generic.List<ServiceHealthItem>();
 
@@ -974,7 +975,7 @@ namespace UrGuide.WebApp.Services
             });
         }
 
-        public async Task<Result<AdminAuditLogResponse>> GetAllAuditLogsAsync(AuditLogFilterParameters parameters, CancellationToken cancellationToken)
+        public async Task<Outcome<AdminAuditLogResponse>> GetAllAuditLogsAsync(AuditLogFilterParameters parameters, CancellationToken cancellationToken)
         {
             try
             {
@@ -1037,7 +1038,7 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public async Task<Result<AdminWebhookListResponse>> GetAllWebhooksAsync(PaginationParameters parameters, CancellationToken cancellationToken)
+        public async Task<Outcome<AdminWebhookListResponse>> GetAllWebhooksAsync(PaginationParameters parameters, CancellationToken cancellationToken)
         {
             try
             {
@@ -1083,12 +1084,12 @@ namespace UrGuide.WebApp.Services
             }
         }
 
-        public Task<Result<PlatformSettings>> GetPlatformSettingsAsync(CancellationToken cancellationToken)
+        public Task<Outcome<PlatformSettings>> GetPlatformSettingsAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(Result.Of(_platformSettings.Get()));
         }
 
-        public Task<Result<bool>> UpdatePlatformSettingsAsync(PlatformSettings settings, CancellationToken cancellationToken)
+        public Task<Outcome<bool>> UpdatePlatformSettingsAsync(PlatformSettings settings, CancellationToken cancellationToken)
         {
             try
             {

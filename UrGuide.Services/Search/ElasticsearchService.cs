@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using BbQ.Outcome;
 using Nest;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace UrGuide.Services.Search
 
         #region Index Management
 
-        public async Task<Result<bool>> CreateIndexAsync(string indexName, CancellationToken cancellationToken = default)
+        public async Task<Outcome<bool>> CreateIndexAsync(string indexName, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -110,7 +111,7 @@ namespace UrGuide.Services.Search
             }
         }
 
-        public async Task<Result<bool>> DeleteIndexAsync(string indexName, CancellationToken cancellationToken = default)
+        public async Task<Outcome<bool>> DeleteIndexAsync(string indexName, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -131,7 +132,7 @@ namespace UrGuide.Services.Search
             }
         }
 
-        public async Task<Result<bool>> IndexExistsAsync(string indexName, CancellationToken cancellationToken = default)
+        public async Task<Outcome<bool>> IndexExistsAsync(string indexName, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -149,7 +150,7 @@ namespace UrGuide.Services.Search
 
         #region Document Indexing
 
-        public async Task<Result<bool>> IndexPostAsync(PostSearchDocument post, CancellationToken cancellationToken = default)
+        public async Task<Outcome<bool>> IndexPostAsync(PostSearchDocument post, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -173,7 +174,7 @@ namespace UrGuide.Services.Search
             }
         }
 
-        public async Task<Result<bool>> IndexTourAsync(TourSearchDocument tour, CancellationToken cancellationToken = default)
+        public async Task<Outcome<bool>> IndexTourAsync(TourSearchDocument tour, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -197,7 +198,7 @@ namespace UrGuide.Services.Search
             }
         }
 
-        public async Task<Result<bool>> BulkIndexPostsAsync(IEnumerable<PostSearchDocument> posts, CancellationToken cancellationToken = default)
+        public async Task<Outcome<bool>> BulkIndexPostsAsync(IEnumerable<PostSearchDocument> posts, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -221,7 +222,7 @@ namespace UrGuide.Services.Search
             }
         }
 
-        public async Task<Result<bool>> BulkIndexToursAsync(IEnumerable<TourSearchDocument> tours, CancellationToken cancellationToken = default)
+        public async Task<Outcome<bool>> BulkIndexToursAsync(IEnumerable<TourSearchDocument> tours, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -249,7 +250,7 @@ namespace UrGuide.Services.Search
 
         #region Document Updates
 
-        public async Task<Result<bool>> UpdatePostAsync(PostSearchDocument post, CancellationToken cancellationToken = default)
+        public async Task<Outcome<bool>> UpdatePostAsync(PostSearchDocument post, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -273,7 +274,7 @@ namespace UrGuide.Services.Search
             }
         }
 
-        public async Task<Result<bool>> UpdateTourAsync(TourSearchDocument tour, CancellationToken cancellationToken = default)
+        public async Task<Outcome<bool>> UpdateTourAsync(TourSearchDocument tour, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -301,7 +302,7 @@ namespace UrGuide.Services.Search
 
         #region Document Deletion
 
-        public async Task<Result<bool>> DeletePostAsync(string postId, CancellationToken cancellationToken = default)
+        public async Task<Outcome<bool>> DeletePostAsync(string postId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -324,7 +325,7 @@ namespace UrGuide.Services.Search
             }
         }
 
-        public async Task<Result<bool>> DeleteTourAsync(string tourId, CancellationToken cancellationToken = default)
+        public async Task<Outcome<bool>> DeleteTourAsync(string tourId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -351,7 +352,7 @@ namespace UrGuide.Services.Search
 
         #region Search Operations
 
-        public async Task<Result<Model.Search.SearchResponse<PostSearchDocument>>> SearchPostsAsync(Model.Search.SearchRequest request, CancellationToken cancellationToken = default)
+        public async Task<Outcome<Model.Search.SearchResponse<PostSearchDocument>>> SearchPostsAsync(Model.Search.SearchRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -374,7 +375,7 @@ namespace UrGuide.Services.Search
             }
         }
 
-        public async Task<Result<Model.Search.SearchResponse<TourSearchDocument>>> SearchToursAsync(Model.Search.SearchRequest request, CancellationToken cancellationToken = default)
+        public async Task<Outcome<Model.Search.SearchResponse<TourSearchDocument>>> SearchToursAsync(Model.Search.SearchRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -833,7 +834,7 @@ namespace UrGuide.Services.Search
 
         #region Autocomplete
 
-        public async Task<Result<AutocompleteResponse>> AutocompleteAsync(AutocompleteRequest request, CancellationToken cancellationToken = default)
+        public async Task<Outcome<AutocompleteResponse>> AutocompleteAsync(AutocompleteRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -904,7 +905,7 @@ namespace UrGuide.Services.Search
 
         #region Utility
 
-        public async Task<Result<bool>> HealthCheckAsync(CancellationToken cancellationToken = default)
+        public async Task<Outcome<bool>> HealthCheckAsync(CancellationToken cancellationToken = default)
         {
             try
             {

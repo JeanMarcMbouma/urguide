@@ -1,6 +1,6 @@
 ﻿using Elasticsearch.Net;
 using FluentValidation;
-using MediatR;
+using BbQ.Cqrs.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -114,7 +114,7 @@ namespace UrGuide.Services.Extensions
             // Feedback
             services.AddTransient<IValidator<FeedbackModel>, FeedbackModelValidator>();
 
-            services.AddMediatR(typeof(UserDeleteAccountCommand).Assembly);
+            services.AddBbQMediator(typeof(UserDeleteAccountCommand).Assembly);
 
             var dataConnectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? configuration.GetConnectionString("Data");

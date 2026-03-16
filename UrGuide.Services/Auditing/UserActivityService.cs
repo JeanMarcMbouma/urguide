@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using BbQ.Outcome;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Core;
@@ -24,7 +25,7 @@ namespace UrGuide.Services.Auditing
         public IUserContext UserContext { get; }
         public UrGuideContext Context { get; }
 
-        public async Task<Result<PagedList<ActivityModel>>> GetUserActivityAsync(PaginationParameters pagination, CancellationToken cancellationToken)
+        public async Task<Outcome<PagedList<ActivityModel>>> GetUserActivityAsync(PaginationParameters pagination, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of<PagedList<ActivityModel>>().WithErrors(ErrorMessages.NotAuthenticated);

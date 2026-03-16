@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
+using BbQ.Outcome;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ namespace UrGuide.Services.Feedback
         public IEmailService EmailService { get; }
         public IUserNotificationService NotificationService { get; }
 
-        public async Task<Result<bool>> AddPostFeedbackAsync(string postId, FeedbackModel feedback, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> AddPostFeedbackAsync(string postId, FeedbackModel feedback, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var post = await Context.Posts.FirstOrDefaultAsync(x => x.Id == postId, cancellationToken);
@@ -79,7 +80,7 @@ Rating: {feedback.Rating} star(s).";
             return Result.Of(true);
         }
 
-        public async Task<Result<bool>> AddUserFeedbackAsync(string userId, FeedbackModel feedback, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> AddUserFeedbackAsync(string userId, FeedbackModel feedback, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var user = await Context.Users.FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
@@ -140,7 +141,7 @@ Rating: {feedback.Rating} star(s).";
             return Result.Of(true);
         }
 
-        public async Task<Result<PagedList<AuthoredFeedback>>> GetPostFeedback(string postId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
+        public async Task<Outcome<PagedList<AuthoredFeedback>>> GetPostFeedback(string postId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
         {
             var post = await Context.Posts.FirstOrDefaultAsync(x => x.Id == postId, cancellationToken);
             if (post == null)
@@ -149,7 +150,7 @@ Rating: {feedback.Rating} star(s).";
                 paginationParameters.PageNumber, f => FeedbackMapper.ToAuthoredFeedback(f)));
         }
 
-        public async Task<Result<PagedList<AuthoredFeedback>>> GetUserFeedback(string userId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
+        public async Task<Outcome<PagedList<AuthoredFeedback>>> GetUserFeedback(string userId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
         {
             var user = await Context.Users.FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
             if (user == null)
@@ -158,7 +159,7 @@ Rating: {feedback.Rating} star(s).";
                 paginationParameters.PageNumber, f => FeedbackMapper.ToAuthoredFeedback(f)));
         }
 
-        public async Task<Result<bool>> RespondToFeedbackAsync(string feedbackId, string guideResponse, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> RespondToFeedbackAsync(string feedbackId, string guideResponse, CancellationToken cancellationToken)
         {
             // Search in user feedback — the feedback subject must be the current user
             var user = await Context.Users

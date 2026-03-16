@@ -21,7 +21,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetUserActivity([FromQuery][Bind(nameof(PaginationParameters.PageNumber))]PaginationParameters pagination, CancellationToken cancellationToken)
         {
             var result = await activityService.GetUserActivityAsync(pagination, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.IsError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Value);
         }
     }
 }

@@ -61,7 +61,7 @@ namespace UrGuide.WebApp.Controllers
                 var startTime = DateTime.UtcNow;
                 var result = await _elasticsearchService.SearchPostsAsync(request, cancellationToken);
 
-                if (result.HasError)
+                if (result.IsError)
                 {
                     return BadRequest(ErrorEnvelop.Create(result.Errors));
                 }
@@ -72,7 +72,7 @@ namespace UrGuide.WebApp.Controllers
                 await _searchAnalyticsService.TrackSearchAsync(
                     request.Query,
                     _userContext.UserId,
-                    result.Data.TotalHits,
+                    result.Value.TotalHits,
                     timeTaken,
                     request.Filters,
                     "posts",
@@ -80,7 +80,7 @@ namespace UrGuide.WebApp.Controllers
                     Request.Headers["User-Agent"].ToString(),
                     cancellationToken);
 
-                return Ok(result.Data);
+                return Ok(result.Value);
             }
             catch (Exception ex)
             {
@@ -111,7 +111,7 @@ namespace UrGuide.WebApp.Controllers
                 var startTime = DateTime.UtcNow;
                 var result = await _elasticsearchService.SearchToursAsync(request, cancellationToken);
 
-                if (result.HasError)
+                if (result.IsError)
                 {
                     return BadRequest(ErrorEnvelop.Create(result.Errors));
                 }
@@ -122,7 +122,7 @@ namespace UrGuide.WebApp.Controllers
                 await _searchAnalyticsService.TrackSearchAsync(
                     request.Query,
                     _userContext.UserId,
-                    result.Data.TotalHits,
+                    result.Value.TotalHits,
                     timeTaken,
                     request.Filters,
                     "tours",
@@ -130,7 +130,7 @@ namespace UrGuide.WebApp.Controllers
                     Request.Headers["User-Agent"].ToString(),
                     cancellationToken);
 
-                return Ok(result.Data);
+                return Ok(result.Value);
             }
             catch (Exception ex)
             {
@@ -160,12 +160,12 @@ namespace UrGuide.WebApp.Controllers
 
                 var result = await _elasticsearchService.AutocompleteAsync(request, cancellationToken);
 
-                if (result.HasError)
+                if (result.IsError)
                 {
                     return BadRequest(ErrorEnvelop.Create(result.Errors));
                 }
 
-                return Ok(result.Data);
+                return Ok(result.Value);
             }
             catch (Exception ex)
             {
@@ -189,7 +189,7 @@ namespace UrGuide.WebApp.Controllers
             {
                 var result = await _elasticsearchService.HealthCheckAsync(cancellationToken);
 
-                if (result.Data)
+                if (result.Value)
                 {
                     return Ok(new { status = "healthy", message = "Elasticsearch is connected" });
                 }
@@ -250,7 +250,7 @@ namespace UrGuide.WebApp.Controllers
                     // Bulk index
                     var result = await _elasticsearchService.BulkIndexPostsAsync(searchDocs, cancellationToken);
                     
-                    if (result.HasError)
+                    if (result.IsError)
                     {
                         _logger.LogError("Failed to bulk index posts batch: {Errors}", string.Join(", ", result.Errors));
                         return StatusCode(500, ErrorEnvelop.Create(result.Errors));
@@ -325,7 +325,7 @@ namespace UrGuide.WebApp.Controllers
                     // Bulk index
                     var result = await _elasticsearchService.BulkIndexToursAsync(searchDocs, cancellationToken);
                     
-                    if (result.HasError)
+                    if (result.IsError)
                     {
                         _logger.LogError("Failed to bulk index tours batch: {Errors}", string.Join(", ", result.Errors));
                         return StatusCode(500, ErrorEnvelop.Create(result.Errors));

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using BbQ.Outcome;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
@@ -44,7 +45,7 @@ namespace UrGuide.Services.DataExport
         public IEmailService EmailService { get; }
         public IConfiguration Configuration { get; }
 
-        public async Task<Result<DataExportResponse>> RequestExportAsync(DataExportRequestModel request, CancellationToken cancellationToken)
+        public async Task<Outcome<DataExportResponse>> RequestExportAsync(DataExportRequestModel request, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of<DataExportResponse>().WithErrors(ErrorMessages.NotAuthenticated);
@@ -93,7 +94,7 @@ namespace UrGuide.Services.DataExport
             }
         }
 
-        public async Task<Result<DataExportResponse>> GetExportStatusAsync(string requestId, CancellationToken cancellationToken)
+        public async Task<Outcome<DataExportResponse>> GetExportStatusAsync(string requestId, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of<DataExportResponse>().WithErrors(ErrorMessages.NotAuthenticated);
@@ -119,7 +120,7 @@ namespace UrGuide.Services.DataExport
             }
         }
 
-        public async Task<Result<(string FilePath, string FileName, long FileSize)>> DownloadExportAsync(string token, CancellationToken cancellationToken)
+        public async Task<Outcome<(string FilePath, string FileName, long FileSize)>> DownloadExportAsync(string token, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -165,7 +166,7 @@ namespace UrGuide.Services.DataExport
             }
         }
 
-        public async Task<Result<bool>> CancelExportAsync(string requestId, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> CancelExportAsync(string requestId, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
