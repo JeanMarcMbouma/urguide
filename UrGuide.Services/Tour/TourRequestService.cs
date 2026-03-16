@@ -1,4 +1,3 @@
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -22,16 +21,13 @@ namespace UrGuide.Services.Tour
     {
         public TourRequestService(UrGuideContext context,
                                   IUserContext userContext,
-                                  IMapper mapper,
                                   ILogger<TourRequestService> logger,
                                   IUserNotificationService notificationService) : base(context, userContext)
         {
-            Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             NotificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
         }
 
-        public IMapper Mapper { get; }
         public ILogger<TourRequestService> Logger { get; }
         public IUserNotificationService NotificationService { get; }
 
@@ -74,7 +70,7 @@ namespace UrGuide.Services.Tour
             // Notify guides in the region
             await NotifyGuidesInRegionAsync(tourRequest, cancellationToken);
 
-            var result = Mapper.Map<TourRequestModel>(tourRequest);
+            var result = TourRequestMapper.ToTourRequestModel(tourRequest);
             return Result.Of(result);
         }
 
@@ -115,7 +111,7 @@ namespace UrGuide.Services.Tour
             if (tourRequest == null)
                 return Result.Of<TourRequestModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
 
-            var result = Mapper.Map<TourRequestModel>(tourRequest);
+            var result = TourRequestMapper.ToTourRequestModel(tourRequest);
             return Result.Of(result);
         }
 
@@ -128,7 +124,7 @@ namespace UrGuide.Services.Tour
                 .OrderByDescending(tr => tr.CreatedAt);
 
             var pagedData = await PagedList.Of(query, pagination.PageNumber, cancellationToken);
-            var result = pagedData.To(tr => Mapper.Map<TourRequestModel>(tr));
+            var result = pagedData.To(tr => TourRequestMapper.ToTourRequestModel(tr));
 
             return Result.Of(result);
         }
@@ -145,7 +141,7 @@ namespace UrGuide.Services.Tour
                 .OrderByDescending(tr => tr.CreatedAt);
 
             var pagedData = await PagedList.Of(query, pagination.PageNumber, cancellationToken);
-            var result = pagedData.To(tr => Mapper.Map<TourRequestModel>(tr));
+            var result = pagedData.To(tr => TourRequestMapper.ToTourRequestModel(tr));
 
             return Result.Of(result);
         }
@@ -159,7 +155,7 @@ namespace UrGuide.Services.Tour
                 .OrderByDescending(tr => tr.CreatedAt);
 
             var pagedData = await PagedList.Of(query, pagination.PageNumber, cancellationToken);
-            var result = pagedData.To(tr => Mapper.Map<TourRequestModel>(tr));
+            var result = pagedData.To(tr => TourRequestMapper.ToTourRequestModel(tr));
 
             return Result.Of(result);
         }
@@ -217,7 +213,7 @@ namespace UrGuide.Services.Tour
             // Notify guides in the region about the budget update
             await NotifyGuidesAboutBudgetUpdateAsync(tourRequest, cancellationToken);
 
-            var result = Mapper.Map<TourRequestModel>(tourRequest);
+            var result = TourRequestMapper.ToTourRequestModel(tourRequest);
             return Result.Of(result);
         }
 

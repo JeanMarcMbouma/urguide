@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading;
@@ -22,17 +21,14 @@ namespace UrGuide.Services.Feedback
         public FeedbackService(UrGuideContext context,
                                IEmailService emailService,
                                IUserContext userContext,
-                               IMapper mapper,
                                IUserNotificationService notificationService)
             : base(context, userContext)
         {
             EmailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
-            Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             NotificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
         }
 
         public IEmailService EmailService { get; }
-        public IMapper Mapper { get; }
         public IUserNotificationService NotificationService { get; }
 
         public async Task<Result<bool>> AddPostFeedbackAsync(string postId, FeedbackModel feedback, CancellationToken cancellationToken)
@@ -150,7 +146,7 @@ Rating: {feedback.Rating} star(s).";
             if (post == null)
                 return Result.Of<PagedList<AuthoredFeedback>>().WithErrors(ErrorMessages.NotFoundEntityForKey);
             return Result.Of(PagedList.Of(post.Feedback.OrderByDescending(f => f.Created).AsEnumerable(),
-                paginationParameters.PageNumber, f => Mapper.Map<AuthoredFeedback>(f)));
+                paginationParameters.PageNumber, f => FeedbackMapper.ToAuthoredFeedback(f)));
         }
 
         public async Task<Result<PagedList<AuthoredFeedback>>> GetUserFeedback(string userId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
@@ -159,7 +155,7 @@ Rating: {feedback.Rating} star(s).";
             if (user == null)
                return Result.Of<PagedList<AuthoredFeedback>>().WithErrors(ErrorMessages.NotFoundEntityForKey);
             return Result.Of(PagedList.Of(user.Feedback.OrderByDescending(f => f.Created).AsEnumerable(),
-                paginationParameters.PageNumber, f => Mapper.Map<AuthoredFeedback>(f)));
+                paginationParameters.PageNumber, f => FeedbackMapper.ToAuthoredFeedback(f)));
         }
 
         public async Task<Result<bool>> RespondToFeedbackAsync(string feedbackId, string guideResponse, CancellationToken cancellationToken)
