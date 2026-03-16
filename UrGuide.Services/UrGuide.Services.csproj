@@ -13,8 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="BbQ.Cqrs" Version="1.0.16" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
-    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="10.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />

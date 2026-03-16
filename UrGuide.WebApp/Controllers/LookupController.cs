@@ -9,6 +9,7 @@ using UrGuide.Model.Lookup;
 using UrGuide.Model.Users;
 using UrGuide.Services.Contracts;
 using UrGuide.WebApp.Models;
+using BbQ.Outcome;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -31,7 +32,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetCategories(CancellationToken cancellationToken)
         {
             var result = await LookupService.GetCategoriesAsync(cancellationToken);
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         [HttpGet("regions")]
@@ -39,7 +40,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetRegions(CancellationToken cancellationToken)
         {
             var result = await LookupService.GetRegionsAsync(cancellationToken);
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         [HttpGet("/users/{id}/info")]
@@ -47,7 +48,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetOne(string id, CancellationToken cancellationToken)
         {
             var result = await UserService.GetUserInfo(id, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("/users/search")]
@@ -55,7 +58,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetUsers([FromQuery]SearchParameters searchParameters, CancellationToken cancellationToken)
         {
             var result = await UserService.GetUsersAsync(searchParameters, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
     }
 }

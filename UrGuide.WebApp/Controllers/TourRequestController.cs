@@ -7,6 +7,7 @@ using UrGuide.Model;
 using UrGuide.Model.Tour;
 using UrGuide.Services.Contracts;
 using UrGuide.WebApp.Models;
+using BbQ.Outcome;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -32,7 +33,7 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.Create(ModelState));
 
             var result = await _tourRequestService.CreateTourRequestAsync(model, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Created($"/tour-requests/{result.Data.TourRequestId}", result.Data);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Created($"/tour-requests/{result.Value.TourRequestId}", result.Value);
         }
 
         [HttpGet("{tourRequestId}")]
@@ -41,7 +42,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetTourRequest(string tourRequestId, CancellationToken cancellationToken)
         {
             var result = await _tourRequestService.GetTourRequestByIdAsync(tourRequestId, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet]
@@ -50,7 +53,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetTourRequests([FromQuery] SearchParameters pagination, CancellationToken cancellationToken)
         {
             var result = await _tourRequestService.GetTourRequestsAsync(pagination, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("my")]
@@ -58,7 +63,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetMyTourRequests([FromQuery] SearchParameters pagination, CancellationToken cancellationToken)
         {
             var result = await _tourRequestService.GetMyTourRequestsAsync(pagination, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("region/{regionId}")]
@@ -67,7 +74,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetTourRequestsByRegion(string regionId, [FromQuery] SearchParameters pagination, CancellationToken cancellationToken)
         {
             var result = await _tourRequestService.GetTourRequestsByRegionAsync(regionId, pagination, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPost("{tourRequestId}/cancel")]
@@ -75,7 +84,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> CancelTourRequest(string tourRequestId, CancellationToken cancellationToken)
         {
             var result = await _tourRequestService.CancelTourRequestAsync(tourRequestId, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPut("{tourRequestId}/budget")]
@@ -86,7 +97,9 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.Create(ModelState));
 
             var result = await _tourRequestService.UpdateBudgetAsync(tourRequestId, model.NewBudget, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
     }
 }

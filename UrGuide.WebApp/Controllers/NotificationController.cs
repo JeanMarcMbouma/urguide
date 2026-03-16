@@ -32,7 +32,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetUnread([FromQuery]PaginationParameters pagination, CancellationToken cancellationToken)
         {
             var result = await NotificationService.GetUnreadAsync(pagination, cancellationToken);
-            return result.HasError ? (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors)) : Ok(result.Data);
+            return result.IsError ? (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : Ok(result.Value);
         }
 
         [HttpGet("{id}")]
@@ -40,7 +40,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> Get(string id, CancellationToken cancellationToken)
         {
             var result = await NotificationService.GetNotificationAsync(id, cancellationToken);
-            return result.HasError ? (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors)) : Ok(result.Data);
+            return result.IsError ? (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : Ok(result.Value);
         }
 
         [HttpGet("all")]
@@ -48,7 +48,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetAll([FromQuery]PaginationParameters pagination, CancellationToken cancellationToken)
         {
             var result = await NotificationService.GetAllAsync(pagination, cancellationToken);
-            return result.HasError ? (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors)) : Ok(result.Data);
+            return result.IsError ? (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : Ok(result.Value);
         }
 
         [HttpPost("chat")]
@@ -71,7 +71,7 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> MarkAsRead(string id, CancellationToken cancellationToken)
         {
             var result = await NotificationService.MarkAsReadAsync(id, cancellationToken);
-            return result.HasError ? (IActionResult)BadRequest(ErrorEnvelop.Create(result.Errors)) : Ok(result.Data);
+            return result.IsError ? (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : Ok(result.Value);
         }
     }
 }

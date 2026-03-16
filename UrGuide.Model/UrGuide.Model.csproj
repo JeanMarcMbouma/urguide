@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BbQ.Outcome" Version="1.0.16" />
     <PackageReference Include="NEST" Version="7.17.5" />
   </ItemGroup>
 

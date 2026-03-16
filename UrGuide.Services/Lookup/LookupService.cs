@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
+using BbQ.Outcome;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -20,7 +21,7 @@ namespace UrGuide.Services.Lookup
 
         public UrGuideContext Context { get; }
 
-        public async Task<Result<IEnumerable<CategoryModel>>> GetCategoriesAsync(CancellationToken cancellationToken)
+        public async Task<Outcome<IEnumerable<CategoryModel>>> GetCategoriesAsync(CancellationToken cancellationToken)
         {
             var cats = await Context.Categories.AsNoTracking().ToListAsync(cancellationToken);
             var result = cats.Select(c => new CategoryModel
@@ -33,7 +34,7 @@ namespace UrGuide.Services.Lookup
             return Result.Of(result);
         }
 
-        public async Task<Result<IEnumerable<RegionModel>>> GetRegionsAsync(CancellationToken cancellationToken)
+        public async Task<Outcome<IEnumerable<RegionModel>>> GetRegionsAsync(CancellationToken cancellationToken)
         {
             var regions = await Context.Regions.AsNoTracking().ToListAsync(cancellationToken);
             var result = regions.Select(r => new RegionModel

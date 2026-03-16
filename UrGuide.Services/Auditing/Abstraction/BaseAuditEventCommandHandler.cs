@@ -1,4 +1,4 @@
-﻿using MediatR;
+﻿using BbQ.Cqrs;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,12 +15,12 @@ namespace UrGuide.Services.Auditing.Abstraction
             Context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        protected virtual Task<Unit> HandleInternal(T request, CancellationToken cancellationToken)
+        protected virtual Task HandleInternal(T request, CancellationToken cancellationToken)
         {
-            return Unit.Task;
+            return Task.CompletedTask;
         }
 
-        public Task<Unit> Handle(T request, CancellationToken cancellationToken)
+        public async Task Handle(T request, CancellationToken cancellationToken)
         {
             Context.AuditEvents.Add(new Data.Entities.Event.AuditEvent
             {
@@ -28,7 +28,8 @@ namespace UrGuide.Services.Auditing.Abstraction
                 EventCode = request.EventCode,
                 ReferenceId = request.ReferenceId
             });
-            return Unit.Task;
+            await HandleInternal(request, cancellationToken);
+            await Context.SaveChangesAsync(cancellationToken);
         }
     }
 }

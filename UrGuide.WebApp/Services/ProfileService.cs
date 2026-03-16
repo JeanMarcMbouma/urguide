@@ -29,7 +29,7 @@ namespace UrGuide.WebApp.Services
         {
             var result = await UserService.GetUserAsync(context.Subject.GetSubjectId(), CancellationToken.None);
             var principal = await UserManager.FindByIdAsync(context.Subject.GetSubjectId());
-            if (result.HasError || result.Data == null || principal == null)
+            if (result.IsError || result.Value == null || principal == null)
             {
                 return;
             }
@@ -37,15 +37,15 @@ namespace UrGuide.WebApp.Services
             var claimPrincipal = await PrincipalFactory.CreateAsync(principal);
 
             context.IssuedClaims.AddRange(claimPrincipal.Claims);
-            SafeAddClaims(context, JwtClaimTypes.BirthDate, result.Data.BirthDay)
-                .SafeAddClaims(context, JwtClaimTypes.Picture, result.Data.ProfileImage)
-                .SafeAddClaims(context, JwtClaimTypes.FamilyName, result.Data.LastName)
-                .SafeAddClaims(context, JwtClaimTypes.GivenName, result.Data.FirstName)
-                .SafeAddClaims(context, JwtClaimTypes.Gender, result.Data.Gender)
-                .SafeAddClaims(context, JwtClaimTypes.Name, result.Data.FullName)
-                .SafeAddClaims(context, JwtClaimTypes.Address, result.Data.Address)
-                .SafeAddClaims(context, "country", result.Data.Country)
-                .SafeAddClaims(context, JwtClaimTypes.Role, result.Data.IsGuide ? "guide" : "user");
+            SafeAddClaims(context, JwtClaimTypes.BirthDate, result.Value.BirthDay)
+                .SafeAddClaims(context, JwtClaimTypes.Picture, result.Value.ProfileImage)
+                .SafeAddClaims(context, JwtClaimTypes.FamilyName, result.Value.LastName)
+                .SafeAddClaims(context, JwtClaimTypes.GivenName, result.Value.FirstName)
+                .SafeAddClaims(context, JwtClaimTypes.Gender, result.Value.Gender)
+                .SafeAddClaims(context, JwtClaimTypes.Name, result.Value.FullName)
+                .SafeAddClaims(context, JwtClaimTypes.Address, result.Value.Address)
+                .SafeAddClaims(context, "country", result.Value.Country)
+                .SafeAddClaims(context, JwtClaimTypes.Role, result.Value.IsGuide ? "guide" : "user");
 
             // Add ASP.NET Identity roles (Admin, etc.) to the token
             var roles = await UserManager.GetRolesAsync(principal);
@@ -58,7 +58,7 @@ namespace UrGuide.WebApp.Services
         public async Task IsActiveAsync(IsActiveContext context)
         {
             var exists = await UserService.ExistsAsync(context.Subject.GetSubjectId(), CancellationToken.None);
-            context.IsActive = exists.Data;
+            context.IsActive = exists.Value;
         }
 
         private ProfileService SafeAddClaims(ProfileDataRequestContext context, string name, string value) {

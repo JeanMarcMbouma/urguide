@@ -56,15 +56,15 @@ namespace UrGuide.WebApp.Controllers
 
                 decimal averageRating = 0;
                 int reviewCount = 0;
-                if (!feedbackResult.HasError && feedbackResult.Data != null)
+                if (!feedbackResult.IsError && feedbackResult.Value != null)
                 {
-                    reviewCount = feedbackResult.Data.ItemsCount;
+                    reviewCount = feedbackResult.Value.ItemsCount;
                     if (reviewCount > 0)
                     {
                         decimal totalRating = 0;
-                        foreach (var fb in feedbackResult.Data.Items)
+                        foreach (var fb in feedbackResult.Value.Items)
                             totalRating += fb.Rating;
-                        averageRating = totalRating / feedbackResult.Data.Items.Count;
+                        averageRating = totalRating / feedbackResult.Value.Items.Count;
                     }
                 }
 
@@ -82,7 +82,7 @@ namespace UrGuide.WebApp.Controllers
                 // Get open tour requests count (guides see open requests)
                 var requestPagination = new SearchParameters { PageNumber = 1 };
                 var requestsResult = await _tourRequestService.GetTourRequestsAsync(requestPagination, cancellationToken);
-                int openRequests = requestsResult.HasError ? 0 : (requestsResult.Data?.ItemsCount ?? 0);
+                int openRequests = requestsResult.IsError ? 0 : (requestsResult.Value?.ItemsCount ?? 0);
 
                 var dashboard = new
                 {

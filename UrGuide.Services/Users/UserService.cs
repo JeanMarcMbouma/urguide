@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Linq;
+using BbQ.Outcome;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Data;
@@ -12,7 +13,7 @@ using UrGuide.Shared;
 using UrGuide.Shared.Contracts;
 using UrGuide.Services.Extensions;
 using Microsoft.EntityFrameworkCore;
-using MediatR;
+using BbQ.Cqrs;
 using UrGuide.Services.Auditing.Command;
 using UrGuide.Core.Attributes;
 using UrGuide.Core;
@@ -55,7 +56,7 @@ namespace UrGuide.Services.Users
         public IImageService ImageService { get; }
         public IMediator Mediator { get; }
 
-        public async Task<Result<bool>> DeleteUserAccountAsync(CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> DeleteUserAccountAsync(CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
@@ -65,14 +66,14 @@ namespace UrGuide.Services.Users
             try
             {
                 var r = await AuthService.DeleteAccount();
-                if (r.HasError)
+                if (r.IsError)
                     return r;
                 var user = await Context.Users.FindAsync(new []{ UserContext.UserId }, cancellationToken);
                 if(user == null)
                     return Result.Of(false).WithErrors("User not found.");
                 Context.Users.Remove(user);
                 await Context.SaveChangesAsync(cancellationToken);
-                await Mediator.Send(new UserDeleteAccountCommand(UserContext.UserId));
+                await Mediator.Send(new UserDeleteAccountCommand(UserContext.UserId), cancellationToken);
                 return Result.Of(true);
             }
             catch (System.Exception e)
@@ -82,46 +83,46 @@ namespace UrGuide.Services.Users
             }
         }
 
-        public async Task<Result<User>> GetUserAsync(string userId, CancellationToken cancellationToken)
+        public async Task<Outcome<User>> GetUserAsync(string userId, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var user = await Context.Users.FindAsync(new[] { userId }, cancellationToken);
             return Result.Of(UserMapper.ToUser(user));
         }
 
-        public async Task<Result<User>> LoginAsync(LoginModel login, CancellationToken cancellationToken)
+        public async Task<Outcome<User>> LoginAsync(LoginModel login, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var userId = await AuthService.LoginAsync(login, cancellationToken);
-            if (userId.HasError)
+            if (userId.IsError)
                 return Result.Of<User>().Combine(userId);
-            var user = await Context.Users.FindAsync(new[] { userId.Data }, cancellationToken);
+            var user = await Context.Users.FindAsync(new[] { userId.Value }, cancellationToken);
             if(user == null)
                 return Result.Of<User>().WithErrors("Invalid login attempt.");
             user.LastActivityDate = System.DateTime.UtcNow;
-            await Mediator.Send(new UserLoggedInCommand(user.Id));
+            await Mediator.Send(new UserLoggedInCommand(user.Id), cancellationToken);
             return Result.Of(UserMapper.ToUser(user));
         }
 
-        public async Task<Result<bool>> RegisterGuideAsync(CreateGuideModel createGuide, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> RegisterGuideAsync(CreateGuideModel createGuide, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            Result<(string userId, string confirmationToken)> result = await AuthService.RegisterGuideAsync(createGuide, cancellationToken);
-            if (result.HasError)
+            Outcome<(string userId, string confirmationToken)> result = await AuthService.RegisterGuideAsync(createGuide, cancellationToken);
+            if (result.IsError)
             {
                 return Result.Of(false).Combine(result);
             }
             try
             {
 
-                var imageUrl = ImageService.SaveAvatar(result.Data.userId, new Model.Shared.ImageFileModel
+                var imageUrl = ImageService.SaveAvatar(result.Value.userId, new Model.Shared.ImageFileModel
                 {
                     ImageBase64 = createGuide.ProfileImage
                 });
 
                 var user = new Data.Entities.Users.User
                 {
-                    Id = result.Data.userId,
+                    Id = result.Value.userId,
                     ProfileImage = new Data.Entities.Users.Image
                     {
                         ImageUrl = imageUrl
@@ -154,7 +155,7 @@ namespace UrGuide.Services.Users
                     Content = "Please confirm your account",
                     Subject = "Email Confirmation",
                     LinkText = "Activate your account",
-                    Link = WebHelper.ResolveUrl(MessageTypes.Confirmation, new { result.Data.confirmationToken, createGuide.Email })
+                    Link = WebHelper.ResolveUrl(MessageTypes.Confirmation, new { result.Value.confirmationToken, createGuide.Email })
                 });
                 return Result.Of(true);
             }
@@ -162,27 +163,27 @@ namespace UrGuide.Services.Users
             catch (System.Exception e)
             {
                 Logger.LogError(e, "Error occured during registration");
-                await AuthService.DeleteAccountAsync(result.Data.userId);
+                await AuthService.DeleteAccountAsync(result.Value.userId);
                 return Result.Of(false).WithErrors("An error has occured during user's registration.", e.Message);
             }
 #pragma warning restore CA1031 // Do not catch general exception types
         }
 
-        public async Task<Result<bool>> RegisterUserAsync(CreateUserModel createUser, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> RegisterUserAsync(CreateUserModel createUser, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            Result<(string userId, string confirmationToken)> result = await AuthService.RegisterUserAsync(createUser, cancellationToken);
-            if (result.HasError)
+            Outcome<(string userId, string confirmationToken)> result = await AuthService.RegisterUserAsync(createUser, cancellationToken);
+            if (result.IsError)
             {
                 return Result.Of(false).Combine(result);
             }
             try
             {
-                var imageUrl = ImageService.SaveAvatar(result.Data.userId);
+                var imageUrl = ImageService.SaveAvatar(result.Value.userId);
 
                 var user = new Data.Entities.Users.User
                 {
-                    Id = result.Data.userId,
+                    Id = result.Value.userId,
                     ProfileImage = new Data.Entities.Users.Image
                     {
                         ImageUrl = imageUrl
@@ -211,7 +212,7 @@ namespace UrGuide.Services.Users
                     Content = "Please confirm your account",
                     Subject = "Email Confirmation",
                     LinkText = "Activate your account",
-                    Link = WebHelper.ResolveUrl(MessageTypes.Confirmation, new { result.Data.confirmationToken, createUser.Email })
+                    Link = WebHelper.ResolveUrl(MessageTypes.Confirmation, new { result.Value.confirmationToken, createUser.Email })
                 });
                 return Result.Of(true);
             }
@@ -219,13 +220,13 @@ namespace UrGuide.Services.Users
             catch (System.Exception e)
             {
                 Logger.LogError(e, "Error occured during registration");
-                await AuthService.DeleteAccountAsync(result.Data.userId);
+                await AuthService.DeleteAccountAsync(result.Value.userId);
                 return Result.Of(false).WithErrors("An error has occured during registration.", e.Message);
             }
 #pragma warning restore CA1031 // Do not catch general exception types
         }
 
-        public async Task<Result<bool>> SetUserAttributeAsync(SetAttribute attribute, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> SetUserAttributeAsync(SetAttribute attribute, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
@@ -259,7 +260,7 @@ namespace UrGuide.Services.Users
             }
         }
 
-        public async Task<Result<bool>> UpdateGuideAsync(UpdateGuideModel updateGuide, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> UpdateGuideAsync(UpdateGuideModel updateGuide, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
@@ -295,7 +296,7 @@ namespace UrGuide.Services.Users
             return Result.Of(true);
         }
 
-        public async Task<Result<User>> GetDetailsAsync(CancellationToken cancellationToken)
+        public async Task<Outcome<User>> GetDetailsAsync(CancellationToken cancellationToken)
         { 
 
             if (!UserContext.IsAuthenticated)
@@ -309,13 +310,13 @@ namespace UrGuide.Services.Users
             return Result.Of(UserMapper.ToUser(user));
         }
 
-        public async Task<Result<bool>> ExistsAsync(string userId, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> ExistsAsync(string userId, CancellationToken cancellationToken)
         {
             var result = await Context.Users.AnyAsync(u => u.Id == userId, cancellationToken);
             return Result.Of(result);
         }
 
-        public async Task<Result<UserInfo>> GetUserInfo(string userId, CancellationToken cancellationToken)
+        public async Task<Outcome<UserInfo>> GetUserInfo(string userId, CancellationToken cancellationToken)
         {
             var result = await Context.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
             if (result == null)
@@ -323,7 +324,7 @@ namespace UrGuide.Services.Users
             return Result.Of(UserMapper.ToUserInfo(result));
         }
 
-        public async Task<Result<bool>> UpdateUserAsync(UpdateUserModel updateUser, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> UpdateUserAsync(UpdateUserModel updateUser, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
@@ -348,7 +349,7 @@ namespace UrGuide.Services.Users
             return Result.Of(true);
         }
 
-        public async Task<Result<PagedList<UserInfo>>> GetUsersAsync(SearchParameters searchParameters, CancellationToken cancellationToken)
+        public async Task<Outcome<PagedList<UserInfo>>> GetUsersAsync(SearchParameters searchParameters, CancellationToken cancellationToken)
         {
             var geo = searchParameters.Nearby ? await IPStackService.GetLocationAsync(UserContext) : null;
             var users = await PagedList.Of(Context.Users
@@ -360,7 +361,7 @@ namespace UrGuide.Services.Users
             return Result.Of(users);
         }
 
-        public async Task<Result<UserDataExport>> GetUserDataExportAsync(CancellationToken cancellationToken)
+        public async Task<Outcome<UserDataExport>> GetUserDataExportAsync(CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of<UserDataExport>().WithErrors(ErrorMessages.NotAuthenticated);

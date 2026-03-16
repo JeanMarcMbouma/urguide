@@ -1,4 +1,4 @@
-﻿using MediatR;
+﻿using BbQ.Cqrs;
 using UrGuide.Data.Entities.Event;
 
 namespace UrGuide.Services.Auditing.Abstraction

@@ -11,7 +11,7 @@ namespace UrGuide.Services.Users
             RuleFor(x => x.To).NotEmpty().MustAsync(async (x, cancellationToken) =>
             {
                 var r = await userService.ExistsAsync(x, cancellationToken);
-                return r.Data;
+                return r.Value;
             });
             RuleFor(x => x.Content).NotEmpty().MaximumLength(500);
         }

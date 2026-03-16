@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using BbQ.Outcome;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
@@ -36,7 +37,7 @@ namespace UrGuide.Services.Users
         public IUserContext UserContext { get; }
         public IInstantMessagingService InstantMessaging { get; }
 
-        public async Task<Result<PagedList<Model.Users.Notification>>> GetAllAsync(PaginationParameters pagination, CancellationToken cancellationToken)
+        public async Task<Outcome<PagedList<Model.Users.Notification>>> GetAllAsync(PaginationParameters pagination, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of<PagedList<Model.Users.Notification>>().WithErrors(ErrorMessages.NotAuthenticated);
@@ -45,7 +46,7 @@ namespace UrGuide.Services.Users
             return Result.Of(items);
         }
 
-        public async Task<Result<Model.Users.Notification>> GetNotificationAsync(string notificationId, CancellationToken cancellationToken)
+        public async Task<Outcome<Model.Users.Notification>> GetNotificationAsync(string notificationId, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of<Model.Users.Notification>().WithErrors(ErrorMessages.NotAuthenticated);
@@ -56,7 +57,7 @@ namespace UrGuide.Services.Users
             return Result.Of(UserMapper.ToNotification(notification));
         }
 
-        public async Task<Result<PagedList<Model.Users.Notification>>> GetUnreadAsync(PaginationParameters pagination, CancellationToken cancellationToken)
+        public async Task<Outcome<PagedList<Model.Users.Notification>>> GetUnreadAsync(PaginationParameters pagination, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of<PagedList<Model.Users.Notification>>().WithErrors(ErrorMessages.NotAuthenticated);
@@ -65,7 +66,7 @@ namespace UrGuide.Services.Users
             return Result.Of(items);
         }
 
-        public async Task<Result<bool>> MarkAsReadAsync(string notificationId, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> MarkAsReadAsync(string notificationId, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);

@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using BbQ.Outcome;
 using UrGuide.Core;
 using UrGuide.Model;
 using UrGuide.Model.Auditing;
@@ -9,6 +10,6 @@ namespace UrGuide.Services.Contracts
 {
     public interface IUserActivityService
     {
-        Task<Result<PagedList<ActivityModel>>> GetUserActivityAsync(PaginationParameters pagination, CancellationToken cancellationToken);
+        Task<Outcome<PagedList<ActivityModel>>> GetUserActivityAsync(PaginationParameters pagination, CancellationToken cancellationToken);
     }
 }

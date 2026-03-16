@@ -8,6 +8,7 @@ using UrGuide.Model;
 using UrGuide.Model.Admin;
 using UrGuide.Services.Contracts;
 using UrGuide.WebApp.Models;
+using BbQ.Outcome;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -42,10 +43,9 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetAllUsersAsync(searchParameters, cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
-
-            return Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -61,10 +61,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetUserDetailAsync(userId, cancellationToken);
 
-            if (result.HasError)
-                return NotFound(ErrorEnvelop.Create(result.Errors));
+            if (result.IsError)
+                return NotFound(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -81,8 +81,8 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.SuspendUserAsync(userId, durationDays, cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+            if (result.IsError)
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             return Ok(new { message = $"User suspended for {durationDays} days", userId });
         }
@@ -99,8 +99,8 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.ActivateUserAsync(userId, cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+            if (result.IsError)
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             return Ok(new { message = "User activated successfully", userId });
         }
@@ -118,8 +118,8 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.DeleteUserAsync(userId, cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+            if (result.IsError)
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             return Ok(new { message = "User deleted successfully", userId });
         }
@@ -136,8 +136,8 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.UpdateUserRolesAsync(model, cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+            if (result.IsError)
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             return Ok(new { message = "User roles updated successfully", model.UserId, roles = model.Roles });
         }
@@ -155,10 +155,9 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetUserActivityAsync(userId, paginationParameters, cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
-
-            return Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -172,10 +171,9 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetAllRolesAsync(cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
-
-            return Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -190,10 +188,9 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetPendingGuidesAsync(paginationParameters, cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
-
-            return Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -209,10 +206,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetGuideVerificationDetailAsync(userId, cancellationToken);
 
-            if (result.HasError)
-                return NotFound(ErrorEnvelop.Create(result.Errors));
+            if (result.IsError)
+                return NotFound(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -227,8 +224,8 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.ProcessGuideVerificationAsync(model, cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+            if (result.IsError)
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             var action = model.Approve ? "approved" : "rejected";
             return Ok(new { message = $"Guide verification {action}", userId = model.UserId });
@@ -246,10 +243,9 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetPendingToursAsync(paginationParameters, cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
-
-            return Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -265,10 +261,10 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetTourModerationDetailAsync(postId, cancellationToken);
 
-            if (result.HasError)
-                return NotFound(ErrorEnvelop.Create(result.Errors));
+            if (result.IsError)
+                return NotFound(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
-            return Ok(result.Data);
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -283,8 +279,8 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.ProcessTourModerationAsync(model, cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+            if (result.IsError)
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             var action = model.Approve ? "approved" : "rejected";
             return Ok(new { message = $"Tour post {action}", postId = model.PostId });
@@ -301,10 +297,9 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetAllTransactionsAsync(parameters, cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
-
-            return Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -316,10 +311,9 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetAllPayoutsAsync(parameters, cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
-
-            return Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -331,10 +325,9 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetAllRefundsAsync(parameters, cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
-
-            return Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         // ── System Monitoring ─────────────────────────────────────────────────
@@ -348,10 +341,9 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetSystemHealthAsync(cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
-
-            return Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -363,10 +355,9 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetAllAuditLogsAsync(parameters, cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
-
-            return Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -378,10 +369,9 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetAllWebhooksAsync(paginationParameters, cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
-
-            return Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -393,10 +383,9 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.GetPlatformSettingsAsync(cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
-
-            return Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -408,8 +397,8 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await _adminService.UpdatePlatformSettingsAsync(settings, cancellationToken);
 
-            if (result.HasError)
-                return BadRequest(ErrorEnvelop.Create(result.Errors));
+            if (result.IsError)
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             return Ok(new { message = "Platform settings updated successfully" });
         }

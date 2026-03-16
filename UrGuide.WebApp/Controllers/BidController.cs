@@ -8,6 +8,7 @@ using UrGuide.Model.Posts;
 using UrGuide.Model.Results;
 using UrGuide.Services.Contracts;
 using UrGuide.WebApp.Models;
+using BbQ.Outcome;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -31,10 +32,12 @@ namespace UrGuide.WebApp.Controllers
         {
             if(model.PostId != postId)
             {
-                return BadRequest(ErrorEnvelop.Create(Result.Of<PostModel>().WithErrors("Invalid object").Errors));
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(Result.Of<PostModel>().WithErrors("Invalid object").Errors));
             }
             var result = await BidService.OpenBidAsync(model, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPost("{postId}/accept")]
@@ -42,7 +45,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> Accept(string postId, CancellationToken cancellationToken)
         {
             var result = await BidService.AcceptBidAsync(postId, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPost("{postId}/reject")]
@@ -50,7 +55,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> Reject(string postId, CancellationToken cancellationToken)
         {
             var result = await BidService.RejectBidAsync(postId, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPost("{postId}/history")]
@@ -59,7 +66,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetHistory(string postId, CancellationToken cancellationToken)
         {
             var result = await BidService.GetBidHistoryAsync(postId, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
     }
 }

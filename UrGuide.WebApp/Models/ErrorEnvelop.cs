@@ -21,5 +21,6 @@ namespace UrGuide.WebApp.Models
         public static ErrorEnvelop<T> Create<T>(IEnumerable<T> errors) => new ErrorEnvelop<T>(errors);
         public static ErrorEnvelop<string> Create(IEnumerable<IdentityError> errors) => new ErrorEnvelop<string>(errors.Select(x => x.Description));
         public static ErrorEnvelop<string> Create(ModelStateDictionary modelState) => new ErrorEnvelop<string>(modelState.SelectMany(x => x.Value?.Errors.Select(y => y.ErrorMessage) ?? Enumerable.Empty<string>()));
+        public static ErrorEnvelop<string> CreateFromOutcome(IReadOnlyList<object> errors) => new ErrorEnvelop<string>(errors.Select(x => x?.ToString() ?? string.Empty));
     }
 }

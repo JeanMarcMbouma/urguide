@@ -1,4 +1,5 @@
 using System.Threading;
+using BbQ.Outcome;
 using System.Threading.Tasks;
 using UrGuide.Model.Results;
 using UrGuide.Model.Users;
@@ -16,7 +17,7 @@ namespace UrGuide.Services.Contracts
         /// <param name="request">Export request details (format)</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result containing the export request details</returns>
-        Task<Result<DataExportResponse>> RequestExportAsync(DataExportRequestModel request, CancellationToken cancellationToken);
+        Task<Outcome<DataExportResponse>> RequestExportAsync(DataExportRequestModel request, CancellationToken cancellationToken);
         
         /// <summary>
         /// Get the status of an export request
@@ -24,7 +25,7 @@ namespace UrGuide.Services.Contracts
         /// <param name="requestId">Export request ID</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result containing the export request details</returns>
-        Task<Result<DataExportResponse>> GetExportStatusAsync(string requestId, CancellationToken cancellationToken);
+        Task<Outcome<DataExportResponse>> GetExportStatusAsync(string requestId, CancellationToken cancellationToken);
         
         /// <summary>
         /// Download an export file using a secure token
@@ -32,7 +33,7 @@ namespace UrGuide.Services.Contracts
         /// <param name="token">Secure download token</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result containing the file path and metadata</returns>
-        Task<Result<(string FilePath, string FileName, long FileSize)>> DownloadExportAsync(string token, CancellationToken cancellationToken);
+        Task<Outcome<(string FilePath, string FileName, long FileSize)>> DownloadExportAsync(string token, CancellationToken cancellationToken);
         
         /// <summary>
         /// Cancel a pending export request
@@ -40,7 +41,7 @@ namespace UrGuide.Services.Contracts
         /// <param name="requestId">Export request ID</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result indicating success or failure</returns>
-        Task<Result<bool>> CancelExportAsync(string requestId, CancellationToken cancellationToken);
+        Task<Outcome<bool>> CancelExportAsync(string requestId, CancellationToken cancellationToken);
         
         /// <summary>
         /// Process pending export requests (background job)

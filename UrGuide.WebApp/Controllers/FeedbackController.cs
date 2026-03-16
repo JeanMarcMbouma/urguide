@@ -8,6 +8,7 @@ using UrGuide.Model;
 using UrGuide.Model.Shared;
 using UrGuide.Services.Contracts;
 using UrGuide.WebApp.Models;
+using BbQ.Outcome;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -28,7 +29,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> PostFeedback(string postId, [FromBody]FeedbackModel feedback, CancellationToken cancellationToken)
         {
             var result = await FeedbackService.AddPostFeedbackAsync(postId, feedback, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPost("users/{userId}/feedback")]
@@ -36,7 +39,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> UserFeedback(string userId, [FromBody]FeedbackModel feedback, CancellationToken cancellationToken)
         {
             var result = await FeedbackService.AddUserFeedbackAsync(userId, feedback, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("feedback/users/{userId}")]
@@ -45,7 +50,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetUserFeedback(string userId, [FromQuery][Bind(nameof(PaginationParameters.PageNumber))]PaginationParameters pagination, CancellationToken cancellationToken)
         {
             var result = await FeedbackService.GetUserFeedback(userId, pagination, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
 
@@ -55,7 +62,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetPostFeedback(string postId, [FromQuery][Bind(nameof(PaginationParameters.PageNumber))]PaginationParameters pagination, CancellationToken cancellationToken)
         {
             var result = await FeedbackService.GetPostFeedback(postId, pagination, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPost("feedback/{feedbackId}/respond")]
@@ -63,7 +72,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> RespondToFeedback(string feedbackId, [FromBody] FeedbackResponseModel response, CancellationToken cancellationToken)
         {
             var result = await FeedbackService.RespondToFeedbackAsync(feedbackId, response.Response, cancellationToken);
-            return result.HasError ? BadRequest(ErrorEnvelop.Create(result.Errors)) : (IActionResult)Ok(result.Data);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
     }
 }

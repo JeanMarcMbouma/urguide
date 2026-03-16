@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using BbQ.Outcome;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
@@ -31,7 +32,7 @@ namespace UrGuide.Services.Tour
         public ILogger<TourRequestService> Logger { get; }
         public IUserNotificationService NotificationService { get; }
 
-        public async Task<Result<TourRequestModel>> CreateTourRequestAsync(CreateTourRequestModel model, CancellationToken cancellationToken)
+        public async Task<Outcome<TourRequestModel>> CreateTourRequestAsync(CreateTourRequestModel model, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of<TourRequestModel>().WithErrors(ErrorMessages.NotAuthenticated);
@@ -101,7 +102,7 @@ namespace UrGuide.Services.Tour
             }
         }
 
-        public async Task<Result<TourRequestModel>> GetTourRequestByIdAsync(string tourRequestId, CancellationToken cancellationToken)
+        public async Task<Outcome<TourRequestModel>> GetTourRequestByIdAsync(string tourRequestId, CancellationToken cancellationToken)
         {
             var tourRequest = await Context.Set<DataTourRequest>()
                 .Include(tr => tr.Requester)
@@ -115,7 +116,7 @@ namespace UrGuide.Services.Tour
             return Result.Of(result);
         }
 
-        public async Task<Result<PagedList<TourRequestModel>>> GetTourRequestsAsync(SearchParameters pagination, CancellationToken cancellationToken)
+        public async Task<Outcome<PagedList<TourRequestModel>>> GetTourRequestsAsync(SearchParameters pagination, CancellationToken cancellationToken)
         {
             var query = Context.Set<DataTourRequest>()
                 .Include(tr => tr.Requester)
@@ -129,7 +130,7 @@ namespace UrGuide.Services.Tour
             return Result.Of(result);
         }
 
-        public async Task<Result<PagedList<TourRequestModel>>> GetMyTourRequestsAsync(SearchParameters pagination, CancellationToken cancellationToken)
+        public async Task<Outcome<PagedList<TourRequestModel>>> GetMyTourRequestsAsync(SearchParameters pagination, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of<PagedList<TourRequestModel>>().WithErrors(ErrorMessages.NotAuthenticated);
@@ -146,7 +147,7 @@ namespace UrGuide.Services.Tour
             return Result.Of(result);
         }
 
-        public async Task<Result<PagedList<TourRequestModel>>> GetTourRequestsByRegionAsync(string regionId, SearchParameters pagination, CancellationToken cancellationToken)
+        public async Task<Outcome<PagedList<TourRequestModel>>> GetTourRequestsByRegionAsync(string regionId, SearchParameters pagination, CancellationToken cancellationToken)
         {
             var query = Context.Set<DataTourRequest>()
                 .Include(tr => tr.Requester)
@@ -160,7 +161,7 @@ namespace UrGuide.Services.Tour
             return Result.Of(result);
         }
 
-        public async Task<Result<bool>> CancelTourRequestAsync(string tourRequestId, CancellationToken cancellationToken)
+        public async Task<Outcome<bool>> CancelTourRequestAsync(string tourRequestId, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of(false).WithErrors(ErrorMessages.NotAuthenticated);
@@ -181,7 +182,7 @@ namespace UrGuide.Services.Tour
             return Result.Of(true);
         }
 
-        public async Task<Result<TourRequestModel>> UpdateBudgetAsync(string tourRequestId, decimal newBudget, CancellationToken cancellationToken)
+        public async Task<Outcome<TourRequestModel>> UpdateBudgetAsync(string tourRequestId, decimal newBudget, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of<TourRequestModel>().WithErrors(ErrorMessages.NotAuthenticated);
