@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -27,18 +26,15 @@ namespace UrGuide.Services.Catalogs
         public CatalogService(
             IUserContext userContext,
             UrGuideContext context,
-            IMapper mapper,
             IIPStackService iPStackService,
             IImageService imageService,
             IMediator mediator) : base(context, userContext)
         {
-            Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             IPStackService = iPStackService ?? throw new ArgumentNullException(nameof(iPStackService));
             ImageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
             Mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
-        public IMapper Mapper { get; }
         public IIPStackService IPStackService { get; }
         public IImageService ImageService { get; }
         public IMediator Mediator { get; }
@@ -86,7 +82,7 @@ namespace UrGuide.Services.Catalogs
             ImageService.SaveImage(newImage);
 
             await Context.SaveChangesAsync(cancellationToken);
-            return Result.Of(Mapper.Map<ImageFileModel>(newImage));
+            return Result.Of(CatalogMapper.ToImageFileModel(newImage));
         }
 
         public async Task<Result<ImageCatalogModel>> CreateCatalogAsync(CreateImageCatalogModel catalogModel, CancellationToken cancellationToken)
@@ -97,7 +93,7 @@ namespace UrGuide.Services.Catalogs
             var catalog = await CreateCatalogInternal(catalogModel, cancellationToken);
             await Context.SaveChangesAsync(cancellationToken);
             await Mediator.Send(new CatalogCreatedCommand(UserContext.UserId, catalog.Data.Id));
-            return Result.Of(Mapper.Map<ImageCatalogModel>(catalog.Data));
+            return Result.Of(CatalogMapper.ToImageCatalogModel(catalog.Data));
         }
 
         private async Task<Result<ImageCatalog>> CreateCatalogInternal(CreateImageCatalogModel catalogModel, CancellationToken cancellationToken)
@@ -134,7 +130,7 @@ namespace UrGuide.Services.Catalogs
             var catalog = await Context.ImageCatalogs.FindAsync(new[] { catalogId }, cancellationToken);
             if (catalog == null)
                 return Result.Of<ImageCatalogModel>().WithErrors("Catalog doesn't exists");
-            return Result.Of(Mapper.Map<ImageCatalogModel>(catalog));
+            return Result.Of(CatalogMapper.ToImageCatalogModel(catalog));
         }
 
         public async Task<Result<IEnumerable<ImageCatalogModel>>> GetCatalogsAsync(string userId, CancellationToken cancellationToken)
@@ -143,7 +139,7 @@ namespace UrGuide.Services.Catalogs
             var catalogIds = await Context.ImageCatalogs.FromSqlInterpolated($"SELECT Image_CatalogId FROM ug.Image_Catalogs WHERE UserId = {userId}").Select( x => x.Id)
                 .ToListAsync(cancellationToken);
             var catalogs = await Context.ImageCatalogs.Where(x => catalogIds.Contains(x.Id)).ToListAsync(cancellationToken);
-            return Result.Of(catalogs.Select(catalog => Mapper.Map<ImageCatalogModel>(catalog)).AsEnumerable());
+            return Result.Of(catalogs.Select(catalog => CatalogMapper.ToImageCatalogModel(catalog)).AsEnumerable());
         }
 
         public async Task<Result<IEnumerable<ImageCatalogModel>>> GetCatalogsAsync(CancellationToken cancellationToken)
@@ -154,7 +150,7 @@ namespace UrGuide.Services.Catalogs
             var catalogs = await Context.ImageCatalogs
                 .Where(x => x.Location == null || geo == null || x.Location.Distance(geo) <= Constants.Distance)
                 .ToListAsync(cancellationToken);
-            return Result.Of(catalogs.Select(catalog => Mapper.Map<ImageCatalogModel>(catalog)).AsEnumerable());
+            return Result.Of(catalogs.Select(catalog => CatalogMapper.ToImageCatalogModel(catalog)).AsEnumerable());
         }
 
         public async Task<Result<bool>> RemoveCatalogAsync(string catalogId, CancellationToken cancellationToken)

@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -27,7 +26,6 @@ namespace UrGuide.Services.Posts
         public PostService(UrGuideContext context,
                            IUserContext userContext,
                            ICatalogService catalogService,
-                           IMapper mapper,
                            IIPStackService iPStackService,
                            ILogger<PostService> logger,
                            IEmailService emailService,
@@ -37,7 +35,6 @@ namespace UrGuide.Services.Posts
                            IElasticsearchService elasticsearchService) : base(context, userContext)
         {
             CatalogService = catalogService ?? throw new ArgumentNullException(nameof(catalogService));
-            Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             IPStackService = iPStackService ?? throw new ArgumentNullException(nameof(iPStackService));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             EmailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
@@ -48,7 +45,6 @@ namespace UrGuide.Services.Posts
         }
 
         public ICatalogService CatalogService { get; }
-        public IMapper Mapper { get; }
         public IIPStackService IPStackService { get; }
         public ILogger<PostService> Logger { get; }
         public IEmailService EmailService { get; }
@@ -93,7 +89,7 @@ New price: <em>{post.Bid.NewValue}</em>";
                     To = authorEmail,
                     ToName = authorFirstName
                 });
-                return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
+                return Result.Of(PostMapper.ToPostModel(PostVisitor.Visit(post, UserContext.UserId)));
             }
             catch (Exception e)
             {
@@ -179,7 +175,7 @@ New price: <em>{post.Bid.NewValue}</em>";
                 Logger.LogWarning(ex, "Failed to index post {PostId} to Elasticsearch", post.Id);
             }
             
-            return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
+            return Result.Of(PostMapper.ToPostModel(PostVisitor.Visit(post, UserContext.UserId)));
         }
 
         public async Task<Result<bool>> DeletePostAsync(string id, CancellationToken cancellationToken)
@@ -213,7 +209,7 @@ New price: <em>{post.Bid.NewValue}</em>";
                 .FirstOrDefaultAsync(p => p.Id == postId, cancellationToken);
             if (post == null)
                 return Result.Of<IEnumerable<ItineraryModel>>().WithErrors(ErrorMessages.NotFoundEntityForKey);
-            return Result.Of(Mapper.Map<IEnumerable<ItineraryModel>>(post.Itineraries));
+            return Result.Of(post.Itineraries.Select(PostMapper.ToItineraryModel).AsEnumerable());
         }
 
         public Task<Result<IEnumerable<PostModel>>> GetLast10PostsAsync(CancellationToken cancellationToken)
@@ -231,7 +227,7 @@ New price: <em>{post.Bid.NewValue}</em>";
                 .Take(size)
                 .ToListAsync(cancellationToken);
 
-            return Result.Of(Mapper.Map<IEnumerable<PostModel>>(PostVisitor.Visit(posts, UserContext.UserId)));
+            return Result.Of(PostVisitor.Visit(posts, UserContext.UserId).Select(PostMapper.ToPostModel));
         }
 
         public Task<Result<IEnumerable<PostModel>>> GetLast100PostsAsync(CancellationToken cancellationToken)
@@ -296,7 +292,7 @@ Post: <strong>{post.Text}</strong></br>
 Old price: <em>{post.Bid.OldValue}</em></br>
 ---------------------------------------</br>
 New price: <em>{post.Bid.NewValue}</em>");
-                return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
+                return Result.Of(PostMapper.ToPostModel(PostVisitor.Visit(post, UserContext.UserId)));
             }
             catch (Exception e)
             {
@@ -341,7 +337,7 @@ Your bid: <em>{value}</em>";
                     ToName = authorFirstName
                 });
                 await CreateNotification(post, post.Bid.Author.Id, content);
-                return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
+                return Result.Of(PostMapper.ToPostModel(PostVisitor.Visit(post, UserContext.UserId)));
             }
             catch (Exception e)
             {
@@ -383,7 +379,7 @@ Your bid: <em>{value}</em>";
             if (post == null)
                 return Result.Of<IEnumerable<BidHistoryModel>>().WithErrors(ErrorMessages.NotFoundEntityForKey);
 
-            return Result.Of(Mapper.Map<IEnumerable<BidHistoryModel>>(post.BidHistories.OrderByDescending(x => x.Created)));
+            return Result.Of(post.BidHistories.OrderByDescending(x => x.Created).Select(PostMapper.ToBidHistoryModel).AsEnumerable());
         }
 
         public Task<Result<IEnumerable<PostModel>>> GetTop10PostsAsync(CancellationToken cancellationToken)
@@ -407,7 +403,7 @@ Your bid: <em>{value}</em>";
                 .Take(size)
                 .ToListAsync(cancellationToken);
 
-            return Result.Of(Mapper.Map<IEnumerable<PostModel>>(PostVisitor.Visit(posts, UserContext.UserId)));
+            return Result.Of(PostVisitor.Visit(posts, UserContext.UserId).Select(PostMapper.ToPostModel));
         }
 
         public async Task<Result<bool>> ReserveSeatsAsync(SeatReservationModel seatReservation, CancellationToken cancellationToken)
@@ -588,7 +584,7 @@ Post: <strong>{post.Text}</strong></br>
 
             if (post == null)
                 return Result.Of<PostModel>().WithErrors(ErrorMessages.NotFoundEntityForKey);
-            return Result.Of(Mapper.Map<PostModel>(PostVisitor.Visit(post, UserContext.UserId)));
+            return Result.Of(PostMapper.ToPostModel(PostVisitor.Visit(post, UserContext.UserId)));
         }
 
         public Task<Result<PagedList<PostModel>>> GetOwnPostsAsync(SearchParameters pagination, CancellationToken cancellationToken)
@@ -616,7 +612,7 @@ Post: <strong>{post.Text}</strong></br>
                             .Where(x => geo == null || x.Location.Distance(geo) <= Constants.Distance)
                             .OrderByDescending(x => x.Id), pagination.PageNumber, cancellationToken);
 
-            var pagedResult = posts.To(p => Mapper.Map<PostModel>(PostVisitor.Visit(p, UserContext.UserId)));
+            var pagedResult = posts.To(p => PostMapper.ToPostModel(PostVisitor.Visit(p, UserContext.UserId)));
 
             return Result.Of(pagedResult);
         }

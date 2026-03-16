@@ -1,4 +1,3 @@
-﻿using AutoMapper;
 using System;
 using System.Collections.Generic;
 using UrGuide.Data.Entities.Event;
@@ -7,9 +6,9 @@ using UrGuide.Services.Helpers;
 
 namespace UrGuide.Services.Auditing
 {
-    class AuditEventMap : Profile
+    static class AuditEventMapper
     {
-        Dictionary<EventCodes, string> _eventDescriptions = new Dictionary<EventCodes, string>
+        private static readonly Dictionary<EventCodes, string> EventDescriptions = new Dictionary<EventCodes, string>
         {
             { EventCodes.Login, "User logged in" },
             { EventCodes.Logout, "User logged out" },
@@ -24,11 +23,13 @@ namespace UrGuide.Services.Auditing
             { EventCodes.CreateCalalog, "User created a catalog {0}" }
         };
 
-        public AuditEventMap()
+        public static ActivityModel ToActivityModel(AuditEvent source)
         {
-            CreateMap<AuditEvent, ActivityModel>()
-                .ForMember(x => x.Event, y => y.MapFrom(x => string.Format(_eventDescriptions[x.EventCode], x.ReferenceId)))
-                .ForMember(x => x.When, y => y.MapFrom(x => DateTimeHelper.GetDateTime(x.Created, DateTimeKind.Utc)));
+            return new ActivityModel
+            {
+                Event = string.Format(EventDescriptions[source.EventCode], source.ReferenceId),
+                When = DateTimeHelper.GetDateTime(source.Created, DateTimeKind.Utc)
+            };
         }
     }
 }

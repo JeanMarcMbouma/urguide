@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -22,14 +21,12 @@ namespace UrGuide.Services.Users
                                    IValidator<CreateNotification> validator,
                                    ILogger<NotificationService> logger,
                                    IUserContext userContext,
-                                   IMapper mapper,
                                    IInstantMessagingService instantMessaging)
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
             Validator = validator ?? throw new ArgumentNullException(nameof(validator));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             UserContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
-            Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             InstantMessaging = instantMessaging ?? throw new ArgumentNullException(nameof(instantMessaging));
         }
 
@@ -37,7 +34,6 @@ namespace UrGuide.Services.Users
         public IValidator<CreateNotification> Validator { get; }
         public ILogger<NotificationService> Logger { get; }
         public IUserContext UserContext { get; }
-        public IMapper Mapper { get; }
         public IInstantMessagingService InstantMessaging { get; }
 
         public async Task<Result<PagedList<Model.Users.Notification>>> GetAllAsync(PaginationParameters pagination, CancellationToken cancellationToken)
@@ -45,7 +41,7 @@ namespace UrGuide.Services.Users
             if (!UserContext.IsAuthenticated)
                 return Result.Of<PagedList<Model.Users.Notification>>().WithErrors(ErrorMessages.NotAuthenticated);
             var user = await Context.Users.FirstAsync(x => x.Id == UserContext.UserId, cancellationToken);
-            var items = PagedList.Of(user.Notifications.OrderByDescending(x => x.Created), pagination.PageNumber, n => Mapper.Map<Model.Users.Notification>(n));
+            var items = PagedList.Of(user.Notifications.OrderByDescending(x => x.Created), pagination.PageNumber, n => UserMapper.ToNotification(n));
             return Result.Of(items);
         }
 
@@ -57,7 +53,7 @@ namespace UrGuide.Services.Users
             var notification = user?.Notifications.FirstOrDefault(x => x.Id == notificationId);
             if (notification == null)
                 return Result.Of<Model.Users.Notification>().WithErrors(ErrorMessages.NotFoundEntityForKey);
-            return Result.Of(Mapper.Map<Model.Users.Notification>(notification));
+            return Result.Of(UserMapper.ToNotification(notification));
         }
 
         public async Task<Result<PagedList<Model.Users.Notification>>> GetUnreadAsync(PaginationParameters pagination, CancellationToken cancellationToken)
@@ -65,7 +61,7 @@ namespace UrGuide.Services.Users
             if (!UserContext.IsAuthenticated)
                 return Result.Of<PagedList<Model.Users.Notification>>().WithErrors(ErrorMessages.NotAuthenticated);
             var user = await Context.Users.FirstAsync(x => x.Id == UserContext.UserId, cancellationToken);
-            var items = PagedList.Of(user.Notifications.Where(m => !m.Read).OrderByDescending(x => x.Created), pagination.PageNumber, n => Mapper.Map<Model.Users.Notification>(n));
+            var items = PagedList.Of(user.Notifications.Where(m => !m.Read).OrderByDescending(x => x.Created), pagination.PageNumber, n => UserMapper.ToNotification(n));
             return Result.Of(items);
         }
 
@@ -104,7 +100,7 @@ namespace UrGuide.Services.Users
                 };
                 user.Notifications.Add(notification);
                 await Context.SaveChangesAsync();
-                _ = InstantMessaging.Send(user.Id, Mapper.Map<Model.Users.Notification>(notification)).ConfigureAwait(false);
+                _ = InstantMessaging.Send(user.Id, UserMapper.ToNotification(notification)).ConfigureAwait(false);
                 return;
             }
             Logger.LogWarning("Notification failed: {Errors}", string.Join(Environment.NewLine, result.Errors.Select(x => x.ErrorMessage)));

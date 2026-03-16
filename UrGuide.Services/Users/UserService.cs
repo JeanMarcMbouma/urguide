@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +18,7 @@ using UrGuide.Core.Attributes;
 using UrGuide.Core;
 using System;
 using UrGuide.Model.Shared;
+using UrGuide.Services.Feedback;
 
 namespace UrGuide.Services.Users
 {
@@ -28,7 +28,6 @@ namespace UrGuide.Services.Users
             IUserContext userContext,
             IAuthService authService,
             ILogger<UserService> logger,
-            IMapper mapper,
             IEmailService emailService,
             IWebHelper webHelper,
             IIPStackService iPStackService,
@@ -39,7 +38,6 @@ namespace UrGuide.Services.Users
             UserContext = userContext ?? throw new System.ArgumentNullException(nameof(userContext));
             AuthService = authService ?? throw new System.ArgumentNullException(nameof(authService));
             Logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
-            Mapper = mapper ?? throw new System.ArgumentNullException(nameof(mapper));
             EmailService = emailService ?? throw new System.ArgumentNullException(nameof(emailService));
             WebHelper = webHelper ?? throw new System.ArgumentNullException(nameof(webHelper));
             IPStackService = iPStackService ?? throw new System.ArgumentNullException(nameof(iPStackService));
@@ -51,7 +49,6 @@ namespace UrGuide.Services.Users
         public IUserContext UserContext { get; }
         public IAuthService AuthService { get; }
         public ILogger<UserService> Logger { get; }
-        public IMapper Mapper { get; }
         public IEmailService EmailService { get; }
         public IWebHelper WebHelper { get; }
         public IIPStackService IPStackService { get; }
@@ -89,7 +86,7 @@ namespace UrGuide.Services.Users
         {
             cancellationToken.ThrowIfCancellationRequested();
             var user = await Context.Users.FindAsync(new[] { userId }, cancellationToken);
-            return Result.Of(Mapper.Map<User>(user));
+            return Result.Of(UserMapper.ToUser(user));
         }
 
         public async Task<Result<User>> LoginAsync(LoginModel login, CancellationToken cancellationToken)
@@ -103,7 +100,7 @@ namespace UrGuide.Services.Users
                 return Result.Of<User>().WithErrors("Invalid login attempt.");
             user.LastActivityDate = System.DateTime.UtcNow;
             await Mediator.Send(new UserLoggedInCommand(user.Id));
-            return Result.Of(Mapper.Map<User>(user));
+            return Result.Of(UserMapper.ToUser(user));
         }
 
         public async Task<Result<bool>> RegisterGuideAsync(CreateGuideModel createGuide, CancellationToken cancellationToken)
@@ -309,8 +306,7 @@ namespace UrGuide.Services.Users
             if (user == null)
                 return Result.Of<User>().WithErrors("User not found.");
 
-            return Result.Of(Mapper.Map<User>(user));
-
+            return Result.Of(UserMapper.ToUser(user));
         }
 
         public async Task<Result<bool>> ExistsAsync(string userId, CancellationToken cancellationToken)
@@ -324,7 +320,7 @@ namespace UrGuide.Services.Users
             var result = await Context.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
             if (result == null)
                 return Result.Of<UserInfo>().WithErrors(ErrorMessages.NotFoundEntityForKey);
-            return Result.Of(Mapper.Map<UserInfo>(result));
+            return Result.Of(UserMapper.ToUserInfo(result));
         }
 
         public async Task<Result<bool>> UpdateUserAsync(UpdateUserModel updateUser, CancellationToken cancellationToken)
@@ -360,7 +356,7 @@ namespace UrGuide.Services.Users
                 .Where(x => EF.Functions.Like(x.FirstName, $"%{searchParameters.Term}%")
                 || EF.Functions.Like(x.LastName, $"%{searchParameters.Term}%")), 
                 searchParameters.PageNumber
-                , u => Mapper.Map<UserInfo>(u), cancellationToken);
+                , u => UserMapper.ToUserInfo(u), cancellationToken);
             return Result.Of(users);
         }
 
@@ -429,10 +425,10 @@ namespace UrGuide.Services.Users
                 var exportData = new UserDataExport
                 {
                     ExportDate = DateTime.UtcNow,
-                    Profile = Mapper.Map<UserInfo>(user),
+                    Profile = UserMapper.ToUserInfo(user),
                     Attributes = userAttributes,
-                    GivenFeedback = givenFeedback.Select(f => Mapper.Map<AuthoredFeedback>(f)).ToList(),
-                    ReceivedFeedback = user.Feedback.Select(f => Mapper.Map<AuthoredFeedback>(f)).ToList(),
+                    GivenFeedback = givenFeedback.Select(f => FeedbackMapper.ToAuthoredFeedback(f)).ToList(),
+                    ReceivedFeedback = user.Feedback.Select(f => FeedbackMapper.ToAuthoredFeedback(f)).ToList(),
                     Galleries = userGalleries.Select(g => new
                     {
                         Id = g.Id,

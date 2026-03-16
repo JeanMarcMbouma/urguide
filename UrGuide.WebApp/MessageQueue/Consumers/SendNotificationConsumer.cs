@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
 using UrGuide.WebApp.MessageQueue.Messages;
 using UrGuide.Data;
 using UrGuide.Shared.Contracts;
+using UrGuide.Services.Users;
 
 namespace UrGuide.WebApp.MessageQueue.Consumers;
 
@@ -17,18 +17,15 @@ public class SendNotificationConsumer : IConsumer<SendNotificationMessage>
 {
     private readonly UrGuideContext _context;
     private readonly IInstantMessagingService _instantMessaging;
-    private readonly IMapper _mapper;
     private readonly ILogger<SendNotificationConsumer> _logger;
 
     public SendNotificationConsumer(
         UrGuideContext context,
         IInstantMessagingService instantMessaging,
-        IMapper mapper,
         ILogger<SendNotificationConsumer> logger)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _instantMessaging = instantMessaging ?? throw new ArgumentNullException(nameof(instantMessaging));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -65,7 +62,7 @@ public class SendNotificationConsumer : IConsumer<SendNotificationMessage>
             // Send real-time notification via SignalR
             try
             {
-                await _instantMessaging.Send(user.Id, _mapper.Map<Model.Users.Notification>(notification));
+                await _instantMessaging.Send(user.Id, UserMapper.ToNotification(notification));
                 _logger.LogInformation("Successfully sent real-time notification to user {UserId}", message.UserId);
             }
             catch (Exception ex)
