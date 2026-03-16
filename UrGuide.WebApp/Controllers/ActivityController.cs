@@ -7,6 +7,7 @@ using UrGuide.Model;
 using UrGuide.Model.Auditing;
 using UrGuide.Services.Contracts;
 using UrGuide.WebApp.Models;
+using BbQ.Outcome;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -21,7 +22,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetUserActivity([FromQuery][Bind(nameof(PaginationParameters.PageNumber))]PaginationParameters pagination, CancellationToken cancellationToken)
         {
             var result = await activityService.GetUserActivityAsync(pagination, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
     }
 }

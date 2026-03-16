@@ -20,6 +20,7 @@ using UrGuide.WebApp.Models;
 using UrGuide.WebApp.Attributes;
 using UrGuide.WebApp.Services;
 using UrGuide.WebApp.Entities;
+using BbQ.Outcome;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -146,7 +147,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetDetails(CancellationToken cancellationToken)
         {
             var result = await UserService.GetDetailsAsync(cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [Authorize]
@@ -156,7 +159,9 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await UserService.UpdateGuideAsync(model, cancellationToken);
 
-            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [Authorize]
@@ -166,7 +171,9 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await UserService.UpdateUserAsync(model, cancellationToken);
 
-            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [Authorize]

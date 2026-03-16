@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using UrGuide.Model.Webhooks;
 using UrGuide.Services.Webhooks;
 using UrGuide.WebApp.Models;
+using BbQ.Outcome;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -37,7 +38,9 @@ namespace UrGuide.WebApp.Controllers
             }
 
             var result = await _webhookService.RegisterWebhookAsync(userId, request);
-            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet]
@@ -51,7 +54,9 @@ namespace UrGuide.WebApp.Controllers
             }
 
             var result = await _webhookService.GetUserWebhooksAsync(userId);
-            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("{id}")]
@@ -65,7 +70,9 @@ namespace UrGuide.WebApp.Controllers
             }
 
             var result = await _webhookService.GetWebhookAsync(id, userId);
-            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPut("{id}")]
@@ -79,7 +86,9 @@ namespace UrGuide.WebApp.Controllers
             }
 
             var result = await _webhookService.UpdateWebhookAsync(id, userId, request);
-            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpDelete("{id}")]
@@ -93,7 +102,9 @@ namespace UrGuide.WebApp.Controllers
             }
 
             var result = await _webhookService.DeleteWebhookAsync(id, userId);
-            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("{id}/deliveries")]
@@ -110,7 +121,9 @@ namespace UrGuide.WebApp.Controllers
             if (pageSize < 1 || pageSize > 100) pageSize = 20;
 
             var result = await _webhookService.GetWebhookDeliveriesAsync(id, userId, page, pageSize);
-            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPost("test")]
@@ -124,7 +137,9 @@ namespace UrGuide.WebApp.Controllers
             }
 
             var result = await _webhookService.TestWebhookAsync(request.WebhookId, userId, request);
-            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
     }
 }

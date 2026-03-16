@@ -9,6 +9,7 @@ using UrGuide.Model.Lookup;
 using UrGuide.Model.Users;
 using UrGuide.Services.Contracts;
 using UrGuide.WebApp.Models;
+using BbQ.Outcome;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -47,7 +48,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetOne(string id, CancellationToken cancellationToken)
         {
             var result = await UserService.GetUserInfo(id, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("/users/search")]
@@ -55,7 +58,9 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> GetUsers([FromQuery]SearchParameters searchParameters, CancellationToken cancellationToken)
         {
             var result = await UserService.GetUsersAsync(searchParameters, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using UrGuide.Model.Users;
 using UrGuide.Services.Contracts;
 using UrGuide.WebApp.Models;
+using BbQ.Outcome;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -43,10 +44,9 @@ namespace UrGuide.WebApp.Controllers
         {
             var result = await DataExportService.RequestExportAsync(request, cancellationToken);
             
-            if (result.IsError)
-                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
-
-            return Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>

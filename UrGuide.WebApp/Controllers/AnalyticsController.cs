@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using UrGuide.Model.Analytics;
 using UrGuide.Services.Contracts;
 using UrGuide.WebApp.Models;
+using BbQ.Outcome;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -53,10 +54,9 @@ namespace UrGuide.WebApp.Controllers
 
             var result = await _analyticsService.GetUserRegistrationTrendsAsync(dateRange, cancellationToken);
 
-            if (result.IsError)
-                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
-
-            return Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -84,10 +84,9 @@ namespace UrGuide.WebApp.Controllers
 
             var result = await _analyticsService.GetTourBookingStatisticsAsync(dateRange, cancellationToken);
 
-            if (result.IsError)
-                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
-
-            return Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -115,10 +114,9 @@ namespace UrGuide.WebApp.Controllers
 
             var result = await _analyticsService.GetRevenueMetricsAsync(dateRange, cancellationToken);
 
-            if (result.IsError)
-                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
-
-            return Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -148,10 +146,9 @@ namespace UrGuide.WebApp.Controllers
 
             var result = await _analyticsService.GetGuidePerformanceMetricsAsync(dateRange, topN, cancellationToken);
 
-            if (result.IsError)
-                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
-
-            return Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -181,10 +178,9 @@ namespace UrGuide.WebApp.Controllers
 
             var result = await _analyticsService.GetPopularDestinationsAsync(dateRange, topN, cancellationToken);
 
-            if (result.IsError)
-                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
-
-            return Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -212,10 +208,9 @@ namespace UrGuide.WebApp.Controllers
 
             var result = await _analyticsService.GetConversionFunnelAsync(dateRange, cancellationToken);
 
-            if (result.IsError)
-                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
-
-            return Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
@@ -243,10 +238,9 @@ namespace UrGuide.WebApp.Controllers
 
             var result = await _analyticsService.GetDashboardSummaryAsync(dateRange, cancellationToken);
 
-            if (result.IsError)
-                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
-
-            return Ok(result.Value);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         /// <summary>
