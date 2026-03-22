@@ -109,7 +109,7 @@ const Reviews = () => {
       {alert && <Alert severity={alert.type} sx={{ mb: 2 }}>{alert.message}</Alert>}
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
             <Typography variant="h2" fontWeight="bold">{avgRating.toFixed(1)}</Typography>
             <Rating value={avgRating} precision={0.1} readOnly />
@@ -118,7 +118,7 @@ const Reviews = () => {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Paper elevation={2} sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>{t('reviews.ratingDistribution')}</Typography>
             {[5, 4, 3, 2, 1].map((star) => (
@@ -138,7 +138,7 @@ const Reviews = () => {
 
       <Paper elevation={2} sx={{ p: 2, mb: 3 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={6}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth size="small">
               <InputLabel>{t('reviews.filterByRating')}</InputLabel>
               <Select
@@ -153,7 +153,7 @@ const Reviews = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth size="small">
               <InputLabel>{t('reviews.sortBy')}</InputLabel>
               <Select

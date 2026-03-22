@@ -110,7 +110,7 @@ const Earnings = () => {
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {summaryCards.map((card) => (
-          <Grid item xs={12} sm={6} md={3} key={card.titleKey}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }} key={card.titleKey}>
             <Paper elevation={2} sx={{ p: 3 }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 {t(card.titleKey)}

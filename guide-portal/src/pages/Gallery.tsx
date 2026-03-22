@@ -143,7 +143,7 @@ const Gallery = () => {
       ) : (
         <Grid container spacing={3}>
           {galleries.map((gallery) => (
-            <Grid item xs={12} sm={6} md={4} key={gallery.id}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={gallery.id}>
               <Paper
                 elevation={2}
                 sx={{ p: 2, cursor: 'pointer', border: selectedGallery?.id === gallery.id ? '2px solid' : 'none', borderColor: 'primary.main' }}

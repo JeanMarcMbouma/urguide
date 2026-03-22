@@ -230,7 +230,7 @@ export default function FinancialDashboard() {
       {revenue && (
         <>
           <Grid container spacing={2} mb={3}>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <MetricCard
                 title="Total Revenue"
                 value={formatCurrency(revenue.totalRevenue)}
@@ -238,7 +238,7 @@ export default function FinancialDashboard() {
                 color="success.main"
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <MetricCard
                 title="Platform Fees"
                 value={formatCurrency(revenue.platformFees)}
@@ -246,7 +246,7 @@ export default function FinancialDashboard() {
                 color="primary.main"
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <MetricCard
                 title="Guide Payouts"
                 value={formatCurrency(revenue.guidePayout)}
@@ -254,7 +254,7 @@ export default function FinancialDashboard() {
                 color="info.main"
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <MetricCard
                 title="Refunded Amount"
                 value={formatCurrency(revenue.refundedAmount)}
@@ -293,7 +293,7 @@ export default function FinancialDashboard() {
 
           {/* Additional metrics */}
           <Grid container spacing={2} mb={3}>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <Paper sx={{ p: 2, textAlign: 'center' }}>
                 <Typography variant="body2" color="text.secondary">
                   Net Revenue
@@ -303,7 +303,7 @@ export default function FinancialDashboard() {
                 </Typography>
               </Paper>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <Paper sx={{ p: 2, textAlign: 'center' }}>
                 <Typography variant="body2" color="text.secondary">
                   Transactions
@@ -313,7 +313,7 @@ export default function FinancialDashboard() {
                 </Typography>
               </Paper>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <Paper sx={{ p: 2, textAlign: 'center' }}>
                 <Typography variant="body2" color="text.secondary">
                   Avg. Transaction Value

@@ -103,35 +103,35 @@ const Profile = () => {
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Paper elevation={2} sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>{t('profile.personalInfo')}</Typography>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label={t('profile.firstName')} value={form.firstName}
                   onChange={(e) => handleChange('firstName', e.target.value)} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label={t('profile.lastName')} value={form.lastName}
                   onChange={(e) => handleChange('lastName', e.target.value)} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label={t('profile.phone')} value={form.phone}
                   onChange={(e) => handleChange('phone', e.target.value)} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label={t('profile.city')} value={form.city}
                   onChange={(e) => handleChange('city', e.target.value)} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label={t('profile.country')} value={form.country}
                   onChange={(e) => handleChange('country', e.target.value)} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label={t('profile.address')} value={form.address}
                   onChange={(e) => handleChange('address', e.target.value)} />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TextField fullWidth label={t('profile.description')} multiline rows={4}
                   value={form.description}
                   onChange={(e) => handleChange('description', e.target.value)} />
@@ -140,7 +140,7 @@ const Profile = () => {
           </Paper>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" gutterBottom>{t('profile.pricing')}</Typography>
             <TextField fullWidth label={t('profile.pricePerHour')} type="number"
@@ -154,7 +154,7 @@ const Profile = () => {
           </Paper>
         </Grid>
 
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper elevation={2} sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>{t('profile.specializations')}</Typography>
             <Autocomplete
@@ -173,7 +173,7 @@ const Profile = () => {
           </Paper>
         </Grid>
 
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper elevation={2} sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>{t('profile.languages')}</Typography>
             <Autocomplete
@@ -192,7 +192,7 @@ const Profile = () => {
           </Paper>
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Divider sx={{ my: 1 }} />
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button variant="contained" startIcon={<SaveIcon />} onClick={handleSave}

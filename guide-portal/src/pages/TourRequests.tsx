@@ -102,7 +102,7 @@ const TourRequests = () => {
 
       <Paper elevation={2} sx={{ p: 2, mb: 3 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={7}>
+          <Grid size={{ xs: 12, sm: 7 }}>
             <TextField
               fullWidth
               placeholder={t('tourRequests.search')}
@@ -118,7 +118,7 @@ const TourRequests = () => {
               size="small"
             />
           </Grid>
-          <Grid item xs={12} sm={5}>
+          <Grid size={{ xs: 12, sm: 5 }}>
             <FormControl fullWidth size="small">
               <InputLabel>{t('tourRequests.status')}</InputLabel>
               <Select
@@ -148,7 +148,7 @@ const TourRequests = () => {
         <>
           <Grid container spacing={2}>
             {requests.map((request) => (
-              <Grid item xs={12} md={6} key={request.id}>
+              <Grid size={{ xs: 12, md: 6 }} key={request.id}>
                 <Card elevation={2}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
@@ -212,7 +212,7 @@ const TourRequests = () => {
               </Grid>
             ))}
             {requests.length === 0 && (
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Paper elevation={1} sx={{ p: 4, textAlign: 'center' }}>
                   <Typography color="text.secondary">{t('tourRequests.noRequests')}</Typography>
                 </Paper>

@@ -111,7 +111,7 @@ const Payouts = () => {
       {alert && <Alert severity={alert.type} sx={{ mb: 2 }}>{alert.message}</Alert>}
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <Paper elevation={2} sx={{ p: 3 }}>
             <Typography variant="body2" color="text.secondary" gutterBottom>
               {t('payouts.availableBalance')}

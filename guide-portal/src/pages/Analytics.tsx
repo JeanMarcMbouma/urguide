@@ -125,7 +125,7 @@ const Analytics = () => {
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {metrics.map((m) => (
-          <Grid item xs={12} sm={6} md={3} key={m.titleKey}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }} key={m.titleKey}>
             <Paper elevation={2} sx={{ p: 3 }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 {t(m.titleKey as Parameters<typeof t>[0])}
@@ -146,19 +146,19 @@ const Analytics = () => {
         <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
           <Typography variant="h6" gutterBottom>{t('analytics.tourStatistics')}</Typography>
           <Grid container spacing={2}>
-            <Grid item xs={6} sm={3}>
+            <Grid size={{ xs: 6, sm: 3 }}>
               <Typography variant="body2" color="text.secondary">{t('analytics.totalTours')}</Typography>
               <Typography variant="h5" fontWeight="bold">{tourStats.totalTours}</Typography>
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid size={{ xs: 6, sm: 3 }}>
               <Typography variant="body2" color="text.secondary">{t('analytics.completed')}</Typography>
               <Typography variant="h5" fontWeight="bold" color="success.main">{tourStats.completedTours}</Typography>
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid size={{ xs: 6, sm: 3 }}>
               <Typography variant="body2" color="text.secondary">{t('analytics.cancelled')}</Typography>
               <Typography variant="h5" fontWeight="bold" color="error.main">{tourStats.cancelledTours}</Typography>
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid size={{ xs: 6, sm: 3 }}>
               <Typography variant="body2" color="text.secondary">{t('analytics.avgDuration')}</Typography>
               <Typography variant="h5" fontWeight="bold">{tourStats.averageDuration}h</Typography>
             </Grid>
@@ -173,7 +173,7 @@ const Analytics = () => {
       )}
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper elevation={2} sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>{t('analytics.responseTimeTrend')}</Typography>
             {responseTimeTrendData.length > 0 ? (
@@ -193,7 +193,7 @@ const Analytics = () => {
             )}
           </Paper>
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper elevation={2} sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>{t('analytics.ratingDistribution')}</Typography>
             {ratingDistributionData.length > 0 && dashboard && dashboard.reviewCount > 0 ? (
