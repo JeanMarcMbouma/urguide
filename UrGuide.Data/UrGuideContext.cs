@@ -60,6 +60,9 @@ namespace UrGuide.Data
         public virtual DbSet<ReviewFlag> ReviewFlags { get; set; }
         public virtual DbSet<ReviewModerationAction> ReviewModerationActions { get; set; }
 
+        // Tour template entities
+        public virtual DbSet<TourTemplate> TourTemplates { get; set; }
+
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
         }
@@ -123,6 +126,9 @@ namespace UrGuide.Data
             // Review moderation configurations
             modelBuilder.ApplyConfiguration(new Configurations.ReviewFlagConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.ReviewModerationActionConfiguration());
+
+            // Tour template configurations
+            modelBuilder.ApplyConfiguration(new Configurations.TourTemplateConfiguration());
         }
     }
 }

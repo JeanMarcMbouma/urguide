@@ -50,6 +50,9 @@ namespace UrGuide.Services.Extensions
             // Review moderation services
             services.AddTransient<Reviews.IReviewModerationService, Reviews.ReviewModerationService>();
             
+            // Tour template services
+            services.AddTransient<Templates.ITourTemplateService, Templates.TourTemplateService>();
+            
             // Data export service
             services.AddTransient<Contracts.IDataExportService, DataExport.DataExportService>();
             
