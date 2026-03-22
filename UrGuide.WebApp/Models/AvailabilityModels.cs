@@ -18,9 +18,9 @@ namespace UrGuide.WebApp.Models
         public string StartDate { get; set; }
         [Required]
         public string EndDate { get; set; }
-        public string Reason { get; set; }
+        public string? Reason { get; set; }
         /// <summary>IANA timezone identifier (e.g. "America/New_York"). Defaults to UTC.</summary>
-        public string Timezone { get; set; }
+        public string? Timezone { get; set; } = "UTC";
     }
 
     public class UnblockDatesRequest

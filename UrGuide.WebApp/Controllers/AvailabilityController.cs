@@ -76,12 +76,13 @@ namespace UrGuide.WebApp.Controllers
 
                 var resolvedTimezone = ResolveTimezone(timezone);
 
-                var blockedDatesList = await _context.GuideBlockedDates
+                // Fetch blocked dates with their reasons so the slot can report why a date is blocked.
+                var blockedEntries = await _context.GuideBlockedDates
                     .Where(d => d.GuideId == guideId && d.Date >= start && d.Date <= end)
-                    .Select(d => d.Date)
+                    .Select(d => new { d.Date, d.Reason })
                     .ToListAsync(cancellationToken);
 
-                var blockedDates = new HashSet<DateTime>(blockedDatesList);
+                var blockedDateMap = blockedEntries.ToDictionary(d => d.Date, d => d.Reason);
 
                 var pattern = await _context.GuideRecurringPatterns
                     .FirstOrDefaultAsync(p => p.GuideId == guideId, cancellationToken);
@@ -89,25 +90,29 @@ namespace UrGuide.WebApp.Controllers
                 var slots = new List<AvailabilitySlot>();
                 for (var date = start; date <= end; date = date.AddDays(1))
                 {
-                    bool isBlocked = blockedDates.Contains(date.Date);
+                    bool isExplicitlyBlocked = blockedDateMap.ContainsKey(date.Date);
+                    bool isBlockedByPattern = false;
 
-                    if (!isBlocked && pattern != null)
+                    if (!isExplicitlyBlocked && pattern != null)
                     {
                         var patternEnd = pattern.EndDate ?? DateTime.MaxValue;
                         if (date <= patternEnd)
                         {
                             if (pattern.PatternType == "weekly" && pattern.DayOfWeek.HasValue && (int)date.DayOfWeek == pattern.DayOfWeek.Value)
-                                isBlocked = true;
+                                isBlockedByPattern = true;
                             else if (pattern.PatternType == "monthly" && pattern.DayOfMonth.HasValue && date.Day == pattern.DayOfMonth.Value)
-                                isBlocked = true;
+                                isBlockedByPattern = true;
                         }
                     }
+
+                    bool isBlocked = isExplicitlyBlocked || isBlockedByPattern;
 
                     slots.Add(new AvailabilitySlot
                     {
                         Date = date.ToString(DateFormat),
                         IsBlocked = isBlocked,
-                        RecurringPattern = isBlocked && pattern != null ? pattern.PatternType : null,
+                        BlockReason = isExplicitlyBlocked ? blockedDateMap[date.Date] : null,
+                        RecurringPattern = isBlockedByPattern ? pattern!.PatternType : null,
                     });
                 }
 
@@ -293,22 +298,38 @@ namespace UrGuide.WebApp.Controllers
         // ── Conflict Check ─────────────────────────────────────────────────────
 
         /// <summary>
-        /// Check whether a given date is blocked for the authenticated guide.
-        /// Tourists/callers can use this before submitting a booking request.
+        /// Check whether a given date is blocked for a guide.
+        /// When <paramref name="guideId"/> is supplied the caller may be any authenticated
+        /// user (e.g. a tourist checking before booking). When omitted the authenticated
+        /// user is treated as the guide, so guides can also check their own calendar.
         /// </summary>
         [HttpGet("check")]
-        public async Task<IActionResult> CheckConflict([FromQuery] string date, CancellationToken cancellationToken)
+        public async Task<IActionResult> CheckConflict(
+            [FromQuery] string date,
+            [FromQuery] string? guideId,
+            CancellationToken cancellationToken)
         {
             try
             {
-                var guideId = GetUserId();
-                if (string.IsNullOrEmpty(guideId)) return Unauthorized();
+                // If no guideId is provided, the authenticated user is the guide being checked.
+                var resolvedGuideId = string.IsNullOrWhiteSpace(guideId) ? GetUserId() : guideId;
+                if (string.IsNullOrEmpty(resolvedGuideId)) return Unauthorized();
+
+                // When an explicit guideId is provided, verify the user exists to prevent
+                // returning misleading 404-like empty responses for unknown IDs.
+                if (!string.IsNullOrWhiteSpace(guideId))
+                {
+                    var guideExists = await _context.Users
+                        .AnyAsync(u => u.Id == resolvedGuideId, cancellationToken);
+                    if (!guideExists)
+                        return NotFound(new { error = $"Guide '{resolvedGuideId}' not found." });
+                }
 
                 if (!DateTime.TryParseExact(date, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var targetDate))
                     return BadRequest(new { error = "Invalid date format. Use yyyy-MM-dd." });
 
                 var blockedEntry = await _context.GuideBlockedDates
-                    .FirstOrDefaultAsync(d => d.GuideId == guideId && d.Date == targetDate.Date, cancellationToken);
+                    .FirstOrDefaultAsync(d => d.GuideId == resolvedGuideId && d.Date == targetDate.Date, cancellationToken);
 
                 bool hasConflict = blockedEntry != null;
                 string? conflictReason = blockedEntry?.Reason;
@@ -316,7 +337,7 @@ namespace UrGuide.WebApp.Controllers
                 if (!hasConflict)
                 {
                     var pattern = await _context.GuideRecurringPatterns
-                        .FirstOrDefaultAsync(p => p.GuideId == guideId, cancellationToken);
+                        .FirstOrDefaultAsync(p => p.GuideId == resolvedGuideId, cancellationToken);
 
                     if (pattern != null)
                     {
@@ -928,13 +949,41 @@ namespace UrGuide.WebApp.Controllers
             return null;
         }
 
+        /// <summary>
+        /// Resolves an IANA or Windows timezone ID to a <see cref="TimeZoneInfo"/>.
+        /// <para>
+        /// On Linux, <see cref="TimeZoneInfo.FindSystemTimeZoneById"/> accepts IANA IDs natively.
+        /// On Windows (without ICU), it accepts Windows IDs only. This method adds a two-pass
+        /// fallback using the built-in <see cref="TimeZoneInfo.TryConvertIanaIdToWindowsId"/> and
+        /// <see cref="TimeZoneInfo.TryConvertWindowsIdToIanaId"/> helpers (available in .NET 6+)
+        /// so that both ID styles work on every platform.
+        /// </para>
+        /// Returns <see cref="TimeZoneInfo.Utc"/> when the ID cannot be resolved.
+        /// </summary>
         private static TimeZoneInfo ResolveTimezone(string? ianaOrWindowsId)
         {
             if (string.IsNullOrWhiteSpace(ianaOrWindowsId))
                 return TimeZoneInfo.Utc;
 
+            // Direct lookup — works as-is on Linux (IANA) and Windows ≥ .NET 6 with ICU enabled.
             try { return TimeZoneInfo.FindSystemTimeZoneById(ianaOrWindowsId); }
-            catch { return TimeZoneInfo.Utc; }
+            catch { }
+
+            // Fallback for Windows without ICU: convert IANA → Windows ID.
+            if (TimeZoneInfo.TryConvertIanaIdToWindowsId(ianaOrWindowsId, out var windowsId))
+            {
+                try { return TimeZoneInfo.FindSystemTimeZoneById(windowsId); }
+                catch { }
+            }
+
+            // Fallback for IANA-only environments receiving a Windows ID: convert Windows → IANA.
+            if (TimeZoneInfo.TryConvertWindowsIdToIanaId(ianaOrWindowsId, out var ianaId))
+            {
+                try { return TimeZoneInfo.FindSystemTimeZoneById(ianaId); }
+                catch { }
+            }
+
+            return TimeZoneInfo.Utc;
         }
 
         /// <summary>Builds an RFC 5545 VCALENDAR string from blocked dates and recurring patterns.</summary>
@@ -948,11 +997,12 @@ namespace UrGuide.WebApp.Controllers
             var sb = new StringBuilder();
             var stamp = DateTime.UtcNow.ToString("yyyyMMdd'T'HHmmss'Z'");
 
-            sb.AppendLine("BEGIN:VCALENDAR");
-            sb.AppendLine("VERSION:2.0");
-            sb.AppendLine("PRODID:-//UrGuide//Availability Calendar//EN");
-            sb.AppendLine("CALSCALE:GREGORIAN");
-            sb.AppendLine("METHOD:PUBLISH");
+            // RFC 5545 requires CRLF line endings; use Append with "\r\n" for strict conformance.
+            sb.Append("BEGIN:VCALENDAR\r\n");
+            sb.Append("VERSION:2.0\r\n");
+            sb.Append("PRODID:-//UrGuide//Availability Calendar//EN\r\n");
+            sb.Append("CALSCALE:GREGORIAN\r\n");
+            sb.Append("METHOD:PUBLISH\r\n");
 
             foreach (var bd in blockedDates)
             {
@@ -961,14 +1011,14 @@ namespace UrGuide.WebApp.Controllers
                 var uid = $"{bd.Date:yyyyMMdd}-{guideId}@availability.urguide";
                 var summary = string.IsNullOrWhiteSpace(bd.Reason) ? "Unavailable" : $"Unavailable: {bd.Reason}";
 
-                sb.AppendLine("BEGIN:VEVENT");
-                sb.AppendLine($"UID:{uid}");
-                sb.AppendLine($"DTSTAMP:{stamp}");
-                sb.AppendLine($"DTSTART;VALUE=DATE:{dtStart}");
-                sb.AppendLine($"DTEND;VALUE=DATE:{dtEnd}");
-                sb.AppendLine($"SUMMARY:{EscapeIcalText(summary)}");
-                sb.AppendLine("TRANSP:OPAQUE");
-                sb.AppendLine("END:VEVENT");
+                sb.Append("BEGIN:VEVENT\r\n");
+                sb.Append($"UID:{uid}\r\n");
+                sb.Append($"DTSTAMP:{stamp}\r\n");
+                sb.Append($"DTSTART;VALUE=DATE:{dtStart}\r\n");
+                sb.Append($"DTEND;VALUE=DATE:{dtEnd}\r\n");
+                sb.Append($"SUMMARY:{EscapeIcalText(summary)}\r\n");
+                sb.Append("TRANSP:OPAQUE\r\n");
+                sb.Append("END:VEVENT\r\n");
             }
 
             // Expand recurring pattern into individual VEVENT entries
@@ -994,40 +1044,67 @@ namespace UrGuide.WebApp.Controllers
                         ? $"every {(DayOfWeek)pattern.DayOfWeek!.Value}"
                         : $"day {pattern.DayOfMonth} of every month";
 
-                    sb.AppendLine("BEGIN:VEVENT");
-                    sb.AppendLine($"UID:{uid}");
-                    sb.AppendLine($"DTSTAMP:{stamp}");
-                    sb.AppendLine($"DTSTART;VALUE=DATE:{dtStart}");
-                    sb.AppendLine($"DTEND;VALUE=DATE:{dtEnd}");
-                    sb.AppendLine($"SUMMARY:Unavailable (recurring {patternLabel})");
-                    sb.AppendLine("TRANSP:OPAQUE");
-                    sb.AppendLine("END:VEVENT");
+                    sb.Append("BEGIN:VEVENT\r\n");
+                    sb.Append($"UID:{uid}\r\n");
+                    sb.Append($"DTSTAMP:{stamp}\r\n");
+                    sb.Append($"DTSTART;VALUE=DATE:{dtStart}\r\n");
+                    sb.Append($"DTEND;VALUE=DATE:{dtEnd}\r\n");
+                    sb.Append($"SUMMARY:Unavailable (recurring {patternLabel})\r\n");
+                    sb.Append("TRANSP:OPAQUE\r\n");
+                    sb.Append("END:VEVENT\r\n");
                 }
             }
 
-            sb.AppendLine("END:VCALENDAR");
+            sb.Append("END:VCALENDAR\r\n");
             return sb.ToString();
         }
 
         /// <summary>
         /// Parses DTSTART dates from VEVENT entries in a VCALENDAR string.
         /// Supports VALUE=DATE (yyyyMMdd) and basic DATE-TIME (yyyyMMddTHHmmssZ) formats.
+        /// Handles RFC 5545 line folding (continuation lines beginning with space/tab).
         /// </summary>
         private static List<DateTime> ParseIcalDates(string icalContent)
         {
             var dates = new List<DateTime>();
             if (string.IsNullOrWhiteSpace(icalContent)) return dates;
 
-            var lines = icalContent
+            var normalized = icalContent
                 .Replace("\r\n", "\n")
-                .Replace("\r", "\n")
-                .Split('\n', StringSplitOptions.RemoveEmptyEntries);
+                .Replace("\r", "\n");
+
+            // RFC 5545 §3.1 line unfolding: a CRLF followed by a single space or tab is a
+            // line continuation and must be joined to the preceding logical line.
+            var physicalLines = normalized.Split('\n');
+            var unfoldedLines = new List<string>();
+            string? currentLine = null;
+
+            foreach (var physical in physicalLines)
+            {
+                if (string.IsNullOrEmpty(physical))
+                    continue;
+
+                if (currentLine != null && physical.Length > 0 && (physical[0] == ' ' || physical[0] == '\t'))
+                {
+                    // Remove the leading whitespace (the fold indicator) and join.
+                    currentLine += physical[1..];
+                }
+                else
+                {
+                    if (currentLine != null)
+                        unfoldedLines.Add(currentLine);
+                    currentLine = physical;
+                }
+            }
+
+            if (currentLine != null)
+                unfoldedLines.Add(currentLine);
 
             bool inEvent = false;
             DateTime? dtStart = null;
             DateTime? dtEnd = null;
 
-            foreach (var rawLine in lines)
+            foreach (var rawLine in unfoldedLines)
             {
                 var line = rawLine.Trim();
 
