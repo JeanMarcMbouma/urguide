@@ -413,6 +413,14 @@ export interface TourStatistics {
 
 export type AnalyticsPeriod = 'week' | 'month' | 'year';
 
+// Activity feed types
+export interface ActivityItem {
+  type: string;
+  description: string;
+  timestamp: string;
+  icon: string;
+}
+
 // Shared generic types
 export interface PagedResult<T> {
   items: T[];

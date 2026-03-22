@@ -8,6 +8,10 @@ import {
   Button,
   CircularProgress,
   Alert,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import {
   AttachMoney as AttachMoneyIcon,
@@ -18,22 +22,29 @@ import {
   Explore as ExploreIcon,
   Event as EventIcon,
   BarChart as BarChartIcon,
+  Payment as PaymentIcon,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { guideApi } from '../services/guideApi';
-import type { GuideDashboard } from '../types/guide.types';
+import type { GuideDashboard, ActivityItem } from '../types/guide.types';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [dashboard, setDashboard] = useState<GuideDashboard | null>(null);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    guideApi
-      .getDashboard()
-      .then(setDashboard)
+    Promise.all([
+      guideApi.getDashboard(),
+      guideApi.getRecentActivity().catch(() => [] as ActivityItem[]),
+    ])
+      .then(([dash, acts]) => {
+        setDashboard(dash);
+        setActivities(acts);
+      })
       .catch(() => setError(t('dashboard.error')))
       .finally(() => setLoading(false));
   }, [t]);
@@ -169,9 +180,32 @@ const Dashboard = () => {
             <Typography variant="h6" gutterBottom>
               {t('dashboard.recentActivity')}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {t('dashboard.activityComingSoon')}
-            </Typography>
+            {activities.length > 0 ? (
+              <List dense disablePadding>
+                {activities.map((activity, idx) => {
+                  const iconMap: Record<string, React.ReactNode> = {
+                    star: <StarIcon color="warning" />,
+                    explore: <ExploreIcon color="primary" />,
+                    payment: <PaymentIcon color="success" />,
+                  };
+                  return (
+                    <ListItem key={idx} disableGutters>
+                      <ListItemIcon sx={{ minWidth: 36 }}>
+                        {iconMap[activity.icon] ?? <InboxIcon />}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={activity.description}
+                        secondary={activity.timestamp ? new Date(activity.timestamp).toLocaleDateString() : ''}
+                      />
+                    </ListItem>
+                  );
+                })}
+              </List>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                {t('dashboard.noActivity')}
+              </Typography>
+            )}
           </Paper>
         </Grid>
       </Grid>
