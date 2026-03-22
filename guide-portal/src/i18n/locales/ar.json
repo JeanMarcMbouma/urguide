@@ -186,7 +186,22 @@
     "clearSuccess": "تم مسح النمط المتكرر.",
     "invalidMonthDay": "يرجى اختيار يوم شهر صالح (1-31).",
     "loading": "جاري تحميل التوفر...",
-    "loadError": "فشل تحميل التوفر."
+    "loadError": "فشل تحميل التوفر.",
+    "exportIcal": "تصدير iCal",
+    "importIcal": "استيراد iCal",
+    "googleSync": "تقويم Google",
+    "exportSuccess": "تم تصدير التقويم بنجاح.",
+    "exportError": "فشل تصدير التقويم.",
+    "importTitle": "استيراد ملف iCal",
+    "importDescription": "قم بتحميل ملف .ics لاستيراد التواريخ المحجوبة من تطبيق تقويم آخر.",
+    "importReasonPlaceholder": "مثال: تم الاستيراد من تقويم Google",
+    "selectIcsFile": "اختر ملف .ics",
+    "importSuccess": "تم استيراد {{count}} تاريخ/تواريخ بنجاح.",
+    "importError": "فشل استيراد ملف التقويم.",
+    "importResultInfo": "تم استيراد {{imported}} تاريخ/تواريخ، تم تخطي {{skipped}} (محجوبة بالفعل).",
+    "googleError": "فشل الاتصال بتقويم Google. يرجى المحاولة مرة أخرى.",
+    "close": "إغلاق",
+    "today": "اليوم"
   },
   "earnings": {
     "title": "لوحة تحكم الأرباح",

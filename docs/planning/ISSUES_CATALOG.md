@@ -1213,7 +1213,7 @@ Add moderation tools for reviews to prevent spam and inappropriate content.
 
 ---
 
-### 26. Booking Calendar and Availability
+### 26. Booking Calendar and Availability ✅ **COMPLETED**
 **Title:** Implement calendar system for guide availability  
 **Labels:** enhancement, scheduling, calendar  
 **Description:**
@@ -1230,12 +1230,26 @@ Add calendar functionality for guides to manage availability and tourists to boo
 - Booking conflict prevention
 
 **Acceptance Criteria:**
-- [ ] Guides can set availability
-- [ ] Calendar view implemented
-- [ ] Booking conflicts prevented
-- [ ] iCal export/import
-- [ ] Google Calendar sync
-- [ ] Timezone handling
+- [x] Guides can set availability
+- [x] Calendar view implemented
+- [x] Booking conflicts prevented
+- [x] iCal export/import
+- [x] Google Calendar sync
+- [x] Timezone handling
+
+**Status:** ✅ **COMPLETED**  
+**Implementation Notes:**
+- `GET /api/availability` – Returns availability slots with timezone support
+- `POST /api/availability/block` – Block date ranges with optional timezone
+- `DELETE /api/availability/block` – Unblock date ranges
+- `POST /api/availability/recurring` – Set weekly/monthly recurring unavailability patterns
+- `DELETE /api/availability/recurring` – Clear recurring pattern
+- `GET /api/availability/check` – Check booking conflict for a specific date
+- `GET /api/availability/export` – Export blocked dates as RFC 5545 iCal (.ics) file
+- `POST /api/availability/import` – Import blocked dates from an iCal (.ics) string
+- `GET /api/availability/google/auth-url` – Returns Google OAuth 2.0 authorisation URL
+- `GET /api/availability/google/callback` – Google OAuth callback handler
+- Guide Portal (`guide-portal`) Availability page updated with iCal export/import buttons and Google Calendar connect button
 
 ---
 
@@ -1528,7 +1542,7 @@ Implement multi-language support for API responses and error messages.
 - **Media Management**: 1 (Advanced Image Management 29)
 - **Support & Dispute**: 1 (Dispute Resolution 30)
 - **AI & Recommendations**: 1 (Tour Recommendation Engine 32)
-- **Scheduling**: 1 (Booking Calendar 26)
+- **Scheduling**: 1 (✅ Booking Calendar 26 completed)
 - **Documentation**: 1 (API Documentation Portal 35)
 - **Localization**: 1 (#38: Multi-language Support - pending)
 - **DevOps**: 2 (✅ Both completed)

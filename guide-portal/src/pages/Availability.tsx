@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   Paper,
@@ -17,16 +17,22 @@ import {
   Alert,
   CircularProgress,
   Tooltip,
+  Divider,
+  Chip,
 } from '@mui/material';
 import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   Block as BlockIcon,
   Repeat as RepeatIcon,
+  FileDownload as FileDownloadIcon,
+  FileUpload as FileUploadIcon,
+  Google as GoogleIcon,
+  AccessTime as AccessTimeIcon,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { guideApi } from '../services/guideApi';
-import type { AvailabilitySlot, BlockDatesRequest, RecurringPattern } from '../types/guide.types';
+import type { AvailabilitySlot, BlockDatesRequest, RecurringPattern, ICalImportResponse } from '../types/guide.types';
 
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -39,10 +45,18 @@ const Availability = () => {
   const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [alert, setAlert] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const [timezone, setTimezone] = useState('UTC');
 
   const [blockOpen, setBlockOpen] = useState(false);
   const [recurringOpen, setRecurringOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importResult, setImportResult] = useState<ICalImportResponse | null>(null);
+  const [importReason, setImportReason] = useState('');
+  const [importLoading, setImportLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [blockForm, setBlockForm] = useState<BlockDatesRequest>({ startDate: '', endDate: '', reason: '' });
   const [recurringForm, setRecurringForm] = useState<RecurringPattern & { dayOfWeekStr: string; dayOfMonthStr: string }>({
     type: 'weekly',
@@ -51,9 +65,9 @@ const Availability = () => {
     endDate: '',
   });
 
-  const showAlert = (type: 'success' | 'error', message: string) => {
+  const showAlert = (type: 'success' | 'error' | 'info', message: string) => {
     setAlert({ type, message });
-    setTimeout(() => setAlert(null), 4000);
+    setTimeout(() => setAlert(null), 5000);
   };
 
   const getStartEnd = useCallback(() => {
@@ -68,10 +82,11 @@ const Availability = () => {
     setError('');
     try {
       const { start, end } = getStartEnd();
-      const fetchedSlots = await guideApi.getAvailability(start, end);
-      setSlots(fetchedSlots);
+      const response = await guideApi.getAvailabilityWithTimezone(start, end, timezone !== 'UTC' ? timezone : undefined);
+      setSlots(response.slots);
+      if (response.timezone) setTimezone(response.timezone);
       const blocked = new Set(
-        fetchedSlots.filter((s) => s.isBlocked).map((s) => s.date.substring(0, 10))
+        response.slots.filter((s) => s.isBlocked).map((s) => s.date.substring(0, 10))
       );
       setBlockedDates(blocked);
     } catch {
@@ -79,7 +94,7 @@ const Availability = () => {
     } finally {
       setLoading(false);
     }
-  }, [getStartEnd, t]);
+  }, [getStartEnd, t, timezone]);
 
   useEffect(() => {
     loadAvailability();
@@ -130,7 +145,59 @@ const Availability = () => {
     }
   };
 
-  // Build calendar grid
+  // ── iCal Export ───────────────────────────────────────────────────────────
+  const handleExportIcal = async () => {
+    try {
+      const { start, end } = getStartEnd();
+      const blob = await guideApi.exportIcal(start, end);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `availability-${currentYear}-${String(currentMonth + 1).padStart(2, '0')}.ics`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showAlert('success', t('availability.exportSuccess'));
+    } catch {
+      showAlert('error', t('availability.exportError'));
+    }
+  };
+
+  // ── iCal Import ───────────────────────────────────────────────────────────
+  const handleImportFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImportLoading(true);
+    try {
+      const text = await file.text();
+      const result = await guideApi.importIcal({ iCalContent: text, reason: importReason || undefined });
+      setImportResult(result);
+      await loadAvailability();
+      showAlert('success', t('availability.importSuccess', { count: result.datesImported }));
+    } catch {
+      showAlert('error', t('availability.importError'));
+    } finally {
+      setImportLoading(false);
+      // Reset file input so the same file can be re-selected
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  // ── Google Calendar ───────────────────────────────────────────────────────
+  const handleGoogleConnect = async () => {
+    setGoogleLoading(true);
+    try {
+      const authUrl = await guideApi.getGoogleCalendarAuthUrl();
+      window.location.href = authUrl;
+    } catch {
+      showAlert('error', t('availability.googleError'));
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  // ── Calendar Grid ─────────────────────────────────────────────────────────
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const monthName = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -154,8 +221,18 @@ const Availability = () => {
 
   return (
     <Box>
+      {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
-        <Typography variant="h4">{t('availability.title')}</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="h4">{t('availability.title')}</Typography>
+          <Chip
+            icon={<AccessTimeIcon fontSize="small" />}
+            label={timezone}
+            size="small"
+            variant="outlined"
+            color="default"
+          />
+        </Box>
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
           <Button variant="outlined" startIcon={<BlockIcon />} onClick={() => setBlockOpen(true)}>
             {t('availability.blockDates')}
@@ -163,12 +240,28 @@ const Availability = () => {
           <Button variant="outlined" startIcon={<RepeatIcon />} onClick={() => setRecurringOpen(true)}>
             {t('availability.setRecurring')}
           </Button>
+          <Button variant="outlined" startIcon={<FileDownloadIcon />} onClick={handleExportIcal}>
+            {t('availability.exportIcal')}
+          </Button>
+          <Button variant="outlined" startIcon={<FileUploadIcon />} onClick={() => setImportOpen(true)}>
+            {t('availability.importIcal')}
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={googleLoading ? <CircularProgress size={16} /> : <GoogleIcon />}
+            onClick={handleGoogleConnect}
+            disabled={googleLoading}
+            color="secondary"
+          >
+            {t('availability.googleSync')}
+          </Button>
         </Box>
       </Box>
 
       {alert && <Alert severity={alert.type} sx={{ mb: 2 }}>{alert.message}</Alert>}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
+      {/* Calendar */}
       <Paper elevation={2} sx={{ p: 3 }}>
         {/* Month navigation */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -230,6 +323,7 @@ const Availability = () => {
               })}
             </Grid>
 
+            {/* Legend */}
             <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <Box sx={{ width: 16, height: 16, bgcolor: 'grey.100', borderRadius: 0.5 }} />
@@ -238,6 +332,10 @@ const Availability = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <Box sx={{ width: 16, height: 16, bgcolor: 'error.light', borderRadius: 0.5 }} />
                 <Typography variant="caption">{t('availability.blocked')}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 16, height: 16, bgcolor: 'primary.light', borderRadius: 0.5 }} />
+                <Typography variant="caption">{t('availability.today')}</Typography>
               </Box>
             </Box>
           </>
@@ -285,7 +383,7 @@ const Availability = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Recurring Dialog */}
+      {/* Recurring Pattern Dialog */}
       <Dialog open={recurringOpen} onClose={() => setRecurringOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{t('availability.recurringTitle')}</DialogTitle>
         <DialogContent>
@@ -339,6 +437,57 @@ const Availability = () => {
           <Button onClick={() => setRecurringOpen(false)}>{t('availability.cancel')}</Button>
           <Button variant="contained" onClick={handleSetRecurring}>
             {t('availability.setPattern')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* iCal Import Dialog */}
+      <Dialog open={importOpen} onClose={() => { setImportOpen(false); setImportResult(null); setImportReason(''); }} maxWidth="sm" fullWidth>
+        <DialogTitle>{t('availability.importTitle')}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+            {t('availability.importDescription')}
+          </Typography>
+          <TextField
+            fullWidth
+            label={t('availability.reason')}
+            value={importReason}
+            onChange={(e) => setImportReason(e.target.value)}
+            placeholder={t('availability.importReasonPlaceholder')}
+            sx={{ mb: 2 }}
+          />
+          <input
+            type="file"
+            accept=".ics,text/calendar"
+            style={{ display: 'none' }}
+            ref={fileInputRef}
+            onChange={handleImportFileChange}
+          />
+          <Button
+            variant="outlined"
+            startIcon={importLoading ? <CircularProgress size={16} /> : <FileUploadIcon />}
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importLoading}
+            fullWidth
+          >
+            {t('availability.selectIcsFile')}
+          </Button>
+
+          {importResult && (
+            <>
+              <Divider sx={{ my: 2 }} />
+              <Alert severity="success">
+                {t('availability.importResultInfo', {
+                  imported: importResult.datesImported,
+                  skipped: importResult.datesSkipped,
+                })}
+              </Alert>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { setImportOpen(false); setImportResult(null); setImportReason(''); }}>
+            {t('availability.close')}
           </Button>
         </DialogActions>
       </Dialog>
