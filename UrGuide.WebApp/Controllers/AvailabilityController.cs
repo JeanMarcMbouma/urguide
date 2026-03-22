@@ -461,7 +461,11 @@ namespace UrGuide.WebApp.Controllers
             if (string.IsNullOrEmpty(clientId))
                 return StatusCode(503, new { error = "Google Calendar integration is not configured." });
 
-            var redirectUri = _configuration["GoogleCalendar:RedirectUri"] ?? $"{Request.Scheme}://{Request.Host}/api/availability/google/callback";
+            // RedirectUri must be explicitly configured to prevent Host-header injection attacks.
+            var redirectUri = _configuration["GoogleCalendar:RedirectUri"];
+            if (string.IsNullOrEmpty(redirectUri))
+                return StatusCode(503, new { error = "GoogleCalendar:RedirectUri is not configured." });
+
             var scope = Uri.EscapeDataString("https://www.googleapis.com/auth/calendar");
             var state = Uri.EscapeDataString(GetUserId());
 
@@ -479,6 +483,8 @@ namespace UrGuide.WebApp.Controllers
         /// <summary>
         /// OAuth 2.0 callback handler for Google Calendar. Exchanges the authorisation
         /// code for tokens. Requires GoogleCalendar:ClientId and GoogleCalendar:ClientSecret.
+        /// Note: Token exchange and secure per-user storage must be completed before
+        /// this integration is production-ready.
         /// </summary>
         [HttpGet("google/callback")]
         [AllowAnonymous]
@@ -495,13 +501,14 @@ namespace UrGuide.WebApp.Controllers
             if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
                 return StatusCode(503, new { error = "Google Calendar integration is not configured." });
 
-            // In a production implementation the code would be exchanged for tokens here
-            // using the Google Token endpoint and the tokens stored securely per user.
+            // TODO: Exchange 'code' for access/refresh tokens using the Google Token endpoint,
+            // then store tokens securely per user (e.g., encrypted in the database).
+            // This stub acknowledges the OAuth flow without completing the token exchange.
             _logger.LogInformation("Google Calendar OAuth callback received for state {State}", state);
 
-            return Ok(new
+            return Accepted(new
             {
-                message = "Google Calendar connected successfully. Token exchange should be completed server-side.",
+                message = "Authorisation code received. Complete server-side token exchange to finish Google Calendar integration.",
                 state,
             });
         }
@@ -557,15 +564,15 @@ namespace UrGuide.WebApp.Controllers
                 var patternEnd = pattern.EndDate ?? rangeEnd;
                 for (var date = rangeStart; date <= patternEnd && date <= rangeEnd; date = date.AddDays(1))
                 {
-                    bool matches = pattern.PatternType == "weekly"
+                    bool isWeeklyMatch = pattern.PatternType == "weekly"
                         && pattern.DayOfWeek.HasValue
                         && (int)date.DayOfWeek == pattern.DayOfWeek.Value;
 
-                    matches = matches || (pattern.PatternType == "monthly"
+                    bool isMonthlyMatch = pattern.PatternType == "monthly"
                         && pattern.DayOfMonth.HasValue
-                        && date.Day == pattern.DayOfMonth.Value);
+                        && date.Day == pattern.DayOfMonth.Value;
 
-                    if (!matches) continue;
+                    if (!isWeeklyMatch && !isMonthlyMatch) continue;
 
                     var dtStart = date.ToString("yyyyMMdd");
                     var dtEnd = date.AddDays(1).ToString("yyyyMMdd");
@@ -642,6 +649,12 @@ namespace UrGuide.WebApp.Controllers
             return dates;
         }
 
+        /// <summary>
+        /// Extracts the date portion from an iCal DTSTART or DTEND property line.
+        /// For DATE-TIME formats the time component is intentionally discarded and the
+        /// result is midnight (the date only), since the availability system works at
+        /// day granularity. DTEND dates used as range end-points are handled exclusively.
+        /// </summary>
         private static DateTime? ParseIcalDate(string line)
         {
             var colonIdx = line.IndexOf(':', StringComparison.Ordinal);

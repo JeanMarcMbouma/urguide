@@ -250,16 +250,6 @@ class GuideApiService {
   }
 
   // ── Availability ───────────────────────────────────────────────────────────
-  async getAvailability(startDate: string, endDate: string, timezone?: string): Promise<AvailabilitySlot[]> {
-    const params: Record<string, string> = { startDate, endDate };
-    if (timezone) params.timezone = timezone;
-    const { data } = await axios.get<AvailabilityResponse>(
-      '/api/availability',
-      { headers: this.authHeader(), params }
-    );
-    return data.slots ?? [];
-  }
-
   async getAvailabilityWithTimezone(startDate: string, endDate: string, timezone?: string): Promise<AvailabilityResponse> {
     const params: Record<string, string> = { startDate, endDate };
     if (timezone) params.timezone = timezone;
@@ -268,6 +258,11 @@ class GuideApiService {
       { headers: this.authHeader(), params }
     );
     return data;
+  }
+
+  async getAvailability(startDate: string, endDate: string, timezone?: string): Promise<AvailabilitySlot[]> {
+    const response = await this.getAvailabilityWithTimezone(startDate, endDate, timezone);
+    return response.slots ?? [];
   }
 
   async blockDates(request: BlockDatesRequest): Promise<void> {
