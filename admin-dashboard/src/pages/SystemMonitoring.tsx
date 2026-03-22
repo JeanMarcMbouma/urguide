@@ -215,7 +215,7 @@ export default function SystemMonitoring() {
           </Box>
           <Grid container spacing={2}>
             {health.services.map((svc) => (
-              <Grid item xs={12} sm={6} md={4} key={svc.serviceName}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={svc.serviceName}>
                 <Paper sx={{ p: 2 }}>
                   <Box display="flex" alignItems="center" gap={1} mb={0.5}>
                     <HealthStatusIcon status={svc.status} />
@@ -509,7 +509,7 @@ export default function SystemMonitoring() {
                         { key: 'emailNotificationsEnabled', label: 'Email Notifications', description: 'Send email notifications' },
                       ] as { key: keyof PlatformSettings; label: string; description: string }[]
                     ).map(({ key, label, description }) => (
-                      <Grid item xs={12} sm={6} key={key}>
+                      <Grid size={{ xs: 12, sm: 6 }} key={key}>
                         <FormControlLabel
                           control={
                             <Switch
@@ -541,7 +541,7 @@ export default function SystemMonitoring() {
                 </Typography>
                 <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={4}>
+                    <Grid size={{ xs: 12, sm: 4 }}>
                       <TextField
                         label="Platform Fee (%)"
                         type="number"
@@ -552,7 +552,7 @@ export default function SystemMonitoring() {
                         onChange={(e) => handleSettingNumber('platformFeePercentage', parseFloat(e.target.value) || 0)}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={4}>
+                    <Grid size={{ xs: 12, sm: 4 }}>
                       <TextField
                         label="Max Images per Post"
                         type="number"
@@ -563,7 +563,7 @@ export default function SystemMonitoring() {
                         onChange={(e) => handleSettingNumber('maxImagesPerPost', parseInt(e.target.value, 10) || 1)}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={4}>
+                    <Grid size={{ xs: 12, sm: 4 }}>
                       <TextField
                         label="Min Booking Days in Advance"
                         type="number"

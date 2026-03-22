@@ -140,7 +140,7 @@ const UserDetail = () => {
 
       <Grid container spacing={3}>
         {/* User Information */}
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Paper sx={{ p: 3 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
               <Typography variant="h6">Profile Information</Typography>
@@ -151,7 +151,7 @@ const UserDetail = () => {
             </Box>
 
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" color="text.secondary">
                   Email
                 </Typography>
@@ -159,7 +159,7 @@ const UserDetail = () => {
                   {user.email}
                 </Typography>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" color="text.secondary">
                   Name
                 </Typography>
@@ -167,7 +167,7 @@ const UserDetail = () => {
                   {user.firstName} {user.lastName}
                 </Typography>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" color="text.secondary">
                   Phone Number
                 </Typography>
@@ -175,7 +175,7 @@ const UserDetail = () => {
                   {user.phoneNumber || 'N/A'}
                 </Typography>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" color="text.secondary">
                   User Type
                 </Typography>
@@ -239,7 +239,7 @@ const UserDetail = () => {
               Activity Statistics
             </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 6, sm: 3 }}>
                 <Card variant="outlined">
                   <CardContent>
                     <Typography variant="body2" color="text.secondary">
@@ -249,7 +249,7 @@ const UserDetail = () => {
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 6, sm: 3 }}>
                 <Card variant="outlined">
                   <CardContent>
                     <Typography variant="body2" color="text.secondary">
@@ -272,7 +272,7 @@ const UserDetail = () => {
         </Grid>
 
         {/* Security & Actions */}
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Paper sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" gutterBottom>
               Security Status

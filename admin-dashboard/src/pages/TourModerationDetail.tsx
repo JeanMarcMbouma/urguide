@@ -132,7 +132,7 @@ const TourModerationDetail = () => {
       </Box>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -232,7 +232,7 @@ const TourModerationDetail = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           {tour.violations && tour.violations.length > 0 && (
             <Card>
               <CardContent>
@@ -268,7 +268,7 @@ const TourModerationDetail = () => {
                 </Typography>
                 <Grid container spacing={1}>
                   {tour.images.map((image: string, index: number) => (
-                    <Grid item xs={6} key={index}>
+                    <Grid size={{ xs: 6 }} key={index}>
                       <Box 
                         component="img" 
                         src={image} 

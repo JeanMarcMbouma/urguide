@@ -126,7 +126,7 @@ const Verification = () => {
         {DOCUMENT_TYPES.map((dt) => {
           const doc = getDocStatus(dt.key);
           return (
-            <Grid item xs={12} md={4} key={dt.key}>
+            <Grid size={{ xs: 12, md: 4 }} key={dt.key}>
               <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
                 <Typography variant="h6" gutterBottom>{t(dt.labelKey as Parameters<typeof t>[0])}</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -171,13 +171,13 @@ const Verification = () => {
       <Paper elevation={2} sx={{ p: 3, mt: 3 }}>
         <Typography variant="h6" gutterBottom>{t('verification.requirements')}</Typography>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={4}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <Typography variant="body2" color="text.secondary">{t('verification.acceptedFormats')}: JPG, PNG, PDF</Typography>
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <Typography variant="body2" color="text.secondary">{t('verification.maxFileSize')}: 10 MB</Typography>
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <Typography variant="body2" color="text.secondary">
               {t('verification.reviewTime')}: {t('verification.reviewTimeValue')}
             </Typography>

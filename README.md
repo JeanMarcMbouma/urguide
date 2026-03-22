@@ -90,6 +90,31 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 - [x] **Real-time Updates**: TanStack Query for efficient server state management
 - [x] **Responsive Design**: Mobile-friendly with MUI's responsive components
 
+### 🧭 Guide Portal
+- [x] **Standalone Guide Application**: React 19 + TypeScript + Vite with Material-UI v7
+- [x] **Guide Registration & Profile**: Complete registration flow, profile editing, and KYC/identity verification
+- [x] **Photo Gallery Management**: Create, upload, and manage tour photo galleries
+- [x] **Tour Request Inbox**: Browse, filter, and respond to incoming tour requests
+- [x] **Bid Management**: Create, edit, and withdraw bids on tour requests
+- [x] **Availability Calendar**: Block dates, recurring patterns, iCal import/export, Google Calendar sync
+- [x] **Earnings Dashboard**: Track earnings, view transaction history with Recharts-based trend charts
+- [x] **Payout Management**: Request payouts, view payout history, manage payment methods
+- [x] **Reviews & Ratings**: View reviews, respond to tourist feedback
+- [x] **Client Messaging**: Database-persisted conversations with real-time chat UI
+- [x] **Analytics Dashboard**: Performance metrics, tour statistics, and Recharts-based visualizations
+  - Performance metrics (response rate, completion rate, cancellation rate, repeat client rate)
+  - Tour statistics (total, completed, cancelled, average duration, top destinations)
+  - Rating distribution bar chart and response time trend line chart
+- [x] **Dashboard Activity Feed**: Live activity feed showing recent reviews, tour requests, and payouts
+- [x] **Internationalization**: Full 5-language support (English, Spanish, French, German, Arabic)
+- [x] **Docker Integration**: Production Dockerfile with Nginx and development Dockerfile.dev with hot-reload
+- [x] **Guide Portal APIs**:
+  - GET `/api/guide/dashboard` – Dashboard summary stats
+  - GET `/api/guide/dashboard/activity` – Recent activity feed
+  - GET `/api/guide/analytics/performance` – Performance metrics
+  - GET `/api/guide/analytics/tour-stats` – Tour statistics
+  - GET/POST `/api/messages/*` – Database-persisted messaging
+
 ### �👥 Guide System API
 - [x] Guide registration with comprehensive questionnaire
 - [x] Guide profile management with detailed information:
@@ -750,12 +775,13 @@ docker-compose ps
 
 ### Services Included
 
-The `docker-compose.yml` orchestrates **5 containers**:
+The `docker-compose.yml` orchestrates **6 containers**:
 - **SQL Server 2022** - Database with persistent volumes
 - **RabbitMQ 3** - Message broker with management UI
 - **Elasticsearch 8.11** - Advanced search engine
 - **UrGuide API** - .NET 10 backend application
 - **Admin Dashboard** - React 18 + Nginx frontend
+- **Guide Portal** - React 19 + Nginx frontend (port 3002)
 
 ### Environment Configuration
 

@@ -50,3 +50,26 @@ services:
       timeout: 3s
       retries: 3
       start_period: 10s
+
+  # Guide Portal development with hot reload
+  guide-portal:
+    build:
+      context: ./guide-portal
+      dockerfile: Dockerfile.dev
+      target: development
+    ports:
+      - "3003:3002"
+    volumes:
+      - ./guide-portal:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - VITE_API_TARGET=http://api:80
+    command: npm run dev -- --host
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3002/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s

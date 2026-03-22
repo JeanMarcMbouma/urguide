@@ -37,6 +37,7 @@ import type {
   PerformanceMetrics,
   TourStatistics,
   AnalyticsPeriod,
+  ActivityItem,
   PagedResult,
 } from '../types/guide.types';
 
@@ -384,25 +385,26 @@ class GuideApiService {
   }
 
   // ── Analytics (reuses dashboard; guide-specific analytics not yet available) ─
-  async getPerformanceMetrics(_guideId: string, _period: AnalyticsPeriod): Promise<PerformanceMetrics> {
-    // Return placeholder until a dedicated analytics endpoint is available
-    return {
-      responseRate: 0,
-      responseTimeAvg: 0,
-      completionRate: 0,
-      cancellationRate: 0,
-      repeatClientRate: 0,
-    };
+  async getPerformanceMetrics(_guideId: string, period: AnalyticsPeriod): Promise<PerformanceMetrics> {
+    const { data } = await axios.get<PerformanceMetrics>('/api/guide/analytics/performance', {
+      headers: this.authHeader(),
+      params: { period },
+    });
+    return data;
   }
 
   async getTourStatistics(_guideId: string): Promise<TourStatistics> {
-    return {
-      totalTours: 0,
-      completedTours: 0,
-      cancelledTours: 0,
-      averageDuration: 0,
-      topDestinations: [],
-    };
+    const { data } = await axios.get<TourStatistics>('/api/guide/analytics/tour-stats', {
+      headers: this.authHeader(),
+    });
+    return data;
+  }
+
+  async getRecentActivity(): Promise<ActivityItem[]> {
+    const { data } = await axios.get<ActivityItem[]>('/api/guide/dashboard/activity', {
+      headers: this.authHeader(),
+    });
+    return data;
   }
 }
 

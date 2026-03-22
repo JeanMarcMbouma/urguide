@@ -358,7 +358,7 @@ const Availability = () => {
           <>
             <Grid container columns={7} sx={{ mb: 1 }}>
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-                <Grid item key={d} sx={{ textAlign: 'center', fontWeight: 'bold', py: 1 }}>
+                <Grid key={d} sx={{ textAlign: 'center', fontWeight: 'bold', py: 1 }}>
                   <Typography variant="caption">{d}</Typography>
                 </Grid>
               ))}
@@ -366,7 +366,7 @@ const Availability = () => {
 
             <Grid container columns={7}>
               {calendarCells.map((day, idx) => {
-                if (!day) return <Grid item key={`empty-${idx}`} />;
+                if (!day) return <Grid key={`empty-${idx}`} />;
                 const dateKey = formatDateKey(day);
                 const slot = slots.find((s) => s.date.substring(0, 10) === dateKey);
                 const isBlocked = blockedDates.has(dateKey);
@@ -375,7 +375,7 @@ const Availability = () => {
                   currentMonth === today.getMonth() &&
                   currentYear === today.getFullYear();
                 return (
-                  <Grid item key={dateKey}>
+                  <Grid key={dateKey}>
                     <Tooltip title={isBlocked ? (slot?.blockReason ?? t('availability.blocked')) : t('availability.available')}>
                       <Box
                         onClick={() => isBlocked && handleUnblock(dateKey)}

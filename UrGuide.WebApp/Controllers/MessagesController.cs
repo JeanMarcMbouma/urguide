@@ -1,11 +1,15 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using UrGuide.Data;
+using UrGuide.Data.Entities.Messages;
 using UrGuide.WebApp.Models;
 
 namespace UrGuide.WebApp.Controllers
@@ -18,14 +22,12 @@ namespace UrGuide.WebApp.Controllers
     public class MessagesController : ControllerBase
     {
         private readonly ILogger<MessagesController> _logger;
+        private readonly UrGuideContext _context;
 
-        // In-memory store keyed by conversationId
-        private static readonly ConcurrentDictionary<string, ConversationSummary> _conversations = new();
-        private static readonly ConcurrentDictionary<string, List<MessageItem>> _messages = new();
-
-        public MessagesController(ILogger<MessagesController> logger)
+        public MessagesController(ILogger<MessagesController> logger, UrGuideContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
@@ -35,22 +37,48 @@ namespace UrGuide.WebApp.Controllers
         /// Get all conversations for the authenticated user
         /// </summary>
         [HttpGet("conversations")]
-        public IActionResult GetConversations([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        public async Task<IActionResult> GetConversations([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
         {
             var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var userConvos = _conversations.Values
-                .Where(c => c.ParticipantId == userId || c.Id.StartsWith(userId) || c.Id.EndsWith(userId))
-                .OrderByDescending(c => c.LastMessageAt)
-                .ToList();
+            var query = _context.Conversations
+                .Where(c => c.Participant1Id == userId || c.Participant2Id == userId)
+                .OrderByDescending(c => c.LastMessageAt);
 
-            var paged = userConvos.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var totalCount = await query.CountAsync(cancellationToken);
+            var conversations = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            // Count unread messages per conversation for this user
+            var convoIds = conversations.Select(c => c.Id).ToList();
+            var unreadCounts = await _context.MessageEntities
+                .Where(m => convoIds.Contains(m.ConversationId) && m.SenderId != userId && !m.IsRead)
+                .GroupBy(m => m.ConversationId)
+                .Select(g => new { ConversationId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(g => g.ConversationId, g => g.Count, cancellationToken);
+
+            var summaries = conversations.Select(c =>
+            {
+                // Determine the "other" participant for display
+                var isParticipant1 = c.Participant1Id == userId;
+                return new ConversationSummary
+                {
+                    Id = c.Id,
+                    ParticipantId = isParticipant1 ? c.Participant2Id : c.Participant1Id,
+                    ParticipantName = isParticipant1 ? c.Participant2Name : c.Participant1Name,
+                    LastMessage = c.LastMessage,
+                    LastMessageAt = c.LastMessageAt,
+                    UnreadCount = unreadCounts.GetValueOrDefault(c.Id, 0),
+                };
+            }).ToList();
 
             return Ok(new ConversationListResponse
             {
-                Conversations = paged,
-                TotalCount = userConvos.Count,
+                Conversations = summaries,
+                TotalCount = totalCount,
                 Page = page,
                 PageSize = pageSize,
             });
@@ -60,21 +88,43 @@ namespace UrGuide.WebApp.Controllers
         /// Get messages for a specific conversation
         /// </summary>
         [HttpGet("conversations/{conversationId}")]
-        public IActionResult GetMessages(string conversationId, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)
+        public async Task<IActionResult> GetMessages(string conversationId, [FromQuery] int page = 1, [FromQuery] int pageSize = 50, CancellationToken cancellationToken = default)
         {
             var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var msgs = _messages.TryGetValue(conversationId, out var list)
-                ? list.OrderBy(m => m.SentAt).ToList()
-                : new List<MessageItem>();
+            // Verify the user is a participant
+            var conversation = await _context.Conversations
+                .FirstOrDefaultAsync(c => c.Id == conversationId &&
+                    (c.Participant1Id == userId || c.Participant2Id == userId), cancellationToken);
 
-            var paged = msgs.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            if (conversation == null)
+                return NotFound(new { error = "Conversation not found." });
+
+            var query = _context.MessageEntities
+                .Where(m => m.ConversationId == conversationId)
+                .OrderBy(m => m.SentAt);
+
+            var totalCount = await query.CountAsync(cancellationToken);
+            var messages = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(m => new MessageItem
+                {
+                    Id = m.Id,
+                    ConversationId = m.ConversationId,
+                    SenderId = m.SenderId,
+                    SenderName = m.SenderName,
+                    Content = m.Content,
+                    SentAt = m.SentAt,
+                    IsRead = m.IsRead,
+                })
+                .ToListAsync(cancellationToken);
 
             return Ok(new MessageListResponse
             {
-                Messages = paged,
-                TotalCount = msgs.Count,
+                Messages = messages,
+                TotalCount = totalCount,
                 Page = page,
                 PageSize = pageSize,
             });
@@ -84,7 +134,7 @@ namespace UrGuide.WebApp.Controllers
         /// Send a message
         /// </summary>
         [HttpPost]
-        public IActionResult SendMessage([FromBody] SendMessageRequest request)
+        public async Task<IActionResult> SendMessage([FromBody] SendMessageRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -94,7 +144,14 @@ namespace UrGuide.WebApp.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                var msg = new MessageItem
+                var conversation = await _context.Conversations
+                    .FirstOrDefaultAsync(c => c.Id == request.ConversationId &&
+                        (c.Participant1Id == userId || c.Participant2Id == userId), cancellationToken);
+
+                if (conversation == null)
+                    return NotFound(new { error = "Conversation not found." });
+
+                var entity = new MessageEntity
                 {
                     Id = Guid.NewGuid().ToString(),
                     ConversationId = request.ConversationId,
@@ -105,17 +162,24 @@ namespace UrGuide.WebApp.Controllers
                     IsRead = false,
                 };
 
-                // Use GetOrAdd to atomically create the list, then lock it for the append
-                var list = _messages.GetOrAdd(request.ConversationId, _ => new List<MessageItem>());
-                lock (list)
-                    list.Add(msg);
+                _context.MessageEntities.Add(entity);
 
                 // Update conversation summary
-                if (_conversations.TryGetValue(request.ConversationId, out var convo))
+                conversation.LastMessage = request.Content;
+                conversation.LastMessageAt = entity.SentAt;
+
+                await _context.SaveChangesAsync(cancellationToken);
+
+                var msg = new MessageItem
                 {
-                    convo.LastMessage = request.Content;
-                    convo.LastMessageAt = msg.SentAt;
-                }
+                    Id = entity.Id,
+                    ConversationId = entity.ConversationId,
+                    SenderId = entity.SenderId,
+                    SenderName = entity.SenderName,
+                    Content = entity.Content,
+                    SentAt = entity.SentAt,
+                    IsRead = entity.IsRead,
+                };
 
                 return Ok(msg);
             }
@@ -130,19 +194,26 @@ namespace UrGuide.WebApp.Controllers
         /// Mark conversation as read
         /// </summary>
         [HttpPut("conversations/{conversationId}/read")]
-        public IActionResult MarkAsRead(string conversationId)
+        public async Task<IActionResult> MarkAsRead(string conversationId, CancellationToken cancellationToken = default)
         {
             var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            if (_messages.TryGetValue(conversationId, out var msgs))
-            {
-                foreach (var msg in msgs.Where(m => m.SenderId != userId))
-                    msg.IsRead = true;
-            }
+            var conversation = await _context.Conversations
+                .FirstOrDefaultAsync(c => c.Id == conversationId &&
+                    (c.Participant1Id == userId || c.Participant2Id == userId), cancellationToken);
 
-            if (_conversations.TryGetValue(conversationId, out var convoSummary))
-                convoSummary.UnreadCount = 0;
+            if (conversation == null)
+                return NotFound(new { error = "Conversation not found." });
+
+            var unreadMessages = await _context.MessageEntities
+                .Where(m => m.ConversationId == conversationId && m.SenderId != userId && !m.IsRead)
+                .ToListAsync(cancellationToken);
+
+            foreach (var msg in unreadMessages)
+                msg.IsRead = true;
+
+            await _context.SaveChangesAsync(cancellationToken);
 
             return Ok(new { message = "Conversation marked as read." });
         }
