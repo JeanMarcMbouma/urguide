@@ -4,6 +4,7 @@ using UrGuide.Data.Entities.Event;
 using UrGuide.Data.Entities.Messages;
 using UrGuide.Data.Entities.Payments;
 using UrGuide.Data.Entities.Posts;
+using UrGuide.Data.Entities.Referrals;
 using UrGuide.Data.Entities.Regions;
 using UrGuide.Data.Entities.Search;
 using UrGuide.Data.Entities.Shared;
@@ -62,6 +63,10 @@ namespace UrGuide.Data
 
         // Tour template entities
         public virtual DbSet<TourTemplate> TourTemplates { get; set; }
+
+        // Referral entities
+        public virtual DbSet<ReferralCode> ReferralCodes { get; set; }
+        public virtual DbSet<Referral> Referrals { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
@@ -129,6 +134,10 @@ namespace UrGuide.Data
 
             // Tour template configurations
             modelBuilder.ApplyConfiguration(new Configurations.TourTemplateConfiguration());
+
+            // Referral configurations
+            modelBuilder.ApplyConfiguration(new Configurations.ReferralCodeConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.ReferralConfiguration());
         }
     }
 }
