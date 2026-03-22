@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 using UrGuide.Data.Entities.Event;
+using UrGuide.Data.Entities.Messages;
 using UrGuide.Data.Entities.Payments;
 using UrGuide.Data.Entities.Posts;
 using UrGuide.Data.Entities.Regions;
@@ -49,6 +50,10 @@ namespace UrGuide.Data
         // Guide verification entities
         public virtual DbSet<GuideVerificationSubmission> GuideVerificationSubmissions { get; set; }
         public virtual DbSet<GuideVerificationDocument> GuideVerificationDocuments { get; set; }
+
+        // Messaging entities
+        public virtual DbSet<ConversationEntity> Conversations { get; set; }
+        public virtual DbSet<MessageEntity> MessageEntities { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
@@ -104,6 +109,10 @@ namespace UrGuide.Data
             // Guide verification configurations
             modelBuilder.ApplyConfiguration(new Configurations.GuideVerificationSubmissionConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.GuideVerificationDocumentConfiguration());
+
+            // Messaging configurations
+            modelBuilder.ApplyConfiguration(new Configurations.ConversationConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.MessageEntityConfiguration());
         }
     }
 }
