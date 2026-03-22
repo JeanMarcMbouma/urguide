@@ -47,6 +47,9 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<Webhooks.IWebhookService, Webhooks.WebhookService>();
             services.AddHttpClient(); // Required for webhook delivery
             
+            // Review moderation services
+            services.AddTransient<Reviews.IReviewModerationService, Reviews.ReviewModerationService>();
+            
             // Data export service
             services.AddTransient<Contracts.IDataExportService, DataExport.DataExportService>();
             

@@ -56,6 +56,10 @@ namespace UrGuide.Data
         public virtual DbSet<MessageEntity> MessageEntities { get; set; }
         public virtual DbSet<FileAttachment> FileAttachments { get; set; }
 
+        // Review moderation entities
+        public virtual DbSet<ReviewFlag> ReviewFlags { get; set; }
+        public virtual DbSet<ReviewModerationAction> ReviewModerationActions { get; set; }
+
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
         }
@@ -115,6 +119,10 @@ namespace UrGuide.Data
             modelBuilder.ApplyConfiguration(new Configurations.ConversationConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.MessageEntityConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.FileAttachmentConfiguration());
+
+            // Review moderation configurations
+            modelBuilder.ApplyConfiguration(new Configurations.ReviewFlagConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.ReviewModerationActionConfiguration());
         }
     }
 }
