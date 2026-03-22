@@ -65,6 +65,9 @@ namespace UrGuide.Services.Extensions
             // Referral services
             services.AddTransient<Referrals.IReferralService, Referrals.ReferralService>();
 
+            // Image processing services
+            services.AddTransient<IImageProcessingService, ImageProcessingService>();
+
             // Elasticsearch
             var elasticsearchUrl = configuration["Elasticsearch:Url"] ?? "http://localhost:9200";
             var elasticsearchUsername = configuration["Elasticsearch:Username"];

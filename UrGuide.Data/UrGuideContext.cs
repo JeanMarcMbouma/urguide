@@ -10,6 +10,7 @@ using UrGuide.Data.Entities.Search;
 using UrGuide.Data.Entities.Shared;
 using UrGuide.Data.Entities.Tour;
 using UrGuide.Data.Entities.Users;
+using UrGuide.Data.Entities.Media;
 using UrGuide.Data.Entities.Webhooks;
 
 namespace UrGuide.Data
@@ -67,6 +68,9 @@ namespace UrGuide.Data
         // Referral entities
         public virtual DbSet<ReferralCode> ReferralCodes { get; set; }
         public virtual DbSet<Referral> Referrals { get; set; }
+
+        // Image processing entities
+        public virtual DbSet<ProcessedImage> ProcessedImages { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
@@ -138,6 +142,9 @@ namespace UrGuide.Data
             // Referral configurations
             modelBuilder.ApplyConfiguration(new Configurations.ReferralCodeConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.ReferralConfiguration());
+
+            // Image processing configurations
+            modelBuilder.ApplyConfiguration(new Configurations.ProcessedImageConfiguration());
         }
     }
 }
