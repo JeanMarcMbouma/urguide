@@ -229,7 +229,7 @@ namespace UrGuide.WebApp.Controllers
                 if (string.IsNullOrEmpty(userId))
                     return Unauthorized();
 
-                var activities = new List<object>();
+                var activities = new List<ActivityItemResponse>();
 
                 // Get recent reviews
                 var pagination = new PaginationParameters { PageNumber = 1 };
@@ -238,12 +238,12 @@ namespace UrGuide.WebApp.Controllers
                 {
                     foreach (var fb in feedbackResult.Value.Items.Take(3))
                     {
-                        activities.Add(new
+                        activities.Add(new ActivityItemResponse
                         {
-                            type = "review",
-                            description = $"New {fb.Rating}-star review from {fb.AuthorFullName}",
-                            timestamp = fb.PublicationDate,
-                            icon = "star",
+                            Type = "review",
+                            Description = $"New {fb.Rating}-star review from {fb.AuthorFullName}",
+                            Timestamp = fb.PublicationDate,
+                            Icon = "star",
                         });
                     }
                 }
@@ -255,12 +255,12 @@ namespace UrGuide.WebApp.Controllers
                 {
                     foreach (var req in requestsResult.Value.Items.Take(3))
                     {
-                        activities.Add(new
+                        activities.Add(new ActivityItemResponse
                         {
-                            type = "tour_request",
-                            description = $"New tour request: {req.Title}",
-                            timestamp = req.CreatedAt.ToString("o"),
-                            icon = "explore",
+                            Type = "tour_request",
+                            Description = $"New tour request: {req.Title}",
+                            Timestamp = req.CreatedAt.ToString("o"),
+                            Icon = "explore",
                         });
                     }
                 }
@@ -272,15 +272,18 @@ namespace UrGuide.WebApp.Controllers
                         .Where(p => p.GuideId == userId)
                         .OrderByDescending(p => p.RequestedAt)
                         .Take(2)
-                        .Select(p => new
-                        {
-                            type = "payout",
-                            description = $"Payout of {p.Amount:C} — {p.Status}",
-                            timestamp = p.RequestedAt.ToString("o"),
-                            icon = "payment",
-                        })
                         .ToListAsync(cancellationToken);
-                    activities.AddRange(payouts);
+
+                    foreach (var p in payouts)
+                    {
+                        activities.Add(new ActivityItemResponse
+                        {
+                            Type = "payout",
+                            Description = $"Payout of {p.Amount:C} — {p.Status}",
+                            Timestamp = p.RequestedAt.ToString("o"),
+                            Icon = "payment",
+                        });
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -289,7 +292,7 @@ namespace UrGuide.WebApp.Controllers
 
                 // Sort by timestamp descending and take most recent
                 var sorted = activities
-                    .OrderByDescending(a => ((dynamic)a).timestamp?.ToString() ?? "")
+                    .OrderByDescending(a => a.Timestamp ?? "")
                     .Take(8)
                     .ToList();
 

@@ -80,7 +80,7 @@ const Analytics = () => {
       ]
     : [];
 
-  // Build rating distribution data from review stats
+  // Estimated rating distribution based on review count (approximation until backend provides actual breakdown)
   const ratingDistributionData = dashboard
     ? [
         { rating: '5★', count: Math.round(dashboard.reviewCount * 0.45) },
