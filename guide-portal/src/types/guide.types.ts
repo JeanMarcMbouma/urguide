@@ -189,6 +189,7 @@ export interface BlockDatesRequest {
   startDate: string;
   endDate: string;
   reason?: string;
+  timezone?: string;
 }
 
 export interface RecurringPattern {
@@ -196,6 +197,42 @@ export interface RecurringPattern {
   dayOfWeek?: number;
   dayOfMonth?: number;
   endDate?: string;
+}
+
+export interface AvailabilityResponse {
+  slots: AvailabilitySlot[];
+  startDate: string;
+  endDate: string;
+  timezone: string;
+}
+
+export interface ICalImportRequest {
+  iCalContent: string;
+  reason?: string;
+}
+
+export interface ICalImportResponse {
+  datesImported: number;
+  datesSkipped: number;
+  importedDates: string[];
+}
+
+export interface ConflictCheckResponse {
+  date: string;
+  hasConflict: boolean;
+  conflictReason?: string;
+}
+
+export interface GoogleCalendarStatusResponse {
+  isConnected: boolean;
+  scope?: string;
+  expiresAt?: string;
+}
+
+export interface GoogleCalendarSyncResponse {
+  datesBlocked: number;
+  datesSkipped: number;
+  blockedDates: string[];
 }
 
 // Earnings types

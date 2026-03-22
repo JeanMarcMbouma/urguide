@@ -44,6 +44,7 @@ namespace UrGuide.Data
         // Guide availability entities
         public virtual DbSet<GuideBlockedDate> GuideBlockedDates { get; set; }
         public virtual DbSet<GuideRecurringPattern> GuideRecurringPatterns { get; set; }
+        public virtual DbSet<GuideGoogleCalendarToken> GuideGoogleCalendarTokens { get; set; }
 
         // Guide verification entities
         public virtual DbSet<GuideVerificationSubmission> GuideVerificationSubmissions { get; set; }
@@ -98,6 +99,7 @@ namespace UrGuide.Data
             // Guide availability configurations
             modelBuilder.ApplyConfiguration(new Configurations.GuideBlockedDateConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.GuideRecurringPatternConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.GuideGoogleCalendarTokenConfiguration());
 
             // Guide verification configurations
             modelBuilder.ApplyConfiguration(new Configurations.GuideVerificationSubmissionConfiguration());

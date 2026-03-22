@@ -15,8 +15,14 @@ import type {
   CreateBidRequest,
   BidHistory,
   AvailabilitySlot,
+  AvailabilityResponse,
   BlockDatesRequest,
   RecurringPattern,
+  ICalImportRequest,
+  ICalImportResponse,
+  ConflictCheckResponse,
+  GoogleCalendarStatusResponse,
+  GoogleCalendarSyncResponse,
   TransactionHistoryResponse,
   PayoutItem,
   PayoutListResponse,
@@ -246,12 +252,19 @@ class GuideApiService {
   }
 
   // ── Availability ───────────────────────────────────────────────────────────
-  async getAvailability(startDate: string, endDate: string): Promise<AvailabilitySlot[]> {
-    const { data } = await axios.get<{ slots: AvailabilitySlot[]; startDate: string; endDate: string }>(
+  async getAvailabilityWithTimezone(startDate: string, endDate: string, timezone?: string): Promise<AvailabilityResponse> {
+    const params: Record<string, string> = { startDate, endDate };
+    if (timezone) params.timezone = timezone;
+    const { data } = await axios.get<AvailabilityResponse>(
       '/api/availability',
-      { headers: this.authHeader(), params: { startDate, endDate } }
+      { headers: this.authHeader(), params }
     );
-    return data.slots ?? [];
+    return data;
+  }
+
+  async getAvailability(startDate: string, endDate: string, timezone?: string): Promise<AvailabilitySlot[]> {
+    const response = await this.getAvailabilityWithTimezone(startDate, endDate, timezone);
+    return response.slots ?? [];
   }
 
   async blockDates(request: BlockDatesRequest): Promise<void> {
@@ -271,6 +284,71 @@ class GuideApiService {
     await axios.post('/api/availability/recurring', pattern, {
       headers: this.authHeader(),
     });
+  }
+
+  async clearRecurringPattern(): Promise<void> {
+    await axios.delete('/api/availability/recurring', {
+      headers: this.authHeader(),
+    });
+  }
+
+  async checkConflict(date: string): Promise<ConflictCheckResponse> {
+    const { data } = await axios.get<ConflictCheckResponse>('/api/availability/check', {
+      headers: this.authHeader(),
+      params: { date },
+    });
+    return data;
+  }
+
+  async exportIcal(startDate?: string, endDate?: string): Promise<Blob> {
+    const params: Record<string, string> = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    const { data } = await axios.get('/api/availability/export', {
+      headers: this.authHeader(),
+      params,
+      responseType: 'blob',
+    });
+    return data;
+  }
+
+  async importIcal(request: ICalImportRequest): Promise<ICalImportResponse> {
+    const { data } = await axios.post<ICalImportResponse>('/api/availability/import', request, {
+      headers: this.authHeader(),
+    });
+    return data;
+  }
+
+  async getGoogleCalendarAuthUrl(): Promise<string> {
+    const { data } = await axios.get<{ authUrl: string }>('/api/availability/google/auth-url', {
+      headers: this.authHeader(),
+    });
+    return data.authUrl;
+  }
+
+  async getGoogleCalendarStatus(): Promise<GoogleCalendarStatusResponse> {
+    const { data } = await axios.get<GoogleCalendarStatusResponse>('/api/availability/google/status', {
+      headers: this.authHeader(),
+    });
+    return data;
+  }
+
+  async disconnectGoogleCalendar(): Promise<void> {
+    await axios.delete('/api/availability/google', {
+      headers: this.authHeader(),
+    });
+  }
+
+  async syncGoogleCalendar(startDate?: string, endDate?: string): Promise<GoogleCalendarSyncResponse> {
+    const params: Record<string, string> = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    const { data } = await axios.post<GoogleCalendarSyncResponse>(
+      '/api/availability/google/sync',
+      {},
+      { headers: this.authHeader(), params }
+    );
+    return data;
   }
 
   // ── Messages ───────────────────────────────────────────────────────────────
