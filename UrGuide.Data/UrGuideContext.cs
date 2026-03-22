@@ -13,6 +13,7 @@ using UrGuide.Data.Entities.Users;
 using UrGuide.Data.Entities.Media;
 using UrGuide.Data.Entities.Webhooks;
 using UrGuide.Data.Entities.Disputes;
+using UrGuide.Data.Entities.Recommendations;
 
 namespace UrGuide.Data
 {
@@ -77,6 +78,11 @@ namespace UrGuide.Data
         public virtual DbSet<Dispute> Disputes { get; set; }
         public virtual DbSet<DisputeEvidence> DisputeEvidence { get; set; }
         public virtual DbSet<DisputeMessage> DisputeMessages { get; set; }
+
+        // Recommendation entities
+        public virtual DbSet<UserPreference> UserPreferences { get; set; }
+        public virtual DbSet<TourInteraction> TourInteractions { get; set; }
+        public virtual DbSet<RecommendationLog> RecommendationLogs { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
@@ -156,6 +162,11 @@ namespace UrGuide.Data
             modelBuilder.ApplyConfiguration(new Configurations.DisputeConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.DisputeEvidenceConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.DisputeMessageConfiguration());
+
+            // Recommendation configurations
+            modelBuilder.ApplyConfiguration(new Configurations.UserPreferenceConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.TourInteractionConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.RecommendationLogConfiguration());
         }
     }
 }

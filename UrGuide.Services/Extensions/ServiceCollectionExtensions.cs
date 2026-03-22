@@ -71,6 +71,9 @@ namespace UrGuide.Services.Extensions
             // Dispute services
             services.AddTransient<Disputes.IDisputeService, Disputes.DisputeService>();
 
+            // Recommendation services
+            services.AddTransient<Recommendations.IRecommendationService, Recommendations.RecommendationService>();
+
             // Elasticsearch
             var elasticsearchUrl = configuration["Elasticsearch:Url"] ?? "http://localhost:9200";
             var elasticsearchUsername = configuration["Elasticsearch:Username"];
