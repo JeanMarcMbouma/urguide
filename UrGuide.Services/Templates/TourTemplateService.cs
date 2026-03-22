@@ -253,7 +253,7 @@ namespace UrGuide.Services.Templates
             {
                 return JsonSerializer.Deserialize<T>(json) ?? defaultValue;
             }
-            catch
+            catch (JsonException)
             {
                 return defaultValue;
             }
