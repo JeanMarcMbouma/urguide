@@ -54,6 +54,7 @@ namespace UrGuide.Data
         // Messaging entities
         public virtual DbSet<ConversationEntity> Conversations { get; set; }
         public virtual DbSet<MessageEntity> MessageEntities { get; set; }
+        public virtual DbSet<FileAttachment> FileAttachments { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
@@ -113,6 +114,7 @@ namespace UrGuide.Data
             // Messaging configurations
             modelBuilder.ApplyConfiguration(new Configurations.ConversationConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.MessageEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.FileAttachmentConfiguration());
         }
     }
 }

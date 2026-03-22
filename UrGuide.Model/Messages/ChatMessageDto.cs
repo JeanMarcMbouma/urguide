@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace UrGuide.Data.Entities.Messages
+namespace UrGuide.Model.Messages
 {
-    public class MessageEntity
+    public class ChatMessageDto
     {
         public string Id { get; set; }
         public string ConversationId { get; set; }
@@ -12,8 +12,6 @@ namespace UrGuide.Data.Entities.Messages
         public string Content { get; set; }
         public DateTime SentAt { get; set; }
         public bool IsRead { get; set; }
-
-        public virtual ConversationEntity Conversation { get; set; }
-        public virtual ICollection<FileAttachment> Attachments { get; set; } = new List<FileAttachment>();
+        public List<FileAttachmentDto> Attachments { get; set; } = new();
     }
 }
