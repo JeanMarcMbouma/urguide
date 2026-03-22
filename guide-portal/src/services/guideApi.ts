@@ -21,6 +21,8 @@ import type {
   ICalImportRequest,
   ICalImportResponse,
   ConflictCheckResponse,
+  GoogleCalendarStatusResponse,
+  GoogleCalendarSyncResponse,
   TransactionHistoryResponse,
   PayoutItem,
   PayoutListResponse,
@@ -322,6 +324,31 @@ class GuideApiService {
       headers: this.authHeader(),
     });
     return data.authUrl;
+  }
+
+  async getGoogleCalendarStatus(): Promise<GoogleCalendarStatusResponse> {
+    const { data } = await axios.get<GoogleCalendarStatusResponse>('/api/availability/google/status', {
+      headers: this.authHeader(),
+    });
+    return data;
+  }
+
+  async disconnectGoogleCalendar(): Promise<void> {
+    await axios.delete('/api/availability/google', {
+      headers: this.authHeader(),
+    });
+  }
+
+  async syncGoogleCalendar(startDate?: string, endDate?: string): Promise<GoogleCalendarSyncResponse> {
+    const params: Record<string, string> = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    const { data } = await axios.post<GoogleCalendarSyncResponse>(
+      '/api/availability/google/sync',
+      {},
+      { headers: this.authHeader(), params }
+    );
+    return data;
   }
 
   // ── Messages ───────────────────────────────────────────────────────────────

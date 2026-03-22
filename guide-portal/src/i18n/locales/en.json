@@ -201,7 +201,12 @@
     "importResultInfo": "Imported {{imported}} date(s), skipped {{skipped}} (already blocked).",
     "googleError": "Google Calendar connection failed. Please try again.",
     "close": "Close",
-    "today": "Today"
+    "today": "Today",
+    "googleSyncNow": "Sync Now",
+    "googleDisconnect": "Disconnect Google",
+    "googleDisconnected": "Google Calendar disconnected.",
+    "googleSyncSuccess": "Synced {{count}} date(s) from Google Calendar.",
+    "googleSyncError": "Failed to sync Google Calendar events."
   },
   "earnings": {
     "title": "Earnings Dashboard",

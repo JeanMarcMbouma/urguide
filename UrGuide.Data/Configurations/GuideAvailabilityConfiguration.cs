@@ -50,4 +50,31 @@ namespace UrGuide.Data.Configurations
             builder.HasIndex(p => p.GuideId).IsUnique(); // One active pattern per guide
         }
     }
+
+    public class GuideGoogleCalendarTokenConfiguration : IEntityTypeConfiguration<GuideGoogleCalendarToken>
+    {
+        public void Configure(EntityTypeBuilder<GuideGoogleCalendarToken> builder)
+        {
+            builder.ToTable("guide_google_calendar_tokens", Constants.Schema);
+
+            builder.HasKey(t => t.Id);
+            builder.Property(t => t.Id).HasMaxLength(50).IsRequired().HasDefaultValueSql(Constants.GuidFn);
+            builder.Property(t => t.GuideId).HasMaxLength(450).IsRequired();
+            builder.Property(t => t.EncryptedAccessToken).HasColumnType("nvarchar(max)").IsRequired();
+            builder.Property(t => t.EncryptedRefreshToken).HasColumnType("nvarchar(max)");
+            builder.Property(t => t.TokenType).HasMaxLength(50).IsRequired().HasDefaultValue("Bearer");
+            builder.Property(t => t.Scope).HasMaxLength(2000).IsRequired();
+            builder.Property(t => t.ExpiresAt).IsRequired();
+            builder.Property(t => t.CreatedAt).IsRequired();
+            builder.Property(t => t.UpdatedAt).IsRequired();
+
+            builder.HasOne(t => t.Guide)
+                .WithMany()
+                .HasForeignKey(t => t.GuideId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // One token record per guide
+            builder.HasIndex(t => t.GuideId).IsUnique();
+        }
+    }
 }

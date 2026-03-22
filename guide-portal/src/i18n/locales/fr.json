@@ -201,7 +201,12 @@
     "importResultInfo": "{{imported}} date(s) importée(s), {{skipped}} ignorée(s) (déjà bloquée(s)).",
     "googleError": "La connexion à Google Agenda a échoué. Veuillez réessayer.",
     "close": "Fermer",
-    "today": "Aujourd'hui"
+    "today": "Aujourd'hui",
+    "googleSyncNow": "Synchroniser maintenant",
+    "googleDisconnect": "Déconnecter Google",
+    "googleDisconnected": "Google Agenda déconnecté.",
+    "googleSyncSuccess": "{{count}} date(s) synchronisée(s) depuis Google Agenda.",
+    "googleSyncError": "Échec de la synchronisation des événements Google Agenda."
   },
   "earnings": {
     "title": "Tableau de bord des revenus",

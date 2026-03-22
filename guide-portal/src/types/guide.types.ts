@@ -223,6 +223,18 @@ export interface ConflictCheckResponse {
   conflictReason?: string;
 }
 
+export interface GoogleCalendarStatusResponse {
+  isConnected: boolean;
+  scope?: string;
+  expiresAt?: string;
+}
+
+export interface GoogleCalendarSyncResponse {
+  datesBlocked: number;
+  datesSkipped: number;
+  blockedDates: string[];
+}
+
 // Earnings types
 export interface EarningsSummary {
   totalEarnings: number;

@@ -1240,16 +1240,19 @@ Add calendar functionality for guides to manage availability and tourists to boo
 **Status:** ✅ **COMPLETED**  
 **Implementation Notes:**
 - `GET /api/availability` – Returns availability slots with timezone support
-- `POST /api/availability/block` – Block date ranges with optional timezone
+- `POST /api/availability/block` – Block date ranges
 - `DELETE /api/availability/block` – Unblock date ranges
 - `POST /api/availability/recurring` – Set weekly/monthly recurring unavailability patterns
 - `DELETE /api/availability/recurring` – Clear recurring pattern
 - `GET /api/availability/check` – Check booking conflict for a specific date
 - `GET /api/availability/export` – Export blocked dates as RFC 5545 iCal (.ics) file
 - `POST /api/availability/import` – Import blocked dates from an iCal (.ics) string
-- `GET /api/availability/google/auth-url` – Returns Google OAuth 2.0 authorisation URL
-- `GET /api/availability/google/callback` – Google OAuth callback handler
-- Guide Portal (`guide-portal`) Availability page updated with iCal export/import buttons and Google Calendar connect button
+- `GET /api/availability/google/auth-url` – Returns Google OAuth 2.0 authorisation URL; state token is CSRF-protected via ASP.NET Core Data Protection (expires in 10 min)
+- `GET /api/availability/google/callback` – Validates state, exchanges code for tokens, stores encrypted at rest; fully production-ready
+- `GET /api/availability/google/status` – Returns whether the guide has connected Google Calendar
+- `DELETE /api/availability/google` – Revokes tokens and removes the Google Calendar connection
+- `POST /api/availability/google/sync` – Fetches Google Calendar events and blocks matching dates; auto-refreshes expired access tokens using stored refresh token
+- Guide Portal Availability page: iCal export/import, Google Calendar connect/disconnect/sync buttons, browser-local timezone auto-detection
 
 ---
 

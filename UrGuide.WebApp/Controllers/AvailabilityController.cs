@@ -2,11 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -27,13 +31,27 @@ namespace UrGuide.WebApp.Controllers
         private readonly UrGuideContext _context;
         private readonly ILogger<AvailabilityController> _logger;
         private readonly IConfiguration _configuration;
+        private readonly IDataProtectionProvider _dataProtectionProvider;
+        private readonly IHttpClientFactory _httpClientFactory;
         private const string DateFormat = "yyyy-MM-dd";
+        private const string Rfc3339DateTimeFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+        private const int DefaultTokenExpirationSeconds = 3600;
+        private const string GoogleTokenEndpoint = "https://oauth2.googleapis.com/token";
+        private const string GoogleCalendarEventsEndpoint = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
+        private const string GoogleRevokeEndpoint = "https://oauth2.googleapis.com/revoke";
 
-        public AvailabilityController(UrGuideContext context, ILogger<AvailabilityController> logger, IConfiguration configuration)
+        public AvailabilityController(
+            UrGuideContext context,
+            ILogger<AvailabilityController> logger,
+            IConfiguration configuration,
+            IDataProtectionProvider dataProtectionProvider,
+            IHttpClientFactory httpClientFactory)
         {
             _context = context;
             _logger = logger;
             _configuration = configuration;
+            _dataProtectionProvider = dataProtectionProvider;
+            _httpClientFactory = httpClientFactory;
         }
 
         private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
@@ -452,7 +470,10 @@ namespace UrGuide.WebApp.Controllers
 
         /// <summary>
         /// Returns the Google OAuth 2.0 authorisation URL to start the Google Calendar
-        /// connection flow. Requires GoogleCalendar:ClientId to be configured.
+        /// connection flow. Requires GoogleCalendar:ClientId and GoogleCalendar:RedirectUri
+        /// to be configured.
+        /// A CSRF-safe state token is generated using ASP.NET Core Data Protection and
+        /// expires after 10 minutes.
         /// </summary>
         [HttpGet("google/auth-url")]
         public IActionResult GetGoogleAuthUrl()
@@ -461,34 +482,50 @@ namespace UrGuide.WebApp.Controllers
             if (string.IsNullOrEmpty(clientId))
                 return StatusCode(503, new { error = "Google Calendar integration is not configured." });
 
-            // RedirectUri must be explicitly configured to prevent Host-header injection attacks.
             var redirectUri = _configuration["GoogleCalendar:RedirectUri"];
             if (string.IsNullOrEmpty(redirectUri))
                 return StatusCode(503, new { error = "GoogleCalendar:RedirectUri is not configured." });
 
-            var scope = Uri.EscapeDataString("https://www.googleapis.com/auth/calendar");
-            var state = Uri.EscapeDataString(GetUserId());
+            var guideId = GetUserId();
+            if (string.IsNullOrEmpty(guideId)) return Unauthorized();
 
-            var authUrl = $"https://accounts.google.com/o/oauth2/v2/auth" +
+            // Generate a time-limited, data-protected state token encoding the user id.
+            // This prevents CSRF attacks and does not expose internal user identifiers.
+            var stateProtector = _dataProtectionProvider
+                .CreateProtector("UrGuide.GoogleCalendarOAuth.State")
+                .ToTimeLimitedDataProtector();
+
+            var statePayload = $"{guideId}:{Guid.NewGuid():N}";
+            var protectedState = stateProtector.Protect(statePayload, lifetime: TimeSpan.FromMinutes(10));
+
+            var scope = Uri.EscapeDataString(
+                "https://www.googleapis.com/auth/calendar " +
+                "https://www.googleapis.com/auth/calendar.events");
+
+            var authUrl = "https://accounts.google.com/o/oauth2/v2/auth" +
                           $"?client_id={Uri.EscapeDataString(clientId)}" +
                           $"&redirect_uri={Uri.EscapeDataString(redirectUri)}" +
-                          $"&response_type=code" +
+                          "&response_type=code" +
                           $"&scope={scope}" +
-                          $"&access_type=offline" +
-                          $"&state={state}";
+                          "&access_type=offline" +
+                          "&prompt=consent" +
+                          $"&state={Uri.EscapeDataString(protectedState)}";
 
             return Ok(new { authUrl });
         }
 
         /// <summary>
-        /// OAuth 2.0 callback handler for Google Calendar. Exchanges the authorisation
-        /// code for tokens. Requires GoogleCalendar:ClientId and GoogleCalendar:ClientSecret.
-        /// Note: Token exchange and secure per-user storage must be completed before
-        /// this integration is production-ready.
+        /// OAuth 2.0 callback handler for Google Calendar.
+        /// Validates the CSRF state token, exchanges the authorisation code for access/refresh
+        /// tokens, then stores the tokens encrypted at rest using ASP.NET Core Data Protection.
         /// </summary>
         [HttpGet("google/callback")]
         [AllowAnonymous]
-        public IActionResult GoogleCalendarCallback([FromQuery] string? code, [FromQuery] string? error, [FromQuery] string? state)
+        public async Task<IActionResult> GoogleCalendarCallback(
+            [FromQuery] string? code,
+            [FromQuery] string? error,
+            [FromQuery] string? state,
+            CancellationToken cancellationToken)
         {
             if (!string.IsNullOrEmpty(error))
                 return BadRequest(new { error = $"Google authorisation denied: {error}" });
@@ -496,24 +533,400 @@ namespace UrGuide.WebApp.Controllers
             if (string.IsNullOrEmpty(code))
                 return BadRequest(new { error = "Missing authorisation code." });
 
+            if (string.IsNullOrEmpty(state))
+                return BadRequest(new { error = "Missing state parameter." });
+
+            // ── Validate CSRF state ────────────────────────────────────────────
+            var stateProtector = _dataProtectionProvider
+                .CreateProtector("UrGuide.GoogleCalendarOAuth.State")
+                .ToTimeLimitedDataProtector();
+
+            string guideId;
+            try
+            {
+                var payload = stateProtector.Unprotect(state, out _);
+                // payload = "guideId:nonce"
+                guideId = payload.Split(':')[0];
+                if (string.IsNullOrEmpty(guideId))
+                    throw new InvalidOperationException("Empty guide id in state.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Invalid or expired Google Calendar OAuth state");
+                return BadRequest(new { error = "Invalid or expired state parameter. Please restart the connection flow." });
+            }
+
+            // ── Exchange authorisation code for tokens ─────────────────────────
             var clientId = _configuration["GoogleCalendar:ClientId"];
             var clientSecret = _configuration["GoogleCalendar:ClientSecret"];
-            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
+            var redirectUri = _configuration["GoogleCalendar:RedirectUri"];
+
+            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret) || string.IsNullOrEmpty(redirectUri))
                 return StatusCode(503, new { error = "Google Calendar integration is not configured." });
 
-            // TODO: Exchange 'code' for access/refresh tokens using the Google Token endpoint,
-            // then store tokens securely per user (e.g., encrypted in the database).
-            // This stub acknowledges the OAuth flow without completing the token exchange.
-            _logger.LogInformation("Google Calendar OAuth callback received for state {State}", state);
-
-            return Accepted(new
+            GoogleTokenResponse tokenResponse;
+            try
             {
-                message = "Authorisation code received. Complete server-side token exchange to finish Google Calendar integration.",
-                state,
-            });
+                var httpClient = _httpClientFactory.CreateClient();
+                var tokenRequest = new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["code"] = code,
+                    ["client_id"] = clientId,
+                    ["client_secret"] = clientSecret,
+                    ["redirect_uri"] = redirectUri,
+                    ["grant_type"] = "authorization_code",
+                });
+
+                var httpResponse = await httpClient.PostAsync(GoogleTokenEndpoint, tokenRequest, cancellationToken);
+                var responseContent = await httpResponse.Content.ReadAsStringAsync(cancellationToken);
+
+                tokenResponse = JsonSerializer.Deserialize<GoogleTokenResponse>(responseContent,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                    ?? throw new InvalidOperationException("Empty response from token endpoint.");
+
+                if (!string.IsNullOrEmpty(tokenResponse.Error))
+                {
+                    _logger.LogWarning("Google token exchange error: {Error} – {Desc}", tokenResponse.Error, tokenResponse.ErrorDescription);
+                    return BadRequest(new { error = $"Token exchange failed: {tokenResponse.Error}" });
+                }
+
+                if (string.IsNullOrEmpty(tokenResponse.AccessToken))
+                    throw new InvalidOperationException("No access token in response.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exchanging Google authorisation code");
+                return StatusCode(502, new { error = "Failed to exchange authorisation code with Google." });
+            }
+
+            // ── Store tokens encrypted at rest ─────────────────────────────────
+            var tokenProtector = _dataProtectionProvider.CreateProtector("UrGuide.GoogleCalendarOAuth.Tokens");
+            var encryptedAccess = tokenProtector.Protect(tokenResponse.AccessToken);
+            var encryptedRefresh = string.IsNullOrEmpty(tokenResponse.RefreshToken)
+                ? null
+                : tokenProtector.Protect(tokenResponse.RefreshToken);
+
+            var now = DateTime.UtcNow;
+            var existing = await _context.GuideGoogleCalendarTokens
+                .FirstOrDefaultAsync(t => t.GuideId == guideId, cancellationToken);
+
+            if (existing != null)
+            {
+                existing.EncryptedAccessToken = encryptedAccess;
+                if (encryptedRefresh != null) existing.EncryptedRefreshToken = encryptedRefresh;
+                existing.Scope = tokenResponse.Scope ?? string.Empty;
+                existing.TokenType = tokenResponse.TokenType ?? "Bearer";
+                existing.ExpiresAt = now.AddSeconds(tokenResponse.ExpiresIn > 0 ? tokenResponse.ExpiresIn : DefaultTokenExpirationSeconds);
+                existing.UpdatedAt = now;
+            }
+            else
+            {
+                await _context.GuideGoogleCalendarTokens.AddAsync(new GuideGoogleCalendarToken
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    GuideId = guideId,
+                    EncryptedAccessToken = encryptedAccess,
+                    EncryptedRefreshToken = encryptedRefresh,
+                    Scope = tokenResponse.Scope ?? string.Empty,
+                    TokenType = tokenResponse.TokenType ?? "Bearer",
+                    ExpiresAt = now.AddSeconds(tokenResponse.ExpiresIn > 0 ? tokenResponse.ExpiresIn : DefaultTokenExpirationSeconds),
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                }, cancellationToken);
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Google Calendar connected for guide {GuideId}", guideId);
+
+            return Ok(new { message = "Google Calendar connected successfully." });
+        }
+
+        /// <summary>
+        /// Returns whether the authenticated guide has connected Google Calendar.
+        /// </summary>
+        [HttpGet("google/status")]
+        public async Task<IActionResult> GetGoogleCalendarStatus(CancellationToken cancellationToken)
+        {
+            try
+            {
+                var guideId = GetUserId();
+                if (string.IsNullOrEmpty(guideId)) return Unauthorized();
+
+                var token = await _context.GuideGoogleCalendarTokens
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(t => t.GuideId == guideId, cancellationToken);
+
+                return Ok(new GoogleCalendarStatusResponse
+                {
+                    IsConnected = token != null,
+                    Scope = token?.Scope,
+                    ExpiresAt = token?.ExpiresAt.ToString("o"),
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting Google Calendar status");
+                return StatusCode(500, new { error = "An error occurred." });
+            }
+        }
+
+        /// <summary>
+        /// Disconnects Google Calendar by revoking the stored tokens and removing them
+        /// from the database.
+        /// </summary>
+        [HttpDelete("google")]
+        public async Task<IActionResult> DisconnectGoogleCalendar(CancellationToken cancellationToken)
+        {
+            try
+            {
+                var guideId = GetUserId();
+                if (string.IsNullOrEmpty(guideId)) return Unauthorized();
+
+                var token = await _context.GuideGoogleCalendarTokens
+                    .FirstOrDefaultAsync(t => t.GuideId == guideId, cancellationToken);
+
+                if (token == null)
+                    return Ok(new { message = "Google Calendar is not connected." });
+
+                // Attempt to revoke access at Google's side (best-effort)
+                try
+                {
+                    var tokenProtector = _dataProtectionProvider.CreateProtector("UrGuide.GoogleCalendarOAuth.Tokens");
+                    var accessToken = tokenProtector.Unprotect(token.EncryptedAccessToken);
+
+                    var httpClient = _httpClientFactory.CreateClient();
+                    await httpClient.PostAsync(
+                        $"{GoogleRevokeEndpoint}?token={Uri.EscapeDataString(accessToken)}",
+                        null,
+                        cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to revoke Google token for guide {GuideId} (proceeding with local removal)", guideId);
+                }
+
+                _context.GuideGoogleCalendarTokens.Remove(token);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                return Ok(new { message = "Google Calendar disconnected successfully." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error disconnecting Google Calendar");
+                return StatusCode(500, new { error = "An error occurred." });
+            }
+        }
+
+        /// <summary>
+        /// Fetches the guide's upcoming busy events from Google Calendar and blocks those
+        /// dates in UrGuide. Date range defaults to the next 30 days.
+        /// Automatically refreshes the access token using the stored refresh token if needed.
+        /// </summary>
+        [HttpPost("google/sync")]
+        public async Task<IActionResult> SyncGoogleCalendar(
+            [FromQuery] string? startDate,
+            [FromQuery] string? endDate,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var guideId = GetUserId();
+                if (string.IsNullOrEmpty(guideId)) return Unauthorized();
+
+                var tokenRecord = await _context.GuideGoogleCalendarTokens
+                    .FirstOrDefaultAsync(t => t.GuideId == guideId, cancellationToken);
+
+                if (tokenRecord == null)
+                    return BadRequest(new { error = "Google Calendar is not connected. Use /api/availability/google/auth-url first." });
+
+                var tokenProtector = _dataProtectionProvider.CreateProtector("UrGuide.GoogleCalendarOAuth.Tokens");
+                var accessToken = tokenProtector.Unprotect(tokenRecord.EncryptedAccessToken);
+
+                // Refresh the access token if it has expired or will expire in the next minute
+                if (tokenRecord.ExpiresAt <= DateTime.UtcNow.AddMinutes(1))
+                {
+                    if (string.IsNullOrEmpty(tokenRecord.EncryptedRefreshToken))
+                        return BadRequest(new { error = "Access token has expired and no refresh token is available. Please reconnect Google Calendar." });
+
+                    var refreshToken = tokenProtector.Unprotect(tokenRecord.EncryptedRefreshToken);
+                    var newTokens = await RefreshAccessTokenAsync(refreshToken, cancellationToken);
+
+                    if (newTokens == null)
+                        return StatusCode(502, new { error = "Failed to refresh Google access token. Please reconnect Google Calendar." });
+
+                    accessToken = newTokens.AccessToken;
+                    tokenRecord.EncryptedAccessToken = tokenProtector.Protect(newTokens.AccessToken);
+                    if (!string.IsNullOrEmpty(newTokens.RefreshToken))
+                        tokenRecord.EncryptedRefreshToken = tokenProtector.Protect(newTokens.RefreshToken);
+                    tokenRecord.ExpiresAt = DateTime.UtcNow.AddSeconds(newTokens.ExpiresIn > 0 ? newTokens.ExpiresIn : DefaultTokenExpirationSeconds);
+                    tokenRecord.UpdatedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+
+                var rangeStart = DateTime.UtcNow.Date;
+                var rangeEnd = rangeStart.AddDays(30);
+
+                if (!string.IsNullOrEmpty(startDate) &&
+                    DateTime.TryParseExact(startDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var ps))
+                    rangeStart = ps;
+
+                if (!string.IsNullOrEmpty(endDate) &&
+                    DateTime.TryParseExact(endDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var pe))
+                    rangeEnd = pe;
+
+                // Fetch events from Google Calendar API
+                var timeMin = Uri.EscapeDataString(rangeStart.ToString(Rfc3339DateTimeFormat));
+                var timeMax = Uri.EscapeDataString(rangeEnd.AddDays(1).ToString(Rfc3339DateTimeFormat));
+                var eventsUrl = $"{GoogleCalendarEventsEndpoint}?timeMin={timeMin}&timeMax={timeMax}&singleEvents=true&orderBy=startTime";
+
+                var httpClient = _httpClientFactory.CreateClient();
+                httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var eventsResponse = await httpClient.GetAsync(eventsUrl, cancellationToken);
+                var eventsContent = await eventsResponse.Content.ReadAsStringAsync(cancellationToken);
+
+                if (!eventsResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("Google Calendar events API returned {Status}: {Content}", eventsResponse.StatusCode, eventsContent);
+                    return StatusCode(502, new { error = "Failed to retrieve events from Google Calendar." });
+                }
+
+                var eventList = JsonSerializer.Deserialize<GoogleCalendarEventList>(eventsContent,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (eventList?.Error != null)
+                    return StatusCode(502, new { error = $"Google Calendar API error: {eventList.Error.Message}" });
+
+                var datesToBlock = new HashSet<DateTime>();
+                foreach (var evt in eventList?.Items ?? new List<GoogleCalendarEvent>())
+                {
+                    if (evt.Status == "cancelled") continue;
+
+                    var evtStart = ParseGoogleEventDate(evt.Start);
+                    var evtEnd = ParseGoogleEventDate(evt.End);
+                    if (evtStart == null) continue;
+                    var evtEndDate = evtEnd ?? evtStart.Value.AddDays(1);
+
+                    for (var d = evtStart.Value.Date; d < evtEndDate.Date; d = d.AddDays(1))
+                    {
+                        datesToBlock.Add(d);
+                    }
+                }
+
+                if (datesToBlock.Count == 0)
+                    return Ok(new GoogleCalendarSyncResponse());
+
+                var existingDatesList = await _context.GuideBlockedDates
+                    .Where(d => d.GuideId == guideId && d.Date >= rangeStart && d.Date <= rangeEnd)
+                    .Select(d => d.Date)
+                    .ToListAsync(cancellationToken);
+
+                var existingDates = new HashSet<DateTime>(existingDatesList);
+                var now = DateTime.UtcNow;
+                var toAdd = new List<GuideBlockedDate>();
+                var blockedDateStrings = new List<string>();
+
+                foreach (var date in datesToBlock.OrderBy(d => d))
+                {
+                    if (!existingDates.Contains(date))
+                    {
+                        toAdd.Add(new GuideBlockedDate
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            GuideId = guideId,
+                            Date = date,
+                            Reason = "Synced from Google Calendar",
+                            CreatedAt = now,
+                        });
+                        blockedDateStrings.Add(date.ToString(DateFormat));
+                        existingDates.Add(date);
+                    }
+                }
+
+                if (toAdd.Count > 0)
+                {
+                    await _context.GuideBlockedDates.AddRangeAsync(toAdd, cancellationToken);
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+
+                return Ok(new GoogleCalendarSyncResponse
+                {
+                    DatesBlocked = toAdd.Count,
+                    DatesSkipped = datesToBlock.Count - toAdd.Count,
+                    BlockedDates = blockedDateStrings,
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error syncing Google Calendar");
+                return StatusCode(500, new { error = "An error occurred while syncing the calendar." });
+            }
         }
 
         // ── Helpers ────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Uses the stored refresh token to obtain a new access token from Google.
+        /// Returns null if the refresh fails.
+        /// </summary>
+        private async Task<GoogleTokenResponse?> RefreshAccessTokenAsync(string refreshToken, CancellationToken cancellationToken)
+        {
+            var clientId = _configuration["GoogleCalendar:ClientId"];
+            var clientSecret = _configuration["GoogleCalendar:ClientSecret"];
+            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
+                return null;
+
+            try
+            {
+                var httpClient = _httpClientFactory.CreateClient();
+                var request = new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["refresh_token"] = refreshToken,
+                    ["client_id"] = clientId,
+                    ["client_secret"] = clientSecret,
+                    ["grant_type"] = "refresh_token",
+                });
+
+                var response = await httpClient.PostAsync(GoogleTokenEndpoint, request, cancellationToken);
+                var content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                var tokenResponse = JsonSerializer.Deserialize<GoogleTokenResponse>(content,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (tokenResponse == null || !string.IsNullOrEmpty(tokenResponse.Error)
+                    || string.IsNullOrEmpty(tokenResponse.AccessToken))
+                {
+                    _logger.LogWarning("Google token refresh failed: {Error}", tokenResponse?.Error);
+                    return null;
+                }
+
+                return tokenResponse;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception during Google token refresh");
+                return null;
+            }
+        }
+
+        /// <summary>Parses a Google Calendar event date/time to a UTC DateTime.</summary>
+        private static DateTime? ParseGoogleEventDate(GoogleEventDateTime? dt)
+        {
+            if (dt == null) return null;
+
+            // All-day event
+            if (!string.IsNullOrEmpty(dt.Date) &&
+                DateTime.TryParseExact(dt.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var allDay))
+                return allDay;
+
+            // Timed event (RFC 3339)
+            if (!string.IsNullOrEmpty(dt.DateTime) &&
+                DateTimeOffset.TryParse(dt.DateTime, CultureInfo.InvariantCulture, DateTimeStyles.None, out var timed))
+                return timed.UtcDateTime;
+
+            return null;
+        }
 
         private static TimeZoneInfo ResolveTimezone(string? ianaOrWindowsId)
         {

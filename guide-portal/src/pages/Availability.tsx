@@ -29,10 +29,18 @@ import {
   FileUpload as FileUploadIcon,
   Google as GoogleIcon,
   AccessTime as AccessTimeIcon,
+  Sync as SyncIcon,
+  LinkOff as LinkOffIcon,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { guideApi } from '../services/guideApi';
-import type { AvailabilitySlot, BlockDatesRequest, RecurringPattern, ICalImportResponse } from '../types/guide.types';
+import type {
+  AvailabilitySlot,
+  BlockDatesRequest,
+  RecurringPattern,
+  ICalImportResponse,
+  GoogleCalendarStatusResponse,
+} from '../types/guide.types';
 
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -46,7 +54,17 @@ const Availability = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [alert, setAlert] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
-  const [timezone, setTimezone] = useState('UTC');
+
+  // Initialise timezone from the browser's local timezone
+  const [timezone, setTimezone] = useState<string>(() => {
+    const resolved = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return resolved || 'UTC';
+  });
+
+  // Google Calendar state
+  const [googleStatus, setGoogleStatus] = useState<GoogleCalendarStatusResponse | null>(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [syncLoading, setSyncLoading] = useState(false);
 
   const [blockOpen, setBlockOpen] = useState(false);
   const [recurringOpen, setRecurringOpen] = useState(false);
@@ -54,7 +72,6 @@ const Availability = () => {
   const [importResult, setImportResult] = useState<ICalImportResponse | null>(null);
   const [importReason, setImportReason] = useState('');
   const [importLoading, setImportLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [blockForm, setBlockForm] = useState<BlockDatesRequest>({ startDate: '', endDate: '', reason: '' });
@@ -96,9 +113,22 @@ const Availability = () => {
     }
   }, [getStartEnd, t, timezone]);
 
+  const loadGoogleStatus = useCallback(async () => {
+    try {
+      const status = await guideApi.getGoogleCalendarStatus();
+      setGoogleStatus(status);
+    } catch {
+      // non-fatal: Google Calendar may not be configured
+    }
+  }, []);
+
   useEffect(() => {
     loadAvailability();
   }, [loadAvailability]);
+
+  useEffect(() => {
+    loadGoogleStatus();
+  }, [loadGoogleStatus]);
 
   const handleBlock = async () => {
     try {
@@ -179,7 +209,6 @@ const Availability = () => {
       showAlert('error', t('availability.importError'));
     } finally {
       setImportLoading(false);
-      // Reset file input so the same file can be re-selected
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -192,8 +221,34 @@ const Availability = () => {
       window.location.href = authUrl;
     } catch {
       showAlert('error', t('availability.googleError'));
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleDisconnect = async () => {
+    setGoogleLoading(true);
+    try {
+      await guideApi.disconnectGoogleCalendar();
+      setGoogleStatus({ isConnected: false });
+      showAlert('success', t('availability.googleDisconnected'));
+    } catch {
+      showAlert('error', t('availability.googleError'));
     } finally {
       setGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleSync = async () => {
+    setSyncLoading(true);
+    try {
+      const { start, end } = getStartEnd();
+      const result = await guideApi.syncGoogleCalendar(start, end);
+      await loadAvailability();
+      showAlert('success', t('availability.googleSyncSuccess', { count: result.datesBlocked }));
+    } catch {
+      showAlert('error', t('availability.googleSyncError'));
+    } finally {
+      setSyncLoading(false);
     }
   };
 
@@ -246,15 +301,40 @@ const Availability = () => {
           <Button variant="outlined" startIcon={<FileUploadIcon />} onClick={() => setImportOpen(true)}>
             {t('availability.importIcal')}
           </Button>
-          <Button
-            variant="outlined"
-            startIcon={googleLoading ? <CircularProgress size={16} /> : <GoogleIcon />}
-            onClick={handleGoogleConnect}
-            disabled={googleLoading}
-            color="secondary"
-          >
-            {t('availability.googleSync')}
-          </Button>
+
+          {/* Google Calendar – show Connect or Sync + Disconnect */}
+          {googleStatus?.isConnected ? (
+            <>
+              <Button
+                variant="outlined"
+                color="success"
+                startIcon={syncLoading ? <CircularProgress size={16} /> : <SyncIcon />}
+                onClick={handleGoogleSync}
+                disabled={syncLoading}
+              >
+                {t('availability.googleSyncNow')}
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={googleLoading ? <CircularProgress size={16} /> : <LinkOffIcon />}
+                onClick={handleGoogleDisconnect}
+                disabled={googleLoading}
+              >
+                {t('availability.googleDisconnect')}
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="outlined"
+              startIcon={googleLoading ? <CircularProgress size={16} /> : <GoogleIcon />}
+              onClick={handleGoogleConnect}
+              disabled={googleLoading}
+              color="secondary"
+            >
+              {t('availability.googleSync')}
+            </Button>
+          )}
         </Box>
       </Box>
 
@@ -263,7 +343,6 @@ const Availability = () => {
 
       {/* Calendar */}
       <Paper elevation={2} sx={{ p: 3 }}>
-        {/* Month navigation */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Button onClick={prevMonth} startIcon={<ChevronLeftIcon />} />
           <Typography variant="h6">{monthName}</Typography>
@@ -277,7 +356,6 @@ const Availability = () => {
           </Box>
         ) : (
           <>
-            {/* Day headers */}
             <Grid container columns={7} sx={{ mb: 1 }}>
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
                 <Grid item key={d} sx={{ textAlign: 'center', fontWeight: 'bold', py: 1 }}>
@@ -286,7 +364,6 @@ const Availability = () => {
               ))}
             </Grid>
 
-            {/* Calendar cells */}
             <Grid container columns={7}>
               {calendarCells.map((day, idx) => {
                 if (!day) return <Grid item key={`empty-${idx}`} />;
@@ -323,7 +400,6 @@ const Availability = () => {
               })}
             </Grid>
 
-            {/* Legend */}
             <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <Box sx={{ width: 16, height: 16, bgcolor: 'grey.100', borderRadius: 0.5 }} />

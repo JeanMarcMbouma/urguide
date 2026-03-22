@@ -201,7 +201,12 @@
     "importResultInfo": "تم استيراد {{imported}} تاريخ/تواريخ، تم تخطي {{skipped}} (محجوبة بالفعل).",
     "googleError": "فشل الاتصال بتقويم Google. يرجى المحاولة مرة أخرى.",
     "close": "إغلاق",
-    "today": "اليوم"
+    "today": "اليوم",
+    "googleSyncNow": "مزامنة الآن",
+    "googleDisconnect": "قطع الاتصال بـ Google",
+    "googleDisconnected": "تم قطع الاتصال بتقويم Google.",
+    "googleSyncSuccess": "تمت مزامنة {{count}} تاريخ/تواريخ من تقويم Google.",
+    "googleSyncError": "فشل مزامنة أحداث تقويم Google."
   },
   "earnings": {
     "title": "لوحة تحكم الأرباح",

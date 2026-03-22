@@ -201,7 +201,12 @@
     "importResultInfo": "{{imported}} fecha(s) importada(s), {{skipped}} omitida(s) (ya bloqueada(s)).",
     "googleError": "La conexión con Google Calendar falló. Por favor, inténtalo de nuevo.",
     "close": "Cerrar",
-    "today": "Hoy"
+    "today": "Hoy",
+    "googleSyncNow": "Sincronizar ahora",
+    "googleDisconnect": "Desconectar Google",
+    "googleDisconnected": "Google Calendar desconectado.",
+    "googleSyncSuccess": "{{count}} fecha(s) sincronizada(s) desde Google Calendar.",
+    "googleSyncError": "Error al sincronizar los eventos de Google Calendar."
   },
   "earnings": {
     "title": "Panel de ganancias",

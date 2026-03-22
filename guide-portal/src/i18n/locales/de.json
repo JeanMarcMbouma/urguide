@@ -201,7 +201,12 @@
     "importResultInfo": "{{imported}} Datum/Daten importiert, {{skipped}} übersprungen (bereits gesperrt).",
     "googleError": "Google Kalender-Verbindung fehlgeschlagen. Bitte erneut versuchen.",
     "close": "Schließen",
-    "today": "Heute"
+    "today": "Heute",
+    "googleSyncNow": "Jetzt synchronisieren",
+    "googleDisconnect": "Google trennen",
+    "googleDisconnected": "Google Kalender getrennt.",
+    "googleSyncSuccess": "{{count}} Datum/Daten aus Google Kalender synchronisiert.",
+    "googleSyncError": "Synchronisierung der Google Kalender-Ereignisse fehlgeschlagen."
   },
   "earnings": {
     "title": "Einnahmen-Dashboard",
