@@ -12,6 +12,7 @@ using UrGuide.Data.Entities.Tour;
 using UrGuide.Data.Entities.Users;
 using UrGuide.Data.Entities.Media;
 using UrGuide.Data.Entities.Webhooks;
+using UrGuide.Data.Entities.Disputes;
 
 namespace UrGuide.Data
 {
@@ -71,6 +72,11 @@ namespace UrGuide.Data
 
         // Image processing entities
         public virtual DbSet<ProcessedImage> ProcessedImages { get; set; }
+
+        // Dispute entities
+        public virtual DbSet<Dispute> Disputes { get; set; }
+        public virtual DbSet<DisputeEvidence> DisputeEvidence { get; set; }
+        public virtual DbSet<DisputeMessage> DisputeMessages { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
@@ -145,6 +151,11 @@ namespace UrGuide.Data
 
             // Image processing configurations
             modelBuilder.ApplyConfiguration(new Configurations.ProcessedImageConfiguration());
+
+            // Dispute configurations
+            modelBuilder.ApplyConfiguration(new Configurations.DisputeConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.DisputeEvidenceConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.DisputeMessageConfiguration());
         }
     }
 }

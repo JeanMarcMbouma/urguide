@@ -68,6 +68,9 @@ namespace UrGuide.Services.Extensions
             // Image processing services
             services.AddTransient<IImageProcessingService, ImageProcessingService>();
 
+            // Dispute services
+            services.AddTransient<Disputes.IDisputeService, Disputes.DisputeService>();
+
             // Elasticsearch
             var elasticsearchUrl = configuration["Elasticsearch:Url"] ?? "http://localhost:9200";
             var elasticsearchUsername = configuration["Elasticsearch:Username"];
