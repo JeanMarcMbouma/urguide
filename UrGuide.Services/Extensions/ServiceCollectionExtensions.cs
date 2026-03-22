@@ -74,6 +74,9 @@ namespace UrGuide.Services.Extensions
             // Recommendation services
             services.AddTransient<Recommendations.IRecommendationService, Recommendations.RecommendationService>();
 
+            // Reporting services
+            services.AddTransient<Reports.IReportingService, Reports.ReportingService>();
+
             // Elasticsearch
             var elasticsearchUrl = configuration["Elasticsearch:Url"] ?? "http://localhost:9200";
             var elasticsearchUsername = configuration["Elasticsearch:Username"];

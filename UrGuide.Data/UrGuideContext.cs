@@ -14,6 +14,7 @@ using UrGuide.Data.Entities.Media;
 using UrGuide.Data.Entities.Webhooks;
 using UrGuide.Data.Entities.Disputes;
 using UrGuide.Data.Entities.Recommendations;
+using UrGuide.Data.Entities.Reports;
 
 namespace UrGuide.Data
 {
@@ -83,6 +84,10 @@ namespace UrGuide.Data
         public virtual DbSet<UserPreference> UserPreferences { get; set; }
         public virtual DbSet<TourInteraction> TourInteractions { get; set; }
         public virtual DbSet<RecommendationLog> RecommendationLogs { get; set; }
+
+        // Report entities
+        public virtual DbSet<ReportDefinition> ReportDefinitions { get; set; }
+        public virtual DbSet<ScheduledReport> ScheduledReports { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
@@ -167,6 +172,10 @@ namespace UrGuide.Data
             modelBuilder.ApplyConfiguration(new Configurations.UserPreferenceConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.TourInteractionConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.RecommendationLogConfiguration());
+
+            // Report configurations
+            modelBuilder.ApplyConfiguration(new Configurations.ReportDefinitionConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.ScheduledReportConfiguration());
         }
     }
 }
