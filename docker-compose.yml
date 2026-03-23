@@ -154,6 +154,27 @@ services:
       start_period: 10s
     restart: unless-stopped
 
+  # Tourist Website
+  tourist-website:
+    build:
+      context: ./tourist-website
+      dockerfile: Dockerfile
+    container_name: urguide-tourist-website
+    ports:
+      - "3003:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - urguide-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
 volumes:
   sqlserver-data:
     driver: local
