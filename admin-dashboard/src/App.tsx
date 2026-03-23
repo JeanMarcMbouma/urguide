@@ -13,6 +13,7 @@ import TourModeration from './pages/TourModeration';
 import TourModerationDetail from './pages/TourModerationDetail';
 import FinancialDashboard from './pages/FinancialDashboard';
 import SystemMonitoring from './pages/SystemMonitoring';
+import TranslationManagement from './pages/TranslationManagement';
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -57,6 +58,7 @@ function App() {
         <Route path="tours/:postId/moderation" element={<TourModerationDetail />} />
         <Route path="financial" element={<FinancialDashboard />} />
         <Route path="system" element={<SystemMonitoring />} />
+        <Route path="translations" element={<TranslationManagement />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

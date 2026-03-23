@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- General errors -->
+  <data name="Error_NotFound" xml:space="preserve">
+    <value>المورد غير موجود.</value>
+  </data>
+  <data name="Error_Unauthorized" xml:space="preserve">
+    <value>غير مصرح لك بتنفيذ هذا الإجراء.</value>
+  </data>
+  <data name="Error_Forbidden" xml:space="preserve">
+    <value>تم رفض الوصول.</value>
+  </data>
+  <data name="Error_BadRequest" xml:space="preserve">
+    <value>الطلب غير صالح.</value>
+  </data>
+  <data name="Error_InternalServer" xml:space="preserve">
+    <value>حدث خطأ غير متوقع.</value>
+  </data>
+  <data name="Error_ValidationFailed" xml:space="preserve">
+    <value>فشل التحقق من الصحة. يرجى التحقق من البيانات المقدمة.</value>
+  </data>
+  <data name="Error_Conflict" xml:space="preserve">
+    <value>حدث تعارض مع الحالة الحالية للمورد.</value>
+  </data>
+
+  <!-- Authentication errors -->
+  <data name="Auth_InvalidCredentials" xml:space="preserve">
+    <value>البريد الإلكتروني أو كلمة المرور غير صحيحة.</value>
+  </data>
+  <data name="Auth_AccountLocked" xml:space="preserve">
+    <value>تم قفل حسابك. يرجى التواصل مع الدعم.</value>
+  </data>
+  <data name="Auth_EmailNotConfirmed" xml:space="preserve">
+    <value>يرجى تأكيد عنوان بريدك الإلكتروني قبل تسجيل الدخول.</value>
+  </data>
+  <data name="Auth_TokenExpired" xml:space="preserve">
+    <value>انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى.</value>
+  </data>
+  <data name="Auth_TokenInvalid" xml:space="preserve">
+    <value>الرمز المقدم غير صالح أو منتهي الصلاحية.</value>
+  </data>
+  <data name="Auth_PasswordMismatch" xml:space="preserve">
+    <value>كلمات المرور غير متطابقة.</value>
+  </data>
+  <data name="Auth_EmailAlreadyRegistered" xml:space="preserve">
+    <value>يوجد حساب بهذا البريد الإلكتروني بالفعل.</value>
+  </data>
+  <data name="Auth_TwoFactorRequired" xml:space="preserve">
+    <value>المصادقة الثنائية مطلوبة.</value>
+  </data>
+  <data name="Auth_TwoFactorInvalid" xml:space="preserve">
+    <value>رمز المصادقة الثنائية غير صالح.</value>
+  </data>
+
+  <!-- User errors -->
+  <data name="User_NotFound" xml:space="preserve">
+    <value>المستخدم غير موجود.</value>
+  </data>
+  <data name="User_ProfileUpdateFailed" xml:space="preserve">
+    <value>فشل تحديث ملف تعريف المستخدم.</value>
+  </data>
+  <data name="User_PasswordChangeFailed" xml:space="preserve">
+    <value>فشل تغيير كلمة المرور.</value>
+  </data>
+
+  <!-- Tour errors -->
+  <data name="Tour_NotFound" xml:space="preserve">
+    <value>طلب الجولة غير موجود.</value>
+  </data>
+  <data name="Tour_AlreadyBooked" xml:space="preserve">
+    <value>تم حجز هذه الجولة بالفعل.</value>
+  </data>
+  <data name="Tour_Expired" xml:space="preserve">
+    <value>انتهت صلاحية طلب الجولة هذا.</value>
+  </data>
+  <data name="Tour_CapacityExceeded" xml:space="preserve">
+    <value>تم تجاوز طاقة الجولة.</value>
+  </data>
+
+  <!-- Bid errors -->
+  <data name="Bid_NotFound" xml:space="preserve">
+    <value>العرض غير موجود.</value>
+  </data>
+  <data name="Bid_AlreadyPlaced" xml:space="preserve">
+    <value>لقد قدمت عرضاً بالفعل لهذا الطلب.</value>
+  </data>
+  <data name="Bid_CannotWithdraw" xml:space="preserve">
+    <value>لا يمكن سحب هذا العرض في حالته الحالية.</value>
+  </data>
+
+  <!-- Payment errors -->
+  <data name="Payment_Failed" xml:space="preserve">
+    <value>فشلت معالجة الدفع. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="Payment_NotFound" xml:space="preserve">
+    <value>الدفعة غير موجودة.</value>
+  </data>
+  <data name="Payment_AlreadyProcessed" xml:space="preserve">
+    <value>تمت معالجة هذه الدفعة بالفعل.</value>
+  </data>
+  <data name="Payment_InsufficientFunds" xml:space="preserve">
+    <value>رصيد غير كافٍ لهذه المعاملة.</value>
+  </data>
+  <data name="Payout_RequestFailed" xml:space="preserve">
+    <value>فشل طلب الدفع. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="Refund_Failed" xml:space="preserve">
+    <value>فشلت معالجة الاسترداد. يرجى المحاولة مرة أخرى.</value>
+  </data>
+
+  <!-- Review errors -->
+  <data name="Review_NotFound" xml:space="preserve">
+    <value>التقييم غير موجود.</value>
+  </data>
+  <data name="Review_AlreadySubmitted" xml:space="preserve">
+    <value>لقد قدمت تقييماً بالفعل لهذه الجولة.</value>
+  </data>
+
+  <!-- File/Upload errors -->
+  <data name="File_UploadFailed" xml:space="preserve">
+    <value>فشل رفع الملف. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="File_InvalidFormat" xml:space="preserve">
+    <value>صيغة الملف غير صالحة. يرجى رفع نوع ملف مدعوم.</value>
+  </data>
+  <data name="File_TooLarge" xml:space="preserve">
+    <value>الملف كبير جداً. الحجم الأقصى المسموح به هو {0} ميجابايت.</value>
+  </data>
+
+  <!-- Email template errors -->
+  <data name="EmailTemplate_NotFound" xml:space="preserve">
+    <value>قالب البريد الإلكتروني غير موجود.</value>
+  </data>
+  <data name="EmailTemplate_RenderFailed" xml:space="preserve">
+    <value>فشل عرض قالب البريد الإلكتروني.</value>
+  </data>
+
+  <!-- Success messages -->
+  <data name="Success_ProfileUpdated" xml:space="preserve">
+    <value>تم تحديث الملف الشخصي بنجاح.</value>
+  </data>
+  <data name="Success_PasswordChanged" xml:space="preserve">
+    <value>تم تغيير كلمة المرور بنجاح.</value>
+  </data>
+  <data name="Success_EmailSent" xml:space="preserve">
+    <value>تم إرسال البريد الإلكتروني بنجاح.</value>
+  </data>
+  <data name="Success_BidPlaced" xml:space="preserve">
+    <value>تم تقديم العرض بنجاح.</value>
+  </data>
+  <data name="Success_BidWithdrawn" xml:space="preserve">
+    <value>تم سحب العرض بنجاح.</value>
+  </data>
+</root>

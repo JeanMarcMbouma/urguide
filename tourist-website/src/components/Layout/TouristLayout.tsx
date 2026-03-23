@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -17,6 +17,8 @@ import {
   Menu,
   MenuItem,
   Badge,
+  Select,
+  FormControl,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -33,16 +35,40 @@ import {
   Message as MessageIcon,
   ExitToApp as LogoutIcon,
   AccountCircle,
+  Language as LanguageIcon,
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n';
 import { useAuth } from '../../hooks/useAuth';
 
 const drawerWidth = 240;
 
+const LANGUAGES: { code: string; label: string }[] = [
+  { code: 'en', label: 'English' },
+  { code: 'fr', label: 'Français' },
+  { code: 'es', label: 'Español' },
+  { code: 'de', label: 'Deutsch' },
+  { code: 'ar', label: 'العربية' },
+];
+
 const TouristLayout = () => {
+  const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [currentLang, setCurrentLang] = useState(i18n.language?.split('-')[0] ?? 'en');
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  // Sync direction for RTL languages
+  useEffect(() => {
+    document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = currentLang;
+  }, [currentLang]);
+
+  const handleLanguageChange = (lang: string) => {
+    i18n.changeLanguage(lang);
+    setCurrentLang(lang);
+  };
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
@@ -57,33 +83,33 @@ const TouristLayout = () => {
   };
 
   const menuItems = [
-    { text: 'Home', icon: <HomeIcon />, path: '/home' },
-    { text: 'Find Guides', icon: <SearchIcon />, path: '/search' },
-    { text: 'Create Tour Request', icon: <ExploreIcon />, path: '/tours/create' },
-    { text: 'My Tour Requests', icon: <ListAltIcon />, path: '/tours/my' },
-    { text: 'My Bookings', icon: <EventAvailableIcon />, path: '/bookings' },
-    { text: 'Payment History', icon: <PaymentIcon />, path: '/payment/history' },
-    { text: 'My Reviews', icon: <RateReviewIcon />, path: '/reviews' },
-    { text: 'Messages', icon: <MessageIcon />, path: '/messages' },
-    { text: 'Notifications', icon: <NotificationsIcon />, path: '/notifications' },
-    { text: 'Profile', icon: <PersonIcon />, path: '/profile' },
-    { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
+    { textKey: 'nav.home', icon: <HomeIcon />, path: '/home' },
+    { textKey: 'nav.findGuides', icon: <SearchIcon />, path: '/search' },
+    { textKey: 'nav.createTourRequest', icon: <ExploreIcon />, path: '/tours/create' },
+    { textKey: 'nav.myTourRequests', icon: <ListAltIcon />, path: '/tours/my' },
+    { textKey: 'nav.myBookings', icon: <EventAvailableIcon />, path: '/bookings' },
+    { textKey: 'nav.paymentHistory', icon: <PaymentIcon />, path: '/payment/history' },
+    { textKey: 'nav.myReviews', icon: <RateReviewIcon />, path: '/reviews' },
+    { textKey: 'nav.messages', icon: <MessageIcon />, path: '/messages' },
+    { textKey: 'nav.notifications', icon: <NotificationsIcon />, path: '/notifications' },
+    { textKey: 'nav.profile', icon: <PersonIcon />, path: '/profile' },
+    { textKey: 'nav.settings', icon: <SettingsIcon />, path: '/settings' },
   ];
 
   const drawer = (
     <div>
       <Toolbar>
         <Typography variant="h6" noWrap component="div">
-          UrGuide
+          {t('layout.title')}
         </Typography>
       </Toolbar>
       <Divider />
       <List>
         {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
+          <ListItem key={item.textKey} disablePadding>
             <ListItemButton onClick={() => navigate(item.path)}>
               <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+              <ListItemText primary={t(item.textKey as Parameters<typeof t>[0])} />
             </ListItemButton>
           </ListItem>
         ))}
@@ -111,8 +137,25 @@ const TouristLayout = () => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Tourist Dashboard
+            {t('layout.dashboardTitle')}
           </Typography>
+
+          {/* Language Switcher */}
+          <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
+            <LanguageIcon sx={{ mr: 0.5, opacity: 0.85 }} fontSize="small" />
+            <FormControl size="small" variant="standard">
+              <Select
+                value={currentLang}
+                onChange={(e) => handleLanguageChange(e.target.value)}
+                disableUnderline
+                sx={{ color: 'inherit', '& .MuiSelect-icon': { color: 'inherit' }, fontSize: 14 }}
+              >
+                {LANGUAGES.map((l) => (
+                  <MenuItem key={l.code} value={l.code}>{l.label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
 
           <IconButton color="inherit" onClick={() => navigate('/notifications')}>
             <Badge color="error" variant="dot">
@@ -137,16 +180,16 @@ const TouristLayout = () => {
             <Divider />
             <MenuItem onClick={() => { handleMenuClose(); navigate('/profile'); }}>
               <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
-              Profile
+              {t('nav.profile')}
             </MenuItem>
             <MenuItem onClick={() => { handleMenuClose(); navigate('/settings'); }}>
               <ListItemIcon><SettingsIcon fontSize="small" /></ListItemIcon>
-              Settings
+              {t('nav.settings')}
             </MenuItem>
             <Divider />
             <MenuItem onClick={handleLogout}>
               <ListItemIcon><LogoutIcon fontSize="small" /></ListItemIcon>
-              Logout
+              {t('nav.logout')}
             </MenuItem>
           </Menu>
         </Toolbar>

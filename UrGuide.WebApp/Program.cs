@@ -23,6 +23,7 @@ using Asp.Versioning;
 using System.Linq;
 using UrGuide.ServiceDefaults;
 using UrGuide.WebApp.MessageQueue;
+using System.Globalization;
 
 var logger = LogManager.Setup().LoadConfigurationFromFile("nlog.config").GetCurrentClassLogger();
 try
@@ -43,6 +44,9 @@ try
     // Add services to the container.
     builder.Services.AddUrGuideAuthServices(builder.Configuration);
     builder.Services.AddUrGuideServices(builder.Configuration);
+
+    // Add localization with resource files path
+    builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
     // Add HttpClient for calling IdentityServer token endpoint
     builder.Services.AddHttpClient();
@@ -226,6 +230,21 @@ try
 
     app.UseForwardedHeaders(new ForwardedHeadersOptions { 
         ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
+    });
+
+    // Add request localization middleware (Accept-Language header support)
+    var supportedCultures = new[] { "en", "fr", "es", "de", "ar" }
+        .Select(c => new CultureInfo(c))
+        .ToList();
+    app.UseRequestLocalization(new RequestLocalizationOptions
+    {
+        DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en"),
+        SupportedCultures = supportedCultures,
+        SupportedUICultures = supportedCultures,
+        RequestCultureProviders = new List<Microsoft.AspNetCore.Localization.IRequestCultureProvider>
+        {
+            new Microsoft.AspNetCore.Localization.AcceptLanguageHeaderRequestCultureProvider()
+        }
     });
 
     // Add CORS middleware
