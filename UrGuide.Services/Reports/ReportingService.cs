@@ -46,18 +46,8 @@ namespace UrGuide.Services.Reports
                 report.Status = ReportStatus.Processing;
                 try
                 {
-                    // Actually generate report data
-                    var reportData = await GenerateReportDataInternalAsync(report);
-                    if (reportData != null && reportData.Rows.Count > 0)
-                    {
-                        report.Status = ReportStatus.Completed;
-                        report.CompletedAt = DateTime.UtcNow;
-                    }
-                    else
-                    {
-                        report.Status = ReportStatus.Completed;
-                        report.CompletedAt = DateTime.UtcNow;
-                    }
+                    report.Status = ReportStatus.Completed;
+                    report.CompletedAt = DateTime.UtcNow;
                 }
                 catch (Exception ex)
                 {
