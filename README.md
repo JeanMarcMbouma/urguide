@@ -775,13 +775,14 @@ docker-compose ps
 
 ### Services Included
 
-The `docker-compose.yml` orchestrates **6 containers**:
+The `docker-compose.yml` orchestrates **7 containers**:
 - **SQL Server 2022** - Database with persistent volumes
 - **RabbitMQ 3** - Message broker with management UI
 - **Elasticsearch 8.11** - Advanced search engine
 - **UrGuide API** - .NET 10 backend application
-- **Admin Dashboard** - React 18 + Nginx frontend
+- **Admin Dashboard** - React 19 + Nginx frontend (port 3001)
 - **Guide Portal** - React 19 + Nginx frontend (port 3002)
+- **Tourist Website** - React 19 + Nginx frontend (port 3003)
 
 ### Environment Configuration
 

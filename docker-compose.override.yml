@@ -73,3 +73,26 @@ services:
       timeout: 3s
       retries: 3
       start_period: 10s
+
+  # Tourist Website development with hot reload
+  tourist-website:
+    build:
+      context: ./tourist-website
+      dockerfile: Dockerfile.dev
+      target: development
+    ports:
+      - "3004:3004"
+    volumes:
+      - ./tourist-website:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - VITE_API_TARGET=http://api:80
+    command: npm run dev -- --host
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3004/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
