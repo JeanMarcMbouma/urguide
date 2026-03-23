@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -21,7 +21,8 @@ import {
   Security as SecurityIcon,
   Notifications as NotificationsIcon,
 } from '@mui/icons-material';
-import { changePassword } from '../services/touristApi';
+import { changePassword, getNotificationPreferences, updateNotificationPreferences } from '../services/touristApi';
+import type { NotificationPreferences } from '../types/tourist.types';
 
 const Settings = () => {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -31,13 +32,29 @@ const Settings = () => {
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
 
-  const [notifications, setNotifications] = useState({
+  const [notifications, setNotifications] = useState<NotificationPreferences>({
     emailNotifications: true,
+    pushNotifications: true,
     bidUpdates: true,
     tourReminders: true,
     promotionalEmails: false,
     reviewReminders: true,
   });
+  const [isSavingPrefs, setIsSavingPrefs] = useState(false);
+  const [prefsError, setPrefsError] = useState('');
+  const [prefsSuccess, setPrefsSuccess] = useState('');
+
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      try {
+        const prefs = await getNotificationPreferences();
+        setNotifications(prefs);
+      } catch {
+        // Use defaults if fetch fails
+      }
+    };
+    fetchPreferences();
+  }, []);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,6 +176,10 @@ const Settings = () => {
           <NotificationsIcon sx={{ mr: 1 }} color="action" />
           <Typography variant="h6">Notification Preferences</Typography>
         </Box>
+
+        {prefsError && <Alert severity="error" sx={{ mb: 2 }}>{prefsError}</Alert>}
+        {prefsSuccess && <Alert severity="success" sx={{ mb: 2 }}>{prefsSuccess}</Alert>}
+
         <List>
           <ListItem>
             <FormControlLabel
@@ -216,6 +237,27 @@ const Settings = () => {
             />
           </ListItem>
         </List>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+          <Button
+            variant="contained"
+            disabled={isSavingPrefs}
+            onClick={async () => {
+              setIsSavingPrefs(true);
+              setPrefsError('');
+              setPrefsSuccess('');
+              try {
+                await updateNotificationPreferences(notifications);
+                setPrefsSuccess('Preferences saved!');
+              } catch {
+                setPrefsError('Failed to save preferences.');
+              } finally {
+                setIsSavingPrefs(false);
+              }
+            }}
+          >
+            {isSavingPrefs ? <CircularProgress size={24} /> : 'Save Preferences'}
+          </Button>
+        </Box>
       </Paper>
     </Container>
   );
