@@ -74,7 +74,7 @@ const Reviews = () => {
                 </Typography>
                 {review.photos?.length > 0 && (
                   <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
-                    {review.photos.map((photo, i) => (
+                    {review.photos.map((_photo, i) => (
                       <Chip key={i} label={`Photo ${i + 1}`} size="small" variant="outlined" />
                     ))}
                   </Box>
