@@ -1,5 +1,4 @@
 using System;
-using UrGuide.Data.Entities.Tour;
 
 namespace UrGuide.Model.Reviews
 {
@@ -10,7 +9,10 @@ namespace UrGuide.Model.Reviews
         public int Rating { get; set; }
         public string AuthorName { get; set; }
         public DateTime CreatedAt { get; set; }
-        public ReviewModerationStatus ModerationStatus { get; set; }
+        /// <summary>
+        /// 0 = Pending, 1 = Approved, 2 = Rejected, 3 = FlaggedForReview, 4 = Removed
+        /// </summary>
+        public int ModerationStatus { get; set; }
         public int FlagCount { get; set; }
         public decimal SpamScore { get; set; }
         public bool IsSpam { get; set; }

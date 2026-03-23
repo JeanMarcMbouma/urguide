@@ -77,6 +77,9 @@ namespace UrGuide.Services.Extensions
             // Reporting services
             services.AddTransient<Reports.IReportingService, Reports.ReportingService>();
 
+            // Email template services
+            services.AddTransient<Email.IEmailTemplateService, Email.EmailTemplateService>();
+
             // Elasticsearch
             var elasticsearchUrl = configuration["Elasticsearch:Url"] ?? "http://localhost:9200";
             var elasticsearchUsername = configuration["Elasticsearch:Username"];

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -60,8 +61,14 @@ namespace UrGuide.WebApp.Controllers
         {
             try
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
                 var report = await _reportingService.GetReportAsync(reportId);
-                if (report == null)
+                if (report == null || report.RequestedBy != userId)
                 {
                     return NotFound(new { error = "Report not found" });
                 }
@@ -107,20 +114,48 @@ namespace UrGuide.WebApp.Controllers
         {
             try
             {
-                var data = await _reportingService.GetReportDataAsync(reportId);
-                if (data == null)
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                // Verify ownership
+                var report = await _reportingService.GetReportAsync(reportId);
+                if (report == null || report.RequestedBy != userId)
                 {
                     return NotFound(new { error = "Report not found" });
                 }
 
+                var data = await _reportingService.GetReportDataAsync(reportId);
+                if (data == null)
+                {
+                    return NotFound(new { error = "Report data not found" });
+                }
+
                 var csvBytes = await _reportingService.ExportToCsvAsync(data);
-                return File(csvBytes, "text/csv", $"{data.ReportName}.csv");
+
+                // Sanitize filename to prevent header injection
+                var safeName = SanitizeFileName(data.ReportName ?? "report");
+                return File(csvBytes, "text/csv", $"{safeName}.csv");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error downloading report");
                 return StatusCode(500, new { error = "An error occurred while downloading the report" });
             }
+        }
+
+        private static string SanitizeFileName(string fileName)
+        {
+            var invalidChars = System.IO.Path.GetInvalidFileNameChars();
+            var sanitized = new string(fileName.Where(c => !invalidChars.Contains(c)).ToArray());
+            if (string.IsNullOrWhiteSpace(sanitized))
+                sanitized = "report";
+            // Limit length
+            if (sanitized.Length > 100)
+                sanitized = sanitized.Substring(0, 100);
+            return sanitized;
         }
 
         /// <summary>

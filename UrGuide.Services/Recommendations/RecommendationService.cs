@@ -20,17 +20,89 @@ namespace UrGuide.Services.Recommendations
 
         public async Task<List<TourRecommendationDto>> GetRecommendationsAsync(string userId, int count = 10, double? latitude = null, double? longitude = null)
         {
-            var recommendations = new List<TourRecommendationDto>();
-
             var tours = await _context.Set<Data.Entities.Tour.Tour>()
                 .Take(count * 3)
                 .ToListAsync();
 
+            var tourIds = tours.Select(t => t.TourId).ToList();
+
+            // Preload aggregates to avoid N+1 queries
+            var bookingCounts = await _context.Set<Data.Entities.Tour.Booking>()
+                .Where(b => tourIds.Contains(b.TourId))
+                .GroupBy(b => b.TourId)
+                .Select(g => new { TourId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(g => g.TourId, g => g.Count);
+
+            var tourRatings = await _context.Set<Data.Entities.Tour.Tour>()
+                .Where(t => tourIds.Contains(t.TourId))
+                .Select(t => new
+                {
+                    t.TourId,
+                    AvgRating = t.Reviews.Any() ? t.Reviews.Average(r => (double)r.Rating) : 0.0
+                })
+                .ToDictionaryAsync(t => t.TourId, t => t.AvgRating);
+
+            var userPreferences = await _context.Set<UserPreference>()
+                .Where(p => p.UserId == userId)
+                .ToListAsync();
+
+            var userBookedTourIds = await _context.Set<Data.Entities.Tour.Booking>()
+                .Where(b => b.AuthorId == userId)
+                .Select(b => b.TourId)
+                .ToListAsync();
+
+            var similarUserIds = userBookedTourIds.Any()
+                ? await _context.Set<Data.Entities.Tour.Booking>()
+                    .Where(b => userBookedTourIds.Contains(b.TourId) && b.AuthorId != userId)
+                    .Select(b => b.AuthorId)
+                    .Distinct()
+                    .Take(50)
+                    .ToListAsync()
+                : new List<string>();
+
+            var collaborativeBookings = similarUserIds.Any()
+                ? await _context.Set<Data.Entities.Tour.Booking>()
+                    .Where(b => tourIds.Contains(b.TourId) && similarUserIds.Contains(b.AuthorId))
+                    .GroupBy(b => b.TourId)
+                    .Select(g => new { TourId = g.Key, Count = g.Count() })
+                    .ToDictionaryAsync(g => g.TourId, g => g.Count)
+                : new Dictionary<string, int>();
+
+            var recommendations = new List<TourRecommendationDto>();
+
             foreach (var tour in tours)
             {
-                var popularityScore = await CalculatePopularityScore(tour.TourId);
-                var contentScore = await CalculateContentScore(userId, tour.TourId);
-                var collaborativeScore = await CalculateCollaborativeScore(userId, tour.TourId);
+                // Popularity score using preloaded data
+                var bCount = bookingCounts.GetValueOrDefault(tour.TourId, 0);
+                var avgRating = tourRatings.GetValueOrDefault(tour.TourId, 0.0);
+                var bookingScore = Math.Min(bCount / 100.0m, 1.0m);
+                var ratingScore = (decimal)avgRating / 5.0m;
+                var popularityScore = (bookingScore * 0.4m) + (ratingScore * 0.6m);
+
+                // Content score using preloaded preferences
+                decimal contentScore = 0.5m;
+                if (userPreferences.Any())
+                {
+                    decimal matchScore = 0m;
+                    decimal totalWeight = 0m;
+                    foreach (var pref in userPreferences)
+                    {
+                        totalWeight += pref.Weight;
+                        if (pref.PreferenceType == "category" && tour.Tags != null && tour.Tags.Contains(pref.PreferenceValue, StringComparison.OrdinalIgnoreCase))
+                            matchScore += pref.Weight;
+                        else if (pref.PreferenceType == "location" && tour.RegionId == pref.PreferenceValue)
+                            matchScore += pref.Weight;
+                    }
+                    contentScore = totalWeight > 0 ? matchScore / totalWeight : 0.5m;
+                }
+
+                // Collaborative score using preloaded data
+                decimal collaborativeScore = 0m;
+                if (similarUserIds.Any())
+                {
+                    var simBookings = collaborativeBookings.GetValueOrDefault(tour.TourId, 0);
+                    collaborativeScore = Math.Min((decimal)simBookings / similarUserIds.Count, 1.0m);
+                }
 
                 decimal locationScore = 0m;
                 if (latitude.HasValue && longitude.HasValue)
@@ -57,19 +129,18 @@ namespace UrGuide.Services.Recommendations
                 .Take(count)
                 .ToList();
 
-            // Log recommendations
-            foreach (var rec in topRecommendations)
+            // Batch insert recommendation logs
+            var logs = topRecommendations.Select(rec => new RecommendationLog
             {
-                _context.Set<RecommendationLog>().Add(new RecommendationLog
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    UserId = userId,
-                    TourId = rec.TourId,
-                    Score = rec.Score,
-                    Algorithm = rec.Algorithm,
-                    CreatedAt = DateTime.UtcNow
-                });
-            }
+                Id = Guid.NewGuid().ToString(),
+                UserId = userId,
+                TourId = rec.TourId,
+                Score = rec.Score,
+                Algorithm = rec.Algorithm,
+                CreatedAt = DateTime.UtcNow
+            }).ToList();
+
+            _context.Set<RecommendationLog>().AddRange(logs);
             await _context.SaveChangesAsync();
 
             return topRecommendations;
@@ -217,79 +288,15 @@ namespace UrGuide.Services.Recommendations
             var bookingCount = await _context.Set<Data.Entities.Tour.Booking>()
                 .CountAsync(b => b.TourId == tourId);
 
-            var reviews = await _context.Set<Data.Entities.Tour.Review>()
-                .ToListAsync();
-
-            var avgRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0;
+            var avgRating = await _context.Set<Data.Entities.Tour.Tour>()
+                .Where(t => t.TourId == tourId && t.Reviews.Any())
+                .Select(t => t.Reviews.Average(r => (double)r.Rating))
+                .FirstOrDefaultAsync();
 
             var bookingScore = Math.Min(bookingCount / 100.0m, 1.0m);
             var ratingScore = (decimal)avgRating / 5.0m;
 
             return (bookingScore * 0.4m) + (ratingScore * 0.6m);
-        }
-
-        private async Task<decimal> CalculateContentScore(string userId, string tourId)
-        {
-            var preferences = await _context.Set<UserPreference>()
-                .Where(p => p.UserId == userId)
-                .ToListAsync();
-
-            if (!preferences.Any())
-                return 0.5m;
-
-            var tour = await _context.Set<Data.Entities.Tour.Tour>()
-                .FirstOrDefaultAsync(t => t.TourId == tourId);
-
-            if (tour == null)
-                return 0m;
-
-            decimal matchScore = 0m;
-            decimal totalWeight = 0m;
-
-            foreach (var pref in preferences)
-            {
-                totalWeight += pref.Weight;
-
-                if (pref.PreferenceType == "category" && tour.Tags != null && tour.Tags.Contains(pref.PreferenceValue, StringComparison.OrdinalIgnoreCase))
-                {
-                    matchScore += pref.Weight;
-                }
-                else if (pref.PreferenceType == "location" && tour.RegionId == pref.PreferenceValue)
-                {
-                    matchScore += pref.Weight;
-                }
-            }
-
-            return totalWeight > 0 ? matchScore / totalWeight : 0.5m;
-        }
-
-        private async Task<decimal> CalculateCollaborativeScore(string userId, string tourId)
-        {
-            // Find users who booked similar tours
-            var userBookedTours = await _context.Set<Data.Entities.Tour.Booking>()
-                .Where(b => b.AuthorId == userId)
-                .Select(b => b.TourId)
-                .ToListAsync();
-
-            if (!userBookedTours.Any())
-                return 0m;
-
-            // Find other users who booked the same tours
-            var similarUserIds = await _context.Set<Data.Entities.Tour.Booking>()
-                .Where(b => userBookedTours.Contains(b.TourId) && b.AuthorId != userId)
-                .Select(b => b.AuthorId)
-                .Distinct()
-                .Take(50)
-                .ToListAsync();
-
-            if (!similarUserIds.Any())
-                return 0m;
-
-            // Check if similar users booked the target tour
-            var similarBookings = await _context.Set<Data.Entities.Tour.Booking>()
-                .CountAsync(b => b.TourId == tourId && similarUserIds.Contains(b.AuthorId));
-
-            return Math.Min((decimal)similarBookings / similarUserIds.Count, 1.0m);
         }
 
         private static decimal CalculateLocationScore(string tourId, double latitude, double longitude)

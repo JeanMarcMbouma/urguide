@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Email;
 using UrGuide.Model.Email;
+using UrGuide.Model.Results;
 
 namespace UrGuide.Services.Email
 {

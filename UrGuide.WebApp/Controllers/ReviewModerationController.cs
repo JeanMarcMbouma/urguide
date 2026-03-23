@@ -1,6 +1,7 @@
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using BbQ.Outcome;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -49,7 +50,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error flagging review {ReviewId}", reviewId);
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
             }
         }
 
@@ -74,7 +75,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting moderation queue");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
             }
         }
 
@@ -101,7 +102,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error moderating review {ReviewId}", reviewId);
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
             }
         }
 
@@ -123,7 +124,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting moderation stats");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
             }
         }
 
@@ -149,7 +150,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error submitting appeal for review {ReviewId}", reviewId);
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
             }
         }
     }

@@ -14,6 +14,7 @@ using UrGuide.Data.Entities.Media;
 using UrGuide.Data.Entities.Webhooks;
 using UrGuide.Data.Entities.Disputes;
 using UrGuide.Data.Entities.Recommendations;
+using UrGuide.Data.Entities.Email;
 using UrGuide.Data.Entities.Reports;
 
 namespace UrGuide.Data
@@ -88,6 +89,10 @@ namespace UrGuide.Data
         // Report entities
         public virtual DbSet<ReportDefinition> ReportDefinitions { get; set; }
         public virtual DbSet<ScheduledReport> ScheduledReports { get; set; }
+
+        // Email template entities
+        public virtual DbSet<EmailTemplate> EmailTemplates { get; set; }
+        public virtual DbSet<EmailTemplateVersion> EmailTemplateVersions { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
@@ -176,6 +181,10 @@ namespace UrGuide.Data
             // Report configurations
             modelBuilder.ApplyConfiguration(new Configurations.ReportDefinitionConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.ScheduledReportConfiguration());
+
+            // Email template configurations
+            modelBuilder.ApplyConfiguration(new Configurations.EmailTemplateConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.EmailTemplateVersionConfiguration());
         }
     }
 }

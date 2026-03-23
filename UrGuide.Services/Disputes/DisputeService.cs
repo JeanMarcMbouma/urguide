@@ -20,6 +20,7 @@ namespace UrGuide.Services.Disputes
         public async Task<DisputeDto> CreateDisputeAsync(string userId, CreateDisputeRequest request)
         {
             var booking = await _context.Set<Data.Entities.Tour.Booking>()
+                .Include(b => b.Tour)
                 .FirstOrDefaultAsync(b => b.BookingId == request.BookingId);
 
             if (booking == null)
@@ -27,12 +28,23 @@ namespace UrGuide.Services.Disputes
                 throw new ArgumentException("Booking not found");
             }
 
+            // Validate the caller is either the booking author or the tour guide
+            if (booking.AuthorId != userId && booking.Tour?.AuthorId != userId)
+            {
+                throw new InvalidOperationException("You are not a participant of this booking");
+            }
+
+            // Determine the other party: if the filer is the booking author, the dispute is against the tour guide; otherwise against the booking author
+            var againstUserId = booking.AuthorId == userId
+                ? booking.Tour?.AuthorId ?? string.Empty
+                : booking.AuthorId;
+
             var dispute = new Dispute
             {
                 DisputeId = Guid.NewGuid().ToString(),
                 BookingId = request.BookingId,
                 FiledBy = userId,
-                AgainstUserId = booking.AuthorId == userId ? booking.TourId : booking.AuthorId,
+                AgainstUserId = againstUserId,
                 Title = request.Title,
                 Description = request.Description,
                 Category = (DisputeCategory)request.Category,

@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Core;
 using UrGuide.Data;
+using UrGuide.Model.Results;
 using UrGuide.Model.Templates;
 using UrGuide.Services.Abstraction;
 using UrGuide.Shared.Contracts;
@@ -164,7 +165,7 @@ namespace UrGuide.Services.Templates
             return Result.Of(result);
         }
 
-        public async Task<Outcome<TourTemplateDto>> CreateTourFromTemplateAsync(string guideId, string templateId, CancellationToken cancellationToken)
+        public async Task<Outcome<TourTemplateDto>> GetTemplateDataForTourCreationAsync(string guideId, string templateId, CancellationToken cancellationToken)
         {
             if (!UserContext.IsAuthenticated)
                 return Result.Of<TourTemplateDto>().WithErrors(ErrorMessages.NotAuthenticated);

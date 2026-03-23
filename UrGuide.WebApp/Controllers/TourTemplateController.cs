@@ -78,18 +78,24 @@ namespace UrGuide.WebApp.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetGuideTemplates([FromQuery] string guideId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string category = null, CancellationToken cancellationToken = default)
         {
-            var effectiveGuideId = guideId ?? _userContext.UserId;
+            var effectiveGuideId = guideId;
+            if (string.IsNullOrEmpty(effectiveGuideId))
+            {
+                effectiveGuideId = _userContext.UserId;
+                if (string.IsNullOrEmpty(effectiveGuideId))
+                    return BadRequest(ErrorEnvelop.Create(new[] { "guideId query parameter is required for unauthenticated requests" }));
+            }
             var result = await _tourTemplateService.GetGuideTemplatesAsync(effectiveGuideId, page, pageSize, category, cancellationToken);
             return result.IsError
                 ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors))
                 : (IActionResult)Ok(result.Value);
         }
 
-        [HttpPost("{templateId}/create-tour")]
+        [HttpPost("{templateId}/use-template")]
         [ProducesResponseType(200, Type = typeof(TourTemplateDto))]
-        public async Task<IActionResult> CreateTourFromTemplate(string templateId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetTemplateDataForTourCreation(string templateId, CancellationToken cancellationToken)
         {
-            var result = await _tourTemplateService.CreateTourFromTemplateAsync(_userContext.UserId, templateId, cancellationToken);
+            var result = await _tourTemplateService.GetTemplateDataForTourCreationAsync(_userContext.UserId, templateId, cancellationToken);
             return result.IsError
                 ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors))
                 : (IActionResult)Ok(result.Value);

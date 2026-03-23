@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Referrals;
 using UrGuide.Model.Referrals;
+using UrGuide.Model.Results;
 
 namespace UrGuide.Services.Referrals
 {
@@ -150,7 +151,7 @@ namespace UrGuide.Services.Referrals
                     {
                         Id = r.Id,
                         ReferredUserId = r.ReferredUserId,
-                        Status = r.Status,
+                        Status = (int)r.Status,
                         RewardAmount = r.RewardAmount,
                         CreatedAt = r.CreatedAt,
                         CompletedAt = r.CompletedAt
@@ -193,16 +194,9 @@ namespace UrGuide.Services.Referrals
                 referral.Status = ReferralStatus.Completed;
                 referral.CompletedAt = DateTime.UtcNow;
 
-                if (referral.ReferralCode != null)
-                {
-                    referral.ReferralCode.TotalEarnings += referral.RewardAmount;
-                    referral.Status = ReferralStatus.Rewarded;
-                    referral.RewardedAt = DateTime.UtcNow;
-                }
-
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Referral completed and rewarded for referred user {ReferredUserId}", referredUserId);
+                _logger.LogInformation("Referral completed for referred user {ReferredUserId}. Reward of {Amount} is pending.", referredUserId, referral.RewardAmount);
 
                 return Result.Of(true);
             }
@@ -235,7 +229,7 @@ namespace UrGuide.Services.Referrals
                     {
                         Id = r.Id,
                         ReferredUserId = r.ReferredUserId,
-                        Status = r.Status,
+                        Status = (int)r.Status,
                         RewardAmount = r.RewardAmount,
                         CreatedAt = r.CreatedAt,
                         CompletedAt = r.CompletedAt
@@ -272,7 +266,7 @@ namespace UrGuide.Services.Referrals
             return new ReferralCodeDto
             {
                 Code = referralCode.Code,
-                Type = referralCode.Type,
+                Type = (int)referralCode.Type,
                 TotalReferrals = referralCode.TotalReferrals,
                 TotalEarnings = referralCode.TotalEarnings,
                 IsActive = referralCode.IsActive,

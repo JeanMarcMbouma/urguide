@@ -6,6 +6,7 @@ namespace UrGuide.Model.Reports
     {
         public string Id { get; set; }
         public string Name { get; set; }
+        public string RequestedBy { get; set; }
         public int Type { get; set; }
         public int Format { get; set; }
         public int Status { get; set; }

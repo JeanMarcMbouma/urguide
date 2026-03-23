@@ -1,6 +1,7 @@
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using BbQ.Outcome;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -49,7 +50,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing image");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
             }
         }
 
@@ -70,7 +71,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting image variants for {ImageId}", imageId);
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
             }
         }
 
@@ -91,7 +92,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting processing status for {ImageId}", imageId);
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
             }
         }
 
@@ -116,7 +117,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error applying watermark to image {ImageId}", imageId);
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
             }
         }
 
@@ -137,7 +138,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting EXIF data for {ImageId}", imageId);
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
             }
         }
 
@@ -151,11 +152,10 @@ namespace UrGuide.WebApp.Controllers
             try
             {
                 var variantsResult = await _imageProcessingService.GetImageVariantsAsync(imageId);
-                string originalUrl = null;
-                variantsResult.Match(
-                    onSuccess: value => { originalUrl = value?.OriginalUrl; return (IActionResult)Ok(value); },
-                    onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
+                if (variantsResult.IsError)
+                    return BadRequest(ErrorEnvelop.CreateFromOutcome(variantsResult.Errors));
 
+                var originalUrl = variantsResult.Value?.OriginalUrl;
                 if (string.IsNullOrEmpty(originalUrl))
                     return BadRequest(new ErrorEnvelop<string>(new[] { "Image not found or has no original URL" }));
 
@@ -167,7 +167,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting CDN URL for {ImageId}", imageId);
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
             }
         }
     }

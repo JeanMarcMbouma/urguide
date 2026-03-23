@@ -40,14 +40,24 @@ namespace UrGuide.Services.Reports
 
             _context.ReportDefinitions.Add(report);
 
-            // For CSV reports, generate immediately
+            // For CSV reports, generate data immediately
             if (report.Format == ReportFormat.CSV)
             {
                 report.Status = ReportStatus.Processing;
                 try
                 {
-                    report.Status = ReportStatus.Completed;
-                    report.CompletedAt = DateTime.UtcNow;
+                    // Actually generate report data
+                    var reportData = await GenerateReportDataInternalAsync(report);
+                    if (reportData != null && reportData.Rows.Count > 0)
+                    {
+                        report.Status = ReportStatus.Completed;
+                        report.CompletedAt = DateTime.UtcNow;
+                    }
+                    else
+                    {
+                        report.Status = ReportStatus.Completed;
+                        report.CompletedAt = DateTime.UtcNow;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -104,6 +114,11 @@ namespace UrGuide.Services.Reports
             if (report == null)
                 return null;
 
+            return await GenerateReportDataInternalAsync(report);
+        }
+
+        private async Task<ReportDataDto> GenerateReportDataInternalAsync(ReportDefinition report)
+        {
             var data = new ReportDataDto
             {
                 ReportId = report.ReportId,
@@ -268,9 +283,9 @@ namespace UrGuide.Services.Reports
             return new BookingSummaryReportData
             {
                 TotalBookings = payments.Count,
-                CompletedBookings = payments.Count(p => p.Status == Data.Entities.Payments.PaymentStatus.Completed),
+                CompletedBookings = payments.Count(p => p.Status == Data.Entities.Payments.PaymentStatus.Succeeded),
                 CancelledBookings = payments.Count(p => p.Status == Data.Entities.Payments.PaymentStatus.Cancelled),
-                Revenue = payments.Where(p => p.Status == Data.Entities.Payments.PaymentStatus.Completed).Sum(p => p.Amount)
+                Revenue = payments.Where(p => p.Status == Data.Entities.Payments.PaymentStatus.Succeeded).Sum(p => p.Amount)
             };
         }
 
@@ -322,6 +337,7 @@ namespace UrGuide.Services.Reports
             {
                 Id = report.ReportId,
                 Name = report.Name,
+                RequestedBy = report.RequestedBy,
                 Type = (int)report.Type,
                 Format = (int)report.Format,
                 Status = (int)report.Status,

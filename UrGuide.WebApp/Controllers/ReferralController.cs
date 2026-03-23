@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using UrGuide.Data.Entities.Referrals;
 using UrGuide.Model.Referrals;
 using UrGuide.Services.Referrals;
 using UrGuide.WebApp.Models;
@@ -40,7 +41,7 @@ namespace UrGuide.WebApp.Controllers
                 return Unauthorized();
             }
 
-            var result = await _referralService.GenerateReferralCodeAsync(userId, request.Type);
+            var result = await _referralService.GenerateReferralCodeAsync(userId, (ReferralCodeType)request.Type);
             return result.Match(
                 onSuccess: value => (IActionResult)Ok(value),
                 onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));

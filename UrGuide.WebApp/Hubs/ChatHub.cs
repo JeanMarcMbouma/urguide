@@ -165,6 +165,12 @@ namespace UrGuide.WebApp.Hubs
             var userName = GetUserName();
             if (string.IsNullOrEmpty(userId)) return;
 
+            // Verify caller is a participant in the conversation
+            var isParticipant = await _context.Conversations
+                .AnyAsync(c => c.Id == conversationId &&
+                    (c.Participant1Id == userId || c.Participant2Id == userId));
+            if (!isParticipant) return;
+
             await Clients.OthersInGroup(conversationId).UserTyping(conversationId, userId, userName);
         }
 
@@ -176,6 +182,12 @@ namespace UrGuide.WebApp.Hubs
             var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return;
 
+            // Verify caller is a participant in the conversation
+            var isParticipant = await _context.Conversations
+                .AnyAsync(c => c.Id == conversationId &&
+                    (c.Participant1Id == userId || c.Participant2Id == userId));
+            if (!isParticipant) return;
+
             await Clients.OthersInGroup(conversationId).UserStoppedTyping(conversationId, userId);
         }
 
@@ -186,6 +198,12 @@ namespace UrGuide.WebApp.Hubs
         {
             var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return;
+
+            // Verify caller is a participant in the conversation
+            var isParticipant = await _context.Conversations
+                .AnyAsync(c => c.Id == conversationId &&
+                    (c.Participant1Id == userId || c.Participant2Id == userId));
+            if (!isParticipant) return;
 
             var message = await _context.MessageEntities
                 .FirstOrDefaultAsync(m => m.Id == messageId
@@ -273,16 +291,29 @@ namespace UrGuide.WebApp.Hubs
         }
 
         /// <summary>
-        /// Get a list of currently online user IDs.
+        /// Get a list of currently online user IDs that share a conversation with the caller.
         /// </summary>
-        public Task<List<string>> GetOnlineUsers()
+        public async Task<List<string>> GetOnlineUsers()
         {
+            var userId = GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return new List<string>();
+
+            // Get IDs of users who share a conversation with the caller
+            var conversationPartnerIds = await _context.Conversations
+                .Where(c => c.Participant1Id == userId || c.Participant2Id == userId)
+                .Select(c => c.Participant1Id == userId ? c.Participant2Id : c.Participant1Id)
+                .Distinct()
+                .ToListAsync();
+
             List<string> onlineUserIds;
             lock (_lock)
             {
-                onlineUserIds = _onlineUsers.Keys.ToList();
+                onlineUserIds = _onlineUsers.Keys
+                    .Where(id => conversationPartnerIds.Contains(id))
+                    .ToList();
             }
-            return Task.FromResult(onlineUserIds);
+            return onlineUserIds;
         }
     }
 }

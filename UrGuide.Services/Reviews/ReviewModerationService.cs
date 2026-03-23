@@ -114,7 +114,7 @@ namespace UrGuide.Services.Reviews
                             ? r.Author.ProfileInfo.FirstName
                             : string.Empty,
                         CreatedAt = r.CreatedAt,
-                        ModerationStatus = r.ModerationStatus,
+                        ModerationStatus = (int)r.ModerationStatus,
                         FlagCount = r.Flags.Count,
                         SpamScore = r.SpamScore,
                         IsSpam = r.IsSpam
@@ -144,8 +144,9 @@ namespace UrGuide.Services.Reviews
                     return Result.Of(false).WithErrors("Review not found");
 
                 var previousContent = review.Text;
+                var actionType = (ModerationActionType)action.ActionType;
 
-                switch (action.ActionType)
+                switch (actionType)
                 {
                     case ModerationActionType.Approved:
                         review.ModerationStatus = ReviewModerationStatus.Approved;
@@ -170,7 +171,7 @@ namespace UrGuide.Services.Reviews
                 {
                     ActionId = Guid.NewGuid().ToString(),
                     ReviewId = reviewId,
-                    ActionType = action.ActionType,
+                    ActionType = actionType,
                     PerformedBy = adminId,
                     Reason = action.Reason,
                     PreviousContent = previousContent,
@@ -193,7 +194,7 @@ namespace UrGuide.Services.Reviews
 
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("Review {ReviewId} moderated by admin {AdminId} with action {ActionType}",
-                    reviewId, adminId, action.ActionType);
+                    reviewId, adminId, actionType);
                 return Result.Of(true);
             }
             catch (Exception ex)

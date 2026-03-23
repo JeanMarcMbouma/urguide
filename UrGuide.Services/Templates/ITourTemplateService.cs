@@ -13,7 +13,7 @@ namespace UrGuide.Services.Templates
         Task<Outcome<bool>> DeleteTemplateAsync(string guideId, string templateId, CancellationToken cancellationToken);
         Task<Outcome<TourTemplateDto>> GetTemplateAsync(string templateId, CancellationToken cancellationToken);
         Task<Outcome<PagedList<TourTemplateListItem>>> GetGuideTemplatesAsync(string guideId, int page, int pageSize, string category, CancellationToken cancellationToken);
-        Task<Outcome<TourTemplateDto>> CreateTourFromTemplateAsync(string guideId, string templateId, CancellationToken cancellationToken);
+        Task<Outcome<TourTemplateDto>> GetTemplateDataForTourCreationAsync(string guideId, string templateId, CancellationToken cancellationToken);
         Task<Outcome<bool>> IncrementUsageCountAsync(string templateId, CancellationToken cancellationToken);
     }
 }
