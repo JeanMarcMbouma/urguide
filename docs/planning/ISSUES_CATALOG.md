@@ -1575,6 +1575,7 @@ Build a comprehensive API documentation portal with interactive examples.
 ### 38. Multi-language Support
 **Title:** Add internationalization (i18n) support  
 **Labels:** enhancement, i18n, localization  
+**Status:** ✅ **COMPLETED**  
 **Description:**
 Implement multi-language support for API responses and error messages.
 
@@ -1589,12 +1590,12 @@ Implement multi-language support for API responses and error messages.
 - Admin UI for managing translations
 
 **Acceptance Criteria:**
-- [ ] Multiple languages supported
-- [ ] Accept-Language header works
-- [ ] Error messages are translated
-- [ ] Email templates are translated
-- [ ] Language detection works
-- [ ] Admin can manage translations
+- [x] Multiple languages supported (EN, FR, ES, DE, AR)
+- [x] Accept-Language header works (RequestLocalizationMiddleware with AcceptLanguageHeaderRequestCultureProvider)
+- [x] Error messages are translated (SharedResource.resx files for 5 languages)
+- [x] Email templates are translated (Language field in EmailTemplate entity + RenderEmailAsync language fallback)
+- [x] Language detection works (frontend: i18next-browser-languagedetector; backend: Accept-Language header)
+- [x] Admin can manage translations (GET /api/localization/languages, GET /api/localization/{language}, GET /api/localization + TranslationManagement UI page)
 
 ---
 
@@ -1603,9 +1604,9 @@ Implement multi-language support for API responses and error messages.
 **Total Issues: 47** (increased from 38 due to complex issue breakdown)
 
 **By Status:**
-- ✅ Completed: 23 (Docker Containerization, CI/CD Pipeline, Payment Integration, Two-Factor Authentication, GDPR Data Export, Message Queue Integration, Advanced Search & Filtering, Webhook System, Analytics Dashboard, API Rate Limiting Improvements, Real-time Chat, Review Moderation, Tour Package Templates, Referral System, Advanced Image Management, Dispute Resolution, Email Templates, Tour Recommendations, Advanced Reporting, Tourist Website Discovery & Search, Tourist Website Booking & Bidding, Tourist Website Payment & Profile, Tourist Website Reviews & Communication)
+- ✅ Completed: 24 (Docker Containerization, CI/CD Pipeline, Payment Integration, Two-Factor Authentication, GDPR Data Export, Message Queue Integration, Advanced Search & Filtering, Webhook System, Analytics Dashboard, API Rate Limiting Improvements, Real-time Chat, Review Moderation, Tour Package Templates, Referral System, Advanced Image Management, Dispute Resolution, Email Templates, Tour Recommendations, Advanced Reporting, Tourist Website Discovery & Search, Tourist Website Booking & Bidding, Tourist Website Payment & Profile, Tourist Website Reviews & Communication, Multi-language Support)
 - 🚧 In Progress: 0
-- 📋 Pending: 24
+- 📋 Pending: 23
 
 **By Priority:**
 - High Priority: 6 (Payment Integration ✅, 2FA ✅, Admin Dashboard (19-19d) 📋, Tourist Website (20-20d) ✅, Backup & DR 📋)

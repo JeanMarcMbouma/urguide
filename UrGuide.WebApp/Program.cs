@@ -23,6 +23,10 @@ using Asp.Versioning;
 using System.Linq;
 using UrGuide.ServiceDefaults;
 using UrGuide.WebApp.MessageQueue;
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Localization;
+using UrGuide.WebApp.Resources;
 
 var logger = LogManager.Setup().LoadConfigurationFromFile("nlog.config").GetCurrentClassLogger();
 try
@@ -43,6 +47,9 @@ try
     // Add services to the container.
     builder.Services.AddUrGuideAuthServices(builder.Configuration);
     builder.Services.AddUrGuideServices(builder.Configuration);
+
+    // Add localization with resource files path
+    builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
     // Add HttpClient for calling IdentityServer token endpoint
     builder.Services.AddHttpClient();
@@ -186,7 +193,8 @@ try
                     errors.AddRange([exceptionHandler.Error.Message, exceptionHandler.Error.StackTrace ?? ""]);
                 } else
                 {
-                    errors.Add("An unexpected error has occured.");
+                    var localizer = request.RequestServices.GetRequiredService<IStringLocalizer<SharedResource>>();
+                    errors.Add(localizer["Error_InternalServer"]);
                 }
                 var result = ErrorEnvelop.Create(errors);
                 await request.Response.WriteAsJsonAsync(result);
@@ -226,6 +234,21 @@ try
 
     app.UseForwardedHeaders(new ForwardedHeadersOptions { 
         ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
+    });
+
+    // Add request localization middleware (Accept-Language header support)
+    var supportedCultures = new[] { "en", "fr", "es", "de", "ar" }
+        .Select(c => new CultureInfo(c))
+        .ToList();
+    app.UseRequestLocalization(new RequestLocalizationOptions
+    {
+        DefaultRequestCulture = new RequestCulture("en"),
+        SupportedCultures = supportedCultures,
+        SupportedUICultures = supportedCultures,
+        RequestCultureProviders = new List<IRequestCultureProvider>
+        {
+            new AcceptLanguageHeaderRequestCultureProvider()
+        }
     });
 
     // Add CORS middleware

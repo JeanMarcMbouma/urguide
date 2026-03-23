@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- General errors -->
+  <data name="Error_NotFound" xml:space="preserve">
+    <value>Ressource nicht gefunden.</value>
+  </data>
+  <data name="Error_Unauthorized" xml:space="preserve">
+    <value>Sie sind nicht berechtigt, diese Aktion durchzuführen.</value>
+  </data>
+  <data name="Error_Forbidden" xml:space="preserve">
+    <value>Zugriff verweigert.</value>
+  </data>
+  <data name="Error_BadRequest" xml:space="preserve">
+    <value>Die Anfrage ist ungültig.</value>
+  </data>
+  <data name="Error_InternalServer" xml:space="preserve">
+    <value>Ein unerwarteter Fehler ist aufgetreten.</value>
+  </data>
+  <data name="Error_ValidationFailed" xml:space="preserve">
+    <value>Validierung fehlgeschlagen. Bitte überprüfen Sie die angegebenen Daten.</value>
+  </data>
+  <data name="Error_Conflict" xml:space="preserve">
+    <value>Es ist ein Konflikt mit dem aktuellen Zustand der Ressource aufgetreten.</value>
+  </data>
+
+  <!-- Authentication errors -->
+  <data name="Auth_InvalidCredentials" xml:space="preserve">
+    <value>Ungültige E-Mail-Adresse oder ungültiges Passwort.</value>
+  </data>
+  <data name="Auth_AccountLocked" xml:space="preserve">
+    <value>Ihr Konto wurde gesperrt. Bitte wenden Sie sich an den Support.</value>
+  </data>
+  <data name="Auth_EmailNotConfirmed" xml:space="preserve">
+    <value>Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich anmelden.</value>
+  </data>
+  <data name="Auth_TokenExpired" xml:space="preserve">
+    <value>Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.</value>
+  </data>
+  <data name="Auth_TokenInvalid" xml:space="preserve">
+    <value>Das angegebene Token ist ungültig oder abgelaufen.</value>
+  </data>
+  <data name="Auth_PasswordMismatch" xml:space="preserve">
+    <value>Die Passwörter stimmen nicht überein.</value>
+  </data>
+  <data name="Auth_EmailAlreadyRegistered" xml:space="preserve">
+    <value>Ein Konto mit dieser E-Mail-Adresse existiert bereits.</value>
+  </data>
+  <data name="Auth_TwoFactorRequired" xml:space="preserve">
+    <value>Zwei-Faktor-Authentifizierung ist erforderlich.</value>
+  </data>
+  <data name="Auth_TwoFactorInvalid" xml:space="preserve">
+    <value>Ungültiger Zwei-Faktor-Authentifizierungscode.</value>
+  </data>
+
+  <!-- User errors -->
+  <data name="User_NotFound" xml:space="preserve">
+    <value>Benutzer nicht gefunden.</value>
+  </data>
+  <data name="User_ProfileUpdateFailed" xml:space="preserve">
+    <value>Aktualisierung des Benutzerprofils fehlgeschlagen.</value>
+  </data>
+  <data name="User_PasswordChangeFailed" xml:space="preserve">
+    <value>Passwortänderung fehlgeschlagen.</value>
+  </data>
+
+  <!-- Tour errors -->
+  <data name="Tour_NotFound" xml:space="preserve">
+    <value>Touranfrage nicht gefunden.</value>
+  </data>
+  <data name="Tour_AlreadyBooked" xml:space="preserve">
+    <value>Diese Tour wurde bereits gebucht.</value>
+  </data>
+  <data name="Tour_Expired" xml:space="preserve">
+    <value>Diese Touranfrage ist abgelaufen.</value>
+  </data>
+  <data name="Tour_CapacityExceeded" xml:space="preserve">
+    <value>Die Kapazität der Tour wurde überschritten.</value>
+  </data>
+
+  <!-- Bid errors -->
+  <data name="Bid_NotFound" xml:space="preserve">
+    <value>Angebot nicht gefunden.</value>
+  </data>
+  <data name="Bid_AlreadyPlaced" xml:space="preserve">
+    <value>Sie haben bereits ein Angebot für diese Touranfrage abgegeben.</value>
+  </data>
+  <data name="Bid_CannotWithdraw" xml:space="preserve">
+    <value>Dieses Angebot kann in seinem aktuellen Zustand nicht zurückgezogen werden.</value>
+  </data>
+
+  <!-- Payment errors -->
+  <data name="Payment_Failed" xml:space="preserve">
+    <value>Zahlungsverarbeitung fehlgeschlagen. Bitte versuchen Sie es erneut.</value>
+  </data>
+  <data name="Payment_NotFound" xml:space="preserve">
+    <value>Zahlung nicht gefunden.</value>
+  </data>
+  <data name="Payment_AlreadyProcessed" xml:space="preserve">
+    <value>Diese Zahlung wurde bereits verarbeitet.</value>
+  </data>
+  <data name="Payment_InsufficientFunds" xml:space="preserve">
+    <value>Unzureichende Mittel für diese Transaktion.</value>
+  </data>
+  <data name="Payout_RequestFailed" xml:space="preserve">
+    <value>Auszahlungsanfrage fehlgeschlagen. Bitte versuchen Sie es erneut.</value>
+  </data>
+  <data name="Refund_Failed" xml:space="preserve">
+    <value>Rückerstattungsverarbeitung fehlgeschlagen. Bitte versuchen Sie es erneut.</value>
+  </data>
+
+  <!-- Review errors -->
+  <data name="Review_NotFound" xml:space="preserve">
+    <value>Bewertung nicht gefunden.</value>
+  </data>
+  <data name="Review_AlreadySubmitted" xml:space="preserve">
+    <value>Sie haben bereits eine Bewertung für diese Tour eingereicht.</value>
+  </data>
+
+  <!-- File/Upload errors -->
+  <data name="File_UploadFailed" xml:space="preserve">
+    <value>Datei-Upload fehlgeschlagen. Bitte versuchen Sie es erneut.</value>
+  </data>
+  <data name="File_InvalidFormat" xml:space="preserve">
+    <value>Ungültiges Dateiformat. Bitte laden Sie einen unterstützten Dateityp hoch.</value>
+  </data>
+  <data name="File_TooLarge" xml:space="preserve">
+    <value>Die Datei ist zu groß. Die maximal zulässige Größe beträgt {0} MB.</value>
+  </data>
+
+  <!-- Email template errors -->
+  <data name="EmailTemplate_NotFound" xml:space="preserve">
+    <value>E-Mail-Vorlage nicht gefunden.</value>
+  </data>
+  <data name="EmailTemplate_RenderFailed" xml:space="preserve">
+    <value>Fehler beim Rendern der E-Mail-Vorlage.</value>
+  </data>
+
+  <!-- Success messages -->
+  <data name="Success_ProfileUpdated" xml:space="preserve">
+    <value>Profil erfolgreich aktualisiert.</value>
+  </data>
+  <data name="Success_PasswordChanged" xml:space="preserve">
+    <value>Passwort erfolgreich geändert.</value>
+  </data>
+  <data name="Success_EmailSent" xml:space="preserve">
+    <value>E-Mail erfolgreich gesendet.</value>
+  </data>
+  <data name="Success_BidPlaced" xml:space="preserve">
+    <value>Angebot erfolgreich abgegeben.</value>
+  </data>
+  <data name="Success_BidWithdrawn" xml:space="preserve">
+    <value>Angebot erfolgreich zurückgezogen.</value>
+  </data>
+</root>
