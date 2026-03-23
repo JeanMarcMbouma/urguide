@@ -28,9 +28,23 @@ const WriteReview = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
   const handlePhotoAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setPhotos((prev) => [...prev, ...Array.from(e.target.files!)].slice(0, 5));
+      const validFiles = Array.from(e.target.files).filter((file) => {
+        if (!ALLOWED_TYPES.includes(file.type)) {
+          setError(`${file.name} is not a supported image format.`);
+          return false;
+        }
+        if (file.size > MAX_FILE_SIZE) {
+          setError(`${file.name} exceeds the 5MB size limit.`);
+          return false;
+        }
+        return true;
+      });
+      setPhotos((prev) => [...prev, ...validFiles].slice(0, 5));
     }
   };
 
