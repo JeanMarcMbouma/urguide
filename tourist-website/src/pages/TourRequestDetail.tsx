@@ -173,8 +173,8 @@ const TourRequestDetail = () => {
         </Paper>
       ) : (
         <Grid container spacing={3}>
-          {bids.map((bid, index) => (
-            <Grid key={index} size={{ xs: 12, md: 6 }}>
+          {bids.map((bid) => (
+            <Grid key={`${bid.author}-${bid.created}`} size={{ xs: 12, md: 6 }}>
               <Card>
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>

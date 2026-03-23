@@ -71,7 +71,7 @@ export const searchGuides = async (filters: SearchFilters): Promise<SearchResult
     },
   });
   // Map SearchResponse<PostSearchDocument> → SearchResult<GuideListItem>
-  const results = (data.results || []).map((item: Record<string, unknown>) => {
+  const guideItems = (data.results || []).map((item: Record<string, unknown>) => {
     const doc = (item as { document?: Record<string, unknown> }).document || item;
     return {
       id: String(doc.id || ''),
@@ -89,7 +89,7 @@ export const searchGuides = async (filters: SearchFilters): Promise<SearchResult
     } as GuideListItem;
   });
   return {
-    items: results,
+    items: guideItems,
     totalCount: Number(data.totalHits) || 0,
     page: Number(data.page) || 1,
     pageSize: Number(data.pageSize) || 12,
@@ -298,10 +298,18 @@ export const getUserProfile = async (): Promise<UserProfile> => {
 };
 
 // POST /updateuser (absolute route, not under /api/account)
+// Must bypass api instance's /api baseURL since this endpoint is at root
+const rootApi = axios.create({ baseURL: '/' });
+rootApi.interceptors.request.use((config) => {
+  const token = authService.getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export const updateProfile = async (profile: UpdateProfileRequest): Promise<void> => {
-  await axios.post('/updateuser', profile, {
-    headers: { Authorization: `Bearer ${authService.getToken()}` },
-  });
+  await rootApi.post('/updateuser', profile);
 };
 
 // POST /api/account/changepassword → ChangePasswordModel

@@ -38,9 +38,8 @@ const Payment = () => {
     try {
       const paymentData = await createPayment({
         bookingId,
-        amount: 0, // Amount is typically calculated server-side from the booking
+        amount: 0, // Server calculates actual amount from booking
         currencyCode: 'USD',
-        description: `Payment for booking ${bookingId}`,
       });
       setPayment(paymentData);
     } catch {
