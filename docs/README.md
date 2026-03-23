@@ -33,6 +33,21 @@ Security documentation, audits, and best practices.
 - [**Secrets Management Guide**](security/SECRETS_MANAGEMENT.md) - Complete guide for managing credentials, API keys, and secrets securely
 - [**Security Audit Report**](security/SECURITY_AUDIT_REPORT.md) - Secrets management implementation audit
 
+### 🧪 Testing
+Testing infrastructure and guidelines.
+
+- **Unit Tests** (`tests/UrGuide.UnitTests/`) - 69 unit tests with xUnit, Moq, FluentAssertions, Coverlet
+- **Integration Tests** (`tests/UrGuide.IntegrationTests/`) - 67 controller integration tests
+- **E2E Tests** (`tests/UrGuide.E2ETests/`) - Playwright-based end-to-end test infrastructure
+- **Performance Tests** (`tests/UrGuide.PerformanceTests/`) - BenchmarkDotNet micro-benchmarks
+
+Run tests:
+```bash
+dotnet test tests/UrGuide.UnitTests/          # Unit tests (69 tests)
+dotnet test tests/UrGuide.IntegrationTests/   # Integration tests (67 tests)
+dotnet run -c Release --project tests/UrGuide.PerformanceTests/  # Benchmarks
+```
+
 ### 📋 Planning
 Project planning, roadmaps, and issue tracking.
 
