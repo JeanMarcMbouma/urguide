@@ -4,12 +4,18 @@ using UrGuide.Data.Entities.Event;
 using UrGuide.Data.Entities.Messages;
 using UrGuide.Data.Entities.Payments;
 using UrGuide.Data.Entities.Posts;
+using UrGuide.Data.Entities.Referrals;
 using UrGuide.Data.Entities.Regions;
 using UrGuide.Data.Entities.Search;
 using UrGuide.Data.Entities.Shared;
 using UrGuide.Data.Entities.Tour;
 using UrGuide.Data.Entities.Users;
+using UrGuide.Data.Entities.Media;
 using UrGuide.Data.Entities.Webhooks;
+using UrGuide.Data.Entities.Disputes;
+using UrGuide.Data.Entities.Recommendations;
+using UrGuide.Data.Entities.Email;
+using UrGuide.Data.Entities.Reports;
 
 namespace UrGuide.Data
 {
@@ -54,6 +60,39 @@ namespace UrGuide.Data
         // Messaging entities
         public virtual DbSet<ConversationEntity> Conversations { get; set; }
         public virtual DbSet<MessageEntity> MessageEntities { get; set; }
+        public virtual DbSet<FileAttachment> FileAttachments { get; set; }
+
+        // Review moderation entities
+        public virtual DbSet<ReviewFlag> ReviewFlags { get; set; }
+        public virtual DbSet<ReviewModerationAction> ReviewModerationActions { get; set; }
+
+        // Tour template entities
+        public virtual DbSet<TourTemplate> TourTemplates { get; set; }
+
+        // Referral entities
+        public virtual DbSet<ReferralCode> ReferralCodes { get; set; }
+        public virtual DbSet<Referral> Referrals { get; set; }
+
+        // Image processing entities
+        public virtual DbSet<ProcessedImage> ProcessedImages { get; set; }
+
+        // Dispute entities
+        public virtual DbSet<Dispute> Disputes { get; set; }
+        public virtual DbSet<DisputeEvidence> DisputeEvidence { get; set; }
+        public virtual DbSet<DisputeMessage> DisputeMessages { get; set; }
+
+        // Recommendation entities
+        public virtual DbSet<UserPreference> UserPreferences { get; set; }
+        public virtual DbSet<TourInteraction> TourInteractions { get; set; }
+        public virtual DbSet<RecommendationLog> RecommendationLogs { get; set; }
+
+        // Report entities
+        public virtual DbSet<ReportDefinition> ReportDefinitions { get; set; }
+        public virtual DbSet<ScheduledReport> ScheduledReports { get; set; }
+
+        // Email template entities
+        public virtual DbSet<EmailTemplate> EmailTemplates { get; set; }
+        public virtual DbSet<EmailTemplateVersion> EmailTemplateVersions { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
@@ -113,6 +152,39 @@ namespace UrGuide.Data
             // Messaging configurations
             modelBuilder.ApplyConfiguration(new Configurations.ConversationConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.MessageEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.FileAttachmentConfiguration());
+
+            // Review moderation configurations
+            modelBuilder.ApplyConfiguration(new Configurations.ReviewFlagConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.ReviewModerationActionConfiguration());
+
+            // Tour template configurations
+            modelBuilder.ApplyConfiguration(new Configurations.TourTemplateConfiguration());
+
+            // Referral configurations
+            modelBuilder.ApplyConfiguration(new Configurations.ReferralCodeConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.ReferralConfiguration());
+
+            // Image processing configurations
+            modelBuilder.ApplyConfiguration(new Configurations.ProcessedImageConfiguration());
+
+            // Dispute configurations
+            modelBuilder.ApplyConfiguration(new Configurations.DisputeConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.DisputeEvidenceConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.DisputeMessageConfiguration());
+
+            // Recommendation configurations
+            modelBuilder.ApplyConfiguration(new Configurations.UserPreferenceConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.TourInteractionConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.RecommendationLogConfiguration());
+
+            // Report configurations
+            modelBuilder.ApplyConfiguration(new Configurations.ReportDefinitionConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.ScheduledReportConfiguration());
+
+            // Email template configurations
+            modelBuilder.ApplyConfiguration(new Configurations.EmailTemplateConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.EmailTemplateVersionConfiguration());
         }
     }
 }

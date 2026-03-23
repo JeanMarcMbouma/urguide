@@ -47,6 +47,12 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<Webhooks.IWebhookService, Webhooks.WebhookService>();
             services.AddHttpClient(); // Required for webhook delivery
             
+            // Review moderation services
+            services.AddTransient<Reviews.IReviewModerationService, Reviews.ReviewModerationService>();
+            
+            // Tour template services
+            services.AddTransient<Templates.ITourTemplateService, Templates.TourTemplateService>();
+            
             // Data export service
             services.AddTransient<Contracts.IDataExportService, DataExport.DataExportService>();
             
@@ -55,6 +61,24 @@ namespace UrGuide.Services.Extensions
             
             // Analytics service
             services.AddTransient<Contracts.IAnalyticsService, AnalyticsService>();
+
+            // Referral services
+            services.AddTransient<Referrals.IReferralService, Referrals.ReferralService>();
+
+            // Image processing services
+            services.AddTransient<IImageProcessingService, ImageProcessingService>();
+
+            // Dispute services
+            services.AddTransient<Disputes.IDisputeService, Disputes.DisputeService>();
+
+            // Recommendation services
+            services.AddTransient<Recommendations.IRecommendationService, Recommendations.RecommendationService>();
+
+            // Reporting services
+            services.AddTransient<Reports.IReportingService, Reports.ReportingService>();
+
+            // Email template services
+            services.AddTransient<Email.IEmailTemplateService, Email.EmailTemplateService>();
 
             // Elasticsearch
             var elasticsearchUrl = configuration["Elasticsearch:Url"] ?? "http://localhost:9200";

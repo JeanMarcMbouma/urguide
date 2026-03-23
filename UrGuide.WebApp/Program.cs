@@ -256,6 +256,7 @@ try
         name: "default",
         pattern: "{controller}/{action=Index}/{id?}");
     app.MapHub<NotificationHub>("/notify");
+    app.MapHub<ChatHub>("/chat");
     
     // Map Aspire default endpoints (health checks at /health and /alive)
     app.MapDefaultEndpoints();
