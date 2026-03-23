@@ -1,2 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿using BenchmarkDotNet.Running;
+using UrGuide.PerformanceTests.Benchmarks;
+
+// Run all benchmarks in this assembly
+BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
