@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,7 @@ using UrGuide.WebApp.Models;
 using UrGuide.WebApp.Attributes;
 using UrGuide.WebApp.Services;
 using UrGuide.WebApp.Entities;
+using UrGuide.WebApp.Resources;
 using BbQ.Outcome;
 
 namespace UrGuide.WebApp.Controllers
@@ -30,6 +32,7 @@ namespace UrGuide.WebApp.Controllers
     [Route("api/[controller]")]
     public class AccountController : Controller
     {
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
         public AccountController(
             IUserService userService, 
@@ -38,7 +41,8 @@ namespace UrGuide.WebApp.Controllers
             IJwtTokenService jwtTokenService,
             UserManager<UrGuideUser> userManager,
             IConfiguration configuration,
-            IHttpClientFactory httpClientFactory)
+            IHttpClientFactory httpClientFactory,
+            IStringLocalizer<SharedResource> localizer)
         {
             UserService = userService ?? throw new ArgumentNullException(nameof(userService));
             AuthService = authService ?? throw new ArgumentNullException(nameof(authService));
@@ -47,6 +51,7 @@ namespace UrGuide.WebApp.Controllers
             UserManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             HttpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            _localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         public IUserService UserService { get; }
@@ -71,7 +76,8 @@ namespace UrGuide.WebApp.Controllers
             var result = await UserService.LoginAsync(model, cancellationToken);
             if (result.IsError)
             {
-                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
+                // Use a single localized message to avoid leaking which credential was wrong
+                return BadRequest(ErrorEnvelop.Create([(string)_localizer["Auth_InvalidCredentials"]]));
             }
             
             var claims = new List<System.Security.Claims.Claim>

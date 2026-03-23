@@ -20,44 +20,20 @@ import {
 } from '@mui/material';
 import { Language as LanguageIcon } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-
-interface LanguageInfo {
-  code: string;
-  name: string;
-  nativeName: string;
-}
-
-interface TranslationData {
-  language: string;
-  culture: string;
-  translations: Record<string, string | null>;
-}
-
-const LANGUAGES_ENDPOINT = '/api/localization/languages';
-const TRANSLATIONS_ENDPOINT = (lang: string) => `/api/localization/${lang}`;
+import { adminApi } from '../services/adminApi';
 
 const TranslationManagement = () => {
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState('en');
 
-  const { data: languages, isLoading: langsLoading } = useQuery<LanguageInfo[]>({
+  const { data: languages, isLoading: langsLoading } = useQuery({
     queryKey: ['supported-languages'],
-    queryFn: async () => {
-      const res = await axios.get<LanguageInfo[]>(LANGUAGES_ENDPOINT);
-      return res.data;
-    },
+    queryFn: () => adminApi.getSupportedLanguages(),
   });
 
-  const { data: translationData, isLoading: transLoading, isError } = useQuery<TranslationData>({
+  const { data: translationData, isLoading: transLoading, isError } = useQuery({
     queryKey: ['translations', selectedLanguage],
-    queryFn: async () => {
-      const token = localStorage.getItem('adminToken');
-      const res = await axios.get<TranslationData>(TRANSLATIONS_ENDPOINT(selectedLanguage), {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      return res.data;
-    },
+    queryFn: () => adminApi.getTranslations(selectedLanguage),
     enabled: !!selectedLanguage,
   });
 

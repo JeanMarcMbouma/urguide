@@ -22,6 +22,7 @@ import type {
 class AdminApiService {
   private api: AxiosInstance;
   private analyticsApi: AxiosInstance;
+  private localizationApi: AxiosInstance;
 
   constructor() {
     this.api = axios.create({
@@ -33,6 +34,13 @@ class AdminApiService {
 
     this.analyticsApi = axios.create({
       baseURL: '/api/analytics',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    this.localizationApi = axios.create({
+      baseURL: '/api/localization',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -58,10 +66,12 @@ class AdminApiService {
     // Request interceptor to add auth token
     this.api.interceptors.request.use(authInterceptor, authErrorHandler);
     this.analyticsApi.interceptors.request.use(authInterceptor, authErrorHandler);
+    this.localizationApi.interceptors.request.use(authInterceptor, authErrorHandler);
 
     // Response interceptor for error handling
     this.api.interceptors.response.use((r) => r, responseErrorHandler);
     this.analyticsApi.interceptors.response.use((r) => r, responseErrorHandler);
+    this.localizationApi.interceptors.response.use((r) => r, responseErrorHandler);
   }
 
   // Get all users with pagination and search
@@ -284,6 +294,20 @@ class AdminApiService {
   // Update platform settings
   async updatePlatformSettings(settings: PlatformSettings): Promise<ApiResult<void>> {
     const { data } = await this.api.put<ApiResult<void>>('/system/settings', settings);
+    return data;
+  }
+
+  // ── Localization ─────────────────────────────────────────────────────────────
+
+  // Get list of supported languages (anonymous)
+  async getSupportedLanguages(): Promise<Array<{ code: string; name: string; nativeName: string }>> {
+    const { data } = await this.localizationApi.get<Array<{ code: string; name: string; nativeName: string }>>('/languages');
+    return data;
+  }
+
+  // Get all translation strings for a specific language (admin only)
+  async getTranslations(language: string): Promise<{ language: string; culture: string; translations: Record<string, string | null> }> {
+    const { data } = await this.localizationApi.get<{ language: string; culture: string; translations: Record<string, string | null> }>(`/${language}`);
     return data;
   }
 }

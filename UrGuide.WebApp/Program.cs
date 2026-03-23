@@ -24,6 +24,9 @@ using System.Linq;
 using UrGuide.ServiceDefaults;
 using UrGuide.WebApp.MessageQueue;
 using System.Globalization;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Localization;
+using UrGuide.WebApp.Resources;
 
 var logger = LogManager.Setup().LoadConfigurationFromFile("nlog.config").GetCurrentClassLogger();
 try
@@ -190,7 +193,8 @@ try
                     errors.AddRange([exceptionHandler.Error.Message, exceptionHandler.Error.StackTrace ?? ""]);
                 } else
                 {
-                    errors.Add("An unexpected error has occured.");
+                    var localizer = request.RequestServices.GetRequiredService<IStringLocalizer<SharedResource>>();
+                    errors.Add(localizer["Error_InternalServer"]);
                 }
                 var result = ErrorEnvelop.Create(errors);
                 await request.Response.WriteAsJsonAsync(result);
@@ -238,12 +242,12 @@ try
         .ToList();
     app.UseRequestLocalization(new RequestLocalizationOptions
     {
-        DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en"),
+        DefaultRequestCulture = new RequestCulture("en"),
         SupportedCultures = supportedCultures,
         SupportedUICultures = supportedCultures,
-        RequestCultureProviders = new List<Microsoft.AspNetCore.Localization.IRequestCultureProvider>
+        RequestCultureProviders = new List<IRequestCultureProvider>
         {
-            new Microsoft.AspNetCore.Localization.AcceptLanguageHeaderRequestCultureProvider()
+            new AcceptLanguageHeaderRequestCultureProvider()
         }
     });
 

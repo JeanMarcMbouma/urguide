@@ -145,6 +145,7 @@ const AdminLayout = () => {
                 onChange={(e) => handleLanguageChange(e.target.value)}
                 disableUnderline
                 sx={{ color: 'inherit', '& .MuiSelect-icon': { color: 'inherit' }, fontSize: 14 }}
+                aria-label={t('layout.language')}
               >
                 {LANGUAGES.map((l) => (
                   <MenuItem key={l.code} value={l.code}>{l.label}</MenuItem>

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Localization;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
+using System.Resources;
 using UrGuide.WebApp.Resources;
 
 namespace UrGuide.WebApp.Controllers
@@ -15,6 +15,11 @@ namespace UrGuide.WebApp.Controllers
     {
         private readonly IStringLocalizer<SharedResource> _localizer;
         private static readonly string[] _supportedLanguages = ["en", "fr", "es", "de", "ar"];
+
+        // ResourceManager for culture-specific lookups without touching ambient culture
+        private static readonly ResourceManager _resourceManager = new ResourceManager(
+            "UrGuide.WebApp.Resources.SharedResource",
+            typeof(SharedResource).Assembly);
 
         public LocalizationController(IStringLocalizer<SharedResource> localizer)
         {
@@ -50,34 +55,16 @@ namespace UrGuide.WebApp.Controllers
             if (!_supportedLanguages.Contains(language))
                 return BadRequest(new { error = $"Language '{language}' is not supported. Supported languages: {string.Join(", ", _supportedLanguages)}" });
 
-            // Switch culture for this request to retrieve the correct localized strings
             var requestedCulture = new CultureInfo(language);
-            var previousCulture = CultureInfo.CurrentUICulture;
+            var resourceKeys = GetAllResourceKeys();
+            var translations = LookupTranslations(resourceKeys, requestedCulture);
 
-            try
+            return Ok(new
             {
-                CultureInfo.CurrentUICulture = requestedCulture;
-
-                var resourceKeys = GetAllResourceKeys();
-                var translations = resourceKeys.ToDictionary(
-                    key => key,
-                    key =>
-                    {
-                        var localizedString = _localizer[key];
-                        return localizedString.ResourceNotFound ? null : localizedString.Value;
-                    });
-
-                return Ok(new
-                {
-                    language,
-                    culture = requestedCulture.DisplayName,
-                    translations
-                });
-            }
-            finally
-            {
-                CultureInfo.CurrentUICulture = previousCulture;
-            }
+                language,
+                culture = requestedCulture.DisplayName,
+                translations
+            });
         }
 
         /// <summary>
@@ -89,34 +76,28 @@ namespace UrGuide.WebApp.Controllers
         public IActionResult GetAllTranslations()
         {
             var resourceKeys = GetAllResourceKeys();
-            var result = new Dictionary<string, Dictionary<string, string?>>();
-
-            foreach (var language in _supportedLanguages)
-            {
-                var requestedCulture = new CultureInfo(language);
-                var previousCulture = CultureInfo.CurrentUICulture;
-                try
-                {
-                    CultureInfo.CurrentUICulture = requestedCulture;
-                    result[language] = resourceKeys.ToDictionary(
-                        key => key,
-                        key =>
-                        {
-                            var localizedString = _localizer[key];
-                            return localizedString.ResourceNotFound ? null : localizedString.Value;
-                        });
-                }
-                finally
-                {
-                    CultureInfo.CurrentUICulture = previousCulture;
-                }
-            }
+            var translations = _supportedLanguages.ToDictionary(
+                lang => lang,
+                lang => LookupTranslations(resourceKeys, new CultureInfo(lang)));
 
             return Ok(new
             {
                 supportedLanguages = _supportedLanguages,
-                translations = result
+                translations
             });
+        }
+
+        /// <summary>
+        /// Looks up translations for the given keys in the given culture using ResourceManager
+        /// directly, without modifying any ambient/thread culture.
+        /// </summary>
+        private static Dictionary<string, string?> LookupTranslations(
+            IEnumerable<string> keys,
+            CultureInfo culture)
+        {
+            return keys.ToDictionary(
+                key => key,
+                key => _resourceManager.GetString(key, culture));
         }
 
         /// <summary>
