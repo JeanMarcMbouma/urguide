@@ -41,9 +41,6 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/home" element={<Home />} />
-      <Route path="/search" element={<GuideSearch />} />
-      <Route path="/guides/:guideId" element={<GuideProfile />} />
 
       <Route
         path="/"
@@ -53,12 +50,15 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/home" replace />} />
+        <Route index element={<Navigate to="home" replace />} />
+        <Route path="home" element={<Home />} />
+        <Route path="search" element={<GuideSearch />} />
+        <Route path="guides/:postId" element={<GuideProfile />} />
         <Route path="tours/create" element={<CreateTourRequest />} />
         <Route path="tours/my" element={<MyTourRequests />} />
         <Route path="tours/:tourRequestId" element={<TourRequestDetail />} />
         <Route path="bookings" element={<Bookings />} />
-        <Route path="payment/:tourRequestId" element={<Payment />} />
+        <Route path="payment/:bookingId" element={<Payment />} />
         <Route path="payment/history" element={<PaymentHistory />} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<Settings />} />

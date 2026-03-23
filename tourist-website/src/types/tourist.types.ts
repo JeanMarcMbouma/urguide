@@ -18,14 +18,14 @@ export interface AuthTokens {
 export interface User {
   id: string;
   email: string;
+  userName: string;
   firstName: string;
   lastName: string;
-  phoneNumber?: string;
-  profileImageUrl?: string;
   roles: string[];
 }
 
 // Guide discovery types (#168)
+// Mapped from PostSearchDocument / PostModel
 export interface GuideListItem {
   id: string;
   firstName: string;
@@ -41,6 +41,7 @@ export interface GuideListItem {
   verified: boolean;
 }
 
+// Mapped from PostModel
 export interface GuideDetail extends GuideListItem {
   bio: string;
   experience: number;
@@ -50,7 +51,7 @@ export interface GuideDetail extends GuideListItem {
 }
 
 export interface GalleryPreview {
-  id: number;
+  id: string;
   title: string;
   coverImageUrl: string;
   imageCount: number;
@@ -64,12 +65,13 @@ export interface SearchFilters {
   minRating?: number;
   languages?: string[];
   specialties?: string[];
-  sortBy?: 'rating' | 'price' | 'reviews';
+  sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   page?: number;
   pageSize?: number;
 }
 
+// Matches backend SearchResponse<T>
 export interface SearchResult<T> {
   items: T[];
   totalCount: number;
@@ -85,7 +87,7 @@ export interface FeaturedContent {
 }
 
 export interface Destination {
-  id: number;
+  id: string;
   name: string;
   country: string;
   imageUrl: string;
@@ -93,7 +95,7 @@ export interface Destination {
 }
 
 export interface TourPreview {
-  id: number;
+  id: string;
   title: string;
   description: string;
   imageUrl?: string;
@@ -104,164 +106,156 @@ export interface TourPreview {
 }
 
 // Tour Request & Bidding types (#169)
+// Matches backend CreateTourRequestModel
 export interface CreateTourRequestData {
   title: string;
   description: string;
-  regionId: number;
-  startDate: string;
-  endDate: string;
-  numberOfPeople: number;
-  budgetMin: number;
-  budgetMax: number;
-  currency: string;
-  languages: string[];
-  specialRequirements?: string;
+  preferredDate: string;
+  maxParticipants: number;
+  maxBudget: number;
+  tags: string;
+  regionId: string;
 }
 
+// Matches backend TourRequestModel
 export interface TourRequest {
-  id: number;
+  tourRequestId: string;
   title: string;
   description: string;
-  regionId: number;
+  preferredDate: string;
+  maxParticipants: number;
+  maxBudget: number;
+  tags: string;
+  regionId: string;
   regionName: string;
-  startDate: string;
-  endDate: string;
-  numberOfPeople: number;
-  budgetMin: number;
-  budgetMax: number;
-  currency: string;
-  languages: string[];
-  specialRequirements?: string;
   status: string;
-  bidCount: number;
+  requesterId: string;
+  requesterName: string;
   createdAt: string;
-  userId: string;
+  updatedAt: string;
 }
 
+// Matches backend BidHistoryModel
 export interface Bid {
-  id: number;
-  postId: number;
-  guideId: string;
-  guideName: string;
-  guideProfileImage?: string;
-  guideRating: number;
-  guideReviewCount: number;
-  amount: number;
-  currency: string;
-  message: string;
-  estimatedDuration: string;
-  status: string;
-  createdAt: string;
+  value: string;
+  author: string;
+  authorImage: string;
+  created: string;
+  isActive: boolean;
 }
 
+// Mapped from PostModel for bookings view
 export interface Booking {
-  id: number;
-  tourRequestId: number;
-  tourTitle: string;
-  guideName: string;
-  guideProfileImage?: string;
+  id: string;
+  text: string;
+  description: string;
+  price: string;
+  rating: string;
+  location: string;
+  status: string;
   startDate: string;
   endDate: string;
-  amount: number;
-  currency: string;
-  status: string;
-  paymentStatus: string;
-  createdAt: string;
+  seats: number;
+  reservedSeats: number;
+  authorId: string;
+  author: string;
+  authorAvatar: string;
+  hasReserved: boolean;
+  reviews: number;
 }
 
 // Payment types (#170)
+// Matches backend CreatePaymentRequest
 export interface PaymentRequest {
-  tourRequestId: number;
+  bookingId: string;
   amount: number;
-  currency: string;
+  currencyCode: string;
+  description?: string;
   paymentMethodId?: string;
 }
 
+// Matches backend PaymentResponse
 export interface PaymentInfo {
-  id: number;
-  tourRequestId: number;
-  amount: number;
-  currency: string;
+  paymentId: string;
+  clientSecret: string;
   status: string;
-  stripePaymentIntentId?: string;
-  clientSecret?: string;
+  amount: number;
+  currencyCode: string;
+  platformFeeAmount: number;
+  guidePayout: number;
   createdAt: string;
 }
 
-export interface TransactionItem {
-  id: number;
-  type: string;
+// Matches backend PaymentDetailsResponse
+export interface PaymentDetails {
+  paymentId: string;
+  userId: string;
+  bookingId: string;
   amount: number;
-  currency: string;
-  description: string;
+  currencyCode: string;
   status: string;
+  paymentMethod: string;
+  description: string;
+  platformFeeAmount: number;
+  guidePayout: number;
   createdAt: string;
-  tourTitle?: string;
-  guideName?: string;
+  updatedAt: string;
 }
 
 export interface TransactionHistoryResponse {
-  transactions: TransactionItem[];
+  items: PaymentDetails[];
   totalCount: number;
   page: number;
   pageSize: number;
 }
 
+// Matches backend /api/auth/me response
 export interface UserProfile {
   id: string;
   email: string;
+  userName: string;
   firstName: string;
   lastName: string;
-  phoneNumber?: string;
-  profileImageUrl?: string;
-  address?: string;
-  city?: string;
-  country?: string;
-  preferredCurrency: string;
-  preferredLanguage: string;
-  twoFactorEnabled: boolean;
-  createdAt: string;
+  roles: string[];
 }
 
+// Matches backend UpdateUserModel
 export interface UpdateProfileRequest {
+  id: string;
   firstName: string;
   lastName: string;
-  phoneNumber?: string;
-  address?: string;
-  city?: string;
-  country?: string;
-  preferredCurrency: string;
-  preferredLanguage: string;
+  profileImage?: string;
+}
+
+// Matches backend SetPreferencesRequest / UserPreferenceDto
+export interface UserPreferenceDto {
+  preferenceType: string;
+  preferenceValue: string;
+  weight: number;
 }
 
 export interface NotificationPreferences {
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-  bidUpdates: boolean;
-  tourReminders: boolean;
-  promotionalEmails: boolean;
-  reviewReminders: boolean;
+  preferences: UserPreferenceDto[];
 }
 
 // Review types (#171)
+// Matches backend AuthoredFeedback
 export interface ReviewItem {
-  id: number;
-  postId: number;
-  tourTitle: string;
-  guideName: string;
+  id: string;
+  text: string;
   rating: number;
-  comment: string;
-  photos: string[];
-  createdAt: string;
+  publicationDate: string;
+  authorId: string;
+  authorImage: string;
+  authorFullName: string;
   guideResponse?: string;
-  guideRespondedAt?: string;
 }
 
+// Matches backend FeedbackModel
 export interface WriteReviewData {
-  postId: number;
+  postId: string;
   rating: number;
-  comment: string;
-  photos?: File[];
+  text: string;
 }
 
 export interface ReviewStats {
@@ -271,45 +265,64 @@ export interface ReviewStats {
 }
 
 // Notification types (#171)
+// Matches backend Notification entity
 export interface NotificationItem {
-  id: number;
-  type: string;
-  title: string;
-  message: string;
-  isRead: boolean;
-  data?: Record<string, string>;
-  createdAt: string;
+  id: string;
+  content: string;
+  authorId: string;
+  authorImage: string;
+  referenceLink: string;
+  created: string;
+  read: boolean;
+  isSystem: boolean;
 }
 
 // Messages types (#171)
+// Matches backend ConversationSummary
 export interface Conversation {
-  id: number;
+  id: string;
   participantId: string;
   participantName: string;
-  participantProfileImage?: string;
   lastMessage: string;
   lastMessageAt: string;
   unreadCount: number;
 }
 
+// Matches backend MessageItem
 export interface Message {
-  id: number;
-  conversationId: number;
+  id: string;
+  conversationId: string;
   senderId: string;
   senderName: string;
   content: string;
+  sentAt: string;
   isRead: boolean;
-  createdAt: string;
 }
 
+// Matches backend SendMessageRequest
 export interface SendMessageRequest {
-  conversationId: number;
+  conversationId: string;
   content: string;
 }
 
-// Shared utility types
+// Matches backend PagedList<T>
 export interface PagedResult<T> {
   items: T[];
+  itemsCount: number;
+  pageNumber: number;
+}
+
+// Matches backend ConversationListResponse
+export interface ConversationListResponse {
+  conversations: Conversation[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}
+
+// Matches backend MessageListResponse
+export interface MessageListResponse {
+  messages: Message[];
   totalCount: number;
   page: number;
   pageSize: number;

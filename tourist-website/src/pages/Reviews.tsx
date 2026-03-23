@@ -10,12 +10,13 @@ import {
   Card,
   CardContent,
   Pagination,
-  Chip,
 } from '@mui/material';
 import { getMyReviews } from '../services/touristApi';
+import { useAuth } from '../hooks/useAuth';
 import type { ReviewItem } from '../types/tourist.types';
 
 const Reviews = () => {
+  const { user } = useAuth();
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
@@ -24,11 +25,12 @@ const Reviews = () => {
 
   useEffect(() => {
     const fetchReviews = async () => {
+      if (!user?.id) return;
       setIsLoading(true);
       try {
-        const data = await getMyReviews(page, 10);
+        const data = await getMyReviews(user.id, page);
         setReviews(data.items || []);
-        setTotalCount(data.totalCount || 0);
+        setTotalCount(data.itemsCount || 0);
       } catch {
         setError('Failed to load reviews.');
       } finally {
@@ -36,7 +38,7 @@ const Reviews = () => {
       }
     };
     fetchReviews();
-  }, [page]);
+  }, [page, user?.id]);
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -60,34 +62,19 @@ const Reviews = () => {
             <Card key={review.id} sx={{ mb: 2 }}>
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="h6">{review.tourTitle}</Typography>
+                  <Typography variant="h6">{review.authorFullName}</Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {new Date(review.createdAt).toLocaleDateString()}
+                    {new Date(review.publicationDate).toLocaleDateString()}
                   </Typography>
                 </Box>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  Guide: {review.guideName}
-                </Typography>
                 <Rating value={review.rating} readOnly size="small" sx={{ mb: 1 }} />
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                  {review.comment}
+                  {review.text}
                 </Typography>
-                {review.photos?.length > 0 && (
-                  <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
-                    {review.photos.map((_photo, i) => (
-                      <Chip key={i} label={`Photo ${i + 1}`} size="small" variant="outlined" />
-                    ))}
-                  </Box>
-                )}
                 {review.guideResponse && (
                   <Paper sx={{ p: 2, bgcolor: 'grey.50', mt: 1 }}>
                     <Typography variant="caption" fontWeight="bold">Guide Response:</Typography>
                     <Typography variant="body2">{review.guideResponse}</Typography>
-                    {review.guideRespondedAt && (
-                      <Typography variant="caption" color="text.secondary">
-                        {new Date(review.guideRespondedAt).toLocaleDateString()}
-                      </Typography>
-                    )}
                   </Paper>
                 )}
               </CardContent>

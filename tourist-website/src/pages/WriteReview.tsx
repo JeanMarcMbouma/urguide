@@ -10,47 +10,17 @@ import {
   Rating,
   Alert,
   CircularProgress,
-  IconButton,
 } from '@mui/material';
-import {
-  PhotoCamera,
-  Close as CloseIcon,
-} from '@mui/icons-material';
 import { submitReview } from '../services/touristApi';
 
 const WriteReview = () => {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
   const [rating, setRating] = useState<number | null>(null);
-  const [comment, setComment] = useState('');
-  const [photos, setPhotos] = useState<File[]>([]);
+  const [text, setText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-
-  const handlePhotoAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const validFiles = Array.from(e.target.files).filter((file) => {
-        if (!ALLOWED_TYPES.includes(file.type)) {
-          setError(`${file.name} is not a supported image format.`);
-          return false;
-        }
-        if (file.size > MAX_FILE_SIZE) {
-          setError(`${file.name} exceeds the 5MB size limit.`);
-          return false;
-        }
-        return true;
-      });
-      setPhotos((prev) => [...prev, ...validFiles].slice(0, 5));
-    }
-  };
-
-  const handlePhotoRemove = (index: number) => {
-    setPhotos((prev) => prev.filter((_, i) => i !== index));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,10 +29,9 @@ const WriteReview = () => {
     setError('');
     try {
       await submitReview({
-        postId: parseInt(postId),
+        postId,
         rating,
-        comment,
-        photos: photos.length > 0 ? photos : undefined,
+        text,
       });
       setSuccess(true);
       setTimeout(() => navigate('/reviews'), 1500);
@@ -103,61 +72,18 @@ const WriteReview = () => {
           rows={5}
           label="Your Review"
           placeholder="Share your experience with other tourists..."
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
           sx={{ mb: 3 }}
           required
         />
-
-        {/* Photo Upload */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" gutterBottom>Photos (optional, max 5)</Typography>
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-            {photos.map((photo, index) => (
-              <Box
-                key={index}
-                sx={{
-                  position: 'relative',
-                  width: 80,
-                  height: 80,
-                  bgcolor: 'grey.200',
-                  borderRadius: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Typography variant="caption" noWrap sx={{ maxWidth: 70, px: 0.5 }}>
-                  {photo.name}
-                </Typography>
-                <IconButton
-                  size="small"
-                  sx={{ position: 'absolute', top: -8, right: -8, bgcolor: 'white' }}
-                  onClick={() => handlePhotoRemove(index)}
-                >
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </Box>
-            ))}
-            {photos.length < 5 && (
-              <Button
-                component="label"
-                variant="outlined"
-                sx={{ width: 80, height: 80 }}
-              >
-                <PhotoCamera />
-                <input type="file" hidden accept="image/*" onChange={handlePhotoAdd} />
-              </Button>
-            )}
-          </Box>
-        </Box>
 
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
           <Button variant="outlined" onClick={() => navigate(-1)}>Cancel</Button>
           <Button
             type="submit"
             variant="contained"
-            disabled={isSubmitting || !rating || !comment}
+            disabled={isSubmitting || !rating || !text}
           >
             {isSubmitting ? <CircularProgress size={24} /> : 'Submit Review'}
           </Button>

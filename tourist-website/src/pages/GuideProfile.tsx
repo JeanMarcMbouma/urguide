@@ -30,7 +30,7 @@ import { getGuideProfile, getGuideReviews } from '../services/touristApi';
 import type { GuideDetail, ReviewItem } from '../types/tourist.types';
 
 const GuideProfile = () => {
-  const { guideId } = useParams<{ guideId: string }>();
+  const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
   const [guide, setGuide] = useState<GuideDetail | null>(null);
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
@@ -39,14 +39,19 @@ const GuideProfile = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!guideId) return;
+      if (!postId) return;
       try {
-        const [guideData, reviewData] = await Promise.all([
-          getGuideProfile(guideId),
-          getGuideReviews(guideId),
-        ]);
+        const guideData = await getGuideProfile(postId);
         setGuide(guideData);
-        setReviews(reviewData.items || []);
+        // Load reviews using the post author's id
+        if (guideData.id) {
+          const reviewData = await getGuideReviews(guideData.id).catch(() => ({
+            items: [],
+            itemsCount: 0,
+            pageNumber: 1,
+          }));
+          setReviews(reviewData.items || []);
+        }
       } catch {
         setError('Failed to load guide profile.');
       } finally {
@@ -54,7 +59,7 @@ const GuideProfile = () => {
       }
     };
     fetchData();
-  }, [guideId]);
+  }, [postId]);
 
   if (isLoading) {
     return (
@@ -208,21 +213,21 @@ const GuideProfile = () => {
                 {reviews.map((review) => (
                   <ListItem key={review.id} alignItems="flex-start" sx={{ px: 0 }}>
                     <ListItemAvatar>
-                      <Avatar>{review.guideName?.[0] || 'U'}</Avatar>
+                      <Avatar src={review.authorImage}>{review.authorFullName?.[0] || 'U'}</Avatar>
                     </ListItemAvatar>
                     <ListItemText
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Rating value={review.rating} size="small" readOnly />
                           <Typography variant="caption" color="text.secondary">
-                            {new Date(review.createdAt).toLocaleDateString()}
+                            {new Date(review.publicationDate).toLocaleDateString()}
                           </Typography>
                         </Box>
                       }
                       secondary={
                         <>
                           <Typography variant="body2" sx={{ mt: 0.5 }}>
-                            {review.comment}
+                            {review.text}
                           </Typography>
                           {review.guideResponse && (
                             <Paper sx={{ p: 1.5, mt: 1, bgcolor: 'grey.50' }}>

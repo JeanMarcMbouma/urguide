@@ -46,14 +46,14 @@ const MyTourRequests = () => {
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [cancelTarget, setCancelTarget] = useState<number | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<string | null>(null);
 
   const fetchRequests = async (p: number) => {
     setIsLoading(true);
     try {
-      const data = await getMyTourRequests(p, 10);
+      const data = await getMyTourRequests(p);
       setRequests(data.items || []);
-      setTotalCount(data.totalCount || 0);
+      setTotalCount(data.itemsCount || 0);
     } catch {
       setError('Failed to load tour requests.');
     } finally {
@@ -115,16 +115,15 @@ const MyTourRequests = () => {
               <TableHead>
                 <TableRow>
                   <TableCell>Title</TableCell>
-                  <TableCell>Dates</TableCell>
-                  <TableCell>Budget</TableCell>
-                  <TableCell>Bids</TableCell>
+                  <TableCell>Preferred Date</TableCell>
+                  <TableCell>Max Budget</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell align="right">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {requests.map((request) => (
-                  <TableRow key={request.id} hover>
+                  <TableRow key={request.tourRequestId} hover>
                     <TableCell>
                       <Typography variant="subtitle2">{request.title}</Typography>
                       <Typography variant="caption" color="text.secondary">
@@ -132,26 +131,23 @@ const MyTourRequests = () => {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      {new Date(request.startDate).toLocaleDateString()} - {new Date(request.endDate).toLocaleDateString()}
+                      {new Date(request.preferredDate).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      {request.currency} {request.budgetMin} - {request.budgetMax}
-                    </TableCell>
-                    <TableCell>
-                      <Chip label={request.bidCount} size="small" color={request.bidCount > 0 ? 'primary' : 'default'} />
+                      ${request.maxBudget}
                     </TableCell>
                     <TableCell>
                       <Chip label={request.status} size="small" color={getStatusColor(request.status)} />
                     </TableCell>
                     <TableCell align="right">
                       <Tooltip title="View Details">
-                        <IconButton onClick={() => navigate(`/tours/${request.id}`)}>
+                        <IconButton onClick={() => navigate(`/tours/${request.tourRequestId}`)}>
                           <Visibility />
                         </IconButton>
                       </Tooltip>
                       {request.status?.toLowerCase() === 'open' && (
                         <Tooltip title="Cancel">
-                          <IconButton onClick={() => setCancelTarget(request.id)} color="error">
+                          <IconButton onClick={() => setCancelTarget(request.tourRequestId)} color="error">
                             <CancelIcon />
                           </IconButton>
                         </Tooltip>

@@ -18,14 +18,10 @@ import type { UpdateProfileRequest } from '../types/tourist.types';
 
 const Profile = () => {
   const [profile, setProfile] = useState<UpdateProfileRequest>({
+    id: '',
     firstName: '',
     lastName: '',
-    phoneNumber: '',
-    address: '',
-    city: '',
-    country: '',
-    preferredCurrency: 'USD',
-    preferredLanguage: 'en',
+    profileImage: '',
   });
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -39,14 +35,9 @@ const Profile = () => {
         const data = await getUserProfile();
         setEmail(data.email);
         setProfile({
+          id: data.id,
           firstName: data.firstName || '',
           lastName: data.lastName || '',
-          phoneNumber: data.phoneNumber || '',
-          address: data.address || '',
-          city: data.city || '',
-          country: data.country || '',
-          preferredCurrency: data.preferredCurrency || 'USD',
-          preferredLanguage: data.preferredLanguage || 'en',
         });
       } catch {
         setError('Failed to load profile.');
@@ -117,38 +108,6 @@ const Profile = () => {
               value={profile.lastName}
               onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
               required
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
-              fullWidth
-              label="Phone Number"
-              value={profile.phoneNumber}
-              onChange={(e) => setProfile({ ...profile, phoneNumber: e.target.value })}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
-              fullWidth
-              label="Country"
-              value={profile.country}
-              onChange={(e) => setProfile({ ...profile, country: e.target.value })}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
-              fullWidth
-              label="City"
-              value={profile.city}
-              onChange={(e) => setProfile({ ...profile, city: e.target.value })}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
-              fullWidth
-              label="Address"
-              value={profile.address}
-              onChange={(e) => setProfile({ ...profile, address: e.target.value })}
             />
           </Grid>
           <Grid size={{ xs: 12 }}>

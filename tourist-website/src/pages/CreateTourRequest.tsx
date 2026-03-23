@@ -7,20 +7,12 @@ import {
   TextField,
   Button,
   Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Box,
   Alert,
   CircularProgress,
-  Chip,
 } from '@mui/material';
 import { createTourRequest } from '../services/touristApi';
 import type { CreateTourRequestData } from '../types/tourist.types';
-
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD'];
-const LANGUAGES = ['English', 'French', 'Spanish', 'German', 'Italian', 'Portuguese', 'Arabic', 'Chinese', 'Japanese', 'Korean'];
 
 const CreateTourRequest = () => {
   const navigate = useNavigate();
@@ -30,18 +22,14 @@ const CreateTourRequest = () => {
   const [form, setForm] = useState<CreateTourRequestData>({
     title: '',
     description: '',
-    regionId: 0,
-    startDate: '',
-    endDate: '',
-    numberOfPeople: 1,
-    budgetMin: 0,
-    budgetMax: 0,
-    currency: 'USD',
-    languages: [],
-    specialRequirements: '',
+    preferredDate: '',
+    maxParticipants: 1,
+    maxBudget: 0,
+    tags: '',
+    regionId: '',
   });
 
-  const handleChange = (field: keyof CreateTourRequestData, value: string | number | string[]) => {
+  const handleChange = (field: keyof CreateTourRequestData, value: string | number) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -52,7 +40,7 @@ const CreateTourRequest = () => {
     try {
       const result = await createTourRequest(form);
       setSuccess(true);
-      setTimeout(() => navigate(`/tours/${result.id}`), 1500);
+      setTimeout(() => navigate(`/tours/${result.tourRequestId}`), 1500);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
       setError(axiosErr.response?.data?.message || 'Failed to create tour request. Please try again.');
@@ -101,11 +89,10 @@ const CreateTourRequest = () => {
             <TextField
               required
               fullWidth
-              type="number"
               label="Region ID"
-              value={form.regionId || ''}
-              onChange={(e) => handleChange('regionId', parseInt(e.target.value) || 0)}
-              slotProps={{ htmlInput: { min: 1 } }}
+              placeholder="e.g., paris-01"
+              value={form.regionId}
+              onChange={(e) => handleChange('regionId', e.target.value)}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
@@ -113,20 +100,9 @@ const CreateTourRequest = () => {
               required
               fullWidth
               type="date"
-              label="Start Date"
-              value={form.startDate}
-              onChange={(e) => handleChange('startDate', e.target.value)}
-              slotProps={{ inputLabel: { shrink: true } }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
-              required
-              fullWidth
-              type="date"
-              label="End Date"
-              value={form.endDate}
-              onChange={(e) => handleChange('endDate', e.target.value)}
+              label="Preferred Date"
+              value={form.preferredDate}
+              onChange={(e) => handleChange('preferredDate', e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
             />
           </Grid>
@@ -135,35 +111,10 @@ const CreateTourRequest = () => {
               required
               fullWidth
               type="number"
-              label="Number of People"
-              value={form.numberOfPeople}
-              onChange={(e) => handleChange('numberOfPeople', parseInt(e.target.value) || 1)}
+              label="Max Participants"
+              value={form.maxParticipants}
+              onChange={(e) => handleChange('maxParticipants', parseInt(e.target.value) || 1)}
               slotProps={{ htmlInput: { min: 1, max: 50 } }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <FormControl fullWidth required>
-              <InputLabel>Currency</InputLabel>
-              <Select
-                value={form.currency}
-                label="Currency"
-                onChange={(e) => handleChange('currency', e.target.value)}
-              >
-                {CURRENCIES.map((c) => (
-                  <MenuItem key={c} value={c}>{c}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
-              required
-              fullWidth
-              type="number"
-              label="Minimum Budget"
-              value={form.budgetMin || ''}
-              onChange={(e) => handleChange('budgetMin', parseFloat(e.target.value) || 0)}
-              slotProps={{ htmlInput: { min: 0 } }}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
@@ -172,42 +123,18 @@ const CreateTourRequest = () => {
               fullWidth
               type="number"
               label="Maximum Budget"
-              value={form.budgetMax || ''}
-              onChange={(e) => handleChange('budgetMax', parseFloat(e.target.value) || 0)}
+              value={form.maxBudget || ''}
+              onChange={(e) => handleChange('maxBudget', parseFloat(e.target.value) || 0)}
               slotProps={{ htmlInput: { min: 0 } }}
             />
           </Grid>
           <Grid size={{ xs: 12 }}>
-            <FormControl fullWidth>
-              <InputLabel>Preferred Languages</InputLabel>
-              <Select
-                multiple
-                value={form.languages}
-                label="Preferred Languages"
-                onChange={(e) => handleChange('languages', e.target.value as string[])}
-                renderValue={(selected) => (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {(selected as string[]).map((value) => (
-                      <Chip key={value} label={value} size="small" />
-                    ))}
-                  </Box>
-                )}
-              >
-                {LANGUAGES.map((lang) => (
-                  <MenuItem key={lang} value={lang}>{lang}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12 }}>
             <TextField
               fullWidth
-              multiline
-              rows={2}
-              label="Special Requirements"
-              placeholder="Any accessibility needs, dietary restrictions, etc."
-              value={form.specialRequirements}
-              onChange={(e) => handleChange('specialRequirements', e.target.value)}
+              label="Tags"
+              placeholder="e.g., culture, history, food (comma-separated)"
+              value={form.tags}
+              onChange={(e) => handleChange('tags', e.target.value)}
             />
           </Grid>
           <Grid size={{ xs: 12 }}>
@@ -218,7 +145,7 @@ const CreateTourRequest = () => {
               <Button
                 type="submit"
                 variant="contained"
-                disabled={isSubmitting || !form.title || !form.description || !form.startDate || !form.endDate || !form.regionId || form.budgetMin <= 0 || form.budgetMax <= 0 || form.budgetMin >= form.budgetMax}
+                disabled={isSubmitting || !form.title || !form.description || !form.preferredDate || !form.regionId || form.maxBudget <= 0}
               >
                 {isSubmitting ? <CircularProgress size={24} /> : 'Create Request'}
               </Button>

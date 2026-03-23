@@ -19,11 +19,13 @@ import {
 } from '@mui/material';
 import { Send as SendIcon } from '@mui/icons-material';
 import { getConversations, getMessages, sendMessage, markConversationRead } from '../services/touristApi';
+import { useAuth } from '../hooks/useAuth';
 import type { Conversation, Message as MessageType } from '../types/tourist.types';
 
 const Messages = () => {
+  const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -35,7 +37,7 @@ const Messages = () => {
     const fetchConversations = async () => {
       try {
         const data = await getConversations();
-        setConversations(data.items || []);
+        setConversations(data.conversations || []);
       } catch {
         setError('Failed to load conversations.');
       } finally {
@@ -50,7 +52,7 @@ const Messages = () => {
     const fetchMessages = async () => {
       try {
         const data = await getMessages(selectedConversation);
-        setMessages(data.items || []);
+        setMessages(data.messages || []);
         await markConversationRead(selectedConversation);
         setConversations((prev) =>
           prev.map((c) =>
@@ -85,6 +87,8 @@ const Messages = () => {
       setIsSending(false);
     }
   };
+
+  const isOwnMessage = (senderId: string) => user?.id === senderId;
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -152,7 +156,7 @@ const Messages = () => {
                         key={msg.id}
                         sx={{
                           display: 'flex',
-                          justifyContent: msg.senderId === 'me' ? 'flex-end' : 'flex-start',
+                          justifyContent: isOwnMessage(msg.senderId) ? 'flex-end' : 'flex-start',
                           mb: 1,
                         }}
                       >
@@ -160,8 +164,8 @@ const Messages = () => {
                           sx={{
                             p: 1.5,
                             maxWidth: '70%',
-                            bgcolor: msg.senderId === 'me' ? 'primary.main' : 'grey.100',
-                            color: msg.senderId === 'me' ? 'white' : 'text.primary',
+                            bgcolor: isOwnMessage(msg.senderId) ? 'primary.main' : 'grey.100',
+                            color: isOwnMessage(msg.senderId) ? 'white' : 'text.primary',
                           }}
                         >
                           <Typography variant="body2">{msg.content}</Typography>
@@ -169,7 +173,7 @@ const Messages = () => {
                             variant="caption"
                             sx={{ opacity: 0.7, display: 'block', textAlign: 'right', mt: 0.5 }}
                           >
-                            {new Date(msg.createdAt).toLocaleTimeString()}
+                            {new Date(msg.sentAt).toLocaleTimeString()}
                           </Typography>
                         </Paper>
                       </Box>

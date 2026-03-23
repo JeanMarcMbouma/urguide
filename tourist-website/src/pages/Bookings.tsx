@@ -19,7 +19,6 @@ import {
 } from '@mui/material';
 import {
   CalendarMonth,
-  Payment as PaymentIcon,
 } from '@mui/icons-material';
 import { getBookings } from '../services/touristApi';
 import type { Booking } from '../types/tourist.types';
@@ -34,7 +33,7 @@ const Bookings = () => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const data = await getBookings(1, 50);
+        const data = await getBookings(1);
         setBookings(data.items || []);
       } catch {
         setError('Failed to load bookings.');
@@ -47,26 +46,26 @@ const Bookings = () => {
 
   const getStatusColor = (status: string): 'default' | 'primary' | 'success' | 'warning' | 'error' => {
     switch (status?.toLowerCase()) {
-      case 'confirmed': return 'success';
+      case 'active': return 'success';
       case 'pending': return 'warning';
       case 'completed': return 'success';
-      case 'cancelled': return 'error';
+      case 'closed': case 'cancelled': return 'error';
       default: return 'default';
     }
   };
 
   const activeBookings = bookings.filter(
-    (b) => ['confirmed', 'pending'].includes(b.status?.toLowerCase())
+    (b) => ['active', 'pending'].includes(b.status?.toLowerCase())
   );
   const pastBookings = bookings.filter(
-    (b) => ['completed', 'cancelled'].includes(b.status?.toLowerCase())
+    (b) => ['completed', 'closed', 'cancelled'].includes(b.status?.toLowerCase())
   );
   const displayedBookings = tab === 0 ? activeBookings : pastBookings;
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom>
-        My Bookings
+        My Tours
       </Typography>
 
       {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
@@ -83,7 +82,7 @@ const Bookings = () => {
       ) : displayedBookings.length === 0 ? (
         <Paper sx={{ p: 6, textAlign: 'center' }}>
           <Typography variant="h6" color="text.secondary" gutterBottom>
-            {tab === 0 ? 'No active bookings' : 'No past bookings'}
+            {tab === 0 ? 'No active tours' : 'No past tours'}
           </Typography>
           {tab === 0 && (
             <Button variant="contained" onClick={() => navigate('/tours/create')} sx={{ mt: 2 }}>
@@ -98,48 +97,36 @@ const Bookings = () => {
               <Card>
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                    <Typography variant="h6">{booking.tourTitle}</Typography>
+                    <Typography variant="h6">{booking.text || booking.description}</Typography>
                     <Chip label={booking.status} size="small" color={getStatusColor(booking.status)} />
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Avatar sx={{ mr: 1, width: 32, height: 32 }}>
-                      {booking.guideName?.[0] || '?'}
+                    <Avatar src={booking.authorAvatar} sx={{ mr: 1, width: 32, height: 32 }}>
+                      {booking.author?.[0] || '?'}
                     </Avatar>
-                    <Typography variant="body2">{booking.guideName}</Typography>
+                    <Typography variant="body2">{booking.author}</Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <CalendarMonth fontSize="small" color="action" />
-                    <Typography variant="body2">
-                      {new Date(booking.startDate).toLocaleDateString()} - {new Date(booking.endDate).toLocaleDateString()}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <PaymentIcon fontSize="small" color="action" />
-                    <Typography variant="body2">
-                      {booking.currency} {booking.amount}
-                    </Typography>
-                    <Chip
-                      label={booking.paymentStatus}
-                      size="small"
-                      variant="outlined"
-                      color={booking.paymentStatus === 'paid' ? 'success' : 'warning'}
-                    />
-                  </Box>
+                  {booking.startDate && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <CalendarMonth fontSize="small" color="action" />
+                      <Typography variant="body2">
+                        {new Date(booking.startDate).toLocaleDateString()}
+                        {booking.endDate && ` - ${new Date(booking.endDate).toLocaleDateString()}`}
+                      </Typography>
+                    </Box>
+                  )}
+                  <Typography variant="body2" color="primary">
+                    ${booking.price}
+                  </Typography>
+                  {booking.hasReserved && (
+                    <Chip label="Reserved" size="small" color="success" sx={{ mt: 1 }} />
+                  )}
                 </CardContent>
                 <CardActions>
-                  {booking.paymentStatus !== 'paid' && booking.status === 'confirmed' && (
+                  {booking.status?.toLowerCase() === 'completed' && (
                     <Button
                       size="small"
-                      variant="contained"
-                      onClick={() => navigate(`/payment/${booking.tourRequestId}`)}
-                    >
-                      Pay Now
-                    </Button>
-                  )}
-                  {booking.status === 'completed' && (
-                    <Button
-                      size="small"
-                      onClick={() => navigate(`/reviews/write/${booking.tourRequestId}`)}
+                      onClick={() => navigate(`/reviews/write/${booking.id}`)}
                     >
                       Write Review
                     </Button>

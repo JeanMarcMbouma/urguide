@@ -18,24 +18,10 @@ import {
 import {
   Notifications as NotificationsIcon,
   MarkEmailRead,
-  Gavel,
-  Payment,
-  Star,
-  Message as MessageIcon,
   Info,
 } from '@mui/icons-material';
 import { getNotifications, markNotificationRead } from '../services/touristApi';
 import type { NotificationItem } from '../types/tourist.types';
-
-const getNotificationIcon = (type: string) => {
-  switch (type?.toLowerCase()) {
-    case 'bid': return <Gavel color="primary" />;
-    case 'payment': return <Payment color="success" />;
-    case 'review': return <Star color="warning" />;
-    case 'message': return <MessageIcon color="info" />;
-    default: return <Info color="action" />;
-  }
-};
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -48,9 +34,9 @@ const Notifications = () => {
     const fetchNotifications = async () => {
       setIsLoading(true);
       try {
-        const data = await getNotifications(page, 20);
+        const data = await getNotifications(page);
         setNotifications(data.items || []);
-        setTotalCount(data.totalCount || 0);
+        setTotalCount(data.itemsCount || 0);
       } catch {
         setError('Failed to load notifications.');
       } finally {
@@ -60,11 +46,11 @@ const Notifications = () => {
     fetchNotifications();
   }, [page]);
 
-  const handleMarkRead = async (id: number) => {
+  const handleMarkRead = async (id: string) => {
     try {
       await markNotificationRead(id);
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
     } catch {
       // Silent fail for mark as read
@@ -76,9 +62,9 @@ const Notifications = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <NotificationsIcon sx={{ mr: 1 }} />
         <Typography variant="h4">Notifications</Typography>
-        {notifications.filter((n) => !n.isRead).length > 0 && (
+        {notifications.filter((n) => !n.read).length > 0 && (
           <Chip
-            label={`${notifications.filter((n) => !n.isRead).length} unread`}
+            label={`${notifications.filter((n) => !n.read).length} unread`}
             color="error"
             size="small"
             sx={{ ml: 2 }}
@@ -106,10 +92,10 @@ const Notifications = () => {
                   {index > 0 && <Divider />}
                   <ListItem
                     sx={{
-                      bgcolor: notification.isRead ? 'transparent' : 'action.hover',
+                      bgcolor: notification.read ? 'transparent' : 'action.hover',
                     }}
                     secondaryAction={
-                      !notification.isRead ? (
+                      !notification.read ? (
                         <IconButton
                           edge="end"
                           onClick={() => handleMarkRead(notification.id)}
@@ -121,18 +107,14 @@ const Notifications = () => {
                     }
                   >
                     <ListItemIcon>
-                      {getNotificationIcon(notification.type)}
+                      <Info color={notification.isSystem ? 'primary' : 'action'} />
                     </ListItemIcon>
                     <ListItemText
-                      primary={notification.title}
+                      primary={notification.content}
                       secondary={
-                        <>
-                          {notification.message}
-                          <br />
-                          <Typography variant="caption" color="text.secondary">
-                            {new Date(notification.createdAt).toLocaleString()}
-                          </Typography>
-                        </>
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(notification.created).toLocaleString()}
+                        </Typography>
                       }
                     />
                   </ListItem>

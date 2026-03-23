@@ -21,10 +21,29 @@ import {
   Security as SecurityIcon,
   Notifications as NotificationsIcon,
 } from '@mui/icons-material';
-import { changePassword, getNotificationPreferences, updateNotificationPreferences } from '../services/touristApi';
-import type { NotificationPreferences } from '../types/tourist.types';
+import { changePassword, getNotificationPreferences, updateNotificationPreferences, getUserProfile } from '../services/touristApi';
+import type { UserPreferenceDto } from '../types/tourist.types';
+
+// Helper to get boolean-like preference from array
+const getPrefValue = (prefs: UserPreferenceDto[], type: string): boolean => {
+  const pref = prefs.find((p) => p.preferenceType === type);
+  return pref ? pref.preferenceValue === 'true' : false;
+};
+
+// Helper to set a boolean-like preference in array
+const setPrefValue = (prefs: UserPreferenceDto[], type: string, value: boolean): UserPreferenceDto[] => {
+  const existing = prefs.findIndex((p) => p.preferenceType === type);
+  const newPref: UserPreferenceDto = { preferenceType: type, preferenceValue: String(value), weight: 1 };
+  if (existing >= 0) {
+    const updated = [...prefs];
+    updated[existing] = newPref;
+    return updated;
+  }
+  return [...prefs, newPref];
+};
 
 const Settings = () => {
+  const [email, setEmail] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -32,28 +51,27 @@ const Settings = () => {
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
 
-  const [notifications, setNotifications] = useState<NotificationPreferences>({
-    emailNotifications: true,
-    pushNotifications: true,
-    bidUpdates: true,
-    tourReminders: true,
-    promotionalEmails: false,
-    reviewReminders: true,
-  });
+  const [preferences, setPreferences] = useState<UserPreferenceDto[]>([]);
   const [isSavingPrefs, setIsSavingPrefs] = useState(false);
   const [prefsError, setPrefsError] = useState('');
   const [prefsSuccess, setPrefsSuccess] = useState('');
 
   useEffect(() => {
-    const fetchPreferences = async () => {
+    const init = async () => {
+      try {
+        const user = await getUserProfile();
+        setEmail(user.email);
+      } catch {
+        // use empty email
+      }
       try {
         const prefs = await getNotificationPreferences();
-        setNotifications(prefs);
+        setPreferences(prefs);
       } catch {
         // Use defaults if fetch fails
       }
     };
-    fetchPreferences();
+    init();
   }, []);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
@@ -73,7 +91,7 @@ const Settings = () => {
 
     setIsChangingPassword(true);
     try {
-      await changePassword(currentPassword, newPassword);
+      await changePassword(email, currentPassword, newPassword, confirmPassword);
       setPasswordSuccess('Password changed successfully!');
       setCurrentPassword('');
       setNewPassword('');
@@ -83,6 +101,10 @@ const Settings = () => {
     } finally {
       setIsChangingPassword(false);
     }
+  };
+
+  const togglePref = (type: string) => {
+    setPreferences((prev) => setPrefValue(prev, type, !getPrefValue(prev, type)));
   };
 
   return (
@@ -181,61 +203,19 @@ const Settings = () => {
         {prefsSuccess && <Alert severity="success" sx={{ mb: 2 }}>{prefsSuccess}</Alert>}
 
         <List>
-          <ListItem>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={notifications.emailNotifications}
-                  onChange={(e) => setNotifications({ ...notifications, emailNotifications: e.target.checked })}
-                />
-              }
-              label="Email Notifications"
-            />
-          </ListItem>
-          <ListItem>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={notifications.bidUpdates}
-                  onChange={(e) => setNotifications({ ...notifications, bidUpdates: e.target.checked })}
-                />
-              }
-              label="Bid Updates"
-            />
-          </ListItem>
-          <ListItem>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={notifications.tourReminders}
-                  onChange={(e) => setNotifications({ ...notifications, tourReminders: e.target.checked })}
-                />
-              }
-              label="Tour Reminders"
-            />
-          </ListItem>
-          <ListItem>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={notifications.promotionalEmails}
-                  onChange={(e) => setNotifications({ ...notifications, promotionalEmails: e.target.checked })}
-                />
-              }
-              label="Promotional Emails"
-            />
-          </ListItem>
-          <ListItem>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={notifications.reviewReminders}
-                  onChange={(e) => setNotifications({ ...notifications, reviewReminders: e.target.checked })}
-                />
-              }
-              label="Review Reminders"
-            />
-          </ListItem>
+          {['emailNotifications', 'bidUpdates', 'tourReminders', 'promotionalEmails', 'reviewReminders'].map((type) => (
+            <ListItem key={type}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={getPrefValue(preferences, type)}
+                    onChange={() => togglePref(type)}
+                  />
+                }
+                label={type.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase())}
+              />
+            </ListItem>
+          ))}
         </List>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
           <Button
@@ -246,7 +226,7 @@ const Settings = () => {
               setPrefsError('');
               setPrefsSuccess('');
               try {
-                await updateNotificationPreferences(notifications);
+                await updateNotificationPreferences(preferences);
                 setPrefsSuccess('Preferences saved!');
               } catch {
                 setPrefsError('Failed to save preferences.');
