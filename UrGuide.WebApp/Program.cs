@@ -27,6 +27,8 @@ using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Localization;
 using UrGuide.WebApp.Resources;
+using UrGuide.WebApp.Middleware;
+using UrGuide.WebApp.Observability;
 
 var logger = LogManager.Setup().LoadConfigurationFromFile("nlog.config").GetCurrentClassLogger();
 try
@@ -91,6 +93,11 @@ try
     
     // Add message queue
     builder.Services.AddMessageQueue(builder.Configuration);
+
+    // Register observability services (Issue #176, #177)
+    builder.Services.AddSingleton<IBusinessMetricsService, BusinessMetricsService>();
+    builder.Services.AddSingleton<ISecurityEventLogger, SecurityEventLogger>();
+    builder.Services.AddSingleton<IUserActivityLogger, UserActivityLogger>();
     
     // Add health checks
     var authConn = builder.Configuration.GetSection("ConnectionStrings:AuthConnection").Value;
@@ -235,6 +242,10 @@ try
     app.UseForwardedHeaders(new ForwardedHeadersOptions { 
         ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
     });
+
+    // Correlation ID and performance logging middleware (Issue #177)
+    app.UseMiddleware<CorrelationIdMiddleware>();
+    app.UseMiddleware<RequestPerformanceMiddleware>();
 
     // Add request localization middleware (Accept-Language header support)
     var supportedCultures = new[] { "en", "fr", "es", "de", "ar" }

@@ -84,6 +84,7 @@ services:
       - RabbitMQ__Username=${RABBITMQ_USER:-guest}
       - RabbitMQ__Password=${RABBITMQ_PASS:-guest}
       - Elasticsearch__Url=http://elasticsearch:9200
+      - Seq__ServerUrl=http://seq:5341
       # Admin user provisioning from .env file
       - Seeding__SeedDefaultAdmin=${SEED_ADMIN_ENABLED:-false}
       - Seeding__AdminEmail=${ADMIN_EMAIL:-admin@urguide.local}
@@ -175,12 +176,29 @@ services:
       start_period: 10s
     restart: unless-stopped
 
+  # Seq structured log aggregation (Issue #177)
+  seq:
+    image: datalust/seq:latest
+    container_name: urguide-seq
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - "5341:5341"   # Seq ingestion port (NLog target)
+      - "8080:80"     # Seq web UI
+    volumes:
+      - seq-data:/data
+    networks:
+      - urguide-network
+    restart: unless-stopped
+
 volumes:
   sqlserver-data:
     driver: local
   rabbitmq-data:
     driver: local
   elasticsearch-data:
+    driver: local
+  seq-data:
     driver: local
 
 networks:

@@ -248,8 +248,25 @@ Allow users to link and unlink social provider accounts to existing email accoun
 ### 6. Enhanced Monitoring and Observability
 **Title:** Implement comprehensive monitoring solution  
 **Labels:** enhancement, monitoring, observability  
+**Status:** ✅ **COMPLETED**  
 **Description:**
 Add advanced monitoring, metrics, and distributed tracing for production environments.
+
+**Implemented:**
+- ✅ Prometheus metrics endpoint at `/metrics` via `OpenTelemetry.Exporter.Prometheus.AspNetCore`
+- ✅ Distributed tracing via OpenTelemetry (ASP.NET Core + HTTP Client instrumentation)
+- ✅ Custom business metrics (`IBusinessMetricsService` / `BusinessMetricsService`):
+  - `urguide.users.registrations` – user registration counter
+  - `urguide.users.logins` – login event counter
+  - `urguide.tours.created` / `urguide.tours.booked` – tour lifecycle counters
+  - `urguide.payments.attempted` / `urguide.payments.succeeded` – payment counters
+  - `urguide.payments.amount` / `urguide.payouts.amount` – payment/payout histograms
+  - `urguide.reviews.submitted` – review counter
+  - `urguide.search.queries` – search query counter
+  - `urguide.ratelimit.hits` – rate-limit rejection counter (with tier tag)
+- ✅ Performance monitoring via `RequestPerformanceMiddleware` (slow-request warnings >1 s)
+- ✅ OTLP exporter support (configure `OTEL_EXPORTER_OTLP_ENDPOINT` env var)
+- ✅ Runtime instrumentation metrics (GC, thread pool, memory)
 
 **Requirements:**
 - Application Insights or similar APM
@@ -260,20 +277,33 @@ Add advanced monitoring, metrics, and distributed tracing for production environ
 - Error tracking and alerting
 
 **Acceptance Criteria:**
-- [ ] APM is configured
-- [ ] Metrics endpoint is available
-- [ ] Distributed tracing works
-- [ ] Custom metrics are tracked
-- [ ] Alerts are configured
-- [ ] Dashboard is created
+- [x] APM is configured (OTLP exporter, Azure Monitor ready)
+- [x] Metrics endpoint is available (`/metrics` – Prometheus scrape)
+- [x] Distributed tracing works (OpenTelemetry)
+- [x] Custom metrics are tracked (`UrGuide.Business` meter)
+- [ ] Alerts are configured (requires external alerting platform, e.g. Grafana/PagerDuty)
+- [ ] Dashboard is created (requires external dashboard, e.g. Grafana)
 
 ---
 
 ### 7. Structured Logging Enhancement
 **Title:** Enhance structured logging with correlation IDs  
 **Labels:** enhancement, logging, observability  
+**Status:** ✅ **COMPLETED**  
 **Description:**
 Improve logging with correlation IDs, structured data, and better log aggregation support.
+
+**Implemented:**
+- ✅ Correlation ID propagation via `CorrelationIdMiddleware`:
+  - Reads `X-Correlation-ID` request header; generates a new GUID if absent
+  - Propagates ID to response headers and to the NLog ambient scope
+- ✅ Structured JSON logging via new `jsonFile` NLog target (JSON layout with timestamp, level, correlationId, requestUrl, userName, exception, etc.)
+- ✅ Log aggregation via `NLog.Targets.Seq` – buffered Seq target writing at Warning+ level (configure `Seq.ServerUrl` / `Seq.ApiKey`)
+- ✅ Performance logging via `RequestPerformanceMiddleware` – every request logged with method, path, status, and duration; slow requests (>1 s) at Warning level
+- ✅ Security event logging via `ISecurityEventLogger` / `SecurityEventLogger`:
+  - Login success/failure, account lockout, password changes, unauthorized access, suspicious activity, 2FA events
+- ✅ User activity logging via `IUserActivityLogger` / `UserActivityLogger`:
+  - Profile, tour, payment, search, review, messaging, and custom activity events
 
 **Requirements:**
 - Correlation ID propagation
@@ -284,12 +314,12 @@ Improve logging with correlation IDs, structured data, and better log aggregatio
 - User activity logging
 
 **Acceptance Criteria:**
-- [ ] Correlation IDs are generated and propagated
-- [ ] Logs are in JSON format
-- [ ] Log aggregation is configured
-- [ ] Performance metrics are logged
-- [ ] Security events are logged
-- [ ] Documentation updated
+- [x] Correlation IDs are generated and propagated
+- [x] Logs are in JSON format
+- [x] Log aggregation is configured (Seq)
+- [x] Performance metrics are logged
+- [x] Security events are logged
+- [x] Documentation updated
 
 ---
 
