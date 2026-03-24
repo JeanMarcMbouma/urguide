@@ -48,7 +48,11 @@ public static class Extensions
             {
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation();
+                    .AddRuntimeInstrumentation()
+                    // Custom business metrics meter
+                    .AddMeter("UrGuide.Business")
+                    // Register Prometheus exporter (endpoint exposed via MapPrometheusScrapingEndpoint)
+                    .AddPrometheusExporter();
             })
             .WithTracing(tracing =>
             {
@@ -101,6 +105,9 @@ public static class Extensions
         {
             Predicate = r => r.Tags.Contains("live")
         });
+
+        // Expose Prometheus scrape endpoint at /metrics
+        app.MapPrometheusScrapingEndpoint();
 
         return app;
     }
