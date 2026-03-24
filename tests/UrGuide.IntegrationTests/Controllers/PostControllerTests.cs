@@ -1,6 +1,6 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
+using BbQ.MockLite;
 using BbQ.Outcome;
 using UrGuide.Core;
 using UrGuide.Model;
@@ -19,7 +19,7 @@ public class PostControllerTests
 
     public PostControllerTests()
     {
-        _postServiceMock = new Mock<IPostService>();
+        _postServiceMock = Mock.Create<IPostService>();
         _controller = new PostController(_postServiceMock.Object);
     }
 

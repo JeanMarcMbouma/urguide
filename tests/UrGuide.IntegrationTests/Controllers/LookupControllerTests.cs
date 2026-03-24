@@ -1,6 +1,6 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
+using BbQ.MockLite;
 using BbQ.Outcome;
 using UrGuide.Core;
 using UrGuide.Model;
@@ -21,8 +21,8 @@ public class LookupControllerTests
 
     public LookupControllerTests()
     {
-        _lookupServiceMock = new Mock<ILookupService>();
-        _userServiceMock = new Mock<IUserService>();
+        _lookupServiceMock = Mock.Create<ILookupService>();
+        _userServiceMock = Mock.Create<IUserService>();
         _controller = new LookupController(_lookupServiceMock.Object, _userServiceMock.Object);
     }
 

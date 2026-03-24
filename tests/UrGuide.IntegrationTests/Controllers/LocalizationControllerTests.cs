@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
-using Moq;
+using BbQ.MockLite;
 using UrGuide.WebApp.Controllers;
 using UrGuide.WebApp.Resources;
 
@@ -14,7 +14,7 @@ public class LocalizationControllerTests
 
     public LocalizationControllerTests()
     {
-        _localizerMock = new Mock<IStringLocalizer<SharedResource>>();
+        _localizerMock = Mock.Create<IStringLocalizer<SharedResource>>();
         _controller = new LocalizationController(_localizerMock.Object);
     }
 

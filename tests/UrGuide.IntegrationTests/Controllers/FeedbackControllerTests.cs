@@ -1,6 +1,6 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
+using BbQ.MockLite;
 using BbQ.Outcome;
 using UrGuide.Core;
 using UrGuide.Model;
@@ -19,7 +19,7 @@ public class FeedbackControllerTests
 
     public FeedbackControllerTests()
     {
-        _feedbackServiceMock = new Mock<IFeedbackService>();
+        _feedbackServiceMock = Mock.Create<IFeedbackService>();
         _controller = new FeedbackController(_feedbackServiceMock.Object);
     }
 

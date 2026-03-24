@@ -1,6 +1,6 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
+using BbQ.MockLite;
 using BbQ.Outcome;
 using UrGuide.Core;
 using UrGuide.Model;
@@ -19,7 +19,7 @@ public class TourRequestControllerTests
 
     public TourRequestControllerTests()
     {
-        _tourRequestServiceMock = new Mock<ITourRequestService>();
+        _tourRequestServiceMock = Mock.Create<ITourRequestService>();
         _controller = new TourRequestController(_tourRequestServiceMock.Object);
     }
 
