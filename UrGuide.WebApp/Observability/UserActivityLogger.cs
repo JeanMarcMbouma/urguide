@@ -4,17 +4,17 @@ namespace UrGuide.WebApp.Observability;
 
 /// <summary>
 /// Default implementation of <see cref="IUserActivityLogger"/>.
-/// Uses a dedicated <see cref="ILogger"/> category (<c>UserActivity</c>) so that
-/// NLog rules can route activity entries to separate targets (e.g. Seq, Elasticsearch)
+/// Uses a named logger with category <c>UserActivity</c> (created via <see cref="ILoggerFactory"/>)
+/// so that NLog rules can route activity entries to separate targets (e.g. Seq, Elasticsearch)
 /// independently of general application logs.
 /// </summary>
 public sealed class UserActivityLogger : IUserActivityLogger
 {
-    private readonly ILogger<UserActivityLogger> _logger;
+    private readonly ILogger _logger;
 
-    public UserActivityLogger(ILogger<UserActivityLogger> logger)
+    public UserActivityLogger(ILoggerFactory loggerFactory)
     {
-        _logger = logger;
+        _logger = loggerFactory.CreateLogger("UserActivity");
     }
 
     public void LogProfileActivity(string userId, string action)

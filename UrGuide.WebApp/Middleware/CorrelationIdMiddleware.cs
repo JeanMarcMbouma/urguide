@@ -43,7 +43,14 @@ public class CorrelationIdMiddleware
         if (context.Request.Headers.TryGetValue(CorrelationIdHeader, out var existingId)
             && !string.IsNullOrWhiteSpace(existingId))
         {
-            return existingId.ToString();
+            var rawId = existingId.ToString().Trim();
+
+            // Only accept valid GUIDs to prevent log injection and malformed header values.
+            // Normalize to canonical "D" format (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).
+            if (Guid.TryParse(rawId, out var parsedGuid))
+            {
+                return parsedGuid.ToString("D");
+            }
         }
 
         return Guid.NewGuid().ToString("D");

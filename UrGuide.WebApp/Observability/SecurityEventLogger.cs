@@ -4,21 +4,23 @@ namespace UrGuide.WebApp.Observability;
 
 /// <summary>
 /// Default implementation of <see cref="ISecurityEventLogger"/>.
-/// Uses a dedicated <see cref="ILogger"/> category (<c>Security</c>) so that
-/// NLog rules can route security events to a separate target or log-aggregation
+/// Uses a named logger with category <c>Security</c> (created via <see cref="ILoggerFactory"/>)
+/// so that NLog rules can route security events to a separate target or log-aggregation
 /// pipeline independent of general application logs.
+/// All events are logged at Warning or higher so they are captured by aggregation
+/// targets (e.g. Seq) that are configured for Warning+.
 /// </summary>
 public sealed class SecurityEventLogger : ISecurityEventLogger
 {
-    private readonly ILogger<SecurityEventLogger> _logger;
+    private readonly ILogger _logger;
 
-    public SecurityEventLogger(ILogger<SecurityEventLogger> logger)
+    public SecurityEventLogger(ILoggerFactory loggerFactory)
     {
-        _logger = logger;
+        _logger = loggerFactory.CreateLogger("Security");
     }
 
     public void LogLoginSuccess(string userId, string ipAddress)
-        => _logger.LogInformation(
+        => _logger.LogWarning(
             "SECURITY: Login succeeded for user {UserId} from {IpAddress}",
             userId, ipAddress);
 
@@ -33,7 +35,7 @@ public sealed class SecurityEventLogger : ISecurityEventLogger
             userId, ipAddress);
 
     public void LogPasswordChanged(string userId, string ipAddress)
-        => _logger.LogInformation(
+        => _logger.LogWarning(
             "SECURITY: Password changed for user {UserId} from {IpAddress}",
             userId, ipAddress);
 
@@ -48,7 +50,7 @@ public sealed class SecurityEventLogger : ISecurityEventLogger
             userId, ipAddress, details);
 
     public void Log2FAEvent(string userId, string eventType, bool success)
-        => _logger.LogInformation(
+        => _logger.LogWarning(
             "SECURITY: 2FA event {EventType} for user {UserId}. Success: {Success}",
             eventType, userId, success);
 }
