@@ -10,7 +10,7 @@ on:
 env:
   DOTNET_VERSION: '10.0.x'
   BUILD_CONFIGURATION: 'Release'
-  SOLUTION_PATH: 'UrGuide.sln'
+  SOLUTION_PATH: 'UrGuide.slnx'
   WEBAPP_PROJECT: 'UrGuide.WebApp/UrGuide.WebApp.csproj'
 
 jobs:
@@ -44,13 +44,14 @@ jobs:
     - name: Build
       run: dotnet build ${{ env.WEBAPP_PROJECT }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
       
-    - name: Run tests (if any)
-      run: |
-        if ls *.Tests/*.csproj 1> /dev/null 2>&1; then
-          dotnet test --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
-        else
-          echo "No test projects found, skipping tests"
-        fi
+    - name: Restore test dependencies
+      run: dotnet restore tests/UrGuide.UnitTests/UrGuide.UnitTests.csproj
+
+    - name: Build tests
+      run: dotnet build tests/UrGuide.UnitTests/UrGuide.UnitTests.csproj --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
+
+    - name: Run tests
+      run: dotnet test tests/UrGuide.UnitTests/UrGuide.UnitTests.csproj --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
         
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@v2
