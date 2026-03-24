@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy solution and project files
-COPY UrGuide.sln ./
+COPY UrGuide.slnx ./
 COPY UrGuide.WebApp/*.csproj ./UrGuide.WebApp/
 COPY UrGuide.Services/*.csproj ./UrGuide.Services/
 COPY UrGuide.Data/*.csproj ./UrGuide.Data/

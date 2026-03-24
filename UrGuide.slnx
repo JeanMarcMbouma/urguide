@@ -1,0 +1,26 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Domain/">
+    <Project Path="UrGuide.Core/UrGuide.Core.csproj" />
+    <Project Path="UrGuide.Data/UrGuide.Data.csproj" />
+    <Project Path="UrGuide.Model/UrGuide.Model.csproj" />
+    <Project Path="UrGuide.Services/UrGuide.Services.csproj" />
+    <Project Path="UrGuide.Shared/UrGuide.Shared.csproj" />
+  </Folder>
+  <Folder Name="/Misc/">
+    <File Path="countries.json" />
+    <File Path="currencies.json" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="tests/UrGuide.E2ETests/UrGuide.E2ETests.csproj" />
+    <Project Path="tests/UrGuide.IntegrationTests/UrGuide.IntegrationTests.csproj" />
+    <Project Path="tests/UrGuide.PerformanceTests/UrGuide.PerformanceTests.csproj" />
+    <Project Path="tests/UrGuide.UnitTests/UrGuide.UnitTests.csproj" />
+  </Folder>
+  <Project Path="UrGuide.ServiceDefaults/UrGuide.ServiceDefaults.csproj" />
+  <Project Path="UrGuide.WebApp/UrGuide.WebApp.csproj" />
+</Solution>

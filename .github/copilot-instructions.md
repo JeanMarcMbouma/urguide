@@ -68,7 +68,7 @@ Always reference these instructions first and fallback to search or bash command
 
 ### Repository Layout
 ```
-UrGuide.sln                 # Main solution file
+UrGuide.slnx                # Main solution file (XML format)
 ├── UrGuide.WebApp/         # Main web application (ASP.NET Core 8.0 + React 18 SPA)
 │   ├── ClientApp/          # React 18 frontend application (Material-UI v5 migration incomplete)
 │   ├── Controllers/        # API controllers  
@@ -89,7 +89,7 @@ UrGuide.sln                 # Main solution file
 - `UrGuide.WebApp/appsettings.json` - Main app configuration
 - `UrGuide.WebApp/ClientApp/package.json` - React dependencies and scripts
 - `UrGuide.WebApp/UrGuide.WebApp.csproj` - .NET project configuration
-- `UrGuide.sln` - Solution file with all projects
+- `UrGuide.slnx` - Solution file with all projects (XML format)
 
 ### Database Configuration
 - Uses Entity Framework Core with SQL Server LocalDB

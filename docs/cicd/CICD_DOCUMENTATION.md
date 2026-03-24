@@ -52,7 +52,7 @@ The UrGuide API project includes a comprehensive CI/CD pipeline built with GitHu
 ```yaml
 DOTNET_VERSION: '8.0.x'
 BUILD_CONFIGURATION: 'Release'
-SOLUTION_PATH: 'UrGuide.sln'
+SOLUTION_PATH: 'UrGuide.slnx'
 WEBAPP_PROJECT: 'UrGuide.WebApp/UrGuide.WebApp.csproj'
 ```
 
