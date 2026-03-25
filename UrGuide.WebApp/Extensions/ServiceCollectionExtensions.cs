@@ -3,6 +3,9 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
+using AspNet.Security.OAuth.Apple;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -20,6 +23,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using UrGuide.Shared.Configuration;
 using UrGuide.Shared.Contracts;
@@ -63,6 +67,7 @@ namespace UrGuide.WebApp.Extensions
             services.AddSingleton<AdminPlatformSettings>();
             services.AddScoped<IAdminSeedingService, AdminSeedingService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
+            services.AddScoped<ISocialAuthService, SocialAuthService>();
 
             // Configure Fido2 for Passkey/WebAuthn support
             string applicationUri = configuration.GetValue<string>("ApplicationUri") ?? "https://localhost:5001";
@@ -169,6 +174,65 @@ namespace UrGuide.WebApp.Extensions
                         }
                     };
                 });
+
+            // Register social login providers (Google, Apple, Microsoft)
+            // Credentials are loaded from configuration; providers are only registered when configured
+            var googleClientId = configuration.GetValue<string>("SocialAuth:Google:ClientId");
+            var googleClientSecret = configuration.GetValue<string>("SocialAuth:Google:ClientSecret");
+            if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+            {
+                services.AddAuthentication()
+                    .AddGoogle("Google", options =>
+                    {
+                        options.ClientId = googleClientId;
+                        options.ClientSecret = googleClientSecret;
+                        options.Scope.Add("email");
+                        options.Scope.Add("profile");
+                        options.SaveTokens = true;
+                        options.Events.OnCreatingTicket = context =>
+                        {
+                            var picture = context.User.GetProperty("picture").GetString();
+                            if (!string.IsNullOrEmpty(picture))
+                            {
+                                context.Identity?.AddClaim(new Claim("picture", picture));
+                            }
+                            return Task.CompletedTask;
+                        };
+                    });
+            }
+
+            var microsoftClientId = configuration.GetValue<string>("SocialAuth:Microsoft:ClientId");
+            var microsoftClientSecret = configuration.GetValue<string>("SocialAuth:Microsoft:ClientSecret");
+            if (!string.IsNullOrEmpty(microsoftClientId) && !string.IsNullOrEmpty(microsoftClientSecret))
+            {
+                services.AddAuthentication()
+                    .AddMicrosoftAccount("Microsoft", options =>
+                    {
+                        options.ClientId = microsoftClientId;
+                        options.ClientSecret = microsoftClientSecret;
+                        // Support both personal Microsoft accounts and Azure AD (work/school)
+                        options.AuthorizationEndpoint = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize";
+                        options.TokenEndpoint = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
+                        options.SaveTokens = true;
+                    });
+            }
+
+            var appleClientId = configuration.GetValue<string>("SocialAuth:Apple:ClientId");
+            var appleTeamId = configuration.GetValue<string>("SocialAuth:Apple:TeamId");
+            var appleKeyId = configuration.GetValue<string>("SocialAuth:Apple:KeyId");
+            var applePrivateKey = configuration.GetValue<string>("SocialAuth:Apple:PrivateKey");
+            if (!string.IsNullOrEmpty(appleClientId) && !string.IsNullOrEmpty(appleTeamId))
+            {
+                services.AddAuthentication()
+                    .AddApple("Apple", options =>
+                    {
+                        options.ClientId = appleClientId;
+                        options.TeamId = appleTeamId;
+                        options.KeyId = appleKeyId ?? string.Empty;
+                        options.GenerateClientSecret = true;
+                        options.SaveTokens = true;
+                    });
+            }
 
             services.AddSignalR();
 
