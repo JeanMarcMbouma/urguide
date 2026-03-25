@@ -55,8 +55,11 @@ jobs:
     - name: Run tests
       run: dotnet test tests/UrGuide.UnitTests/UrGuide.UnitTests.csproj --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
 
+    - name: Restore integration test dependencies
+      run: dotnet restore tests/UrGuide.IntegrationTests/UrGuide.IntegrationTests.csproj
+
     - name: Build integration tests
-      run: dotnet build tests/UrGuide.IntegrationTests/UrGuide.IntegrationTests.csproj --configuration ${{ env.BUILD_CONFIGURATION }}
+      run: dotnet build tests/UrGuide.IntegrationTests/UrGuide.IntegrationTests.csproj --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
 
     - name: Run integration tests
       run: dotnet test tests/UrGuide.IntegrationTests/UrGuide.IntegrationTests.csproj --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal --logger "trx;LogFileName=integration-test-results.trx"
