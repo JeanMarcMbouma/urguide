@@ -54,6 +54,12 @@ jobs:
 
     - name: Run tests
       run: dotnet test tests/UrGuide.UnitTests/UrGuide.UnitTests.csproj --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+
+    - name: Build integration tests
+      run: dotnet build tests/UrGuide.IntegrationTests/UrGuide.IntegrationTests.csproj --configuration ${{ env.BUILD_CONFIGURATION }}
+
+    - name: Run integration tests
+      run: dotnet test tests/UrGuide.IntegrationTests/UrGuide.IntegrationTests.csproj --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal --logger "trx;LogFileName=integration-test-results.trx"
         
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@v2

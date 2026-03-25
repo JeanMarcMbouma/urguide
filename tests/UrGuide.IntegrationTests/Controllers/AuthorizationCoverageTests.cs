@@ -6,6 +6,12 @@ namespace UrGuide.IntegrationTests.Controllers;
 
 public class AuthorizationCoverageTests
 {
+    private static void AssertEndpointHasAttribute<TAttribute>(Type controllerType, string methodName)
+        where TAttribute : Attribute
+    {
+        controllerType.GetMethod(methodName)!.Should().BeDecoratedWith<TAttribute>();
+    }
+
     [Fact]
     public void PostController_Class_ShouldRequireAuthorization()
     {
@@ -15,14 +21,14 @@ public class AuthorizationCoverageTests
     [Fact]
     public void PostController_PublicEndpoints_ShouldAllowAnonymous()
     {
-        typeof(PostController).GetMethod(nameof(PostController.GetUsersPosts))!.Should().BeDecoratedWith<AllowAnonymousAttribute>();
-        typeof(PostController).GetMethod(nameof(PostController.SearchPost))!.Should().BeDecoratedWith<AllowAnonymousAttribute>();
-        typeof(PostController).GetMethod(nameof(PostController.Get))!.Should().BeDecoratedWith<AllowAnonymousAttribute>();
-        typeof(PostController).GetMethod(nameof(PostController.Last100))!.Should().BeDecoratedWith<AllowAnonymousAttribute>();
-        typeof(PostController).GetMethod(nameof(PostController.Top10))!.Should().BeDecoratedWith<AllowAnonymousAttribute>();
-        typeof(PostController).GetMethod(nameof(PostController.GetOne))!.Should().BeDecoratedWith<AllowAnonymousAttribute>();
-        typeof(PostController).GetMethod(nameof(PostController.Top100))!.Should().BeDecoratedWith<AllowAnonymousAttribute>();
-        typeof(PostController).GetMethod(nameof(PostController.GetItineraries))!.Should().BeDecoratedWith<AllowAnonymousAttribute>();
+        AssertEndpointHasAttribute<AllowAnonymousAttribute>(typeof(PostController), nameof(PostController.GetUsersPosts));
+        AssertEndpointHasAttribute<AllowAnonymousAttribute>(typeof(PostController), nameof(PostController.SearchPost));
+        AssertEndpointHasAttribute<AllowAnonymousAttribute>(typeof(PostController), nameof(PostController.Get));
+        AssertEndpointHasAttribute<AllowAnonymousAttribute>(typeof(PostController), nameof(PostController.Last100));
+        AssertEndpointHasAttribute<AllowAnonymousAttribute>(typeof(PostController), nameof(PostController.Top10));
+        AssertEndpointHasAttribute<AllowAnonymousAttribute>(typeof(PostController), nameof(PostController.GetOne));
+        AssertEndpointHasAttribute<AllowAnonymousAttribute>(typeof(PostController), nameof(PostController.Top100));
+        AssertEndpointHasAttribute<AllowAnonymousAttribute>(typeof(PostController), nameof(PostController.GetItineraries));
     }
 
     [Fact]
@@ -34,9 +40,9 @@ public class AuthorizationCoverageTests
     [Fact]
     public void TourRequestController_PublicEndpoints_ShouldAllowAnonymous()
     {
-        typeof(TourRequestController).GetMethod(nameof(TourRequestController.GetTourRequest))!.Should().BeDecoratedWith<AllowAnonymousAttribute>();
-        typeof(TourRequestController).GetMethod(nameof(TourRequestController.GetTourRequests))!.Should().BeDecoratedWith<AllowAnonymousAttribute>();
-        typeof(TourRequestController).GetMethod(nameof(TourRequestController.GetTourRequestsByRegion))!.Should().BeDecoratedWith<AllowAnonymousAttribute>();
+        AssertEndpointHasAttribute<AllowAnonymousAttribute>(typeof(TourRequestController), nameof(TourRequestController.GetTourRequest));
+        AssertEndpointHasAttribute<AllowAnonymousAttribute>(typeof(TourRequestController), nameof(TourRequestController.GetTourRequests));
+        AssertEndpointHasAttribute<AllowAnonymousAttribute>(typeof(TourRequestController), nameof(TourRequestController.GetTourRequestsByRegion));
     }
 
     [Fact]
@@ -48,8 +54,8 @@ public class AuthorizationCoverageTests
     [Fact]
     public void FeedbackController_PublicEndpoints_ShouldAllowAnonymous()
     {
-        typeof(FeedbackController).GetMethod(nameof(FeedbackController.GetUserFeedback))!.Should().BeDecoratedWith<AllowAnonymousAttribute>();
-        typeof(FeedbackController).GetMethod(nameof(FeedbackController.GetPostFeedback))!.Should().BeDecoratedWith<AllowAnonymousAttribute>();
+        AssertEndpointHasAttribute<AllowAnonymousAttribute>(typeof(FeedbackController), nameof(FeedbackController.GetUserFeedback));
+        AssertEndpointHasAttribute<AllowAnonymousAttribute>(typeof(FeedbackController), nameof(FeedbackController.GetPostFeedback));
     }
 
     [Fact]
@@ -71,7 +77,6 @@ public class AuthorizationCoverageTests
     [Fact]
     public void LocalizationController_SupportedLanguagesEndpoint_ShouldAllowAnonymous()
     {
-        typeof(LocalizationController).GetMethod(nameof(LocalizationController.GetSupportedLanguages))!
-            .Should().BeDecoratedWith<AllowAnonymousAttribute>();
+        AssertEndpointHasAttribute<AllowAnonymousAttribute>(typeof(LocalizationController), nameof(LocalizationController.GetSupportedLanguages));
     }
 }
