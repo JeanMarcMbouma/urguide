@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { CircularProgress, Box } from '@mui/material';
 import { useAuth } from './hooks/useAuth';
 import TouristLayout from './components/Layout/TouristLayout';
+import PWAPrompt from './components/shared/PWAPrompt';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import GuideSearch from './pages/GuideSearch';
@@ -39,6 +40,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
+    <>
     <Routes>
       <Route path="/login" element={<Login />} />
 
@@ -70,6 +72,8 @@ function App() {
 
       <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
+    <PWAPrompt />
+    </>
   );
 }
 

@@ -10,6 +10,7 @@ User and integration guides for working with UrGuide features.
 - [**Two-Factor Authentication & Passkey Guide**](guides/2FA_PASSKEY_GUIDE.md) - How to implement and use 2FA and WebAuthn passkeys
 - [**Webhook Integration Guide**](guides/WEBHOOK_INTEGRATION_GUIDE.md) - Integration guide for webhook event publishing
 - [**Webhook Integration Examples**](guides/WEBHOOK_INTEGRATION_EXAMPLES.md) - Practical examples for webhook integration
+- [**Push Notifications Guide**](guides/PUSH_NOTIFICATIONS_GUIDE.md) - FCM push notification setup, cache strategies, and background sync
 
 ### 🔧 Implementation
 Technical implementation summaries and architecture documentation.

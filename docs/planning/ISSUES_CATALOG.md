@@ -1172,6 +1172,7 @@ Implement review display, responses, client messaging, and performance analytics
 ### 22. Mobile-Responsive PWA Features
 **Title:** Progressive Web App enhancements  
 **Labels:** enhancement, pwa, mobile  
+**Status:** ✅ COMPLETED  
 **Description:**
 Add PWA capabilities to web applications for app-like experience on mobile devices.
 
@@ -1185,12 +1186,20 @@ Add PWA capabilities to web applications for app-like experience on mobile devic
 - Cache strategies
 
 **Acceptance Criteria:**
-- [ ] Service worker implemented
-- [ ] Offline mode works
-- [ ] Push notifications functional
-- [ ] App installable on mobile
-- [ ] Background sync enabled
-- [ ] Lighthouse PWA score >90
+- [x] Service worker implemented (via vite-plugin-pwa + Workbox)
+- [x] Offline mode works (NetworkFirst + StaleWhileRevalidate strategies)
+- [x] Push notifications functional (FCM via `pushNotificationService.ts` — requires `VITE_FIREBASE_*` env vars at deployment)
+- [x] App installable on mobile (web app manifest + install prompt via `usePWA` hook)
+- [x] Background sync enabled (Workbox BackgroundSync queues per app)
+- [ ] Lighthouse PWA score >90 (to be verified via Lighthouse audit after deployment)
+
+**Implementation Notes:**
+- `vite-plugin-pwa` added to all three frontend apps (tourist-website, guide-portal, admin-dashboard)
+- `usePWA` hook handles SW registration, update detection, and install prompt
+- `PWAPrompt` component shows offline-ready, update-available, and install banners
+- Web app manifest configured per app with correct icons and theme colors
+- FCM push notification service in `src/services/pushNotificationService.ts` — requires `VITE_FIREBASE_*` env vars at deployment
+- See [Push Notifications Guide](../guides/PUSH_NOTIFICATIONS_GUIDE.md) for FCM setup instructions
 
 ---
 
