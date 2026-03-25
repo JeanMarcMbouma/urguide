@@ -17,5 +17,9 @@ namespace UrGuide.WebApp.Entities
         
         // Passkey/WebAuthn properties (stored as collection)
         public ICollection<PasskeyCredential> PasskeyCredentials { get; set; } = new List<PasskeyCredential>();
+
+        // Social login properties
+        public string? AvatarUrl { get; set; }
+        public ICollection<SocialLoginProvider> SocialLoginProviders { get; set; } = new List<SocialLoginProvider>();
     }
 }

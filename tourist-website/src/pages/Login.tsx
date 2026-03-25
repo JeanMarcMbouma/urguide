@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { LockOutlined as LockIcon } from '@mui/icons-material';
 import { useAuth } from '../hooks/useAuth';
+import SocialLoginButtons from '../components/shared/SocialLoginButtons';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -112,6 +113,7 @@ const Login = () => {
               >
                 {isLoading ? <CircularProgress size={24} /> : 'Sign In'}
               </Button>
+              <SocialLoginButtons returnUrl="/home" />
             </Box>
           ) : (
             <Box component="form" onSubmit={handleTwoFactorVerify} noValidate>
