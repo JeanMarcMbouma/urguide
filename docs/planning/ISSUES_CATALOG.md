@@ -377,9 +377,9 @@ Create integration tests for API endpoints using WebApplicationFactory.
 
 **Implementation:**
 - Project: `tests/UrGuide.IntegrationTests/` (xUnit + Moq + FluentAssertions + WebApplicationFactory + EF InMemory)
-- 67 integration tests across 5 controllers
+- 75 integration tests across 5 controllers + authorization metadata coverage tests
 - TestDbContextFactory for in-memory database testing
-- Controllers tested: Lookup (8), Localization (10), Feedback (10), Post (19), TourRequest (14)
+- Controllers tested: Lookup (9), Localization (10), Feedback (11), Post (24), TourRequest (13)
 
 **Requirements:**
 - xUnit with WebApplicationFactory
@@ -402,10 +402,10 @@ Create integration tests for API endpoints using WebApplicationFactory.
 **Acceptance Criteria:**
 - [x] Integration tests for all controllers
 - [x] Database integration tests
-- [ ] Auth/authz tests comprehensive
+- [x] Auth/authz tests comprehensive
 - [x] Error handling tests
 - [x] Validation tests
-- [ ] Tests run in CI/CD
+- [x] Tests run in CI/CD
 - [x] All tests pass consistently
 
 ---
