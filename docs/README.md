@@ -15,6 +15,7 @@ User and integration guides for working with UrGuide features.
 Technical implementation summaries and architecture documentation.
 
 - [**Admin API Documentation**](implementation/ADMIN_API_DOCUMENTATION.md) - Admin dashboard backend API reference and implementation guide
+- [**Admin User Provisioning**](implementation/ADMIN_USER_PROVISIONING.md) - Admin account seeding and provisioning utilities
 - [**JWT Authentication**](implementation/JWT_AUTHENTICATION.md) - JWT token generation and validation for admin dashboard API
 - [**Issue #19 Implementation Summary**](implementation/ISSUE_19_IMPLEMENTATION_SUMMARY.md) - Complete implementation details for admin dashboard
 - [**Message Queue Implementation**](implementation/MESSAGE_QUEUE_IMPLEMENTATION.md) - MassTransit + RabbitMQ async processing
@@ -36,7 +37,7 @@ Security documentation, audits, and best practices.
 ### 🧪 Testing
 Testing infrastructure and guidelines.
 
-- **Unit Tests** (`tests/UrGuide.UnitTests/`) - 69 unit tests with xUnit, Moq, FluentAssertions, Coverlet
+- **Unit Tests** (`tests/UrGuide.UnitTests/`) - 69 unit tests with xUnit, BbQ.MockLite, FluentAssertions, Coverlet
 - **Integration Tests** (`tests/UrGuide.IntegrationTests/`) - 67 controller integration tests
 - **E2E Tests** (`tests/UrGuide.E2ETests/`) - Playwright-based end-to-end test infrastructure
 - **Performance Tests** (`tests/UrGuide.PerformanceTests/`) - BenchmarkDotNet micro-benchmarks
