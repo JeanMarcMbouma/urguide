@@ -63,16 +63,6 @@ export default defineConfig(({ mode }) => {
                 networkTimeoutSeconds: 10,
               },
             },
-            {
-              urlPattern: /^\/api\//i,
-              handler: 'NetworkFirst',
-              options: {
-                cacheName: 'api-cache',
-                expiration: { maxEntries: 100, maxAgeSeconds: 60 * 2 },
-                cacheableResponse: { statuses: [0, 200] },
-                networkTimeoutSeconds: 10,
-              },
-            },
           ],
           backgroundSync: {
             name: 'tour-request-queue',

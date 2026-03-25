@@ -54,16 +54,6 @@ export default defineConfig(({ mode }) => {
                 cacheableResponse: { statuses: [0, 200] },
               },
             },
-            {
-              urlPattern: /^\/api\//i,
-              handler: 'NetworkFirst',
-              options: {
-                cacheName: 'api-cache',
-                expiration: { maxEntries: 200, maxAgeSeconds: 60 * 2 },
-                cacheableResponse: { statuses: [0, 200] },
-                networkTimeoutSeconds: 10,
-              },
-            },
           ],
           backgroundSync: {
             name: 'admin-action-queue',

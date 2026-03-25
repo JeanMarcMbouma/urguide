@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -22,6 +22,7 @@ export function usePWA(): PWAState {
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(
     'Notification' in window ? Notification.permission : 'denied'
   );
+  const updateIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const {
     needRefresh: [needRefresh],
@@ -29,8 +30,8 @@ export function usePWA(): PWAState {
     updateServiceWorker,
   } = useRegisterSW({
     onRegistered(registration) {
-      if (registration) {
-        setInterval(() => {
+      if (registration && !updateIntervalRef.current) {
+        updateIntervalRef.current = setInterval(() => {
           registration.update();
         }, 60 * 60 * 1000);
       }
@@ -39,6 +40,15 @@ export function usePWA(): PWAState {
       console.error('Service worker registration error:', error);
     },
   });
+
+  useEffect(() => {
+    return () => {
+      if (updateIntervalRef.current !== null) {
+        clearInterval(updateIntervalRef.current);
+        updateIntervalRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const handler = (e: Event) => {

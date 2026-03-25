@@ -11,9 +11,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import WifiOffIcon from '@mui/icons-material/WifiOff';
+import { useTranslation } from 'react-i18next';
 import { usePWA } from '../../hooks/usePWA';
 
 export default function PWAPrompt() {
+  const { t } = useTranslation();
   const { needRefresh, offlineReady, updateServiceWorker, installPromptAvailable, installApp } =
     usePWA();
   const [offlineDismissed, setOfflineDismissed] = useState(false);
@@ -37,7 +39,7 @@ export default function PWAPrompt() {
             </IconButton>
           }
         >
-          App is ready to work offline.
+          {t('pwa.offlineReady')}
         </Alert>
       </Snackbar>
 
@@ -57,7 +59,7 @@ export default function PWAPrompt() {
                 variant="outlined"
                 onClick={() => updateServiceWorker(true)}
               >
-                Reload
+                {t('pwa.reload')}
               </Button>
               <IconButton size="small" color="inherit" onClick={() => updateServiceWorker(false)}>
                 <CloseIcon fontSize="small" />
@@ -65,7 +67,7 @@ export default function PWAPrompt() {
             </Stack>
           }
         >
-          A new version is available.
+          {t('pwa.newVersion')}
         </Alert>
       </Snackbar>
 
@@ -80,7 +82,7 @@ export default function PWAPrompt() {
           action={
             <Stack direction="row" spacing={1} alignItems="center">
               <Button size="small" color="inherit" variant="outlined" onClick={installApp}>
-                Install
+                {t('pwa.install')}
               </Button>
               <IconButton size="small" color="inherit" onClick={() => setInstallDismissed(true)}>
                 <CloseIcon fontSize="small" />
@@ -88,7 +90,7 @@ export default function PWAPrompt() {
             </Stack>
           }
         >
-          <Typography variant="body2">Install Admin Dashboard for a better experience.</Typography>
+          <Typography variant="body2">{t('pwa.installPrompt', { appName: 'Admin Dashboard' })}</Typography>
         </Alert>
       </Snackbar>
     </>

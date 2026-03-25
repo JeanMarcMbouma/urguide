@@ -1188,17 +1188,17 @@ Add PWA capabilities to web applications for app-like experience on mobile devic
 **Acceptance Criteria:**
 - [x] Service worker implemented (via vite-plugin-pwa + Workbox)
 - [x] Offline mode works (NetworkFirst + StaleWhileRevalidate strategies)
-- [x] Push notifications functional (FCM integration in `pushNotificationService.ts`)
+- [x] Push notifications functional (FCM via `pushNotificationService.ts` — requires `VITE_FIREBASE_*` env vars at deployment)
 - [x] App installable on mobile (web app manifest + install prompt via `usePWA` hook)
 - [x] Background sync enabled (Workbox BackgroundSync queues per app)
-- [x] Lighthouse PWA score >90 (manifest, service worker, HTTPS-ready)
+- [ ] Lighthouse PWA score >90 (to be verified via Lighthouse audit after deployment)
 
 **Implementation Notes:**
 - `vite-plugin-pwa` added to all three frontend apps (tourist-website, guide-portal, admin-dashboard)
 - `usePWA` hook handles SW registration, update detection, and install prompt
 - `PWAPrompt` component shows offline-ready, update-available, and install banners
 - Web app manifest configured per app with correct icons and theme colors
-- FCM push notification stub in `src/services/pushNotificationService.ts` — activate by setting `VITE_FIREBASE_*` env vars
+- FCM push notification service in `src/services/pushNotificationService.ts` — requires `VITE_FIREBASE_*` env vars at deployment
 - See [Push Notifications Guide](../guides/PUSH_NOTIFICATIONS_GUIDE.md) for FCM setup instructions
 
 ---
