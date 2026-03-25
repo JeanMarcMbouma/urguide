@@ -110,7 +110,7 @@ namespace UrGuide.WebApp.Controllers
                 Request.Headers.UserAgent.ToString(),
                 cancellationToken);
 
-            if (!string.IsNullOrEmpty(returnUrl))
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 // Redirect with token as query parameter for SPA consumption
                 var separator = returnUrl.Contains('?') ? "&" : "?";
@@ -194,7 +194,7 @@ namespace UrGuide.WebApp.Controllers
                 Request.Headers.UserAgent.ToString(),
                 cancellationToken);
 
-            if (!string.IsNullOrEmpty(returnUrl))
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
             }
