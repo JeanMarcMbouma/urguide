@@ -89,6 +89,7 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
   - GET `/api/admin/roles` - List available roles
 - [x] **Real-time Updates**: TanStack Query for efficient server state management
 - [x] **Responsive Design**: Mobile-friendly with MUI's responsive components
+- [x] **Progressive Web App**: Service worker, web app manifest, offline support, install prompt, background sync, and FCM push notifications (all three frontend apps)
 
 ### 🧭 Guide Portal
 - [x] **Standalone Guide Application**: React 19 + TypeScript + Vite with Material-UI v7
