@@ -13,6 +13,7 @@ import {
 import { LockOutlined as LockIcon } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
+import SocialLoginButtons from '../components/shared/SocialLoginButtons';
 
 const Login = () => {
   const { t } = useTranslation();
@@ -114,6 +115,7 @@ const Login = () => {
               >
                 {isLoading ? <CircularProgress size={24} /> : t('login.signIn')}
               </Button>
+              <SocialLoginButtons returnUrl="/dashboard" />
             </Box>
           ) : (
             <Box component="form" onSubmit={handleTwoFactorVerify} noValidate>
