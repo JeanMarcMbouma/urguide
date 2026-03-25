@@ -221,14 +221,15 @@ namespace UrGuide.WebApp.Extensions
             var appleTeamId = configuration.GetValue<string>("SocialAuth:Apple:TeamId");
             var appleKeyId = configuration.GetValue<string>("SocialAuth:Apple:KeyId");
             var applePrivateKey = configuration.GetValue<string>("SocialAuth:Apple:PrivateKey");
-            if (!string.IsNullOrEmpty(appleClientId) && !string.IsNullOrEmpty(appleTeamId))
+            if (!string.IsNullOrEmpty(appleClientId) && !string.IsNullOrEmpty(appleTeamId)
+                && !string.IsNullOrEmpty(appleKeyId) && !string.IsNullOrEmpty(applePrivateKey))
             {
                 services.AddAuthentication()
                     .AddApple("Apple", options =>
                     {
                         options.ClientId = appleClientId;
                         options.TeamId = appleTeamId;
-                        options.KeyId = appleKeyId ?? string.Empty;
+                        options.KeyId = appleKeyId;
                         options.GenerateClientSecret = true;
                         options.SaveTokens = true;
                     });
