@@ -169,6 +169,15 @@ const UserDetail = () => {
     setConfirmDialog({ open: false, action: null });
   };
 
+  const getConfirmDialogProps = (action: 'suspend' | 'activate' | 'delete' | null) => {
+    const map = {
+      delete: { title: t('userDetail.deleteUser'), message: t('userDetail.confirmDelete') },
+      suspend: { title: t('userDetail.suspendUser'), message: t('userDetail.confirmSuspend') },
+      activate: { title: t('userDetail.activateUser'), message: t('userDetail.confirmActivate') },
+    };
+    return action ? map[action] : { title: '', message: '' };
+  };
+
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" mt={4}>
@@ -483,8 +492,8 @@ const UserDetail = () => {
 
       <ConfirmDialog
         open={confirmDialog.open}
-        title={`${confirmDialog.action === 'delete' ? t('userDetail.deleteUser') : confirmDialog.action === 'suspend' ? t('userDetail.suspendUser') : t('userDetail.activateUser')}`}
-        message={t('userDetail.confirmAction', { action: confirmDialog.action })}
+        title={getConfirmDialogProps(confirmDialog.action).title}
+        message={getConfirmDialogProps(confirmDialog.action).message}
         confirmText={confirmDialog.action === 'delete' ? t('common.delete') : t('common.confirm')}
         severity={confirmDialog.action === 'delete' ? 'error' : 'warning'}
         onConfirm={handleConfirm}
