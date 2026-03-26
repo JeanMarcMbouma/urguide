@@ -50,7 +50,7 @@ This document provides a quick summary of the CI/CD modernization implementation
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
 │  │ Build & Test │  │Code Quality  │  │  Dependency  │  │
 │  │              │  │   (CodeQL)   │  │    Check     │  │
-│  │ • .NET 8     │  │ • C# Scan    │  │ • NuGet Scan │  │
+│  │ • .NET 10    │  │ • C# Scan    │  │ • NuGet Scan │  │
 │  │ • NuGet      │  │ • Security   │  │ • Vulns      │  │
 │  │ • Tests      │  │   Alerts     │  │ • Report     │  │
 │  └──────┬───────┘  └──────────────┘  └──────────────┘  │
@@ -81,7 +81,7 @@ This document provides a quick summary of the CI/CD modernization implementation
 ├─────────────────────────────────────────────────────────┤
 │                                                          │
 │  1. BUILD STAGE                                         │
-│     • Base: mcr.microsoft.com/dotnet/sdk:8.0            │
+│     • Base: mcr.microsoft.com/dotnet/sdk:10.0           │
 │     • Restore dependencies                              │
 │     • Build application                                 │
 │                                                          │
@@ -90,7 +90,7 @@ This document provides a quick summary of the CI/CD modernization implementation
 │     • Remove development files                          │
 │                                                          │
 │  3. RUNTIME STAGE                                       │
-│     • Base: mcr.microsoft.com/dotnet/aspnet:8.0         │
+│     • Base: mcr.microsoft.com/dotnet/aspnet:10.0        │
 │     • Copy published app                                │
 │     • Configure health checks                           │
 │     • Run as non-root user                              │
@@ -218,7 +218,7 @@ Comprehensive guide covering:
 | Criteria | Status | Notes |
 |----------|--------|-------|
 | Reliable automated builds/tests/deployments | ✅ | Multi-stage GitHub Actions |
-| Build pipeline covers .NET and containers | ✅ | .NET 8 + Docker builds |
+| Build pipeline covers .NET and containers | ✅ | .NET 10 + Docker builds |
 | Developers notified of build/deploy issues | ✅ | Workflow notifications |
 | Documentation updated | ✅ | 3 docs updated, 1 new guide |
 | Security scanning | ✅ | CodeQL + dependency checks |

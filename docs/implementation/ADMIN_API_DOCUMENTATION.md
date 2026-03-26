@@ -437,18 +437,27 @@ curl -X PUT "https://localhost:5001/api/admin/users/roles" \
 ### 1. React Admin Dashboard Setup
 Create separate admin app or admin section:
 ```
-UrGuide.WebApp/ClientApp/src/admin/
-├── AdminApp.tsx           # Main admin application
-├── routes/                # Admin routing configuration
-├── components/            # Shared admin components
-├── pages/
-│   ├── Login.tsx          # Admin login with 2FA
-│   ├── Dashboard.tsx      # Overview/statistics
-│   ├── UserList.tsx       # User management table
-│   ├── UserDetail.tsx     # Individual user page
-│   └── ActivityLog.tsx    # Audit trail viewer
-└── services/
-    └── adminApi.ts        # API client for admin endpoints
+admin-dashboard/
+├── src/
+│   ├── main.tsx              # App entry with providers
+│   ├── App.tsx               # Root component with routing
+│   ├── types/
+│   │   └── admin.types.ts    # TypeScript type definitions
+│   ├── services/
+│   │   ├── adminApi.ts       # API client for admin endpoints
+│   │   └── authService.ts    # Authentication service
+│   ├── components/
+│   │   ├── Layout/
+│   │   │   └── AdminLayout.tsx    # Main layout with sidebar
+│   │   └── shared/
+│   │       └── ConfirmDialog.tsx  # Confirmation dialog component
+│   └── pages/
+│       ├── Login.tsx         # Admin login with 2FA
+│       ├── Dashboard.tsx     # Overview/statistics
+│       ├── UserList.tsx      # User management table
+│       ├── UserDetail.tsx    # Individual user page
+│       └── ActivityLog.tsx   # Audit trail viewer
+└── public/                   # Static assets
 ```
 
 ### 2. User Management Interface Features

@@ -7,17 +7,20 @@ Complete guide to run UrGuide platform with Docker Compose.
 - Docker 20.10+ and Docker Compose 2.0+
 - Windows/Linux/macOS with Docker Desktop installed
 - 8GB RAM recommended (for all services)
-- Ports available: 1433, 5000, 3001, 5672, 15672, 9200, 9300
+- Ports available: 1433, 5000, 3001, 3002, 3003, 5341, 5672, 8080, 9200, 15672
 
 ## 📦 What Gets Started
 
-Running `docker-compose up` starts **5 containers**:
+Running `docker-compose up` starts **8 containers**:
 
 1. **SQL Server 2022** - Database (port 1433)
 2. **RabbitMQ 3** - Message queue (port 5672, UI: 15672)
 3. **Elasticsearch 8.11** - Search engine (port 9200)
 4. **UrGuide API** - .NET 10 backend (port 5000)
-5. **Admin Dashboard** - React 18 frontend (port 3001)
+5. **Admin Dashboard** - React 19 frontend (port 3001)
+6. **Guide Portal** - React 19 frontend (port 3002)
+7. **Tourist Website** - React 19 frontend (port 3003)
+8. **Seq** - Structured logging (port 5341 ingestion, 8080 web UI)
 
 ## ⚡ Quick Start (Production Mode)
 
@@ -35,8 +38,11 @@ docker-compose ps
 # 4. Access the applications
 # API: http://localhost:5000
 # Admin Dashboard: http://localhost:3001
+# Guide Portal: http://localhost:3002
+# Tourist Website: http://localhost:3003
 # Swagger: http://localhost:5000/swagger
 # RabbitMQ UI: http://localhost:15672 (guest/guest)
+# Seq Logs: http://localhost:8080
 ```
 
 ## 🛠️ Development Mode (with Hot Reload)
@@ -59,7 +65,7 @@ docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
 
 # 4. Code changes auto-reload
 # - .NET: dotnet watch (backend)
-# - React: Vite HMR (admin dashboard)
+# - React: Vite HMR (admin dashboard, guide portal, tourist website)
 ```
 
 ### 👤 Admin User Auto-Provisioning
@@ -272,7 +278,10 @@ docker stop <container-name>
 - Elasticsearch: ~1GB (configurable via ES_JAVA_OPTS)
 - UrGuide API: ~200MB
 - Admin Dashboard: ~25MB
-- **Total**: ~2GB RAM
+- Guide Portal: ~25MB
+- Tourist Website: ~25MB
+- Seq: ~200MB
+- **Total**: ~2.1GB RAM
 
 ### Reduce Elasticsearch Memory
 Edit `docker-compose.yml`:
@@ -375,6 +384,9 @@ After starting services, verify:
 - [ ] Elasticsearch: `curl http://localhost:9200` returns cluster info
 - [ ] API: Visit http://localhost:5000/swagger
 - [ ] Admin Dashboard: Visit http://localhost:3001
+- [ ] Guide Portal: Visit http://localhost:3002
+- [ ] Tourist Website: Visit http://localhost:3003
+- [ ] Seq Logs: Visit http://localhost:8080
 - [ ] All containers healthy: `docker-compose ps` shows all as "healthy"
 
 ---
