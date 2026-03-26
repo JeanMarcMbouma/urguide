@@ -19,6 +19,19 @@ namespace UrGuide.Data.Configurations
                 v => (EventCodes)v);
             builder.Property(x => x.EventCode).HasConversion(converter).IsRequired();
             builder.Property(x => x.Created).IsRequired().HasColumnType("datetime2");
+            builder.Property(x => x.IpAddress).HasMaxLength(45);
+            builder.Property(x => x.UserAgent).HasMaxLength(500);
+            builder.Property(x => x.Details).HasMaxLength(4000);
+            builder.Property(x => x.Category).HasMaxLength(100);
+            var severityConverter = new ValueConverter<AuditSeverity, int>(
+                v => (int)v,
+                v => (AuditSeverity)v);
+            builder.Property(x => x.Severity).HasConversion(severityConverter).HasDefaultValue(AuditSeverity.Info);
+
+            builder.HasIndex(x => x.UserId);
+            builder.HasIndex(x => x.Created);
+            builder.HasIndex(x => x.EventCode);
+            builder.HasIndex(x => x.Category);
         }
     }
 }

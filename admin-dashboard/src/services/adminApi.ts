@@ -21,6 +21,10 @@ import type {
   CreateNotificationTemplateRequest,
   UpdateNotificationTemplateRequest,
   TemplatePreviewResult,
+  AccountFreezeRequest,
+  AccountUnfreezeRequest,
+  AccountFreezeInfo,
+  AccountFreezeHistoryResponse,
 } from '../types/admin.types';
 
 class AdminApiService {
@@ -276,6 +280,8 @@ class AdminApiService {
         StartDate: params?.startDate,
         EndDate: params?.endDate,
         EventCode: params?.eventCode,
+        Category: params?.category,
+        Severity: params?.severity,
       },
     });
     return data;
@@ -362,6 +368,37 @@ class AdminApiService {
       variables,
       { baseURL: '/api' }
     );
+    return data;
+  }
+
+  // ── Account Freeze / Temporary Suspension ─────────────────────────────────
+
+  // Freeze a user account
+  async freezeAccount(request: AccountFreezeRequest): Promise<AccountFreezeInfo> {
+    const { data } = await this.api.post<AccountFreezeInfo>('/users/freeze', request);
+    return data;
+  }
+
+  // Unfreeze a user account
+  async unfreezeAccount(request: AccountUnfreezeRequest): Promise<ApiResult<void>> {
+    const { data } = await this.api.post<ApiResult<void>>('/users/unfreeze', request);
+    return data;
+  }
+
+  // Get freeze history for a user
+  async getFreezeHistory(userId: string, pageNumber: number = 1): Promise<AccountFreezeHistoryResponse> {
+    const { data } = await this.api.get<AccountFreezeHistoryResponse>(
+      `/users/${userId}/freeze-history`,
+      { params: { PageNumber: pageNumber } }
+    );
+    return data;
+  }
+
+  // Get all currently frozen accounts
+  async getFrozenAccounts(pageNumber: number = 1): Promise<AccountFreezeHistoryResponse> {
+    const { data } = await this.api.get<AccountFreezeHistoryResponse>('/users/frozen', {
+      params: { PageNumber: pageNumber },
+    });
     return data;
   }
 }

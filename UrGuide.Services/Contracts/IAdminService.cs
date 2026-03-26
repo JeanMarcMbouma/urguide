@@ -127,5 +127,27 @@ namespace UrGuide.Services.Contracts
         /// Update platform settings / feature toggles
         /// </summary>
         Task<Outcome<bool>> UpdatePlatformSettingsAsync(PlatformSettings settings, CancellationToken cancellationToken);
+
+        // ── Account Freeze / Temporary Suspension ─────────────────────────────
+
+        /// <summary>
+        /// Freeze a user account with reason and optional duration
+        /// </summary>
+        Task<Outcome<AccountFreezeInfo>> FreezeAccountAsync(AccountFreezeRequest request, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Unfreeze a previously frozen user account
+        /// </summary>
+        Task<Outcome<bool>> UnfreezeAccountAsync(AccountUnfreezeRequest request, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Get freeze history for a specific user
+        /// </summary>
+        Task<Outcome<AccountFreezeHistoryResponse>> GetFreezeHistoryAsync(string userId, PaginationParameters paginationParameters, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Get all currently frozen accounts
+        /// </summary>
+        Task<Outcome<AccountFreezeHistoryResponse>> GetFrozenAccountsAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken);
     }
 }

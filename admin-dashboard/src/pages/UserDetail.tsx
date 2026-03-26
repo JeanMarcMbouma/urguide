@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Paper,
@@ -18,6 +19,17 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from '@mui/material';
 import {
   ArrowBack as BackIcon,
@@ -25,6 +37,8 @@ import {
   Block as BlockIcon,
   CheckCircle as ActivateIcon,
   Delete as DeleteIcon,
+  AcUnit as FreezeIcon,
+  Whatshot as UnfreezeIcon,
 } from '@mui/icons-material';
 import { adminApi } from '../services/adminApi';
 import ConfirmDialog from '../components/shared/ConfirmDialog';
@@ -33,6 +47,7 @@ const UserDetail = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const [editingRoles, setEditingRoles] = useState(false);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -43,6 +58,11 @@ const UserDetail = () => {
     action: null,
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
+  const [freezeDialog, setFreezeDialog] = useState(false);
+  const [freezeReason, setFreezeReason] = useState('');
+  const [freezeDuration, setFreezeDuration] = useState<number | ''>('');
+  const [unfreezeDialog, setUnfreezeDialog] = useState(false);
+  const [unfreezeReason, setUnfreezeReason] = useState('');
 
   // Fetch user details
   const { data: user, isLoading, error } = useQuery({
@@ -63,10 +83,10 @@ const UserDetail = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user', userId] });
       setEditingRoles(false);
-      setSnackbar({ open: true, message: 'Roles updated successfully', severity: 'success' });
+      setSnackbar({ open: true, message: t('userDetail.rolesUpdated'), severity: 'success' });
     },
     onError: () => {
-      setSnackbar({ open: true, message: 'Failed to update roles', severity: 'error' });
+      setSnackbar({ open: true, message: t('userDetail.rolesUpdateError'), severity: 'error' });
     },
   });
 
@@ -74,7 +94,7 @@ const UserDetail = () => {
     mutationFn: () => adminApi.suspendUser(userId!, 30),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user', userId] });
-      setSnackbar({ open: true, message: 'User suspended successfully', severity: 'success' });
+      setSnackbar({ open: true, message: t('userDetail.suspendSuccess'), severity: 'success' });
     },
   });
 
@@ -82,15 +102,57 @@ const UserDetail = () => {
     mutationFn: () => adminApi.activateUser(userId!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user', userId] });
-      setSnackbar({ open: true, message: 'User activated successfully', severity: 'success' });
+      setSnackbar({ open: true, message: t('userDetail.activateSuccess'), severity: 'success' });
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: () => adminApi.deleteUser(userId!),
     onSuccess: () => {
-      setSnackbar({ open: true, message: 'User deleted successfully', severity: 'success' });
+      setSnackbar({ open: true, message: t('userDetail.deleteSuccess'), severity: 'success' });
       setTimeout(() => navigate('/users'), 1500);
+    },
+  });
+
+  // Freeze / Unfreeze mutations
+  const { data: freezeHistory } = useQuery({
+    queryKey: ['freezeHistory', userId],
+    queryFn: () => adminApi.getFreezeHistory(userId!),
+    enabled: !!userId,
+  });
+
+  const freezeMutation = useMutation({
+    mutationFn: () =>
+      adminApi.freezeAccount({
+        userId: userId!,
+        reason: freezeReason,
+        durationDays: freezeDuration ? Number(freezeDuration) : undefined,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user', userId] });
+      queryClient.invalidateQueries({ queryKey: ['freezeHistory', userId] });
+      setFreezeDialog(false);
+      setFreezeReason('');
+      setFreezeDuration('');
+      setSnackbar({ open: true, message: t('userDetail.freezeSuccess'), severity: 'success' });
+    },
+    onError: () => {
+      setSnackbar({ open: true, message: t('userDetail.freezeError'), severity: 'error' });
+    },
+  });
+
+  const unfreezeMutation = useMutation({
+    mutationFn: () =>
+      adminApi.unfreezeAccount({ userId: userId!, reason: unfreezeReason || undefined }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user', userId] });
+      queryClient.invalidateQueries({ queryKey: ['freezeHistory', userId] });
+      setUnfreezeDialog(false);
+      setUnfreezeReason('');
+      setSnackbar({ open: true, message: t('userDetail.unfreezeSuccess'), severity: 'success' });
+    },
+    onError: () => {
+      setSnackbar({ open: true, message: t('userDetail.unfreezeError'), severity: 'error' });
     },
   });
 
@@ -107,6 +169,15 @@ const UserDetail = () => {
     setConfirmDialog({ open: false, action: null });
   };
 
+  const getConfirmDialogProps = (action: 'suspend' | 'activate' | 'delete' | null) => {
+    const map = {
+      delete: { title: t('userDetail.deleteUser'), message: t('userDetail.confirmDelete') },
+      suspend: { title: t('userDetail.suspendUser'), message: t('userDetail.confirmSuspend') },
+      activate: { title: t('userDetail.activateUser'), message: t('userDetail.confirmActivate') },
+    };
+    return action ? map[action] : { title: '', message: '' };
+  };
+
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" mt={4}>
@@ -118,24 +189,26 @@ const UserDetail = () => {
   if (error || !user) {
     return (
       <Box>
-        <Alert severity="error">Failed to load user details</Alert>
+        <Alert severity="error">{t('userDetail.loadError')}</Alert>
         <Button startIcon={<BackIcon />} onClick={() => navigate('/users')} sx={{ mt: 2 }}>
-          Back to Users
+          {t('userDetail.backToUsers')}
         </Button>
       </Box>
     );
   }
 
   const isLocked = user.lockoutEnd && new Date(user.lockoutEnd) > new Date();
+  const activeFreeze = freezeHistory?.items?.find((f) => f.status === 'Active');
+  const isFrozen = !!activeFreeze;
 
   return (
     <Box>
       <Button startIcon={<BackIcon />} onClick={() => navigate('/users')} sx={{ mb: 2 }}>
-        Back to Users
+        {t('userDetail.backToUsers')}
       </Button>
 
       <Typography variant="h4" gutterBottom>
-        User Details
+        {t('userDetail.title')}
       </Typography>
 
       <Grid container spacing={3}>
@@ -143,9 +216,9 @@ const UserDetail = () => {
         <Grid size={{ xs: 12, md: 8 }}>
           <Paper sx={{ p: 3 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-              <Typography variant="h6">Profile Information</Typography>
+              <Typography variant="h6">{t('userDetail.profileInfo')}</Typography>
               <Chip
-                label={isLocked ? 'Suspended' : 'Active'}
+                label={isLocked ? t('userDetail.suspended') : t('userDetail.active')}
                 color={isLocked ? 'error' : 'success'}
               />
             </Box>
@@ -153,7 +226,7 @@ const UserDetail = () => {
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Email
+                  {t('userDetail.email')}
                 </Typography>
                 <Typography variant="body1" fontWeight="medium">
                   {user.email}
@@ -161,7 +234,7 @@ const UserDetail = () => {
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Name
+                  {t('userDetail.name')}
                 </Typography>
                 <Typography variant="body1" fontWeight="medium">
                   {user.firstName} {user.lastName}
@@ -169,33 +242,33 @@ const UserDetail = () => {
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Phone Number
+                  {t('userDetail.phoneNumber')}
                 </Typography>
                 <Typography variant="body1" fontWeight="medium">
-                  {user.phoneNumber || 'N/A'}
+                  {user.phoneNumber || t('common.na')}
                 </Typography>
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" color="text.secondary">
-                  User Type
+                  {t('userDetail.userType')}
                 </Typography>
-                <Chip label={user.isGuide ? 'Guide' : 'User'} size="small" />
+                <Chip label={user.isGuide ? t('userDetail.guide') : t('userDetail.user')} size="small" />
               </Grid>
             </Grid>
 
             <Box mt={3}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                Roles
+                {t('userDetail.roles')}
               </Typography>
               {editingRoles ? (
                 <Box>
                   <FormControl fullWidth sx={{ mb: 2 }}>
-                    <InputLabel>Roles</InputLabel>
+                    <InputLabel>{t('userDetail.roles')}</InputLabel>
                     <Select
                       multiple
                       value={selectedRoles}
                       onChange={(e) => setSelectedRoles(e.target.value as string[])}
-                      input={<OutlinedInput label="Roles" />}
+                      input={<OutlinedInput label={t('userDetail.roles')} />}
                       renderValue={(selected) => (
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                           {selected.map((value) => (
@@ -213,10 +286,10 @@ const UserDetail = () => {
                   </FormControl>
                   <Box display="flex" gap={1}>
                     <Button variant="contained" onClick={() => updateRolesMutation.mutate()}>
-                      Save
+                      {t('common.save')}
                     </Button>
                     <Button variant="outlined" onClick={() => setEditingRoles(false)}>
-                      Cancel
+                      {t('common.cancel')}
                     </Button>
                   </Box>
                 </Box>
@@ -226,7 +299,7 @@ const UserDetail = () => {
                     <Chip key={role} label={role} />
                   ))}
                   <Button startIcon={<EditIcon />} size="small" onClick={handleStartEditRoles}>
-                    Edit
+                    {t('common.edit')}
                   </Button>
                 </Box>
               )}
@@ -236,14 +309,14 @@ const UserDetail = () => {
           {/* Activity Statistics */}
           <Paper sx={{ p: 3, mt: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Activity Statistics
+              {t('userDetail.activityStats')}
             </Typography>
             <Grid container spacing={2}>
               <Grid size={{ xs: 6, sm: 3 }}>
                 <Card variant="outlined">
                   <CardContent>
                     <Typography variant="body2" color="text.secondary">
-                      Posts
+                      {t('userDetail.posts')}
                     </Typography>
                     <Typography variant="h5">{user.postCount}</Typography>
                   </CardContent>
@@ -253,7 +326,7 @@ const UserDetail = () => {
                 <Card variant="outlined">
                   <CardContent>
                     <Typography variant="body2" color="text.secondary">
-                      Tours
+                      {t('userDetail.tours')}
                     </Typography>
                     <Typography variant="h5">{user.tourCount}</Typography>
                   </CardContent>
@@ -266,7 +339,7 @@ const UserDetail = () => {
               sx={{ mt: 2 }}
               onClick={() => navigate(`/users/${userId}/activity`)}
             >
-              View Activity Log
+              {t('userDetail.viewActivityLog')}
             </Button>
           </Paper>
         </Grid>
@@ -275,27 +348,27 @@ const UserDetail = () => {
         <Grid size={{ xs: 12, md: 4 }}>
           <Paper sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Security Status
+              {t('userDetail.securityStatus')}
             </Typography>
             <Box display="flex" flexDirection="column" gap={1}>
               <Box display="flex" justifyContent="space-between">
-                <Typography variant="body2">Email Verified</Typography>
+                <Typography variant="body2">{t('userDetail.emailVerified')}</Typography>
                 <Chip
-                  label={user.emailConfirmed ? 'Yes' : 'No'}
+                  label={user.emailConfirmed ? t('common.yes') : t('common.no')}
                   color={user.emailConfirmed ? 'success' : 'default'}
                   size="small"
                 />
               </Box>
               <Box display="flex" justifyContent="space-between">
-                <Typography variant="body2">2FA Enabled</Typography>
+                <Typography variant="body2">{t('userDetail.twoFaEnabled')}</Typography>
                 <Chip
-                  label={user.twoFactorEnabled ? 'Yes' : 'No'}
+                  label={user.twoFactorEnabled ? t('common.yes') : t('common.no')}
                   color={user.twoFactorEnabled ? 'success' : 'default'}
                   size="small"
                 />
               </Box>
               <Box display="flex" justifyContent="space-between">
-                <Typography variant="body2">Failed Attempts</Typography>
+                <Typography variant="body2">{t('userDetail.failedAttempts')}</Typography>
                 <Typography variant="body2" fontWeight="medium">
                   {user.accessFailedCount}
                 </Typography>
@@ -303,7 +376,7 @@ const UserDetail = () => {
               {isLocked && (
                 <Box display="flex" flexDirection="column" mt={1}>
                   <Typography variant="body2" color="error">
-                    Locked Until
+                    {t('userDetail.lockedUntil')}
                   </Typography>
                   <Typography variant="body2" fontWeight="medium">
                     {new Date(user.lockoutEnd!).toLocaleString()}
@@ -315,7 +388,7 @@ const UserDetail = () => {
 
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Actions
+              {t('userDetail.actions')}
             </Typography>
             <Box display="flex" flexDirection="column" gap={1}>
               {isLocked ? (
@@ -325,7 +398,7 @@ const UserDetail = () => {
                   startIcon={<ActivateIcon />}
                   onClick={() => setConfirmDialog({ open: true, action: 'activate' })}
                 >
-                  Activate Account
+                  {t('userDetail.activateAccount')}
                 </Button>
               ) : (
                 <Button
@@ -334,7 +407,26 @@ const UserDetail = () => {
                   startIcon={<BlockIcon />}
                   onClick={() => setConfirmDialog({ open: true, action: 'suspend' })}
                 >
-                  Suspend Account
+                  {t('userDetail.suspendAccount')}
+                </Button>
+              )}
+              {isFrozen ? (
+                <Button
+                  variant="contained"
+                  color="info"
+                  startIcon={<UnfreezeIcon />}
+                  onClick={() => setUnfreezeDialog(true)}
+                >
+                  {t('userDetail.unfreezeAccount')}
+                </Button>
+              ) : (
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  startIcon={<FreezeIcon />}
+                  onClick={() => setFreezeDialog(true)}
+                >
+                  {t('userDetail.freezeAccount')}
                 </Button>
               )}
               <Button
@@ -343,18 +435,66 @@ const UserDetail = () => {
                 startIcon={<DeleteIcon />}
                 onClick={() => setConfirmDialog({ open: true, action: 'delete' })}
               >
-                Delete Account
+                {t('userDetail.deleteAccount')}
               </Button>
             </Box>
+            {isFrozen && activeFreeze && (
+              <Alert severity="info" sx={{ mt: 2 }}>
+                <Typography variant="body2" fontWeight="bold">{t('userDetail.accountFrozen')}</Typography>
+                <Typography variant="body2">{t('userDetail.reason')}: {activeFreeze.reason}</Typography>
+                {activeFreeze.expiresAt && (
+                  <Typography variant="body2">
+                    {t('userDetail.expires')}: {new Date(activeFreeze.expiresAt).toLocaleString()}
+                  </Typography>
+                )}
+              </Alert>
+            )}
           </Paper>
+
+          {/* Freeze History */}
+          {freezeHistory && freezeHistory.items.length > 0 && (
+            <Paper sx={{ p: 3, mt: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                {t('userDetail.freezeHistory')}
+              </Typography>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>{t('userDetail.status')}</TableCell>
+                      <TableCell>{t('userDetail.reason')}</TableCell>
+                      <TableCell>{t('userDetail.frozenAt')}</TableCell>
+                      <TableCell>{t('userDetail.expires')}</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {freezeHistory.items.map((record) => (
+                      <TableRow key={record.id}>
+                        <TableCell>
+                          <Chip
+                            label={record.status}
+                            color={record.status === 'Active' ? 'error' : record.status === 'Unfrozen' ? 'success' : 'default'}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell>{record.reason}</TableCell>
+                        <TableCell>{new Date(record.frozenAt).toLocaleString()}</TableCell>
+                        <TableCell>{record.expiresAt ? new Date(record.expiresAt).toLocaleString() : t('common.indefinite')}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+          )}
         </Grid>
       </Grid>
 
       <ConfirmDialog
         open={confirmDialog.open}
-        title={`${confirmDialog.action === 'delete' ? 'Delete' : confirmDialog.action === 'suspend' ? 'Suspend' : 'Activate'} User`}
-        message={`Are you sure you want to ${confirmDialog.action} this user?`}
-        confirmText={confirmDialog.action === 'delete' ? 'Delete' : 'Confirm'}
+        title={getConfirmDialogProps(confirmDialog.action).title}
+        message={getConfirmDialogProps(confirmDialog.action).message}
+        confirmText={confirmDialog.action === 'delete' ? t('common.delete') : t('common.confirm')}
         severity={confirmDialog.action === 'delete' ? 'error' : 'warning'}
         onConfirm={handleConfirm}
         onCancel={() => setConfirmDialog({ open: false, action: null })}
@@ -367,6 +507,78 @@ const UserDetail = () => {
       >
         <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
       </Snackbar>
+
+      {/* Freeze Dialog */}
+      <Dialog open={freezeDialog} onClose={() => setFreezeDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>{t('userDetail.freezeDialogTitle')}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {t('userDetail.freezeDialogDesc')}
+          </Typography>
+          <TextField
+            label={t('userDetail.reasonLabel')}
+            fullWidth
+            required
+            multiline
+            rows={3}
+            value={freezeReason}
+            onChange={(e) => setFreezeReason(e.target.value)}
+            inputProps={{ maxLength: 2000 }}
+            helperText={`${freezeReason.length}/2000`}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            label={t('userDetail.durationLabel')}
+            type="number"
+            fullWidth
+            value={freezeDuration}
+            onChange={(e) => setFreezeDuration(e.target.value ? Number(e.target.value) : '')}
+            helperText={t('userDetail.durationHelp')}
+            inputProps={{ min: 1, max: 3650 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setFreezeDialog(false)}>{t('common.cancel')}</Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            disabled={!freezeReason.trim() || freezeMutation.isPending}
+            onClick={() => freezeMutation.mutate()}
+          >
+            {freezeMutation.isPending ? t('userDetail.freezing') : t('userDetail.freeze')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Unfreeze Dialog */}
+      <Dialog open={unfreezeDialog} onClose={() => setUnfreezeDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>{t('userDetail.unfreezeDialogTitle')}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {t('userDetail.unfreezeDialogDesc')}
+          </Typography>
+          <TextField
+            label={t('userDetail.reasonOptionalLabel')}
+            fullWidth
+            multiline
+            rows={2}
+            value={unfreezeReason}
+            onChange={(e) => setUnfreezeReason(e.target.value)}
+            inputProps={{ maxLength: 2000 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setUnfreezeDialog(false)}>{t('common.cancel')}</Button>
+          <Button
+            variant="contained"
+            color="info"
+            disabled={unfreezeMutation.isPending}
+            onClick={() => unfreezeMutation.mutate()}
+          >
+            {unfreezeMutation.isPending ? t('userDetail.unfreezing') : t('userDetail.unfreeze')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

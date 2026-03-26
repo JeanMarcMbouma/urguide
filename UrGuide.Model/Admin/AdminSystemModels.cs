@@ -34,6 +34,11 @@ namespace UrGuide.Model.Admin
         public string UserEmail { get; set; }
         public string ReferenceId { get; set; }
         public DateTime Created { get; set; }
+        public string IpAddress { get; set; }
+        public string UserAgent { get; set; }
+        public string Details { get; set; }
+        public string Category { get; set; }
+        public string Severity { get; set; }
     }
 
     public class AdminWebhookListResponse
@@ -79,5 +84,7 @@ namespace UrGuide.Model.Admin
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string EventCode { get; set; }
+        public string Category { get; set; }
+        public string Severity { get; set; }
     }
 }

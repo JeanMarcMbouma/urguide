@@ -532,3 +532,141 @@ export const updateUserRoles = async (model: UpdateUserRolesModel) => {
 - UrGuide.WebApp.dll ✅
 
 **Ready for frontend development!**
+
+---
+
+## Account Freeze / Temporary Suspension
+
+### Freeze Account
+**POST** `/api/admin/users/freeze`
+
+Freeze a user account with a reason and optional duration. Sets Identity lockout and creates an audit trail.
+
+**Request Body:**
+```json
+{
+  "userId": "string",
+  "reason": "string (required, max 2000 chars)",
+  "durationDays": 30
+}
+```
+- `durationDays` is optional (1–3650). When omitted, the freeze is indefinite.
+
+**Response:** `200 OK`
+```json
+{
+  "id": "string",
+  "userId": "string",
+  "userEmail": "user@example.com",
+  "reason": "Violation of terms",
+  "frozenByAdminId": "string",
+  "frozenAt": "2025-01-19T12:00:00Z",
+  "expiresAt": "2025-02-18T12:00:00Z",
+  "status": "Active"
+}
+```
+
+### Unfreeze Account
+**POST** `/api/admin/users/unfreeze`
+
+Remove an active freeze from a user account.
+
+**Request Body:**
+```json
+{
+  "userId": "string",
+  "reason": "string (optional)"
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+  "message": "Account unfrozen successfully",
+  "userId": "string"
+}
+```
+
+### Get Freeze History
+**GET** `/api/admin/users/{userId}/freeze-history`
+
+Returns paginated freeze history for a specific user.
+
+**Query Parameters:**
+- `PageNumber` (optional, default: 1)
+
+**Response:** `200 OK`
+```json
+{
+  "items": [
+    {
+      "id": "string",
+      "userId": "string",
+      "userEmail": "user@example.com",
+      "reason": "Violation of terms",
+      "frozenByAdminId": "string",
+      "frozenAt": "2025-01-19T12:00:00Z",
+      "expiresAt": "2025-02-18T12:00:00Z",
+      "unfrozenAt": "2025-01-25T10:00:00Z",
+      "unfrozenByAdminId": "string",
+      "unfreezeReason": "Issue resolved",
+      "status": "Unfrozen"
+    }
+  ],
+  "totalCount": 1,
+  "pageNumber": 1,
+  "pageSize": 20
+}
+```
+
+### Get Frozen Accounts
+**GET** `/api/admin/users/frozen`
+
+Returns paginated list of all currently frozen accounts.
+
+**Query Parameters:**
+- `PageNumber` (optional, default: 1)
+
+---
+
+## Enhanced Audit Logging
+
+### Audit Event Fields
+All audit events now include enhanced fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique event identifier |
+| `eventCode` | string | Event type (e.g., `AccountFrozen`, `Login`) |
+| `userId` | string | User who performed the action |
+| `userEmail` | string | Email of the acting user |
+| `referenceId` | string | Target entity ID |
+| `created` | datetime | Event timestamp |
+| `ipAddress` | string | Client IP address |
+| `userAgent` | string | Client user agent |
+| `details` | string | Human-readable description |
+| `category` | string | Event category (Authentication, Account, Content, etc.) |
+| `severity` | string | Info, Warning, or Critical |
+
+### Audit Log Filter Parameters
+**GET** `/api/admin/system/audit-logs`
+
+Enhanced filters:
+- `UserId` — filter by acting user
+- `StartDate` / `EndDate` — date range
+- `EventCode` — specific event type
+- `Category` — event category (Authentication, Account, Content, AccountManagement, Moderation, Financial, Settings, System)
+- `Severity` — Info, Warning, or Critical
+
+### Event Code Categories
+
+| Code Range | Category | Events |
+|------------|----------|--------|
+| 1000–1006 | Authentication | Login, Logout, FailedLogin, PasswordChanged, PasswordReset, TwoFactorEnabled/Disabled |
+| 2000–2004 | Account | Register, DeleteAccount, ProfileUpdated, EmailChanged, RolesUpdated |
+| 3000–3005 | Content | CreatePost, EditPost, DeletePost, CreateCatalog, EditCatalog, DeleteCatalog |
+| 4000–4004 | AccountManagement | AccountFrozen, AccountUnfrozen, AccountSuspended, AccountActivated, AccountDeleted |
+| 5000–5003 | Moderation | GuideVerificationApproved/Rejected, TourApproved/Rejected |
+| 6000–6002 | Financial | PaymentProcessed, RefundIssued, PayoutProcessed |
+| 7000 | Settings | SettingsUpdated |
+| 10000 | System | Maintenance |
