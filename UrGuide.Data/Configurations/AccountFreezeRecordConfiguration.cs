@@ -27,6 +27,9 @@ namespace UrGuide.Data.Configurations
 
             builder.HasIndex(x => x.UserId);
             builder.HasIndex(x => x.Status);
+            builder.HasIndex(x => new { x.UserId, x.Status })
+                .HasFilter("[Status] = 0")
+                .IsUnique();
         }
     }
 }

@@ -1177,6 +1177,9 @@ namespace UrGuide.WebApp.Services
                 if (string.IsNullOrWhiteSpace(request.Reason))
                     return Result.Of<AccountFreezeInfo>().WithErrors("Reason is required");
 
+                if (request.DurationDays.HasValue && (request.DurationDays.Value < 1 || request.DurationDays.Value > 3650))
+                    return Result.Of<AccountFreezeInfo>().WithErrors("Duration must be between 1 and 3650 days");
+
                 var user = await _userManager.FindByIdAsync(request.UserId);
                 if (user == null)
                     return Result.Of<AccountFreezeInfo>().WithErrors("User not found");

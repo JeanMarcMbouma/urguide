@@ -42,11 +42,11 @@ namespace UrGuide.Services.Auditing
                     UserId = userId ?? SystemUserId,
                     EventCode = eventCode,
                     ReferenceId = referenceId,
-                    Details = details,
+                    Details = details != null && details.Length > 4000 ? details[..3997] + "..." : details,
                     Category = category ?? GetDefaultCategory(eventCode),
                     Severity = severity,
                     IpAddress = ipAddress,
-                    UserAgent = userAgent
+                    UserAgent = userAgent != null && userAgent.Length > 500 ? userAgent[..497] + "..." : userAgent
                 };
 
                 _context.AuditEvents.Add(auditEvent);
