@@ -46,9 +46,17 @@ namespace UrGuide.Services.Auditing
 
         public static ActivityModel ToActivityModel(AuditEvent source)
         {
-            var description = EventDescriptions.TryGetValue(source.EventCode, out var desc)
-                ? string.Format(desc, source.ReferenceId)
-                : $"Event: {source.EventCode}";
+            string description;
+            if (EventDescriptions.TryGetValue(source.EventCode, out var desc))
+            {
+                description = desc.Contains("{0}")
+                    ? string.Format(desc, source.ReferenceId)
+                    : desc;
+            }
+            else
+            {
+                description = $"Event: {source.EventCode}";
+            }
 
             return new ActivityModel
             {

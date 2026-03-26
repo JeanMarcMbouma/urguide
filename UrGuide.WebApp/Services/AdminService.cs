@@ -25,6 +25,8 @@ namespace UrGuide.WebApp.Services
     /// </summary>
     public class AdminService : IAdminService
     {
+        private const int DefaultPageSize = 20;
+
         private readonly UserManager<UrGuideUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UrGuideContext _context;
@@ -1307,7 +1309,7 @@ namespace UrGuide.WebApp.Services
 
                 var totalCount = await query.CountAsync(cancellationToken);
 
-                var pageSize = 20;
+                var pageSize = DefaultPageSize;
                 var page = Math.Max(1, paginationParameters.PageNumber);
                 var records = await query
                     .Skip((page - 1) * pageSize)
@@ -1358,7 +1360,7 @@ namespace UrGuide.WebApp.Services
 
                 var totalCount = await query.CountAsync(cancellationToken);
 
-                var pageSize = 20;
+                var pageSize = DefaultPageSize;
                 var page = Math.Max(1, paginationParameters.PageNumber);
                 var records = await query
                     .Skip((page - 1) * pageSize)

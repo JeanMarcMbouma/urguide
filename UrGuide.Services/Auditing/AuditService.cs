@@ -13,6 +13,8 @@ namespace UrGuide.Services.Auditing
     /// </summary>
     public class AuditService : IAuditService
     {
+        private const string SystemUserId = "system";
+
         private readonly UrGuideContext _context;
         private readonly ILogger<AuditService> _logger;
 
@@ -37,7 +39,7 @@ namespace UrGuide.Services.Auditing
             {
                 var auditEvent = new AuditEvent
                 {
-                    UserId = userId ?? "system",
+                    UserId = userId ?? SystemUserId,
                     EventCode = eventCode,
                     ReferenceId = referenceId,
                     Details = details,
