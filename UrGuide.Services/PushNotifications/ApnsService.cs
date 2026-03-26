@@ -18,6 +18,7 @@ public class ApnsService : IPushNotificationProvider
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
     private readonly ILogger<ApnsService> _logger;
+    private readonly SemaphoreSlim _tokenLock = new(1, 1);
     private string _cachedJwtToken = string.Empty;
     private DateTime _tokenExpiry = DateTime.MinValue;
 
@@ -107,44 +108,52 @@ public class ApnsService : IPushNotificationProvider
 
     private string GetOrCreateJwtToken(string teamId, string keyId)
     {
-        if (!string.IsNullOrEmpty(_cachedJwtToken) && DateTime.UtcNow < _tokenExpiry)
-        {
-            return _cachedJwtToken;
-        }
-
-        var keyPath = _configuration["PushNotifications:APNs:PrivateKeyPath"];
-        if (string.IsNullOrEmpty(keyPath))
-        {
-            _logger.LogWarning("APNs private key path is not configured.");
-            return string.Empty;
-        }
-
+        _tokenLock.Wait();
         try
         {
-            var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            var header = JsonSerializer.Serialize(new { alg = "ES256", kid = keyId });
-            var claims = JsonSerializer.Serialize(new { iss = teamId, iat = now });
+            if (!string.IsNullOrEmpty(_cachedJwtToken) && DateTime.UtcNow < _tokenExpiry)
+            {
+                return _cachedJwtToken;
+            }
 
-            var headerBase64 = Base64UrlEncode(Encoding.UTF8.GetBytes(header));
-            var claimsBase64 = Base64UrlEncode(Encoding.UTF8.GetBytes(claims));
-            var unsignedToken = $"{headerBase64}.{claimsBase64}";
+            var keyPath = _configuration["PushNotifications:APNs:PrivateKeyPath"];
+            if (string.IsNullOrEmpty(keyPath))
+            {
+                _logger.LogWarning("APNs private key path is not configured.");
+                return string.Empty;
+            }
 
-            var privateKeyText = System.IO.File.ReadAllText(keyPath);
-            using var ecdsa = ECDsa.Create();
-            ecdsa.ImportFromPem(privateKeyText);
+            try
+            {
+                var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                var header = JsonSerializer.Serialize(new { alg = "ES256", kid = keyId });
+                var claims = JsonSerializer.Serialize(new { iss = teamId, iat = now });
 
-            var signature = ecdsa.SignData(
-                Encoding.UTF8.GetBytes(unsignedToken),
-                HashAlgorithmName.SHA256);
+                var headerBase64 = Base64UrlEncode(Encoding.UTF8.GetBytes(header));
+                var claimsBase64 = Base64UrlEncode(Encoding.UTF8.GetBytes(claims));
+                var unsignedToken = $"{headerBase64}.{claimsBase64}";
 
-            _cachedJwtToken = $"{unsignedToken}.{Base64UrlEncode(signature)}";
-            _tokenExpiry = DateTime.UtcNow.AddMinutes(50); // APNs tokens valid for 1 hour
-            return _cachedJwtToken;
+                var privateKeyText = System.IO.File.ReadAllText(keyPath);
+                using var ecdsa = ECDsa.Create();
+                ecdsa.ImportFromPem(privateKeyText);
+
+                var signature = ecdsa.SignData(
+                    Encoding.UTF8.GetBytes(unsignedToken),
+                    HashAlgorithmName.SHA256);
+
+                _cachedJwtToken = $"{unsignedToken}.{Base64UrlEncode(signature)}";
+                _tokenExpiry = DateTime.UtcNow.AddMinutes(50); // APNs tokens valid for 1 hour
+                return _cachedJwtToken;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create APNs JWT token.");
+                return string.Empty;
+            }
         }
-        catch (Exception ex)
+        finally
         {
-            _logger.LogError(ex, "Failed to create APNs JWT token.");
-            return string.Empty;
+            _tokenLock.Release();
         }
     }
 

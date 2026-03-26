@@ -142,6 +142,7 @@ class PushNotificationService : IPushNotificationService
         }
 
         var results = new List<PushNotificationResultDto>();
+        var logs = new List<(Data.Entities.PushNotifications.PushNotificationLog Log, Data.Entities.PushNotifications.DeviceRegistration Device)>();
 
         foreach (var device in devices)
         {
@@ -164,7 +165,7 @@ class PushNotificationService : IPushNotificationService
                 TemplateId = request.TemplateId ?? string.Empty
             };
             Context.PushNotificationLogs.Add(log);
-            await Context.SaveChangesAsync(ct);
+            logs.Add((log, device));
 
             var deliveryResult = await provider.SendAsync(
                 device.DeviceToken,
@@ -179,9 +180,12 @@ class PushNotificationService : IPushNotificationService
             log.ErrorMessage = deliveryResult.ErrorMessage ?? string.Empty;
             if (deliveryResult.Success)
                 log.DeliveredAt = DateTime.UtcNow;
+        }
 
-            await Context.SaveChangesAsync(ct);
+        await Context.SaveChangesAsync(ct);
 
+        foreach (var (log, device) in logs)
+        {
             results.Add(MapToResultDto(log, device));
         }
 

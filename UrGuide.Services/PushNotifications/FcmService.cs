@@ -33,12 +33,18 @@ public class FcmService : IPushNotificationProvider
     {
         try
         {
-            var serverKey = _configuration["PushNotifications:FCM:ServerKey"];
             var projectId = _configuration["PushNotifications:FCM:ProjectId"];
+            var useV1Api = !string.IsNullOrEmpty(projectId);
 
-            if (string.IsNullOrEmpty(serverKey))
+            // V1 API uses OAuth2 access token; legacy API uses server key
+            var authToken = useV1Api
+                ? _configuration["PushNotifications:FCM:AccessToken"]
+                : _configuration["PushNotifications:FCM:ServerKey"];
+
+            if (string.IsNullOrEmpty(authToken))
             {
-                _logger.LogWarning("FCM configuration is incomplete. ServerKey is required.");
+                var requiredKey = useV1Api ? "AccessToken" : "ServerKey";
+                _logger.LogWarning("FCM configuration is incomplete. {Key} is required.", requiredKey);
                 return new PushNotificationDeliveryResult
                 {
                     Success = false,
@@ -47,24 +53,24 @@ public class FcmService : IPushNotificationProvider
                 };
             }
 
-            var fcmUrl = string.IsNullOrEmpty(projectId)
-                ? "https://fcm.googleapis.com/fcm/send"
-                : $"https://fcm.googleapis.com/v1/projects/{projectId}/messages:send";
+            var fcmUrl = useV1Api
+                ? $"https://fcm.googleapis.com/v1/projects/{projectId}/messages:send"
+                : "https://fcm.googleapis.com/fcm/send";
 
-            var payload = BuildFcmPayload(deviceToken, title, body, imageUrl, data, !string.IsNullOrEmpty(projectId));
+            var payload = BuildFcmPayload(deviceToken, title, body, imageUrl, data, useV1Api);
 
             var request = new HttpRequestMessage(HttpMethod.Post, fcmUrl)
             {
                 Content = new StringContent(payload, Encoding.UTF8, "application/json")
             };
 
-            if (!string.IsNullOrEmpty(projectId))
+            if (useV1Api)
             {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", serverKey);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
             }
             else
             {
-                request.Headers.TryAddWithoutValidation("Authorization", $"key={serverKey}");
+                request.Headers.TryAddWithoutValidation("Authorization", $"key={authToken}");
             }
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
