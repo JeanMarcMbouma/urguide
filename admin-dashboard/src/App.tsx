@@ -15,6 +15,7 @@ import TourModerationDetail from './pages/TourModerationDetail';
 import FinancialDashboard from './pages/FinancialDashboard';
 import SystemMonitoring from './pages/SystemMonitoring';
 import TranslationManagement from './pages/TranslationManagement';
+import NotificationTemplates from './pages/NotificationTemplates';
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -61,6 +62,7 @@ function App() {
         <Route path="financial" element={<FinancialDashboard />} />
         <Route path="system" element={<SystemMonitoring />} />
         <Route path="translations" element={<TranslationManagement />} />
+        <Route path="notification-templates" element={<NotificationTemplates />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

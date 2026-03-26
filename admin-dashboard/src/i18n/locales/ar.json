@@ -7,7 +7,8 @@
         "financial": "المالية",
         "system": "النظام",
         "logout": "تسجيل الخروج",
-        "translations": "الترجمات"
+        "translations": "الترجمات",
+        "notificationTemplates": "قوالب الإشعارات"
     },
     "layout": {
         "title": "UrGuide Admin",

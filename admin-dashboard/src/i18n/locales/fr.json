@@ -7,7 +7,8 @@
         "financial": "Financier",
         "system": "Système",
         "logout": "Déconnexion",
-        "translations": "Traductions"
+        "translations": "Traductions",
+        "notificationTemplates": "Modèles de notifications"
     },
     "layout": {
         "title": "UrGuide Admin",

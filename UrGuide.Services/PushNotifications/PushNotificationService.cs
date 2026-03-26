@@ -22,13 +22,15 @@ class PushNotificationService : IPushNotificationService
         IValidator<DeviceRegistrationRequest> validator,
         ILogger<PushNotificationService> logger,
         IUserContext userContext,
-        IEnumerable<IPushNotificationProvider> providers)
+        IEnumerable<IPushNotificationProvider> providers,
+        INotificationTemplateService templateService)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
         Validator = validator ?? throw new ArgumentNullException(nameof(validator));
         Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         UserContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
         Providers = providers ?? throw new ArgumentNullException(nameof(providers));
+        TemplateService = templateService ?? throw new ArgumentNullException(nameof(templateService));
     }
 
     public UrGuideContext Context { get; }
@@ -36,6 +38,7 @@ class PushNotificationService : IPushNotificationService
     public ILogger<PushNotificationService> Logger { get; }
     public IUserContext UserContext { get; }
     public IEnumerable<IPushNotificationProvider> Providers { get; }
+    public INotificationTemplateService TemplateService { get; }
 
     public async Task<Outcome<DeviceRegistrationDto>> RegisterDeviceAsync(DeviceRegistrationRequest request, CancellationToken ct)
     {
@@ -117,6 +120,32 @@ class PushNotificationService : IPushNotificationService
 
         if (string.IsNullOrEmpty(request.UserId))
             return Result.Of<List<PushNotificationResultDto>>().WithErrors("UserId is required.");
+
+        // Resolve template when TemplateId is provided
+        if (!string.IsNullOrEmpty(request.TemplateId))
+        {
+            var templateOutcome = await TemplateService.GetTemplateByIdAsync(request.TemplateId, ct);
+            if (!templateOutcome.IsError && templateOutcome.Value != null)
+            {
+                var (renderedTitle, renderedBody) = TemplateService.RenderTemplate(
+                    templateOutcome.Value, request.TemplateVariables);
+                request.Title = renderedTitle;
+                request.Body = renderedBody;
+                if (string.IsNullOrEmpty(request.ImageUrl) && !string.IsNullOrEmpty(templateOutcome.Value.ImageUrl))
+                    request.ImageUrl = templateOutcome.Value.ImageUrl;
+                if (string.IsNullOrEmpty(request.ActionUrl) && !string.IsNullOrEmpty(templateOutcome.Value.ActionUrl))
+                    request.ActionUrl = templateOutcome.Value.ActionUrl;
+                Logger.LogInformation(
+                    "Template '{TemplateId}' resolved for notification to user {UserId}",
+                    request.TemplateId, request.UserId);
+            }
+            else
+            {
+                Logger.LogWarning(
+                    "Template '{TemplateId}' not found; falling back to request Title/Body",
+                    request.TemplateId);
+            }
+        }
 
         if (string.IsNullOrEmpty(request.Title) && string.IsNullOrEmpty(request.Body))
             return Result.Of<List<PushNotificationResultDto>>().WithErrors("Title or Body is required.");

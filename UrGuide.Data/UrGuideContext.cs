@@ -124,6 +124,7 @@ namespace UrGuide.Data
         public virtual DbSet<Entities.PushNotifications.DeviceRegistration> DeviceRegistrations { get; set; }
         public virtual DbSet<Entities.PushNotifications.PushNotificationLog> PushNotificationLogs { get; set; }
         public virtual DbSet<Entities.PushNotifications.NotificationPreference> NotificationPreferences { get; set; }
+        public virtual DbSet<Entities.PushNotifications.NotificationTemplate> NotificationTemplates { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
@@ -243,6 +244,7 @@ namespace UrGuide.Data
             modelBuilder.ApplyConfiguration(new Configurations.DeviceRegistrationConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PushNotificationLogConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.NotificationPreferenceConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.NotificationTemplateConfiguration());
         }
     }
 }

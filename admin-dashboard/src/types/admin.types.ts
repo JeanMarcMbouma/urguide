@@ -273,3 +273,47 @@ export interface AuditLogFilterParameters {
   endDate?: string;
   eventCode?: string;
 }
+
+// ── Push Notification Templates ───────────────────────────────────────────────
+
+export interface NotificationTemplateDto {
+  id: string;
+  name: string;
+  category: string;
+  language: string;
+  version: number;
+  titleTemplate: string;
+  bodyTemplate: string;
+  imageUrl: string;
+  actionUrl: string;
+  isActive: boolean;
+  variantGroup: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateNotificationTemplateRequest {
+  name: string;
+  category: string;
+  language: string;
+  titleTemplate: string;
+  bodyTemplate: string;
+  imageUrl?: string;
+  actionUrl?: string;
+  variantGroup?: string;
+}
+
+export interface UpdateNotificationTemplateRequest {
+  titleTemplate: string;
+  bodyTemplate: string;
+  imageUrl?: string;
+  actionUrl?: string;
+  isActive: boolean;
+  variantGroup?: string;
+}
+
+export interface TemplatePreviewResult {
+  title: string;
+  body: string;
+}

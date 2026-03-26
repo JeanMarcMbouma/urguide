@@ -23,6 +23,7 @@ Technical implementation summaries and architecture documentation.
 - [**Webhook Implementation Summary**](implementation/WEBHOOK_IMPLEMENTATION_SUMMARY.md) - Webhook system architecture and features
 - [**Refactoring Summary**](implementation/REFACTORING_SUMMARY.md) - Platform transformation to API-only architecture
 - [**Social Login Integration**](implementation/SOCIAL_LOGIN_INTEGRATION.md) - Google, Apple, Microsoft OAuth social login and account linking
+- [**Push Notification Templates**](implementation/PUSH_NOTIFICATION_TEMPLATES.md) - Reusable templates with variable substitution, versioning, multi-language and A/B testing
 
 ### 🚀 CI/CD
 Continuous Integration and Deployment documentation.

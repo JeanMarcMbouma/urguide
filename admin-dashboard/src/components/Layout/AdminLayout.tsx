@@ -31,6 +31,7 @@ import {
   Monitor as SystemIcon,
   Language as LanguageIcon,
   Translate as TranslateIcon,
+  Notifications as NotificationsIcon,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n';
@@ -90,6 +91,7 @@ const AdminLayout = () => {
     { textKey: 'nav.financial', icon: <FinancialIcon />, path: '/financial' },
     { textKey: 'nav.system', icon: <SystemIcon />, path: '/system' },
     { textKey: 'nav.translations', icon: <TranslateIcon />, path: '/translations' },
+    { textKey: 'nav.notificationTemplates', icon: <NotificationsIcon />, path: '/notification-templates' },
   ];
 
   const drawer = (
