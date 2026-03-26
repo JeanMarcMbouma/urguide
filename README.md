@@ -206,24 +206,24 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 ## 📋 API Roadmap & Future Features
 
 ### 💳 Payment & Financial System (Enhanced)
-- [ ] Platform currency system (coins)
-- [ ] Fund withdrawal to bank accounts
-- [ ] Automated payout scheduling
-- [ ] Advanced financial reporting
+- [x] Platform currency system (coins) - Coin wallet with purchase, spend, and transaction tracking
+- [x] Fund withdrawal to bank accounts - Bank withdrawal requests with status tracking
+- [x] Automated payout scheduling - Configurable payout schedules (weekly/bi-weekly/monthly/on-demand)
+- [x] Advanced financial reporting - Revenue, payouts, platform fees, and period-based reporting
 
 ### 🎁 Gamification & Rewards
-- [ ] User loyalty program with discounts
-- [ ] Badge system (Silver, Gold, Platinum)
-- [ ] Built-in lottery system for free tours
-- [ ] Achievement tracking
+- [x] User loyalty program with discounts - Tiered loyalty (Bronze/Silver/Gold/Platinum) with discount percentages
+- [x] Badge system (Silver, Gold, Platinum) - Configurable badges with criteria and tier-based awards
+- [x] Built-in lottery system for free tours - Lottery draws with cryptographically secure winner selection
+- [x] Achievement tracking - Progress-based achievements with points rewards
 
 ### 📈 Premium Features
-- [ ] Guide membership tiers:
+- [x] Guide membership tiers:
   - **Basic**: 2% platform fee, top 100 appearance, small group tours (<3 members)
   - **Premium**: 5% platform fee, top 10 local search, unlimited group size
-- [ ] Monthly/quarterly/yearly subscription plans
-- [ ] Advanced search and visibility boosts
-- [ ] Personalized advertising system
+- [x] Monthly/quarterly/yearly subscription plans - Configurable billing cycles with auto-renewal
+- [x] Advanced search and visibility boosts - Search ranking, featured listing, top result, and highlighted profile boosts
+- [x] Personalized advertising system - Targeted ads with budget management, impression/click tracking, and performance analytics
 
 ### 🔒 Security & Privacy
 - [x] Two-factor authentication (2FA) - TOTP and Passkey/WebAuthn support implemented

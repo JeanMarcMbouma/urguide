@@ -1695,12 +1695,187 @@ Implement multi-language support for API responses and error messages.
 
 ---
 
+## 💳 Enhanced Financial System
+
+### 39. Payment & Financial System (Enhanced)
+**Title:** Implement enhanced financial features including platform currency, withdrawals, automated payouts, and advanced reporting  
+**Labels:** enhancement, financial, high-priority  
+**Status:** ✅ **COMPLETED**  
+**Description:**
+Extend the existing payment system with platform currency (coins), fund withdrawal to bank accounts, automated payout scheduling, and advanced financial reporting capabilities.
+
+**Implemented:**
+- ✅ Platform currency system (coins) with wallet management
+  - Coin wallet per user with balance tracking
+  - Add coins (purchase) and spend coins (tour payments)
+  - Transaction history with pagination
+  - Multiple transaction types (Purchase, Reward, Referral, TourPayment, Refund, Withdrawal, Bonus)
+- ✅ Fund withdrawal to bank accounts
+  - Bank account details (bank name, account number, routing number, account holder)
+  - Withdrawal request status tracking (Pending → Processing → Completed/Failed/Cancelled)
+  - Transaction reference tracking
+  - Multi-currency support
+- ✅ Automated payout scheduling
+  - Configurable frequency (Weekly, BiWeekly, Monthly, OnDemand)
+  - Minimum amount threshold per payout
+  - Next payout date calculation
+  - Schedule pause/resume support
+- ✅ Advanced financial reporting
+  - Revenue, payouts, platform fees, and refund totals
+  - Transaction count and average transaction value
+  - Period-based revenue breakdown (day, week, month, year)
+  - Configurable date ranges
+
+**API Endpoints:**
+- `GET /api/financial/wallet` - Get user's coin wallet
+- `POST /api/financial/wallet/add` - Add coins to wallet
+- `POST /api/financial/wallet/spend` - Spend coins from wallet
+- `GET /api/financial/wallet/transactions` - Get coin transaction history
+- `POST /api/financial/withdrawal` - Create withdrawal request
+- `GET /api/financial/withdrawal/{withdrawalId}` - Get withdrawal details
+- `GET /api/financial/withdrawals` - Get user's withdrawal history
+- `POST /api/financial/withdrawal/{withdrawalId}/process` - Process withdrawal
+- `POST /api/financial/withdrawal/{withdrawalId}/cancel` - Cancel withdrawal
+- `POST /api/financial/payout-schedule` - Create automated payout schedule
+- `GET /api/financial/payout-schedule` - Get payout schedule
+- `PUT /api/financial/payout-schedule` - Update payout schedule
+- `POST /api/financial/report` - Generate financial report
+
+**Acceptance Criteria:**
+- [x] Users can purchase and spend platform coins
+- [x] Users can request fund withdrawals to bank accounts
+- [x] Guides can set up automated payout schedules
+- [x] Admins can generate advanced financial reports
+- [x] All financial operations are tracked with transaction history
+- [x] API documentation updated with new endpoints
+
+---
+
+## 🎁 Gamification & Engagement
+
+### 40. Gamification & Rewards System
+**Title:** Implement gamification features including loyalty program, badges, lottery, and achievement tracking  
+**Labels:** enhancement, gamification, engagement  
+**Status:** ✅ **COMPLETED**  
+**Description:**
+Add gamification features to increase user engagement including a loyalty program with tiered discounts, badge awards, lottery system for free tours, and achievement tracking with progress.
+
+**Implemented:**
+- ✅ User loyalty program with discounts
+  - Tiered loyalty levels: Bronze (0%), Silver (5%), Gold (10%), Platinum (15%) discounts
+  - Automatic tier upgrades based on points: Bronze (0), Silver (500+), Gold (2000+), Platinum (5000+)
+  - Point earning and redemption
+  - Loyalty transaction history
+- ✅ Badge system (Silver, Gold, Platinum)
+  - Configurable badges with name, description, icon, tier, category, and criteria
+  - Badge tiers: Silver, Gold, Platinum
+  - User badge awards with earned date tracking
+  - Prevents duplicate badge awards
+- ✅ Built-in lottery system for free tours
+  - Lottery draws with configurable max entries, winner count, and deadlines
+  - Cryptographically secure random winner selection using RandomNumberGenerator
+  - Entry validation (deadline, capacity, duplicate prevention)
+  - Lottery status tracking (Upcoming, Open, Closed, Drawn, Cancelled)
+- ✅ Achievement tracking
+  - Configurable achievements with categories, thresholds, and point rewards
+  - Progress tracking per user per achievement
+  - Automatic completion detection when threshold is reached
+  - Achievement history with completion timestamps
+- ✅ Gamification dashboard aggregating all user gamification data
+
+**API Endpoints:**
+- `GET /api/gamification/dashboard` - Get gamification dashboard (loyalty + badges + achievements + lotteries)
+- `GET /api/gamification/loyalty` - Get loyalty account
+- `POST /api/gamification/loyalty/earn` - Earn loyalty points
+- `POST /api/gamification/loyalty/redeem` - Redeem loyalty points
+- `GET /api/gamification/loyalty/history` - Get loyalty transaction history
+- `POST /api/gamification/badges` - Create a badge (admin)
+- `GET /api/gamification/badges` - Get all available badges
+- `GET /api/gamification/badges/user` - Get user's earned badges
+- `POST /api/gamification/badges/award/{badgeId}` - Award badge to user
+- `POST /api/gamification/lottery` - Create lottery draw
+- `GET /api/gamification/lottery/{drawId}` - Get lottery draw details
+- `GET /api/gamification/lottery/active` - Get active lotteries
+- `POST /api/gamification/lottery/{drawId}/enter` - Enter lottery
+- `POST /api/gamification/lottery/{drawId}/draw` - Draw winners
+- `POST /api/gamification/achievements` - Create achievement (admin)
+- `GET /api/gamification/achievements` - Get all achievements
+- `GET /api/gamification/achievements/user` - Get user's achievements
+- `POST /api/gamification/achievements/progress` - Update achievement progress
+
+**Acceptance Criteria:**
+- [x] Users earn loyalty points and receive tier-based discounts
+- [x] Badge system with Silver, Gold, Platinum tiers is functional
+- [x] Lottery system supports secure random winner selection
+- [x] Achievement progress is tracked and auto-completes
+- [x] Dashboard aggregates all gamification data
+- [x] API documentation updated
+
+---
+
+## 📈 Premium & Subscription System
+
+### 41. Premium Features & Subscription Plans
+**Title:** Implement premium guide membership tiers, subscription plans, visibility boosts, and advertising system  
+**Labels:** enhancement, premium, monetization  
+**Status:** ✅ **COMPLETED**  
+**Description:**
+Implement premium features including guide membership tiers (Basic/Premium), monthly/quarterly/yearly subscription plans, advanced search visibility boosts, and a personalized advertising system.
+
+**Implemented:**
+- ✅ Guide membership tiers with subscription plans
+  - Plan tiers: Basic (2% platform fee, top 100 appearance, small groups) and Premium (5% platform fee, top 10 local search, unlimited group size)
+  - Configurable billing cycles: Monthly, Quarterly, Yearly
+  - Auto-renewal support with Stripe subscription ID tracking
+  - Subscription status tracking (Active, Expired, Cancelled, PastDue, Trial)
+  - Plan management (create, list, get details)
+- ✅ Advanced search and visibility boosts
+  - Boost types: SearchRanking, FeaturedListing, TopResult, HighlightedProfile
+  - Configurable duration and multiplier
+  - Cost calculation based on boost type and duration
+  - Active boost tracking with expiration
+- ✅ Personalized advertising system
+  - Ad creation with title, content, image, and target URL
+  - Target audience options: AllUsers, Tourists, Guides, PremiumUsers, RegionSpecific
+  - Budget management with spent tracking
+  - Impression and click tracking (anonymous endpoints)
+  - Ad performance analytics (CTR, CPC, remaining budget)
+  - Ad status management (Draft, Active, Paused, Expired, Rejected)
+  - Automatic pause when budget is exhausted
+
+**API Endpoints:**
+- `POST /api/premium/plans` - Create subscription plan (admin)
+- `GET /api/premium/plans` - Get all available plans
+- `GET /api/premium/plans/{planId}` - Get plan details
+- `POST /api/premium/subscribe` - Subscribe to a plan
+- `GET /api/premium/subscription` - Get current subscription
+- `POST /api/premium/subscription/cancel` - Cancel subscription
+- `POST /api/premium/boosts` - Create visibility boost
+- `GET /api/premium/boosts` - Get active boosts
+- `POST /api/premium/ads` - Create advertisement
+- `GET /api/premium/ads/{adId}` - Get advertisement details
+- `GET /api/premium/ads` - Get advertiser's ads
+- `PUT /api/premium/ads/{adId}` - Update advertisement
+- `GET /api/premium/ads/{adId}/performance` - Get ad performance analytics
+- `POST /api/premium/ads/{adId}/impression` - Record ad impression (anonymous)
+- `POST /api/premium/ads/{adId}/click` - Record ad click (anonymous)
+
+**Acceptance Criteria:**
+- [x] Guide membership tiers with configurable fees and group sizes
+- [x] Monthly/quarterly/yearly subscription plans are available
+- [x] Visibility boosts enhance search ranking and listing prominence
+- [x] Advertising system supports targeted ads with budget management
+- [x] Ad performance analytics track impressions, clicks, and costs
+- [x] API documentation updated
+
+---
+
 ## Summary
 
-**Total Issues: 47** (increased from 38 due to complex issue breakdown)
+**Total Issues: 50** (increased from 47 due to new roadmap features)
 
 **By Status:**
-- ✅ Completed: 28 (Docker Containerization, CI/CD Pipeline, Payment Integration, Two-Factor Authentication, GDPR Data Export, Message Queue Integration, Advanced Search & Filtering, Webhook System, Analytics Dashboard, API Rate Limiting Improvements, Real-time Chat, Review Moderation, Tour Package Templates, Referral System, Advanced Image Management, Dispute Resolution, Email Templates, Tour Recommendations, Advanced Reporting, Tourist Website Discovery & Search, Tourist Website Booking & Bidding, Tourist Website Payment & Profile, Tourist Website Reviews & Communication, Multi-language Support, Google OAuth, Apple Sign-In, Microsoft OAuth, Social Account Linking)
+- ✅ Completed: 31 (Docker Containerization, CI/CD Pipeline, Payment Integration, Two-Factor Authentication, GDPR Data Export, Message Queue Integration, Advanced Search & Filtering, Webhook System, Analytics Dashboard, API Rate Limiting Improvements, Real-time Chat, Review Moderation, Tour Package Templates, Referral System, Advanced Image Management, Dispute Resolution, Email Templates, Tour Recommendations, Advanced Reporting, Tourist Website Discovery & Search, Tourist Website Booking & Bidding, Tourist Website Payment & Profile, Tourist Website Reviews & Communication, Multi-language Support, Google OAuth, Apple Sign-In, Microsoft OAuth, Social Account Linking, Payment & Financial System Enhanced, Gamification & Rewards, Premium Features & Subscriptions)
 - 🚧 In Progress: 0
 - 📋 Pending: 19
 
@@ -1729,8 +1904,10 @@ Implement multi-language support for API responses and error messages.
 - **Documentation**: 1 (API Documentation Portal 35)
 - **Localization**: 1 (#38: Multi-language Support - pending)
 - **DevOps**: 2 (✅ Both completed)
-- **Financial**: 1 (✅ Payment Integration completed)
+- **Financial**: 2 (✅ Payment Integration completed, ✅ Enhanced Financial System #39 completed)
 - **Compliance**: 1 (✅ GDPR Data Export completed)
+- **Gamification**: 1 (✅ Gamification & Rewards #40 completed)
+- **Premium & Monetization**: 1 (✅ Premium Features & Subscriptions #41 completed)
 
 **Complex Issues Breakdown:**
 - **Issue #5 (Social Login)** split into 4 issues: Google OAuth (5), Apple OAuth (5b), Microsoft OAuth (5c), Account Linking (5d)
@@ -1759,5 +1936,6 @@ Implement multi-language support for API responses and error messages.
   - Tourist Website: #20, #20b, #20c, #20d
   - Guide Portal: #21, #21b, #21c, #21d
 - **Existing issues**: #22-35, #38 (no changes to numbering)
+- **Roadmap additions**: #39 (Enhanced Financial System), #40 (Gamification & Rewards), #41 (Premium Features & Subscriptions)
 
 These refined issues provide a more manageable roadmap with focused, achievable deliverables for building the complete tourism platform.
