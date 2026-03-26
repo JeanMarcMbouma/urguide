@@ -73,10 +73,22 @@ const HealthStatusIcon = ({ status }: { status: string }) => {
 };
 
 const EVENT_CODES = [
-  '', 'Login', 'Logout', 'Register', 'DeleteAccount',
-  'CreatePost', 'EditPost', 'EditCatalog', 'DeleteCatalog', 'DeletePost',
-  'CreateCalalog', 'Maintenance',
+  '', 'Login', 'Logout', 'FailedLogin', 'PasswordChanged', 'PasswordReset',
+  'TwoFactorEnabled', 'TwoFactorDisabled',
+  'Register', 'DeleteAccount', 'ProfileUpdated', 'EmailChanged', 'RolesUpdated',
+  'CreatePost', 'EditPost', 'EditCatalog', 'DeleteCatalog', 'DeletePost', 'CreateCalalog',
+  'AccountFrozen', 'AccountUnfrozen', 'AccountSuspended', 'AccountActivated', 'AccountDeleted',
+  'GuideVerificationApproved', 'GuideVerificationRejected', 'TourApproved', 'TourRejected',
+  'PaymentProcessed', 'RefundIssued', 'PayoutProcessed',
+  'SettingsUpdated', 'Maintenance',
 ];
+
+const AUDIT_CATEGORIES = [
+  '', 'Authentication', 'Account', 'Content', 'AccountManagement',
+  'Moderation', 'Financial', 'Settings', 'System',
+];
+
+const AUDIT_SEVERITIES = ['', 'Info', 'Warning', 'Critical'];
 
 export default function SystemMonitoring() {
   const [tab, setTab] = useState(0);
@@ -290,7 +302,7 @@ export default function SystemMonitoring() {
         {/* Audit Logs tab */}
         <TabPanel value={tab} index={1}>
           <Box px={2} pb={2}>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={2}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={2} flexWrap="wrap">
               <TextField
                 label="User ID"
                 size="small"
@@ -319,6 +331,38 @@ export default function SystemMonitoring() {
                 {EVENT_CODES.map((c) => (
                   <MenuItem key={c} value={c}>
                     {c || 'All Events'}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                select
+                label="Category"
+                size="small"
+                value={auditFilters.category ?? ''}
+                onChange={(e) =>
+                  setAuditFilters({ ...auditFilters, category: e.target.value || undefined, pageNumber: 1 })
+                }
+                sx={{ minWidth: 160 }}
+              >
+                {AUDIT_CATEGORIES.map((c) => (
+                  <MenuItem key={c} value={c}>
+                    {c || 'All Categories'}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                select
+                label="Severity"
+                size="small"
+                value={auditFilters.severity ?? ''}
+                onChange={(e) =>
+                  setAuditFilters({ ...auditFilters, severity: e.target.value || undefined, pageNumber: 1 })
+                }
+                sx={{ minWidth: 120 }}
+              >
+                {AUDIT_SEVERITIES.map((s) => (
+                  <MenuItem key={s} value={s}>
+                    {s || 'All'}
                   </MenuItem>
                 ))}
               </TextField>
@@ -356,8 +400,11 @@ export default function SystemMonitoring() {
                     <TableHead>
                       <TableRow>
                         <TableCell>Event</TableCell>
+                        <TableCell>Category</TableCell>
+                        <TableCell>Severity</TableCell>
                         <TableCell>User</TableCell>
-                        <TableCell>Reference</TableCell>
+                        <TableCell>Details</TableCell>
+                        <TableCell>IP Address</TableCell>
                         <TableCell>Timestamp</TableCell>
                       </TableRow>
                     </TableHead>
@@ -368,11 +415,31 @@ export default function SystemMonitoring() {
                             <Chip label={entry.eventCode} size="small" variant="outlined" />
                           </TableCell>
                           <TableCell>
+                            <Typography variant="caption">{entry.category || '—'}</Typography>
+                          </TableCell>
+                          <TableCell>
+                            {entry.severity && (
+                              <Chip
+                                label={entry.severity}
+                                size="small"
+                                color={
+                                  entry.severity === 'Critical' ? 'error' :
+                                  entry.severity === 'Warning' ? 'warning' : 'default'
+                                }
+                              />
+                            )}
+                          </TableCell>
+                          <TableCell>
                             <Typography variant="body2">{entry.userEmail || entry.userId}</Typography>
                           </TableCell>
                           <TableCell>
+                            <Typography variant="caption" sx={{ maxWidth: 250, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {entry.details || entry.referenceId || '—'}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
                             <Typography variant="caption" fontFamily="monospace">
-                              {entry.referenceId || '—'}
+                              {entry.ipAddress || '—'}
                             </Typography>
                           </TableCell>
                           <TableCell>{formatDate(entry.created)}</TableCell>
@@ -380,7 +447,7 @@ export default function SystemMonitoring() {
                       ))}
                       {auditLogs.items.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={4} align="center">
+                          <TableCell colSpan={7} align="center">
                             No audit log entries found.
                           </TableCell>
                         </TableRow>

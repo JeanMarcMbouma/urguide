@@ -192,6 +192,7 @@ namespace UrGuide.WebApp.Services
                     referenceId: userId,
                     details: $"User suspended for {durationDays} days",
                     severity: AuditSeverity.Warning,
+                    ipAddress: _userContext.IPAddress?.ToString(),
                     cancellationToken: cancellationToken);
 
                 return Result.Of(true);
@@ -231,6 +232,7 @@ namespace UrGuide.WebApp.Services
                     _userContext.UserId,
                     referenceId: userId,
                     details: "User account activated",
+                    ipAddress: _userContext.IPAddress?.ToString(),
                     cancellationToken: cancellationToken);
 
                 return Result.Of(true);
@@ -271,6 +273,7 @@ namespace UrGuide.WebApp.Services
                     referenceId: userId,
                     details: "User account deleted",
                     severity: AuditSeverity.Critical,
+                    ipAddress: _userContext.IPAddress?.ToString(),
                     cancellationToken: cancellationToken);
 
                 return Result.Of(true);
@@ -332,6 +335,7 @@ namespace UrGuide.WebApp.Services
                     _userContext.UserId,
                     referenceId: model.UserId,
                     details: $"Roles updated to: {string.Join(", ", model.Roles)}",
+                    ipAddress: _userContext.IPAddress?.ToString(),
                     cancellationToken: cancellationToken);
 
                 return Result.Of(true);
@@ -1177,6 +1181,9 @@ namespace UrGuide.WebApp.Services
                 if (string.IsNullOrWhiteSpace(request.Reason))
                     return Result.Of<AccountFreezeInfo>().WithErrors("Reason is required");
 
+                if (request.Reason.Length > 2000)
+                    return Result.Of<AccountFreezeInfo>().WithErrors("Reason must not exceed 2000 characters");
+
                 if (request.DurationDays.HasValue && (request.DurationDays.Value < 1 || request.DurationDays.Value > 3650))
                     return Result.Of<AccountFreezeInfo>().WithErrors("Duration must be between 1 and 3650 days");
 
@@ -1187,15 +1194,26 @@ namespace UrGuide.WebApp.Services
                 if (user.Id == _userContext.UserId)
                     return Result.Of<AccountFreezeInfo>().WithErrors("Cannot freeze your own account");
 
+                var now = DateTime.UtcNow;
+
                 // Check if user already has an active freeze
                 var existingFreeze = await _context.AccountFreezeRecords
                     .Where(f => f.UserId == request.UserId && f.Status == AccountFreezeStatus.Active)
                     .FirstOrDefaultAsync(cancellationToken);
 
+                // Treat timed freezes that have passed ExpiresAt as expired
+                if (existingFreeze != null &&
+                    existingFreeze.ExpiresAt.HasValue &&
+                    existingFreeze.ExpiresAt <= now)
+                {
+                    existingFreeze.Status = AccountFreezeStatus.Expired;
+                    await _context.SaveChangesAsync(cancellationToken);
+                    existingFreeze = null;
+                }
+
                 if (existingFreeze != null)
                     return Result.Of<AccountFreezeInfo>().WithErrors("User account is already frozen");
 
-                var now = DateTime.UtcNow;
                 DateTime? expiresAt = request.DurationDays.HasValue && request.DurationDays.Value > 0
                     ? now.AddDays(request.DurationDays.Value)
                     : null;
@@ -1211,17 +1229,56 @@ namespace UrGuide.WebApp.Services
                     Status = AccountFreezeStatus.Active
                 };
 
-                _context.AccountFreezeRecords.Add(freezeRecord);
+                // Capture original lockout state for rollback
+                var originalLockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                var originalLockoutEnabled = user.LockoutEnabled;
 
-                // Also set lockout on the identity user
+                // Set lockout on the identity user
                 var lockoutEnd = expiresAt.HasValue
                     ? new DateTimeOffset(expiresAt.Value, TimeSpan.Zero)
                     : DateTimeOffset.MaxValue;
-                await _userManager.SetLockoutEndDateAsync(user, lockoutEnd);
-                if (!user.LockoutEnabled)
-                    await _userManager.SetLockoutEnabledAsync(user, true);
 
-                await _context.SaveChangesAsync(cancellationToken);
+                var setLockoutEndResult = await _userManager.SetLockoutEndDateAsync(user, lockoutEnd);
+                if (!setLockoutEndResult.Succeeded)
+                {
+                    var errors = string.Join("; ", setLockoutEndResult.Errors.Select(e => e.Description));
+                    _logger.LogError("Failed to set lockout end date for user {UserId}: {Errors}", request.UserId, errors);
+                    return Result.Of<AccountFreezeInfo>().WithErrors("Failed to freeze account");
+                }
+
+                if (!user.LockoutEnabled)
+                {
+                    var enableLockoutResult = await _userManager.SetLockoutEnabledAsync(user, true);
+                    if (!enableLockoutResult.Succeeded)
+                    {
+                        _logger.LogError("Failed to enable lockout for user {UserId}", request.UserId);
+                        // Best-effort revert of lockout end date
+                        await _userManager.SetLockoutEndDateAsync(user, originalLockoutEnd);
+                        return Result.Of<AccountFreezeInfo>().WithErrors("Failed to freeze account");
+                    }
+                }
+
+                _context.AccountFreezeRecords.Add(freezeRecord);
+
+                try
+                {
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to save freeze record for user {UserId}. Rolling back lockout.", request.UserId);
+                    try
+                    {
+                        await _userManager.SetLockoutEndDateAsync(user, originalLockoutEnd);
+                        if (user.LockoutEnabled != originalLockoutEnabled)
+                            await _userManager.SetLockoutEnabledAsync(user, originalLockoutEnabled);
+                    }
+                    catch (Exception rollbackEx)
+                    {
+                        _logger.LogError(rollbackEx, "Failed to roll back lockout for user {UserId}", request.UserId);
+                    }
+                    return Result.Of<AccountFreezeInfo>().WithErrors("Failed to freeze account");
+                }
 
                 await _auditService.LogAsync(
                     EventCodes.AccountFrozen,
@@ -1230,6 +1287,7 @@ namespace UrGuide.WebApp.Services
                     details: $"Account frozen. Reason: {request.Reason}" +
                              (expiresAt.HasValue ? $". Expires: {expiresAt.Value:O}" : ". Indefinite"),
                     severity: AuditSeverity.Warning,
+                    ipAddress: _userContext.IPAddress?.ToString(),
                     cancellationToken: cancellationToken);
 
                 _logger.LogInformation("Account {UserId} frozen by admin {AdminId}. Reason: {Reason}",
@@ -1261,6 +1319,9 @@ namespace UrGuide.WebApp.Services
                 if (string.IsNullOrWhiteSpace(request.UserId))
                     return Result.Of(false).WithErrors("User ID is required");
 
+                if (request.Reason != null && request.Reason.Length > 2000)
+                    return Result.Of(false).WithErrors("Reason must not exceed 2000 characters");
+
                 var user = await _userManager.FindByIdAsync(request.UserId);
                 if (user == null)
                     return Result.Of(false).WithErrors("User not found");
@@ -1272,14 +1333,33 @@ namespace UrGuide.WebApp.Services
                 if (activeFreeze == null)
                     return Result.Of(false).WithErrors("No active freeze found for this user");
 
+                // Capture original lockout end for rollback
+                var originalLockoutEnd = user.LockoutEnd;
+
+                // Remove lockout first
+                var lockoutResult = await _userManager.SetLockoutEndDateAsync(user, null);
+                if (!lockoutResult.Succeeded)
+                {
+                    var errors = string.Join("; ", lockoutResult.Errors.Select(e => e.Description));
+                    _logger.LogError("Failed to remove lockout for user {UserId}: {Errors}", request.UserId, errors);
+                    return Result.Of(false).WithErrors("Failed to remove account lockout");
+                }
+
+                var resetResult = await _userManager.ResetAccessFailedCountAsync(user);
+                if (!resetResult.Succeeded)
+                {
+                    _logger.LogError("Failed to reset access failed count for user {UserId}", request.UserId);
+                    // Attempt to restore original lockout state
+                    try { await _userManager.SetLockoutEndDateAsync(user, originalLockoutEnd); }
+                    catch (Exception ex) { _logger.LogError(ex, "Failed to restore lockout for user {UserId}", request.UserId); }
+                    return Result.Of(false).WithErrors("Failed to reset access failed count");
+                }
+
+                // Identity operations succeeded; update freeze record
                 activeFreeze.Status = AccountFreezeStatus.Unfrozen;
                 activeFreeze.UnfrozenAt = DateTime.UtcNow;
                 activeFreeze.UnfrozenByAdminId = _userContext.UserId;
                 activeFreeze.UnfreezeReason = request.Reason;
-
-                // Remove lockout
-                await _userManager.SetLockoutEndDateAsync(user, null);
-                await _userManager.ResetAccessFailedCountAsync(user);
 
                 await _context.SaveChangesAsync(cancellationToken);
 
@@ -1288,6 +1368,7 @@ namespace UrGuide.WebApp.Services
                     _userContext.UserId,
                     referenceId: request.UserId,
                     details: $"Account unfrozen. Reason: {request.Reason}",
+                    ipAddress: _userContext.IPAddress?.ToString(),
                     cancellationToken: cancellationToken);
 
                 _logger.LogInformation("Account {UserId} unfrozen by admin {AdminId}. Reason: {Reason}",
@@ -1357,8 +1438,11 @@ namespace UrGuide.WebApp.Services
         {
             try
             {
+                var now = DateTime.UtcNow;
+
                 var query = _context.AccountFreezeRecords
-                    .Where(f => f.Status == AccountFreezeStatus.Active)
+                    .Where(f => f.Status == AccountFreezeStatus.Active &&
+                                (f.ExpiresAt == null || f.ExpiresAt > now))
                     .OrderByDescending(f => f.FrozenAt);
 
                 var totalCount = await query.CountAsync(cancellationToken);

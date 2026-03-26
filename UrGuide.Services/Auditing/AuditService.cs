@@ -14,6 +14,12 @@ namespace UrGuide.Services.Auditing
     public class AuditService : IAuditService
     {
         private const string SystemUserId = "system";
+        private const int MaxUserIdLength = 600;
+        private const int MaxReferenceIdLength = 500;
+        private const int MaxDetailsLength = 4000;
+        private const int MaxCategoryLength = 100;
+        private const int MaxIpAddressLength = 45;
+        private const int MaxUserAgentLength = 500;
 
         private readonly UrGuideContext _context;
         private readonly ILogger<AuditService> _logger;
@@ -39,14 +45,14 @@ namespace UrGuide.Services.Auditing
             {
                 var auditEvent = new AuditEvent
                 {
-                    UserId = userId ?? SystemUserId,
+                    UserId = Truncate(userId ?? SystemUserId, MaxUserIdLength),
                     EventCode = eventCode,
-                    ReferenceId = referenceId,
-                    Details = details != null && details.Length > 4000 ? details[..3997] + "..." : details,
-                    Category = category ?? GetDefaultCategory(eventCode),
+                    ReferenceId = Truncate(referenceId, MaxReferenceIdLength),
+                    Details = Truncate(details, MaxDetailsLength),
+                    Category = Truncate(category ?? GetDefaultCategory(eventCode), MaxCategoryLength),
                     Severity = severity,
-                    IpAddress = ipAddress,
-                    UserAgent = userAgent != null && userAgent.Length > 500 ? userAgent[..497] + "..." : userAgent
+                    IpAddress = Truncate(ipAddress, MaxIpAddressLength),
+                    UserAgent = Truncate(userAgent, MaxUserAgentLength)
                 };
 
                 _context.AuditEvents.Add(auditEvent);
@@ -54,12 +60,18 @@ namespace UrGuide.Services.Auditing
 
                 _logger.LogInformation(
                     "Audit [{Severity}] {EventCode} by {UserId}: {Details}",
-                    severity, eventCode, userId, details);
+                    auditEvent.Severity, auditEvent.EventCode, auditEvent.UserId, auditEvent.Details);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to write audit event {EventCode} for user {UserId}", eventCode, userId);
+                _logger.LogError(ex, "Failed to write audit event {EventCode} for user {UserId}", eventCode, userId ?? SystemUserId);
             }
+        }
+
+        private static string Truncate(string value, int maxLength)
+        {
+            if (value == null) return null;
+            return value.Length > maxLength ? value[..(maxLength - 3)] + "..." : value;
         }
 
         private static string GetDefaultCategory(EventCodes eventCode)

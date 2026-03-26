@@ -18,6 +18,17 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from '@mui/material';
 import {
   ArrowBack as BackIcon,
@@ -25,6 +36,8 @@ import {
   Block as BlockIcon,
   CheckCircle as ActivateIcon,
   Delete as DeleteIcon,
+  AcUnit as FreezeIcon,
+  Whatshot as UnfreezeIcon,
 } from '@mui/icons-material';
 import { adminApi } from '../services/adminApi';
 import ConfirmDialog from '../components/shared/ConfirmDialog';
@@ -43,6 +56,11 @@ const UserDetail = () => {
     action: null,
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
+  const [freezeDialog, setFreezeDialog] = useState(false);
+  const [freezeReason, setFreezeReason] = useState('');
+  const [freezeDuration, setFreezeDuration] = useState<number | ''>('');
+  const [unfreezeDialog, setUnfreezeDialog] = useState(false);
+  const [unfreezeReason, setUnfreezeReason] = useState('');
 
   // Fetch user details
   const { data: user, isLoading, error } = useQuery({
@@ -94,6 +112,48 @@ const UserDetail = () => {
     },
   });
 
+  // Freeze / Unfreeze mutations
+  const { data: freezeHistory } = useQuery({
+    queryKey: ['freezeHistory', userId],
+    queryFn: () => adminApi.getFreezeHistory(userId!),
+    enabled: !!userId,
+  });
+
+  const freezeMutation = useMutation({
+    mutationFn: () =>
+      adminApi.freezeAccount({
+        userId: userId!,
+        reason: freezeReason,
+        durationDays: freezeDuration ? Number(freezeDuration) : undefined,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user', userId] });
+      queryClient.invalidateQueries({ queryKey: ['freezeHistory', userId] });
+      setFreezeDialog(false);
+      setFreezeReason('');
+      setFreezeDuration('');
+      setSnackbar({ open: true, message: 'Account frozen successfully', severity: 'success' });
+    },
+    onError: () => {
+      setSnackbar({ open: true, message: 'Failed to freeze account', severity: 'error' });
+    },
+  });
+
+  const unfreezeMutation = useMutation({
+    mutationFn: () =>
+      adminApi.unfreezeAccount({ userId: userId!, reason: unfreezeReason || undefined }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user', userId] });
+      queryClient.invalidateQueries({ queryKey: ['freezeHistory', userId] });
+      setUnfreezeDialog(false);
+      setUnfreezeReason('');
+      setSnackbar({ open: true, message: 'Account unfrozen successfully', severity: 'success' });
+    },
+    onError: () => {
+      setSnackbar({ open: true, message: 'Failed to unfreeze account', severity: 'error' });
+    },
+  });
+
   const handleStartEditRoles = () => {
     setSelectedRoles(user?.roles || []);
     setEditingRoles(true);
@@ -127,6 +187,8 @@ const UserDetail = () => {
   }
 
   const isLocked = user.lockoutEnd && new Date(user.lockoutEnd) > new Date();
+  const activeFreeze = freezeHistory?.items?.find((f) => f.status === 'Active');
+  const isFrozen = !!activeFreeze;
 
   return (
     <Box>
@@ -337,6 +399,25 @@ const UserDetail = () => {
                   Suspend Account
                 </Button>
               )}
+              {isFrozen ? (
+                <Button
+                  variant="contained"
+                  color="info"
+                  startIcon={<UnfreezeIcon />}
+                  onClick={() => setUnfreezeDialog(true)}
+                >
+                  Unfreeze Account
+                </Button>
+              ) : (
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  startIcon={<FreezeIcon />}
+                  onClick={() => setFreezeDialog(true)}
+                >
+                  Freeze Account
+                </Button>
+              )}
               <Button
                 variant="outlined"
                 color="error"
@@ -346,7 +427,55 @@ const UserDetail = () => {
                 Delete Account
               </Button>
             </Box>
+            {isFrozen && activeFreeze && (
+              <Alert severity="info" sx={{ mt: 2 }}>
+                <Typography variant="body2" fontWeight="bold">Account is frozen</Typography>
+                <Typography variant="body2">Reason: {activeFreeze.reason}</Typography>
+                {activeFreeze.expiresAt && (
+                  <Typography variant="body2">
+                    Expires: {new Date(activeFreeze.expiresAt).toLocaleString()}
+                  </Typography>
+                )}
+              </Alert>
+            )}
           </Paper>
+
+          {/* Freeze History */}
+          {freezeHistory && freezeHistory.items.length > 0 && (
+            <Paper sx={{ p: 3, mt: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                Freeze History
+              </Typography>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Status</TableCell>
+                      <TableCell>Reason</TableCell>
+                      <TableCell>Frozen At</TableCell>
+                      <TableCell>Expires</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {freezeHistory.items.map((record) => (
+                      <TableRow key={record.id}>
+                        <TableCell>
+                          <Chip
+                            label={record.status}
+                            color={record.status === 'Active' ? 'error' : record.status === 'Unfrozen' ? 'success' : 'default'}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell>{record.reason}</TableCell>
+                        <TableCell>{new Date(record.frozenAt).toLocaleString()}</TableCell>
+                        <TableCell>{record.expiresAt ? new Date(record.expiresAt).toLocaleString() : 'Indefinite'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+          )}
         </Grid>
       </Grid>
 
@@ -367,6 +496,78 @@ const UserDetail = () => {
       >
         <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
       </Snackbar>
+
+      {/* Freeze Dialog */}
+      <Dialog open={freezeDialog} onClose={() => setFreezeDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Freeze Account</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Freezing an account will lock the user out. You can set an optional duration.
+          </Typography>
+          <TextField
+            label="Reason"
+            fullWidth
+            required
+            multiline
+            rows={3}
+            value={freezeReason}
+            onChange={(e) => setFreezeReason(e.target.value)}
+            inputProps={{ maxLength: 2000 }}
+            helperText={`${freezeReason.length}/2000`}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            label="Duration (days)"
+            type="number"
+            fullWidth
+            value={freezeDuration}
+            onChange={(e) => setFreezeDuration(e.target.value ? Number(e.target.value) : '')}
+            helperText="Leave empty for indefinite freeze. Max 3650 days."
+            inputProps={{ min: 1, max: 3650 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setFreezeDialog(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            disabled={!freezeReason.trim() || freezeMutation.isPending}
+            onClick={() => freezeMutation.mutate()}
+          >
+            {freezeMutation.isPending ? 'Freezing...' : 'Freeze'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Unfreeze Dialog */}
+      <Dialog open={unfreezeDialog} onClose={() => setUnfreezeDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Unfreeze Account</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            This will remove the active freeze and restore account access.
+          </Typography>
+          <TextField
+            label="Reason (optional)"
+            fullWidth
+            multiline
+            rows={2}
+            value={unfreezeReason}
+            onChange={(e) => setUnfreezeReason(e.target.value)}
+            inputProps={{ maxLength: 2000 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setUnfreezeDialog(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="info"
+            disabled={unfreezeMutation.isPending}
+            onClick={() => unfreezeMutation.mutate()}
+          >
+            {unfreezeMutation.isPending ? 'Unfreezing...' : 'Unfreeze'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

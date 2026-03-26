@@ -224,6 +224,11 @@ export interface AdminAuditLogItem {
   userEmail: string;
   referenceId: string;
   created: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+  details: string | null;
+  category: string | null;
+  severity: string | null;
 }
 
 export interface AdminAuditLogResponse {
@@ -272,6 +277,8 @@ export interface AuditLogFilterParameters {
   startDate?: string;
   endDate?: string;
   eventCode?: string;
+  category?: string;
+  severity?: string;
 }
 
 // ── Push Notification Templates ───────────────────────────────────────────────
@@ -316,4 +323,38 @@ export interface UpdateNotificationTemplateRequest {
 export interface TemplatePreviewResult {
   title: string;
   body: string;
+}
+
+// ── Account Freeze types ──────────────────────────────────────────────────────
+
+export interface AccountFreezeRequest {
+  userId: string;
+  reason: string;
+  durationDays?: number;
+}
+
+export interface AccountUnfreezeRequest {
+  userId: string;
+  reason?: string;
+}
+
+export interface AccountFreezeInfo {
+  id: string;
+  userId: string;
+  userEmail: string;
+  reason: string;
+  frozenByAdminId: string;
+  frozenAt: string;
+  expiresAt: string | null;
+  unfrozenAt: string | null;
+  unfrozenByAdminId: string | null;
+  unfreezeReason: string | null;
+  status: string;
+}
+
+export interface AccountFreezeHistoryResponse {
+  items: AccountFreezeInfo[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
 }
