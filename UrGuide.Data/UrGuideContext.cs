@@ -18,6 +18,7 @@ using UrGuide.Data.Entities.Email;
 using UrGuide.Data.Entities.Financial;
 using UrGuide.Data.Entities.Gamification;
 using UrGuide.Data.Entities.Premium;
+using UrGuide.Data.Entities.PushNotifications;
 using UrGuide.Data.Entities.Reports;
 
 namespace UrGuide.Data
@@ -118,6 +119,11 @@ namespace UrGuide.Data
         // Email template entities
         public virtual DbSet<EmailTemplate> EmailTemplates { get; set; }
         public virtual DbSet<EmailTemplateVersion> EmailTemplateVersions { get; set; }
+
+        // Push Notifications
+        public virtual DbSet<Entities.PushNotifications.DeviceRegistration> DeviceRegistrations { get; set; }
+        public virtual DbSet<Entities.PushNotifications.PushNotificationLog> PushNotificationLogs { get; set; }
+        public virtual DbSet<Entities.PushNotifications.NotificationPreference> NotificationPreferences { get; set; }
 
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
@@ -232,6 +238,11 @@ namespace UrGuide.Data
             modelBuilder.ApplyConfiguration(new Configurations.GuideSubscriptionConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.VisibilityBoostConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.AdvertisementConfiguration());
+
+            // Push notification configurations
+            modelBuilder.ApplyConfiguration(new Configurations.DeviceRegistrationConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.PushNotificationLogConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.NotificationPreferenceConfiguration());
         }
     }
 }

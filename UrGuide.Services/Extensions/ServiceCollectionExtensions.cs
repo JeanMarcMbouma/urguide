@@ -20,6 +20,7 @@ using UrGuide.Services.Shared;
 using UrGuide.Services.Tour;
 using UrGuide.Services.Users;
 using UrGuide.Services.Analytics;
+using UrGuide.Model.PushNotifications;
 
 namespace UrGuide.Services.Extensions
 {
@@ -89,6 +90,11 @@ namespace UrGuide.Services.Extensions
             // Premium services
             services.AddTransient<Premium.IPremiumService, Premium.PremiumService>();
 
+            // Push notification services
+            services.AddTransient<Contracts.IPushNotificationService, PushNotifications.PushNotificationService>();
+            services.AddSingleton<PushNotifications.IPushNotificationProvider, PushNotifications.ApnsService>();
+            services.AddTransient<PushNotifications.IPushNotificationProvider, PushNotifications.FcmService>();
+
             // Elasticsearch
             var elasticsearchUrl = configuration["Elasticsearch:Url"] ?? "http://localhost:9200";
             var elasticsearchUsername = configuration["Elasticsearch:Username"];
@@ -146,6 +152,9 @@ namespace UrGuide.Services.Extensions
 
             // Feedback
             services.AddTransient<IValidator<FeedbackModel>, FeedbackModelValidator>();
+
+            // Push Notifications
+            services.AddTransient<IValidator<DeviceRegistrationRequest>, PushNotifications.DeviceRegistrationValidator>();
 
             services.AddBbQMediator(typeof(UserDeleteAccountCommand).Assembly);
 
