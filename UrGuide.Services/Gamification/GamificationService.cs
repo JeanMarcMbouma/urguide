@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Gamification;
 using UrGuide.Model.Gamification;
+using UrGuide.Model.Results;
 
 namespace UrGuide.Services.Gamification
 {
@@ -595,10 +596,10 @@ namespace UrGuide.Services.Gamification
 
                 var dashboard = new GamificationDashboardDto
                 {
-                    Loyalty = loyaltyResult.IsSuccessful ? loyaltyResult.Value : null,
-                    Badges = badgesResult.IsSuccessful ? badgesResult.Value : new List<UserBadgeDto>(),
-                    Achievements = achievementsResult.IsSuccessful ? achievementsResult.Value : new List<UserAchievementDto>(),
-                    ActiveLotteries = lotteriesResult.IsSuccessful ? lotteriesResult.Value : new List<LotteryDrawDto>()
+                    Loyalty = !loyaltyResult.IsError ? loyaltyResult.Value : null,
+                    Badges = !badgesResult.IsError ? badgesResult.Value : new List<UserBadgeDto>(),
+                    Achievements = !achievementsResult.IsError ? achievementsResult.Value : new List<UserAchievementDto>(),
+                    ActiveLotteries = !lotteriesResult.IsError ? lotteriesResult.Value : new List<LotteryDrawDto>()
                 };
 
                 return Result.Of(dashboard);

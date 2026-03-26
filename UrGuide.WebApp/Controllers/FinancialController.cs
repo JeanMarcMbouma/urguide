@@ -1,8 +1,11 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using UrGuide.Services.Financial;
 using UrGuide.Model.Financial;
+using UrGuide.WebApp.Models;
+using BbQ.Outcome;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -18,134 +21,130 @@ namespace UrGuide.WebApp.Controllers
             _financialService = financialService;
         }
 
-        // Coin Wallet
         [HttpGet("wallet")]
         public async Task<IActionResult> GetWallet()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var outcome = await _financialService.GetWalletAsync(userId);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _financialService.GetWalletAsync(userId);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPost("wallet/add")]
         public async Task<IActionResult> AddCoins([FromBody] AddCoinsRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var outcome = await _financialService.AddCoinsAsync(userId, request);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _financialService.AddCoinsAsync(userId, request);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPost("wallet/spend")]
         public async Task<IActionResult> SpendCoins([FromBody] SpendCoinsRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var outcome = await _financialService.SpendCoinsAsync(userId, request);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _financialService.SpendCoinsAsync(userId, request);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("wallet/transactions")]
         public async Task<IActionResult> GetTransactions([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var outcome = await _financialService.GetTransactionsAsync(userId, page, pageSize);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _financialService.GetTransactionsAsync(userId, page, pageSize);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
-        // Withdrawals
         [HttpPost("withdrawal")]
         public async Task<IActionResult> CreateWithdrawal([FromBody] CreateWithdrawalRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var outcome = await _financialService.CreateWithdrawalAsync(userId, request);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _financialService.CreateWithdrawalAsync(userId, request);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("withdrawal/{withdrawalId}")]
         public async Task<IActionResult> GetWithdrawal(string withdrawalId)
         {
-            var outcome = await _financialService.GetWithdrawalAsync(withdrawalId);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _financialService.GetWithdrawalAsync(withdrawalId);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("withdrawals")]
         public async Task<IActionResult> GetUserWithdrawals([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var outcome = await _financialService.GetUserWithdrawalsAsync(userId, page, pageSize);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _financialService.GetUserWithdrawalsAsync(userId, page, pageSize);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPost("withdrawal/{withdrawalId}/process")]
         public async Task<IActionResult> ProcessWithdrawal(string withdrawalId)
         {
-            var outcome = await _financialService.ProcessWithdrawalAsync(withdrawalId);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _financialService.ProcessWithdrawalAsync(withdrawalId);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPost("withdrawal/{withdrawalId}/cancel")]
         public async Task<IActionResult> CancelWithdrawal(string withdrawalId)
         {
-            var outcome = await _financialService.CancelWithdrawalAsync(withdrawalId);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _financialService.CancelWithdrawalAsync(withdrawalId);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
-        // Payout Schedules
         [HttpPost("payout-schedule")]
         public async Task<IActionResult> CreatePayoutSchedule([FromBody] CreatePayoutScheduleRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var outcome = await _financialService.CreatePayoutScheduleAsync(userId, request);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _financialService.CreatePayoutScheduleAsync(userId, request);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("payout-schedule")]
         public async Task<IActionResult> GetPayoutSchedule()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var outcome = await _financialService.GetPayoutScheduleAsync(userId);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _financialService.GetPayoutScheduleAsync(userId);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPut("payout-schedule")]
         public async Task<IActionResult> UpdatePayoutSchedule([FromBody] UpdatePayoutScheduleRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var outcome = await _financialService.UpdatePayoutScheduleAsync(userId, request);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _financialService.UpdatePayoutScheduleAsync(userId, request);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
-        // Financial Reporting
         [HttpPost("report")]
         public async Task<IActionResult> GenerateFinancialReport([FromBody] FinancialReportRequest request)
         {
-            var outcome = await _financialService.GenerateFinancialReportAsync(request);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _financialService.GenerateFinancialReportAsync(request);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
     }
 }

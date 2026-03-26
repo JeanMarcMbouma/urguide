@@ -1,8 +1,11 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using UrGuide.Services.Premium;
 using UrGuide.Model.Premium;
+using UrGuide.WebApp.Models;
+using BbQ.Outcome;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -18,148 +21,148 @@ namespace UrGuide.WebApp.Controllers
             _premiumService = premiumService;
         }
 
-        // Subscription Plans
         [HttpPost("plans")]
         public async Task<IActionResult> CreatePlan([FromBody] CreateSubscriptionPlanRequest request)
         {
-            var outcome = await _premiumService.CreatePlanAsync(request);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _premiumService.CreatePlanAsync(request);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("plans")]
         public async Task<IActionResult> GetAllPlans()
         {
-            var outcome = await _premiumService.GetAllPlansAsync();
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _premiumService.GetAllPlansAsync();
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("plans/{planId}")]
         public async Task<IActionResult> GetPlan(string planId)
         {
-            var outcome = await _premiumService.GetPlanAsync(planId);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _premiumService.GetPlanAsync(planId);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
-        // Guide Subscriptions
         [HttpPost("subscribe")]
         public async Task<IActionResult> Subscribe([FromBody] SubscribeRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var outcome = await _premiumService.SubscribeAsync(userId, request);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _premiumService.SubscribeAsync(userId, request);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("subscription")]
         public async Task<IActionResult> GetSubscription()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var outcome = await _premiumService.GetGuideSubscriptionAsync(userId);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _premiumService.GetGuideSubscriptionAsync(userId);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPost("subscription/cancel")]
         public async Task<IActionResult> CancelSubscription()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var outcome = await _premiumService.CancelSubscriptionAsync(userId);
-            if (outcome.IsSuccessful)
-                return Ok(new { cancelled = outcome.Value });
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _premiumService.CancelSubscriptionAsync(userId);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(new { cancelled = value }),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
-        // Visibility Boosts
         [HttpPost("boosts")]
         public async Task<IActionResult> CreateBoost([FromBody] CreateVisibilityBoostRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var outcome = await _premiumService.CreateBoostAsync(userId, request);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _premiumService.CreateBoostAsync(userId, request);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("boosts")]
         public async Task<IActionResult> GetActiveBoosts()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var outcome = await _premiumService.GetActiveBoostsAsync(userId);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _premiumService.GetActiveBoostsAsync(userId);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
-        // Advertisements
         [HttpPost("ads")]
         public async Task<IActionResult> CreateAdvertisement([FromBody] CreateAdvertisementRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var outcome = await _premiumService.CreateAdvertisementAsync(userId, request);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _premiumService.CreateAdvertisementAsync(userId, request);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("ads/{adId}")]
         public async Task<IActionResult> GetAdvertisement(string adId)
         {
-            var outcome = await _premiumService.GetAdvertisementAsync(adId);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _premiumService.GetAdvertisementAsync(adId);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("ads")]
         public async Task<IActionResult> GetMyAds([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var outcome = await _premiumService.GetAdvertiserAdsAsync(userId, page, pageSize);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _premiumService.GetAdvertiserAdsAsync(userId, page, pageSize);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPut("ads/{adId}")]
         public async Task<IActionResult> UpdateAdvertisement(string adId, [FromBody] UpdateAdvertisementRequest request)
         {
-            var outcome = await _premiumService.UpdateAdvertisementAsync(adId, request);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _premiumService.UpdateAdvertisementAsync(adId, request);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpGet("ads/{adId}/performance")]
         public async Task<IActionResult> GetAdPerformance(string adId)
         {
-            var outcome = await _premiumService.GetAdPerformanceAsync(adId);
-            if (outcome.IsSuccessful)
-                return Ok(outcome.Value);
-            return BadRequest(new { errors = outcome.Errors?.Select(e => e.Message) });
+            var result = await _premiumService.GetAdPerformanceAsync(adId);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPost("ads/{adId}/impression")]
         [AllowAnonymous]
         public async Task<IActionResult> RecordImpression(string adId)
         {
-            var outcome = await _premiumService.RecordImpressionAsync(adId);
-            return Ok(new { recorded = outcome.Value });
+            var result = await _premiumService.RecordImpressionAsync(adId);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(new { recorded = value }),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
         [HttpPost("ads/{adId}/click")]
         [AllowAnonymous]
         public async Task<IActionResult> RecordClick(string adId)
         {
-            var outcome = await _premiumService.RecordClickAsync(adId);
-            return Ok(new { recorded = outcome.Value });
+            var result = await _premiumService.RecordClickAsync(adId);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(new { recorded = value }),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
     }
 }

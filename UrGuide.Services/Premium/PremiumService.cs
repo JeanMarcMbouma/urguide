@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Premium;
 using UrGuide.Model.Premium;
+using UrGuide.Model.Results;
 
 namespace UrGuide.Services.Premium
 {
