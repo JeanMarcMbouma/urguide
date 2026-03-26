@@ -218,8 +218,27 @@ const NotificationTemplates = () => {
   const runPreview = async () => {
     if (!previewTemplateId) return;
     try {
-      const vars = JSON.parse(previewVarsText);
-      const result = await adminApi.previewNotificationTemplate(previewTemplateId, vars);
+      const parsed = JSON.parse(previewVarsText);
+
+      // Ensure we have a plain object for key/value pairs
+      if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        showSnack('Preview variables must be a JSON object of key/value pairs.', 'error');
+        return;
+      }
+
+      const coercedVars: Record<string, string> = {};
+      for (const [key, value] of Object.entries(parsed)) {
+        const valueType = typeof value;
+        if (value === null || valueType === 'string' || valueType === 'number' || valueType === 'boolean') {
+          coercedVars[key] = value === null ? '' : String(value);
+        } else {
+          // Nested objects/arrays are not supported by the API contract
+          showSnack('Preview variables must be flat key/value pairs (no nested objects or arrays).', 'error');
+          return;
+        }
+      }
+
+      const result = await adminApi.previewNotificationTemplate(previewTemplateId, coercedVars);
       setPreviewResult(result);
     } catch {
       showSnack('Invalid JSON in variables.', 'error');
