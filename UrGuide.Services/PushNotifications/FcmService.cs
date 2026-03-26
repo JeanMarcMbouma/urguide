@@ -77,7 +77,7 @@ public class FcmService : IPushNotificationProvider
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation("FCM notification sent successfully to device {DeviceToken}", deviceToken[..Math.Min(8, deviceToken.Length)] + "...");
+                _logger.LogInformation("FCM notification sent successfully.");
                 return new PushNotificationDeliveryResult
                 {
                     Success = true,
@@ -97,7 +97,7 @@ public class FcmService : IPushNotificationProvider
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send FCM notification to device {DeviceToken}", deviceToken[..Math.Min(8, deviceToken.Length)] + "...");
+            _logger.LogError(ex, "Failed to send FCM notification.");
             return new PushNotificationDeliveryResult
             {
                 Success = false,

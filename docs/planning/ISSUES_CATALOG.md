@@ -665,6 +665,7 @@ Integrate Elasticsearch for advanced search capabilities with fuzzy matching, fi
 ### 13. Mobile App Push Notifications - Android (FCM)
 **Title:** Add Firebase Cloud Messaging (FCM) for Android push notifications  
 **Labels:** enhancement, mobile, notifications  
+**Status:** ✅ **COMPLETED**  
 **Description:**
 Integrate Firebase Cloud Messaging for Android push notifications with device token management.
 
@@ -676,17 +677,26 @@ Integrate Firebase Cloud Messaging for Android push notifications with device to
 - Opt-in/opt-out management
 
 **Acceptance Criteria:**
-- [ ] FCM is integrated
-- [ ] Device registration works
-- [ ] Notifications are delivered to Android
-- [ ] Users can opt-out
-- [ ] Delivery tracking works
+- [x] FCM is integrated
+- [x] Device registration works
+- [x] Notifications are delivered to Android
+- [x] Users can opt-out
+- [x] Delivery tracking works
+
+**Implemented:**
+- `FcmService` with legacy server key and FCM v1 API support
+- `PushNotificationController` with device registration endpoints (`POST/DELETE /api/push-notifications/devices`)
+- `PushNotificationService` for unified notification dispatch and delivery tracking
+- `NotificationPreference` entity for opt-in/opt-out management
+- `PushNotificationLog` entity for delivery status tracking
+- Configuration via `PushNotifications:FCM` section in appsettings.json
 
 ---
 
 ### 13b. Mobile App Push Notifications - iOS (APNs)
 **Title:** Add Apple Push Notification Service (APNs) for iOS push notifications  
 **Labels:** enhancement, mobile, notifications  
+**Status:** ✅ **COMPLETED**  
 **Description:**
 Integrate Apple Push Notification Service for iOS push notifications with device token management.
 
@@ -699,11 +709,21 @@ Integrate Apple Push Notification Service for iOS push notifications with device
 - Certificate/key management
 
 **Acceptance Criteria:**
-- [ ] APNs is integrated
-- [ ] Device registration works
-- [ ] Notifications are delivered to iOS
-- [ ] Users can opt-out
-- [ ] Delivery tracking works
+- [x] APNs is integrated
+- [x] Device registration works
+- [x] Notifications are delivered to iOS
+- [x] Users can opt-out
+- [x] Delivery tracking works
+
+**Implemented:**
+- `ApnsService` with JWT/ES256 authentication, HTTP/2 support, sandbox/production endpoints
+- `PushNotificationController` with 7 API endpoints for full lifecycle management
+- `DeviceRegistration` entity with platform-aware token storage
+- `PushNotificationLog` for delivery tracking with status (Pending/Sent/Delivered/Failed/Expired)
+- `NotificationPreference` entity with per-category opt-in/opt-out (tours, bookings, chat, promotions, system)
+- Certificate/key management via `PushNotifications:APNs` configuration (TeamId, KeyId, BundleId, PrivateKeyPath)
+- `DeviceRegistrationValidator` with FluentValidation
+- 14 unit tests for validation and model defaults
 
 ---
 

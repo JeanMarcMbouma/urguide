@@ -21,6 +21,7 @@ public class ApnsService : IPushNotificationProvider
     private readonly SemaphoreSlim _tokenLock = new(1, 1);
     private string _cachedJwtToken = string.Empty;
     private DateTime _tokenExpiry = DateTime.MinValue;
+    private string _cachedPrivateKey;
 
     public DevicePlatform Platform => DevicePlatform.iOS;
 
@@ -53,7 +54,7 @@ public class ApnsService : IPushNotificationProvider
                 };
             }
 
-            var jwtToken = GetOrCreateJwtToken(teamId, keyId);
+            var jwtToken = await GetOrCreateJwtTokenAsync(teamId, keyId);
             var host = useSandbox
                 ? "https://api.sandbox.push.apple.com"
                 : "https://api.push.apple.com";
@@ -74,7 +75,7 @@ public class ApnsService : IPushNotificationProvider
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation("APNs notification sent successfully to device {DeviceToken}", deviceToken[..Math.Min(8, deviceToken.Length)] + "...");
+                _logger.LogInformation("APNs notification sent successfully to device.");
                 return new PushNotificationDeliveryResult
                 {
                     Success = true,
@@ -96,7 +97,7 @@ public class ApnsService : IPushNotificationProvider
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send APNs notification to device {DeviceToken}", deviceToken[..Math.Min(8, deviceToken.Length)] + "...");
+            _logger.LogError(ex, "Failed to send APNs notification.");
             return new PushNotificationDeliveryResult
             {
                 Success = false,
@@ -106,9 +107,9 @@ public class ApnsService : IPushNotificationProvider
         }
     }
 
-    private string GetOrCreateJwtToken(string teamId, string keyId)
+    private async Task<string> GetOrCreateJwtTokenAsync(string teamId, string keyId)
     {
-        _tokenLock.Wait();
+        await _tokenLock.WaitAsync();
         try
         {
             if (!string.IsNullOrEmpty(_cachedJwtToken) && DateTime.UtcNow < _tokenExpiry)
@@ -133,9 +134,13 @@ public class ApnsService : IPushNotificationProvider
                 var claimsBase64 = Base64UrlEncode(Encoding.UTF8.GetBytes(claims));
                 var unsignedToken = $"{headerBase64}.{claimsBase64}";
 
-                var privateKeyText = System.IO.File.ReadAllText(keyPath);
+                if (_cachedPrivateKey == null)
+                {
+                    _cachedPrivateKey = await System.IO.File.ReadAllTextAsync(keyPath);
+                }
+
                 using var ecdsa = ECDsa.Create();
-                ecdsa.ImportFromPem(privateKeyText);
+                ecdsa.ImportFromPem(_cachedPrivateKey);
 
                 var signature = ecdsa.SignData(
                     Encoding.UTF8.GetBytes(unsignedToken),
