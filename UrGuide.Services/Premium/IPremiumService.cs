@@ -23,10 +23,10 @@ namespace UrGuide.Services.Premium
 
         // Advertisements
         Task<Outcome<AdvertisementDto>> CreateAdvertisementAsync(string advertiserId, CreateAdvertisementRequest request);
-        Task<Outcome<AdvertisementDto>> GetAdvertisementAsync(string adId);
+        Task<Outcome<AdvertisementDto>> GetAdvertisementAsync(string adId, string advertiserId);
         Task<Outcome<List<AdvertisementDto>>> GetAdvertiserAdsAsync(string advertiserId, int page = 1, int pageSize = 20);
         Task<Outcome<AdvertisementDto>> UpdateAdvertisementAsync(string adId, string advertiserId, UpdateAdvertisementRequest request);
-        Task<Outcome<AdPerformanceDto>> GetAdPerformanceAsync(string adId);
+        Task<Outcome<AdPerformanceDto>> GetAdPerformanceAsync(string adId, string advertiserId);
         Task<Outcome<bool>> RecordImpressionAsync(string adId);
         Task<Outcome<bool>> RecordClickAsync(string adId);
     }

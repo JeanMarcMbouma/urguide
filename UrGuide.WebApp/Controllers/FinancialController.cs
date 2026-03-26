@@ -103,6 +103,26 @@ namespace UrGuide.WebApp.Controllers
                 onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpPost("withdrawal/{withdrawalId}/complete")]
+        public async Task<IActionResult> CompleteWithdrawal(string withdrawalId, [FromBody] CompleteWithdrawalRequest request)
+        {
+            var result = await _financialService.CompleteWithdrawalAsync(withdrawalId, request.TransactionReference);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("withdrawal/{withdrawalId}/fail")]
+        public async Task<IActionResult> FailWithdrawal(string withdrawalId, [FromBody] FailWithdrawalRequest request)
+        {
+            var result = await _financialService.FailWithdrawalAsync(withdrawalId, request.FailureReason);
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
+        }
+
         [HttpPost("withdrawal/{withdrawalId}/cancel")]
         public async Task<IActionResult> CancelWithdrawal(string withdrawalId)
         {

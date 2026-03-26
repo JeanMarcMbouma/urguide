@@ -172,6 +172,7 @@ namespace UrGuide.Model.Premium
         [StringLength(2000)]
         public string ImageUrl { get; set; }
 
+        [Range(0, 4)]
         public int? Status { get; set; }
 
         [Range(0.01, double.MaxValue)]

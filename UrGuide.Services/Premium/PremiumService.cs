@@ -292,7 +292,7 @@ namespace UrGuide.Services.Premium
             }
         }
 
-        public async Task<Outcome<AdvertisementDto>> GetAdvertisementAsync(string adId)
+        public async Task<Outcome<AdvertisementDto>> GetAdvertisementAsync(string adId, string advertiserId)
         {
             try
             {
@@ -300,6 +300,9 @@ namespace UrGuide.Services.Premium
                     .FirstOrDefaultAsync(a => a.AdvertisementId == adId);
 
                 if (ad == null)
+                    return Result.Of<AdvertisementDto>().WithErrors("Advertisement not found");
+
+                if (ad.AdvertiserId != advertiserId)
                     return Result.Of<AdvertisementDto>().WithErrors("Advertisement not found");
 
                 return Result.Of(MapToAdDto(ad));
@@ -354,7 +357,11 @@ namespace UrGuide.Services.Premium
                     ad.ImageUrl = request.ImageUrl;
 
                 if (request.Status.HasValue)
+                {
+                    if (!Enum.IsDefined(typeof(AdStatus), request.Status.Value))
+                        return Result.Of<AdvertisementDto>().WithErrors("Invalid status value");
                     ad.Status = (AdStatus)request.Status.Value;
+                }
 
                 if (request.AdditionalBudget.HasValue)
                     ad.Budget += request.AdditionalBudget.Value;
@@ -372,7 +379,7 @@ namespace UrGuide.Services.Premium
             }
         }
 
-        public async Task<Outcome<AdPerformanceDto>> GetAdPerformanceAsync(string adId)
+        public async Task<Outcome<AdPerformanceDto>> GetAdPerformanceAsync(string adId, string advertiserId)
         {
             try
             {
@@ -380,6 +387,9 @@ namespace UrGuide.Services.Premium
                     .FirstOrDefaultAsync(a => a.AdvertisementId == adId);
 
                 if (ad == null)
+                    return Result.Of<AdPerformanceDto>().WithErrors("Advertisement not found");
+
+                if (ad.AdvertiserId != advertiserId)
                     return Result.Of<AdPerformanceDto>().WithErrors("Advertisement not found");
 
                 var ctr = ad.Impressions > 0 ? (decimal)ad.Clicks / ad.Impressions * 100 : 0;

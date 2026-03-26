@@ -194,12 +194,13 @@ namespace UrGuide.Services.Gamification
         {
             try
             {
-                var badges = await _context.Badges
+                var badgeEntities = await _context.Badges
                     .Where(b => b.IsActive)
                     .OrderBy(b => b.Tier)
                     .ThenBy(b => b.Name)
-                    .Select(b => MapToBadgeDto(b))
                     .ToListAsync();
+
+                var badges = badgeEntities.Select(MapToBadgeDto).ToList();
 
                 return Result.Of(badges);
             }
@@ -411,6 +412,13 @@ namespace UrGuide.Services.Gamification
                 if (draw.Status == LotteryStatus.Drawn)
                     return Result.Of<LotteryDrawDto>().WithErrors("Winners have already been drawn");
 
+                if (draw.Status == LotteryStatus.Open && draw.EntryDeadline > DateTime.UtcNow)
+                    return Result.Of<LotteryDrawDto>().WithErrors("Cannot draw winners before entry deadline has passed");
+
+                // Close the draw if still open
+                if (draw.Status == LotteryStatus.Open)
+                    draw.Status = LotteryStatus.Closed;
+
                 var entries = draw.Entries.ToList();
                 var winnerCount = Math.Min(draw.WinnerCount, entries.Count);
 
@@ -474,12 +482,13 @@ namespace UrGuide.Services.Gamification
         {
             try
             {
-                var achievements = await _context.Achievements
+                var achievementEntities = await _context.Achievements
                     .Where(a => a.IsActive)
                     .OrderBy(a => a.Category)
                     .ThenBy(a => a.Name)
-                    .Select(a => MapToAchievementDto(a))
                     .ToListAsync();
+
+                var achievements = achievementEntities.Select(MapToAchievementDto).ToList();
 
                 return Result.Of(achievements);
             }
@@ -559,6 +568,28 @@ namespace UrGuide.Services.Gamification
                 {
                     userAchievement.IsCompleted = true;
                     userAchievement.CompletedAt = DateTime.UtcNow;
+
+                    // Award points reward via loyalty account
+                    if (achievement.PointsReward > 0)
+                    {
+                        var loyaltyAccount = await GetOrCreateLoyaltyAccountAsync(userId);
+                        loyaltyAccount.Points += achievement.PointsReward;
+                        loyaltyAccount.UpdatedAt = DateTime.UtcNow;
+                        UpdateTier(loyaltyAccount);
+
+                        var loyaltyTxn = new LoyaltyTransaction
+                        {
+                            LoyaltyTransactionId = Guid.NewGuid().ToString(),
+                            LoyaltyAccountId = loyaltyAccount.LoyaltyAccountId,
+                            Points = achievement.PointsReward,
+                            TransactionType = LoyaltyTransactionType.Earned,
+                            Description = $"Achievement completed: {achievement.Name}",
+                            ReferenceId = achievement.AchievementId,
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        _context.LoyaltyTransactions.Add(loyaltyTxn);
+                    }
+
                     _logger.LogInformation("User {UserId} completed achievement {AchievementName}", userId, achievement.Name);
                 }
 

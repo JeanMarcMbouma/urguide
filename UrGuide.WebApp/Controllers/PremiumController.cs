@@ -112,7 +112,8 @@ namespace UrGuide.WebApp.Controllers
         [HttpGet("ads/{adId}")]
         public async Task<IActionResult> GetAdvertisement(string adId)
         {
-            var result = await _premiumService.GetAdvertisementAsync(adId);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _premiumService.GetAdvertisementAsync(adId, userId);
             return result.Match(
                 onSuccess: value => (IActionResult)Ok(value),
                 onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
@@ -143,7 +144,8 @@ namespace UrGuide.WebApp.Controllers
         [HttpGet("ads/{adId}/performance")]
         public async Task<IActionResult> GetAdPerformance(string adId)
         {
-            var result = await _premiumService.GetAdPerformanceAsync(adId);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _premiumService.GetAdPerformanceAsync(adId, userId);
             return result.Match(
                 onSuccess: value => (IActionResult)Ok(value),
                 onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));

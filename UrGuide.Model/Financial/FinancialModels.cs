@@ -88,6 +88,20 @@ namespace UrGuide.Model.Financial
         public string AccountHolderName { get; set; }
     }
 
+    public class CompleteWithdrawalRequest
+    {
+        [Required]
+        [StringLength(200)]
+        public string TransactionReference { get; set; }
+    }
+
+    public class FailWithdrawalRequest
+    {
+        [Required]
+        [StringLength(1000)]
+        public string FailureReason { get; set; }
+    }
+
     // Payout Schedule
     public class PayoutScheduleDto
     {

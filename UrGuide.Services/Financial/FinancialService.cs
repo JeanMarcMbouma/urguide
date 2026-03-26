@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Financial;
+using UrGuide.Data.Entities.Premium;
 using UrGuide.Model.Financial;
 using UrGuide.Model.Results;
 
@@ -166,6 +167,14 @@ namespace UrGuide.Services.Financial
         {
             try
             {
+                // Store only masked account details to reduce breach impact
+                var maskedAccount = request.AccountNumber.Length > 4
+                    ? new string('*', request.AccountNumber.Length - 4) + request.AccountNumber[^4..]
+                    : request.AccountNumber;
+                var maskedRouting = !string.IsNullOrEmpty(request.RoutingNumber) && request.RoutingNumber.Length > 4
+                    ? new string('*', request.RoutingNumber.Length - 4) + request.RoutingNumber[^4..]
+                    : request.RoutingNumber;
+
                 var withdrawal = new WithdrawalRequest
                 {
                     WithdrawalRequestId = Guid.NewGuid().ToString(),
@@ -173,8 +182,8 @@ namespace UrGuide.Services.Financial
                     Amount = request.Amount,
                     CurrencyCode = request.CurrencyCode,
                     BankName = request.BankName,
-                    AccountNumber = request.AccountNumber,
-                    RoutingNumber = request.RoutingNumber,
+                    AccountNumber = maskedAccount,
+                    RoutingNumber = maskedRouting,
                     AccountHolderName = request.AccountHolderName,
                     Status = WithdrawalStatus.Pending,
                     RequestedAt = DateTime.UtcNow
@@ -218,13 +227,14 @@ namespace UrGuide.Services.Financial
         {
             try
             {
-                var withdrawals = await _context.WithdrawalRequests
+                var entities = await _context.WithdrawalRequests
                     .Where(w => w.UserId == userId)
                     .OrderByDescending(w => w.RequestedAt)
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
-                    .Select(w => MapToWithdrawalDto(w))
                     .ToListAsync();
+
+                var withdrawals = entities.Select(MapToWithdrawalDto).ToList();
 
                 return Result.Of(withdrawals);
             }
@@ -259,6 +269,62 @@ namespace UrGuide.Services.Financial
             {
                 _logger.LogError(ex, "Error processing withdrawal {WithdrawalId}", withdrawalId);
                 return Result.Of<WithdrawalRequestDto>().WithErrors("Failed to process withdrawal request");
+            }
+        }
+
+        public async Task<Outcome<WithdrawalRequestDto>> CompleteWithdrawalAsync(string withdrawalId, string transactionReference)
+        {
+            try
+            {
+                var withdrawal = await _context.WithdrawalRequests
+                    .FirstOrDefaultAsync(w => w.WithdrawalRequestId == withdrawalId);
+
+                if (withdrawal == null)
+                    return Result.Of<WithdrawalRequestDto>().WithErrors("Withdrawal request not found");
+
+                if (withdrawal.Status != WithdrawalStatus.Processing)
+                    return Result.Of<WithdrawalRequestDto>().WithErrors("Withdrawal must be in processing status to complete");
+
+                withdrawal.Status = WithdrawalStatus.Completed;
+                withdrawal.TransactionReference = transactionReference;
+                withdrawal.CompletedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Completed withdrawal {WithdrawalId}", withdrawalId);
+                return Result.Of(MapToWithdrawalDto(withdrawal));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error completing withdrawal {WithdrawalId}", withdrawalId);
+                return Result.Of<WithdrawalRequestDto>().WithErrors("Failed to complete withdrawal request");
+            }
+        }
+
+        public async Task<Outcome<WithdrawalRequestDto>> FailWithdrawalAsync(string withdrawalId, string failureReason)
+        {
+            try
+            {
+                var withdrawal = await _context.WithdrawalRequests
+                    .FirstOrDefaultAsync(w => w.WithdrawalRequestId == withdrawalId);
+
+                if (withdrawal == null)
+                    return Result.Of<WithdrawalRequestDto>().WithErrors("Withdrawal request not found");
+
+                if (withdrawal.Status != WithdrawalStatus.Processing)
+                    return Result.Of<WithdrawalRequestDto>().WithErrors("Withdrawal must be in processing status to fail");
+
+                withdrawal.Status = WithdrawalStatus.Failed;
+                withdrawal.FailureReason = failureReason;
+                withdrawal.CompletedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Failed withdrawal {WithdrawalId}", withdrawalId);
+                return Result.Of(MapToWithdrawalDto(withdrawal));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error failing withdrawal {WithdrawalId}", withdrawalId);
+                return Result.Of<WithdrawalRequestDto>().WithErrors("Failed to update withdrawal request");
             }
         }
 
@@ -408,6 +474,10 @@ namespace UrGuide.Services.Financial
                 var totalPlatformFees = platformFees.Sum(f => f.Amount);
                 var totalRefunds = refunds.Sum(r => r.Amount);
 
+                var activeSubscriptions = await _context.GuideSubscriptions
+                    .CountAsync(s => s.Status == Data.Entities.Premium.GuideSubscriptionStatus.Active
+                        && s.EndDate > DateTime.UtcNow);
+
                 var report = new FinancialReportDto
                 {
                     TotalRevenue = totalRevenue,
@@ -415,6 +485,7 @@ namespace UrGuide.Services.Financial
                     TotalPlatformFees = totalPlatformFees,
                     TotalRefunds = totalRefunds,
                     TotalTransactions = payments.Count,
+                    TotalActiveSubscriptions = activeSubscriptions,
                     AverageTransactionValue = payments.Count > 0 ? totalRevenue / payments.Count : 0,
                     ReportStartDate = request.StartDate,
                     ReportEndDate = request.EndDate,
