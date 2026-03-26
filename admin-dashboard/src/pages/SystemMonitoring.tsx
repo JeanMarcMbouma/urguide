@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Typography,
@@ -91,6 +92,7 @@ const AUDIT_CATEGORIES = [
 const AUDIT_SEVERITIES = ['', 'Info', 'Warning', 'Critical'];
 
 export default function SystemMonitoring() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState(0);
   const [auditFilters, setAuditFilters] = useState<AuditLogFilterParameters>({ pageNumber: 1, pageSize: 50 });
   const [webhookPage, setWebhookPage] = useState(1);
@@ -161,10 +163,10 @@ export default function SystemMonitoring() {
     mutationFn: (s: PlatformSettings) => adminApi.updatePlatformSettings(s),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['platformSettings'] });
-      setSnackbar({ open: true, message: 'Settings saved successfully.', severity: 'success' });
+      setSnackbar({ open: true, message: t('system.settingsSaved'), severity: 'success' });
     },
     onError: () => {
-      setSnackbar({ open: true, message: 'Failed to save settings.', severity: 'error' });
+      setSnackbar({ open: true, message: t('system.settingsSaveError'), severity: 'error' });
     },
   });
 
@@ -187,10 +189,10 @@ export default function SystemMonitoring() {
   return (
     <Box>
       <Typography variant="h5" fontWeight="bold" mb={0.5}>
-        System Monitoring
+        {t('system.title')}
       </Typography>
       <Typography variant="body2" color="text.secondary" mb={3}>
-        Platform health, audit logs, webhooks and configuration
+        {t('system.subtitle')}
       </Typography>
 
       {/* Health overview cards */}
@@ -201,7 +203,7 @@ export default function SystemMonitoring() {
       )}
       {healthError && (
         <Alert severity="info" sx={{ mb: 2 }}>
-          Health status is currently unavailable.
+          {t('system.healthUnavailable')}
         </Alert>
       )}
       {health && (
@@ -209,7 +211,7 @@ export default function SystemMonitoring() {
           <Box display="flex" alignItems="center" gap={1} mb={1.5}>
             <HealthStatusIcon status={health.overallStatus} />
             <Typography variant="h6">
-              Overall Status:{' '}
+              {t('system.overallStatus')}:{' '}
               <Typography
                 component="span"
                 color={health.overallStatus === 'Healthy' ? 'success.main' : 'warning.main'}
@@ -219,10 +221,10 @@ export default function SystemMonitoring() {
               </Typography>
             </Typography>
             <Button size="small" startIcon={<RefreshIcon />} onClick={() => refetchHealth()}>
-              Refresh
+              {t('common.refresh')}
             </Button>
             <Typography variant="caption" color="text.secondary">
-              Last checked: {formatDate(health.checkedAt)}
+              {t('system.lastChecked')}: {formatDate(health.checkedAt)}
             </Typography>
           </Box>
           <Grid container spacing={2}>
@@ -244,7 +246,7 @@ export default function SystemMonitoring() {
                   </Typography>
                   {svc.responseTimeMs >= 0 && (
                     <Typography variant="caption" color="text.secondary">
-                      Response: {svc.responseTimeMs} ms
+                      {t('system.response')}: {svc.responseTimeMs} ms
                     </Typography>
                   )}
                 </Paper>
@@ -257,10 +259,10 @@ export default function SystemMonitoring() {
       {/* Tabs */}
       <Paper>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tab label="Health" />
-          <Tab label="Audit Logs" />
-          <Tab label="Webhooks" />
-          <Tab label="Settings" />
+          <Tab label={t('system.tabHealth')} />
+          <Tab label={t('system.tabAuditLogs')} />
+          <Tab label={t('system.tabWebhooks')} />
+          <Tab label={t('system.tabSettings')} />
         </Tabs>
 
         {/* Health tab — detailed table */}
@@ -271,10 +273,10 @@ export default function SystemMonitoring() {
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell>Service</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell>Message</TableCell>
-                      <TableCell>Response (ms)</TableCell>
+                      <TableCell>{t('system.service')}</TableCell>
+                      <TableCell>{t('system.status')}</TableCell>
+                      <TableCell>{t('system.message')}</TableCell>
+                      <TableCell>{t('system.responseMs')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -289,7 +291,7 @@ export default function SystemMonitoring() {
                           />
                         </TableCell>
                         <TableCell>{svc.message}</TableCell>
-                        <TableCell>{svc.responseTimeMs >= 0 ? svc.responseTimeMs : 'N/A'}</TableCell>
+                        <TableCell>{svc.responseTimeMs >= 0 ? svc.responseTimeMs : t('common.na')}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -304,7 +306,7 @@ export default function SystemMonitoring() {
           <Box px={2} pb={2}>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={2} flexWrap="wrap">
               <TextField
-                label="User ID"
+                label={t('system.userId')}
                 size="small"
                 value={auditFilters.userId ?? ''}
                 onChange={(e) =>
@@ -320,7 +322,7 @@ export default function SystemMonitoring() {
               />
               <TextField
                 select
-                label="Event Code"
+                label={t('system.eventCode')}
                 size="small"
                 value={auditFilters.eventCode ?? ''}
                 onChange={(e) =>
@@ -330,13 +332,13 @@ export default function SystemMonitoring() {
               >
                 {EVENT_CODES.map((c) => (
                   <MenuItem key={c} value={c}>
-                    {c || 'All Events'}
+                    {c || t('system.allEvents')}
                   </MenuItem>
                 ))}
               </TextField>
               <TextField
                 select
-                label="Category"
+                label={t('system.category')}
                 size="small"
                 value={auditFilters.category ?? ''}
                 onChange={(e) =>
@@ -346,13 +348,13 @@ export default function SystemMonitoring() {
               >
                 {AUDIT_CATEGORIES.map((c) => (
                   <MenuItem key={c} value={c}>
-                    {c || 'All Categories'}
+                    {c || t('system.allCategories')}
                   </MenuItem>
                 ))}
               </TextField>
               <TextField
                 select
-                label="Severity"
+                label={t('system.severity')}
                 size="small"
                 value={auditFilters.severity ?? ''}
                 onChange={(e) =>
@@ -362,12 +364,12 @@ export default function SystemMonitoring() {
               >
                 {AUDIT_SEVERITIES.map((s) => (
                   <MenuItem key={s} value={s}>
-                    {s || 'All'}
+                    {s || t('system.all')}
                   </MenuItem>
                 ))}
               </TextField>
               <TextField
-                label="From"
+                label={t('system.from')}
                 type="date"
                 size="small"
                 InputLabelProps={{ shrink: true }}
@@ -377,7 +379,7 @@ export default function SystemMonitoring() {
                 }
               />
               <TextField
-                label="To"
+                label={t('system.to')}
                 type="date"
                 size="small"
                 InputLabelProps={{ shrink: true }}
@@ -392,20 +394,20 @@ export default function SystemMonitoring() {
                 <CircularProgress />
               </Box>
             )}
-            {auditError && <Alert severity="error">Failed to load audit logs.</Alert>}
+            {auditError && <Alert severity="error">{t('system.auditLoadError')}</Alert>}
             {auditLogs && (
               <>
                 <TableContainer>
                   <Table size="small">
                     <TableHead>
                       <TableRow>
-                        <TableCell>Event</TableCell>
-                        <TableCell>Category</TableCell>
-                        <TableCell>Severity</TableCell>
-                        <TableCell>User</TableCell>
-                        <TableCell>Details</TableCell>
-                        <TableCell>IP Address</TableCell>
-                        <TableCell>Timestamp</TableCell>
+                        <TableCell>{t('system.event')}</TableCell>
+                        <TableCell>{t('system.category')}</TableCell>
+                        <TableCell>{t('system.severity')}</TableCell>
+                        <TableCell>{t('system.user')}</TableCell>
+                        <TableCell>{t('system.details')}</TableCell>
+                        <TableCell>{t('system.ipAddress')}</TableCell>
+                        <TableCell>{t('system.timestamp')}</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -448,7 +450,7 @@ export default function SystemMonitoring() {
                       {auditLogs.items.length === 0 && (
                         <TableRow>
                           <TableCell colSpan={7} align="center">
-                            No audit log entries found.
+                            {t('system.noAuditEntries')}
                           </TableCell>
                         </TableRow>
                       )}
@@ -457,7 +459,7 @@ export default function SystemMonitoring() {
                 </TableContainer>
                 <Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
                   <Typography variant="caption" color="text.secondary">
-                    {auditLogs.totalCount.toLocaleString()} total entries
+                    {t('system.totalEntries', { count: auditLogs.totalCount.toLocaleString() })}
                   </Typography>
                   <Pagination
                     count={Math.ceil(auditLogs.totalCount / (auditLogs.pageSize || 50))}
@@ -475,27 +477,27 @@ export default function SystemMonitoring() {
           <Box px={2} pb={2}>
             <Box display="flex" alignItems="center" gap={1} mb={2}>
               <WebhookIcon color="action" />
-              <Typography variant="subtitle1">All Registered Webhooks</Typography>
+              <Typography variant="subtitle1">{t('system.webhooksTitle')}</Typography>
             </Box>
             {webhooksLoading && (
               <Box display="flex" justifyContent="center" py={4}>
                 <CircularProgress />
               </Box>
             )}
-            {webhooksError && <Alert severity="error">Failed to load webhooks.</Alert>}
+            {webhooksError && <Alert severity="error">{t('system.webhookLoadError')}</Alert>}
             {webhooks && (
               <>
                 <TableContainer>
                   <Table size="small">
                     <TableHead>
                       <TableRow>
-                        <TableCell>URL</TableCell>
-                        <TableCell>Owner</TableCell>
-                        <TableCell>Active</TableCell>
-                        <TableCell>Success</TableCell>
-                        <TableCell>Failures</TableCell>
-                        <TableCell>Last Triggered</TableCell>
-                        <TableCell>Created</TableCell>
+                        <TableCell>{t('system.url')}</TableCell>
+                        <TableCell>{t('system.owner')}</TableCell>
+                        <TableCell>{t('system.active')}</TableCell>
+                        <TableCell>{t('system.success')}</TableCell>
+                        <TableCell>{t('system.failures')}</TableCell>
+                        <TableCell>{t('system.lastTriggered')}</TableCell>
+                        <TableCell>{t('system.created')}</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -513,7 +515,7 @@ export default function SystemMonitoring() {
                           <TableCell>{wh.userEmail || wh.userId.slice(0, 8)}</TableCell>
                           <TableCell>
                             <Chip
-                              label={wh.isActive ? 'Active' : 'Inactive'}
+                              label={wh.isActive ? t('system.active') : t('system.inactive')}
                               size="small"
                               color={wh.isActive ? 'success' : 'default'}
                             />
@@ -527,7 +529,7 @@ export default function SystemMonitoring() {
                       {webhooks.items.length === 0 && (
                         <TableRow>
                           <TableCell colSpan={7} align="center">
-                            No webhooks registered.
+                            {t('system.noWebhooks')}
                           </TableCell>
                         </TableRow>
                       )}
@@ -551,29 +553,29 @@ export default function SystemMonitoring() {
           <Box px={2} pb={2}>
             <Box display="flex" alignItems="center" gap={1} mb={2}>
               <SettingsIcon color="action" />
-              <Typography variant="subtitle1">Platform Settings &amp; Feature Toggles</Typography>
+              <Typography variant="subtitle1">{t('system.settingsTitle')}</Typography>
             </Box>
             {settingsLoading && (
               <Box display="flex" justifyContent="center" py={4}>
                 <CircularProgress />
               </Box>
             )}
-            {settingsError && <Alert severity="error">Failed to load platform settings.</Alert>}
+            {settingsError && <Alert severity="error">{t('system.settingsLoadError')}</Alert>}
             {displaySettings && (
               <>
                 <Typography variant="subtitle2" color="text.secondary" mb={1}>
-                  Feature Toggles
+                  {t('system.featureToggles')}
                 </Typography>
                 <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
                   <Grid container spacing={1}>
                     {(
                       [
-                        { key: 'maintenanceMode', label: 'Maintenance Mode', description: 'Show maintenance page to all users' },
-                        { key: 'registrationEnabled', label: 'User Registration', description: 'Allow new users to register' },
-                        { key: 'guideApplicationsEnabled', label: 'Guide Applications', description: 'Allow guide applications' },
-                        { key: 'tourBookingEnabled', label: 'Tour Booking', description: 'Allow tour booking' },
-                        { key: 'paymentsEnabled', label: 'Payments', description: 'Enable payment processing' },
-                        { key: 'emailNotificationsEnabled', label: 'Email Notifications', description: 'Send email notifications' },
+                        { key: 'maintenanceMode', label: t('system.maintenanceMode'), description: t('system.maintenanceModeDesc') },
+                        { key: 'registrationEnabled', label: t('system.userRegistration'), description: t('system.userRegistrationDesc') },
+                        { key: 'guideApplicationsEnabled', label: t('system.guideApplications'), description: t('system.guideApplicationsDesc') },
+                        { key: 'tourBookingEnabled', label: t('system.tourBooking'), description: t('system.tourBookingDesc') },
+                        { key: 'paymentsEnabled', label: t('system.payments'), description: t('system.paymentsDesc') },
+                        { key: 'emailNotificationsEnabled', label: t('system.emailNotifications'), description: t('system.emailNotificationsDesc') },
                       ] as { key: keyof PlatformSettings; label: string; description: string }[]
                     ).map(({ key, label, description }) => (
                       <Grid size={{ xs: 12, sm: 6 }} key={key}>
@@ -604,13 +606,13 @@ export default function SystemMonitoring() {
                 <Divider sx={{ my: 2 }} />
 
                 <Typography variant="subtitle2" color="text.secondary" mb={1}>
-                  Numeric Settings
+                  {t('system.numericSettings')}
                 </Typography>
                 <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
                   <Grid container spacing={2}>
                     <Grid size={{ xs: 12, sm: 4 }}>
                       <TextField
-                        label="Platform Fee (%)"
+                        label={t('system.platformFee')}
                         type="number"
                         size="small"
                         fullWidth
@@ -621,7 +623,7 @@ export default function SystemMonitoring() {
                     </Grid>
                     <Grid size={{ xs: 12, sm: 4 }}>
                       <TextField
-                        label="Max Images per Post"
+                        label={t('system.maxImagesPerPost')}
                         type="number"
                         size="small"
                         fullWidth
@@ -632,7 +634,7 @@ export default function SystemMonitoring() {
                     </Grid>
                     <Grid size={{ xs: 12, sm: 4 }}>
                       <TextField
-                        label="Min Booking Days in Advance"
+                        label={t('system.minBookingDays')}
                         type="number"
                         size="small"
                         fullWidth
@@ -653,7 +655,7 @@ export default function SystemMonitoring() {
                     onClick={handleSaveSettings}
                     disabled={updateSettingsMutation.isPending}
                   >
-                    {updateSettingsMutation.isPending ? 'Saving…' : 'Save Settings'}
+                    {updateSettingsMutation.isPending ? t('system.saving') : t('system.saveSettings')}
                   </Button>
                 </Box>
               </>
