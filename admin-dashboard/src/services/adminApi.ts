@@ -17,6 +17,10 @@ import type {
   AdminWebhookListResponse,
   PlatformSettings,
   AuditLogFilterParameters,
+  NotificationTemplateDto,
+  CreateNotificationTemplateRequest,
+  UpdateNotificationTemplateRequest,
+  TemplatePreviewResult,
 } from '../types/admin.types';
 
 class AdminApiService {
@@ -308,6 +312,56 @@ class AdminApiService {
   // Get all translation strings for a specific language (admin only)
   async getTranslations(language: string): Promise<{ language: string; culture: string; translations: Record<string, string | null> }> {
     const { data } = await this.localizationApi.get<{ language: string; culture: string; translations: Record<string, string | null> }>(`/${language}`);
+    return data;
+  }
+
+  // ── Push Notification Templates ───────────────────────────────────────────
+
+  // List all templates, optionally filtered by category and/or language
+  async getNotificationTemplates(category?: string, language?: string): Promise<NotificationTemplateDto[]> {
+    const { data } = await this.api.get<NotificationTemplateDto[]>('/notification-templates', {
+      params: { category, language },
+      baseURL: '/api',
+    });
+    return data;
+  }
+
+  // Get a template by ID
+  async getNotificationTemplateById(id: string): Promise<NotificationTemplateDto> {
+    const { data } = await this.api.get<NotificationTemplateDto>(`/notification-templates/${id}`, {
+      baseURL: '/api',
+    });
+    return data;
+  }
+
+  // Create a new template
+  async createNotificationTemplate(request: CreateNotificationTemplateRequest): Promise<NotificationTemplateDto> {
+    const { data } = await this.api.post<NotificationTemplateDto>('/notification-templates', request, {
+      baseURL: '/api',
+    });
+    return data;
+  }
+
+  // Update an existing template (creates new versioned record)
+  async updateNotificationTemplate(id: string, request: UpdateNotificationTemplateRequest): Promise<NotificationTemplateDto> {
+    const { data } = await this.api.put<NotificationTemplateDto>(`/notification-templates/${id}`, request, {
+      baseURL: '/api',
+    });
+    return data;
+  }
+
+  // Deactivate (soft-delete) a template
+  async deleteNotificationTemplate(id: string): Promise<void> {
+    await this.api.delete(`/notification-templates/${id}`, { baseURL: '/api' });
+  }
+
+  // Preview rendered template with variable substitution
+  async previewNotificationTemplate(id: string, variables: Record<string, string>): Promise<TemplatePreviewResult> {
+    const { data } = await this.api.post<TemplatePreviewResult>(
+      `/notification-templates/${id}/preview`,
+      variables,
+      { baseURL: '/api' }
+    );
     return data;
   }
 }

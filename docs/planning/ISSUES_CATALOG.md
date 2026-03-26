@@ -730,23 +730,33 @@ Integrate Apple Push Notification Service for iOS push notifications with device
 ### 13c. Push Notification Templates
 **Title:** Create reusable push notification templates  
 **Labels:** enhancement, mobile, notifications  
+**Status:** ✅ **COMPLETED**  
 **Description:**
 Implement notification template system for consistent messaging across FCM and APNs.
 
-**Requirements:**
-- Template creation and management
-- Variable substitution
-- Admin template editor
-- Template versioning
-- Multi-language support
-- A/B testing support
+**Implemented:**
+- ✅ Template creation and management (CRUD with versioning)
+- ✅ Variable substitution using `{{variable_name}}` placeholders
+- ✅ Admin template editor in the admin dashboard
+- ✅ Template versioning (each update creates a new version; old versions remain for history)
+- ✅ Multi-language support (ISO 639-1, English fallback)
+- ✅ A/B testing support via variant groups
+
+**API Endpoints:**
+- `GET /api/notification-templates` - List templates (filter by category/language)
+- `GET /api/notification-templates/{id}` - Get template by ID
+- `GET /api/notification-templates/by-name/{name}` - Get active template by name + language
+- `POST /api/notification-templates` - Create template
+- `PUT /api/notification-templates/{id}` - Update template (creates new version)
+- `DELETE /api/notification-templates/{id}` - Deactivate template
+- `POST /api/notification-templates/{id}/preview` - Preview rendered template
 
 **Acceptance Criteria:**
-- [ ] Templates can be created/edited
-- [ ] Variables work correctly
-- [ ] Multi-language templates
-- [ ] Templates versioned
-- [ ] Documentation updated
+- [x] Templates can be created/edited
+- [x] Variables work correctly
+- [x] Multi-language templates
+- [x] Templates versioned
+- [x] Documentation updated
 
 ---
 
@@ -1911,7 +1921,7 @@ Implement premium features including guide membership tiers (Basic/Premium), mon
 - **Security & Authentication**: 5 (5 completed: 2FA ✅, Google OAuth 5 ✅, Apple OAuth 5b ✅, Microsoft OAuth 5c ✅, Account Linking 5d ✅)
 - **Monitoring & Observability**: 2 (0 completed, 2 pending)
 - **Features & Enhancements**: 5 (3 completed, 2 pending)
-- **Mobile & Integration**: 5 (1 completed: Webhook System ✅, 4 pending: FCM 13, APNs 13b, Notification Templates 13c, expanded from 13)
+- **Mobile & Integration**: 5 (2 completed: Webhook System ✅, Notification Templates 13c ✅, 3 pending: FCM 13, APNs 13b, expanded from 13)
 - **Infrastructure**: 4 (1 completed: Message Queue ✅, 3 pending: Redis Caching, CDN, Backup & DR)
 - **Analytics & Reporting**: 2 (1 completed: Analytics Dashboard ✅, 1 pending: Advanced Reporting)
 - **Communication**: 2 (Real-time Chat 24, Email Templates 31)

@@ -91,6 +91,7 @@ namespace UrGuide.Services.Extensions
             services.AddTransient<Premium.IPremiumService, Premium.PremiumService>();
 
             // Push notification services
+            services.AddTransient<Contracts.INotificationTemplateService, PushNotifications.NotificationTemplateService>();
             services.AddTransient<Contracts.IPushNotificationService, PushNotifications.PushNotificationService>();
             services.AddSingleton<PushNotifications.IPushNotificationProvider, PushNotifications.ApnsService>();
             services.AddTransient<PushNotifications.IPushNotificationProvider, PushNotifications.FcmService>();
