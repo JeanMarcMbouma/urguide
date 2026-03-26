@@ -141,11 +141,11 @@ public class FcmService : IPushNotificationProvider
         catch (JsonException ex)
         {
             _logger.LogWarning(ex, "Failed to parse FCM legacy response body.");
-            // If we can't parse but got a 2xx, treat as sent
             return new PushNotificationDeliveryResult
             {
-                Success = true,
-                Status = DeliveryStatus.Sent
+                Success = false,
+                ErrorMessage = "FCM response could not be parsed; delivery status unknown.",
+                Status = DeliveryStatus.Failed
             };
         }
     }

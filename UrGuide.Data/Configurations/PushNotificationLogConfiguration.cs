@@ -53,6 +53,7 @@ namespace UrGuide.Data.Configurations
                 .HasForeignKey(l => l.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // NoAction to preserve notification history when a device registration is removed
             builder.HasOne(l => l.DeviceRegistration)
                 .WithMany()
                 .HasForeignKey(l => l.DeviceRegistrationId)
