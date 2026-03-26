@@ -15,10 +15,10 @@ namespace UrGuide.Services.Financial
 
         // Withdrawals
         Task<Outcome<WithdrawalRequestDto>> CreateWithdrawalAsync(string userId, CreateWithdrawalRequest request);
-        Task<Outcome<WithdrawalRequestDto>> GetWithdrawalAsync(string withdrawalId);
+        Task<Outcome<WithdrawalRequestDto>> GetWithdrawalAsync(string withdrawalId, string userId);
         Task<Outcome<List<WithdrawalRequestDto>>> GetUserWithdrawalsAsync(string userId, int page = 1, int pageSize = 20);
         Task<Outcome<WithdrawalRequestDto>> ProcessWithdrawalAsync(string withdrawalId);
-        Task<Outcome<bool>> CancelWithdrawalAsync(string withdrawalId);
+        Task<Outcome<bool>> CancelWithdrawalAsync(string withdrawalId, string userId);
 
         // Payout Schedules
         Task<Outcome<PayoutScheduleDto>> CreatePayoutScheduleAsync(string guideId, CreatePayoutScheduleRequest request);

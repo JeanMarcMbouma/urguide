@@ -64,6 +64,8 @@ namespace UrGuide.WebApp.Controllers
         [HttpGet("loyalty/history")]
         public async Task<IActionResult> GetLoyaltyHistory([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
+            if (page < 1) page = 1;
+            if (pageSize < 1 || pageSize > 100) pageSize = 20;
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _gamificationService.GetLoyaltyHistoryAsync(userId, page, pageSize);
             return result.Match(
@@ -71,6 +73,7 @@ namespace UrGuide.WebApp.Controllers
                 onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("badges")]
         public async Task<IActionResult> CreateBadge([FromBody] CreateBadgeRequest request)
         {
@@ -109,6 +112,7 @@ namespace UrGuide.WebApp.Controllers
                 onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("lottery")]
         public async Task<IActionResult> CreateLotteryDraw([FromBody] CreateLotteryDrawRequest request)
         {
@@ -146,6 +150,7 @@ namespace UrGuide.WebApp.Controllers
                 onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("lottery/{drawId}/draw")]
         public async Task<IActionResult> DrawWinners(string drawId)
         {
@@ -155,6 +160,7 @@ namespace UrGuide.WebApp.Controllers
                 onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("achievements")]
         public async Task<IActionResult> CreateAchievement([FromBody] CreateAchievementRequest request)
         {

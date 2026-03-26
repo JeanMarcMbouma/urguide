@@ -54,6 +54,8 @@ namespace UrGuide.WebApp.Controllers
         [HttpGet("wallet/transactions")]
         public async Task<IActionResult> GetTransactions([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
+            if (page < 1) page = 1;
+            if (pageSize < 1 || pageSize > 100) pageSize = 20;
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _financialService.GetTransactionsAsync(userId, page, pageSize);
             return result.Match(
@@ -74,7 +76,8 @@ namespace UrGuide.WebApp.Controllers
         [HttpGet("withdrawal/{withdrawalId}")]
         public async Task<IActionResult> GetWithdrawal(string withdrawalId)
         {
-            var result = await _financialService.GetWithdrawalAsync(withdrawalId);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _financialService.GetWithdrawalAsync(withdrawalId, userId);
             return result.Match(
                 onSuccess: value => (IActionResult)Ok(value),
                 onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
@@ -90,6 +93,7 @@ namespace UrGuide.WebApp.Controllers
                 onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("withdrawal/{withdrawalId}/process")]
         public async Task<IActionResult> ProcessWithdrawal(string withdrawalId)
         {
@@ -102,7 +106,8 @@ namespace UrGuide.WebApp.Controllers
         [HttpPost("withdrawal/{withdrawalId}/cancel")]
         public async Task<IActionResult> CancelWithdrawal(string withdrawalId)
         {
-            var result = await _financialService.CancelWithdrawalAsync(withdrawalId);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _financialService.CancelWithdrawalAsync(withdrawalId, userId);
             return result.Match(
                 onSuccess: value => (IActionResult)Ok(value),
                 onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
@@ -138,6 +143,7 @@ namespace UrGuide.WebApp.Controllers
                 onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("report")]
         public async Task<IActionResult> GenerateFinancialReport([FromBody] FinancialReportRequest request)
         {

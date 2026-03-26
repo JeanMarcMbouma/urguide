@@ -192,7 +192,7 @@ namespace UrGuide.Services.Financial
             }
         }
 
-        public async Task<Outcome<WithdrawalRequestDto>> GetWithdrawalAsync(string withdrawalId)
+        public async Task<Outcome<WithdrawalRequestDto>> GetWithdrawalAsync(string withdrawalId, string userId)
         {
             try
             {
@@ -200,6 +200,9 @@ namespace UrGuide.Services.Financial
                     .FirstOrDefaultAsync(w => w.WithdrawalRequestId == withdrawalId);
 
                 if (withdrawal == null)
+                    return Result.Of<WithdrawalRequestDto>().WithErrors("Withdrawal request not found");
+
+                if (withdrawal.UserId != userId)
                     return Result.Of<WithdrawalRequestDto>().WithErrors("Withdrawal request not found");
 
                 return Result.Of(MapToWithdrawalDto(withdrawal));
@@ -259,7 +262,7 @@ namespace UrGuide.Services.Financial
             }
         }
 
-        public async Task<Outcome<bool>> CancelWithdrawalAsync(string withdrawalId)
+        public async Task<Outcome<bool>> CancelWithdrawalAsync(string withdrawalId, string userId)
         {
             try
             {
@@ -267,6 +270,9 @@ namespace UrGuide.Services.Financial
                     .FirstOrDefaultAsync(w => w.WithdrawalRequestId == withdrawalId);
 
                 if (withdrawal == null)
+                    return Result.Of(false).WithErrors("Withdrawal request not found");
+
+                if (withdrawal.UserId != userId)
                     return Result.Of(false).WithErrors("Withdrawal request not found");
 
                 if (withdrawal.Status != WithdrawalStatus.Pending)

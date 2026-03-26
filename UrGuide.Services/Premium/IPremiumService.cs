@@ -25,7 +25,7 @@ namespace UrGuide.Services.Premium
         Task<Outcome<AdvertisementDto>> CreateAdvertisementAsync(string advertiserId, CreateAdvertisementRequest request);
         Task<Outcome<AdvertisementDto>> GetAdvertisementAsync(string adId);
         Task<Outcome<List<AdvertisementDto>>> GetAdvertiserAdsAsync(string advertiserId, int page = 1, int pageSize = 20);
-        Task<Outcome<AdvertisementDto>> UpdateAdvertisementAsync(string adId, UpdateAdvertisementRequest request);
+        Task<Outcome<AdvertisementDto>> UpdateAdvertisementAsync(string adId, string advertiserId, UpdateAdvertisementRequest request);
         Task<Outcome<AdPerformanceDto>> GetAdPerformanceAsync(string adId);
         Task<Outcome<bool>> RecordImpressionAsync(string adId);
         Task<Outcome<bool>> RecordClickAsync(string adId);

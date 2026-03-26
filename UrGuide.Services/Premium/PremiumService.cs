@@ -331,7 +331,7 @@ namespace UrGuide.Services.Premium
             }
         }
 
-        public async Task<Outcome<AdvertisementDto>> UpdateAdvertisementAsync(string adId, UpdateAdvertisementRequest request)
+        public async Task<Outcome<AdvertisementDto>> UpdateAdvertisementAsync(string adId, string advertiserId, UpdateAdvertisementRequest request)
         {
             try
             {
@@ -339,6 +339,9 @@ namespace UrGuide.Services.Premium
                     .FirstOrDefaultAsync(a => a.AdvertisementId == adId);
 
                 if (ad == null)
+                    return Result.Of<AdvertisementDto>().WithErrors("Advertisement not found");
+
+                if (ad.AdvertiserId != advertiserId)
                     return Result.Of<AdvertisementDto>().WithErrors("Advertisement not found");
 
                 if (!string.IsNullOrEmpty(request.Title))

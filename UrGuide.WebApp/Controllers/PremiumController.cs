@@ -21,6 +21,7 @@ namespace UrGuide.WebApp.Controllers
             _premiumService = premiumService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("plans")]
         public async Task<IActionResult> CreatePlan([FromBody] CreateSubscriptionPlanRequest request)
         {
@@ -120,6 +121,8 @@ namespace UrGuide.WebApp.Controllers
         [HttpGet("ads")]
         public async Task<IActionResult> GetMyAds([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
+            if (page < 1) page = 1;
+            if (pageSize < 1 || pageSize > 100) pageSize = 20;
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _premiumService.GetAdvertiserAdsAsync(userId, page, pageSize);
             return result.Match(
@@ -130,7 +133,8 @@ namespace UrGuide.WebApp.Controllers
         [HttpPut("ads/{adId}")]
         public async Task<IActionResult> UpdateAdvertisement(string adId, [FromBody] UpdateAdvertisementRequest request)
         {
-            var result = await _premiumService.UpdateAdvertisementAsync(adId, request);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _premiumService.UpdateAdvertisementAsync(adId, userId, request);
             return result.Match(
                 onSuccess: value => (IActionResult)Ok(value),
                 onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
