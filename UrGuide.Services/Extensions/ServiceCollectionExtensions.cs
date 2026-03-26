@@ -80,6 +80,15 @@ namespace UrGuide.Services.Extensions
             // Email template services
             services.AddTransient<Email.IEmailTemplateService, Email.EmailTemplateService>();
 
+            // Financial services
+            services.AddTransient<Financial.IFinancialService, Financial.FinancialService>();
+
+            // Gamification services
+            services.AddTransient<Gamification.IGamificationService, Gamification.GamificationService>();
+
+            // Premium services
+            services.AddTransient<Premium.IPremiumService, Premium.PremiumService>();
+
             // Elasticsearch
             var elasticsearchUrl = configuration["Elasticsearch:Url"] ?? "http://localhost:9200";
             var elasticsearchUsername = configuration["Elasticsearch:Username"];

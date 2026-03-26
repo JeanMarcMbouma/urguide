@@ -15,6 +15,9 @@ using UrGuide.Data.Entities.Webhooks;
 using UrGuide.Data.Entities.Disputes;
 using UrGuide.Data.Entities.Recommendations;
 using UrGuide.Data.Entities.Email;
+using UrGuide.Data.Entities.Financial;
+using UrGuide.Data.Entities.Gamification;
+using UrGuide.Data.Entities.Premium;
 using UrGuide.Data.Entities.Reports;
 
 namespace UrGuide.Data
@@ -89,6 +92,28 @@ namespace UrGuide.Data
         // Report entities
         public virtual DbSet<ReportDefinition> ReportDefinitions { get; set; }
         public virtual DbSet<ScheduledReport> ScheduledReports { get; set; }
+
+        // Financial entities
+        public virtual DbSet<CoinWallet> CoinWallets { get; set; }
+        public virtual DbSet<CoinTransaction> CoinTransactions { get; set; }
+        public virtual DbSet<WithdrawalRequest> WithdrawalRequests { get; set; }
+        public virtual DbSet<PayoutSchedule> PayoutSchedules { get; set; }
+
+        // Gamification entities
+        public virtual DbSet<LoyaltyAccount> LoyaltyAccounts { get; set; }
+        public virtual DbSet<LoyaltyTransaction> LoyaltyTransactions { get; set; }
+        public virtual DbSet<Badge> Badges { get; set; }
+        public virtual DbSet<UserBadge> UserBadges { get; set; }
+        public virtual DbSet<LotteryDraw> LotteryDraws { get; set; }
+        public virtual DbSet<LotteryEntry> LotteryEntries { get; set; }
+        public virtual DbSet<Achievement> Achievements { get; set; }
+        public virtual DbSet<UserAchievement> UserAchievements { get; set; }
+
+        // Premium entities
+        public virtual DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
+        public virtual DbSet<GuideSubscription> GuideSubscriptions { get; set; }
+        public virtual DbSet<VisibilityBoost> VisibilityBoosts { get; set; }
+        public virtual DbSet<Advertisement> Advertisements { get; set; }
 
         // Email template entities
         public virtual DbSet<EmailTemplate> EmailTemplates { get; set; }
@@ -185,6 +210,28 @@ namespace UrGuide.Data
             // Email template configurations
             modelBuilder.ApplyConfiguration(new Configurations.EmailTemplateConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.EmailTemplateVersionConfiguration());
+
+            // Financial configurations
+            modelBuilder.ApplyConfiguration(new Configurations.CoinWalletConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.CoinTransactionConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.WithdrawalRequestConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.PayoutScheduleConfiguration());
+
+            // Gamification configurations
+            modelBuilder.ApplyConfiguration(new Configurations.LoyaltyAccountConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.LoyaltyTransactionConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.BadgeConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.UserBadgeConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.LotteryDrawConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.LotteryEntryConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.AchievementConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.UserAchievementConfiguration());
+
+            // Premium configurations
+            modelBuilder.ApplyConfiguration(new Configurations.SubscriptionPlanConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.GuideSubscriptionConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.VisibilityBoostConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.AdvertisementConfiguration());
         }
     }
 }
