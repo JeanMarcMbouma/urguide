@@ -1275,7 +1275,7 @@ namespace UrGuide.WebApp.Services
                     }
                     catch (Exception rollbackEx)
                     {
-                        _logger.LogError(rollbackEx, "Failed to roll back lockout for user {UserId}", request.UserId);
+                        _logger.LogError(rollbackEx, "Failed to roll back lockout for user {UserId}. Account may be in an inconsistent state.", request.UserId);
                     }
                     return Result.Of<AccountFreezeInfo>().WithErrors("Failed to freeze account");
                 }
@@ -1350,8 +1350,14 @@ namespace UrGuide.WebApp.Services
                 {
                     _logger.LogError("Failed to reset access failed count for user {UserId}", request.UserId);
                     // Attempt to restore original lockout state
-                    try { await _userManager.SetLockoutEndDateAsync(user, originalLockoutEnd); }
-                    catch (Exception ex) { _logger.LogError(ex, "Failed to restore lockout for user {UserId}", request.UserId); }
+                    try
+                    {
+                        await _userManager.SetLockoutEndDateAsync(user, originalLockoutEnd);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to restore lockout for user {UserId}", request.UserId);
+                    }
                     return Result.Of(false).WithErrors("Failed to reset access failed count");
                 }
 
