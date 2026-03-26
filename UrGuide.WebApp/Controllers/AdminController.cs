@@ -402,5 +402,78 @@ namespace UrGuide.WebApp.Controllers
 
             return Ok(new { message = "Platform settings updated successfully" });
         }
+
+        // ── Account Freeze / Temporary Suspension ─────────────────────────────
+
+        /// <summary>
+        /// Freeze a user account with reason and optional duration
+        /// </summary>
+        /// <param name="request">Freeze request with user ID, reason, and optional duration</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Freeze record details</returns>
+        [HttpPost("users/freeze")]
+        [ProducesResponseType(200, Type = typeof(AccountFreezeInfo))]
+        public async Task<IActionResult> FreezeAccount([FromBody] AccountFreezeRequest request, CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.FreezeAccountAsync(request, cancellationToken);
+
+            if (result.IsError)
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
+
+            return Ok(result.Value);
+        }
+
+        /// <summary>
+        /// Unfreeze a previously frozen user account
+        /// </summary>
+        /// <param name="request">Unfreeze request with user ID and reason</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Success status</returns>
+        [HttpPost("users/unfreeze")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> UnfreezeAccount([FromBody] AccountUnfreezeRequest request, CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.UnfreezeAccountAsync(request, cancellationToken);
+
+            if (result.IsError)
+                return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
+
+            return Ok(new { message = "Account unfrozen successfully", request.UserId });
+        }
+
+        /// <summary>
+        /// Get freeze history for a specific user
+        /// </summary>
+        /// <param name="userId">User ID</param>
+        /// <param name="paginationParameters">Pagination parameters</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Paginated freeze history</returns>
+        [HttpGet("users/{userId}/freeze-history")]
+        [ProducesResponseType(200, Type = typeof(AccountFreezeHistoryResponse))]
+        public async Task<IActionResult> GetFreezeHistory(string userId, [FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.GetFreezeHistoryAsync(userId, paginationParameters, cancellationToken);
+
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
+        }
+
+        /// <summary>
+        /// Get all currently frozen accounts
+        /// </summary>
+        /// <param name="paginationParameters">Pagination parameters</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Paginated list of frozen accounts</returns>
+        [HttpGet("users/frozen")]
+        [ProducesResponseType(200, Type = typeof(AccountFreezeHistoryResponse))]
+        public async Task<IActionResult> GetFrozenAccounts([FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken = default)
+        {
+            var result = await _adminService.GetFrozenAccountsAsync(paginationParameters, cancellationToken);
+
+            return result.Match(
+                onSuccess: value => (IActionResult)Ok(value),
+                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
+        }
     }
 }

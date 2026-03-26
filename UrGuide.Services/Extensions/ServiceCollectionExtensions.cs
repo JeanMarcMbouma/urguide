@@ -96,6 +96,9 @@ namespace UrGuide.Services.Extensions
             services.AddSingleton<PushNotifications.IPushNotificationProvider, PushNotifications.ApnsService>();
             services.AddTransient<PushNotifications.IPushNotificationProvider, PushNotifications.FcmService>();
 
+            // Audit service
+            services.AddTransient<Contracts.IAuditService, Auditing.AuditService>();
+
             // Elasticsearch
             var elasticsearchUrl = configuration["Elasticsearch:Url"] ?? "http://localhost:9200";
             var elasticsearchUsername = configuration["Elasticsearch:Username"];

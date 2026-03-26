@@ -126,6 +126,9 @@ namespace UrGuide.Data
         public virtual DbSet<Entities.PushNotifications.NotificationPreference> NotificationPreferences { get; set; }
         public virtual DbSet<Entities.PushNotifications.NotificationTemplate> NotificationTemplates { get; set; }
 
+        // Account freeze records
+        public virtual DbSet<Entities.Users.AccountFreezeRecord> AccountFreezeRecords { get; set; }
+
         public UrGuideContext([NotNull] DbContextOptions options) : base(options)
         {
         }
@@ -245,6 +248,9 @@ namespace UrGuide.Data
             modelBuilder.ApplyConfiguration(new Configurations.PushNotificationLogConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.NotificationPreferenceConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.NotificationTemplateConfiguration());
+
+            // Account freeze configurations
+            modelBuilder.ApplyConfiguration(new Configurations.AccountFreezeRecordConfiguration());
         }
     }
 }

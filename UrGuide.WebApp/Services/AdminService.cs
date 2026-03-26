@@ -9,6 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Core;
 using UrGuide.Data;
+using UrGuide.Data.Entities.Event;
+using UrGuide.Data.Entities.Users;
 using UrGuide.Model;
 using UrGuide.Model.Admin;
 using UrGuide.Model.Results;
@@ -29,6 +31,7 @@ namespace UrGuide.WebApp.Services
         private readonly IUserContext _userContext;
         private readonly ILogger<AdminService> _logger;
         private readonly AdminPlatformSettings _platformSettings;
+        private readonly IAuditService _auditService;
 
         public AdminService(
             UserManager<UrGuideUser> userManager,
@@ -36,7 +39,8 @@ namespace UrGuide.WebApp.Services
             UrGuideContext context,
             IUserContext userContext,
             ILogger<AdminService> logger,
-            AdminPlatformSettings platformSettings)
+            AdminPlatformSettings platformSettings,
+            IAuditService auditService)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
@@ -44,6 +48,7 @@ namespace UrGuide.WebApp.Services
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _platformSettings = platformSettings ?? throw new ArgumentNullException(nameof(platformSettings));
+            _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
         }
 
         public async Task<Outcome<PagedList<AdminUserInfo>>> GetAllUsersAsync(SearchParameters searchParameters, CancellationToken cancellationToken)
@@ -179,6 +184,14 @@ namespace UrGuide.WebApp.Services
                 _logger.LogInformation("User {UserId} suspended by admin {AdminId} for {Days} days", 
                     userId, _userContext.UserId, durationDays);
 
+                await _auditService.LogAsync(
+                    EventCodes.AccountSuspended,
+                    _userContext.UserId,
+                    referenceId: userId,
+                    details: $"User suspended for {durationDays} days",
+                    severity: AuditSeverity.Warning,
+                    cancellationToken: cancellationToken);
+
                 return Result.Of(true);
             }
             catch (Exception ex)
@@ -211,6 +224,13 @@ namespace UrGuide.WebApp.Services
 
                 _logger.LogInformation("User {UserId} activated by admin {AdminId}", userId, _userContext.UserId);
 
+                await _auditService.LogAsync(
+                    EventCodes.AccountActivated,
+                    _userContext.UserId,
+                    referenceId: userId,
+                    details: "User account activated",
+                    cancellationToken: cancellationToken);
+
                 return Result.Of(true);
             }
             catch (Exception ex)
@@ -242,6 +262,14 @@ namespace UrGuide.WebApp.Services
                 }
 
                 _logger.LogInformation("User {UserId} deleted by admin {AdminId}", userId, _userContext.UserId);
+
+                await _auditService.LogAsync(
+                    EventCodes.AccountDeleted,
+                    _userContext.UserId,
+                    referenceId: userId,
+                    details: "User account deleted",
+                    severity: AuditSeverity.Critical,
+                    cancellationToken: cancellationToken);
 
                 return Result.Of(true);
             }
@@ -296,6 +324,13 @@ namespace UrGuide.WebApp.Services
 
                 _logger.LogInformation("User {UserId} roles updated by admin {AdminId}. New roles: {Roles}", 
                     model.UserId, _userContext.UserId, string.Join(", ", model.Roles));
+
+                await _auditService.LogAsync(
+                    EventCodes.RolesUpdated,
+                    _userContext.UserId,
+                    referenceId: model.UserId,
+                    details: $"Roles updated to: {string.Join(", ", model.Roles)}",
+                    cancellationToken: cancellationToken);
 
                 return Result.Of(true);
             }
@@ -994,6 +1029,13 @@ namespace UrGuide.WebApp.Services
                     Enum.TryParse<UrGuide.Data.Entities.Event.EventCodes>(parameters.EventCode, true, out var eventCode))
                     query = query.Where(e => e.EventCode == eventCode);
 
+                if (!string.IsNullOrWhiteSpace(parameters.Category))
+                    query = query.Where(e => e.Category == parameters.Category);
+
+                if (!string.IsNullOrWhiteSpace(parameters.Severity) &&
+                    Enum.TryParse<AuditSeverity>(parameters.Severity, true, out var severity))
+                    query = query.Where(e => e.Severity == severity);
+
                 var totalCount = await query.CountAsync(cancellationToken);
 
                 var pageSize = parameters.PageSize > 0 ? parameters.PageSize : 50;
@@ -1020,7 +1062,12 @@ namespace UrGuide.WebApp.Services
                     UserId = e.UserId,
                     UserEmail = e.UserId != null && userEmailMap.TryGetValue(e.UserId, out var email) ? email : string.Empty,
                     ReferenceId = e.ReferenceId,
-                    Created = e.Created
+                    Created = e.Created,
+                    IpAddress = e.IpAddress,
+                    UserAgent = e.UserAgent,
+                    Details = e.Details,
+                    Category = e.Category,
+                    Severity = e.Severity.ToString()
                 }).ToList();
 
                 return Result.Of(new AdminAuditLogResponse
@@ -1113,6 +1160,246 @@ namespace UrGuide.WebApp.Services
             {
                 _logger.LogError(ex, "Error updating platform settings");
                 return Task.FromResult(Result.Of(false).WithErrors("Failed to update platform settings"));
+            }
+        }
+
+        // ── Account Freeze / Temporary Suspension ─────────────────────────────
+
+        public async Task<Outcome<AccountFreezeInfo>> FreezeAccountAsync(AccountFreezeRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(request.UserId))
+                    return Result.Of<AccountFreezeInfo>().WithErrors("User ID is required");
+
+                if (string.IsNullOrWhiteSpace(request.Reason))
+                    return Result.Of<AccountFreezeInfo>().WithErrors("Reason is required");
+
+                var user = await _userManager.FindByIdAsync(request.UserId);
+                if (user == null)
+                    return Result.Of<AccountFreezeInfo>().WithErrors("User not found");
+
+                if (user.Id == _userContext.UserId)
+                    return Result.Of<AccountFreezeInfo>().WithErrors("Cannot freeze your own account");
+
+                // Check if user already has an active freeze
+                var existingFreeze = await _context.AccountFreezeRecords
+                    .Where(f => f.UserId == request.UserId && f.Status == AccountFreezeStatus.Active)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (existingFreeze != null)
+                    return Result.Of<AccountFreezeInfo>().WithErrors("User account is already frozen");
+
+                var now = DateTime.UtcNow;
+                DateTime? expiresAt = request.DurationDays.HasValue && request.DurationDays.Value > 0
+                    ? now.AddDays(request.DurationDays.Value)
+                    : null;
+
+                var freezeRecord = new AccountFreezeRecord
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    UserId = request.UserId,
+                    Reason = request.Reason,
+                    FrozenByAdminId = _userContext.UserId,
+                    FrozenAt = now,
+                    ExpiresAt = expiresAt,
+                    Status = AccountFreezeStatus.Active
+                };
+
+                _context.AccountFreezeRecords.Add(freezeRecord);
+
+                // Also set lockout on the identity user
+                var lockoutEnd = expiresAt.HasValue
+                    ? new DateTimeOffset(expiresAt.Value, TimeSpan.Zero)
+                    : DateTimeOffset.MaxValue;
+                await _userManager.SetLockoutEndDateAsync(user, lockoutEnd);
+                if (!user.LockoutEnabled)
+                    await _userManager.SetLockoutEnabledAsync(user, true);
+
+                await _context.SaveChangesAsync(cancellationToken);
+
+                await _auditService.LogAsync(
+                    EventCodes.AccountFrozen,
+                    _userContext.UserId,
+                    referenceId: request.UserId,
+                    details: $"Account frozen. Reason: {request.Reason}" +
+                             (expiresAt.HasValue ? $". Expires: {expiresAt.Value:O}" : ". Indefinite"),
+                    severity: AuditSeverity.Warning,
+                    cancellationToken: cancellationToken);
+
+                _logger.LogInformation("Account {UserId} frozen by admin {AdminId}. Reason: {Reason}",
+                    request.UserId, _userContext.UserId, request.Reason);
+
+                return Result.Of(new AccountFreezeInfo
+                {
+                    Id = freezeRecord.Id,
+                    UserId = freezeRecord.UserId,
+                    UserEmail = user.Email ?? "",
+                    Reason = freezeRecord.Reason,
+                    FrozenByAdminId = freezeRecord.FrozenByAdminId,
+                    FrozenAt = freezeRecord.FrozenAt,
+                    ExpiresAt = freezeRecord.ExpiresAt,
+                    Status = freezeRecord.Status.ToString()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error freezing account for {UserId}", request.UserId);
+                return Result.Of<AccountFreezeInfo>().WithErrors("Failed to freeze account");
+            }
+        }
+
+        public async Task<Outcome<bool>> UnfreezeAccountAsync(AccountUnfreezeRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(request.UserId))
+                    return Result.Of(false).WithErrors("User ID is required");
+
+                var user = await _userManager.FindByIdAsync(request.UserId);
+                if (user == null)
+                    return Result.Of(false).WithErrors("User not found");
+
+                var activeFreeze = await _context.AccountFreezeRecords
+                    .Where(f => f.UserId == request.UserId && f.Status == AccountFreezeStatus.Active)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (activeFreeze == null)
+                    return Result.Of(false).WithErrors("No active freeze found for this user");
+
+                activeFreeze.Status = AccountFreezeStatus.Unfrozen;
+                activeFreeze.UnfrozenAt = DateTime.UtcNow;
+                activeFreeze.UnfrozenByAdminId = _userContext.UserId;
+                activeFreeze.UnfreezeReason = request.Reason;
+
+                // Remove lockout
+                await _userManager.SetLockoutEndDateAsync(user, null);
+                await _userManager.ResetAccessFailedCountAsync(user);
+
+                await _context.SaveChangesAsync(cancellationToken);
+
+                await _auditService.LogAsync(
+                    EventCodes.AccountUnfrozen,
+                    _userContext.UserId,
+                    referenceId: request.UserId,
+                    details: $"Account unfrozen. Reason: {request.Reason}",
+                    cancellationToken: cancellationToken);
+
+                _logger.LogInformation("Account {UserId} unfrozen by admin {AdminId}. Reason: {Reason}",
+                    request.UserId, _userContext.UserId, request.Reason);
+
+                return Result.Of(true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error unfreezing account for {UserId}", request.UserId);
+                return Result.Of(false).WithErrors("Failed to unfreeze account");
+            }
+        }
+
+        public async Task<Outcome<AccountFreezeHistoryResponse>> GetFreezeHistoryAsync(string userId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var query = _context.AccountFreezeRecords
+                    .Where(f => f.UserId == userId)
+                    .OrderByDescending(f => f.FrozenAt);
+
+                var totalCount = await query.CountAsync(cancellationToken);
+
+                var pageSize = 20;
+                var page = Math.Max(1, paginationParameters.PageNumber);
+                var records = await query
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync(cancellationToken);
+
+                // Get user email
+                var user = await _userManager.FindByIdAsync(userId);
+                var userEmail = user?.Email ?? "";
+
+                var items = records.Select(r => new AccountFreezeInfo
+                {
+                    Id = r.Id,
+                    UserId = r.UserId,
+                    UserEmail = userEmail,
+                    Reason = r.Reason,
+                    FrozenByAdminId = r.FrozenByAdminId,
+                    FrozenAt = r.FrozenAt,
+                    ExpiresAt = r.ExpiresAt,
+                    UnfrozenAt = r.UnfrozenAt,
+                    UnfrozenByAdminId = r.UnfrozenByAdminId,
+                    UnfreezeReason = r.UnfreezeReason,
+                    Status = r.Status.ToString()
+                }).ToList();
+
+                return Result.Of(new AccountFreezeHistoryResponse
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = page,
+                    PageSize = pageSize
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting freeze history for {UserId}", userId);
+                return Result.Of<AccountFreezeHistoryResponse>().WithErrors("Failed to retrieve freeze history");
+            }
+        }
+
+        public async Task<Outcome<AccountFreezeHistoryResponse>> GetFrozenAccountsAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var query = _context.AccountFreezeRecords
+                    .Where(f => f.Status == AccountFreezeStatus.Active)
+                    .OrderByDescending(f => f.FrozenAt);
+
+                var totalCount = await query.CountAsync(cancellationToken);
+
+                var pageSize = 20;
+                var page = Math.Max(1, paginationParameters.PageNumber);
+                var records = await query
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync(cancellationToken);
+
+                // Get user emails
+                var userIds = records.Select(r => r.UserId).Distinct().ToList();
+                var users = await _userManager.Users
+                    .Where(u => userIds.Contains(u.Id))
+                    .Select(u => new { u.Id, u.Email })
+                    .ToListAsync(cancellationToken);
+                var emailMap = users.ToDictionary(u => u.Id, u => u.Email ?? "");
+
+                var items = records.Select(r => new AccountFreezeInfo
+                {
+                    Id = r.Id,
+                    UserId = r.UserId,
+                    UserEmail = r.UserId != null && emailMap.TryGetValue(r.UserId, out var email) ? email : "",
+                    Reason = r.Reason,
+                    FrozenByAdminId = r.FrozenByAdminId,
+                    FrozenAt = r.FrozenAt,
+                    ExpiresAt = r.ExpiresAt,
+                    UnfrozenAt = r.UnfrozenAt,
+                    UnfrozenByAdminId = r.UnfrozenByAdminId,
+                    UnfreezeReason = r.UnfreezeReason,
+                    Status = r.Status.ToString()
+                }).ToList();
+
+                return Result.Of(new AccountFreezeHistoryResponse
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = page,
+                    PageSize = pageSize
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting frozen accounts");
+                return Result.Of<AccountFreezeHistoryResponse>().WithErrors("Failed to retrieve frozen accounts");
             }
         }
     }
