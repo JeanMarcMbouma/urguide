@@ -33,18 +33,11 @@ public class FcmService : IPushNotificationProvider
     {
         try
         {
-            var projectId = _configuration["PushNotifications:FCM:ProjectId"];
-            var useV1Api = !string.IsNullOrEmpty(projectId);
+            var serverKey = _configuration["PushNotifications:FCM:ServerKey"];
 
-            // V1 API uses OAuth2 access token; legacy API uses server key
-            var authToken = useV1Api
-                ? _configuration["PushNotifications:FCM:AccessToken"]
-                : _configuration["PushNotifications:FCM:ServerKey"];
-
-            if (string.IsNullOrEmpty(authToken))
+            if (string.IsNullOrEmpty(serverKey))
             {
-                var requiredKey = useV1Api ? "AccessToken" : "ServerKey";
-                _logger.LogWarning("FCM configuration is incomplete. {Key} is required.", requiredKey);
+                _logger.LogWarning("FCM configuration is incomplete. ServerKey is required.");
                 return new PushNotificationDeliveryResult
                 {
                     Success = false,
@@ -53,36 +46,22 @@ public class FcmService : IPushNotificationProvider
                 };
             }
 
-            var fcmUrl = useV1Api
-                ? $"https://fcm.googleapis.com/v1/projects/{projectId}/messages:send"
-                : "https://fcm.googleapis.com/fcm/send";
+            var fcmUrl = "https://fcm.googleapis.com/fcm/send";
 
-            var payload = BuildFcmPayload(deviceToken, title, body, imageUrl, data, useV1Api);
+            var payload = BuildFcmPayload(deviceToken, title, body, imageUrl, actionUrl, data);
 
             var request = new HttpRequestMessage(HttpMethod.Post, fcmUrl)
             {
                 Content = new StringContent(payload, Encoding.UTF8, "application/json")
             };
-
-            if (useV1Api)
-            {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
-            }
-            else
-            {
-                request.Headers.TryAddWithoutValidation("Authorization", $"key={authToken}");
-            }
+            request.Headers.TryAddWithoutValidation("Authorization", $"key={serverKey}");
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation("FCM notification sent successfully.");
-                return new PushNotificationDeliveryResult
-                {
-                    Success = true,
-                    Status = DeliveryStatus.Sent
-                };
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                return ParseLegacyFcmResponse(responseBody);
             }
 
             var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -107,57 +86,95 @@ public class FcmService : IPushNotificationProvider
         }
     }
 
-    private static string BuildFcmPayload(string deviceToken, string title, string body, string imageUrl, Dictionary<string, string> data, bool useV1Api)
+    private PushNotificationDeliveryResult ParseLegacyFcmResponse(string responseBody)
     {
-        if (useV1Api)
+        try
         {
-            var message = new Dictionary<string, object>
+            using var doc = JsonDocument.Parse(responseBody);
+            var root = doc.RootElement;
+
+            var success = root.TryGetProperty("success", out var successProp) ? successProp.GetInt32() : 0;
+            var failure = root.TryGetProperty("failure", out var failureProp) ? failureProp.GetInt32() : 0;
+
+            if (success > 0 && failure == 0)
             {
-                ["message"] = new Dictionary<string, object>
+                _logger.LogInformation("FCM notification sent successfully.");
+                return new PushNotificationDeliveryResult
                 {
-                    ["token"] = deviceToken,
-                    ["notification"] = new Dictionary<string, object>
+                    Success = true,
+                    Status = DeliveryStatus.Sent
+                };
+            }
+
+            // Extract per-token error from results array
+            var errorMessage = "FCM delivery failed.";
+            if (root.TryGetProperty("results", out var results) && results.GetArrayLength() > 0)
+            {
+                var firstResult = results[0];
+                if (firstResult.TryGetProperty("error", out var errorProp))
+                {
+                    errorMessage = errorProp.GetString() ?? errorMessage;
+
+                    // NotRegistered/InvalidRegistration means the token is stale
+                    if (errorMessage == "NotRegistered" || errorMessage == "InvalidRegistration")
                     {
-                        ["title"] = title ?? string.Empty,
-                        ["body"] = body ?? string.Empty
+                        return new PushNotificationDeliveryResult
+                        {
+                            Success = false,
+                            ErrorMessage = errorMessage,
+                            Status = DeliveryStatus.Expired
+                        };
                     }
                 }
+            }
+
+            _logger.LogWarning("FCM legacy response: success={Success}, failure={Failure}, error={Error}",
+                success, failure, errorMessage);
+
+            return new PushNotificationDeliveryResult
+            {
+                Success = false,
+                ErrorMessage = errorMessage,
+                Status = DeliveryStatus.Failed
             };
-
-            var innerMessage = (Dictionary<string, object>)message["message"];
-            if (!string.IsNullOrEmpty(imageUrl))
-            {
-                ((Dictionary<string, object>)innerMessage["notification"])["image"] = imageUrl;
-            }
-            if (data != null && data.Count > 0)
-            {
-                innerMessage["data"] = data;
-            }
-
-            return JsonSerializer.Serialize(message);
         }
-        else
+        catch (JsonException ex)
         {
-            var payload = new Dictionary<string, object>
+            _logger.LogWarning(ex, "Failed to parse FCM legacy response body.");
+            // If we can't parse but got a 2xx, treat as sent
+            return new PushNotificationDeliveryResult
             {
-                ["to"] = deviceToken,
-                ["notification"] = new Dictionary<string, object>
-                {
-                    ["title"] = title ?? string.Empty,
-                    ["body"] = body ?? string.Empty
-                }
+                Success = true,
+                Status = DeliveryStatus.Sent
             };
-
-            if (!string.IsNullOrEmpty(imageUrl))
-            {
-                ((Dictionary<string, object>)payload["notification"])["image"] = imageUrl;
-            }
-            if (data != null && data.Count > 0)
-            {
-                payload["data"] = data;
-            }
-
-            return JsonSerializer.Serialize(payload);
         }
+    }
+
+    private static string BuildFcmPayload(string deviceToken, string title, string body, string imageUrl, string actionUrl, Dictionary<string, string> data)
+    {
+        var notification = new Dictionary<string, object>
+        {
+            ["title"] = title ?? string.Empty,
+            ["body"] = body ?? string.Empty
+        };
+
+        if (!string.IsNullOrEmpty(imageUrl))
+            notification["image"] = imageUrl;
+        if (!string.IsNullOrEmpty(actionUrl))
+            notification["click_action"] = actionUrl;
+
+        var payload = new Dictionary<string, object>
+        {
+            ["to"] = deviceToken,
+            ["notification"] = notification
+        };
+
+        var dataPayload = data != null ? new Dictionary<string, string>(data) : new Dictionary<string, string>();
+        if (!string.IsNullOrEmpty(actionUrl))
+            dataPayload["action_url"] = actionUrl;
+        if (dataPayload.Count > 0)
+            payload["data"] = dataPayload;
+
+        return JsonSerializer.Serialize(payload);
     }
 }

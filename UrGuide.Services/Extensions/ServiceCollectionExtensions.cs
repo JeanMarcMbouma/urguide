@@ -92,7 +92,7 @@ namespace UrGuide.Services.Extensions
 
             // Push notification services
             services.AddTransient<Contracts.IPushNotificationService, PushNotifications.PushNotificationService>();
-            services.AddTransient<PushNotifications.IPushNotificationProvider, PushNotifications.ApnsService>();
+            services.AddSingleton<PushNotifications.IPushNotificationProvider, PushNotifications.ApnsService>();
             services.AddTransient<PushNotifications.IPushNotificationProvider, PushNotifications.FcmService>();
 
             // Elasticsearch

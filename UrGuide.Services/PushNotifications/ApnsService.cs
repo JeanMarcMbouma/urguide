@@ -21,7 +21,7 @@ public class ApnsService : IPushNotificationProvider
     private readonly SemaphoreSlim _tokenLock = new(1, 1);
     private string _cachedJwtToken = string.Empty;
     private DateTime _tokenExpiry = DateTime.MinValue;
-    private string _cachedPrivateKey;
+    private string? _cachedPrivateKey;
 
     public DevicePlatform Platform => DevicePlatform.iOS;
 
@@ -54,7 +54,18 @@ public class ApnsService : IPushNotificationProvider
                 };
             }
 
-            var jwtToken = await GetOrCreateJwtTokenAsync(teamId, keyId);
+            var jwtToken = await GetOrCreateJwtTokenAsync(teamId, keyId, cancellationToken);
+
+            if (string.IsNullOrEmpty(jwtToken))
+            {
+                return new PushNotificationDeliveryResult
+                {
+                    Success = false,
+                    ErrorMessage = "APNs JWT token could not be created. Check PrivateKeyPath configuration.",
+                    Status = DeliveryStatus.Failed
+                };
+            }
+
             var host = useSandbox
                 ? "https://api.sandbox.push.apple.com"
                 : "https://api.push.apple.com";
@@ -64,7 +75,8 @@ public class ApnsService : IPushNotificationProvider
             var request = new HttpRequestMessage(HttpMethod.Post, $"{host}/3/device/{deviceToken}")
             {
                 Content = new StringContent(payload, Encoding.UTF8, "application/json"),
-                Version = new Version(2, 0)
+                Version = new Version(2, 0),
+                VersionPolicy = HttpVersionPolicy.RequestVersionExact
             };
             request.Headers.Authorization = new AuthenticationHeaderValue("bearer", jwtToken);
             request.Headers.TryAddWithoutValidation("apns-topic", bundleId);
@@ -107,9 +119,9 @@ public class ApnsService : IPushNotificationProvider
         }
     }
 
-    private async Task<string> GetOrCreateJwtTokenAsync(string teamId, string keyId)
+    private async Task<string> GetOrCreateJwtTokenAsync(string teamId, string keyId, CancellationToken cancellationToken)
     {
-        await _tokenLock.WaitAsync();
+        await _tokenLock.WaitAsync(cancellationToken);
         try
         {
             if (!string.IsNullOrEmpty(_cachedJwtToken) && DateTime.UtcNow < _tokenExpiry)
@@ -136,7 +148,7 @@ public class ApnsService : IPushNotificationProvider
 
                 if (_cachedPrivateKey == null)
                 {
-                    _cachedPrivateKey = await System.IO.File.ReadAllTextAsync(keyPath);
+                    _cachedPrivateKey = await System.IO.File.ReadAllTextAsync(keyPath, cancellationToken);
                 }
 
                 using var ecdsa = ECDsa.Create();

@@ -125,10 +125,34 @@ class PushNotificationService : IPushNotificationService
         var preferences = await Context.NotificationPreferences
             .FirstOrDefaultAsync(p => p.UserId == request.UserId, ct);
 
-        if (preferences != null && !preferences.PushEnabled)
+        if (preferences != null)
         {
-            Logger.LogInformation("Push notifications disabled for user {UserId}", request.UserId);
-            return Result.Of(new List<PushNotificationResultDto>());
+            if (!preferences.PushEnabled)
+            {
+                Logger.LogInformation("Push notifications disabled for user {UserId}", request.UserId);
+                return Result.Of(new List<PushNotificationResultDto>());
+            }
+
+            // Category-specific preference checks
+            if (!string.IsNullOrEmpty(request.Category))
+            {
+                var categoryLower = request.Category.ToLowerInvariant();
+                var categoryDisabled = categoryLower switch
+                {
+                    "tour_updates" or "tourupdates" => !preferences.TourUpdatesEnabled,
+                    "booking_alerts" or "bookingalerts" => !preferences.BookingAlertsEnabled,
+                    "chat_messages" or "chatmessages" or "chat" => !preferences.ChatMessagesEnabled,
+                    "promotional" or "promotions" => !preferences.PromotionalEnabled,
+                    "system" or "system_alerts" => !preferences.SystemAlertsEnabled,
+                    _ => false
+                };
+
+                if (categoryDisabled)
+                {
+                    Logger.LogInformation("{Category} notifications disabled for user {UserId}", request.Category, request.UserId);
+                    return Result.Of(new List<PushNotificationResultDto>());
+                }
+            }
         }
 
         var devices = await Context.DeviceRegistrations
@@ -178,7 +202,7 @@ class PushNotificationService : IPushNotificationService
 
             log.Status = deliveryResult.Status;
             log.ErrorMessage = deliveryResult.ErrorMessage ?? string.Empty;
-            if (deliveryResult.Success)
+            if (deliveryResult.Status == DeliveryStatus.Delivered)
                 log.DeliveredAt = DateTime.UtcNow;
         }
 
@@ -199,7 +223,9 @@ class PushNotificationService : IPushNotificationService
 
         var log = await Context.PushNotificationLogs
             .Include(l => l.DeviceRegistration)
-            .FirstOrDefaultAsync(l => l.Id == notificationId, ct);
+            .FirstOrDefaultAsync(
+                l => l.Id == notificationId && l.DeviceRegistration.UserId == UserContext.UserId,
+                ct);
 
         if (log == null)
             return Result.Of<PushNotificationResultDto>().WithErrors(ErrorMessages.NotFoundEntityForKey);
