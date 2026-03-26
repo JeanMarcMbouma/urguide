@@ -15,6 +15,7 @@ using UrGuide.Data.Entities.Webhooks;
 using UrGuide.Data.Entities.Disputes;
 using UrGuide.Data.Entities.Recommendations;
 using UrGuide.Data.Entities.Email;
+using UrGuide.Data.Entities.Financial;
 using UrGuide.Data.Entities.Reports;
 
 namespace UrGuide.Data
@@ -89,6 +90,12 @@ namespace UrGuide.Data
         // Report entities
         public virtual DbSet<ReportDefinition> ReportDefinitions { get; set; }
         public virtual DbSet<ScheduledReport> ScheduledReports { get; set; }
+
+        // Financial entities
+        public virtual DbSet<CoinWallet> CoinWallets { get; set; }
+        public virtual DbSet<CoinTransaction> CoinTransactions { get; set; }
+        public virtual DbSet<WithdrawalRequest> WithdrawalRequests { get; set; }
+        public virtual DbSet<PayoutSchedule> PayoutSchedules { get; set; }
 
         // Email template entities
         public virtual DbSet<EmailTemplate> EmailTemplates { get; set; }
