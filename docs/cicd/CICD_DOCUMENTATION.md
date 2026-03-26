@@ -16,7 +16,7 @@ The UrGuide API project includes a comprehensive CI/CD pipeline built with GitHu
 **Jobs:**
 
 #### Build and Test
-- Sets up .NET 8.0 SDK
+- Sets up .NET 10.0 SDK
 - Caches NuGet packages for faster builds
 - Restores dependencies
 - Builds the application in Release configuration
@@ -50,7 +50,7 @@ The UrGuide API project includes a comprehensive CI/CD pipeline built with GitHu
 
 **Environment Variables:**
 ```yaml
-DOTNET_VERSION: '8.0.x'
+DOTNET_VERSION: '10.0.x'
 BUILD_CONFIGURATION: 'Release'
 SOLUTION_PATH: 'UrGuide.slnx'
 WEBAPP_PROJECT: 'UrGuide.WebApp/UrGuide.WebApp.csproj'

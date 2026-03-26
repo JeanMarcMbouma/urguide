@@ -70,7 +70,7 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 - [x] **Backup Codes**: Recovery codes for 2FA account access
 
 ### �️ Admin Dashboard
-- [x] **Modern Admin Interface**: React 18 + TypeScript + Vite with Material-UI v6
+- [x] **Modern Admin Interface**: React 19 + TypeScript + Vite with Material-UI v7
 - [x] **Admin Authentication**: Secure login with 2FA integration and role-based access
 - [x] **User Management**: Complete CRUD operations for user accounts
   - Paginated user list with advanced search and filtering
@@ -227,7 +227,7 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 
 ### 🔒 Security & Privacy
 - [x] Two-factor authentication (2FA) - TOTP and Passkey/WebAuthn support implemented
-- [ ] Social login (Google/Apple/Microsoft)
+- [x] Social login (Google/Apple/Microsoft) - OAuth integration via SocialAuthController
 - [x] Data export functionality (GDPR compliance) - JSON and CSV export implemented
 - [ ] Account freeze/temporary suspension
 - [ ] Enhanced audit logging
@@ -776,7 +776,7 @@ docker-compose ps
 
 ### Services Included
 
-The `docker-compose.yml` orchestrates **7 containers**:
+The `docker-compose.yml` orchestrates **8 containers**:
 - **SQL Server 2022** - Database with persistent volumes
 - **RabbitMQ 3** - Message broker with management UI
 - **Elasticsearch 8.11** - Advanced search engine
@@ -784,6 +784,7 @@ The `docker-compose.yml` orchestrates **7 containers**:
 - **Admin Dashboard** - React 19 + Nginx frontend (port 3001)
 - **Guide Portal** - React 19 + Nginx frontend (port 3002)
 - **Tourist Website** - React 19 + Nginx frontend (port 3003)
+- **Seq** - Structured log aggregation and search (port 5341/8080)
 
 ### Environment Configuration
 
@@ -886,7 +887,10 @@ The `docker-compose.yml` includes:
 - **RabbitMQ 3**: Message broker with management UI
 - **Elasticsearch 8.11**: Advanced search engine
 - **UrGuide API**: The main .NET 10 application with health checks
-- **Admin Dashboard**: React 18 admin interface with Nginx
+- **Admin Dashboard**: React 19 admin interface with Nginx
+- **Guide Portal**: React 19 guide interface with Nginx
+- **Tourist Website**: React 19 tourist interface with Nginx
+- **Seq**: Structured log aggregation (Datalust Seq)
 - **Automatic migrations**: Database migrations run on startup
 - **Volume mounts**: Persistent storage for uploads and logs
 
@@ -940,7 +944,7 @@ _(Comprehensive API testing suite coming soon - see issues catalog)_
 
 ## � Admin Dashboard Development
 
-The admin dashboard is a separate React 18 + TypeScript + Vite application located in the `admin-dashboard/` directory.
+The admin dashboard is a separate React 19 + TypeScript + Vite application located in the `admin-dashboard/` directory.
 
 ### Prerequisites
 - Node.js 18+ and npm
@@ -979,13 +983,13 @@ npm run dev
 
 ### Technology Stack
 
-- **React 18.3** - Modern React with hooks
-- **TypeScript 5.7** - Type-safe development
-- **Vite 6.0** - Fast build tool and dev server
-- **Material-UI v6** - Enterprise-ready component library
+- **React 19.2** - Modern React with hooks
+- **TypeScript 5.9** - Type-safe development
+- **Vite 8.0** - Fast build tool and dev server
+- **Material-UI v7** - Enterprise-ready component library
 - **MUI X Data Grid** - Advanced table with pagination, sorting, filtering
 - **TanStack Query v5** - Server state management
-- **React Router v6** - Client-side routing
+- **React Router v7** - Client-side routing
 - **Axios** - HTTP client for API calls
 
 ### API Integration
