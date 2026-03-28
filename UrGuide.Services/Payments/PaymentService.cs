@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Stripe;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Payments;
@@ -16,13 +18,15 @@ namespace UrGuide.Services.Payments
     {
         private readonly UrGuideContext _context;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<PaymentService> _logger;
         private readonly PaymentIntentService _paymentIntentService;
         private readonly CustomerService _customerService;
 
-        public PaymentService(UrGuideContext context, IConfiguration configuration)
+        public PaymentService(UrGuideContext context, IConfiguration configuration, ILogger<PaymentService> logger)
         {
-            _context = context;
-            _configuration = configuration;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             
             var stripeApiKey = _configuration["Stripe:SecretKey"];
             if (!string.IsNullOrEmpty(stripeApiKey))
@@ -34,14 +38,14 @@ namespace UrGuide.Services.Payments
             _customerService = new CustomerService();
         }
 
-        public async Task<PaymentResponse> CreatePaymentAsync(string userId, CreatePaymentRequest request)
+        public async Task<PaymentResponse> CreatePaymentAsync(string userId, CreatePaymentRequest request, CancellationToken cancellationToken = default)
         {
             // Validate booking
             var booking = await _context.Set<Booking>()
                 .Include(b => b.Tour)
                     .ThenInclude(t => t.Author)
                     .ThenInclude(a => a.Subscription)
-                .FirstOrDefaultAsync(b => b.BookingId == request.BookingId);
+                .FirstOrDefaultAsync(b => b.BookingId == request.BookingId, cancellationToken);
 
             if (booking == null)
             {
@@ -49,7 +53,7 @@ namespace UrGuide.Services.Payments
             }
 
             // Get or create Stripe customer
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _context.Users.FindAsync(new object?[] { userId }, cancellationToken);
             if (user == null)
             {
                 throw new ArgumentException("User not found");
@@ -67,10 +71,10 @@ namespace UrGuide.Services.Payments
                         { "user_id", userId }
                     }
                 };
-                var customer = await _customerService.CreateAsync(customerOptions);
+                var customer = await _customerService.CreateAsync(customerOptions, cancellationToken: cancellationToken);
                 stripeCustomerId = customer.Id;
                 user.StripeCustomerId = stripeCustomerId;
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
             }
             else
             {
@@ -102,7 +106,7 @@ namespace UrGuide.Services.Payments
                 }
             };
 
-            var paymentIntent = await _paymentIntentService.CreateAsync(paymentIntentOptions);
+            var paymentIntent = await _paymentIntentService.CreateAsync(paymentIntentOptions, cancellationToken: cancellationToken);
 
             // Create payment record
             var payment = new Payment
@@ -154,7 +158,10 @@ namespace UrGuide.Services.Payments
 
             _context.PaymentTransactions.Add(transaction);
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Payment {PaymentId} created for booking {BookingId} by user {UserId}, amount: {Amount} {Currency}",
+                payment.PaymentId, request.BookingId, userId, request.Amount, request.CurrencyCode);
 
             return new PaymentResponse
             {
@@ -169,10 +176,10 @@ namespace UrGuide.Services.Payments
             };
         }
 
-        public async Task<PaymentDetailsResponse> GetPaymentAsync(string paymentId)
+        public async Task<PaymentDetailsResponse> GetPaymentAsync(string paymentId, CancellationToken cancellationToken = default)
         {
             var payment = await _context.Payments
-                .FirstOrDefaultAsync(p => p.PaymentId == paymentId);
+                .FirstOrDefaultAsync(p => p.PaymentId == paymentId, cancellationToken);
 
             if (payment == null)
             {
@@ -196,7 +203,7 @@ namespace UrGuide.Services.Payments
             };
         }
 
-        public async Task<TransactionHistoryResponse> GetUserTransactionHistoryAsync(string userId, int page = 1, int pageSize = 20)
+        public async Task<TransactionHistoryResponse> GetUserTransactionHistoryAsync(string userId, int page = 1, int pageSize = 20, CancellationToken cancellationToken = default)
         {
             var query = from payment in _context.Payments
                         where payment.UserId == userId
@@ -213,11 +220,11 @@ namespace UrGuide.Services.Payments
                             Status = payment.Status.ToString()
                         };
 
-            var totalCount = await query.CountAsync();
+            var totalCount = await query.CountAsync(cancellationToken);
             var transactions = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return new TransactionHistoryResponse
             {
@@ -228,9 +235,9 @@ namespace UrGuide.Services.Payments
             };
         }
 
-        public async Task<bool> ConfirmPaymentAsync(string paymentId)
+        public async Task<bool> ConfirmPaymentAsync(string paymentId, CancellationToken cancellationToken = default)
         {
-            var payment = await _context.Payments.FindAsync(paymentId);
+            var payment = await _context.Payments.FindAsync(new object?[] { paymentId }, cancellationToken);
             if (payment == null)
             {
                 return false;
@@ -240,20 +247,23 @@ namespace UrGuide.Services.Payments
             payment.UpdatedAt = DateTime.UtcNow;
 
             // Update booking status
-            var booking = await _context.Set<Booking>().FindAsync(payment.BookingId);
+            var booking = await _context.Set<Booking>().FindAsync(new object?[] { payment.BookingId }, cancellationToken);
             if (booking != null)
             {
                 booking.Status = BookingStatus.Confirmed;
                 booking.UpdatedAt = DateTime.UtcNow;
             }
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Payment {PaymentId} confirmed", paymentId);
+
             return true;
         }
 
-        public async Task<bool> CancelPaymentAsync(string paymentId)
+        public async Task<bool> CancelPaymentAsync(string paymentId, CancellationToken cancellationToken = default)
         {
-            var payment = await _context.Payments.FindAsync(paymentId);
+            var payment = await _context.Payments.FindAsync(new object?[] { paymentId }, cancellationToken);
             if (payment == null)
             {
                 return false;
@@ -264,31 +274,36 @@ namespace UrGuide.Services.Payments
             {
                 try
                 {
-                    await _paymentIntentService.CancelAsync(payment.StripePaymentIntentId);
+                    await _paymentIntentService.CancelAsync(payment.StripePaymentIntentId, cancellationToken: cancellationToken);
                 }
-                catch (StripeException)
+                catch (StripeException ex)
                 {
-                    // Log error but continue
+                    _logger.LogError(ex, "Failed to cancel Stripe payment intent {PaymentIntentId} for payment {PaymentId}",
+                        payment.StripePaymentIntentId, paymentId);
                 }
             }
 
             payment.Status = PaymentStatus.Cancelled;
             payment.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Payment {PaymentId} cancelled", paymentId);
 
             return true;
         }
 
-        public async Task UpdatePaymentStatusAsync(string stripePaymentIntentId, PaymentStatus status)
+        public async Task UpdatePaymentStatusAsync(string stripePaymentIntentId, PaymentStatus status, CancellationToken cancellationToken = default)
         {
             var payment = await _context.Payments
-                .FirstOrDefaultAsync(p => p.StripePaymentIntentId == stripePaymentIntentId);
+                .FirstOrDefaultAsync(p => p.StripePaymentIntentId == stripePaymentIntentId, cancellationToken);
 
             if (payment != null)
             {
                 payment.Status = status;
                 payment.UpdatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
+
+                _logger.LogInformation("Payment status updated for Stripe intent {PaymentIntentId} to {Status}", stripePaymentIntentId, status);
             }
         }
     }

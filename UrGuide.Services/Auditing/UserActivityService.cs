@@ -13,7 +13,7 @@ using UrGuide.Shared.Contracts;
 
 namespace UrGuide.Services.Auditing
 {
-    class UserActivityService : IUserActivityService
+    public class UserActivityService : IUserActivityService
     {
         public UserActivityService(IUserContext userContext,
                                    UrGuideContext context)
