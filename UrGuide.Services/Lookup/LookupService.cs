@@ -12,7 +12,7 @@ using UrGuide.Services.Contracts;
 
 namespace UrGuide.Services.Lookup
 {
-    class LookupService : ILookupService
+    public class LookupService : ILookupService
     {
         public LookupService(UrGuideContext context)
         {

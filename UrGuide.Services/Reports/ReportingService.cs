@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Reports;
 using UrGuide.Model.Reports;
@@ -13,13 +15,15 @@ namespace UrGuide.Services.Reports
     public class ReportingService : IReportingService
     {
         private readonly UrGuideContext _context;
+        private readonly ILogger<ReportingService> _logger;
 
-        public ReportingService(UrGuideContext context)
+        public ReportingService(UrGuideContext context, ILogger<ReportingService> logger)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<ReportDto> GenerateReportAsync(string userId, GenerateReportRequest request)
+        public async Task<ReportDto> GenerateReportAsync(string userId, GenerateReportRequest request, CancellationToken cancellationToken = default)
         {
             var report = new ReportDefinition
             {
@@ -51,20 +55,23 @@ namespace UrGuide.Services.Reports
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogError(ex, "Failed to generate CSV report {ReportId} for user {UserId}", report.ReportId, userId);
                     report.Status = ReportStatus.Failed;
                     report.ErrorMessage = ex.Message;
                 }
             }
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Report {ReportId} generated for user {UserId}", report.ReportId, userId);
 
             return MapToDto(report);
         }
 
-        public async Task<ReportDto> GetReportAsync(string reportId)
+        public async Task<ReportDto> GetReportAsync(string reportId, CancellationToken cancellationToken = default)
         {
             var report = await _context.ReportDefinitions
-                .FirstOrDefaultAsync(r => r.ReportId == reportId);
+                .FirstOrDefaultAsync(r => r.ReportId == reportId, cancellationToken);
 
             if (report == null)
                 return null;
@@ -72,13 +79,13 @@ namespace UrGuide.Services.Reports
             return MapToDto(report);
         }
 
-        public async Task<(List<ReportListItem> Items, int TotalCount)> GetUserReportsAsync(string userId, int page = 1, int pageSize = 20)
+        public async Task<(List<ReportListItem> Items, int TotalCount)> GetUserReportsAsync(string userId, int page = 1, int pageSize = 20, CancellationToken cancellationToken = default)
         {
             var query = _context.ReportDefinitions
                 .Where(r => r.RequestedBy == userId)
                 .OrderByDescending(r => r.CreatedAt);
 
-            var totalCount = await query.CountAsync();
+            var totalCount = await query.CountAsync(cancellationToken);
 
             var items = await query
                 .Skip((page - 1) * pageSize)
@@ -91,23 +98,23 @@ namespace UrGuide.Services.Reports
                     Status = (int)r.Status,
                     CreatedAt = r.CreatedAt
                 })
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return (items, totalCount);
         }
 
-        public async Task<ReportDataDto> GetReportDataAsync(string reportId)
+        public async Task<ReportDataDto> GetReportDataAsync(string reportId, CancellationToken cancellationToken = default)
         {
             var report = await _context.ReportDefinitions
-                .FirstOrDefaultAsync(r => r.ReportId == reportId);
+                .FirstOrDefaultAsync(r => r.ReportId == reportId, cancellationToken);
 
             if (report == null)
                 return null;
 
-            return await GenerateReportDataInternalAsync(report);
+            return await GenerateReportDataInternalAsync(report, cancellationToken);
         }
 
-        private async Task<ReportDataDto> GenerateReportDataInternalAsync(ReportDefinition report)
+        private async Task<ReportDataDto> GenerateReportDataInternalAsync(ReportDefinition report, CancellationToken cancellationToken = default)
         {
             var data = new ReportDataDto
             {
@@ -124,7 +131,7 @@ namespace UrGuide.Services.Reports
                         .Where(p => p.UserId == report.RequestedBy)
                         .OrderByDescending(p => p.CreatedAt)
                         .Take(100)
-                        .ToListAsync();
+                        .ToListAsync(cancellationToken);
                     foreach (var p in payments)
                     {
                         data.Rows.Add(new List<string>
@@ -142,7 +149,7 @@ namespace UrGuide.Services.Reports
                     var bookings = await _context.Payments
                         .OrderByDescending(p => p.CreatedAt)
                         .Take(100)
-                        .ToListAsync();
+                        .ToListAsync(cancellationToken);
                     foreach (var b in bookings)
                     {
                         data.Rows.Add(new List<string>
@@ -164,7 +171,7 @@ namespace UrGuide.Services.Reports
             return data;
         }
 
-        public async Task<ScheduledReportDto> CreateScheduleAsync(string userId, CreateScheduledReportRequest request)
+        public async Task<ScheduledReportDto> CreateScheduleAsync(string userId, CreateScheduledReportRequest request, CancellationToken cancellationToken = default)
         {
             var schedule = new ScheduledReport
             {
@@ -182,25 +189,27 @@ namespace UrGuide.Services.Reports
             };
 
             _context.ScheduledReports.Add(schedule);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Report schedule {ScheduleId} created for user {UserId}", schedule.ScheduleId, userId);
 
             return MapToScheduleDto(schedule);
         }
 
-        public async Task<List<ScheduledReportDto>> GetSchedulesAsync(string userId)
+        public async Task<List<ScheduledReportDto>> GetSchedulesAsync(string userId, CancellationToken cancellationToken = default)
         {
             var schedules = await _context.ScheduledReports
                 .Where(s => s.UserId == userId)
                 .OrderByDescending(s => s.CreatedAt)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return schedules.Select(MapToScheduleDto).ToList();
         }
 
-        public async Task<ScheduledReportDto> UpdateScheduleAsync(string userId, string scheduleId, CreateScheduledReportRequest request)
+        public async Task<ScheduledReportDto> UpdateScheduleAsync(string userId, string scheduleId, CreateScheduledReportRequest request, CancellationToken cancellationToken = default)
         {
             var schedule = await _context.ScheduledReports
-                .FirstOrDefaultAsync(s => s.ScheduleId == scheduleId && s.UserId == userId);
+                .FirstOrDefaultAsync(s => s.ScheduleId == scheduleId && s.UserId == userId, cancellationToken);
 
             if (schedule == null)
                 return null;
@@ -213,30 +222,30 @@ namespace UrGuide.Services.Reports
             schedule.ParametersJson = request.Parameters;
             schedule.NextRunAt = CalculateNextRunAt((ScheduleFrequency)request.Frequency);
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
 
             return MapToScheduleDto(schedule);
         }
 
-        public async Task<bool> DeleteScheduleAsync(string userId, string scheduleId)
+        public async Task<bool> DeleteScheduleAsync(string userId, string scheduleId, CancellationToken cancellationToken = default)
         {
             var schedule = await _context.ScheduledReports
-                .FirstOrDefaultAsync(s => s.ScheduleId == scheduleId && s.UserId == userId);
+                .FirstOrDefaultAsync(s => s.ScheduleId == scheduleId && s.UserId == userId, cancellationToken);
 
             if (schedule == null)
                 return false;
 
             _context.ScheduledReports.Remove(schedule);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
 
             return true;
         }
 
-        public async Task<GuideEarningsReportData> GenerateGuideEarningsDataAsync(string guideId, DateTime startDate, DateTime endDate)
+        public async Task<GuideEarningsReportData> GenerateGuideEarningsDataAsync(string guideId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
         {
             var payments = await _context.Payments
                 .Where(p => p.UserId == guideId && p.CreatedAt >= startDate && p.CreatedAt <= endDate)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             var totalEarnings = payments.Sum(p => p.GuidePayout);
             var bookingCount = payments.Count;
@@ -264,11 +273,11 @@ namespace UrGuide.Services.Reports
             };
         }
 
-        public async Task<BookingSummaryReportData> GenerateBookingSummaryDataAsync(DateTime startDate, DateTime endDate)
+        public async Task<BookingSummaryReportData> GenerateBookingSummaryDataAsync(DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
         {
             var payments = await _context.Payments
                 .Where(p => p.CreatedAt >= startDate && p.CreatedAt <= endDate)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return new BookingSummaryReportData
             {

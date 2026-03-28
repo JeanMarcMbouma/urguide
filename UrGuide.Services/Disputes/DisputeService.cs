@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Disputes;
 using UrGuide.Model.Disputes;
@@ -11,17 +13,19 @@ namespace UrGuide.Services.Disputes
     public class DisputeService : IDisputeService
     {
         private readonly UrGuideContext _context;
+        private readonly ILogger<DisputeService> _logger;
 
-        public DisputeService(UrGuideContext context)
+        public DisputeService(UrGuideContext context, ILogger<DisputeService> logger)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<DisputeDto> CreateDisputeAsync(string userId, CreateDisputeRequest request)
+        public async Task<DisputeDto> CreateDisputeAsync(string userId, CreateDisputeRequest request, CancellationToken cancellationToken = default)
         {
             var booking = await _context.Set<Data.Entities.Tour.Booking>()
                 .Include(b => b.Tour)
-                .FirstOrDefaultAsync(b => b.BookingId == request.BookingId);
+                .FirstOrDefaultAsync(b => b.BookingId == request.BookingId, cancellationToken);
 
             if (booking == null)
             {
@@ -55,17 +59,19 @@ namespace UrGuide.Services.Disputes
             };
 
             _context.Disputes.Add(dispute);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Dispute {DisputeId} created by user {UserId} for booking {BookingId}", dispute.DisputeId, userId, request.BookingId);
 
             return MapToDto(dispute);
         }
 
-        public async Task<DisputeDto> GetDisputeAsync(string disputeId)
+        public async Task<DisputeDto> GetDisputeAsync(string disputeId, CancellationToken cancellationToken = default)
         {
             var dispute = await _context.Disputes
                 .Include(d => d.Evidence)
                 .Include(d => d.Messages)
-                .FirstOrDefaultAsync(d => d.DisputeId == disputeId);
+                .FirstOrDefaultAsync(d => d.DisputeId == disputeId, cancellationToken);
 
             if (dispute == null)
             {
@@ -75,13 +81,13 @@ namespace UrGuide.Services.Disputes
             return MapToDto(dispute);
         }
 
-        public async Task<DisputeListResponse> GetUserDisputesAsync(string userId, int page = 1, int pageSize = 20)
+        public async Task<DisputeListResponse> GetUserDisputesAsync(string userId, int page = 1, int pageSize = 20, CancellationToken cancellationToken = default)
         {
             var query = _context.Disputes
                 .Where(d => d.FiledBy == userId || d.AgainstUserId == userId)
                 .OrderByDescending(d => d.CreatedAt);
 
-            var totalCount = await query.CountAsync();
+            var totalCount = await query.CountAsync(cancellationToken);
             var disputes = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -100,7 +106,7 @@ namespace UrGuide.Services.Disputes
                     EvidenceCount = d.Evidence.Count,
                     MessageCount = d.Messages.Count
                 })
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return new DisputeListResponse
             {
@@ -111,7 +117,7 @@ namespace UrGuide.Services.Disputes
             };
         }
 
-        public async Task<DisputeListResponse> GetAdminDisputeQueueAsync(int page = 1, int pageSize = 20, int? status = null, int? priority = null)
+        public async Task<DisputeListResponse> GetAdminDisputeQueueAsync(int page = 1, int pageSize = 20, int? status = null, int? priority = null, CancellationToken cancellationToken = default)
         {
             var query = _context.Disputes.AsQueryable();
 
@@ -129,7 +135,7 @@ namespace UrGuide.Services.Disputes
 
             var orderedQuery = query.OrderByDescending(d => d.Priority).ThenByDescending(d => d.CreatedAt);
 
-            var totalCount = await query.CountAsync();
+            var totalCount = await query.CountAsync(cancellationToken);
             var disputes = await orderedQuery
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -148,7 +154,7 @@ namespace UrGuide.Services.Disputes
                     EvidenceCount = d.Evidence.Count,
                     MessageCount = d.Messages.Count
                 })
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return new DisputeListResponse
             {
@@ -159,10 +165,10 @@ namespace UrGuide.Services.Disputes
             };
         }
 
-        public async Task<DisputeEvidenceDto> SubmitEvidenceAsync(string userId, string disputeId, SubmitEvidenceRequest request)
+        public async Task<DisputeEvidenceDto> SubmitEvidenceAsync(string userId, string disputeId, SubmitEvidenceRequest request, CancellationToken cancellationToken = default)
         {
             var dispute = await _context.Disputes
-                .FirstOrDefaultAsync(d => d.DisputeId == disputeId);
+                .FirstOrDefaultAsync(d => d.DisputeId == disputeId, cancellationToken);
 
             if (dispute == null)
             {
@@ -188,7 +194,9 @@ namespace UrGuide.Services.Disputes
 
             _context.DisputeEvidence.Add(evidence);
             dispute.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Evidence {EvidenceId} submitted for dispute {DisputeId} by user {UserId}", evidence.EvidenceId, disputeId, userId);
 
             return new DisputeEvidenceDto
             {
@@ -202,10 +210,10 @@ namespace UrGuide.Services.Disputes
             };
         }
 
-        public async Task<DisputeMessageDto> AddMessageAsync(string userId, string disputeId, DisputeMessageRequest request)
+        public async Task<DisputeMessageDto> AddMessageAsync(string userId, string disputeId, DisputeMessageRequest request, CancellationToken cancellationToken = default)
         {
             var dispute = await _context.Disputes
-                .FirstOrDefaultAsync(d => d.DisputeId == disputeId);
+                .FirstOrDefaultAsync(d => d.DisputeId == disputeId, cancellationToken);
 
             if (dispute == null)
             {
@@ -217,7 +225,7 @@ namespace UrGuide.Services.Disputes
                 throw new InvalidOperationException("Cannot add messages to a closed or resolved dispute");
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
 
             var message = new DisputeMessage
             {
@@ -232,7 +240,7 @@ namespace UrGuide.Services.Disputes
 
             _context.DisputeMessages.Add(message);
             dispute.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
 
             return new DisputeMessageDto
             {
@@ -245,10 +253,10 @@ namespace UrGuide.Services.Disputes
             };
         }
 
-        public async Task<bool> AssignDisputeAsync(string adminId, string disputeId)
+        public async Task<bool> AssignDisputeAsync(string adminId, string disputeId, CancellationToken cancellationToken = default)
         {
             var dispute = await _context.Disputes
-                .FirstOrDefaultAsync(d => d.DisputeId == disputeId);
+                .FirstOrDefaultAsync(d => d.DisputeId == disputeId, cancellationToken);
 
             if (dispute == null)
             {
@@ -258,17 +266,19 @@ namespace UrGuide.Services.Disputes
             dispute.AssignedTo = adminId;
             dispute.Status = DisputeStatus.UnderReview;
             dispute.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Dispute {DisputeId} assigned to admin {AdminId}", disputeId, adminId);
 
             return true;
         }
 
-        public async Task<DisputeDto> ResolveDisputeAsync(string adminId, string disputeId, ResolveDisputeRequest request)
+        public async Task<DisputeDto> ResolveDisputeAsync(string adminId, string disputeId, ResolveDisputeRequest request, CancellationToken cancellationToken = default)
         {
             var dispute = await _context.Disputes
                 .Include(d => d.Evidence)
                 .Include(d => d.Messages)
-                .FirstOrDefaultAsync(d => d.DisputeId == disputeId);
+                .FirstOrDefaultAsync(d => d.DisputeId == disputeId, cancellationToken);
 
             if (dispute == null)
             {
@@ -280,15 +290,17 @@ namespace UrGuide.Services.Disputes
             dispute.RefundAmount = request.RefundAmount;
             dispute.ResolvedAt = DateTime.UtcNow;
             dispute.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Dispute {DisputeId} resolved by admin {AdminId}", disputeId, adminId);
 
             return MapToDto(dispute);
         }
 
-        public async Task<bool> EscalateDisputeAsync(string adminId, string disputeId)
+        public async Task<bool> EscalateDisputeAsync(string adminId, string disputeId, CancellationToken cancellationToken = default)
         {
             var dispute = await _context.Disputes
-                .FirstOrDefaultAsync(d => d.DisputeId == disputeId);
+                .FirstOrDefaultAsync(d => d.DisputeId == disputeId, cancellationToken);
 
             if (dispute == null)
             {
@@ -298,24 +310,26 @@ namespace UrGuide.Services.Disputes
             dispute.Status = DisputeStatus.Escalated;
             dispute.Priority = DisputePriority.Urgent;
             dispute.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Dispute {DisputeId} escalated by admin {AdminId}", disputeId, adminId);
 
             return true;
         }
 
-        public async Task<DisputeStatsDto> GetDisputeStatsAsync()
+        public async Task<DisputeStatsDto> GetDisputeStatsAsync(CancellationToken cancellationToken = default)
         {
             var stats = new DisputeStatsDto
             {
-                OpenCount = await _context.Disputes.CountAsync(d => d.Status == DisputeStatus.Open),
-                UnderReviewCount = await _context.Disputes.CountAsync(d => d.Status == DisputeStatus.UnderReview),
-                ResolvedCount = await _context.Disputes.CountAsync(d => d.Status == DisputeStatus.Resolved)
+                OpenCount = await _context.Disputes.CountAsync(d => d.Status == DisputeStatus.Open, cancellationToken),
+                UnderReviewCount = await _context.Disputes.CountAsync(d => d.Status == DisputeStatus.UnderReview, cancellationToken),
+                ResolvedCount = await _context.Disputes.CountAsync(d => d.Status == DisputeStatus.Resolved, cancellationToken)
             };
 
             var resolvedDisputes = await _context.Disputes
                 .Where(d => d.Status == DisputeStatus.Resolved && d.ResolvedAt.HasValue)
                 .Select(d => EF.Functions.DateDiffDay(d.CreatedAt, d.ResolvedAt.Value))
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             stats.AverageResolutionDays = resolvedDisputes.Any()
                 ? resolvedDisputes.Average(d => (double)d)

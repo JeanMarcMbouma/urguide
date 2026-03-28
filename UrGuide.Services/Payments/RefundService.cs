@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Stripe;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Payments;
@@ -15,12 +17,14 @@ namespace UrGuide.Services.Payments
     {
         private readonly UrGuideContext _context;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<RefundService> _logger;
         private readonly Stripe.RefundService _stripeRefundService;
 
-        public RefundService(UrGuideContext context, IConfiguration configuration)
+        public RefundService(UrGuideContext context, IConfiguration configuration, ILogger<RefundService> logger)
         {
-            _context = context;
-            _configuration = configuration;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             
             var stripeApiKey = _configuration["Stripe:SecretKey"];
             if (!string.IsNullOrEmpty(stripeApiKey))
@@ -31,11 +35,11 @@ namespace UrGuide.Services.Payments
             _stripeRefundService = new Stripe.RefundService();
         }
 
-        public async Task<RefundResponse> CreateRefundAsync(string userId, CreateRefundRequest request)
+        public async Task<RefundResponse> CreateRefundAsync(string userId, CreateRefundRequest request, CancellationToken cancellationToken = default)
         {
             // Validate payment
             var payment = await _context.Payments
-                .FirstOrDefaultAsync(p => p.PaymentId == request.PaymentId);
+                .FirstOrDefaultAsync(p => p.PaymentId == request.PaymentId, cancellationToken);
 
             if (payment == null)
             {
@@ -53,7 +57,7 @@ namespace UrGuide.Services.Payments
             // Check if already fully refunded
             var existingRefunds = await _context.Refunds
                 .Where(r => r.PaymentId == request.PaymentId && r.Status == RefundStatus.Succeeded)
-                .SumAsync(r => r.Amount);
+                .SumAsync(r => r.Amount, cancellationToken);
 
             if (existingRefunds >= payment.Amount)
             {
@@ -96,7 +100,10 @@ namespace UrGuide.Services.Payments
 
             _context.PaymentTransactions.Add(transaction);
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Refund {RefundId} created for payment {PaymentId} by user {UserId}, amount: {Amount}",
+                refund.RefundId, request.PaymentId, userId, refundAmount);
 
             return new RefundResponse
             {
@@ -112,10 +119,10 @@ namespace UrGuide.Services.Payments
             };
         }
 
-        public async Task<RefundResponse> GetRefundAsync(string refundId)
+        public async Task<RefundResponse> GetRefundAsync(string refundId, CancellationToken cancellationToken = default)
         {
             var refund = await _context.Refunds
-                .FirstOrDefaultAsync(r => r.RefundId == refundId);
+                .FirstOrDefaultAsync(r => r.RefundId == refundId, cancellationToken);
 
             if (refund == null)
             {
@@ -137,13 +144,13 @@ namespace UrGuide.Services.Payments
             };
         }
 
-        public async Task<RefundListResponse> GetPaymentRefundsAsync(string paymentId, int page = 1, int pageSize = 20)
+        public async Task<RefundListResponse> GetPaymentRefundsAsync(string paymentId, int page = 1, int pageSize = 20, CancellationToken cancellationToken = default)
         {
             var query = _context.Refunds
                 .Where(r => r.PaymentId == paymentId)
                 .OrderByDescending(r => r.RequestedAt);
 
-            var totalCount = await query.CountAsync();
+            var totalCount = await query.CountAsync(cancellationToken);
             var refunds = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -160,7 +167,7 @@ namespace UrGuide.Services.Payments
                     ProcessedAt = r.ProcessedAt,
                     FailureReason = r.FailureReason
                 })
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return new RefundListResponse
             {
@@ -171,11 +178,11 @@ namespace UrGuide.Services.Payments
             };
         }
 
-        public async Task<bool> ProcessRefundAsync(string refundId)
+        public async Task<bool> ProcessRefundAsync(string refundId, CancellationToken cancellationToken = default)
         {
             var refund = await _context.Refunds
                 .Include(r => r.Payment)
-                .FirstOrDefaultAsync(r => r.RefundId == refundId);
+                .FirstOrDefaultAsync(r => r.RefundId == refundId, cancellationToken);
 
             if (refund == null)
             {
@@ -199,7 +206,7 @@ namespace UrGuide.Services.Payments
                         }
                     };
 
-                    var stripeRefund = await _stripeRefundService.CreateAsync(refundOptions);
+                    var stripeRefund = await _stripeRefundService.CreateAsync(refundOptions, cancellationToken: cancellationToken);
                     refund.StripeRefundId = stripeRefund.Id;
                 }
 
@@ -210,7 +217,7 @@ namespace UrGuide.Services.Payments
                 // Update payment status
                 var totalRefunded = await _context.Refunds
                     .Where(r => r.PaymentId == refund.PaymentId && r.Status == RefundStatus.Succeeded)
-                    .SumAsync(r => r.Amount);
+                    .SumAsync(r => r.Amount, cancellationToken);
 
                 if (totalRefunded >= refund.Payment.Amount)
                 {
@@ -222,23 +229,28 @@ namespace UrGuide.Services.Payments
                 }
                 refund.Payment.UpdatedAt = DateTime.UtcNow;
 
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
+
+                _logger.LogInformation("Refund {RefundId} processed successfully for payment {PaymentId}", refundId, refund.PaymentId);
+
                 return true;
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to process refund {RefundId} for payment {PaymentId}", refundId, refund.PaymentId);
+
                 refund.Status = RefundStatus.Failed;
                 refund.FailureReason = ex.Message;
                 refund.UpdatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
                 return false;
             }
         }
 
-        public async Task UpdateRefundStatusAsync(string stripeRefundId, string status)
+        public async Task UpdateRefundStatusAsync(string stripeRefundId, string status, CancellationToken cancellationToken = default)
         {
             var refund = await _context.Refunds
-                .FirstOrDefaultAsync(r => r.StripeRefundId == stripeRefundId);
+                .FirstOrDefaultAsync(r => r.StripeRefundId == stripeRefundId, cancellationToken);
 
             if (refund != null)
             {
@@ -250,7 +262,9 @@ namespace UrGuide.Services.Payments
                     _ => refund.Status
                 };
                 refund.UpdatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
+
+                _logger.LogInformation("Refund status updated for Stripe refund {StripeRefundId} to {Status}", stripeRefundId, status);
             }
         }
     }

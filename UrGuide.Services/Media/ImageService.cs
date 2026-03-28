@@ -13,7 +13,7 @@ using UrGuide.Shared.Contracts;
 
 namespace UrGuide.Services.Media
 {
-    class ImageService : IImageService
+    public class ImageService : IImageService
     {
         public ImageService(IWebHelper webHelper)
         {
