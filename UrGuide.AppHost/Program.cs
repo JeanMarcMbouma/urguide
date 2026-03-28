@@ -9,6 +9,7 @@ var rabbitMqUser = builder.AddParameter(
     secret: false);
 
 var rabbitMqPassword = builder.AddParameter("rabbitmq-password", secret: true);
+var adminDashboardClientSecret = builder.AddParameter("admin-dashboard-client-secret", secret: true);
 
 var sqlServer = builder.AddSqlServer("sqlserver", sqlPassword, port: 14330)
     .WithDataVolume("sqlserver-data");
@@ -45,8 +46,9 @@ var api = builder.AddProject(
             options.ExcludeKestrelEndpoints = true;
         })
     .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development")
-    .WithEnvironment("ASPNETCORE_URLS", "http://+:80")
+    .WithEnvironment("ASPNETCORE_URLS", "http://+:5000")
     .WithEnvironment("ApplicationUri", "http://localhost:5000")
+    .WithEnvironment("IdentityServer__Clients__AdminDashboard__ClientSecret", adminDashboardClientSecret)
     .WithReference(authDatabase, "AuthConnection")
     .WithReference(appDatabase, "DefaultConnection")
     .WithEnvironment("RabbitMQ__Host", "rabbitmq")
@@ -54,7 +56,7 @@ var api = builder.AddProject(
     .WithEnvironment("RabbitMQ__Password", rabbitMqPassword)
     .WithEnvironment("Elasticsearch__Url", elasticsearch)
     .WithEnvironment("Seq__ServerUrl", seq.GetEndpoint("ingestion"))
-    .WithHttpEndpoint(targetPort: 80, port: 5000, name: "http")
+    .WithHttpEndpoint(targetPort: 5000, port: 5000, name: "http")
     .WithExternalHttpEndpoints()
     .WithHttpHealthCheck("/health")
     .WaitFor(authDatabase)
