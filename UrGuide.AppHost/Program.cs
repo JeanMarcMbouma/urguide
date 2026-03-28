@@ -1,10 +1,6 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var sqlPassword = builder.AddParameter(
-    "sql-password",
-    "YourStrong@Passw0rd",
-    publishValueAsDefault: true,
-    secret: false);
+var sqlPassword = builder.AddParameter("sql-password", secret: true);
 
 var rabbitMqUser = builder.AddParameter(
     "rabbitmq-user",
@@ -12,11 +8,7 @@ var rabbitMqUser = builder.AddParameter(
     publishValueAsDefault: true,
     secret: false);
 
-var rabbitMqPassword = builder.AddParameter(
-    "rabbitmq-password",
-    "guest",
-    publishValueAsDefault: true,
-    secret: false);
+var rabbitMqPassword = builder.AddParameter("rabbitmq-password", secret: true);
 
 var sqlServer = builder.AddSqlServer("sqlserver", sqlPassword, port: 14330)
     .WithDataVolume("sqlserver-data");
