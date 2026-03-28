@@ -37,7 +37,7 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 - **Email**: SendGrid integration
 - **Payments**: Stripe.net 48.0 for payment processing
 - **Health Checks**: ASP.NET Core Health Checks with SQL Server monitoring
-- **.NET Aspire**: Service defaults for OpenTelemetry, resilience, and service discovery
+- **.NET Aspire**: Service defaults plus an AppHost that orchestrates the API, SQL Server, RabbitMQ, Elasticsearch, Seq, and SPA containers
 - **OpenTelemetry**: Version 1.15.0 for distributed tracing, metrics, and logging
 
 ## ✅ Implemented Features
@@ -56,7 +56,7 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
   - Analytics tracking
   - Exemptions for internal services
   - Graceful degradation
-- [x] **.NET Aspire Integration**: OpenTelemetry observability, HTTP resilience patterns, and service discovery
+- [x] **.NET Aspire Integration**: OpenTelemetry observability, HTTP resilience patterns, service discovery, and an AppHost that mirrors the Docker-based development stack
 
 ### 🔐 Authentication & User Management
 - [x] User registration and profile creation via API
@@ -1169,4 +1169,3 @@ For questions and support:
 ---
 
 **Built with ❤️ for the tourism community**
-
