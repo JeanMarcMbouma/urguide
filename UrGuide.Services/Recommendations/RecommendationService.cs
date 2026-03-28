@@ -43,6 +43,13 @@ namespace UrGuide.Services.Recommendations
         internal const double MaxRelevantDistanceKm = 100.0;
         internal const double EarthRadiusKm = 6371.0;
 
+        // Popular tours blending weights
+        internal const decimal PopularTourScoreWeight = 0.7m;
+        internal const decimal PopularTourLocationWeight = 0.3m;
+
+        // Preference constraints
+        internal const decimal MaxPreferenceWeight = 10.0m;
+
         // Valid preference types
         internal static readonly HashSet<string> ValidPreferenceTypes = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -322,7 +329,7 @@ namespace UrGuide.Services.Recommendations
                 if (latitude.HasValue && longitude.HasValue)
                 {
                     var locationScore = CalculateLocationScore(tourLocations, tour.TourId, latitude.Value, longitude.Value);
-                    score = (score * 0.7m) + (locationScore * 0.3m);
+                    score = (score * PopularTourScoreWeight) + (locationScore * PopularTourLocationWeight);
                 }
 
                 recommendations.Add(new TourRecommendationDto
@@ -370,7 +377,7 @@ namespace UrGuide.Services.Recommendations
 
             foreach (var pref in request.Preferences)
             {
-                var weight = Math.Clamp(pref.Weight, 0.0m, 10.0m);
+                var weight = Math.Clamp(pref.Weight, 0.0m, MaxPreferenceWeight);
                 _context.Set<UserPreference>().Add(new UserPreference
                 {
                     Id = Guid.NewGuid().ToString(),
