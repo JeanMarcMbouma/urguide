@@ -4,6 +4,9 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Folder Name="/Orchestration/">
+    <Project Path="UrGuide.AppHost/UrGuide.AppHost.csproj" />
+  </Folder>
   <Folder Name="/Domain/">
     <Project Path="UrGuide.Core/UrGuide.Core.csproj" />
     <Project Path="UrGuide.Data/UrGuide.Data.csproj" />
