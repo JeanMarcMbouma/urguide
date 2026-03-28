@@ -37,6 +37,21 @@ namespace UrGuide.WebApp.Controllers
                     return Unauthorized();
                 }
 
+                if (count < 1 || count > 50)
+                {
+                    return BadRequest(new { error = "Count must be between 1 and 50" });
+                }
+
+                if (lat.HasValue && (lat.Value < -90 || lat.Value > 90))
+                {
+                    return BadRequest(new { error = "Latitude must be between -90 and 90" });
+                }
+
+                if (lng.HasValue && (lng.Value < -180 || lng.Value > 180))
+                {
+                    return BadRequest(new { error = "Longitude must be between -180 and 180" });
+                }
+
                 var recommendations = await _recommendationService.GetRecommendationsAsync(userId, count, lat, lng);
                 return Ok(recommendations);
             }
@@ -56,6 +71,21 @@ namespace UrGuide.WebApp.Controllers
         {
             try
             {
+                if (count < 1 || count > 50)
+                {
+                    return BadRequest(new { error = "Count must be between 1 and 50" });
+                }
+
+                if (lat.HasValue && (lat.Value < -90 || lat.Value > 90))
+                {
+                    return BadRequest(new { error = "Latitude must be between -90 and 90" });
+                }
+
+                if (lng.HasValue && (lng.Value < -180 || lng.Value > 180))
+                {
+                    return BadRequest(new { error = "Longitude must be between -180 and 180" });
+                }
+
                 var tours = await _recommendationService.GetPopularToursAsync(count, lat, lng);
                 return Ok(tours);
             }
@@ -80,7 +110,22 @@ namespace UrGuide.WebApp.Controllers
                     return Unauthorized();
                 }
 
+                if (request?.Preferences == null || request.Preferences.Count == 0)
+                {
+                    return BadRequest(new { error = "At least one preference is required" });
+                }
+
+                if (request.Preferences.Count > 20)
+                {
+                    return BadRequest(new { error = "Maximum 20 preferences allowed" });
+                }
+
                 var result = await _recommendationService.SetUserPreferencesAsync(userId, request);
+                if (!result)
+                {
+                    return BadRequest(new { error = "Invalid preferences. Valid types: category, location, price_range, duration, language" });
+                }
+
                 return Ok(new { success = result });
             }
             catch (Exception ex)
@@ -128,7 +173,22 @@ namespace UrGuide.WebApp.Controllers
                     return Unauthorized();
                 }
 
+                if (string.IsNullOrWhiteSpace(request?.TourId))
+                {
+                    return BadRequest(new { error = "TourId is required" });
+                }
+
+                if (request.Type < 0 || request.Type > 4)
+                {
+                    return BadRequest(new { error = "Type must be between 0 (Viewed) and 4 (Shared)" });
+                }
+
                 var result = await _recommendationService.RecordInteractionAsync(userId, request);
+                if (!result)
+                {
+                    return BadRequest(new { error = "Invalid interaction type" });
+                }
+
                 return Ok(new { success = result });
             }
             catch (Exception ex)
@@ -150,6 +210,11 @@ namespace UrGuide.WebApp.Controllers
                 if (string.IsNullOrEmpty(userId))
                 {
                     return Unauthorized();
+                }
+
+                if (string.IsNullOrWhiteSpace(request?.RecommendationId))
+                {
+                    return BadRequest(new { error = "RecommendationId is required" });
                 }
 
                 var result = await _recommendationService.ProvideFeedbackAsync(userId, request);
