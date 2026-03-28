@@ -156,7 +156,7 @@ namespace UrGuide.Services.Payments
 
         public async Task<bool> ProcessPayoutAsync(string payoutId, CancellationToken cancellationToken = default)
         {
-            var payout = await _context.Payouts.FindAsync(new object[] { payoutId }, cancellationToken);
+            var payout = await _context.Payouts.FindAsync(new object?[] { payoutId }, cancellationToken);
             if (payout == null)
             {
                 return false;

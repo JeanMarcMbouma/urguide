@@ -53,7 +53,7 @@ namespace UrGuide.Services.Payments
             }
 
             // Get or create Stripe customer
-            var user = await _context.Users.FindAsync(new object[] { userId }, cancellationToken);
+            var user = await _context.Users.FindAsync(new object?[] { userId }, cancellationToken);
             if (user == null)
             {
                 throw new ArgumentException("User not found");
@@ -237,7 +237,7 @@ namespace UrGuide.Services.Payments
 
         public async Task<bool> ConfirmPaymentAsync(string paymentId, CancellationToken cancellationToken = default)
         {
-            var payment = await _context.Payments.FindAsync(new object[] { paymentId }, cancellationToken);
+            var payment = await _context.Payments.FindAsync(new object?[] { paymentId }, cancellationToken);
             if (payment == null)
             {
                 return false;
@@ -247,7 +247,7 @@ namespace UrGuide.Services.Payments
             payment.UpdatedAt = DateTime.UtcNow;
 
             // Update booking status
-            var booking = await _context.Set<Booking>().FindAsync(new object[] { payment.BookingId }, cancellationToken);
+            var booking = await _context.Set<Booking>().FindAsync(new object?[] { payment.BookingId }, cancellationToken);
             if (booking != null)
             {
                 booking.Status = BookingStatus.Confirmed;
@@ -263,7 +263,7 @@ namespace UrGuide.Services.Payments
 
         public async Task<bool> CancelPaymentAsync(string paymentId, CancellationToken cancellationToken = default)
         {
-            var payment = await _context.Payments.FindAsync(new object[] { paymentId }, cancellationToken);
+            var payment = await _context.Payments.FindAsync(new object?[] { paymentId }, cancellationToken);
             if (payment == null)
             {
                 return false;
