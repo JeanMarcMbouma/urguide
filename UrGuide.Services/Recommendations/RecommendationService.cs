@@ -49,9 +49,10 @@ namespace UrGuide.Services.Recommendations
 
         // Preference constraints
         internal const decimal MaxPreferenceWeight = 10.0m;
+        internal const int MaxPreferences = 20;
 
         // Valid preference types
-        internal static readonly HashSet<string> ValidPreferenceTypes = new(StringComparer.OrdinalIgnoreCase)
+        public static readonly HashSet<string> ValidPreferenceTypes = new(StringComparer.OrdinalIgnoreCase)
         {
             "category", "location", "price_range", "duration", "language"
         };
@@ -114,16 +115,20 @@ namespace UrGuide.Services.Recommendations
                 .ToListAsync();
 
             // Load tour interactions for the user to boost scores
-            var userInteractions = await _context.Set<TourInteraction>()
+            // Materialize flat list first, then group in memory to avoid EF Core translation issues
+            var userInteractionItems = await _context.Set<TourInteraction>()
                 .AsNoTracking()
                 .Where(i => i.UserId == userId && tourIds.Contains(i.TourId))
-                .GroupBy(i => i.TourId)
-                .Select(g => new
-                {
-                    TourId = g.Key,
-                    Types = g.Select(i => i.Type).Distinct().ToList()
-                })
-                .ToDictionaryAsync(g => g.TourId, g => g.Types);
+                .Select(i => new { i.TourId, i.Type })
+                .Distinct()
+                .ToListAsync();
+
+            var userInteractions = userInteractionItems
+                .GroupBy(x => x.TourId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => x.Type).Distinct().ToList()
+                );
 
             // Load MapPins for location scoring
             Dictionary<string, (double Lat, double Lng)> tourLocations = new();
@@ -272,8 +277,11 @@ namespace UrGuide.Services.Recommendations
 
             _logger.LogInformation("Fetching {Count} popular tours", count);
 
+            // Order by booking count descending in SQL to surface genuinely popular tours
             var tours = await _context.Set<Data.Entities.Tour.Tour>()
                 .AsNoTracking()
+                .OrderByDescending(t => t.Bookings.Count)
+                .ThenByDescending(t => t.Reviews.Any() ? t.Reviews.Average(r => (double)r.Rating) : 0.0)
                 .Take(count * 2)
                 .ToListAsync();
 
@@ -353,6 +361,16 @@ namespace UrGuide.Services.Recommendations
             if (request?.Preferences == null || !request.Preferences.Any())
             {
                 _logger.LogWarning("SetUserPreferences called with empty preferences for user {UserId}", userId);
+                return false;
+            }
+
+            if (request.Preferences.Count > MaxPreferences)
+            {
+                _logger.LogWarning(
+                    "SetUserPreferences called with {Count} preferences for user {UserId}, which exceeds the maximum of {Max}.",
+                    request.Preferences.Count,
+                    userId,
+                    MaxPreferences);
                 return false;
             }
 

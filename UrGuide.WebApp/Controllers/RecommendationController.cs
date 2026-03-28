@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
+using UrGuide.Data.Entities.Recommendations;
 using UrGuide.Model.Recommendations;
 using UrGuide.Services.Recommendations;
 
@@ -123,7 +124,8 @@ namespace UrGuide.WebApp.Controllers
                 var result = await _recommendationService.SetUserPreferencesAsync(userId, request);
                 if (!result)
                 {
-                    return BadRequest(new { error = "Invalid preferences. Valid types: category, location, price_range, duration, language" });
+                    var validTypes = string.Join(", ", RecommendationService.ValidPreferenceTypes);
+                    return BadRequest(new { error = $"Invalid preferences. Valid types: {validTypes}" });
                 }
 
                 return Ok(new { success = result });
@@ -178,9 +180,10 @@ namespace UrGuide.WebApp.Controllers
                     return BadRequest(new { error = "TourId is required" });
                 }
 
-                if (request.Type < 0 || request.Type > 4)
+                if (!Enum.IsDefined(typeof(InteractionType), request.Type))
                 {
-                    return BadRequest(new { error = "Type must be between 0 (Viewed) and 4 (Shared)" });
+                    var allowedTypes = string.Join(", ", Enum.GetNames(typeof(InteractionType)));
+                    return BadRequest(new { error = $"Type must be a valid interaction type. Allowed values: {allowedTypes}" });
                 }
 
                 var result = await _recommendationService.RecordInteractionAsync(userId, request);
