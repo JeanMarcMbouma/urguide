@@ -6,6 +6,8 @@
     <LangVersion>14.0</LangVersion>
     <UserSecretsId>d216c234-b1d4-4e9e-be44-0c9a46cdacde</UserSecretsId>
     <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

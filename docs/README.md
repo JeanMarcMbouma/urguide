@@ -57,6 +57,17 @@ Project planning, roadmaps, and issue tracking.
 
 - [**Issues Catalog**](planning/ISSUES_CATALOG.md) - Outstanding feature requests and improvements
 
+### 🌐 API Documentation Portal
+Interactive API documentation with examples, tutorials, and SDK guides.
+
+- [**API Portal Overview**](api-portal/README.md) - Portal index, interactive explorer, and quick start
+- [**Authentication Guide**](api-portal/AUTHENTICATION_GUIDE.md) - JWT, OAuth2, social login, and 2FA authentication
+- [**Code Examples**](api-portal/CODE_EXAMPLES.md) - Ready-to-use examples in C#, JavaScript, Python, and cURL
+- [**Tutorials**](api-portal/TUTORIALS.md) - Step-by-step integration tutorials for common scenarios
+- [**SDK Documentation**](api-portal/SDK_DOCUMENTATION.md) - SDK generation, client libraries, and mobile integration
+- [**API Versioning**](api-portal/API_VERSIONING.md) - Versioning strategy, supported versions, and migration guidance
+- [**Changelog**](api-portal/CHANGELOG.md) - API changes, new features, and deprecation notices
+
 ## 🚀 Quick Start
 
 New to UrGuide? Start with these resources:
