@@ -1,7 +1,6 @@
 ﻿using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -10,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,8 +28,16 @@ namespace UrGuide.WebApp.Controllers
     [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
     [ProducesResponseType(500, Type = typeof(ErrorEnvelop<string>))]
     [Route("api/[controller]")]
-    public class AccountController : Controller
+    public class AccountController : ControllerBase
     {
+        private readonly IUserService _userService;
+        private readonly IAuthService _authService;
+        private readonly IIdentityServerInteractionService _interactionService;
+        private readonly IJwtTokenService _jwtTokenService;
+        private readonly UserManager<UrGuideUser> _userManager;
+        private readonly ITwoFactorService _twoFactorService;
+        private readonly IConfiguration _configuration;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly IStringLocalizer<SharedResource> _localizer;
 
         public AccountController(
@@ -40,44 +46,34 @@ namespace UrGuide.WebApp.Controllers
             IIdentityServerInteractionService interactionService,
             IJwtTokenService jwtTokenService,
             UserManager<UrGuideUser> userManager,
+            ITwoFactorService twoFactorService,
             IConfiguration configuration,
             IHttpClientFactory httpClientFactory,
             IStringLocalizer<SharedResource> localizer)
         {
-            UserService = userService ?? throw new ArgumentNullException(nameof(userService));
-            AuthService = authService ?? throw new ArgumentNullException(nameof(authService));
-            InteractionService = interactionService ?? throw new ArgumentNullException(nameof(interactionService));
-            JwtTokenService = jwtTokenService ?? throw new ArgumentNullException(nameof(jwtTokenService));
-            UserManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            HttpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+            _interactionService = interactionService ?? throw new ArgumentNullException(nameof(interactionService));
+            _jwtTokenService = jwtTokenService ?? throw new ArgumentNullException(nameof(jwtTokenService));
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _twoFactorService = twoFactorService ?? throw new ArgumentNullException(nameof(twoFactorService));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
             _localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
-        public IUserService UserService { get; }
-        public IAuthService AuthService { get; }
-        public IIdentityServerInteractionService InteractionService { get; }
-        public IJwtTokenService JwtTokenService { get; }
-        public UserManager<UrGuideUser> UserManager { get; }
-        public IConfiguration Configuration { get; }
-        public IHttpClientFactory HttpClientFactory { get; }
-
-        [HttpGet("/login")]
-        public IActionResult Login(string? returnUrl)
-        {
-            ViewBag.ReturnUrl = returnUrl;
-            return View();
-        }
-
+        /// <summary>
+        /// Login endpoint - authenticates user and returns session info
+        /// </summary>
         [HttpPost("/login")]
-        [RateLimit(5, "1m")] // Custom rate limit: 5 login attempts per minute
+        [RateLimit(5, "1m")]
+        [ProducesResponseType(200)]
         public async Task<IActionResult> Login([FromBody] LoginModel model, CancellationToken cancellationToken, string? returnUrl = null)
         {
-            var result = await UserService.LoginAsync(model, cancellationToken);
+            var result = await _userService.LoginAsync(model, cancellationToken);
             if (result.IsError)
             {
-                // Use a single localized message to avoid leaking which credential was wrong
-                return BadRequest(ErrorEnvelop.Create([(string)_localizer["Auth_InvalidCredentials"]]));
+                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_InvalidCredentials"].Value));
             }
             
             var claims = new List<System.Security.Claims.Claim>
@@ -89,150 +85,184 @@ namespace UrGuide.WebApp.Controllers
             var principal = new System.Security.Claims.ClaimsPrincipal(identity);
             
             await HttpContext.SignInAsync(principal);
-            var context = InteractionService.GetAuthorizationContextAsync(returnUrl);
-            if (context != null && Url.IsLocalUrl(returnUrl))
-            {
-                return Redirect(returnUrl);
-            }
-            return Ok(returnUrl);
+
+            return Ok(new { returnUrl });
         }
 
+        /// <summary>
+        /// Register a new user
+        /// </summary>
         [HttpPost("/register")]
-        public async Task<IActionResult> Register([FromBody]CreateUserModel model,
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> Register([FromBody] CreateUserModel model,
             CancellationToken cancellationToken,
             string? returnUrl = null)
         {
-            var result = await UserService.RegisterUserAsync(model, cancellationToken);
-            return !result.IsError ? Ok(returnUrl) : (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
+            var result = await _userService.RegisterUserAsync(model, cancellationToken);
+            return !result.IsError ? Ok(new { returnUrl }) : BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
         }
 
+        /// <summary>
+        /// Register a new guide
+        /// </summary>
         [HttpPost("/newguide")]
-        public async Task<IActionResult> NewGuide([FromBody]CreateGuideModel model,
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> NewGuide([FromBody] CreateGuideModel model,
             CancellationToken cancellationToken,
             string? returnUrl = null)
         {
-            var result = await UserService.RegisterGuideAsync(model, cancellationToken);
-            return !result.IsError ? Ok(returnUrl) : (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
+            var result = await _userService.RegisterGuideAsync(model, cancellationToken);
+            return !result.IsError ? Ok(new { returnUrl }) : BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
         }
 
+        /// <summary>
+        /// Confirm a user's email address
+        /// </summary>
         [HttpGet("confirmEmail")]
-        public async Task<IActionResult> ConfirmEmail([FromQuery]EmailConfirmationModel emailConfirmation, CancellationToken cancellationToken)
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] EmailConfirmationModel emailConfirmation, CancellationToken cancellationToken)
         {
-            var result = await AuthService.ConfirmEmailAsync(emailConfirmation, cancellationToken);
-            if(!result.IsError)
-                return Redirect("/email-confirmed");
+            var result = await _authService.ConfirmEmailAsync(emailConfirmation, cancellationToken);
+            if (!result.IsError)
+                return Ok(new { message = _localizer["Auth_EmailConfirmed"].Value });
             return Forbid();
         }
 
+        /// <summary>
+        /// Request a password reset email
+        /// </summary>
         [HttpGet("forgetpassword")]
-        public async Task<IActionResult> ForgetPassword([FromQuery]PasswordResetRequestModel model, 
-            CancellationToken cancellationToken) {
-            await AuthService.RequestPasswordResetAsync(model, cancellationToken);
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> ForgetPassword([FromQuery] PasswordResetRequestModel model, 
+            CancellationToken cancellationToken)
+        {
+            await _authService.RequestPasswordResetAsync(model, cancellationToken);
             return Ok();
         }
 
+        /// <summary>
+        /// Reset password using a token
+        /// </summary>
         [HttpPost("resetpassword")]
-        public async Task<IActionResult> ResetPassord([FromBody]ResetPasswordModel model,
-            CancellationToken cancellationToken) {
-            var result = await AuthService.ResetPasswordAsync(model, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok();
-        }
-
-        [Authorize]
-        [HttpPost("changepassword")]
-        public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordModel model, 
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model,
             CancellationToken cancellationToken)
         {
-            var result = await AuthService.ChangePasswordAsync(model, cancellationToken);
-            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : (IActionResult)Ok();
+            var result = await _authService.ResetPasswordAsync(model, cancellationToken);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : Ok();
         }
 
+        /// <summary>
+        /// Change password for the authenticated user
+        /// </summary>
+        [Authorize]
+        [HttpPost("changepassword")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model, 
+            CancellationToken cancellationToken)
+        {
+            var result = await _authService.ChangePasswordAsync(model, cancellationToken);
+            return result.IsError ? BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors)) : Ok();
+        }
+
+        /// <summary>
+        /// Get current authenticated user details
+        /// </summary>
         [Authorize]
         [HttpGet("/getdetails")]
         [ProducesDefaultResponseType(typeof(User))]
         public async Task<IActionResult> GetDetails(CancellationToken cancellationToken)
         {
-            var result = await UserService.GetDetailsAsync(cancellationToken);
+            var result = await _userService.GetDetailsAsync(cancellationToken);
             return result.Match(
                 onSuccess: value => (IActionResult)Ok(value),
-                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
+                onError: errors => BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
+        /// <summary>
+        /// Update guide profile
+        /// </summary>
         [Authorize]
         [HttpPost("/updateguide")]
         [ProducesDefaultResponseType(typeof(bool))]
-        public async Task<IActionResult> UpdateGuide([FromBody]UpdateGuideModel model, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateGuide([FromBody] UpdateGuideModel model, CancellationToken cancellationToken)
         {
-            var result = await UserService.UpdateGuideAsync(model, cancellationToken);
+            var result = await _userService.UpdateGuideAsync(model, cancellationToken);
 
             return result.Match(
                 onSuccess: value => (IActionResult)Ok(value),
-                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
+                onError: errors => BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
+        /// <summary>
+        /// Update user profile
+        /// </summary>
         [Authorize]
         [HttpPost("/updateuser")]
         [ProducesDefaultResponseType(typeof(bool))]
         public async Task<IActionResult> UpdateUser([FromBody] UpdateUserModel model, CancellationToken cancellationToken)
         {
-            var result = await UserService.UpdateUserAsync(model, cancellationToken);
+            var result = await _userService.UpdateUserAsync(model, cancellationToken);
 
             return result.Match(
                 onSuccess: value => (IActionResult)Ok(value),
-                onError: errors => (IActionResult)BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
+                onError: errors => BadRequest(ErrorEnvelop.CreateFromOutcome(errors)));
         }
 
+        /// <summary>
+        /// Sign out the current user
+        /// </summary>
         [Authorize]
         [HttpGet("logout")]
-        public async Task<IActionResult> Signout(string? returnUrl = null)
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> Signout(string? logoutId = null)
         {
-            await AuthService.SignOutAsync();
+            await _authService.SignOutAsync();
             await HttpContext.SignOutAsync();
-            var logoutId = Request.Query["logoutId"].ToString();
 
-            if (!string.IsNullOrEmpty(returnUrl))
-                return Redirect(returnUrl);
-            else if (!string.IsNullOrEmpty(logoutId))
+            string? postLogoutRedirectUri = null;
+            if (!string.IsNullOrEmpty(logoutId))
             {
-                var context = await InteractionService.GetLogoutContextAsync(logoutId);
-                returnUrl = context?.PostLogoutRedirectUri;
-                if (!string.IsNullOrEmpty(returnUrl))
-                {
-                    return Redirect(returnUrl);
-                }
+                var context = await _interactionService.GetLogoutContextAsync(logoutId);
+                postLogoutRedirectUri = context?.PostLogoutRedirectUri;
             }
-            return Ok();
+
+            return Ok(new { message = _localizer["Auth_SignedOut"].Value, postLogoutRedirectUri });
         }
 
+        /// <summary>
+        /// Delete the current user's account
+        /// </summary>
         [Authorize]
-        [HttpGet("delete")]
-        public async Task<IActionResult> Delete(CancellationToken cancellationToken, string? returnUrl = null)
+        [HttpDelete("delete")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> Delete(CancellationToken cancellationToken)
         {
-            var r = await UserService.DeleteUserAccountAsync(cancellationToken);
-            if (!r.IsError)
-                await HttpContext.SignOutAsync();
-            else
+            var r = await _userService.DeleteUserAccountAsync(cancellationToken);
+            if (r.IsError)
                 return BadRequest(ErrorEnvelop.CreateFromOutcome(r.Errors));
-            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                return Redirect(returnUrl);
-            return Ok();
+
+            await HttpContext.SignOutAsync();
+            return Ok(new { message = _localizer["Auth_AccountDeleted"].Value });
         }
 
+        /// <summary>
+        /// Download all user data as a JSON file (GDPR export)
+        /// </summary>
         [Authorize]
         [HttpGet("downloaddata")]
         [ProducesDefaultResponseType(typeof(UserDataExport))]
         public async Task<IActionResult> DownloadData(CancellationToken cancellationToken)
         {
-            var result = await UserService.GetUserDataExportAsync(cancellationToken);
+            var result = await _userService.GetUserDataExportAsync(cancellationToken);
             if (result.IsError)
                 return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
-            // Return the data as a JSON file download
             var fileName = $"urguide_user_data_{DateTime.UtcNow:yyyyMMdd_HHmmss}.json";
-            var jsonContent = System.Text.Json.JsonSerializer.Serialize(result.Value, new System.Text.Json.JsonSerializerOptions
+            var jsonContent = JsonSerializer.Serialize(result.Value, new JsonSerializerOptions
             {
                 WriteIndented = true,
-                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
             
             var bytes = System.Text.Encoding.UTF8.GetBytes(jsonContent);
@@ -260,18 +290,14 @@ namespace UrGuide.WebApp.Controllers
 
             try
             {
-                // Use current request's base URL since IdentityServer is in the same process
-                // This ensures it works in all environments (localhost:5000, Docker, production)
                 var baseUrl = $"{Request.Scheme}://{Request.Host}";
                 var tokenEndpoint = $"{baseUrl}/connect/token";
 
-                // Get admin dashboard client credentials from configuration
-                var clientId = Configuration.GetValue<string>("IdentityServer:Clients:AdminDashboard:ClientId") ?? "admin-dashboard";
-                var clientSecret = Configuration.GetValue<string>("IdentityServer:Clients:AdminDashboard:ClientSecret")
+                var clientId = _configuration.GetValue<string>("IdentityServer:Clients:AdminDashboard:ClientId") ?? "admin-dashboard";
+                var clientSecret = _configuration.GetValue<string>("IdentityServer:Clients:AdminDashboard:ClientSecret")
                     ?? throw new InvalidOperationException("Admin dashboard client secret not configured. Set IdentityServer:Clients:AdminDashboard:ClientSecret in configuration.");
 
-                // Call IdentityServer token endpoint with Resource Owner Password Credentials grant
-                using var httpClient = HttpClientFactory.CreateClient();
+                using var httpClient = _httpClientFactory.CreateClient();
                 var tokenRequest = new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     ["client_id"] = clientId,
@@ -287,7 +313,6 @@ namespace UrGuide.WebApp.Controllers
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    // Parse error response
                     var errorResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent);
                     var errorMessage = errorResponse?.ContainsKey("error_description") == true
                         ? errorResponse["error_description"]?.ToString() ?? _localizer["Auth_InvalidCredentials"].Value
@@ -296,7 +321,6 @@ namespace UrGuide.WebApp.Controllers
                     return BadRequest(ErrorEnvelop.Create(errorMessage));
                 }
 
-                // Parse successful token response
                 var tokenResponse = JsonSerializer.Deserialize<IdentityServerTokenResponse>(responseContent);
                 
                 if (tokenResponse == null || string.IsNullOrEmpty(tokenResponse.AccessToken))
@@ -304,20 +328,18 @@ namespace UrGuide.WebApp.Controllers
                     return BadRequest(ErrorEnvelop.Create(_localizer["Auth_TokenObtainFailed"].Value));
                 }
 
-                // Get user details for the response
                 var loginModel = new LoginModel { UserName = userName, Password = request.Password };
-                var loginResult = await UserService.LoginAsync(loginModel, cancellationToken);
+                var loginResult = await _userService.LoginAsync(loginModel, cancellationToken);
                 
                 if (loginResult.IsError)
                 {
                     return BadRequest(ErrorEnvelop.CreateFromOutcome(loginResult.Errors));
                 }
 
-                var userDetails = await UserService.GetUserAsync(loginResult.Value.Id, cancellationToken);
-                var user = await UserManager.FindByIdAsync(loginResult.Value.Id);
-                var roles = user != null ? await UserManager.GetRolesAsync(user) : new List<string>();
+                var userDetails = await _userService.GetUserAsync(loginResult.Value.Id, cancellationToken);
+                var user = await _userManager.FindByIdAsync(loginResult.Value.Id);
+                var roles = user != null ? await _userManager.GetRolesAsync(user) : new List<string>();
 
-                // Return IdentityServer token with user info
                 return Ok(new
                 {
                     accessToken = tokenResponse.AccessToken,
@@ -335,13 +357,13 @@ namespace UrGuide.WebApp.Controllers
                     }
                 });
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException)
             {
-                return StatusCode(500, ErrorEnvelop.Create($"Failed to communicate with authentication server: {ex.Message}"));
+                return StatusCode(500, ErrorEnvelop.Create(_localizer["Auth_InternalError"].Value));
             }
-            catch (Exception ex)
+            catch (InvalidOperationException)
             {
-                return StatusCode(500, ErrorEnvelop.Create($"Authentication failed: {ex.Message}"));
+                return StatusCode(500, ErrorEnvelop.Create(_localizer["Auth_InternalError"].Value));
             }
         }
 
@@ -360,18 +382,14 @@ namespace UrGuide.WebApp.Controllers
 
             try
             {
-                // Use current request's base URL since IdentityServer is in the same process
-                // This ensures it works in all environments (localhost:5000, Docker, production)
                 var baseUrl = $"{Request.Scheme}://{Request.Host}";
                 var tokenEndpoint = $"{baseUrl}/connect/token";
 
-                // Get admin dashboard client credentials from configuration
-                var clientId = Configuration.GetValue<string>("IdentityServer:Clients:AdminDashboard:ClientId") ?? "admin-dashboard";
-                var clientSecret = Configuration.GetValue<string>("IdentityServer:Clients:AdminDashboard:ClientSecret")
+                var clientId = _configuration.GetValue<string>("IdentityServer:Clients:AdminDashboard:ClientId") ?? "admin-dashboard";
+                var clientSecret = _configuration.GetValue<string>("IdentityServer:Clients:AdminDashboard:ClientSecret")
                     ?? throw new InvalidOperationException("Admin dashboard client secret not configured. Set IdentityServer:Clients:AdminDashboard:ClientSecret in configuration.");
 
-                // Call IdentityServer token endpoint with refresh token grant
-                using var httpClient = HttpClientFactory.CreateClient();
+                using var httpClient = _httpClientFactory.CreateClient();
                 var tokenRequest = new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     ["client_id"] = clientId,
@@ -408,13 +426,13 @@ namespace UrGuide.WebApp.Controllers
                     tokenType = tokenResponse.TokenType
                 });
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException)
             {
-                return StatusCode(500, ErrorEnvelop.Create($"Failed to communicate with authentication server: {ex.Message}"));
+                return StatusCode(500, ErrorEnvelop.Create(_localizer["Auth_InternalError"].Value));
             }
-            catch (Exception ex)
+            catch (InvalidOperationException)
             {
-                return StatusCode(500, ErrorEnvelop.Create($"Token refresh failed: {ex.Message}"));
+                return StatusCode(500, ErrorEnvelop.Create(_localizer["Auth_InternalError"].Value));
             }
         }
 
@@ -436,49 +454,31 @@ namespace UrGuide.WebApp.Controllers
 
             try
             {
-                // Validate credentials
-                var user = await UserManager.FindByNameAsync(userName) 
-                    ?? await UserManager.FindByEmailAsync(userName);
+                var user = await _userManager.FindByNameAsync(userName) 
+                    ?? await _userManager.FindByEmailAsync(userName);
                 
                 if (user == null)
                 {
                     return BadRequest(ErrorEnvelop.Create(_localizer["Auth_InvalidCredentials"].Value));
                 }
 
-                // Check password
-                var passwordValid = await UserManager.CheckPasswordAsync(user, request.Password);
+                var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
                 if (!passwordValid)
                 {
                     return BadRequest(ErrorEnvelop.Create(_localizer["Auth_InvalidCredentials"].Value));
                 }
 
-                // Get user roles
-                var roles = await UserManager.GetRolesAsync(user);
-                var claims = new List<System.Security.Claims.Claim>
-                {
-                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, user.Id),
-                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.UserName ?? ""),
-                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Email, user.Email ?? ""),
-                    new System.Security.Claims.Claim("role", string.Join(",", roles))
-                };
+                var roles = await _userManager.GetRolesAsync(user);
 
-                // Add individual role claims
-                foreach (var role in roles)
-                {
-                    claims.Add(new System.Security.Claims.Claim("role", role));
-                }
+                var token = _jwtTokenService.GenerateToken(user.Id, user.UserName ?? "", user.Email ?? "", roles.ToList());
 
-                // Generate JWT token using JwtTokenService
-                var token = JwtTokenService.GenerateToken(user.Id, user.UserName ?? "", user.Email ?? "", roles.ToList());
-
-                // Get user details
-                var userDetails = await UserService.GetUserAsync(user.Id, cancellationToken);
+                var userDetails = await _userService.GetUserAsync(user.Id, cancellationToken);
 
                 return Ok(new
                 {
                     accessToken = token,
                     tokenType = "Bearer",
-                    expiresIn = 28800, // 8 hours in seconds
+                    expiresIn = 28800,
                     user = new
                     {
                         id = user.Id,
@@ -490,9 +490,9 @@ namespace UrGuide.WebApp.Controllers
                     }
                 });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ErrorEnvelop.Create($"Token generation failed: {ex.Message}"));
+                return StatusCode(500, ErrorEnvelop.Create(_localizer["Auth_InternalError"].Value));
             }
         }
 
@@ -505,7 +505,6 @@ namespace UrGuide.WebApp.Controllers
         [ProducesResponseType(401)]
         public async Task<IActionResult> GetCurrentUserInfo(CancellationToken cancellationToken)
         {
-            // Claims are transformed automatically in JWT bearer configuration
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
             var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
@@ -515,13 +514,12 @@ namespace UrGuide.WebApp.Controllers
                 return Unauthorized();
             }
 
-            var result = await UserService.GetUserAsync(userId, cancellationToken);
+            var result = await _userService.GetUserAsync(userId, cancellationToken);
             if (result.IsError || result.Value == null)
             {
                 return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
             }
 
-            // Get roles from standard claim type (transformed from JWT "role" claims)
             var roles = User.FindAll(System.Security.Claims.ClaimTypes.Role).Select(c => c.Value).ToArray();
 
             return Ok(new
@@ -536,17 +534,46 @@ namespace UrGuide.WebApp.Controllers
         }
 
         /// <summary>
-        /// API endpoint for 2FA verification (placeholder for future implementation)
+        /// Verify a 2FA code during login or for sensitive operations.
+        /// Supports both TOTP codes and backup codes.
         /// </summary>
         [HttpPost("/api/auth/verify-2fa")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
-        public async Task<IActionResult> VerifyTwoFactor([FromBody] dynamic request, CancellationToken cancellationToken)
+        public async Task<IActionResult> VerifyTwoFactor([FromBody] Verify2FACodeRequest request, CancellationToken cancellationToken)
         {
-            // Placeholder for 2FA verification
-            // This would need to be implemented based on your 2FA requirements
-            await Task.CompletedTask;
-            return BadRequest(ErrorEnvelop.Create(_localizer["Auth_TwoFactorNotImplemented"].Value));
+            if (string.IsNullOrEmpty(request?.Code))
+            {
+                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_CodeRequired"].Value));
+            }
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_UserNotFound"].Value));
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_UserNotFound"].Value));
+            }
+
+            if (!user.TwoFactorEnabled)
+            {
+                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_TwoFactorNotEnabled"].Value));
+            }
+
+            bool isValid = request.IsBackupCode
+                ? await _twoFactorService.VerifyBackupCodeAsync(user, request.Code)
+                : await _twoFactorService.VerifyTotpCodeAsync(user, request.Code);
+
+            if (!isValid)
+            {
+                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_TwoFactorInvalid"].Value));
+            }
+
+            return Ok(new { message = _localizer["Auth_TwoFactorVerified"].Value });
         }
     }
 }
