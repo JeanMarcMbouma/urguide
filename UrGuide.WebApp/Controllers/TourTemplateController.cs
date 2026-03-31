@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.Core;
@@ -7,6 +8,7 @@ using UrGuide.Model.Templates;
 using UrGuide.Services.Templates;
 using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Models;
+using UrGuide.WebApp.Resources;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -19,11 +21,13 @@ namespace UrGuide.WebApp.Controllers
     {
         private readonly ITourTemplateService _tourTemplateService;
         private readonly IUserContext _userContext;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public TourTemplateController(ITourTemplateService tourTemplateService, IUserContext userContext)
+        public TourTemplateController(ITourTemplateService tourTemplateService, IUserContext userContext, IStringLocalizer<SharedResource> localizer)
         {
             _tourTemplateService = tourTemplateService;
             _userContext = userContext;
+            _localizer = localizer;
         }
 
         [HttpPost]
@@ -83,7 +87,7 @@ namespace UrGuide.WebApp.Controllers
             {
                 effectiveGuideId = _userContext.UserId;
                 if (string.IsNullOrEmpty(effectiveGuideId))
-                    return BadRequest(ErrorEnvelop.Create(new[] { "guideId query parameter is required for unauthenticated requests" }));
+                    return BadRequest(ErrorEnvelop.Create(new[] { _localizer["TourTemplate_GuideIdRequired"].Value }));
             }
             var result = await _tourTemplateService.GetGuideTemplatesAsync(effectiveGuideId, page, pageSize, category, cancellationToken);
             return result.IsError

@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using UrGuide.WebApp.Attributes;
 using UrGuide.WebApp.Models;
 using UrGuide.WebApp.RateLimiting;
+using UrGuide.WebApp.Resources;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -20,10 +22,12 @@ namespace UrGuide.WebApp.Controllers
     public class RateLimitController : ControllerBase
     {
         private readonly IRateLimitAnalyticsService _analyticsService;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public RateLimitController(IRateLimitAnalyticsService analyticsService)
+        public RateLimitController(IRateLimitAnalyticsService analyticsService, IStringLocalizer<SharedResource> localizer)
         {
             _analyticsService = analyticsService ?? throw new ArgumentNullException(nameof(analyticsService));
+            _localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         /// <summary>
@@ -41,7 +45,7 @@ namespace UrGuide.WebApp.Controllers
             
             if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized(ErrorEnvelop.Create(new[] { "User ID not found in claims" }));
+                return Unauthorized(ErrorEnvelop.Create(new[] { _localizer["Error_UserIdNotFound"].Value }));
             }
 
             var stats = await _analyticsService.GetStatisticsAsync(userId, from, to);

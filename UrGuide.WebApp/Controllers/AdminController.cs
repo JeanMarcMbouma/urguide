@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using UrGuide.Model;
 using UrGuide.Model.Admin;
 using UrGuide.Services.Contracts;
 using UrGuide.WebApp.Models;
+using UrGuide.WebApp.Resources;
 using BbQ.Outcome;
 
 namespace UrGuide.WebApp.Controllers
@@ -25,10 +27,12 @@ namespace UrGuide.WebApp.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IAdminService _adminService;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public AdminController(IAdminService adminService)
+        public AdminController(IAdminService adminService, IStringLocalizer<SharedResource> localizer)
         {
             _adminService = adminService ?? throw new ArgumentNullException(nameof(adminService));
+            _localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         /// <summary>
@@ -84,7 +88,7 @@ namespace UrGuide.WebApp.Controllers
             if (result.IsError)
                 return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
-            return Ok(new { message = $"User suspended for {durationDays} days", userId });
+            return Ok(new { message = string.Format(_localizer["Admin_UserSuspended"].Value, durationDays), userId });
         }
 
         /// <summary>
@@ -102,7 +106,7 @@ namespace UrGuide.WebApp.Controllers
             if (result.IsError)
                 return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
-            return Ok(new { message = "User activated successfully", userId });
+            return Ok(new { message = _localizer["Admin_UserActivatedSuccess"].Value, userId });
         }
 
         /// <summary>
@@ -121,7 +125,7 @@ namespace UrGuide.WebApp.Controllers
             if (result.IsError)
                 return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
-            return Ok(new { message = "User deleted successfully", userId });
+            return Ok(new { message = _localizer["Admin_UserDeletedSuccess"].Value, userId });
         }
 
         /// <summary>
@@ -139,7 +143,7 @@ namespace UrGuide.WebApp.Controllers
             if (result.IsError)
                 return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
-            return Ok(new { message = "User roles updated successfully", model.UserId, roles = model.Roles });
+            return Ok(new { message = _localizer["Admin_UserRolesUpdatedSuccess"].Value, model.UserId, roles = model.Roles });
         }
 
         /// <summary>
@@ -228,7 +232,7 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             var action = model.Approve ? "approved" : "rejected";
-            return Ok(new { message = $"Guide verification {action}", userId = model.UserId });
+            return Ok(new { message = string.Format(_localizer["Admin_GuideVerificationAction"].Value, action), userId = model.UserId });
         }
 
         /// <summary>
@@ -283,7 +287,7 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
             var action = model.Approve ? "approved" : "rejected";
-            return Ok(new { message = $"Tour post {action}", postId = model.PostId });
+            return Ok(new { message = string.Format(_localizer["Admin_TourPostAction"].Value, action), postId = model.PostId });
         }
 
         // ── Financial Monitoring ──────────────────────────────────────────────
@@ -400,7 +404,7 @@ namespace UrGuide.WebApp.Controllers
             if (result.IsError)
                 return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
-            return Ok(new { message = "Platform settings updated successfully" });
+            return Ok(new { message = _localizer["Admin_SettingsUpdatedSuccess"].Value });
         }
 
         // ── Account Freeze / Temporary Suspension ─────────────────────────────
@@ -438,7 +442,7 @@ namespace UrGuide.WebApp.Controllers
             if (result.IsError)
                 return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
-            return Ok(new { message = "Account unfrozen successfully", request.UserId });
+            return Ok(new { message = _localizer["Admin_AccountUnfrozenSuccess"].Value, request.UserId });
         }
 
         /// <summary>

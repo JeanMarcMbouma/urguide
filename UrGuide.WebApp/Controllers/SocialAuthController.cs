@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
@@ -9,6 +10,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using UrGuide.WebApp.Models;
+using UrGuide.WebApp.Resources;
 using UrGuide.WebApp.Services;
 
 namespace UrGuide.WebApp.Controllers
@@ -24,15 +26,18 @@ namespace UrGuide.WebApp.Controllers
     {
         private readonly ISocialAuthService _socialAuthService;
         private readonly ILogger<SocialAuthController> _logger;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
         private static readonly string[] SupportedProviders = ["Google", "Apple", "Microsoft"];
 
         public SocialAuthController(
             ISocialAuthService socialAuthService,
-            ILogger<SocialAuthController> logger)
+            ILogger<SocialAuthController> logger,
+            IStringLocalizer<SharedResource> localizer)
         {
             _socialAuthService = socialAuthService;
             _logger = logger;
+            _localizer = localizer;
         }
 
         /// <summary>
@@ -46,7 +51,7 @@ namespace UrGuide.WebApp.Controllers
         {
             if (!IsProviderSupported(provider))
             {
-                return BadRequest(ErrorEnvelop.Create([$"Unsupported provider: {provider}. Supported: Google, Apple, Microsoft"]));
+                return BadRequest(ErrorEnvelop.Create([string.Format(_localizer["SocialAuth_UnsupportedProvider"].Value, provider)]));
             }
 
             var redirectUrl = Url.Action(nameof(Callback), "SocialAuth", new { provider, returnUrl });
@@ -72,7 +77,7 @@ namespace UrGuide.WebApp.Controllers
             if (!authenticateResult.Succeeded || authenticateResult.Principal == null)
             {
                 _logger.LogWarning("Social auth callback failed for provider {Provider}", provider);
-                return BadRequest(ErrorEnvelop.Create(["Authentication failed. Please try again."]));
+                return BadRequest(ErrorEnvelop.Create([_localizer["SocialAuth_AuthenticationFailed"].Value]));
             }
 
             var claims = authenticateResult.Principal.Claims.ToList();
@@ -89,7 +94,7 @@ namespace UrGuide.WebApp.Controllers
 
             if (string.IsNullOrEmpty(providerKey))
             {
-                return BadRequest(ErrorEnvelop.Create(["Could not retrieve user identifier from provider."]));
+                return BadRequest(ErrorEnvelop.Create([_localizer["SocialAuth_NoIdentifier"].Value]));
             }
 
             var result = await _socialAuthService.ProcessSocialLoginAsync(
@@ -97,7 +102,7 @@ namespace UrGuide.WebApp.Controllers
 
             if (!result.Success)
             {
-                return BadRequest(ErrorEnvelop.Create([result.Error ?? "Social login failed."]));
+                return BadRequest(ErrorEnvelop.Create([result.Error ?? _localizer["SocialAuth_LoginFailed"].Value]));
             }
 
             // Log the audit event
@@ -135,7 +140,7 @@ namespace UrGuide.WebApp.Controllers
         {
             if (!IsProviderSupported(provider))
             {
-                return BadRequest(ErrorEnvelop.Create([$"Unsupported provider: {provider}"]));
+                return BadRequest(ErrorEnvelop.Create([string.Format(_localizer["SocialAuth_UnsupportedProvider"].Value, provider)]));
             }
 
             var redirectUrl = Url.Action(nameof(LinkCallback), "SocialAuth", new { provider, returnUrl });
@@ -161,7 +166,7 @@ namespace UrGuide.WebApp.Controllers
             var authenticateResult = await HttpContext.AuthenticateAsync(provider);
             if (!authenticateResult.Succeeded || authenticateResult.Principal == null)
             {
-                return BadRequest(ErrorEnvelop.Create(["Authentication failed during linking."]));
+                return BadRequest(ErrorEnvelop.Create([_localizer["SocialAuth_AuthenticationFailed"].Value]));
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -185,7 +190,7 @@ namespace UrGuide.WebApp.Controllers
 
             if (!result.Success)
             {
-                return BadRequest(ErrorEnvelop.Create([result.Error ?? "Linking failed."]));
+                return BadRequest(ErrorEnvelop.Create([result.Error ?? _localizer["SocialAuth_LinkingFailed"].Value]));
             }
 
             await _socialAuthService.LogAuditEventAsync(
@@ -219,14 +224,14 @@ namespace UrGuide.WebApp.Controllers
 
             if (!IsProviderSupported(provider))
             {
-                return BadRequest(ErrorEnvelop.Create([$"Unsupported provider: {provider}"]));
+                return BadRequest(ErrorEnvelop.Create([string.Format(_localizer["SocialAuth_UnsupportedProvider"].Value, provider)]));
             }
 
             var result = await _socialAuthService.UnlinkProviderAsync(userId, provider, cancellationToken);
 
             if (!result.Success)
             {
-                return BadRequest(ErrorEnvelop.Create([result.Error ?? "Unlinking failed."]));
+                return BadRequest(ErrorEnvelop.Create([result.Error ?? _localizer["SocialAuth_UnlinkingFailed"].Value]));
             }
 
             await _socialAuthService.LogAuditEventAsync(

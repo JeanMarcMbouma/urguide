@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using UrGuide.Data;
+using UrGuide.WebApp.Resources;
 using UrGuide.Data.Entities.Users;
 using UrGuide.Model.Admin;
 using UrGuide.WebApp.Models;
@@ -23,11 +25,13 @@ namespace UrGuide.WebApp.Controllers
     {
         private readonly UrGuideContext _context;
         private readonly ILogger<GuideVerificationController> _logger;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public GuideVerificationController(UrGuideContext context, ILogger<GuideVerificationController> logger)
+        public GuideVerificationController(UrGuideContext context, ILogger<GuideVerificationController> logger, IStringLocalizer<SharedResource> localizer)
         {
             _context = context;
             _logger = logger;
+            _localizer = localizer;
         }
 
         private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
@@ -134,7 +138,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error submitting verification document");
-                return StatusCode(500, new { error = "An error occurred while submitting the document" });
+                return StatusCode(500, new { error = _localizer["Verification_SubmitError"].Value });
             }
         }
 
@@ -179,7 +183,7 @@ namespace UrGuide.WebApp.Controllers
                     .FirstOrDefaultAsync(s => s.Id == submissionId, cancellationToken);
 
                 if (submission == null)
-                    return NotFound(new { error = "Verification submission not found." });
+                    return NotFound(new { error = _localizer["Verification_NotFound"].Value });
 
                 var now = DateTime.UtcNow;
                 submission.Status = (int)GuideVerificationStatus.Approved;
@@ -195,12 +199,12 @@ namespace UrGuide.WebApp.Controllers
                 await _context.SaveChangesAsync(cancellationToken);
                 _logger.LogInformation("Guide verification {SubmissionId} approved by admin {AdminId}", submissionId, adminId);
 
-                return Ok(new { message = "Verification approved.", submissionId });
+                return Ok(new { message = _localizer["Verification_ApprovedSuccess"].Value, submissionId });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error approving verification {SubmissionId}", submissionId);
-                return StatusCode(500, new { error = "An error occurred while approving the verification" });
+                return StatusCode(500, new { error = _localizer["Verification_ApproveError"].Value });
             }
         }
 
@@ -218,7 +222,7 @@ namespace UrGuide.WebApp.Controllers
                     .FirstOrDefaultAsync(s => s.Id == submissionId, cancellationToken);
 
                 if (submission == null)
-                    return NotFound(new { error = "Verification submission not found." });
+                    return NotFound(new { error = _localizer["Verification_NotFound"].Value });
 
                 var now = DateTime.UtcNow;
                 submission.Status = (int)GuideVerificationStatus.Rejected;
@@ -231,12 +235,12 @@ namespace UrGuide.WebApp.Controllers
                 await _context.SaveChangesAsync(cancellationToken);
                 _logger.LogInformation("Guide verification {SubmissionId} rejected by admin {AdminId}. Reason: {Reason}", submissionId, adminId, request?.Reason);
 
-                return Ok(new { message = "Verification rejected.", submissionId });
+                return Ok(new { message = _localizer["Verification_RejectedSuccess"].Value, submissionId });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error rejecting verification {SubmissionId}", submissionId);
-                return StatusCode(500, new { error = "An error occurred while rejecting the verification" });
+                return StatusCode(500, new { error = _localizer["Verification_RejectError"].Value });
             }
         }
 

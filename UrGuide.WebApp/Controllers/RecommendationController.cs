@@ -2,11 +2,13 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using UrGuide.Data.Entities.Recommendations;
 using UrGuide.Model.Recommendations;
 using UrGuide.Services.Recommendations;
+using UrGuide.WebApp.Resources;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -17,11 +19,13 @@ namespace UrGuide.WebApp.Controllers
     {
         private readonly IRecommendationService _recommendationService;
         private readonly ILogger<RecommendationController> _logger;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public RecommendationController(IRecommendationService recommendationService, ILogger<RecommendationController> logger)
+        public RecommendationController(IRecommendationService recommendationService, ILogger<RecommendationController> logger, IStringLocalizer<SharedResource> localizer)
         {
             _recommendationService = recommendationService;
             _logger = logger;
+            _localizer = localizer;
         }
 
         /// <summary>
@@ -40,17 +44,17 @@ namespace UrGuide.WebApp.Controllers
 
                 if (count < 1 || count > 50)
                 {
-                    return BadRequest(new { error = "Count must be between 1 and 50" });
+                    return BadRequest(new { error = _localizer["Recommendation_CountInvalid"].Value });
                 }
 
                 if (lat.HasValue && (lat.Value < -90 || lat.Value > 90))
                 {
-                    return BadRequest(new { error = "Latitude must be between -90 and 90" });
+                    return BadRequest(new { error = _localizer["Recommendation_LatitudeInvalid"].Value });
                 }
 
                 if (lng.HasValue && (lng.Value < -180 || lng.Value > 180))
                 {
-                    return BadRequest(new { error = "Longitude must be between -180 and 180" });
+                    return BadRequest(new { error = _localizer["Recommendation_LongitudeInvalid"].Value });
                 }
 
                 var recommendations = await _recommendationService.GetRecommendationsAsync(userId, count, lat, lng);
@@ -59,7 +63,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting recommendations");
-                return StatusCode(500, new { error = "An error occurred while getting recommendations" });
+                return StatusCode(500, new { error = _localizer["Recommendation_GetError"].Value });
             }
         }
 
@@ -74,17 +78,17 @@ namespace UrGuide.WebApp.Controllers
             {
                 if (count < 1 || count > 50)
                 {
-                    return BadRequest(new { error = "Count must be between 1 and 50" });
+                    return BadRequest(new { error = _localizer["Recommendation_CountInvalid"].Value });
                 }
 
                 if (lat.HasValue && (lat.Value < -90 || lat.Value > 90))
                 {
-                    return BadRequest(new { error = "Latitude must be between -90 and 90" });
+                    return BadRequest(new { error = _localizer["Recommendation_LatitudeInvalid"].Value });
                 }
 
                 if (lng.HasValue && (lng.Value < -180 || lng.Value > 180))
                 {
-                    return BadRequest(new { error = "Longitude must be between -180 and 180" });
+                    return BadRequest(new { error = _localizer["Recommendation_LongitudeInvalid"].Value });
                 }
 
                 var tours = await _recommendationService.GetPopularToursAsync(count, lat, lng);
@@ -93,7 +97,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting popular tours");
-                return StatusCode(500, new { error = "An error occurred while getting popular tours" });
+                return StatusCode(500, new { error = _localizer["Recommendation_PopularToursError"].Value });
             }
         }
 
@@ -113,19 +117,19 @@ namespace UrGuide.WebApp.Controllers
 
                 if (request?.Preferences == null || request.Preferences.Count == 0)
                 {
-                    return BadRequest(new { error = "At least one preference is required" });
+                    return BadRequest(new { error = _localizer["Recommendation_PreferenceRequired"].Value });
                 }
 
                 if (request.Preferences.Count > 20)
                 {
-                    return BadRequest(new { error = "Maximum 20 preferences allowed" });
+                    return BadRequest(new { error = _localizer["Recommendation_PreferenceMaximum"].Value });
                 }
 
                 var result = await _recommendationService.SetUserPreferencesAsync(userId, request);
                 if (!result)
                 {
                     var validTypes = string.Join(", ", RecommendationService.ValidPreferenceTypes);
-                    return BadRequest(new { error = $"Invalid preferences. Valid types: {validTypes}" });
+                    return BadRequest(new { error = string.Format(_localizer["Recommendation_PreferenceInvalid"].Value, validTypes) });
                 }
 
                 return Ok(new { success = result });
@@ -133,7 +137,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error setting preferences");
-                return StatusCode(500, new { error = "An error occurred while setting preferences" });
+                return StatusCode(500, new { error = _localizer["Recommendation_SetPreferencesError"].Value });
             }
         }
 
@@ -157,7 +161,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting preferences");
-                return StatusCode(500, new { error = "An error occurred while getting preferences" });
+                return StatusCode(500, new { error = _localizer["Recommendation_GetPreferencesError"].Value });
             }
         }
 
@@ -177,19 +181,19 @@ namespace UrGuide.WebApp.Controllers
 
                 if (string.IsNullOrWhiteSpace(request?.TourId))
                 {
-                    return BadRequest(new { error = "TourId is required" });
+                    return BadRequest(new { error = _localizer["Recommendation_TourIdRequired"].Value });
                 }
 
                 if (!Enum.IsDefined(typeof(InteractionType), request.Type))
                 {
                     var allowedTypes = string.Join(", ", Enum.GetNames(typeof(InteractionType)));
-                    return BadRequest(new { error = $"Type must be a valid interaction type. Allowed values: {allowedTypes}" });
+                    return BadRequest(new { error = string.Format(_localizer["Recommendation_InteractionTypeInvalid"].Value, allowedTypes) });
                 }
 
                 var result = await _recommendationService.RecordInteractionAsync(userId, request);
                 if (!result)
                 {
-                    return BadRequest(new { error = "Invalid interaction type" });
+                    return BadRequest(new { error = _localizer["Recommendation_InteractionTypeUnknown"].Value });
                 }
 
                 return Ok(new { success = result });
@@ -197,7 +201,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error recording interaction");
-                return StatusCode(500, new { error = "An error occurred while recording the interaction" });
+                return StatusCode(500, new { error = _localizer["Recommendation_RecordInteractionError"].Value });
             }
         }
 
@@ -217,13 +221,13 @@ namespace UrGuide.WebApp.Controllers
 
                 if (string.IsNullOrWhiteSpace(request?.RecommendationId))
                 {
-                    return BadRequest(new { error = "RecommendationId is required" });
+                    return BadRequest(new { error = _localizer["Recommendation_FeedbackIdRequired"].Value });
                 }
 
                 var result = await _recommendationService.ProvideFeedbackAsync(userId, request);
                 if (!result)
                 {
-                    return NotFound(new { error = "Recommendation not found" });
+                    return NotFound(new { error = _localizer["Recommendation_NotFound"].Value });
                 }
 
                 return Ok(new { success = result });
@@ -231,7 +235,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error providing feedback");
-                return StatusCode(500, new { error = "An error occurred while providing feedback" });
+                return StatusCode(500, new { error = _localizer["Recommendation_FeedbackError"].Value });
             }
         }
 
@@ -250,7 +254,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting recommendation stats");
-                return StatusCode(500, new { error = "An error occurred while getting recommendation stats" });
+                return StatusCode(500, new { error = _localizer["Recommendation_StatsError"].Value });
             }
         }
     }

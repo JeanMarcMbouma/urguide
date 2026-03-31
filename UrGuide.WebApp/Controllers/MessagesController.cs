@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Messages;
 using UrGuide.WebApp.Models;
+using UrGuide.WebApp.Resources;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -23,11 +25,13 @@ namespace UrGuide.WebApp.Controllers
     {
         private readonly ILogger<MessagesController> _logger;
         private readonly UrGuideContext _context;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public MessagesController(ILogger<MessagesController> logger, UrGuideContext context)
+        public MessagesController(ILogger<MessagesController> logger, UrGuideContext context, IStringLocalizer<SharedResource> localizer)
         {
             _logger = logger;
             _context = context;
+            _localizer = localizer;
         }
 
         private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
@@ -99,7 +103,7 @@ namespace UrGuide.WebApp.Controllers
                     (c.Participant1Id == userId || c.Participant2Id == userId), cancellationToken);
 
             if (conversation == null)
-                return NotFound(new { error = "Conversation not found." });
+                return NotFound(new { error = _localizer["Message_ConversationNotFound"].Value });
 
             var query = _context.MessageEntities
                 .Where(m => m.ConversationId == conversationId)
@@ -149,7 +153,7 @@ namespace UrGuide.WebApp.Controllers
                         (c.Participant1Id == userId || c.Participant2Id == userId), cancellationToken);
 
                 if (conversation == null)
-                    return NotFound(new { error = "Conversation not found." });
+                    return NotFound(new { error = _localizer["Message_ConversationNotFound"].Value });
 
                 var entity = new MessageEntity
                 {
@@ -186,7 +190,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error sending message");
-                return StatusCode(500, new { error = "An error occurred while sending the message" });
+                return StatusCode(500, new { error = _localizer["Message_SendError"].Value });
             }
         }
 
@@ -204,7 +208,7 @@ namespace UrGuide.WebApp.Controllers
                     (c.Participant1Id == userId || c.Participant2Id == userId), cancellationToken);
 
             if (conversation == null)
-                return NotFound(new { error = "Conversation not found." });
+                return NotFound(new { error = _localizer["Message_ConversationNotFound"].Value });
 
             var unreadMessages = await _context.MessageEntities
                 .Where(m => m.ConversationId == conversationId && m.SenderId != userId && !m.IsRead)
@@ -215,7 +219,7 @@ namespace UrGuide.WebApp.Controllers
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            return Ok(new { message = "Conversation marked as read." });
+            return Ok(new { message = _localizer["Message_MarkedAsReadSuccess"].Value });
         }
     }
 }

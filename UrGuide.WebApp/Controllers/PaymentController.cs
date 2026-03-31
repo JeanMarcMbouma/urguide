@@ -2,10 +2,12 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using UrGuide.Model.Payments;
 using UrGuide.Services.Payments;
+using UrGuide.WebApp.Resources;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -16,11 +18,13 @@ namespace UrGuide.WebApp.Controllers
     {
         private readonly IPaymentService _paymentService;
         private readonly ILogger<PaymentController> _logger;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public PaymentController(IPaymentService paymentService, ILogger<PaymentController> logger)
+        public PaymentController(IPaymentService paymentService, ILogger<PaymentController> logger, IStringLocalizer<SharedResource> localizer)
         {
             _paymentService = paymentService;
             _logger = logger;
+            _localizer = localizer;
         }
 
         /// <summary>
@@ -48,7 +52,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating payment");
-                return StatusCode(500, new { error = "An error occurred while creating the payment" });
+                return StatusCode(500, new { error = _localizer["Payment_CreateError"].Value });
             }
         }
 
@@ -70,7 +74,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving payment");
-                return StatusCode(500, new { error = "An error occurred while retrieving the payment" });
+                return StatusCode(500, new { error = _localizer["Payment_RetrieveError"].Value });
             }
         }
 
@@ -94,7 +98,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving transaction history");
-                return StatusCode(500, new { error = "An error occurred while retrieving transaction history" });
+                return StatusCode(500, new { error = _localizer["Payment_HistoryError"].Value });
             }
         }
 
@@ -109,15 +113,15 @@ namespace UrGuide.WebApp.Controllers
                 var success = await _paymentService.ConfirmPaymentAsync(paymentId);
                 if (!success)
                 {
-                    return NotFound(new { error = "Payment not found" });
+                    return NotFound(new { error = _localizer["Payment_NotFound"].Value });
                 }
 
-                return Ok(new { message = "Payment confirmed successfully" });
+                return Ok(new { message = _localizer["Payment_ConfirmSuccess"].Value });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error confirming payment");
-                return StatusCode(500, new { error = "An error occurred while confirming the payment" });
+                return StatusCode(500, new { error = _localizer["Payment_ConfirmError"].Value });
             }
         }
 
@@ -132,15 +136,15 @@ namespace UrGuide.WebApp.Controllers
                 var success = await _paymentService.CancelPaymentAsync(paymentId);
                 if (!success)
                 {
-                    return NotFound(new { error = "Payment not found" });
+                    return NotFound(new { error = _localizer["Payment_NotFound"].Value });
                 }
 
-                return Ok(new { message = "Payment cancelled successfully" });
+                return Ok(new { message = _localizer["Payment_CancelSuccess"].Value });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error cancelling payment");
-                return StatusCode(500, new { error = "An error occurred while cancelling the payment" });
+                return StatusCode(500, new { error = _localizer["Payment_CancelError"].Value });
             }
         }
     }

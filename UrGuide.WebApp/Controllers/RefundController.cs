@@ -2,10 +2,12 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using UrGuide.Model.Payments;
 using UrGuide.Services.Payments;
+using UrGuide.WebApp.Resources;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -16,11 +18,13 @@ namespace UrGuide.WebApp.Controllers
     {
         private readonly IRefundService _refundService;
         private readonly ILogger<RefundController> _logger;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public RefundController(IRefundService refundService, ILogger<RefundController> logger)
+        public RefundController(IRefundService refundService, ILogger<RefundController> logger, IStringLocalizer<SharedResource> localizer)
         {
             _refundService = refundService;
             _logger = logger;
+            _localizer = localizer;
         }
 
         /// <summary>
@@ -53,7 +57,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating refund");
-                return StatusCode(500, new { error = "An error occurred while creating the refund" });
+                return StatusCode(500, new { error = _localizer["Refund_CreateError"].Value });
             }
         }
 
@@ -75,7 +79,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving refund");
-                return StatusCode(500, new { error = "An error occurred while retrieving the refund" });
+                return StatusCode(500, new { error = _localizer["Refund_RetrieveError"].Value });
             }
         }
 
@@ -93,7 +97,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving payment refunds");
-                return StatusCode(500, new { error = "An error occurred while retrieving refunds" });
+                return StatusCode(500, new { error = _localizer["Refund_ListError"].Value });
             }
         }
 
@@ -109,15 +113,15 @@ namespace UrGuide.WebApp.Controllers
                 var success = await _refundService.ProcessRefundAsync(refundId);
                 if (!success)
                 {
-                    return NotFound(new { error = "Refund not found or failed to process" });
+                    return NotFound(new { error = _localizer["Refund_NotFound"].Value });
                 }
 
-                return Ok(new { message = "Refund processed successfully" });
+                return Ok(new { message = _localizer["Refund_ProcessSuccess"].Value });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing refund");
-                return StatusCode(500, new { error = "An error occurred while processing the refund" });
+                return StatusCode(500, new { error = _localizer["Refund_ProcessError"].Value });
             }
         }
     }

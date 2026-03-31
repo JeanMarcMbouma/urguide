@@ -4,10 +4,12 @@ using System.Threading.Tasks;
 using BbQ.Outcome;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using UrGuide.Model.Reviews;
 using UrGuide.Services.Reviews;
 using UrGuide.WebApp.Models;
+using UrGuide.WebApp.Resources;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -20,13 +22,16 @@ namespace UrGuide.WebApp.Controllers
     {
         private readonly IReviewModerationService _moderationService;
         private readonly ILogger<ReviewModerationController> _logger;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
         public ReviewModerationController(
             IReviewModerationService moderationService,
-            ILogger<ReviewModerationController> logger)
+            ILogger<ReviewModerationController> logger,
+            IStringLocalizer<SharedResource> localizer)
         {
             _moderationService = moderationService;
             _logger = logger;
+            _localizer = localizer;
         }
 
         /// <summary>
@@ -50,7 +55,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error flagging review {ReviewId}", reviewId);
-                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
+                return StatusCode(500, ErrorEnvelop.Create(new[] { _localizer["Error_InternalServer"].Value }));
             }
         }
 
@@ -75,7 +80,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting moderation queue");
-                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
+                return StatusCode(500, ErrorEnvelop.Create(new[] { _localizer["Error_InternalServer"].Value }));
             }
         }
 
@@ -102,7 +107,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error moderating review {ReviewId}", reviewId);
-                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
+                return StatusCode(500, ErrorEnvelop.Create(new[] { _localizer["Error_InternalServer"].Value }));
             }
         }
 
@@ -124,7 +129,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting moderation stats");
-                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
+                return StatusCode(500, ErrorEnvelop.Create(new[] { _localizer["Error_InternalServer"].Value }));
             }
         }
 
@@ -150,7 +155,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error submitting appeal for review {ReviewId}", reviewId);
-                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
+                return StatusCode(500, ErrorEnvelop.Create(new[] { _localizer["Error_InternalServer"].Value }));
             }
         }
     }

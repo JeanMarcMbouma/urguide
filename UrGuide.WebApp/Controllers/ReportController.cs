@@ -3,10 +3,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using UrGuide.Model.Reports;
 using UrGuide.Services.Reports;
+using UrGuide.WebApp.Resources;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -17,11 +19,13 @@ namespace UrGuide.WebApp.Controllers
     {
         private readonly IReportingService _reportingService;
         private readonly ILogger<ReportController> _logger;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public ReportController(IReportingService reportingService, ILogger<ReportController> logger)
+        public ReportController(IReportingService reportingService, ILogger<ReportController> logger, IStringLocalizer<SharedResource> localizer)
         {
             _reportingService = reportingService;
             _logger = logger;
+            _localizer = localizer;
         }
 
         /// <summary>
@@ -49,7 +53,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error generating report");
-                return StatusCode(500, new { error = "An error occurred while generating the report" });
+                return StatusCode(500, new { error = _localizer["Report_GenerateError"].Value });
             }
         }
 
@@ -70,7 +74,7 @@ namespace UrGuide.WebApp.Controllers
                 var report = await _reportingService.GetReportAsync(reportId);
                 if (report == null || report.RequestedBy != userId)
                 {
-                    return NotFound(new { error = "Report not found" });
+                    return NotFound(new { error = _localizer["Report_NotFound"].Value });
                 }
 
                 return Ok(report);
@@ -78,7 +82,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving report");
-                return StatusCode(500, new { error = "An error occurred while retrieving the report" });
+                return StatusCode(500, new { error = _localizer["Report_RetrieveError"].Value });
             }
         }
 
@@ -102,7 +106,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving user reports");
-                return StatusCode(500, new { error = "An error occurred while retrieving reports" });
+                return StatusCode(500, new { error = _localizer["Report_ListError"].Value });
             }
         }
 
@@ -124,13 +128,13 @@ namespace UrGuide.WebApp.Controllers
                 var report = await _reportingService.GetReportAsync(reportId);
                 if (report == null || report.RequestedBy != userId)
                 {
-                    return NotFound(new { error = "Report not found" });
+                    return NotFound(new { error = _localizer["Report_NotFound"].Value });
                 }
 
                 var data = await _reportingService.GetReportDataAsync(reportId);
                 if (data == null)
                 {
-                    return NotFound(new { error = "Report data not found" });
+                    return NotFound(new { error = _localizer["Report_DataNotFound"].Value });
                 }
 
                 var csvBytes = await _reportingService.ExportToCsvAsync(data);
@@ -142,7 +146,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error downloading report");
-                return StatusCode(500, new { error = "An error occurred while downloading the report" });
+                return StatusCode(500, new { error = _localizer["Report_DownloadError"].Value });
             }
         }
 
@@ -183,7 +187,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating scheduled report");
-                return StatusCode(500, new { error = "An error occurred while creating the schedule" });
+                return StatusCode(500, new { error = _localizer["Report_ScheduleCreateError"].Value });
             }
         }
 
@@ -207,7 +211,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving scheduled reports");
-                return StatusCode(500, new { error = "An error occurred while retrieving schedules" });
+                return StatusCode(500, new { error = _localizer["Report_ScheduleListError"].Value });
             }
         }
 
@@ -228,7 +232,7 @@ namespace UrGuide.WebApp.Controllers
                 var schedule = await _reportingService.UpdateScheduleAsync(userId, scheduleId, request);
                 if (schedule == null)
                 {
-                    return NotFound(new { error = "Schedule not found" });
+                    return NotFound(new { error = _localizer["Report_ScheduleNotFound"].Value });
                 }
 
                 return Ok(schedule);
@@ -236,7 +240,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating scheduled report");
-                return StatusCode(500, new { error = "An error occurred while updating the schedule" });
+                return StatusCode(500, new { error = _localizer["Report_ScheduleUpdateError"].Value });
             }
         }
 
@@ -257,15 +261,15 @@ namespace UrGuide.WebApp.Controllers
                 var success = await _reportingService.DeleteScheduleAsync(userId, scheduleId);
                 if (!success)
                 {
-                    return NotFound(new { error = "Schedule not found" });
+                    return NotFound(new { error = _localizer["Report_ScheduleNotFound"].Value });
                 }
 
-                return Ok(new { message = "Schedule deleted successfully" });
+                return Ok(new { message = _localizer["Report_ScheduleDeleteSuccess"].Value });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting scheduled report");
-                return StatusCode(500, new { error = "An error occurred while deleting the schedule" });
+                return StatusCode(500, new { error = _localizer["Report_ScheduleDeleteError"].Value });
             }
         }
 
@@ -289,7 +293,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error generating guide earnings report");
-                return StatusCode(500, new { error = "An error occurred while generating the earnings report" });
+                return StatusCode(500, new { error = _localizer["Report_EarningsError"].Value });
             }
         }
 
@@ -308,7 +312,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error generating booking summary report");
-                return StatusCode(500, new { error = "An error occurred while generating the booking summary" });
+                return StatusCode(500, new { error = _localizer["Report_BookingSummaryError"].Value });
             }
         }
     }

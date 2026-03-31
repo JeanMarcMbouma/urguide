@@ -3,8 +3,10 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using UrGuide.Model.Email;
+using UrGuide.WebApp.Resources;
 using UrGuide.Services.Email;
 
 namespace UrGuide.WebApp.Controllers
@@ -16,11 +18,13 @@ namespace UrGuide.WebApp.Controllers
     {
         private readonly IEmailTemplateService _emailTemplateService;
         private readonly ILogger<EmailTemplateController> _logger;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public EmailTemplateController(IEmailTemplateService emailTemplateService, ILogger<EmailTemplateController> logger)
+        public EmailTemplateController(IEmailTemplateService emailTemplateService, ILogger<EmailTemplateController> logger, IStringLocalizer<SharedResource> localizer)
         {
             _emailTemplateService = emailTemplateService;
             _logger = logger;
+            _localizer = localizer;
         }
 
         /// <summary>
@@ -48,7 +52,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating email template");
-                return StatusCode(500, new { error = "An error occurred while creating the email template" });
+                return StatusCode(500, new { error = _localizer["EmailTemplate_CreateError"].Value });
             }
         }
 
@@ -77,7 +81,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating email template {TemplateId}", templateId);
-                return StatusCode(500, new { error = "An error occurred while updating the email template" });
+                return StatusCode(500, new { error = _localizer["EmailTemplate_UpdateError"].Value });
             }
         }
 
@@ -100,7 +104,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving email template {TemplateId}", templateId);
-                return StatusCode(500, new { error = "An error occurred while retrieving the email template" });
+                return StatusCode(500, new { error = _localizer["EmailTemplate_RetrieveError"].Value });
             }
         }
 
@@ -127,7 +131,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error listing email templates");
-                return StatusCode(500, new { error = "An error occurred while listing email templates" });
+                return StatusCode(500, new { error = _localizer["EmailTemplate_ListError"].Value });
             }
         }
 
@@ -150,7 +154,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error previewing email template");
-                return StatusCode(500, new { error = "An error occurred while previewing the email template" });
+                return StatusCode(500, new { error = _localizer["EmailTemplate_PreviewError"].Value });
             }
         }
 
@@ -173,7 +177,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving versions for template {TemplateId}", templateId);
-                return StatusCode(500, new { error = "An error occurred while retrieving template versions" });
+                return StatusCode(500, new { error = _localizer["EmailTemplate_VersionsError"].Value });
             }
         }
 
@@ -196,7 +200,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deactivating email template {TemplateId}", templateId);
-                return StatusCode(500, new { error = "An error occurred while deactivating the email template" });
+                return StatusCode(500, new { error = _localizer["EmailTemplate_DeactivateError"].Value });
             }
         }
     }

@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using UrGuide.Core;
+using UrGuide.WebApp.Resources;
 using UrGuide.Data;
 using UrGuide.Model;
 using UrGuide.Model.Shared;
@@ -30,19 +32,22 @@ namespace UrGuide.WebApp.Controllers
         private readonly ITourRequestService _tourRequestService;
         private readonly UrGuideContext _context;
         private readonly ILogger<GuideDashboardController> _logger;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
         public GuideDashboardController(
             IFeedbackService feedbackService,
             IPayoutService payoutService,
             ITourRequestService tourRequestService,
             UrGuideContext context,
-            ILogger<GuideDashboardController> logger)
+            ILogger<GuideDashboardController> logger,
+            IStringLocalizer<SharedResource> localizer)
         {
             _feedbackService = feedbackService;
             _payoutService = payoutService;
             _tourRequestService = tourRequestService;
             _context = context;
             _logger = logger;
+            _localizer = localizer;
         }
 
         /// <summary>
@@ -104,7 +109,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving guide dashboard");
-                return StatusCode(500, new { error = "An error occurred while retrieving dashboard data" });
+                return StatusCode(500, new { error = _localizer["Dashboard_RetrieveError"].Value });
             }
         }
 
@@ -157,7 +162,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving guide performance metrics");
-                return StatusCode(500, new { error = "An error occurred while retrieving performance metrics" });
+                return StatusCode(500, new { error = _localizer["Dashboard_MetricsError"].Value });
             }
         }
 
@@ -213,7 +218,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving tour statistics");
-                return StatusCode(500, new { error = "An error occurred while retrieving tour statistics" });
+                return StatusCode(500, new { error = _localizer["Dashboard_StatisticsError"].Value });
             }
         }
 
@@ -301,7 +306,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving recent activity");
-                return StatusCode(500, new { error = "An error occurred while retrieving recent activity" });
+                return StatusCode(500, new { error = _localizer["Dashboard_ActivityError"].Value });
             }
         }
     }

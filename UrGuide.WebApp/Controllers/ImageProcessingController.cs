@@ -4,10 +4,12 @@ using System.Threading.Tasks;
 using BbQ.Outcome;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using UrGuide.Model.Media;
 using UrGuide.Services.Media;
 using UrGuide.WebApp.Models;
+using UrGuide.WebApp.Resources;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -20,13 +22,16 @@ namespace UrGuide.WebApp.Controllers
     {
         private readonly IImageProcessingService _imageProcessingService;
         private readonly ILogger<ImageProcessingController> _logger;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
         public ImageProcessingController(
             IImageProcessingService imageProcessingService,
-            ILogger<ImageProcessingController> logger)
+            ILogger<ImageProcessingController> logger,
+            IStringLocalizer<SharedResource> localizer)
         {
             _imageProcessingService = imageProcessingService;
             _logger = logger;
+            _localizer = localizer;
         }
 
         /// <summary>
@@ -50,7 +55,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing image");
-                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
+                return StatusCode(500, ErrorEnvelop.Create(new[] { _localizer["Error_InternalServer"].Value }));
             }
         }
 
@@ -71,7 +76,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting image variants for {ImageId}", imageId);
-                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
+                return StatusCode(500, ErrorEnvelop.Create(new[] { _localizer["Error_InternalServer"].Value }));
             }
         }
 
@@ -92,7 +97,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting processing status for {ImageId}", imageId);
-                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
+                return StatusCode(500, ErrorEnvelop.Create(new[] { _localizer["Error_InternalServer"].Value }));
             }
         }
 
@@ -117,7 +122,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error applying watermark to image {ImageId}", imageId);
-                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
+                return StatusCode(500, ErrorEnvelop.Create(new[] { _localizer["Error_InternalServer"].Value }));
             }
         }
 
@@ -138,7 +143,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting EXIF data for {ImageId}", imageId);
-                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
+                return StatusCode(500, ErrorEnvelop.Create(new[] { _localizer["Error_InternalServer"].Value }));
             }
         }
 
@@ -157,7 +162,7 @@ namespace UrGuide.WebApp.Controllers
 
                 var originalUrl = variantsResult.Value?.OriginalUrl;
                 if (string.IsNullOrEmpty(originalUrl))
-                    return BadRequest(new ErrorEnvelop<string>(new[] { "Image not found or has no original URL" }));
+                    return BadRequest(new ErrorEnvelop<string>(new[] { _localizer["Image_NotFoundOrNoUrl"].Value }));
 
                 var result = await _imageProcessingService.GetCdnUrlAsync(originalUrl, cdnProvider);
                 return result.Match(
@@ -167,7 +172,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting CDN URL for {ImageId}", imageId);
-                return StatusCode(500, ErrorEnvelop.Create(new[] { "Internal server error" }));
+                return StatusCode(500, ErrorEnvelop.Create(new[] { _localizer["Error_InternalServer"].Value }));
             }
         }
     }

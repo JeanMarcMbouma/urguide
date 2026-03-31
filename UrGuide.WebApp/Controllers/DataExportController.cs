@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using System;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using UrGuide.Model.Users;
 using UrGuide.Services.Contracts;
 using UrGuide.WebApp.Models;
+using UrGuide.WebApp.Resources;
 using BbQ.Outcome;
 
 namespace UrGuide.WebApp.Controllers
@@ -22,9 +24,12 @@ namespace UrGuide.WebApp.Controllers
     [ProducesResponseType(500, Type = typeof(ErrorEnvelop<string>))]
     public class DataExportController : ControllerBase
     {
-        public DataExportController(IDataExportService dataExportService)
+        private readonly IStringLocalizer<SharedResource> _localizer;
+
+        public DataExportController(IDataExportService dataExportService, IStringLocalizer<SharedResource> localizer)
         {
             DataExportService = dataExportService ?? throw new ArgumentNullException(nameof(dataExportService));
+            _localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         public IDataExportService DataExportService { get; }
@@ -130,7 +135,7 @@ namespace UrGuide.WebApp.Controllers
             if (result.IsError)
                 return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
 
-            return Ok(new { message = "Export request cancelled successfully" });
+            return Ok(new { message = _localizer["DataExport_CancelSuccess"].Value });
         }
     }
 }
