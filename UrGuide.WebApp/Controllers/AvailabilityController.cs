@@ -14,10 +14,12 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using UrGuide.Data;
 using UrGuide.Data.Entities.Tour;
 using UrGuide.WebApp.Models;
+using UrGuide.WebApp.Resources;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -33,6 +35,7 @@ namespace UrGuide.WebApp.Controllers
         private readonly IConfiguration _configuration;
         private readonly IDataProtectionProvider _dataProtectionProvider;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IStringLocalizer<SharedResource> _localizer;
         private const string DateFormat = "yyyy-MM-dd";
         private const string Rfc3339DateTimeFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
         private const int DefaultTokenExpirationSeconds = 3600;
@@ -45,13 +48,15 @@ namespace UrGuide.WebApp.Controllers
             ILogger<AvailabilityController> logger,
             IConfiguration configuration,
             IDataProtectionProvider dataProtectionProvider,
-            IHttpClientFactory httpClientFactory)
+            IHttpClientFactory httpClientFactory,
+            IStringLocalizer<SharedResource> localizer)
         {
             _context = context;
             _logger = logger;
             _configuration = configuration;
             _dataProtectionProvider = dataProtectionProvider;
             _httpClientFactory = httpClientFactory;
+            _localizer = localizer;
         }
 
         private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
@@ -72,7 +77,7 @@ namespace UrGuide.WebApp.Controllers
 
                 if (!DateTime.TryParseExact(startDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var start) ||
                     !DateTime.TryParseExact(endDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var end))
-                    return BadRequest(new { error = "Invalid date format. Use yyyy-MM-dd." });
+                    return BadRequest(new { error = _localizer["Availability_InvalidDateFormat"].Value });
 
                 var resolvedTimezone = ResolveTimezone(timezone);
 
@@ -127,7 +132,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving availability");
-                return StatusCode(500, new { error = "An error occurred while retrieving availability" });
+                return StatusCode(500, new { error = _localizer["Availability_RetrieveError"].Value });
             }
         }
 
@@ -143,7 +148,7 @@ namespace UrGuide.WebApp.Controllers
 
                 if (!DateTime.TryParseExact(request.StartDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var start) ||
                     !DateTime.TryParseExact(request.EndDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var end))
-                    return BadRequest(new { error = "Invalid date format." });
+                    return BadRequest(new { error = _localizer["Availability_InvalidDate"].Value });
 
                 var existingDatesList = await _context.GuideBlockedDates
                     .Where(d => d.GuideId == guideId && d.Date >= start && d.Date <= end)
@@ -175,12 +180,12 @@ namespace UrGuide.WebApp.Controllers
                     await _context.SaveChangesAsync(cancellationToken);
                 }
 
-                return Ok(new { message = "Dates blocked successfully." });
+                return Ok(new { message = _localizer["Availability_BlockSuccess"].Value });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error blocking dates");
-                return StatusCode(500, new { error = "An error occurred while blocking dates" });
+                return StatusCode(500, new { error = _localizer["Availability_BlockError"].Value });
             }
         }
 
@@ -194,7 +199,7 @@ namespace UrGuide.WebApp.Controllers
 
                 if (!DateTime.TryParseExact(startDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var start) ||
                     !DateTime.TryParseExact(endDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var end))
-                    return BadRequest(new { error = "Invalid date format." });
+                    return BadRequest(new { error = _localizer["Availability_InvalidDate"].Value });
 
                 var toRemove = await _context.GuideBlockedDates
                     .Where(d => d.GuideId == guideId && d.Date >= start && d.Date <= end)
@@ -206,12 +211,12 @@ namespace UrGuide.WebApp.Controllers
                     await _context.SaveChangesAsync(cancellationToken);
                 }
 
-                return Ok(new { message = "Dates unblocked successfully." });
+                return Ok(new { message = _localizer["Availability_UnblockSuccess"].Value });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error unblocking dates");
-                return StatusCode(500, new { error = "An error occurred while unblocking dates" });
+                return StatusCode(500, new { error = _localizer["Availability_UnblockError"].Value });
             }
         }
 
@@ -260,12 +265,12 @@ namespace UrGuide.WebApp.Controllers
                 }
 
                 await _context.SaveChangesAsync(cancellationToken);
-                return Ok(new { message = "Recurring pattern set successfully." });
+                return Ok(new { message = _localizer["Availability_RecurringSetSuccess"].Value });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error setting recurring pattern");
-                return StatusCode(500, new { error = "An error occurred while setting the recurring pattern" });
+                return StatusCode(500, new { error = _localizer["Availability_RecurringSetError"].Value });
             }
         }
 
@@ -286,12 +291,12 @@ namespace UrGuide.WebApp.Controllers
                     await _context.SaveChangesAsync(cancellationToken);
                 }
 
-                return Ok(new { message = "Recurring pattern cleared." });
+                return Ok(new { message = _localizer["Availability_RecurringClearSuccess"].Value });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error clearing recurring pattern");
-                return StatusCode(500, new { error = "An error occurred" });
+                return StatusCode(500, new { error = _localizer["Availability_GenericError"].Value });
             }
         }
 
@@ -322,11 +327,11 @@ namespace UrGuide.WebApp.Controllers
                     var guideExists = await _context.Users
                         .AnyAsync(u => u.Id == resolvedGuideId, cancellationToken);
                     if (!guideExists)
-                        return NotFound(new { error = $"Guide '{resolvedGuideId}' not found." });
+                        return NotFound(new { error = string.Format(_localizer["Availability_GuideNotFound"].Value, resolvedGuideId) });
                 }
 
                 if (!DateTime.TryParseExact(date, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var targetDate))
-                    return BadRequest(new { error = "Invalid date format. Use yyyy-MM-dd." });
+                    return BadRequest(new { error = _localizer["Availability_InvalidDateFormat"].Value });
 
                 var blockedEntry = await _context.GuideBlockedDates
                     .FirstOrDefaultAsync(d => d.GuideId == resolvedGuideId && d.Date == targetDate.Date, cancellationToken);
@@ -368,7 +373,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error checking conflict for date {Date}", date);
-                return StatusCode(500, new { error = "An error occurred while checking availability conflict" });
+                return StatusCode(500, new { error = _localizer["Availability_ConflictCheckError"].Value });
             }
         }
 
@@ -415,7 +420,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error exporting iCal");
-                return StatusCode(500, new { error = "An error occurred while exporting the calendar" });
+                return StatusCode(500, new { error = _localizer["Availability_ExportError"].Value });
             }
         }
 
@@ -438,7 +443,7 @@ namespace UrGuide.WebApp.Controllers
 
                 var datesToBlock = ParseIcalDates(request.ICalContent);
                 if (datesToBlock.Count == 0)
-                    return BadRequest(new { error = "No valid dates found in the provided iCal content." });
+                    return BadRequest(new { error = _localizer["Availability_NoValidDates"].Value });
 
                 var existingDatesList = await _context.GuideBlockedDates
                     .Where(d => d.GuideId == guideId)
@@ -483,7 +488,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error importing iCal");
-                return StatusCode(500, new { error = "An error occurred while importing the calendar" });
+                return StatusCode(500, new { error = _localizer["Availability_ImportError"].Value });
             }
         }
 
@@ -501,11 +506,11 @@ namespace UrGuide.WebApp.Controllers
         {
             var clientId = _configuration["GoogleCalendar:ClientId"];
             if (string.IsNullOrEmpty(clientId))
-                return StatusCode(503, new { error = "Google Calendar integration is not configured." });
+                return StatusCode(503, new { error = _localizer["GoogleCalendar_NotConfigured"].Value });
 
             var redirectUri = _configuration["GoogleCalendar:RedirectUri"];
             if (string.IsNullOrEmpty(redirectUri))
-                return StatusCode(503, new { error = "GoogleCalendar:RedirectUri is not configured." });
+                return StatusCode(503, new { error = _localizer["GoogleCalendar_RedirectUriNotConfigured"].Value });
 
             var guideId = GetUserId();
             if (string.IsNullOrEmpty(guideId)) return Unauthorized();
@@ -549,13 +554,13 @@ namespace UrGuide.WebApp.Controllers
             CancellationToken cancellationToken)
         {
             if (!string.IsNullOrEmpty(error))
-                return BadRequest(new { error = $"Google authorisation denied: {error}" });
+                return BadRequest(new { error = string.Format(_localizer["GoogleCalendar_AuthDenied"].Value, error) });
 
             if (string.IsNullOrEmpty(code))
-                return BadRequest(new { error = "Missing authorisation code." });
+                return BadRequest(new { error = _localizer["GoogleCalendar_MissingCode"].Value });
 
             if (string.IsNullOrEmpty(state))
-                return BadRequest(new { error = "Missing state parameter." });
+                return BadRequest(new { error = _localizer["GoogleCalendar_MissingState"].Value });
 
             // ── Validate CSRF state ────────────────────────────────────────────
             var stateProtector = _dataProtectionProvider
@@ -574,7 +579,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Invalid or expired Google Calendar OAuth state");
-                return BadRequest(new { error = "Invalid or expired state parameter. Please restart the connection flow." });
+                return BadRequest(new { error = _localizer["GoogleCalendar_InvalidState"].Value });
             }
 
             // ── Exchange authorisation code for tokens ─────────────────────────
@@ -583,7 +588,7 @@ namespace UrGuide.WebApp.Controllers
             var redirectUri = _configuration["GoogleCalendar:RedirectUri"];
 
             if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret) || string.IsNullOrEmpty(redirectUri))
-                return StatusCode(503, new { error = "Google Calendar integration is not configured." });
+                return StatusCode(503, new { error = _localizer["GoogleCalendar_NotConfigured"].Value });
 
             GoogleTokenResponse tokenResponse;
             try
@@ -608,7 +613,7 @@ namespace UrGuide.WebApp.Controllers
                 if (!string.IsNullOrEmpty(tokenResponse.Error))
                 {
                     _logger.LogWarning("Google token exchange error: {Error} – {Desc}", tokenResponse.Error, tokenResponse.ErrorDescription);
-                    return BadRequest(new { error = $"Token exchange failed: {tokenResponse.Error}" });
+                    return BadRequest(new { error = string.Format(_localizer["GoogleCalendar_TokenExchangeFailed"].Value, tokenResponse.Error) });
                 }
 
                 if (string.IsNullOrEmpty(tokenResponse.AccessToken))
@@ -617,7 +622,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error exchanging Google authorisation code");
-                return StatusCode(502, new { error = "Failed to exchange authorisation code with Google." });
+                return StatusCode(502, new { error = _localizer["GoogleCalendar_ExchangeFailed"].Value });
             }
 
             // ── Store tokens encrypted at rest ─────────────────────────────────
@@ -659,7 +664,7 @@ namespace UrGuide.WebApp.Controllers
             await _context.SaveChangesAsync(cancellationToken);
             _logger.LogInformation("Google Calendar connected for guide {GuideId}", guideId);
 
-            return Ok(new { message = "Google Calendar connected successfully." });
+            return Ok(new { message = _localizer["GoogleCalendar_ConnectSuccess"].Value });
         }
 
         /// <summary>
@@ -687,7 +692,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting Google Calendar status");
-                return StatusCode(500, new { error = "An error occurred." });
+                return StatusCode(500, new { error = _localizer["Availability_GenericError"].Value });
             }
         }
 
@@ -707,7 +712,7 @@ namespace UrGuide.WebApp.Controllers
                     .FirstOrDefaultAsync(t => t.GuideId == guideId, cancellationToken);
 
                 if (token == null)
-                    return Ok(new { message = "Google Calendar is not connected." });
+                    return Ok(new { message = _localizer["GoogleCalendar_NotConnected"].Value });
 
                 // Attempt to revoke access at Google's side (best-effort)
                 try
@@ -729,12 +734,12 @@ namespace UrGuide.WebApp.Controllers
                 _context.GuideGoogleCalendarTokens.Remove(token);
                 await _context.SaveChangesAsync(cancellationToken);
 
-                return Ok(new { message = "Google Calendar disconnected successfully." });
+                return Ok(new { message = _localizer["GoogleCalendar_DisconnectSuccess"].Value });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error disconnecting Google Calendar");
-                return StatusCode(500, new { error = "An error occurred." });
+                return StatusCode(500, new { error = _localizer["Availability_GenericError"].Value });
             }
         }
 
@@ -758,7 +763,7 @@ namespace UrGuide.WebApp.Controllers
                     .FirstOrDefaultAsync(t => t.GuideId == guideId, cancellationToken);
 
                 if (tokenRecord == null)
-                    return BadRequest(new { error = "Google Calendar is not connected. Use /api/availability/google/auth-url first." });
+                    return BadRequest(new { error = _localizer["GoogleCalendar_RequireAuth"].Value });
 
                 var tokenProtector = _dataProtectionProvider.CreateProtector("UrGuide.GoogleCalendarOAuth.Tokens");
                 var accessToken = tokenProtector.Unprotect(tokenRecord.EncryptedAccessToken);
@@ -767,13 +772,13 @@ namespace UrGuide.WebApp.Controllers
                 if (tokenRecord.ExpiresAt <= DateTime.UtcNow.AddMinutes(1))
                 {
                     if (string.IsNullOrEmpty(tokenRecord.EncryptedRefreshToken))
-                        return BadRequest(new { error = "Access token has expired and no refresh token is available. Please reconnect Google Calendar." });
+                        return BadRequest(new { error = _localizer["GoogleCalendar_TokenExpired"].Value });
 
                     var refreshToken = tokenProtector.Unprotect(tokenRecord.EncryptedRefreshToken);
                     var newTokens = await RefreshAccessTokenAsync(refreshToken, cancellationToken);
 
                     if (newTokens == null)
-                        return StatusCode(502, new { error = "Failed to refresh Google access token. Please reconnect Google Calendar." });
+                        return StatusCode(502, new { error = _localizer["GoogleCalendar_TokenRefreshFailed"].Value });
 
                     accessToken = newTokens.AccessToken;
                     tokenRecord.EncryptedAccessToken = tokenProtector.Protect(newTokens.AccessToken);
@@ -810,14 +815,14 @@ namespace UrGuide.WebApp.Controllers
                 if (!eventsResponse.IsSuccessStatusCode)
                 {
                     _logger.LogWarning("Google Calendar events API returned {Status}: {Content}", eventsResponse.StatusCode, eventsContent);
-                    return StatusCode(502, new { error = "Failed to retrieve events from Google Calendar." });
+                    return StatusCode(502, new { error = _localizer["GoogleCalendar_RetrieveEventsFailed"].Value });
                 }
 
                 var eventList = JsonSerializer.Deserialize<GoogleCalendarEventList>(eventsContent,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 if (eventList?.Error != null)
-                    return StatusCode(502, new { error = $"Google Calendar API error: {eventList.Error.Message}" });
+                    return StatusCode(502, new { error = string.Format(_localizer["GoogleCalendar_ApiError"].Value, eventList.Error.Message) });
 
                 var datesToBlock = new HashSet<DateTime>();
                 foreach (var evt in eventList?.Items ?? new List<GoogleCalendarEvent>())
@@ -881,7 +886,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error syncing Google Calendar");
-                return StatusCode(500, new { error = "An error occurred while syncing the calendar." });
+                return StatusCode(500, new { error = _localizer["GoogleCalendar_SyncError"].Value });
             }
         }
 
