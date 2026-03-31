@@ -646,4 +646,47 @@
   <data name="Image_NotFoundOrNoUrl" xml:space="preserve">
     <value>الصورة غير موجودة أو لا تحتوي على رابط أصلي.</value>
   </data>
+
+  <!-- Passkey errors -->
+  <data name="Passkey_InvalidAttestation" xml:space="preserve">
+    <value>استجابة التصديق غير صالحة.</value>
+  </data>
+  <data name="Passkey_RegistrationFailed" xml:space="preserve">
+    <value>فشل تسجيل مفتاح المرور.</value>
+  </data>
+  <data name="Passkey_UsernameRequired" xml:space="preserve">
+    <value>اسم المستخدم مطلوب.</value>
+  </data>
+  <data name="Passkey_UserNotFoundOrNoPasskeys" xml:space="preserve">
+    <value>المستخدم غير موجود أو لا توجد مفاتيح مرور مسجلة.</value>
+  </data>
+  <data name="Passkey_InvalidAssertion" xml:space="preserve">
+    <value>استجابة التأكيد غير صالحة.</value>
+  </data>
+  <data name="Passkey_AuthenticationFailed" xml:space="preserve">
+    <value>فشل المصادقة بمفتاح المرور.</value>
+  </data>
+  <data name="Passkey_CredentialIdRequired" xml:space="preserve">
+    <value>معرف بيانات الاعتماد مطلوب.</value>
+  </data>
+  <data name="Passkey_DeleteFailed" xml:space="preserve">
+    <value>فشل حذف مفتاح المرور.</value>
+  </data>
+  <data name="Passkey_DeletedSuccess" xml:space="preserve">
+    <value>تم حذف مفتاح المرور بنجاح.</value>
+  </data>
+
+  <!-- Additional auth errors -->
+  <data name="Auth_CredentialsRequired" xml:space="preserve">
+    <value>اسم المستخدم/البريد الإلكتروني وكلمة المرور مطلوبان.</value>
+  </data>
+  <data name="Auth_TokenObtainFailed" xml:space="preserve">
+    <value>فشل الحصول على رمز الوصول.</value>
+  </data>
+  <data name="Auth_RefreshTokenRequired" xml:space="preserve">
+    <value>رمز التحديث مطلوب.</value>
+  </data>
+  <data name="Auth_TwoFactorNotImplemented" xml:space="preserve">
+    <value>لم يتم تنفيذ التحقق بخطوتين بعد للوحة الإدارة.</value>
+  </data>
 </root>

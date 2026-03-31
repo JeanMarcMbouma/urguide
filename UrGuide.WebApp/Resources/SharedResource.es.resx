@@ -647,4 +647,47 @@
   <data name="Image_NotFoundOrNoUrl" xml:space="preserve">
     <value>Imagen no encontrada o sin URL original.</value>
   </data>
+
+  <!-- Passkey errors -->
+  <data name="Passkey_InvalidAttestation" xml:space="preserve">
+    <value>Respuesta de atestación inválida.</value>
+  </data>
+  <data name="Passkey_RegistrationFailed" xml:space="preserve">
+    <value>Error al registrar la clave de acceso.</value>
+  </data>
+  <data name="Passkey_UsernameRequired" xml:space="preserve">
+    <value>El nombre de usuario es obligatorio.</value>
+  </data>
+  <data name="Passkey_UserNotFoundOrNoPasskeys" xml:space="preserve">
+    <value>Usuario no encontrado o sin claves de acceso registradas.</value>
+  </data>
+  <data name="Passkey_InvalidAssertion" xml:space="preserve">
+    <value>Respuesta de aserción inválida.</value>
+  </data>
+  <data name="Passkey_AuthenticationFailed" xml:space="preserve">
+    <value>Error de autenticación con clave de acceso.</value>
+  </data>
+  <data name="Passkey_CredentialIdRequired" xml:space="preserve">
+    <value>El identificador de credencial es obligatorio.</value>
+  </data>
+  <data name="Passkey_DeleteFailed" xml:space="preserve">
+    <value>Error al eliminar la clave de acceso.</value>
+  </data>
+  <data name="Passkey_DeletedSuccess" xml:space="preserve">
+    <value>Clave de acceso eliminada exitosamente.</value>
+  </data>
+
+  <!-- Additional auth errors -->
+  <data name="Auth_CredentialsRequired" xml:space="preserve">
+    <value>El nombre de usuario/correo y la contraseña son obligatorios.</value>
+  </data>
+  <data name="Auth_TokenObtainFailed" xml:space="preserve">
+    <value>Error al obtener el token de acceso.</value>
+  </data>
+  <data name="Auth_RefreshTokenRequired" xml:space="preserve">
+    <value>El token de actualización es obligatorio.</value>
+  </data>
+  <data name="Auth_TwoFactorNotImplemented" xml:space="preserve">
+    <value>La verificación 2FA aún no está implementada para el panel de administración.</value>
+  </data>
 </root>

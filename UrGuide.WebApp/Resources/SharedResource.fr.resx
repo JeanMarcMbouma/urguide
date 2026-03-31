@@ -647,4 +647,47 @@
   <data name="Image_NotFoundOrNoUrl" xml:space="preserve">
     <value>Image introuvable ou sans URL d'origine.</value>
   </data>
+
+  <!-- Passkey errors -->
+  <data name="Passkey_InvalidAttestation" xml:space="preserve">
+    <value>Réponse d'attestation invalide.</value>
+  </data>
+  <data name="Passkey_RegistrationFailed" xml:space="preserve">
+    <value>Échec de l'enregistrement de la clé d'accès.</value>
+  </data>
+  <data name="Passkey_UsernameRequired" xml:space="preserve">
+    <value>Le nom d'utilisateur est requis.</value>
+  </data>
+  <data name="Passkey_UserNotFoundOrNoPasskeys" xml:space="preserve">
+    <value>Utilisateur introuvable ou aucune clé d'accès enregistrée.</value>
+  </data>
+  <data name="Passkey_InvalidAssertion" xml:space="preserve">
+    <value>Réponse d'assertion invalide.</value>
+  </data>
+  <data name="Passkey_AuthenticationFailed" xml:space="preserve">
+    <value>Échec de l'authentification par clé d'accès.</value>
+  </data>
+  <data name="Passkey_CredentialIdRequired" xml:space="preserve">
+    <value>L'identifiant de la clé est requis.</value>
+  </data>
+  <data name="Passkey_DeleteFailed" xml:space="preserve">
+    <value>Échec de la suppression de la clé d'accès.</value>
+  </data>
+  <data name="Passkey_DeletedSuccess" xml:space="preserve">
+    <value>Clé d'accès supprimée avec succès.</value>
+  </data>
+
+  <!-- Additional auth errors -->
+  <data name="Auth_CredentialsRequired" xml:space="preserve">
+    <value>Le nom d'utilisateur/e-mail et le mot de passe sont requis.</value>
+  </data>
+  <data name="Auth_TokenObtainFailed" xml:space="preserve">
+    <value>Échec de l'obtention du jeton d'accès.</value>
+  </data>
+  <data name="Auth_RefreshTokenRequired" xml:space="preserve">
+    <value>Le jeton de rafraîchissement est requis.</value>
+  </data>
+  <data name="Auth_TwoFactorNotImplemented" xml:space="preserve">
+    <value>La vérification 2FA n'est pas encore implémentée pour le tableau de bord administrateur.</value>
+  </data>
 </root>

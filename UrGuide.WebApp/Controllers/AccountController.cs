@@ -255,7 +255,7 @@ namespace UrGuide.WebApp.Controllers
             var userName = request?.UserName ?? request?.Email;
             if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(request?.Password))
             {
-                return BadRequest(ErrorEnvelop.Create("Username/email and password are required"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_CredentialsRequired"].Value));
             }
 
             try
@@ -290,8 +290,8 @@ namespace UrGuide.WebApp.Controllers
                     // Parse error response
                     var errorResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent);
                     var errorMessage = errorResponse?.ContainsKey("error_description") == true
-                        ? errorResponse["error_description"]?.ToString() ?? "Invalid credentials"
-                        : "Invalid credentials";
+                        ? errorResponse["error_description"]?.ToString() ?? _localizer["Auth_InvalidCredentials"].Value
+                        : _localizer["Auth_InvalidCredentials"].Value;
                     
                     return BadRequest(ErrorEnvelop.Create(errorMessage));
                 }
@@ -301,7 +301,7 @@ namespace UrGuide.WebApp.Controllers
                 
                 if (tokenResponse == null || string.IsNullOrEmpty(tokenResponse.AccessToken))
                 {
-                    return BadRequest(ErrorEnvelop.Create("Failed to obtain access token"));
+                    return BadRequest(ErrorEnvelop.Create(_localizer["Auth_TokenObtainFailed"].Value));
                 }
 
                 // Get user details for the response
@@ -355,7 +355,7 @@ namespace UrGuide.WebApp.Controllers
         {
             if (string.IsNullOrWhiteSpace(request?.RefreshToken))
             {
-                return BadRequest(ErrorEnvelop.Create("Refresh token is required"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_RefreshTokenRequired"].Value));
             }
 
             try
@@ -387,8 +387,8 @@ namespace UrGuide.WebApp.Controllers
                 {
                     var errorResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent);
                     var errorMessage = errorResponse?.ContainsKey("error_description") == true
-                        ? errorResponse["error_description"]?.ToString() ?? "Invalid refresh token"
-                        : "Invalid refresh token";
+                        ? errorResponse["error_description"]?.ToString() ?? _localizer["Auth_TokenInvalid"].Value
+                        : _localizer["Auth_TokenInvalid"].Value;
                     
                     return BadRequest(ErrorEnvelop.Create(errorMessage));
                 }
@@ -397,7 +397,7 @@ namespace UrGuide.WebApp.Controllers
                 
                 if (tokenResponse == null || string.IsNullOrEmpty(tokenResponse.AccessToken))
                 {
-                    return BadRequest(ErrorEnvelop.Create("Failed to obtain access token"));
+                    return BadRequest(ErrorEnvelop.Create(_localizer["Auth_TokenObtainFailed"].Value));
                 }
 
                 return Ok(new
@@ -431,7 +431,7 @@ namespace UrGuide.WebApp.Controllers
             var userName = request?.UserName ?? request?.Email;
             if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(request?.Password))
             {
-                return BadRequest(ErrorEnvelop.Create("Username/email and password are required"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_CredentialsRequired"].Value));
             }
 
             try
@@ -442,14 +442,14 @@ namespace UrGuide.WebApp.Controllers
                 
                 if (user == null)
                 {
-                    return BadRequest(ErrorEnvelop.Create("Invalid credentials"));
+                    return BadRequest(ErrorEnvelop.Create(_localizer["Auth_InvalidCredentials"].Value));
                 }
 
                 // Check password
                 var passwordValid = await UserManager.CheckPasswordAsync(user, request.Password);
                 if (!passwordValid)
                 {
-                    return BadRequest(ErrorEnvelop.Create("Invalid credentials"));
+                    return BadRequest(ErrorEnvelop.Create(_localizer["Auth_InvalidCredentials"].Value));
                 }
 
                 // Get user roles
@@ -546,7 +546,7 @@ namespace UrGuide.WebApp.Controllers
             // Placeholder for 2FA verification
             // This would need to be implemented based on your 2FA requirements
             await Task.CompletedTask;
-            return BadRequest(ErrorEnvelop.Create("2FA verification not yet implemented for admin dashboard"));
+            return BadRequest(ErrorEnvelop.Create(_localizer["Auth_TwoFactorNotImplemented"].Value));
         }
     }
 }

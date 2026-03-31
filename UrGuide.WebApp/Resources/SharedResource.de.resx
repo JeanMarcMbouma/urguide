@@ -647,4 +647,47 @@
   <data name="Image_NotFoundOrNoUrl" xml:space="preserve">
     <value>Bild nicht gefunden oder ohne Original-URL.</value>
   </data>
+
+  <!-- Passkey errors -->
+  <data name="Passkey_InvalidAttestation" xml:space="preserve">
+    <value>Ungültige Attestierungsantwort.</value>
+  </data>
+  <data name="Passkey_RegistrationFailed" xml:space="preserve">
+    <value>Registrierung des Passkeys fehlgeschlagen.</value>
+  </data>
+  <data name="Passkey_UsernameRequired" xml:space="preserve">
+    <value>Benutzername ist erforderlich.</value>
+  </data>
+  <data name="Passkey_UserNotFoundOrNoPasskeys" xml:space="preserve">
+    <value>Benutzer nicht gefunden oder keine Passkeys registriert.</value>
+  </data>
+  <data name="Passkey_InvalidAssertion" xml:space="preserve">
+    <value>Ungültige Assertionsantwort.</value>
+  </data>
+  <data name="Passkey_AuthenticationFailed" xml:space="preserve">
+    <value>Authentifizierung mit Passkey fehlgeschlagen.</value>
+  </data>
+  <data name="Passkey_CredentialIdRequired" xml:space="preserve">
+    <value>Anmeldedaten-ID ist erforderlich.</value>
+  </data>
+  <data name="Passkey_DeleteFailed" xml:space="preserve">
+    <value>Löschen des Passkeys fehlgeschlagen.</value>
+  </data>
+  <data name="Passkey_DeletedSuccess" xml:space="preserve">
+    <value>Passkey erfolgreich gelöscht.</value>
+  </data>
+
+  <!-- Additional auth errors -->
+  <data name="Auth_CredentialsRequired" xml:space="preserve">
+    <value>Benutzername/E-Mail und Passwort sind erforderlich.</value>
+  </data>
+  <data name="Auth_TokenObtainFailed" xml:space="preserve">
+    <value>Zugriffstoken konnte nicht abgerufen werden.</value>
+  </data>
+  <data name="Auth_RefreshTokenRequired" xml:space="preserve">
+    <value>Aktualisierungstoken ist erforderlich.</value>
+  </data>
+  <data name="Auth_TwoFactorNotImplemented" xml:space="preserve">
+    <value>2FA-Verifizierung ist für das Admin-Dashboard noch nicht implementiert.</value>
+  </data>
 </root>

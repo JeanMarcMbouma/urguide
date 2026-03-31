@@ -74,7 +74,7 @@ namespace UrGuide.WebApp.Controllers
         {
             if (request is null || request.AttestationResponse == null)
             {
-                return BadRequest(ErrorEnvelop.Create("Invalid attestation response"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["Passkey_InvalidAttestation"].Value));
             }
             
             var user = await _userManager.FindByIdAsync(_userContext.UserId);
@@ -88,7 +88,7 @@ namespace UrGuide.WebApp.Controllers
             
             if (!success)
             {
-                return BadRequest(ErrorEnvelop.Create("Failed to register passkey"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["Passkey_RegistrationFailed"].Value));
             }
             
             var response = new PasskeyRegistrationCompleteResponse
@@ -110,13 +110,13 @@ namespace UrGuide.WebApp.Controllers
         {
             if (string.IsNullOrEmpty(request?.UserName))
             {
-                return BadRequest(ErrorEnvelop.Create("Username is required"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["Passkey_UsernameRequired"].Value));
             }
             
             var options = await _passkeyService.StartLoginAsync(request.UserName);
             if (options == null)
             {
-                return BadRequest(ErrorEnvelop.Create("User not found or no passkeys registered"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["Passkey_UserNotFoundOrNoPasskeys"].Value));
             }
             
             var response = new PasskeyLoginStartResponse
@@ -137,14 +137,14 @@ namespace UrGuide.WebApp.Controllers
         {
             if (request?.AssertionResponse == null)
             {
-                return BadRequest(ErrorEnvelop.Create("Invalid assertion response"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["Passkey_InvalidAssertion"].Value));
             }
             
             var (success, user) = await _passkeyService.CompleteLoginAsync(request.AssertionResponse);
             
             if (!success || user == null)
             {
-                return BadRequest(ErrorEnvelop.Create("Failed to authenticate with passkey"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["Passkey_AuthenticationFailed"].Value));
             }
             
             // Sign in the user
@@ -190,17 +190,17 @@ namespace UrGuide.WebApp.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest(ErrorEnvelop.Create("Credential ID is required"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["Passkey_CredentialIdRequired"].Value));
             }
             
             var success = await _passkeyService.DeletePasskeyAsync(_userContext.UserId, id);
             
             if (!success)
             {
-                return BadRequest(ErrorEnvelop.Create("Failed to delete passkey"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["Passkey_DeleteFailed"].Value));
             }
             
-            return Ok(new { message = "Passkey deleted successfully" });
+            return Ok(new { message = _localizer["Passkey_DeletedSuccess"].Value });
         }
     }
 }
