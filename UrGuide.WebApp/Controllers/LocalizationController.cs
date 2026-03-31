@@ -53,7 +53,7 @@ namespace UrGuide.WebApp.Controllers
         public IActionResult GetTranslations(string language)
         {
             if (!_supportedLanguages.Contains(language))
-                return BadRequest(new { error = $"Language '{language}' is not supported. Supported languages: {string.Join(", ", _supportedLanguages)}" });
+                return BadRequest(new { error = string.Format(_localizer["Localization_LanguageNotSupported"].Value, language, string.Join(", ", _supportedLanguages)) });
 
             var requestedCulture = new CultureInfo(language);
             var resourceKeys = GetAllResourceKeys();

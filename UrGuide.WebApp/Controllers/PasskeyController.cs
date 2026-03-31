@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Entities;
 using UrGuide.WebApp.Models;
+using UrGuide.WebApp.Resources;
 using UrGuide.WebApp.Services;
 
 namespace UrGuide.WebApp.Controllers
@@ -21,17 +23,20 @@ namespace UrGuide.WebApp.Controllers
         private readonly UserManager<UrGuideUser> _userManager;
         private readonly IUserContext _userContext;
         private readonly SignInManager<UrGuideUser> _signInManager;
+        private readonly IStringLocalizer<SharedResource> _localizer;
         
         public PasskeyController(
             IPasskeyService passkeyService,
             UserManager<UrGuideUser> userManager,
             IUserContext userContext,
-            SignInManager<UrGuideUser> signInManager)
+            SignInManager<UrGuideUser> signInManager,
+            IStringLocalizer<SharedResource> localizer)
         {
             _passkeyService = passkeyService ?? throw new ArgumentNullException(nameof(passkeyService));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
+            _localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
         
         /// <summary>
@@ -45,7 +50,7 @@ namespace UrGuide.WebApp.Controllers
             var user = await _userManager.FindByIdAsync(_userContext.UserId);
             if (user == null)
             {
-                return BadRequest(ErrorEnvelop.Create("User not found"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["User_NotFound"].Value));
             }
             
             var friendlyName = request?.FriendlyName ?? "Passkey";
@@ -75,7 +80,7 @@ namespace UrGuide.WebApp.Controllers
             var user = await _userManager.FindByIdAsync(_userContext.UserId);
             if (user == null)
             {
-                return BadRequest(ErrorEnvelop.Create("User not found"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["User_NotFound"].Value));
             }
             
             var friendlyName = request.FriendlyName ?? "Passkey";

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
@@ -12,6 +13,7 @@ using UrGuide.Services.Contracts;
 using UrGuide.Services.Search;
 using UrGuide.Shared.Contracts;
 using UrGuide.WebApp.Models;
+using UrGuide.WebApp.Resources;
 
 namespace UrGuide.WebApp.Controllers
 {
@@ -24,19 +26,22 @@ namespace UrGuide.WebApp.Controllers
         private readonly IUserContext _userContext;
         private readonly ILogger<SearchController> _logger;
         private readonly UrGuideContext _context;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
         public SearchController(
             IElasticsearchService elasticsearchService,
             ISearchAnalyticsService searchAnalyticsService,
             IUserContext userContext,
             ILogger<SearchController> logger,
-            UrGuideContext context)
+            UrGuideContext context,
+            IStringLocalizer<SharedResource> localizer)
         {
             _elasticsearchService = elasticsearchService ?? throw new ArgumentNullException(nameof(elasticsearchService));
             _searchAnalyticsService = searchAnalyticsService ?? throw new ArgumentNullException(nameof(searchAnalyticsService));
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         /// <summary>
@@ -85,7 +90,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error searching posts");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, _localizer["Error_InternalServer"].Value);
             }
         }
 
@@ -135,7 +140,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error searching tours");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, _localizer["Error_InternalServer"].Value);
             }
         }
 
@@ -170,7 +175,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting autocomplete suggestions");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, _localizer["Error_InternalServer"].Value);
             }
         }
 
@@ -265,12 +270,12 @@ namespace UrGuide.WebApp.Controllers
                 }
                 
                 _logger.LogInformation("Successfully re-indexed {Count} posts", totalIndexed);
-                return Ok(new { message = $"Successfully re-indexed {totalIndexed} posts" });
+                return Ok(new { message = string.Format(_localizer["Search_ReindexedSuccess"].Value, totalIndexed) });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error re-indexing posts");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, _localizer["Error_InternalServer"].Value);
             }
         }
 
@@ -340,12 +345,12 @@ namespace UrGuide.WebApp.Controllers
                 }
                 
                 _logger.LogInformation("Successfully re-indexed {Count} tours", totalIndexed);
-                return Ok(new { message = $"Successfully re-indexed {totalIndexed} tours" });
+                return Ok(new { message = string.Format(_localizer["Search_ReindexedSuccess"].Value, totalIndexed) });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error re-indexing tours");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, _localizer["Error_InternalServer"].Value);
             }
         }
     }
