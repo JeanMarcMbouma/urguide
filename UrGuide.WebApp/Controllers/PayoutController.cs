@@ -2,9 +2,11 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using UrGuide.Model.Payments;
+using UrGuide.WebApp.Resources;
 using UrGuide.Services.Payments;
 
 namespace UrGuide.WebApp.Controllers
@@ -16,11 +18,13 @@ namespace UrGuide.WebApp.Controllers
     {
         private readonly IPayoutService _payoutService;
         private readonly ILogger<PayoutController> _logger;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public PayoutController(IPayoutService payoutService, ILogger<PayoutController> logger)
+        public PayoutController(IPayoutService payoutService, ILogger<PayoutController> logger, IStringLocalizer<SharedResource> localizer)
         {
             _payoutService = payoutService;
             _logger = logger;
+            _localizer = localizer;
         }
 
         /// <summary>
@@ -59,7 +63,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating payout");
-                return StatusCode(500, new { error = "An error occurred while creating the payout" });
+                return StatusCode(500, new { error = _localizer["Payout_CreateError"].Value });
             }
         }
 
@@ -81,7 +85,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving payout");
-                return StatusCode(500, new { error = "An error occurred while retrieving the payout" });
+                return StatusCode(500, new { error = _localizer["Payout_RetrieveError"].Value });
             }
         }
 
@@ -111,7 +115,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving guide payouts");
-                return StatusCode(500, new { error = "An error occurred while retrieving payouts" });
+                return StatusCode(500, new { error = _localizer["Payout_ListError"].Value });
             }
         }
 
@@ -141,7 +145,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving guide balance");
-                return StatusCode(500, new { error = "An error occurred while retrieving balance" });
+                return StatusCode(500, new { error = _localizer["Payout_BalanceError"].Value });
             }
         }
 
@@ -157,15 +161,15 @@ namespace UrGuide.WebApp.Controllers
                 var success = await _payoutService.ProcessPayoutAsync(payoutId);
                 if (!success)
                 {
-                    return NotFound(new { error = "Payout not found or failed to process" });
+                    return NotFound(new { error = _localizer["Payout_NotFound"].Value });
                 }
 
-                return Ok(new { message = "Payout processed successfully" });
+                return Ok(new { message = _localizer["Payout_ProcessSuccess"].Value });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing payout");
-                return StatusCode(500, new { error = "An error occurred while processing the payout" });
+                return StatusCode(500, new { error = _localizer["Payout_ProcessError"].Value });
             }
         }
     }

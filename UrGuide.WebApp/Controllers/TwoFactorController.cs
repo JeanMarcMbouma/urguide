@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Localization;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using UrGuide.Shared.Contracts;
+using UrGuide.WebApp.Resources;
 using UrGuide.WebApp.Data;
 using UrGuide.WebApp.Entities;
 using UrGuide.WebApp.Models;
@@ -26,19 +28,22 @@ namespace UrGuide.WebApp.Controllers
         private readonly IUserContext _userContext;
         private readonly IMemoryCache _cache;
         private readonly UrGuideAuthContext _context;
+        private readonly IStringLocalizer<SharedResource> _localizer;
         
         public TwoFactorController(
             ITwoFactorService twoFactorService,
             UserManager<UrGuideUser> userManager,
             IUserContext userContext,
             IMemoryCache cache,
-            UrGuideAuthContext context)
+            UrGuideAuthContext context,
+            IStringLocalizer<SharedResource> localizer)
         {
             _twoFactorService = twoFactorService ?? throw new ArgumentNullException(nameof(twoFactorService));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
         
         /// <summary>
@@ -51,7 +56,7 @@ namespace UrGuide.WebApp.Controllers
             var user = await _userManager.FindByIdAsync(_userContext.UserId);
             if (user == null)
             {
-                return BadRequest(ErrorEnvelop.Create("User not found"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["TwoFactor_UserNotFound"].Value));
             }
             
             // Query passkey count from database
@@ -80,12 +85,12 @@ namespace UrGuide.WebApp.Controllers
             var user = await _userManager.FindByIdAsync(_userContext.UserId);
             if (user == null)
             {
-                return BadRequest(ErrorEnvelop.Create("User not found"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["TwoFactor_UserNotFound"].Value));
             }
             
             if (user.TwoFactorEnabled)
             {
-                return BadRequest(ErrorEnvelop.Create("2FA is already enabled"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["TwoFactor_AlreadyEnabled"].Value));
             }
             
             var (secret, qrCode, manualKey) = await _twoFactorService.GenerateQRCodeAsync(user);
@@ -113,25 +118,25 @@ namespace UrGuide.WebApp.Controllers
         {
             if (string.IsNullOrEmpty(request.Code))
             {
-                return BadRequest(ErrorEnvelop.Create("Code is required"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["TwoFactor_CodeRequired"].Value));
             }
             
             var user = await _userManager.FindByIdAsync(_userContext.UserId);
             if (user == null)
             {
-                return BadRequest(ErrorEnvelop.Create("User not found"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["TwoFactor_UserNotFound"].Value));
             }
             
             if (user.TwoFactorEnabled)
             {
-                return BadRequest(ErrorEnvelop.Create("2FA is already enabled"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["TwoFactor_AlreadyEnabled"].Value));
             }
             
             // Use the secret that was generated during the 2FA enable/setup call
             var cacheKey = $"2fa_setup_{user.Id}";
             if (!_cache.TryGetValue<string>(cacheKey, out var secret) || string.IsNullOrEmpty(secret))
             {
-                return BadRequest(ErrorEnvelop.Create("2FA setup not initiated or has expired"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["TwoFactor_SetupExpired"].Value));
             }
             
             // Temporarily store secret for verification
@@ -142,7 +147,7 @@ namespace UrGuide.WebApp.Controllers
             {
                 // Clear the pending secret on failure
                 user.TwoFactorSecret = null;
-                return BadRequest(ErrorEnvelop.Create("Invalid verification code"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["TwoFactor_InvalidCode"].Value));
             }
             
             // Enable 2FA using the same secret that was used to generate the QR code
@@ -173,21 +178,21 @@ namespace UrGuide.WebApp.Controllers
             var user = await _userManager.FindByIdAsync(_userContext.UserId);
             if (user == null)
             {
-                return BadRequest(ErrorEnvelop.Create("User not found"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["TwoFactor_UserNotFound"].Value));
             }
             
             if (!user.TwoFactorEnabled)
             {
-                return BadRequest(ErrorEnvelop.Create("2FA is not enabled"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["TwoFactor_NotEnabled"].Value));
             }
             
             var success = await _twoFactorService.DisableTwoFactorAsync(user);
             if (!success)
             {
-                return BadRequest(ErrorEnvelop.Create("Failed to disable 2FA"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["TwoFactor_DisableFailed"].Value));
             }
             
-            return Ok(new { message = "2FA disabled successfully" });
+            return Ok(new { message = _localizer["TwoFactor_DisabledSuccess"].Value });
         }
         
         /// <summary>
@@ -200,12 +205,12 @@ namespace UrGuide.WebApp.Controllers
             var user = await _userManager.FindByIdAsync(_userContext.UserId);
             if (user == null)
             {
-                return BadRequest(ErrorEnvelop.Create("User not found"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["TwoFactor_UserNotFound"].Value));
             }
             
             if (!user.TwoFactorEnabled)
             {
-                return BadRequest(ErrorEnvelop.Create("2FA is not enabled"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["TwoFactor_NotEnabled"].Value));
             }
             
             var backupCodes = await _twoFactorService.GenerateBackupCodesAsync(user);
@@ -228,13 +233,13 @@ namespace UrGuide.WebApp.Controllers
         {
             if (string.IsNullOrEmpty(request.Code))
             {
-                return BadRequest(ErrorEnvelop.Create("Code is required"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["TwoFactor_CodeRequired"].Value));
             }
             
             var user = await _userManager.FindByIdAsync(_userContext.UserId);
             if (user == null)
             {
-                return BadRequest(ErrorEnvelop.Create("User not found"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["TwoFactor_UserNotFound"].Value));
             }
             
             bool isValid = request.IsBackupCode
@@ -243,10 +248,10 @@ namespace UrGuide.WebApp.Controllers
             
             if (!isValid)
             {
-                return BadRequest(ErrorEnvelop.Create("Invalid verification code"));
+                return BadRequest(ErrorEnvelop.Create(_localizer["TwoFactor_InvalidCode"].Value));
             }
             
-            return Ok(new { message = "Code verified successfully" });
+            return Ok(new { message = _localizer["TwoFactor_VerifiedSuccess"].Value });
         }
     }
 }

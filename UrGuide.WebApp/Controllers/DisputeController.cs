@@ -2,9 +2,11 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using UrGuide.Model.Disputes;
+using UrGuide.WebApp.Resources;
 using UrGuide.Services.Disputes;
 
 namespace UrGuide.WebApp.Controllers
@@ -16,11 +18,13 @@ namespace UrGuide.WebApp.Controllers
     {
         private readonly IDisputeService _disputeService;
         private readonly ILogger<DisputeController> _logger;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public DisputeController(IDisputeService disputeService, ILogger<DisputeController> logger)
+        public DisputeController(IDisputeService disputeService, ILogger<DisputeController> logger, IStringLocalizer<SharedResource> localizer)
         {
             _disputeService = disputeService;
             _logger = logger;
+            _localizer = localizer;
         }
 
         /// <summary>
@@ -48,7 +52,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating dispute");
-                return StatusCode(500, new { error = "An error occurred while creating the dispute" });
+                return StatusCode(500, new { error = _localizer["Dispute_CreateError"].Value });
             }
         }
 
@@ -70,7 +74,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving dispute");
-                return StatusCode(500, new { error = "An error occurred while retrieving the dispute" });
+                return StatusCode(500, new { error = _localizer["Dispute_RetrieveError"].Value });
             }
         }
 
@@ -94,7 +98,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving user disputes");
-                return StatusCode(500, new { error = "An error occurred while retrieving disputes" });
+                return StatusCode(500, new { error = _localizer["Dispute_ListError"].Value });
             }
         }
 
@@ -113,7 +117,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving admin dispute queue");
-                return StatusCode(500, new { error = "An error occurred while retrieving the dispute queue" });
+                return StatusCode(500, new { error = _localizer["Dispute_QueueError"].Value });
             }
         }
 
@@ -147,7 +151,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error submitting evidence");
-                return StatusCode(500, new { error = "An error occurred while submitting evidence" });
+                return StatusCode(500, new { error = _localizer["Dispute_SubmitEvidenceError"].Value });
             }
         }
 
@@ -181,7 +185,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error adding message");
-                return StatusCode(500, new { error = "An error occurred while adding the message" });
+                return StatusCode(500, new { error = _localizer["Dispute_AddMessageError"].Value });
             }
         }
 
@@ -203,15 +207,15 @@ namespace UrGuide.WebApp.Controllers
                 var success = await _disputeService.AssignDisputeAsync(adminId, disputeId);
                 if (!success)
                 {
-                    return NotFound(new { error = "Dispute not found" });
+                    return NotFound(new { error = _localizer["Dispute_NotFound"].Value });
                 }
 
-                return Ok(new { message = "Dispute assigned successfully" });
+                return Ok(new { message = _localizer["Dispute_AssignSuccess"].Value });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error assigning dispute");
-                return StatusCode(500, new { error = "An error occurred while assigning the dispute" });
+                return StatusCode(500, new { error = _localizer["Dispute_AssignError"].Value });
             }
         }
 
@@ -240,7 +244,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error resolving dispute");
-                return StatusCode(500, new { error = "An error occurred while resolving the dispute" });
+                return StatusCode(500, new { error = _localizer["Dispute_ResolveError"].Value });
             }
         }
 
@@ -262,15 +266,15 @@ namespace UrGuide.WebApp.Controllers
                 var success = await _disputeService.EscalateDisputeAsync(adminId, disputeId);
                 if (!success)
                 {
-                    return NotFound(new { error = "Dispute not found" });
+                    return NotFound(new { error = _localizer["Dispute_NotFound"].Value });
                 }
 
-                return Ok(new { message = "Dispute escalated successfully" });
+                return Ok(new { message = _localizer["Dispute_EscalateSuccess"].Value });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error escalating dispute");
-                return StatusCode(500, new { error = "An error occurred while escalating the dispute" });
+                return StatusCode(500, new { error = _localizer["Dispute_EscalateError"].Value });
             }
         }
 
@@ -289,7 +293,7 @@ namespace UrGuide.WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving dispute stats");
-                return StatusCode(500, new { error = "An error occurred while retrieving dispute statistics" });
+                return StatusCode(500, new { error = _localizer["Dispute_StatsError"].Value });
             }
         }
     }
