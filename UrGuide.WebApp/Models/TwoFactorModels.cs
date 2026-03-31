@@ -45,6 +45,33 @@ namespace UrGuide.WebApp.Models
         public string? Code { get; set; }
         public bool IsBackupCode { get; set; }
     }
+
+    /// <summary>
+    /// Request to verify 2FA code during the login flow (unauthenticated).
+    /// Requires user identification since the user is not yet fully authenticated.
+    /// </summary>
+    public class Verify2FALoginRequest
+    {
+        /// <summary>
+        /// The email or username of the user attempting to log in
+        /// </summary>
+        public string? Email { get; set; }
+        
+        /// <summary>
+        /// The user's password for re-validation
+        /// </summary>
+        public string? Password { get; set; }
+        
+        /// <summary>
+        /// The TOTP code or backup code
+        /// </summary>
+        public string? Code { get; set; }
+
+        /// <summary>
+        /// Whether the code is a backup code instead of a TOTP code
+        /// </summary>
+        public bool IsBackupCode { get; set; }
+    }
     
     /// <summary>
     /// 2FA status information

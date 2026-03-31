@@ -534,29 +534,38 @@ namespace UrGuide.WebApp.Controllers
         }
 
         /// <summary>
-        /// Verify a 2FA code during login or for sensitive operations.
-        /// Supports both TOTP codes and backup codes.
+        /// Verify a 2FA code during the login flow.
+        /// This endpoint does not require authentication since the user is mid-login.
+        /// Credentials are re-validated along with the 2FA code.
         /// </summary>
         [HttpPost("/api/auth/verify-2fa")]
+        [RateLimit(5, "1m")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400, Type = typeof(ErrorEnvelop<string>))]
-        public async Task<IActionResult> VerifyTwoFactor([FromBody] Verify2FACodeRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> VerifyTwoFactor([FromBody] Verify2FALoginRequest request, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(request?.Code))
             {
                 return BadRequest(ErrorEnvelop.Create(_localizer["Auth_CodeRequired"].Value));
             }
 
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
+            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
             {
-                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_UserNotFound"].Value));
+                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_CredentialsRequired"].Value));
             }
 
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByEmailAsync(request.Email)
+                ?? await _userManager.FindByNameAsync(request.Email);
+
             if (user == null)
             {
-                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_UserNotFound"].Value));
+                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_InvalidCredentials"].Value));
+            }
+
+            var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+            if (!passwordValid)
+            {
+                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_InvalidCredentials"].Value));
             }
 
             if (!user.TwoFactorEnabled)
