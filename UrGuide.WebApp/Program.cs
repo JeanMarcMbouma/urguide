@@ -29,6 +29,8 @@ using Microsoft.Extensions.Localization;
 using UrGuide.WebApp.Resources;
 using UrGuide.WebApp.Middleware;
 using UrGuide.WebApp.Observability;
+using System.IO;
+using System.Reflection;
 
 var logger = LogManager.Setup().LoadConfigurationFromFile("nlog.config").GetCurrentClassLogger();
 try
@@ -169,13 +171,31 @@ try
         { 
             Title = "UrGuide API", 
             Version = "v1",
-            Description = "UrGuide Tourism Platform API - Connect travelers with local guides",
+            Description = "UrGuide Tourism Platform API - Connect travelers with local guides worldwide. " +
+                "This API provides endpoints for tour discovery, booking, payments, real-time messaging, " +
+                "guide management, and platform administration. " +
+                "See the [API Documentation Portal](https://github.com/JeanMarcMbouma/urguide/tree/main/docs/api-portal) " +
+                "for tutorials, code examples, and SDK documentation.",
             Contact = new OpenApiContact
             {
                 Name = "UrGuide Support",
                 Url = new Uri("https://github.com/JeanMarcMbouma/urguide")
-            }
+            },
+            License = new OpenApiLicense
+            {
+                Name = "MIT License",
+                Url = new Uri("https://github.com/JeanMarcMbouma/urguide/blob/main/LICENSE")
+            },
+            TermsOfService = new Uri("https://github.com/JeanMarcMbouma/urguide/blob/main/docs/api-portal/README.md")
         });
+
+        // Include XML comments from the web app for richer Swagger documentation
+        var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+        if (File.Exists(xmlPath))
+        {
+            c.IncludeXmlComments(xmlPath);
+        }
     });
 
     builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
@@ -277,6 +297,12 @@ try
         c.OAuthClientId("UrGuide.WebAPI");
         c.OAuthAppName("UrGuide Swagger UI");
         c.OAuthUsePkce();
+        c.DocumentTitle = "UrGuide API Documentation";
+        c.DefaultModelsExpandDepth(1);
+        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
+        c.EnableDeepLinking();
+        c.DisplayRequestDuration();
+        c.EnableFilter();
     });
     app.UseAuthentication();
     app.UseIdentityServer();
