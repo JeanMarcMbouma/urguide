@@ -164,4 +164,487 @@
   <data name="Success_BidWithdrawn" xml:space="preserve">
     <value>Oferta retirada exitosamente.</value>
   </data>
+
+  <!-- Dispute errors -->
+  <data name="Dispute_CreateError" xml:space="preserve">
+    <value>Se produjo un error al crear la disputa.</value>
+  </data>
+  <data name="Dispute_RetrieveError" xml:space="preserve">
+    <value>Se produjo un error al recuperar la disputa.</value>
+  </data>
+  <data name="Dispute_ListError" xml:space="preserve">
+    <value>Se produjo un error al recuperar las disputas.</value>
+  </data>
+  <data name="Dispute_QueueError" xml:space="preserve">
+    <value>Se produjo un error al recuperar la cola de disputas.</value>
+  </data>
+  <data name="Dispute_SubmitEvidenceError" xml:space="preserve">
+    <value>Se produjo un error al enviar la evidencia.</value>
+  </data>
+  <data name="Dispute_AddMessageError" xml:space="preserve">
+    <value>Se produjo un error al agregar el mensaje.</value>
+  </data>
+  <data name="Dispute_NotFound" xml:space="preserve">
+    <value>Disputa no encontrada.</value>
+  </data>
+  <data name="Dispute_AssignSuccess" xml:space="preserve">
+    <value>Disputa asignada exitosamente.</value>
+  </data>
+  <data name="Dispute_AssignError" xml:space="preserve">
+    <value>Se produjo un error al asignar la disputa.</value>
+  </data>
+  <data name="Dispute_ResolveError" xml:space="preserve">
+    <value>Se produjo un error al resolver la disputa.</value>
+  </data>
+  <data name="Dispute_EscalateSuccess" xml:space="preserve">
+    <value>Disputa escalada exitosamente.</value>
+  </data>
+  <data name="Dispute_EscalateError" xml:space="preserve">
+    <value>Se produjo un error al escalar la disputa.</value>
+  </data>
+  <data name="Dispute_StatsError" xml:space="preserve">
+    <value>Se produjo un error al recuperar las estadísticas de disputas.</value>
+  </data>
+
+  <!-- Payout errors -->
+  <data name="Payout_CreateError" xml:space="preserve">
+    <value>Se produjo un error al crear el pago.</value>
+  </data>
+  <data name="Payout_RetrieveError" xml:space="preserve">
+    <value>Se produjo un error al recuperar el pago.</value>
+  </data>
+  <data name="Payout_ListError" xml:space="preserve">
+    <value>Se produjo un error al recuperar los pagos.</value>
+  </data>
+  <data name="Payout_BalanceError" xml:space="preserve">
+    <value>Se produjo un error al recuperar el saldo.</value>
+  </data>
+  <data name="Payout_NotFound" xml:space="preserve">
+    <value>Pago no encontrado o no se pudo procesar.</value>
+  </data>
+  <data name="Payout_ProcessSuccess" xml:space="preserve">
+    <value>Pago procesado exitosamente.</value>
+  </data>
+  <data name="Payout_ProcessError" xml:space="preserve">
+    <value>Se produjo un error al procesar el pago.</value>
+  </data>
+
+  <!-- Email template operation errors -->
+  <data name="EmailTemplate_CreateError" xml:space="preserve">
+    <value>Se produjo un error al crear la plantilla de correo electrónico.</value>
+  </data>
+  <data name="EmailTemplate_UpdateError" xml:space="preserve">
+    <value>Se produjo un error al actualizar la plantilla de correo electrónico.</value>
+  </data>
+  <data name="EmailTemplate_RetrieveError" xml:space="preserve">
+    <value>Se produjo un error al recuperar la plantilla de correo electrónico.</value>
+  </data>
+  <data name="EmailTemplate_ListError" xml:space="preserve">
+    <value>Se produjo un error al listar las plantillas de correo electrónico.</value>
+  </data>
+  <data name="EmailTemplate_PreviewError" xml:space="preserve">
+    <value>Se produjo un error al previsualizar la plantilla de correo electrónico.</value>
+  </data>
+  <data name="EmailTemplate_VersionsError" xml:space="preserve">
+    <value>Se produjo un error al recuperar las versiones de la plantilla.</value>
+  </data>
+  <data name="EmailTemplate_DeactivateError" xml:space="preserve">
+    <value>Se produjo un error al desactivar la plantilla de correo electrónico.</value>
+  </data>
+
+  <!-- Two-factor authentication messages -->
+  <data name="TwoFactor_UserNotFound" xml:space="preserve">
+    <value>Usuario no encontrado.</value>
+  </data>
+  <data name="TwoFactor_AlreadyEnabled" xml:space="preserve">
+    <value>La autenticación de dos factores ya está habilitada.</value>
+  </data>
+  <data name="TwoFactor_CodeRequired" xml:space="preserve">
+    <value>El código es obligatorio.</value>
+  </data>
+  <data name="TwoFactor_SetupExpired" xml:space="preserve">
+    <value>La configuración 2FA no se ha iniciado o ha expirado.</value>
+  </data>
+  <data name="TwoFactor_InvalidCode" xml:space="preserve">
+    <value>Código de verificación inválido.</value>
+  </data>
+  <data name="TwoFactor_NotEnabled" xml:space="preserve">
+    <value>La autenticación de dos factores no está habilitada.</value>
+  </data>
+  <data name="TwoFactor_DisableFailed" xml:space="preserve">
+    <value>Error al desactivar la autenticación de dos factores.</value>
+  </data>
+  <data name="TwoFactor_DisabledSuccess" xml:space="preserve">
+    <value>Autenticación de dos factores desactivada exitosamente.</value>
+  </data>
+  <data name="TwoFactor_VerifiedSuccess" xml:space="preserve">
+    <value>Código verificado exitosamente.</value>
+  </data>
+
+  <!-- Guide verification messages -->
+  <data name="Verification_SubmitError" xml:space="preserve">
+    <value>Se produjo un error al enviar el documento.</value>
+  </data>
+  <data name="Verification_NotFound" xml:space="preserve">
+    <value>Envío de verificación no encontrado.</value>
+  </data>
+  <data name="Verification_ApprovedSuccess" xml:space="preserve">
+    <value>Verificación aprobada.</value>
+  </data>
+  <data name="Verification_ApproveError" xml:space="preserve">
+    <value>Se produjo un error al aprobar la verificación.</value>
+  </data>
+  <data name="Verification_RejectedSuccess" xml:space="preserve">
+    <value>Verificación rechazada.</value>
+  </data>
+  <data name="Verification_RejectError" xml:space="preserve">
+    <value>Se produjo un error al rechazar la verificación.</value>
+  </data>
+
+  <!-- Guide dashboard errors -->
+  <data name="Dashboard_RetrieveError" xml:space="preserve">
+    <value>Se produjo un error al recuperar los datos del panel.</value>
+  </data>
+  <data name="Dashboard_MetricsError" xml:space="preserve">
+    <value>Se produjo un error al recuperar las métricas de rendimiento.</value>
+  </data>
+  <data name="Dashboard_StatisticsError" xml:space="preserve">
+    <value>Se produjo un error al recuperar las estadísticas de los recorridos.</value>
+  </data>
+  <data name="Dashboard_ActivityError" xml:space="preserve">
+    <value>Se produjo un error al recuperar la actividad reciente.</value>
+  </data>
+
+  <!-- Message errors -->
+  <data name="Message_ConversationNotFound" xml:space="preserve">
+    <value>Conversación no encontrada.</value>
+  </data>
+  <data name="Message_SendError" xml:space="preserve">
+    <value>Se produjo un error al enviar el mensaje.</value>
+  </data>
+  <data name="Message_MarkedAsReadSuccess" xml:space="preserve">
+    <value>Conversación marcada como leída.</value>
+  </data>
+
+  <!-- Payment operation errors -->
+  <data name="Payment_CreateError" xml:space="preserve">
+    <value>Se produjo un error al crear el pago.</value>
+  </data>
+  <data name="Payment_RetrieveError" xml:space="preserve">
+    <value>Se produjo un error al recuperar el pago.</value>
+  </data>
+  <data name="Payment_HistoryError" xml:space="preserve">
+    <value>Se produjo un error al recuperar el historial de transacciones.</value>
+  </data>
+  <data name="Payment_ConfirmSuccess" xml:space="preserve">
+    <value>Pago confirmado exitosamente.</value>
+  </data>
+  <data name="Payment_ConfirmError" xml:space="preserve">
+    <value>Se produjo un error al confirmar el pago.</value>
+  </data>
+  <data name="Payment_CancelSuccess" xml:space="preserve">
+    <value>Pago cancelado exitosamente.</value>
+  </data>
+  <data name="Payment_CancelError" xml:space="preserve">
+    <value>Se produjo un error al cancelar el pago.</value>
+  </data>
+
+  <!-- Recommendation errors -->
+  <data name="Recommendation_CountInvalid" xml:space="preserve">
+    <value>La cantidad debe estar entre 1 y 50.</value>
+  </data>
+  <data name="Recommendation_LatitudeInvalid" xml:space="preserve">
+    <value>La latitud debe estar entre -90 y 90.</value>
+  </data>
+  <data name="Recommendation_LongitudeInvalid" xml:space="preserve">
+    <value>La longitud debe estar entre -180 y 180.</value>
+  </data>
+  <data name="Recommendation_GetError" xml:space="preserve">
+    <value>Se produjo un error al obtener las recomendaciones.</value>
+  </data>
+  <data name="Recommendation_PopularToursError" xml:space="preserve">
+    <value>Se produjo un error al obtener los recorridos populares.</value>
+  </data>
+  <data name="Recommendation_PreferenceRequired" xml:space="preserve">
+    <value>Se requiere al menos una preferencia.</value>
+  </data>
+  <data name="Recommendation_PreferenceMaximum" xml:space="preserve">
+    <value>Se permiten un máximo de 20 preferencias.</value>
+  </data>
+  <data name="Recommendation_PreferenceInvalid" xml:space="preserve">
+    <value>Preferencias inválidas. Tipos válidos: {0}</value>
+  </data>
+  <data name="Recommendation_SetPreferencesError" xml:space="preserve">
+    <value>Se produjo un error al establecer las preferencias.</value>
+  </data>
+  <data name="Recommendation_GetPreferencesError" xml:space="preserve">
+    <value>Se produjo un error al obtener las preferencias.</value>
+  </data>
+  <data name="Recommendation_TourIdRequired" xml:space="preserve">
+    <value>TourId es obligatorio.</value>
+  </data>
+  <data name="Recommendation_InteractionTypeInvalid" xml:space="preserve">
+    <value>El tipo debe ser un tipo de interacción válido. Valores permitidos: {0}</value>
+  </data>
+  <data name="Recommendation_InteractionTypeUnknown" xml:space="preserve">
+    <value>Tipo de interacción inválido.</value>
+  </data>
+  <data name="Recommendation_RecordInteractionError" xml:space="preserve">
+    <value>Se produjo un error al registrar la interacción.</value>
+  </data>
+  <data name="Recommendation_FeedbackIdRequired" xml:space="preserve">
+    <value>RecommendationId es obligatorio.</value>
+  </data>
+  <data name="Recommendation_NotFound" xml:space="preserve">
+    <value>Recomendación no encontrada.</value>
+  </data>
+  <data name="Recommendation_FeedbackError" xml:space="preserve">
+    <value>Se produjo un error al proporcionar comentarios.</value>
+  </data>
+  <data name="Recommendation_StatsError" xml:space="preserve">
+    <value>Se produjo un error al obtener las estadísticas de recomendaciones.</value>
+  </data>
+
+  <!-- Refund errors -->
+  <data name="Refund_CreateError" xml:space="preserve">
+    <value>Se produjo un error al crear el reembolso.</value>
+  </data>
+  <data name="Refund_RetrieveError" xml:space="preserve">
+    <value>Se produjo un error al recuperar el reembolso.</value>
+  </data>
+  <data name="Refund_ListError" xml:space="preserve">
+    <value>Se produjo un error al recuperar los reembolsos.</value>
+  </data>
+  <data name="Refund_NotFound" xml:space="preserve">
+    <value>Reembolso no encontrado o no se pudo procesar.</value>
+  </data>
+  <data name="Refund_ProcessSuccess" xml:space="preserve">
+    <value>Reembolso procesado exitosamente.</value>
+  </data>
+  <data name="Refund_ProcessError" xml:space="preserve">
+    <value>Se produjo un error al procesar el reembolso.</value>
+  </data>
+
+  <!-- Report errors -->
+  <data name="Report_GenerateError" xml:space="preserve">
+    <value>Se produjo un error al generar el informe.</value>
+  </data>
+  <data name="Report_NotFound" xml:space="preserve">
+    <value>Informe no encontrado.</value>
+  </data>
+  <data name="Report_RetrieveError" xml:space="preserve">
+    <value>Se produjo un error al recuperar el informe.</value>
+  </data>
+  <data name="Report_ListError" xml:space="preserve">
+    <value>Se produjo un error al recuperar los informes.</value>
+  </data>
+  <data name="Report_DataNotFound" xml:space="preserve">
+    <value>Datos del informe no encontrados.</value>
+  </data>
+  <data name="Report_DownloadError" xml:space="preserve">
+    <value>Se produjo un error al descargar el informe.</value>
+  </data>
+  <data name="Report_ScheduleCreateError" xml:space="preserve">
+    <value>Se produjo un error al crear la programación.</value>
+  </data>
+  <data name="Report_ScheduleListError" xml:space="preserve">
+    <value>Se produjo un error al recuperar las programaciones.</value>
+  </data>
+  <data name="Report_ScheduleNotFound" xml:space="preserve">
+    <value>Programación no encontrada.</value>
+  </data>
+  <data name="Report_ScheduleUpdateError" xml:space="preserve">
+    <value>Se produjo un error al actualizar la programación.</value>
+  </data>
+  <data name="Report_ScheduleDeleteSuccess" xml:space="preserve">
+    <value>Programación eliminada exitosamente.</value>
+  </data>
+  <data name="Report_ScheduleDeleteError" xml:space="preserve">
+    <value>Se produjo un error al eliminar la programación.</value>
+  </data>
+  <data name="Report_EarningsError" xml:space="preserve">
+    <value>Se produjo un error al generar el informe de ganancias.</value>
+  </data>
+  <data name="Report_BookingSummaryError" xml:space="preserve">
+    <value>Se produjo un error al generar el resumen de reservas.</value>
+  </data>
+
+  <!-- Search messages -->
+  <data name="Search_ReindexedSuccess" xml:space="preserve">
+    <value>{0} elementos reindexados exitosamente.</value>
+  </data>
+
+  <!-- Social authentication errors -->
+  <data name="SocialAuth_UnsupportedProvider" xml:space="preserve">
+    <value>Proveedor no compatible: {0}. Compatibles: Google, Apple, Microsoft.</value>
+  </data>
+  <data name="SocialAuth_AuthenticationFailed" xml:space="preserve">
+    <value>Error de autenticación. Por favor, inténtelo de nuevo.</value>
+  </data>
+  <data name="SocialAuth_NoIdentifier" xml:space="preserve">
+    <value>No se pudo recuperar el identificador del usuario del proveedor.</value>
+  </data>
+  <data name="SocialAuth_LoginFailed" xml:space="preserve">
+    <value>Error en el inicio de sesión social.</value>
+  </data>
+  <data name="SocialAuth_LinkingFailed" xml:space="preserve">
+    <value>Error en la vinculación.</value>
+  </data>
+  <data name="SocialAuth_UnlinkingFailed" xml:space="preserve">
+    <value>Error en la desvinculación.</value>
+  </data>
+
+  <!-- Rate limit errors -->
+  <data name="Error_UserIdNotFound" xml:space="preserve">
+    <value>ID de usuario no encontrado en las reclamaciones.</value>
+  </data>
+
+  <!-- Tour template errors -->
+  <data name="TourTemplate_GuideIdRequired" xml:space="preserve">
+    <value>El parámetro de consulta guideId es obligatorio para solicitudes no autenticadas.</value>
+  </data>
+
+  <!-- Data export messages -->
+  <data name="DataExport_CancelSuccess" xml:space="preserve">
+    <value>Solicitud de exportación cancelada exitosamente.</value>
+  </data>
+
+  <!-- Admin messages -->
+  <data name="Admin_UserSuspended" xml:space="preserve">
+    <value>Usuario suspendido por {0} días.</value>
+  </data>
+  <data name="Admin_UserActivatedSuccess" xml:space="preserve">
+    <value>Usuario activado exitosamente.</value>
+  </data>
+  <data name="Admin_UserDeletedSuccess" xml:space="preserve">
+    <value>Usuario eliminado exitosamente.</value>
+  </data>
+  <data name="Admin_UserRolesUpdatedSuccess" xml:space="preserve">
+    <value>Roles del usuario actualizados exitosamente.</value>
+  </data>
+  <data name="Admin_GuideVerificationAction" xml:space="preserve">
+    <value>Verificación del guía {0}.</value>
+  </data>
+  <data name="Admin_TourPostAction" xml:space="preserve">
+    <value>Publicación del recorrido {0}.</value>
+  </data>
+  <data name="Admin_SettingsUpdatedSuccess" xml:space="preserve">
+    <value>Configuración de la plataforma actualizada exitosamente.</value>
+  </data>
+  <data name="Admin_AccountUnfrozenSuccess" xml:space="preserve">
+    <value>Cuenta descongelada exitosamente.</value>
+  </data>
+
+  <!-- Availability errors -->
+  <data name="Availability_InvalidDateFormat" xml:space="preserve">
+    <value>Formato de fecha inválido. Use aaaa-MM-dd.</value>
+  </data>
+  <data name="Availability_RetrieveError" xml:space="preserve">
+    <value>Se produjo un error al recuperar la disponibilidad.</value>
+  </data>
+  <data name="Availability_InvalidDate" xml:space="preserve">
+    <value>Formato de fecha inválido.</value>
+  </data>
+  <data name="Availability_BlockSuccess" xml:space="preserve">
+    <value>Fechas bloqueadas exitosamente.</value>
+  </data>
+  <data name="Availability_BlockError" xml:space="preserve">
+    <value>Se produjo un error al bloquear las fechas.</value>
+  </data>
+  <data name="Availability_UnblockSuccess" xml:space="preserve">
+    <value>Fechas desbloqueadas exitosamente.</value>
+  </data>
+  <data name="Availability_UnblockError" xml:space="preserve">
+    <value>Se produjo un error al desbloquear las fechas.</value>
+  </data>
+  <data name="Availability_RecurringSetSuccess" xml:space="preserve">
+    <value>Patrón recurrente establecido exitosamente.</value>
+  </data>
+  <data name="Availability_RecurringSetError" xml:space="preserve">
+    <value>Se produjo un error al establecer el patrón recurrente.</value>
+  </data>
+  <data name="Availability_RecurringClearSuccess" xml:space="preserve">
+    <value>Patrón recurrente eliminado.</value>
+  </data>
+  <data name="Availability_GuideNotFound" xml:space="preserve">
+    <value>Guía '{0}' no encontrado.</value>
+  </data>
+  <data name="Availability_ConflictCheckError" xml:space="preserve">
+    <value>Se produjo un error al verificar el conflicto de disponibilidad.</value>
+  </data>
+  <data name="Availability_ExportError" xml:space="preserve">
+    <value>Se produjo un error al exportar el calendario.</value>
+  </data>
+  <data name="Availability_NoValidDates" xml:space="preserve">
+    <value>No se encontraron fechas válidas en el contenido iCal proporcionado.</value>
+  </data>
+  <data name="Availability_ImportError" xml:space="preserve">
+    <value>Se produjo un error al importar el calendario.</value>
+  </data>
+  <data name="Availability_GenericError" xml:space="preserve">
+    <value>Se produjo un error.</value>
+  </data>
+
+  <!-- Google Calendar errors -->
+  <data name="GoogleCalendar_NotConfigured" xml:space="preserve">
+    <value>La integración de Google Calendar no está configurada.</value>
+  </data>
+  <data name="GoogleCalendar_RedirectUriNotConfigured" xml:space="preserve">
+    <value>GoogleCalendar:RedirectUri no está configurado.</value>
+  </data>
+  <data name="GoogleCalendar_AuthDenied" xml:space="preserve">
+    <value>Autorización de Google denegada: {0}</value>
+  </data>
+  <data name="GoogleCalendar_MissingCode" xml:space="preserve">
+    <value>Falta el código de autorización.</value>
+  </data>
+  <data name="GoogleCalendar_MissingState" xml:space="preserve">
+    <value>Falta el parámetro de estado.</value>
+  </data>
+  <data name="GoogleCalendar_InvalidState" xml:space="preserve">
+    <value>Parámetro de estado inválido o expirado. Por favor, reinicie el flujo de conexión.</value>
+  </data>
+  <data name="GoogleCalendar_TokenExchangeFailed" xml:space="preserve">
+    <value>Error en el intercambio de token: {0}</value>
+  </data>
+  <data name="GoogleCalendar_ExchangeFailed" xml:space="preserve">
+    <value>Error al intercambiar el código de autorización con Google.</value>
+  </data>
+  <data name="GoogleCalendar_ConnectSuccess" xml:space="preserve">
+    <value>Google Calendar conectado exitosamente.</value>
+  </data>
+  <data name="GoogleCalendar_NotConnected" xml:space="preserve">
+    <value>Google Calendar no está conectado.</value>
+  </data>
+  <data name="GoogleCalendar_DisconnectSuccess" xml:space="preserve">
+    <value>Google Calendar desconectado exitosamente.</value>
+  </data>
+  <data name="GoogleCalendar_RequireAuth" xml:space="preserve">
+    <value>Google Calendar no está conectado. Use primero /api/availability/google/auth-url.</value>
+  </data>
+  <data name="GoogleCalendar_TokenExpired" xml:space="preserve">
+    <value>El token de acceso ha expirado y no hay token de actualización disponible. Por favor, reconecte Google Calendar.</value>
+  </data>
+  <data name="GoogleCalendar_TokenRefreshFailed" xml:space="preserve">
+    <value>Error al actualizar el token de acceso de Google. Por favor, reconecte Google Calendar.</value>
+  </data>
+  <data name="GoogleCalendar_RetrieveEventsFailed" xml:space="preserve">
+    <value>Error al recuperar eventos de Google Calendar.</value>
+  </data>
+  <data name="GoogleCalendar_ApiError" xml:space="preserve">
+    <value>Error de la API de Google Calendar: {0}</value>
+  </data>
+  <data name="GoogleCalendar_SyncError" xml:space="preserve">
+    <value>Se produjo un error al sincronizar el calendario.</value>
+  </data>
+
+  <!-- Localization errors -->
+  <data name="Localization_LanguageNotSupported" xml:space="preserve">
+    <value>El idioma '{0}' no es compatible. Idiomas compatibles: {1}</value>
+  </data>
+
+  <!-- Image errors -->
+  <data name="Image_NotFoundOrNoUrl" xml:space="preserve">
+    <value>Imagen no encontrada o sin URL original.</value>
+  </data>
 </root>

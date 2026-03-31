@@ -164,4 +164,486 @@
   <data name="Success_BidWithdrawn" xml:space="preserve">
     <value>تم سحب العرض بنجاح.</value>
   </data>
+  <!-- Dispute errors -->
+  <data name="Dispute_CreateError" xml:space="preserve">
+    <value>حدث خطأ أثناء إنشاء النزاع.</value>
+  </data>
+  <data name="Dispute_RetrieveError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد النزاع.</value>
+  </data>
+  <data name="Dispute_ListError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد النزاعات.</value>
+  </data>
+  <data name="Dispute_QueueError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد قائمة انتظار النزاعات.</value>
+  </data>
+  <data name="Dispute_SubmitEvidenceError" xml:space="preserve">
+    <value>حدث خطأ أثناء تقديم الأدلة.</value>
+  </data>
+  <data name="Dispute_AddMessageError" xml:space="preserve">
+    <value>حدث خطأ أثناء إضافة الرسالة.</value>
+  </data>
+  <data name="Dispute_NotFound" xml:space="preserve">
+    <value>النزاع غير موجود.</value>
+  </data>
+  <data name="Dispute_AssignSuccess" xml:space="preserve">
+    <value>تم تعيين النزاع بنجاح.</value>
+  </data>
+  <data name="Dispute_AssignError" xml:space="preserve">
+    <value>حدث خطأ أثناء تعيين النزاع.</value>
+  </data>
+  <data name="Dispute_ResolveError" xml:space="preserve">
+    <value>حدث خطأ أثناء حل النزاع.</value>
+  </data>
+  <data name="Dispute_EscalateSuccess" xml:space="preserve">
+    <value>تم تصعيد النزاع بنجاح.</value>
+  </data>
+  <data name="Dispute_EscalateError" xml:space="preserve">
+    <value>حدث خطأ أثناء تصعيد النزاع.</value>
+  </data>
+  <data name="Dispute_StatsError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد إحصائيات النزاعات.</value>
+  </data>
+
+  <!-- Payout errors -->
+  <data name="Payout_CreateError" xml:space="preserve">
+    <value>حدث خطأ أثناء إنشاء الدفعة.</value>
+  </data>
+  <data name="Payout_RetrieveError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد الدفعة.</value>
+  </data>
+  <data name="Payout_ListError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد الدفعات.</value>
+  </data>
+  <data name="Payout_BalanceError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد الرصيد.</value>
+  </data>
+  <data name="Payout_NotFound" xml:space="preserve">
+    <value>الدفعة غير موجودة أو فشلت المعالجة.</value>
+  </data>
+  <data name="Payout_ProcessSuccess" xml:space="preserve">
+    <value>تمت معالجة الدفعة بنجاح.</value>
+  </data>
+  <data name="Payout_ProcessError" xml:space="preserve">
+    <value>حدث خطأ أثناء معالجة الدفعة.</value>
+  </data>
+
+  <!-- Email template operation errors -->
+  <data name="EmailTemplate_CreateError" xml:space="preserve">
+    <value>حدث خطأ أثناء إنشاء قالب البريد الإلكتروني.</value>
+  </data>
+  <data name="EmailTemplate_UpdateError" xml:space="preserve">
+    <value>حدث خطأ أثناء تحديث قالب البريد الإلكتروني.</value>
+  </data>
+  <data name="EmailTemplate_RetrieveError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد قالب البريد الإلكتروني.</value>
+  </data>
+  <data name="EmailTemplate_ListError" xml:space="preserve">
+    <value>حدث خطأ أثناء سرد قوالب البريد الإلكتروني.</value>
+  </data>
+  <data name="EmailTemplate_PreviewError" xml:space="preserve">
+    <value>حدث خطأ أثناء معاينة قالب البريد الإلكتروني.</value>
+  </data>
+  <data name="EmailTemplate_VersionsError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد إصدارات القالب.</value>
+  </data>
+  <data name="EmailTemplate_DeactivateError" xml:space="preserve">
+    <value>حدث خطأ أثناء إلغاء تنشيط قالب البريد الإلكتروني.</value>
+  </data>
+
+  <!-- Two-factor authentication messages -->
+  <data name="TwoFactor_UserNotFound" xml:space="preserve">
+    <value>المستخدم غير موجود.</value>
+  </data>
+  <data name="TwoFactor_AlreadyEnabled" xml:space="preserve">
+    <value>المصادقة الثنائية مفعّلة بالفعل.</value>
+  </data>
+  <data name="TwoFactor_CodeRequired" xml:space="preserve">
+    <value>الرمز مطلوب.</value>
+  </data>
+  <data name="TwoFactor_SetupExpired" xml:space="preserve">
+    <value>لم يتم بدء إعداد المصادقة الثنائية أو انتهت صلاحيته.</value>
+  </data>
+  <data name="TwoFactor_InvalidCode" xml:space="preserve">
+    <value>رمز التحقق غير صالح.</value>
+  </data>
+  <data name="TwoFactor_NotEnabled" xml:space="preserve">
+    <value>المصادقة الثنائية غير مفعّلة.</value>
+  </data>
+  <data name="TwoFactor_DisableFailed" xml:space="preserve">
+    <value>فشل في تعطيل المصادقة الثنائية.</value>
+  </data>
+  <data name="TwoFactor_DisabledSuccess" xml:space="preserve">
+    <value>تم تعطيل المصادقة الثنائية بنجاح.</value>
+  </data>
+  <data name="TwoFactor_VerifiedSuccess" xml:space="preserve">
+    <value>تم التحقق من الرمز بنجاح.</value>
+  </data>
+
+  <!-- Guide verification messages -->
+  <data name="Verification_SubmitError" xml:space="preserve">
+    <value>حدث خطأ أثناء تقديم المستند.</value>
+  </data>
+  <data name="Verification_NotFound" xml:space="preserve">
+    <value>طلب التحقق غير موجود.</value>
+  </data>
+  <data name="Verification_ApprovedSuccess" xml:space="preserve">
+    <value>تمت الموافقة على التحقق.</value>
+  </data>
+  <data name="Verification_ApproveError" xml:space="preserve">
+    <value>حدث خطأ أثناء الموافقة على التحقق.</value>
+  </data>
+  <data name="Verification_RejectedSuccess" xml:space="preserve">
+    <value>تم رفض التحقق.</value>
+  </data>
+  <data name="Verification_RejectError" xml:space="preserve">
+    <value>حدث خطأ أثناء رفض التحقق.</value>
+  </data>
+
+  <!-- Guide dashboard errors -->
+  <data name="Dashboard_RetrieveError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد بيانات لوحة المعلومات.</value>
+  </data>
+  <data name="Dashboard_MetricsError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد مقاييس الأداء.</value>
+  </data>
+  <data name="Dashboard_StatisticsError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد إحصائيات الجولات.</value>
+  </data>
+  <data name="Dashboard_ActivityError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد النشاط الأخير.</value>
+  </data>
+
+  <!-- Message errors -->
+  <data name="Message_ConversationNotFound" xml:space="preserve">
+    <value>المحادثة غير موجودة.</value>
+  </data>
+  <data name="Message_SendError" xml:space="preserve">
+    <value>حدث خطأ أثناء إرسال الرسالة.</value>
+  </data>
+  <data name="Message_MarkedAsReadSuccess" xml:space="preserve">
+    <value>تم وضع علامة مقروءة على المحادثة.</value>
+  </data>
+
+  <!-- Payment operation errors -->
+  <data name="Payment_CreateError" xml:space="preserve">
+    <value>حدث خطأ أثناء إنشاء الدفعة.</value>
+  </data>
+  <data name="Payment_RetrieveError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد الدفعة.</value>
+  </data>
+  <data name="Payment_HistoryError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد سجل المعاملات.</value>
+  </data>
+  <data name="Payment_ConfirmSuccess" xml:space="preserve">
+    <value>تم تأكيد الدفعة بنجاح.</value>
+  </data>
+  <data name="Payment_ConfirmError" xml:space="preserve">
+    <value>حدث خطأ أثناء تأكيد الدفعة.</value>
+  </data>
+  <data name="Payment_CancelSuccess" xml:space="preserve">
+    <value>تم إلغاء الدفعة بنجاح.</value>
+  </data>
+  <data name="Payment_CancelError" xml:space="preserve">
+    <value>حدث خطأ أثناء إلغاء الدفعة.</value>
+  </data>
+
+  <!-- Recommendation errors -->
+  <data name="Recommendation_CountInvalid" xml:space="preserve">
+    <value>يجب أن يكون العدد بين 1 و 50.</value>
+  </data>
+  <data name="Recommendation_LatitudeInvalid" xml:space="preserve">
+    <value>يجب أن يكون خط العرض بين -90 و 90.</value>
+  </data>
+  <data name="Recommendation_LongitudeInvalid" xml:space="preserve">
+    <value>يجب أن يكون خط الطول بين -180 و 180.</value>
+  </data>
+  <data name="Recommendation_GetError" xml:space="preserve">
+    <value>حدث خطأ أثناء الحصول على التوصيات.</value>
+  </data>
+  <data name="Recommendation_PopularToursError" xml:space="preserve">
+    <value>حدث خطأ أثناء الحصول على الجولات الشائعة.</value>
+  </data>
+  <data name="Recommendation_PreferenceRequired" xml:space="preserve">
+    <value>مطلوب تفضيل واحد على الأقل.</value>
+  </data>
+  <data name="Recommendation_PreferenceMaximum" xml:space="preserve">
+    <value>الحد الأقصى 20 تفضيلاً مسموح به.</value>
+  </data>
+  <data name="Recommendation_PreferenceInvalid" xml:space="preserve">
+    <value>تفضيلات غير صالحة. الأنواع الصالحة: {0}</value>
+  </data>
+  <data name="Recommendation_SetPreferencesError" xml:space="preserve">
+    <value>حدث خطأ أثناء تعيين التفضيلات.</value>
+  </data>
+  <data name="Recommendation_GetPreferencesError" xml:space="preserve">
+    <value>حدث خطأ أثناء الحصول على التفضيلات.</value>
+  </data>
+  <data name="Recommendation_TourIdRequired" xml:space="preserve">
+    <value>معرّف الجولة مطلوب.</value>
+  </data>
+  <data name="Recommendation_InteractionTypeInvalid" xml:space="preserve">
+    <value>يجب أن يكون النوع نوع تفاعل صالح. القيم المسموحة: {0}</value>
+  </data>
+  <data name="Recommendation_InteractionTypeUnknown" xml:space="preserve">
+    <value>نوع التفاعل غير صالح.</value>
+  </data>
+  <data name="Recommendation_RecordInteractionError" xml:space="preserve">
+    <value>حدث خطأ أثناء تسجيل التفاعل.</value>
+  </data>
+  <data name="Recommendation_FeedbackIdRequired" xml:space="preserve">
+    <value>معرّف التوصية مطلوب.</value>
+  </data>
+  <data name="Recommendation_NotFound" xml:space="preserve">
+    <value>التوصية غير موجودة.</value>
+  </data>
+  <data name="Recommendation_FeedbackError" xml:space="preserve">
+    <value>حدث خطأ أثناء تقديم الملاحظات.</value>
+  </data>
+  <data name="Recommendation_StatsError" xml:space="preserve">
+    <value>حدث خطأ أثناء الحصول على إحصائيات التوصيات.</value>
+  </data>
+
+  <!-- Refund errors -->
+  <data name="Refund_CreateError" xml:space="preserve">
+    <value>حدث خطأ أثناء إنشاء الاسترداد.</value>
+  </data>
+  <data name="Refund_RetrieveError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد المبلغ المسترد.</value>
+  </data>
+  <data name="Refund_ListError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد المبالغ المستردة.</value>
+  </data>
+  <data name="Refund_NotFound" xml:space="preserve">
+    <value>الاسترداد غير موجود أو فشلت المعالجة.</value>
+  </data>
+  <data name="Refund_ProcessSuccess" xml:space="preserve">
+    <value>تمت معالجة الاسترداد بنجاح.</value>
+  </data>
+  <data name="Refund_ProcessError" xml:space="preserve">
+    <value>حدث خطأ أثناء معالجة الاسترداد.</value>
+  </data>
+
+  <!-- Report errors -->
+  <data name="Report_GenerateError" xml:space="preserve">
+    <value>حدث خطأ أثناء إنشاء التقرير.</value>
+  </data>
+  <data name="Report_NotFound" xml:space="preserve">
+    <value>التقرير غير موجود.</value>
+  </data>
+  <data name="Report_RetrieveError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد التقرير.</value>
+  </data>
+  <data name="Report_ListError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد التقارير.</value>
+  </data>
+  <data name="Report_DataNotFound" xml:space="preserve">
+    <value>بيانات التقرير غير موجودة.</value>
+  </data>
+  <data name="Report_DownloadError" xml:space="preserve">
+    <value>حدث خطأ أثناء تنزيل التقرير.</value>
+  </data>
+  <data name="Report_ScheduleCreateError" xml:space="preserve">
+    <value>حدث خطأ أثناء إنشاء الجدول الزمني.</value>
+  </data>
+  <data name="Report_ScheduleListError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد الجداول الزمنية.</value>
+  </data>
+  <data name="Report_ScheduleNotFound" xml:space="preserve">
+    <value>الجدول الزمني غير موجود.</value>
+  </data>
+  <data name="Report_ScheduleUpdateError" xml:space="preserve">
+    <value>حدث خطأ أثناء تحديث الجدول الزمني.</value>
+  </data>
+  <data name="Report_ScheduleDeleteSuccess" xml:space="preserve">
+    <value>تم حذف الجدول الزمني بنجاح.</value>
+  </data>
+  <data name="Report_ScheduleDeleteError" xml:space="preserve">
+    <value>حدث خطأ أثناء حذف الجدول الزمني.</value>
+  </data>
+  <data name="Report_EarningsError" xml:space="preserve">
+    <value>حدث خطأ أثناء إنشاء تقرير الأرباح.</value>
+  </data>
+  <data name="Report_BookingSummaryError" xml:space="preserve">
+    <value>حدث خطأ أثناء إنشاء ملخص الحجوزات.</value>
+  </data>
+
+  <!-- Search messages -->
+  <data name="Search_ReindexedSuccess" xml:space="preserve">
+    <value>تمت إعادة فهرسة {0} عنصر بنجاح.</value>
+  </data>
+
+  <!-- Social authentication errors -->
+  <data name="SocialAuth_UnsupportedProvider" xml:space="preserve">
+    <value>مزود غير مدعوم: {0}. المدعومون: Google، Apple، Microsoft.</value>
+  </data>
+  <data name="SocialAuth_AuthenticationFailed" xml:space="preserve">
+    <value>فشلت المصادقة. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="SocialAuth_NoIdentifier" xml:space="preserve">
+    <value>تعذر استرداد معرّف المستخدم من المزود.</value>
+  </data>
+  <data name="SocialAuth_LoginFailed" xml:space="preserve">
+    <value>فشل تسجيل الدخول الاجتماعي.</value>
+  </data>
+  <data name="SocialAuth_LinkingFailed" xml:space="preserve">
+    <value>فشل الربط.</value>
+  </data>
+  <data name="SocialAuth_UnlinkingFailed" xml:space="preserve">
+    <value>فشل إلغاء الربط.</value>
+  </data>
+
+  <!-- Rate limit errors -->
+  <data name="Error_UserIdNotFound" xml:space="preserve">
+    <value>معرّف المستخدم غير موجود في المطالبات.</value>
+  </data>
+
+  <!-- Tour template errors -->
+  <data name="TourTemplate_GuideIdRequired" xml:space="preserve">
+    <value>معامل الاستعلام guideId مطلوب للطلبات غير المصادق عليها.</value>
+  </data>
+
+  <!-- Data export messages -->
+  <data name="DataExport_CancelSuccess" xml:space="preserve">
+    <value>تم إلغاء طلب التصدير بنجاح.</value>
+  </data>
+
+  <!-- Admin messages -->
+  <data name="Admin_UserSuspended" xml:space="preserve">
+    <value>تم تعليق المستخدم لمدة {0} يوم.</value>
+  </data>
+  <data name="Admin_UserActivatedSuccess" xml:space="preserve">
+    <value>تم تنشيط المستخدم بنجاح.</value>
+  </data>
+  <data name="Admin_UserDeletedSuccess" xml:space="preserve">
+    <value>تم حذف المستخدم بنجاح.</value>
+  </data>
+  <data name="Admin_UserRolesUpdatedSuccess" xml:space="preserve">
+    <value>تم تحديث أدوار المستخدم بنجاح.</value>
+  </data>
+  <data name="Admin_GuideVerificationAction" xml:space="preserve">
+    <value>تحقق المرشد {0}.</value>
+  </data>
+  <data name="Admin_TourPostAction" xml:space="preserve">
+    <value>منشور الجولة {0}.</value>
+  </data>
+  <data name="Admin_SettingsUpdatedSuccess" xml:space="preserve">
+    <value>تم تحديث إعدادات المنصة بنجاح.</value>
+  </data>
+  <data name="Admin_AccountUnfrozenSuccess" xml:space="preserve">
+    <value>تم إلغاء تجميد الحساب بنجاح.</value>
+  </data>
+
+  <!-- Availability errors -->
+  <data name="Availability_InvalidDateFormat" xml:space="preserve">
+    <value>تنسيق تاريخ غير صالح. استخدم yyyy-MM-dd.</value>
+  </data>
+  <data name="Availability_RetrieveError" xml:space="preserve">
+    <value>حدث خطأ أثناء استرداد التوفر.</value>
+  </data>
+  <data name="Availability_InvalidDate" xml:space="preserve">
+    <value>تنسيق تاريخ غير صالح.</value>
+  </data>
+  <data name="Availability_BlockSuccess" xml:space="preserve">
+    <value>تم حظر التواريخ بنجاح.</value>
+  </data>
+  <data name="Availability_BlockError" xml:space="preserve">
+    <value>حدث خطأ أثناء حظر التواريخ.</value>
+  </data>
+  <data name="Availability_UnblockSuccess" xml:space="preserve">
+    <value>تم إلغاء حظر التواريخ بنجاح.</value>
+  </data>
+  <data name="Availability_UnblockError" xml:space="preserve">
+    <value>حدث خطأ أثناء إلغاء حظر التواريخ.</value>
+  </data>
+  <data name="Availability_RecurringSetSuccess" xml:space="preserve">
+    <value>تم تعيين النمط المتكرر بنجاح.</value>
+  </data>
+  <data name="Availability_RecurringSetError" xml:space="preserve">
+    <value>حدث خطأ أثناء تعيين النمط المتكرر.</value>
+  </data>
+  <data name="Availability_RecurringClearSuccess" xml:space="preserve">
+    <value>تم مسح النمط المتكرر.</value>
+  </data>
+  <data name="Availability_GuideNotFound" xml:space="preserve">
+    <value>المرشد '{0}' غير موجود.</value>
+  </data>
+  <data name="Availability_ConflictCheckError" xml:space="preserve">
+    <value>حدث خطأ أثناء التحقق من تعارض التوفر.</value>
+  </data>
+  <data name="Availability_ExportError" xml:space="preserve">
+    <value>حدث خطأ أثناء تصدير التقويم.</value>
+  </data>
+  <data name="Availability_NoValidDates" xml:space="preserve">
+    <value>لم يتم العثور على تواريخ صالحة في محتوى iCal المقدم.</value>
+  </data>
+  <data name="Availability_ImportError" xml:space="preserve">
+    <value>حدث خطأ أثناء استيراد التقويم.</value>
+  </data>
+  <data name="Availability_GenericError" xml:space="preserve">
+    <value>حدث خطأ.</value>
+  </data>
+
+  <!-- Google Calendar errors -->
+  <data name="GoogleCalendar_NotConfigured" xml:space="preserve">
+    <value>تكامل تقويم Google غير مُهيّأ.</value>
+  </data>
+  <data name="GoogleCalendar_RedirectUriNotConfigured" xml:space="preserve">
+    <value>GoogleCalendar:RedirectUri غير مُهيّأ.</value>
+  </data>
+  <data name="GoogleCalendar_AuthDenied" xml:space="preserve">
+    <value>تم رفض تفويض Google: {0}</value>
+  </data>
+  <data name="GoogleCalendar_MissingCode" xml:space="preserve">
+    <value>رمز التفويض مفقود.</value>
+  </data>
+  <data name="GoogleCalendar_MissingState" xml:space="preserve">
+    <value>معامل الحالة مفقود.</value>
+  </data>
+  <data name="GoogleCalendar_InvalidState" xml:space="preserve">
+    <value>معامل حالة غير صالح أو منتهي الصلاحية. يرجى إعادة بدء عملية الاتصال.</value>
+  </data>
+  <data name="GoogleCalendar_TokenExchangeFailed" xml:space="preserve">
+    <value>فشل تبادل الرمز المميز: {0}</value>
+  </data>
+  <data name="GoogleCalendar_ExchangeFailed" xml:space="preserve">
+    <value>فشل تبادل رمز التفويض مع Google.</value>
+  </data>
+  <data name="GoogleCalendar_ConnectSuccess" xml:space="preserve">
+    <value>تم ربط تقويم Google بنجاح.</value>
+  </data>
+  <data name="GoogleCalendar_NotConnected" xml:space="preserve">
+    <value>تقويم Google غير متصل.</value>
+  </data>
+  <data name="GoogleCalendar_DisconnectSuccess" xml:space="preserve">
+    <value>تم فصل تقويم Google بنجاح.</value>
+  </data>
+  <data name="GoogleCalendar_RequireAuth" xml:space="preserve">
+    <value>تقويم Google غير متصل. استخدم /api/availability/google/auth-url أولاً.</value>
+  </data>
+  <data name="GoogleCalendar_TokenExpired" xml:space="preserve">
+    <value>انتهت صلاحية رمز الوصول ولا يتوفر رمز تحديث. يرجى إعادة ربط تقويم Google.</value>
+  </data>
+  <data name="GoogleCalendar_TokenRefreshFailed" xml:space="preserve">
+    <value>فشل تحديث رمز وصول Google. يرجى إعادة ربط تقويم Google.</value>
+  </data>
+  <data name="GoogleCalendar_RetrieveEventsFailed" xml:space="preserve">
+    <value>فشل استرداد الأحداث من تقويم Google.</value>
+  </data>
+  <data name="GoogleCalendar_ApiError" xml:space="preserve">
+    <value>خطأ في واجهة برمجة تطبيقات تقويم Google: {0}</value>
+  </data>
+  <data name="GoogleCalendar_SyncError" xml:space="preserve">
+    <value>حدث خطأ أثناء مزامنة التقويم.</value>
+  </data>
+
+  <!-- Localization errors -->
+  <data name="Localization_LanguageNotSupported" xml:space="preserve">
+    <value>اللغة '{0}' غير مدعومة. اللغات المدعومة: {1}</value>
+  </data>
+
+  <!-- Image errors -->
+  <data name="Image_NotFoundOrNoUrl" xml:space="preserve">
+    <value>الصورة غير موجودة أو لا تحتوي على رابط أصلي.</value>
+  </data>
 </root>
