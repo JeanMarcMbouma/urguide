@@ -687,7 +687,28 @@
   <data name="Auth_RefreshTokenRequired" xml:space="preserve">
     <value>El token de actualización es obligatorio.</value>
   </data>
-  <data name="Auth_TwoFactorNotImplemented" xml:space="preserve">
-    <value>La verificación 2FA aún no está implementada para el panel de administración.</value>
+  <data name="Auth_EmailConfirmed" xml:space="preserve">
+    <value>Dirección de correo electrónico confirmada exitosamente.</value>
+  </data>
+  <data name="Auth_SignedOut" xml:space="preserve">
+    <value>Sesión cerrada exitosamente.</value>
+  </data>
+  <data name="Auth_AccountDeleted" xml:space="preserve">
+    <value>Cuenta eliminada exitosamente.</value>
+  </data>
+  <data name="Auth_InternalError" xml:space="preserve">
+    <value>Se produjo un error interno de autenticación. Inténtelo de nuevo más tarde.</value>
+  </data>
+  <data name="Auth_CodeRequired" xml:space="preserve">
+    <value>Se requiere el código de verificación.</value>
+  </data>
+  <data name="Auth_UserNotFound" xml:space="preserve">
+    <value>Usuario no encontrado.</value>
+  </data>
+  <data name="Auth_TwoFactorNotEnabled" xml:space="preserve">
+    <value>La autenticación de dos factores no está habilitada para esta cuenta.</value>
+  </data>
+  <data name="Auth_TwoFactorVerified" xml:space="preserve">
+    <value>Código de autenticación de dos factores verificado exitosamente.</value>
   </data>
 </root>
