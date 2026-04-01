@@ -1,10 +1,10 @@
 ﻿using Duende.IdentityServer.Services;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +30,8 @@ namespace UrGuide.WebApp.Controllers
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
+        private const string TwoFactorRequiredError = "2FA_REQUIRED";
+
         private readonly IUserService _userService;
         private readonly IAuthService _authService;
         private readonly IIdentityServerInteractionService _interactionService;
@@ -39,6 +41,7 @@ namespace UrGuide.WebApp.Controllers
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IStringLocalizer<SharedResource> _localizer;
+        private readonly ILogger<AccountController> _logger;
 
         public AccountController(
             IUserService userService, 
@@ -49,7 +52,8 @@ namespace UrGuide.WebApp.Controllers
             ITwoFactorService twoFactorService,
             IConfiguration configuration,
             IHttpClientFactory httpClientFactory,
-            IStringLocalizer<SharedResource> localizer)
+            IStringLocalizer<SharedResource> localizer,
+            ILogger<AccountController> logger)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
@@ -60,6 +64,7 @@ namespace UrGuide.WebApp.Controllers
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
             _localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -70,23 +75,29 @@ namespace UrGuide.WebApp.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> Login([FromBody] LoginModel model, CancellationToken cancellationToken, string? returnUrl = null)
         {
+            var safeReturnUrl = !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)
+                ? returnUrl
+                : null;
+
             var result = await _userService.LoginAsync(model, cancellationToken);
             if (result.IsError)
             {
+                // Detect 2FA requirement from the underlying PasswordSignInAsync result
+                if (result.Errors.Any(e => string.Equals(e?.ToString(), TwoFactorRequiredError, StringComparison.OrdinalIgnoreCase)))
+                {
+                    var user = await _userManager.FindByNameAsync(model.UserName)
+                        ?? await _userManager.FindByEmailAsync(model.UserName);
+                    if (user != null)
+                    {
+                        return Ok(new { requiresTwoFactor = true, userId = user.Id });
+                    }
+                }
+
                 return BadRequest(ErrorEnvelop.Create(_localizer["Auth_InvalidCredentials"].Value));
             }
-            
-            var claims = new List<System.Security.Claims.Claim>
-            {
-                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, result.Value.Id),
-                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, result.Value.UserName)
-            };
-            var identity = new System.Security.Claims.ClaimsIdentity(claims, "login");
-            var principal = new System.Security.Claims.ClaimsPrincipal(identity);
-            
-            await HttpContext.SignInAsync(principal);
 
-            return Ok(new { returnUrl });
+            // PasswordSignInAsync (called inside LoginAsync) already handles cookie sign-in
+            return Ok(new { returnUrl = safeReturnUrl });
         }
 
         /// <summary>
@@ -98,8 +109,12 @@ namespace UrGuide.WebApp.Controllers
             CancellationToken cancellationToken,
             string? returnUrl = null)
         {
+            var safeReturnUrl = !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)
+                ? returnUrl
+                : null;
+
             var result = await _userService.RegisterUserAsync(model, cancellationToken);
-            return !result.IsError ? Ok(new { returnUrl }) : BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
+            return !result.IsError ? Ok(new { returnUrl = safeReturnUrl }) : BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
         }
 
         /// <summary>
@@ -111,8 +126,12 @@ namespace UrGuide.WebApp.Controllers
             CancellationToken cancellationToken,
             string? returnUrl = null)
         {
+            var safeReturnUrl = !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)
+                ? returnUrl
+                : null;
+
             var result = await _userService.RegisterGuideAsync(model, cancellationToken);
-            return !result.IsError ? Ok(new { returnUrl }) : BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
+            return !result.IsError ? Ok(new { returnUrl = safeReturnUrl }) : BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
         }
 
         /// <summary>
@@ -125,7 +144,7 @@ namespace UrGuide.WebApp.Controllers
             var result = await _authService.ConfirmEmailAsync(emailConfirmation, cancellationToken);
             if (!result.IsError)
                 return Ok(new { message = _localizer["Auth_EmailConfirmed"].Value });
-            return Forbid();
+            return BadRequest(ErrorEnvelop.CreateFromOutcome(result.Errors));
         }
 
         /// <summary>
@@ -218,7 +237,6 @@ namespace UrGuide.WebApp.Controllers
         public async Task<IActionResult> Signout(string? logoutId = null)
         {
             await _authService.SignOutAsync();
-            await HttpContext.SignOutAsync();
 
             string? postLogoutRedirectUri = null;
             if (!string.IsNullOrEmpty(logoutId))
@@ -242,7 +260,6 @@ namespace UrGuide.WebApp.Controllers
             if (r.IsError)
                 return BadRequest(ErrorEnvelop.CreateFromOutcome(r.Errors));
 
-            await HttpContext.SignOutAsync();
             return Ok(new { message = _localizer["Auth_AccountDeleted"].Value });
         }
 
@@ -373,12 +390,19 @@ namespace UrGuide.WebApp.Controllers
                     }
                 });
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException ex)
             {
+                _logger.LogError(ex, "HTTP request error during ApiLogin");
                 return StatusCode(500, ErrorEnvelop.Create(_localizer["Auth_InternalError"].Value));
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException ex)
             {
+                _logger.LogError(ex, "Configuration error during ApiLogin");
+                return StatusCode(500, ErrorEnvelop.Create(_localizer["Auth_InternalError"].Value));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error during ApiLogin");
                 return StatusCode(500, ErrorEnvelop.Create(_localizer["Auth_InternalError"].Value));
             }
         }
@@ -442,12 +466,14 @@ namespace UrGuide.WebApp.Controllers
                     tokenType = tokenResponse.TokenType
                 });
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException ex)
             {
+                _logger.LogError(ex, "HTTP request error during RefreshToken");
                 return StatusCode(500, ErrorEnvelop.Create(_localizer["Auth_InternalError"].Value));
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException ex)
             {
+                _logger.LogError(ex, "Configuration error during RefreshToken");
                 return StatusCode(500, ErrorEnvelop.Create(_localizer["Auth_InternalError"].Value));
             }
         }
