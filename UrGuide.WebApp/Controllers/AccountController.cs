@@ -582,9 +582,8 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.Create(_localizer["Auth_TwoFactorNotEnabled"].Value));
             }
 
-            bool isValid = request.IsBackupCode
-                ? await _twoFactorService.VerifyBackupCodeAsync(user, request.Code)
-                : await _twoFactorService.VerifyTotpCodeAsync(user, request.Code);
+            bool isValid = await _twoFactorService.VerifyTotpCodeAsync(user, request.Code)
+                || await _twoFactorService.VerifyBackupCodeAsync(user, request.Code);
 
             if (!isValid)
             {

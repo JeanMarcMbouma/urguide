@@ -49,6 +49,8 @@ namespace UrGuide.WebApp.Models
     /// <summary>
     /// Request to verify 2FA code during the login flow (unauthenticated).
     /// The userId is provided by the login endpoint when 2FA is required.
+    /// The code can be either a TOTP code or a backup code — the backend
+    /// auto-detects which type it is so the UI can use a single input field.
     /// </summary>
     public class Verify2FALoginRequest
     {
@@ -61,11 +63,6 @@ namespace UrGuide.WebApp.Models
         /// The TOTP code or backup code
         /// </summary>
         public string? Code { get; set; }
-
-        /// <summary>
-        /// Whether the code is a backup code instead of a TOTP code
-        /// </summary>
-        public bool IsBackupCode { get; set; }
     }
     
     /// <summary>

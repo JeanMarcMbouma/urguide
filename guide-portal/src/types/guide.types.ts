@@ -7,7 +7,6 @@ export interface LoginRequest {
 export interface TwoFactorRequest {
   userId: string;
   code: string;
-  isBackupCode?: boolean;
 }
 
 export interface AuthTokens {
