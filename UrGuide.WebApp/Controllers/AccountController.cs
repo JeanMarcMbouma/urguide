@@ -290,6 +290,31 @@ namespace UrGuide.WebApp.Controllers
 
             try
             {
+                // Validate credentials first to check 2FA status before requesting tokens
+                var user = await _userManager.FindByNameAsync(userName)
+                    ?? await _userManager.FindByEmailAsync(userName);
+
+                if (user == null)
+                {
+                    return BadRequest(ErrorEnvelop.Create(_localizer["Auth_InvalidCredentials"].Value));
+                }
+
+                var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+                if (!passwordValid)
+                {
+                    return BadRequest(ErrorEnvelop.Create(_localizer["Auth_InvalidCredentials"].Value));
+                }
+
+                // If 2FA is enabled, return a challenge response instead of tokens
+                if (user.TwoFactorEnabled)
+                {
+                    return Ok(new
+                    {
+                        requiresTwoFactor = true,
+                        userId = user.Id
+                    });
+                }
+
                 var baseUrl = $"{Request.Scheme}://{Request.Host}";
                 var tokenEndpoint = $"{baseUrl}/connect/token";
 
@@ -328,17 +353,8 @@ namespace UrGuide.WebApp.Controllers
                     return BadRequest(ErrorEnvelop.Create(_localizer["Auth_TokenObtainFailed"].Value));
                 }
 
-                var loginModel = new LoginModel { UserName = userName, Password = request.Password };
-                var loginResult = await _userService.LoginAsync(loginModel, cancellationToken);
-                
-                if (loginResult.IsError)
-                {
-                    return BadRequest(ErrorEnvelop.CreateFromOutcome(loginResult.Errors));
-                }
-
-                var userDetails = await _userService.GetUserAsync(loginResult.Value.Id, cancellationToken);
-                var user = await _userManager.FindByIdAsync(loginResult.Value.Id);
-                var roles = user != null ? await _userManager.GetRolesAsync(user) : new List<string>();
+                var userDetails = await _userService.GetUserAsync(user.Id, cancellationToken);
+                var roles = await _userManager.GetRolesAsync(user);
 
                 return Ok(new
                 {
@@ -348,9 +364,9 @@ namespace UrGuide.WebApp.Controllers
                     tokenType = tokenResponse.TokenType,
                     user = new
                     {
-                        id = loginResult.Value.Id,
+                        id = user.Id,
                         email = userName,
-                        userName = loginResult.Value.UserName,
+                        userName = user.UserName,
                         firstName = userDetails.IsError ? "" : userDetails.Value.FirstName,
                         lastName = userDetails.IsError ? "" : userDetails.Value.LastName,
                         roles = roles
@@ -536,7 +552,8 @@ namespace UrGuide.WebApp.Controllers
         /// <summary>
         /// Verify a 2FA code during the login flow.
         /// This endpoint does not require authentication since the user is mid-login.
-        /// Credentials are re-validated along with the 2FA code.
+        /// The userId is provided by the login endpoint when 2FA is required.
+        /// On success, returns auth tokens for the authenticated session.
         /// </summary>
         [HttpPost("/api/auth/verify-2fa")]
         [RateLimit(5, "1m")]
@@ -549,21 +566,13 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.Create(_localizer["Auth_CodeRequired"].Value));
             }
 
-            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+            if (string.IsNullOrWhiteSpace(request.UserId))
             {
-                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_CredentialsRequired"].Value));
+                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_UserNotFound"].Value));
             }
 
-            var user = await _userManager.FindByEmailAsync(request.Email)
-                ?? await _userManager.FindByNameAsync(request.Email);
-
+            var user = await _userManager.FindByIdAsync(request.UserId);
             if (user == null)
-            {
-                return BadRequest(ErrorEnvelop.Create(_localizer["Auth_InvalidCredentials"].Value));
-            }
-
-            var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
-            if (!passwordValid)
             {
                 return BadRequest(ErrorEnvelop.Create(_localizer["Auth_InvalidCredentials"].Value));
             }
@@ -582,7 +591,27 @@ namespace UrGuide.WebApp.Controllers
                 return BadRequest(ErrorEnvelop.Create(_localizer["Auth_TwoFactorInvalid"].Value));
             }
 
-            return Ok(new { message = _localizer["Auth_TwoFactorVerified"].Value });
+            // Generate JWT token for the verified user
+            var roles = await _userManager.GetRolesAsync(user);
+            var token = _jwtTokenService.GenerateToken(user.Id, user.UserName ?? "", user.Email ?? "", roles.ToList());
+
+            var userDetails = await _userService.GetUserAsync(user.Id, cancellationToken);
+
+            return Ok(new
+            {
+                accessToken = token,
+                tokenType = "Bearer",
+                expiresIn = 28800,
+                user = new
+                {
+                    id = user.Id,
+                    email = user.Email,
+                    userName = user.UserName,
+                    firstName = userDetails.IsError ? "" : userDetails.Value.FirstName,
+                    lastName = userDetails.IsError ? "" : userDetails.Value.LastName,
+                    roles = roles.ToArray()
+                }
+            });
         }
     }
 }

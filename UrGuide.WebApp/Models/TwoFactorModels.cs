@@ -48,19 +48,14 @@ namespace UrGuide.WebApp.Models
 
     /// <summary>
     /// Request to verify 2FA code during the login flow (unauthenticated).
-    /// Requires user identification since the user is not yet fully authenticated.
+    /// The userId is provided by the login endpoint when 2FA is required.
     /// </summary>
     public class Verify2FALoginRequest
     {
         /// <summary>
-        /// The email or username of the user attempting to log in
+        /// The user ID returned by the login endpoint when 2FA is required
         /// </summary>
-        public string? Email { get; set; }
-        
-        /// <summary>
-        /// The user's password for re-validation
-        /// </summary>
-        public string? Password { get; set; }
+        public string? UserId { get; set; }
         
         /// <summary>
         /// The TOTP code or backup code
