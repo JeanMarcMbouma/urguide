@@ -3,9 +3,11 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using UrGuide.WebApp.Controllers;
+using UrGuide.WebApp.Resources;
 using UrGuide.WebApp.Services;
 
 namespace UrGuide.IntegrationTests.Controllers;
@@ -14,15 +16,20 @@ public class SocialAuthControllerTests
 {
     private readonly Mock<ISocialAuthService> _socialAuthServiceMock;
     private readonly Mock<ILogger<SocialAuthController>> _loggerMock;
+    private readonly Mock<IStringLocalizer<SharedResource>> _localizerMock;
     private readonly SocialAuthController _controller;
 
     public SocialAuthControllerTests()
     {
         _socialAuthServiceMock = Mock.Create<ISocialAuthService>();
         _loggerMock = Mock.Create<ILogger<SocialAuthController>>();
+        _localizerMock = Mock.Create<IStringLocalizer<SharedResource>>();
+        _localizerMock.Setup(l => l[It.IsAny<string>()])
+            .Returns(new LocalizedString("SocialAuth_UnsupportedProvider", "Provider not supported"));
         _controller = new SocialAuthController(
             _socialAuthServiceMock.Object,
-            _loggerMock.Object);
+            _loggerMock.Object,
+            _localizerMock.Object);
 
         // Set up a default HttpContext with a mock URL helper
         var httpContext = new DefaultHttpContext();
