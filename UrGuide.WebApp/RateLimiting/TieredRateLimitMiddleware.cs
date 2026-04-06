@@ -1,39 +1,55 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using StackExchange.Redis;
 using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using UrGuide.WebApp.Attributes;
+using UrGuide.WebApp.Caching;
 
 namespace UrGuide.WebApp.RateLimiting
 {
     /// <summary>
-    /// Middleware for tiered rate limiting based on user authentication and subscription level
+    /// Middleware for tiered rate limiting based on user authentication and subscription level.
+    /// When Redis is available, uses atomic INCR/EXPIRE operations for distributed accuracy.
+    /// Falls back to in-process IMemoryCache when Redis is unavailable.
     /// </summary>
     public class TieredRateLimitMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<TieredRateLimitMiddleware> _logger;
         private readonly RateLimitOptions _options;
-        private readonly IMemoryCache _cache;
+        private readonly IMemoryCache _memoryCache;
         private readonly IRateLimitAnalyticsService _analytics;
+        // Resolved lazily via IServiceProvider so the middleware starts safely even when
+        // IConnectionMultiplexer is not registered (Redis fallback scenario).
+        private readonly IConnectionMultiplexer? _redis;
+        private readonly string _keyPrefix;
 
         public TieredRateLimitMiddleware(
             RequestDelegate next,
             ILogger<TieredRateLimitMiddleware> logger,
             IOptions<RateLimitOptions> options,
-            IMemoryCache cache,
-            IRateLimitAnalyticsService analytics)
+            IMemoryCache memoryCache,
+            IRateLimitAnalyticsService analytics,
+            IServiceProvider services)
         {
             _next = next;
             _logger = logger;
             _options = options.Value;
-            _cache = cache;
+            _memoryCache = memoryCache;
             _analytics = analytics;
+            // GetService<T> returns null (rather than throwing) when T is not registered.
+            _redis = services.GetService<IConnectionMultiplexer>();
+            // Use the same key prefix as the rest of the cache layer to avoid collisions
+            // when this Redis instance is shared across environments or applications.
+            var redisOpts = services.GetService<IOptions<RedisOptions>>();
+            _keyPrefix = redisOpts?.Value?.KeyPrefix ?? "urguide";
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -75,7 +91,7 @@ namespace UrGuide.WebApp.RateLimiting
 
             // Get the applicable policy - use route pattern to avoid per-ID buckets
             var routePatternText = (endpoint as RouteEndpoint)?.RoutePattern?.RawText;
-            var endpointKey = !string.IsNullOrEmpty(routePatternText) 
+            var endpointKey = !string.IsNullOrEmpty(routePatternText)
                 ? $"{context.Request.Method}:{routePatternText}"
                 : $"{context.Request.Method}:{context.Request.Path}";
             var policy = GetApplicablePolicy(endpoint, endpointKey, tier);
@@ -87,63 +103,20 @@ namespace UrGuide.WebApp.RateLimiting
                 return;
             }
 
-            // Check rate limit
+            // Check rate limit using Redis when available, fall back to memory cache
             var identifier = userId ?? ipAddress ?? "unknown";
-            var cacheKey = $"ratelimit:{tier}:{identifier}:{endpointKey}";
-            var lockKey = $"{cacheKey}:lock";
-            var resetKey = $"{cacheKey}:reset";
             var periodTimeSpan = policy.GetPeriodTimeSpan();
-
-            // Use a lock object with same expiration as counter to prevent memory leak
-            var lockObj = _cache.GetOrCreate(lockKey, entry =>
-            {
-                entry.AbsoluteExpirationRelativeToNow = periodTimeSpan;
-                return new object();
-            })!;
 
             int currentCount;
             DateTimeOffset resetTime;
-            lock (lockObj)
-            {
-                // Get or create reset time for this window
-                if (!_cache.TryGetValue(resetKey, out resetTime))
-                {
-                    resetTime = DateTimeOffset.UtcNow.Add(periodTimeSpan);
-                    _cache.Set(resetKey, resetTime, new MemoryCacheEntryOptions
-                    {
-                        AbsoluteExpiration = resetTime
-                    });
-                }
 
-                // Check if window has expired
-                if (DateTimeOffset.UtcNow >= resetTime)
-                {
-                    // Reset the window
-                    currentCount = 1;
-                    resetTime = DateTimeOffset.UtcNow.Add(periodTimeSpan);
-                    _cache.Set(resetKey, resetTime, new MemoryCacheEntryOptions
-                    {
-                        AbsoluteExpiration = resetTime
-                    });
-                    _cache.Set(cacheKey, currentCount, new MemoryCacheEntryOptions
-                    {
-                        AbsoluteExpiration = resetTime
-                    });
-                }
-                else
-                {
-                    // Increment counter without changing expiration
-                    currentCount = _cache.GetOrCreate(cacheKey, entry =>
-                    {
-                        entry.AbsoluteExpiration = resetTime;
-                        return 0;
-                    });
-                    currentCount++;
-                    _cache.Set(cacheKey, currentCount, new MemoryCacheEntryOptions
-                    {
-                        AbsoluteExpiration = resetTime
-                    });
-                }
+            if (_redis != null && _redis.IsConnected)
+            {
+                (currentCount, resetTime) = await IncrementRedisCounterAsync(tier, identifier, endpointKey, periodTimeSpan);
+            }
+            else
+            {
+                (currentCount, resetTime) = IncrementMemoryCounter(tier, identifier, endpointKey, periodTimeSpan);
             }
 
             // Track analytics
@@ -161,10 +134,10 @@ namespace UrGuide.WebApp.RateLimiting
                     await _analytics.RecordViolationAsync(userId, endpointKey, tier);
                 }
 
-                _logger.LogWarning("Rate limit exceeded for {Identifier} on tier {Tier}, endpoint {Endpoint}. Count: {Count}/{Limit}",
+                _logger.LogWarning(
+                    "Rate limit exceeded for {Identifier} on tier {Tier}, endpoint {Endpoint}. Count: {Count}/{Limit}",
                     identifier, tier, endpointKey, currentCount, policy.Limit);
 
-                // Add rate limit headers
                 AddRateLimitHeaders(context, policy, currentCount, resetTime);
 
                 // Return 429 Too Many Requests
@@ -172,18 +145,112 @@ namespace UrGuide.WebApp.RateLimiting
                 await context.Response.WriteAsJsonAsync(new
                 {
                     error = "Rate limit exceeded",
-                    message = $"Too many requests. Please try again later.",
+                    message = "Too many requests. Please try again later.",
                     retryAfter = GetRetryAfter(resetTime)
                 });
                 return;
             }
 
-            // Add rate limit headers
             AddRateLimitHeaders(context, policy, currentCount, resetTime);
 
             // Continue to next middleware
             await _next(context);
         }
+
+        // ── Redis counter (atomic INCR + EXPIRE) ──────────────────────────────
+
+        private async Task<(int count, DateTimeOffset resetTime)> IncrementRedisCounterAsync(
+            RateLimitTier tier, string identifier, string endpointKey, TimeSpan period)
+        {
+            try
+            {
+                var db = _redis!.GetDatabase();
+                // Apply the configured prefix so rate-limit keys are isolated from other apps
+                // sharing the same Redis instance, consistent with how RedisCacheService names keys.
+                var rawKey = CacheKeys.RateLimit(tier.ToString(), identifier, endpointKey);
+                var counterKey = $"{_keyPrefix}:{rawKey}";
+
+                // Atomically increment the counter.
+                var count = await db.StringIncrementAsync(counterKey);
+
+                // Always ensure the key has a TTL — guards against a lost EXPIRE
+                // (e.g. if the first request's EXPIRE call failed or the key pre-existed).
+                var ttl = await db.KeyTimeToLiveAsync(counterKey);
+                if (!ttl.HasValue || ttl.Value <= TimeSpan.Zero)
+                {
+                    var expirySet = await db.KeyExpireAsync(counterKey, period);
+                    if (!expirySet)
+                    {
+                        _logger.LogWarning("Failed to set expiration for Redis rate-limit key {Key}", counterKey);
+                    }
+                    ttl = await db.KeyTimeToLiveAsync(counterKey);
+                }
+
+                var resetTime = ttl.HasValue && ttl.Value > TimeSpan.Zero
+                    ? DateTimeOffset.UtcNow.Add(ttl.Value)
+                    : DateTimeOffset.UtcNow.Add(period);
+
+                return ((int)count, resetTime);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Redis rate-limit counter failed; falling back to memory cache");
+                return IncrementMemoryCounter(tier, identifier, endpointKey, period);
+            }
+        }
+
+        // ── In-memory counter (single-node fallback) ──────────────────────────
+
+        private (int count, DateTimeOffset resetTime) IncrementMemoryCounter(
+            RateLimitTier tier, string identifier, string endpointKey, TimeSpan period)
+        {
+            var cacheKey = CacheKeys.RateLimit(tier.ToString(), identifier, endpointKey);
+            var lockKey  = $"{cacheKey}:lock";
+            var resetKey = CacheKeys.RateLimitReset(tier.ToString(), identifier, endpointKey);
+
+            var lockObj = _memoryCache.GetOrCreate(lockKey, entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = period;
+                return new object();
+            })!;
+
+            int currentCount;
+            DateTimeOffset resetTime;
+
+            lock (lockObj)
+            {
+                if (!_memoryCache.TryGetValue(resetKey, out resetTime))
+                {
+                    resetTime = DateTimeOffset.UtcNow.Add(period);
+                    _memoryCache.Set(resetKey, resetTime, new MemoryCacheEntryOptions
+                    {
+                        AbsoluteExpiration = resetTime
+                    });
+                }
+
+                if (DateTimeOffset.UtcNow >= resetTime)
+                {
+                    currentCount = 1;
+                    resetTime = DateTimeOffset.UtcNow.Add(period);
+                    _memoryCache.Set(resetKey, resetTime, new MemoryCacheEntryOptions { AbsoluteExpiration = resetTime });
+                    _memoryCache.Set(cacheKey, currentCount, new MemoryCacheEntryOptions { AbsoluteExpiration = resetTime });
+                }
+                else
+                {
+                    currentCount = _memoryCache.GetOrCreate(cacheKey, entry =>
+                    {
+                        entry.AbsoluteExpiration = resetTime;
+                        return 0;
+                    });
+                    currentCount++;
+                    _memoryCache.Set(cacheKey, currentCount, new MemoryCacheEntryOptions { AbsoluteExpiration = resetTime });
+                }
+            }
+
+            return (currentCount, resetTime);
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────────────
 
         private RateLimitTier GetUserTier(HttpContext context)
         {
@@ -191,48 +258,35 @@ namespace UrGuide.WebApp.RateLimiting
 
             // Check if user is authenticated
             if (!user.Identity?.IsAuthenticated ?? true)
-            {
                 return RateLimitTier.Anonymous;
-            }
 
             // Check if user is premium
-            // Look for IsPremium claim or check user attributes
             var isPremiumClaim = user.FindFirst("IsPremium")?.Value;
             if (isPremiumClaim == "True" || isPremiumClaim == "true")
-            {
                 return RateLimitTier.Premium;
-            }
 
             // Check for premium role
             if (user.IsInRole("Premium"))
-            {
                 return RateLimitTier.Premium;
-            }
 
             // Default to authenticated
             return RateLimitTier.Authenticated;
         }
 
-        private string? GetUserId(HttpContext context)
-        {
-            return context.User.Identity?.IsAuthenticated == true
+        private string? GetUserId(HttpContext context) =>
+            context.User.Identity?.IsAuthenticated == true
                 ? context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                 : null;
-        }
 
-        private string? GetClientIpAddress(HttpContext context)
-        {
+        private string? GetClientIpAddress(HttpContext context) =>
             // Rely on RemoteIpAddress, which will be populated correctly when
             // ForwardedHeadersMiddleware is configured in the application
-            return context.Connection.RemoteIpAddress?.ToString();
-        }
+            context.Connection.RemoteIpAddress?.ToString();
 
         private bool IsExempt(string? userId, string? ipAddress)
         {
             if (_options.Exemptions == null || !_options.Exemptions.Any())
-            {
                 return false;
-            }
 
             return (!string.IsNullOrEmpty(userId) && _options.Exemptions.Contains(userId))
                 || (!string.IsNullOrEmpty(ipAddress) && _options.Exemptions.Contains(ipAddress));
@@ -244,13 +298,11 @@ namespace UrGuide.WebApp.RateLimiting
             var customAttributes = endpoint?.Metadata?.GetOrderedMetadata<RateLimitAttribute>();
             if (customAttributes != null && customAttributes.Any())
             {
-                // First, try to find an attribute whose Tier matches the current tier
                 var matchingAttribute = customAttributes.FirstOrDefault(a =>
                     !string.IsNullOrEmpty(a.Tier) &&
                     Enum.TryParse<RateLimitTier>(a.Tier, out var specifiedTier) &&
                     specifiedTier == tier);
 
-                // If no exact tier match, fall back to an attribute without a specified Tier
                 var applicableAttribute = matchingAttribute ?? customAttributes.FirstOrDefault(a =>
                     string.IsNullOrEmpty(a.Tier));
 
@@ -270,17 +322,13 @@ namespace UrGuide.WebApp.RateLimiting
             {
                 var tierKey = tier.ToString();
                 if (endpointPolicies.TryGetValue(tierKey, out var policy))
-                {
                     return policy;
-                }
             }
 
             // Fall back to global policy for the tier
             var globalTierKey = tier.ToString();
             if (_options.Policies.TryGetValue(globalTierKey, out var globalPolicy))
-            {
                 return globalPolicy;
-            }
 
             return null;
         }
@@ -288,25 +336,16 @@ namespace UrGuide.WebApp.RateLimiting
         private void AddRateLimitHeaders(HttpContext context, RateLimitPolicy policy, int currentCount, DateTimeOffset resetTime)
         {
             var remaining = Math.Max(0, policy.Limit - currentCount);
-
-            context.Response.Headers["X-RateLimit-Limit"] = policy.Limit.ToString();
+            context.Response.Headers["X-RateLimit-Limit"]     = policy.Limit.ToString();
             context.Response.Headers["X-RateLimit-Remaining"] = remaining.ToString();
-            context.Response.Headers["X-RateLimit-Reset"] = resetTime.ToUnixTimeSeconds().ToString();
-            context.Response.Headers["X-RateLimit-Tier"] = policy.Tier.ToString();
+            context.Response.Headers["X-RateLimit-Reset"]     = resetTime.ToUnixTimeSeconds().ToString();
+            context.Response.Headers["X-RateLimit-Tier"]      = policy.Tier.ToString();
         }
 
         private int GetRetryAfter(DateTimeOffset resetTime)
         {
-            var now = DateTimeOffset.UtcNow;
-            var remaining = resetTime - now;
-
-            if (remaining <= TimeSpan.Zero)
-            {
-                return 0;
-            }
-
-            // Return the number of whole seconds remaining, rounded up (defensive max to handle edge cases)
-            return Math.Max(0, (int)Math.Ceiling(remaining.TotalSeconds));
+            var remaining = resetTime - DateTimeOffset.UtcNow;
+            return remaining <= TimeSpan.Zero ? 0 : Math.Max(0, (int)Math.Ceiling(remaining.TotalSeconds));
         }
     }
 }
