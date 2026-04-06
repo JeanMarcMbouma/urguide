@@ -29,6 +29,7 @@ namespace UrGuide.WebApp.RateLimiting
         // Resolved lazily via IServiceProvider so the middleware starts safely even when
         // IConnectionMultiplexer is not registered (Redis fallback scenario).
         private readonly IConnectionMultiplexer? _redis;
+        private readonly string _keyPrefix;
 
         public TieredRateLimitMiddleware(
             RequestDelegate next,
@@ -45,6 +46,10 @@ namespace UrGuide.WebApp.RateLimiting
             _analytics = analytics;
             // GetService<T> returns null (rather than throwing) when T is not registered.
             _redis = services.GetService<IConnectionMultiplexer>();
+            // Use the same key prefix as the rest of the cache layer to avoid collisions
+            // when this Redis instance is shared across environments or applications.
+            var redisOpts = services.GetService<IOptions<RedisOptions>>();
+            _keyPrefix = redisOpts?.Value?.KeyPrefix ?? "urguide";
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -160,15 +165,27 @@ namespace UrGuide.WebApp.RateLimiting
             try
             {
                 var db = _redis!.GetDatabase();
-                var counterKey = CacheKeys.RateLimit(tier.ToString(), identifier, endpointKey);
+                // Apply the configured prefix so rate-limit keys are isolated from other apps
+                // sharing the same Redis instance, consistent with how RedisCacheService names keys.
+                var rawKey = CacheKeys.RateLimit(tier.ToString(), identifier, endpointKey);
+                var counterKey = $"{_keyPrefix}:{rawKey}";
 
-                // Atomically increment; set TTL on first request in window
+                // Atomically increment the counter.
                 var count = await db.StringIncrementAsync(counterKey);
-                if (count == 1)
-                    await db.KeyExpireAsync(counterKey, period);
 
-                // Derive reset time from remaining TTL
+                // Always ensure the key has a TTL — guards against a lost EXPIRE
+                // (e.g. if the first request's EXPIRE call failed or the key pre-existed).
                 var ttl = await db.KeyTimeToLiveAsync(counterKey);
+                if (!ttl.HasValue || ttl.Value <= TimeSpan.Zero)
+                {
+                    var expirySet = await db.KeyExpireAsync(counterKey, period);
+                    if (!expirySet)
+                    {
+                        _logger.LogWarning("Failed to set expiration for Redis rate-limit key {Key}", counterKey);
+                    }
+                    ttl = await db.KeyTimeToLiveAsync(counterKey);
+                }
+
                 var resetTime = ttl.HasValue && ttl.Value > TimeSpan.Zero
                     ? DateTimeOffset.UtcNow.Add(ttl.Value)
                     : DateTimeOffset.UtcNow.Add(period);

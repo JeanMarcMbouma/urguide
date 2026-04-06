@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,11 +14,13 @@ namespace UrGuide.WebApp.Caching
     /// <summary>
     /// Redis-backed implementation of <see cref="ICacheService"/> using the cache-aside pattern.
     /// All cache misses are logged so callers can monitor hit/miss ratios in structured logs.
+    /// When Redis is unavailable, <see cref="IConnectionMultiplexer"/> will be null and
+    /// tag-based invalidation is skipped; all other operations continue via <see cref="IDistributedCache"/>.
     /// </summary>
     public class RedisCacheService : ICacheService
     {
         private readonly IDistributedCache _distributedCache;
-        private readonly IConnectionMultiplexer _multiplexer;
+        private readonly IConnectionMultiplexer? _multiplexer;
         private readonly ILogger<RedisCacheService> _logger;
         private readonly RedisOptions _options;
 
@@ -24,14 +28,16 @@ namespace UrGuide.WebApp.Caching
 
         public RedisCacheService(
             IDistributedCache distributedCache,
-            IConnectionMultiplexer multiplexer,
             ILogger<RedisCacheService> logger,
-            IOptions<RedisOptions> options)
+            IOptions<RedisOptions> options,
+            IServiceProvider services)
         {
             _distributedCache = distributedCache ?? throw new ArgumentNullException(nameof(distributedCache));
-            _multiplexer = multiplexer ?? throw new ArgumentNullException(nameof(multiplexer));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+            // GetService<T> returns null (rather than throwing) when IConnectionMultiplexer is not
+            // registered — this happens in the Redis-unavailable fallback scenario.
+            _multiplexer = services.GetService<IConnectionMultiplexer>();
         }
 
         /// <inheritdoc/>
@@ -107,18 +113,44 @@ namespace UrGuide.WebApp.Caching
         /// <inheritdoc/>
         public async Task RemoveByTagAsync(string tag, CancellationToken cancellationToken = default)
         {
+            if (_multiplexer is null)
+            {
+                _logger.LogDebug("Tag invalidation skipped for tag {Tag}: no Redis connection available", tag);
+                return;
+            }
+
             try
             {
                 var db = _multiplexer.GetDatabase();
-                var server = _multiplexer.GetServer(_multiplexer.GetEndPoints()[0]);
                 var prefix = BuildKey(tag);
+                var keysToDelete = new List<RedisKey>();
 
-                // SCAN the keyspace for matching keys; avoids blocking KEYS command
-                await foreach (var key in server.KeysAsync(pattern: $"{prefix}*"))
+                // Iterate all connected primary endpoints — handles standalone, Sentinel, and cluster.
+                // Replicas are skipped because they only hold read-only copies.
+                foreach (var endPoint in _multiplexer.GetEndPoints())
                 {
-                    await db.KeyDeleteAsync(key);
-                    _logger.LogDebug("Invalidated cache key {Key} via tag {Tag}", key, tag);
+                    var server = _multiplexer.GetServer(endPoint);
+                    if (!server.IsConnected || server.IsReplica)
+                        continue;
+
+                    // SCAN avoids blocking the server; honours cancellation per-iteration.
+                    await foreach (var key in server.KeysAsync(pattern: $"{prefix}*")
+                        .WithCancellation(cancellationToken))
+                    {
+                        keysToDelete.Add(key);
+                    }
                 }
+
+                if (keysToDelete.Count > 0)
+                {
+                    // Batch delete minimises round-trips
+                    await db.KeyDeleteAsync(keysToDelete.ToArray());
+                    _logger.LogDebug("Invalidated {Count} cache keys for tag {Tag}", keysToDelete.Count, tag);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -129,6 +161,9 @@ namespace UrGuide.WebApp.Caching
         /// <inheritdoc/>
         public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default)
         {
+            if (_multiplexer is null)
+                return false;
+
             try
             {
                 var db = _multiplexer.GetDatabase();

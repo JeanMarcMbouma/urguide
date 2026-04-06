@@ -109,13 +109,12 @@ try
     var authConn = builder.Configuration.GetSection("ConnectionStrings:AuthConnection").Value;
     var dataConn = builder.Configuration.GetSection("ConnectionStrings:DefaultConnection").Value;
     var elasticsearchUrl = builder.Configuration.GetSection("Elasticsearch:Url").Value ?? "http://localhost:9200";
-    var redisConnForHealth = builder.Configuration["Redis:ConnectionString"] ?? "localhost:6379";
     builder.Services.AddHealthChecks()
         .AddSqlServer(authConn ?? "", name: "auth-db")
         .AddSqlServer(dataConn ?? "", name: "data-db")
         .AddMessageQueueHealthChecks(builder.Configuration)
-        .AddElasticsearch(elasticsearchUrl, name: "elasticsearch")
-        .AddRedis(redisConnForHealth, name: "redis");
+        .AddElasticsearch(elasticsearchUrl, name: "elasticsearch");
+        // Redis health check is added conditionally below, only when Redis connects successfully.
     
     // Add CORS policy for API consumers
     builder.Services.AddCors(options =>
@@ -243,7 +242,7 @@ try
         // Use Redis as the distributed cache backend
         builder.Services.AddStackExchangeRedisCache(opts =>
         {
-            opts.ConnectionMultiplexerFactory = () => Task.FromResult(redisMultiplexer as IConnectionMultiplexer);
+            opts.ConnectionMultiplexerFactory = () => Task.FromResult<IConnectionMultiplexer>(redisMultiplexer!);
             opts.InstanceName = string.IsNullOrEmpty(redisOptions.KeyPrefix)
                 ? "urguide:"
                 : $"{redisOptions.KeyPrefix}:";
@@ -251,14 +250,22 @@ try
 
         builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
+        // Only register the Redis health check when the connection was actually established.
+        // Using redisConfig.ToString() ensures the health check uses the same Sentinel-aware
+        // configuration (including service name and all sentinel endpoints) as the multiplexer.
+        builder.Services.AddHealthChecks()
+            .AddRedis(redisConfig.ToString(), name: "redis");
+
         logger.Info("Redis connected successfully ({Endpoint})", redisOptions.ConnectionString);
     }
     catch (Exception ex)
     {
         logger.Warn(ex, "Redis connection failed; falling back to in-memory distributed cache");
         builder.Services.AddDistributedMemoryCache();
-        // IConnectionMultiplexer is intentionally NOT registered; the middleware will resolve it
-        // via IServiceProvider.GetService<IConnectionMultiplexer>() which returns null safely.
+        // Register ICacheService backed by in-memory IDistributedCache so any component
+        // injecting ICacheService continues to work. IConnectionMultiplexer is not registered
+        // so RedisCacheService will resolve it as null and skip tag-based invalidation.
+        builder.Services.AddScoped<ICacheService, RedisCacheService>();
     }
 
     // ── Distributed sessions backed by Redis ──────────────────────────────────

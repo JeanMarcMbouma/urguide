@@ -831,7 +831,7 @@ Integrate Redis for distributed caching to improve performance and enable horizo
   }
 }
 ```
-Override `ConnectionString` with the `REDIS_CONNECTION_STRING` environment variable in production.
+Override `ConnectionString` with the `Redis__ConnectionString` environment variable in production.
 
 **Acceptance Criteria:**
 - [x] Redis is integrated

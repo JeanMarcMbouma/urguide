@@ -24,7 +24,11 @@ namespace UrGuide.WebApp.Caching
         /// <summary>Removes a single item from the cache.</summary>
         Task RemoveAsync(string key, CancellationToken cancellationToken = default);
 
-        /// <summary>Removes all keys that share the given tag prefix (e.g. "tour:", "user:").</summary>
+        /// <summary>
+        /// Removes all keys that share the given tag prefix.
+        /// Pass the prefix without a trailing colon, matching the format used by the
+        /// <see cref="CacheKeys"/> helpers (e.g. <c>"tour"</c> or <c>"user"</c>).
+        /// </summary>
         Task RemoveByTagAsync(string tag, CancellationToken cancellationToken = default);
 
         /// <summary>Returns true when the Redis backend is reachable.</summary>
