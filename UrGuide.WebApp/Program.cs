@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Threading.Tasks;
 using NLog;
 using NLog.Web;
 using UrGuide.WebApp.Data;
@@ -29,8 +30,11 @@ using Microsoft.Extensions.Localization;
 using UrGuide.WebApp.Resources;
 using UrGuide.WebApp.Middleware;
 using UrGuide.WebApp.Observability;
+using UrGuide.WebApp.Caching;
 using System.IO;
 using System.Reflection;
+using StackExchange.Redis;
+using Microsoft.Extensions.Configuration;
 
 var logger = LogManager.Setup().LoadConfigurationFromFile("nlog.config").GetCurrentClassLogger();
 try
@@ -105,11 +109,13 @@ try
     var authConn = builder.Configuration.GetSection("ConnectionStrings:AuthConnection").Value;
     var dataConn = builder.Configuration.GetSection("ConnectionStrings:DefaultConnection").Value;
     var elasticsearchUrl = builder.Configuration.GetSection("Elasticsearch:Url").Value ?? "http://localhost:9200";
+    var redisConnForHealth = builder.Configuration["Redis:ConnectionString"] ?? "localhost:6379";
     builder.Services.AddHealthChecks()
         .AddSqlServer(authConn ?? "", name: "auth-db")
         .AddSqlServer(dataConn ?? "", name: "data-db")
         .AddMessageQueueHealthChecks(builder.Configuration)
-        .AddElasticsearch(elasticsearchUrl, name: "elasticsearch");
+        .AddElasticsearch(elasticsearchUrl, name: "elasticsearch")
+        .AddRedis(redisConnForHealth, name: "redis");
     
     // Add CORS policy for API consumers
     builder.Services.AddCors(options =>
@@ -200,6 +206,71 @@ try
 
     builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
     
+    // ── Redis distributed cache ────────────────────────────────────────────────
+    // Bind options and build the connection multiplexer (supports Sentinel HA)
+    builder.Services.Configure<RedisOptions>(builder.Configuration.GetSection("Redis"));
+    var redisOptions = builder.Configuration.GetSection("Redis").Get<RedisOptions>() ?? new RedisOptions();
+
+    IConnectionMultiplexer? redisMultiplexer = null;
+    try
+    {
+        ConfigurationOptions redisConfig;
+        if (!string.IsNullOrEmpty(redisOptions.SentinelServiceName) &&
+            !string.IsNullOrEmpty(redisOptions.SentinelEndpoints))
+        {
+            // Redis Sentinel for high availability
+            redisConfig = new ConfigurationOptions
+            {
+                ServiceName = redisOptions.SentinelServiceName,
+                AbortOnConnectFail = false,
+                AllowAdmin = redisOptions.AllowAdmin,
+                DefaultDatabase = redisOptions.Database
+            };
+            foreach (var ep in redisOptions.SentinelEndpoints.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                redisConfig.EndPoints.Add(ep.Trim());
+        }
+        else
+        {
+            redisConfig = ConfigurationOptions.Parse(redisOptions.ConnectionString);
+            redisConfig.AbortOnConnectFail = false;
+            redisConfig.AllowAdmin = redisOptions.AllowAdmin;
+            redisConfig.DefaultDatabase = redisOptions.Database;
+        }
+
+        redisMultiplexer = ConnectionMultiplexer.Connect(redisConfig);
+        builder.Services.AddSingleton<IConnectionMultiplexer>(redisMultiplexer);
+
+        // Use Redis as the distributed cache backend
+        builder.Services.AddStackExchangeRedisCache(opts =>
+        {
+            opts.ConnectionMultiplexerFactory = () => Task.FromResult(redisMultiplexer as IConnectionMultiplexer);
+            opts.InstanceName = string.IsNullOrEmpty(redisOptions.KeyPrefix)
+                ? "urguide:"
+                : $"{redisOptions.KeyPrefix}:";
+        });
+
+        builder.Services.AddScoped<ICacheService, RedisCacheService>();
+
+        logger.Info("Redis connected successfully ({Endpoint})", redisOptions.ConnectionString);
+    }
+    catch (Exception ex)
+    {
+        logger.Warn(ex, "Redis connection failed; falling back to in-memory distributed cache");
+        builder.Services.AddDistributedMemoryCache();
+        // IConnectionMultiplexer is intentionally NOT registered; the middleware will resolve it
+        // via IServiceProvider.GetService<IConnectionMultiplexer>() which returns null safely.
+    }
+
+    // ── Distributed sessions backed by Redis ──────────────────────────────────
+    var sessionSection = builder.Configuration.GetSection("Session");
+    builder.Services.AddSession(opts =>
+    {
+        opts.IdleTimeout = sessionSection.GetValue<TimeSpan?>("IdleTimeout") ?? TimeSpan.FromMinutes(20);
+        opts.Cookie.HttpOnly = sessionSection.GetValue<bool?>("CookieHttpOnly") ?? true;
+        opts.Cookie.IsEssential = sessionSection.GetValue<bool?>("CookieIsEssential") ?? true;
+        opts.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    });
+
     // Add background services
     builder.Services.AddHostedService<UrGuide.WebApp.Services.DataExportBackgroundService>();
 
@@ -285,6 +356,9 @@ try
     // Add CORS middleware
     app.UseCors("ApiCorsPolicy");
     
+    // Distributed session (backed by Redis)
+    app.UseSession();
+
     // Add caching middleware
     app.UseResponseCaching();
     app.UseOutputCache();

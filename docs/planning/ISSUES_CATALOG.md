@@ -802,24 +802,44 @@ Create a webhook system to notify external systems of important events.
 ### 15. Redis Caching Integration
 **Title:** Add Redis for distributed caching  
 **Labels:** enhancement, performance, infrastructure  
+**Status:** ✅ **COMPLETED**  
 **Description:**
 Integrate Redis for distributed caching to improve performance and enable horizontal scaling.
 
-**Requirements:**
-- Redis integration
-- Cache-aside pattern implementation
-- Distributed session storage
-- Rate limiting with Redis
-- Cache invalidation strategy
-- Redis Sentinel for high availability
+**Implemented:**
+- ✅ Redis integration via `Microsoft.Extensions.Caching.StackExchangeRedis` and `StackExchange.Redis`
+- ✅ `ICacheService` / `RedisCacheService` implementing the cache-aside pattern (`GetOrSetAsync`)
+- ✅ Cache invalidation via `RemoveAsync` and `RemoveByTagAsync` (SCAN-based prefix eviction)
+- ✅ `CacheKeys` constants class for consistent, collision-free key naming
+- ✅ Distributed session storage backed by Redis (`AddSession` + `UseSession`)
+- ✅ Rate limiting upgraded to Redis atomic INCR/EXPIRE operations; graceful fallback to `IMemoryCache`
+- ✅ Redis Sentinel support configured via `SentinelServiceName` + `SentinelEndpoints` options
+- ✅ Redis health check at `/health` via `AspNetCore.HealthChecks.Redis`
+- ✅ Graceful degradation: if Redis is unreachable the app continues with in-memory distributed cache
+
+**Configuration (`appsettings.json` → `"Redis"` section):**
+```json
+{
+  "Redis": {
+    "ConnectionString": "localhost:6379",
+    "KeyPrefix": "urguide",
+    "DefaultExpiry": "00:30:00",
+    "Database": 0,
+    "AllowAdmin": true,
+    "SentinelServiceName": "",
+    "SentinelEndpoints": ""
+  }
+}
+```
+Override `ConnectionString` with the `REDIS_CONNECTION_STRING` environment variable in production.
 
 **Acceptance Criteria:**
-- [ ] Redis is integrated
-- [ ] Caching works correctly
-- [ ] Sessions are distributed
-- [ ] Rate limiting uses Redis
-- [ ] Invalidation works
-- [ ] HA is configured
+- [x] Redis is integrated
+- [x] Caching works correctly
+- [x] Sessions are distributed
+- [x] Rate limiting uses Redis
+- [x] Invalidation works
+- [x] HA is configured
 
 ---
 
@@ -1906,9 +1926,9 @@ Implement premium features including guide membership tiers (Basic/Premium), mon
 **Total Issues: 50** (increased from 47 due to new roadmap features)
 
 **By Status:**
-- ✅ Completed: 31 (Docker Containerization, CI/CD Pipeline, Payment Integration, Two-Factor Authentication, GDPR Data Export, Message Queue Integration, Advanced Search & Filtering, Webhook System, Analytics Dashboard, API Rate Limiting Improvements, Real-time Chat, Review Moderation, Tour Package Templates, Referral System, Advanced Image Management, Dispute Resolution, Email Templates, Tour Recommendations, Advanced Reporting, Tourist Website Discovery & Search, Tourist Website Booking & Bidding, Tourist Website Payment & Profile, Tourist Website Reviews & Communication, Multi-language Support, Google OAuth, Apple Sign-In, Microsoft OAuth, Social Account Linking, Payment & Financial System Enhanced, Gamification & Rewards, Premium Features & Subscriptions)
+- ✅ Completed: 32 (Docker Containerization, CI/CD Pipeline, Payment Integration, Two-Factor Authentication, GDPR Data Export, Message Queue Integration, Advanced Search & Filtering, Webhook System, Analytics Dashboard, API Rate Limiting Improvements, Real-time Chat, Review Moderation, Tour Package Templates, Referral System, Advanced Image Management, Dispute Resolution, Email Templates, Tour Recommendations, Advanced Reporting, Tourist Website Discovery & Search, Tourist Website Booking & Bidding, Tourist Website Payment & Profile, Tourist Website Reviews & Communication, Multi-language Support, Google OAuth, Apple Sign-In, Microsoft OAuth, Social Account Linking, Payment & Financial System Enhanced, Gamification & Rewards, Premium Features & Subscriptions, Redis Caching Integration)
 - 🚧 In Progress: 0
-- 📋 Pending: 19
+- 📋 Pending: 18
 
 **By Priority:**
 - High Priority: 6 (Payment Integration ✅, 2FA ✅, Admin Dashboard (19-19d) 📋, Tourist Website (20-20d) ✅, Backup & DR 📋)
@@ -1923,7 +1943,7 @@ Implement premium features including guide membership tiers (Basic/Premium), mon
 - **Monitoring & Observability**: 2 (0 completed, 2 pending)
 - **Features & Enhancements**: 5 (3 completed, 2 pending)
 - **Mobile & Integration**: 5 (2 completed: Webhook System ✅, Notification Templates 13c ✅, 3 pending: FCM 13, APNs 13b, expanded from 13)
-- **Infrastructure**: 4 (1 completed: Message Queue ✅, 3 pending: Redis Caching, CDN, Backup & DR)
+- **Infrastructure**: 4 (2 completed: Message Queue ✅, Redis Caching ✅, 2 pending: CDN, Backup & DR)
 - **Analytics & Reporting**: 2 (1 completed: Analytics Dashboard ✅, 1 pending: Advanced Reporting)
 - **Communication**: 2 (Real-time Chat 24, Email Templates 31)
 - **Content Management**: 2 (Review Moderation 25, Tour Templates 27)
