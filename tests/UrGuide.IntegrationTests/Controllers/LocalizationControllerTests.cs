@@ -15,6 +15,8 @@ public class LocalizationControllerTests
     public LocalizationControllerTests()
     {
         _localizerMock = Mock.Create<IStringLocalizer<SharedResource>>();
+        _localizerMock.Setup(l => l[It.IsAny<string>()])
+            .Returns(new LocalizedString("Localization_LanguageNotSupported", "Language not supported"));
         _controller = new LocalizationController(_localizerMock.Object);
     }
 
