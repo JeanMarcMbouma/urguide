@@ -126,7 +126,12 @@ namespace UrGuide.WebApp.Services
 
                 await client.ConnectAsync(host, port, secureSocketOptions);
 
-                if (!string.IsNullOrEmpty(username))
+                if (!string.IsNullOrEmpty(username) && string.IsNullOrEmpty(password))
+                {
+                    throw new InvalidOperationException("SMTP configuration is invalid: 'Smtp:Password' must be provided when 'Smtp:Username' is set.");
+                }
+
+                if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
                 {
                     await client.AuthenticateAsync(username, password);
                 }
