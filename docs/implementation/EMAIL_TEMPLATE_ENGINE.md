@@ -34,7 +34,7 @@ Admin Dashboard ──── CRUD ────► EmailTemplate (DB)
 | `EmailTemplateService` | `UrGuide.Services/Email/` | Concrete implementation against EF Core |
 | `EmailTemplateController` | `UrGuide.WebApp/Controllers/` | REST API consumed by the admin dashboard |
 | `IEmailService` | `UrGuide.Shared/Contracts/` | Send email (raw content or rendered template) |
-| `EmailService` | `UrGuide.WebApp/Services/` | SMTP delivery via `System.Net.Mail`; delegates rendering to `IEmailTemplateService` |
+| `EmailService` | `UrGuide.WebApp/Services/` | MailKit SMTP delivery; delegates rendering to `IEmailTemplateService` |
 
 ---
 
@@ -77,7 +77,7 @@ Callers should populate `SendDirectMessageCommand.Language` with the recipient's
 
 ## SMTP Configuration
 
-Email delivery uses `System.Net.Mail.SmtpClient` (built into .NET). No third-party SDK is required. Configure SMTP via `appsettings.json` or environment variables:
+Email delivery uses **MailKit** (v4+), a modern, actively maintained SMTP library. MailKit provides full async support, proper TLS handling, and is the recommended replacement for the obsolete `System.Net.Mail.SmtpClient`. Configure SMTP via `appsettings.json` or environment variables:
 
 ```json
 {

@@ -1,8 +1,9 @@
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Configuration;
+using MimeKit;
 using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Net.Mail;
 using System.Threading.Tasks;
 using UrGuide.Shared.Contracts;
 using UrGuide.Model.Messages;
@@ -13,12 +14,15 @@ using UrGuide.Services.Email;
 namespace UrGuide.WebApp.Services
 {
     /// <summary>
-    /// SMTP-based email delivery service that uses the proprietary admin-managed
-    /// template engine for rendering. Falls back to raw content when no template name
-    /// is supplied, preserving backwards-compatibility with existing callers.
+    /// SMTP-based email delivery service (MailKit) that integrates with the proprietary
+    /// admin-managed template engine for rendering. Falls back to raw content when no
+    /// template name is supplied, preserving backwards-compatibility with existing callers.
     /// </summary>
     public partial class EmailService : IEmailService, IEmailSender
     {
+        /// <summary>Default BCP 47 language tag used when the caller does not specify one.</summary>
+        public const string DefaultLanguage = "en";
+
         private readonly IConfiguration _configuration;
         private readonly IEmailTemplateService _emailTemplateService;
         private readonly ILogger<EmailService> _logger;
@@ -43,7 +47,7 @@ namespace UrGuide.WebApp.Services
             // Use the proprietary DB template engine when a template name is provided
             if (!string.IsNullOrEmpty(message.TemplateName))
             {
-                var language = string.IsNullOrEmpty(message.Language) ? "en" : message.Language;
+                var language = string.IsNullOrEmpty(message.Language) ? DefaultLanguage : message.Language;
                 var variables = message.TemplateVariables != null
                     ? new Dictionary<string, string>(message.TemplateVariables)
                     : new Dictionary<string, string>();
@@ -91,7 +95,7 @@ namespace UrGuide.WebApp.Services
         }
 
         // ------------------------------------------------------------------ //
-        // Internal SMTP delivery                                              //
+        // Internal SMTP delivery (MailKit)                                   //
         // ------------------------------------------------------------------ //
 
         private async Task SendSmtpAsync(string to, string toName, string subject, string htmlBody)
@@ -105,29 +109,31 @@ namespace UrGuide.WebApp.Services
             var fromName = smtpSection.GetValue<string>("FromName") ?? "UrGuide";
             var enableSsl = smtpSection.GetValue<bool>("EnableSsl", true);
 
-#pragma warning disable CA5386 // SmtpClient is the recommended built-in SMTP client here
-            using var client = new SmtpClient(host, port)
-            {
-                EnableSsl = enableSsl,
-                Credentials = !string.IsNullOrEmpty(username)
-                    ? new NetworkCredential(username, password)
-                    : CredentialCache.DefaultNetworkCredentials
-            };
-#pragma warning restore CA5386
+            var mail = new MimeMessage();
+            mail.From.Add(new MailboxAddress(fromName, fromEmail));
+            mail.To.Add(new MailboxAddress(string.IsNullOrEmpty(toName) ? to : toName, to));
+            mail.Subject = subject ?? string.Empty;
 
-            using var mailMessage = new MailMessage
-            {
-                From = new MailAddress(fromEmail, fromName),
-                Subject = subject ?? string.Empty,
-                Body = htmlBody ?? string.Empty,
-                IsBodyHtml = true
-            };
-
-            mailMessage.To.Add(new MailAddress(to, string.IsNullOrEmpty(toName) ? to : toName));
+            var bodyBuilder = new BodyBuilder { HtmlBody = htmlBody ?? string.Empty };
+            mail.Body = bodyBuilder.ToMessageBody();
 
             try
             {
-                await client.SendMailAsync(mailMessage);
+                using var client = new SmtpClient();
+                var secureSocketOptions = enableSsl
+                    ? SecureSocketOptions.StartTls
+                    : SecureSocketOptions.None;
+
+                await client.ConnectAsync(host, port, secureSocketOptions);
+
+                if (!string.IsNullOrEmpty(username))
+                {
+                    await client.AuthenticateAsync(username, password);
+                }
+
+                await client.SendAsync(mail);
+                await client.DisconnectAsync(true);
+
                 _logger.LogInformation("Email sent to {To} via SMTP {Host}:{Port}", to, host, port);
             }
             catch (Exception ex)

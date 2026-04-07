@@ -34,7 +34,7 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 - **Validation**: FluentValidation 12.1
 - **Logging**: NLog 6.1 with structured logging
 - **Rate Limiting**: AspNetCoreRateLimit + Custom Tiered Rate Limiting (Anonymous, Authenticated, Premium)
-- **Email**: Proprietary DB-backed template engine with multi-language support (SMTP delivery via System.Net.Mail)
+- **Email**: Proprietary DB-backed template engine with multi-language support (MailKit SMTP delivery)
 - **Payments**: Stripe.net 48.0 for payment processing
 - **Health Checks**: ASP.NET Core Health Checks with SQL Server monitoring
 - **.NET Aspire**: Service defaults plus an AppHost that orchestrates the API, SQL Server, RabbitMQ, Elasticsearch, Seq, and SPA containers
