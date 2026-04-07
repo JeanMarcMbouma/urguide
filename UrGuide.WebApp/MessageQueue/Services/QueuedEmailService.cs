@@ -36,7 +36,7 @@ public class QueuedEmailService : IEmailService
                 Content = message.Content,
                 Link = message.Link,
                 LinkText = message.LinkText,
-                Language = message.Language ?? "en",
+                Language = message.Language,
                 TemplateName = message.TemplateName,
                 TemplateVariables = message.TemplateVariables,
                 QueuedAt = DateTime.UtcNow

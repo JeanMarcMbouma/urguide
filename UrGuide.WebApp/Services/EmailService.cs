@@ -43,6 +43,7 @@ namespace UrGuide.WebApp.Services
 
             var subject = message.Subject;
             var htmlBody = message.Content;
+            string plainTextBody = null;
 
             // Use the proprietary DB template engine when a template name is provided
             if (!string.IsNullOrEmpty(message.TemplateName))
@@ -69,6 +70,7 @@ namespace UrGuide.WebApp.Services
                 {
                     subject = renderResult.Value.Subject;
                     htmlBody = renderResult.Value.HtmlBody;
+                    plainTextBody = renderResult.Value.PlainTextBody;
                 }
                 else
                 {
@@ -78,7 +80,7 @@ namespace UrGuide.WebApp.Services
                 }
             }
 
-            await SendSmtpAsync(message.To, message.ToName, subject, htmlBody);
+            await SendSmtpAsync(message.To, message.ToName, subject, htmlBody, plainTextBody);
         }
 
         /// <summary>
@@ -98,7 +100,7 @@ namespace UrGuide.WebApp.Services
         // Internal SMTP delivery (MailKit)                                   //
         // ------------------------------------------------------------------ //
 
-        private async Task SendSmtpAsync(string to, string toName, string subject, string htmlBody)
+        private async Task SendSmtpAsync(string to, string toName, string subject, string htmlBody, string plainTextBody = null)
         {
             var smtpSection = _configuration.GetSection("Smtp");
             var host = smtpSection.GetValue<string>("Host") ?? "localhost";
@@ -115,6 +117,10 @@ namespace UrGuide.WebApp.Services
             mail.Subject = subject ?? string.Empty;
 
             var bodyBuilder = new BodyBuilder { HtmlBody = htmlBody ?? string.Empty };
+            if (!string.IsNullOrEmpty(plainTextBody))
+            {
+                bodyBuilder.TextBody = plainTextBody;
+            }
             mail.Body = bodyBuilder.ToMessageBody();
 
             try
