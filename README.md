@@ -34,7 +34,7 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 - **Validation**: FluentValidation 12.1
 - **Logging**: NLog 6.1 with structured logging
 - **Rate Limiting**: AspNetCoreRateLimit + Custom Tiered Rate Limiting (Anonymous, Authenticated, Premium)
-- **Email**: SendGrid integration
+- **Email**: Proprietary DB-backed template engine with multi-language support (SMTP delivery via System.Net.Mail)
 - **Payments**: Stripe.net 48.0 for payment processing
 - **Health Checks**: ASP.NET Core Health Checks with SQL Server monitoring
 - **.NET Aspire**: Service defaults plus an AppHost that orchestrates the API, SQL Server, RabbitMQ, Elasticsearch, Seq, and SPA containers
@@ -284,7 +284,8 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
    
    # Set optional API keys
    dotnet user-secrets set "IpStack:ApiKey" "your-ipstack-api-key"
-   dotnet user-secrets set "SENDGRID_URGUIDE_API_KEY" "your-sendgrid-api-key"
+   dotnet user-secrets set "Smtp__Username" "your-smtp-username"
+   dotnet user-secrets set "Smtp__Password" "your-smtp-password"
    dotnet user-secrets set "Stripe:SecretKey" "sk_test_..."
    ```
    dotnet user-secrets set "Stripe:WebhookSecret" "whsec_..."
@@ -622,7 +623,7 @@ Response includes RabbitMQ status:
 
 Three dedicated consumers process messages:
 
-1. **SendEmailConsumer**: Processes email sending via SendGrid
+1. **SendEmailConsumer**: Processes email sending via the proprietary template engine and SMTP
 2. **ProcessImageConsumer**: Handles image resizing and optimization
 3. **SendNotificationConsumer**: Dispatches real-time notifications via SignalR
 
@@ -803,15 +804,15 @@ cp .env.example .env
 
 **Optional but recommended**:
 - `IPSTACK_API_KEY` - For IP geolocation
-- `SENDGRID_API_KEY` - For email notifications
+- `Smtp__Host`, `Smtp__Username`, `Smtp__Password` - SMTP server credentials for email delivery
 - `STRIPE_SECRET_KEY` - For payment processing
 - `JWT__KEY` - Custom JWT secret (auto-generated if not set)  
 - `IPSTACK_API_KEY` - IPStack API key (optional)
-- `SENDGRID_API_KEY` - SendGrid API key (optional)
 **Required Environment Variables:**
 - `SQL_SA_PASSWORD` - SQL Server SA password (minimum 8 characters, complexity required)
 - `IPSTACK_API_KEY` - IPStack API key for geolocation
-- `SENDGRID_API_KEY` - SendGrid API key for emails
+- `Smtp__Host` - SMTP server hostname for email delivery (default: localhost)
+- `Smtp__Username` / `Smtp__Password` - SMTP credentials (optional for relay servers)
 - `XAMARIN_CLIENT_SECRET` - Client secret for mobile app
 - `ADMIN_DASHBOARD_CLIENT_SECRET` - Client secret for admin dashboard (generate with `openssl rand -base64 32`)
 - `SEED_ADMIN_ENABLED` - Enable automatic admin user provisioning (true/false)
@@ -1080,7 +1081,7 @@ The project includes automated GitHub Actions workflows:
    - Configure HTTPS certificates
    - Set up proper CORS origins
    - Configure rate limiting for production traffic
-   - Update SendGrid API keys for email
+   - Configure SMTP credentials for email delivery (set `Smtp__Host`, `Smtp__Username`, `Smtp__Password`)
    - Configure Azure SignalR Service (optional, for scale-out)
 
 3. **Apply database migrations**:
@@ -1112,7 +1113,8 @@ cd UrGuide.WebApp
 
 # Configure required secrets
 dotnet user-secrets set "IpStack:ApiKey" "your-api-key"
-dotnet user-secrets set "SENDGRID_URGUIDE_API_KEY" "your-api-key"
+dotnet user-secrets set "Smtp__Username" "your-smtp-user"
+dotnet user-secrets set "Smtp__Password" "your-smtp-password"
 dotnet user-secrets set "IdentityServer:Clients:Xamarin:ClientSecret" "your-secret"
 ```
 

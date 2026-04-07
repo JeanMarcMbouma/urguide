@@ -38,7 +38,10 @@ public class SendEmailConsumer : IConsumer<SendEmailMessage>
                 Subject = message.Subject,
                 Content = message.Content,
                 Link = message.Link,
-                LinkText = message.LinkText
+                LinkText = message.LinkText,
+                Language = message.Language,
+                TemplateName = message.TemplateName,
+                TemplateVariables = message.TemplateVariables
             });
 
             _logger.LogInformation("Successfully sent email to {To}", message.To);

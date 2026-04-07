@@ -72,6 +72,9 @@ namespace UrGuide.Data.Configurations
             var system = new User
             {
                 Id = systemUserId,
+                Email = "system@urguide.org",
+                FirstName = "System",
+                LastName = "User",
                 CreatedAt = new DateTime(2020, 1, 1, 12, 0, 0),
                 LastActivityDate = new DateTime(2020, 1, 1, 12, 0, 0)
             };
