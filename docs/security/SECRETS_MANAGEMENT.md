@@ -36,7 +36,7 @@ cp .env.example .env
 
 **Optional but recommended:**
 - `IPSTACK_API_KEY` - For IP geolocation
-- `SENDGRID_API_KEY` - For email notifications
+- `SMTP__USERNAME` / `SMTP__PASSWORD` - For email delivery (SMTP credentials)
 - `STRIPE_SECRET_KEY` - For payment testing
 - `JWT__KEY` - Custom JWT secret (auto-generated if not set)
 
@@ -63,7 +63,9 @@ uuidgen  # or use online: https://www.uuidgenerator.net/
 | `ADMIN_DASHBOARD_CLIENT_SECRET` | IdentityServer:Clients:AdminDashboard:ClientSecret | OAuth2 client secret |
 | `XAMARIN_CLIENT_SECRET` | IdentityServer:Clients:Xamarin:ClientSecret | Mobile app client secret |
 | `IPSTACK_API_KEY` | IpStack:ApiKey | IP geolocation API key |
-| `SENDGRID_API_KEY` | SENDGRID_URGUIDE_API_KEY | Email service API key |
+| `SMTP__HOST` | Smtp:Host | SMTP server hostname |
+| `SMTP__USERNAME` | Smtp:Username | SMTP authentication username |
+| `SMTP__PASSWORD` | Smtp:Password | SMTP authentication password |
 | `STRIPE_SECRET_KEY` | Stripe:SecretKey | Payment gateway secret |
 | `STRIPE_WEBHOOK_SECRET` | Stripe:WebhookSecret | Stripe webhook signature |
 | `JWT__KEY` | Jwt:Key | Custom JWT signing key |

@@ -17,7 +17,10 @@ services:
       - DOTNET_USE_POLLING_FILE_WATCHER=true
       # Load secrets from environment variables (set in .env file)
       - IpStack__ApiKey=${IPSTACK_API_KEY}
-      - SENDGRID_URGUIDE_API_KEY=${SENDGRID_API_KEY}
+      - Smtp__Host=${SMTP_HOST:-localhost}
+      - Smtp__Port=${SMTP_PORT:-587}
+      - Smtp__Username=${SMTP__USERNAME}
+      - Smtp__Password=${SMTP__PASSWORD}
       - IdentityServer__Clients__Xamarin__ClientSecret=${XAMARIN_CLIENT_SECRET}
       # Admin user provisioning from .env file (overrides appsettings)
       - Seeding__SeedDefaultAdmin=${SEED_ADMIN_ENABLED:-true}

@@ -24,6 +24,7 @@ Technical implementation summaries and architecture documentation.
 - [**Refactoring Summary**](implementation/REFACTORING_SUMMARY.md) - Platform transformation to API-only architecture
 - [**Social Login Integration**](implementation/SOCIAL_LOGIN_INTEGRATION.md) - Google, Apple, Microsoft OAuth social login and account linking
 - [**Push Notification Templates**](implementation/PUSH_NOTIFICATION_TEMPLATES.md) - Reusable templates with variable substitution, versioning, multi-language and A/B testing
+- [**Email Template Engine**](implementation/EMAIL_TEMPLATE_ENGINE.md) - Proprietary database-backed email templating with multi-language support, admin dashboard CRUD, and SMTP delivery
 
 ### 🚀 CI/CD
 Continuous Integration and Deployment documentation.

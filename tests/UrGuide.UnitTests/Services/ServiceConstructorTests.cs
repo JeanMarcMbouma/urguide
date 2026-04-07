@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UrGuide.Data;
 using UrGuide.Services.Disputes;
+using UrGuide.Services.Email;
 using UrGuide.Services.Payments;
 using UrGuide.Services.Reports;
 
@@ -148,6 +149,26 @@ public class ServiceConstructorTests
         var config = new ConfigurationBuilder().Build();
 
         var act = () => new RefundService(CreateMockContext(), config, null!);
+
+        act.Should().Throw<ArgumentNullException>()
+            .And.ParamName.Should().Be("logger");
+    }
+
+    [Fact]
+    public void EmailTemplateService_throws_when_context_is_null()
+    {
+        var logger = new LoggerFactory().CreateLogger<EmailTemplateService>();
+
+        var act = () => new EmailTemplateService(null!, logger);
+
+        act.Should().Throw<ArgumentNullException>()
+            .And.ParamName.Should().Be("context");
+    }
+
+    [Fact]
+    public void EmailTemplateService_throws_when_logger_is_null()
+    {
+        var act = () => new EmailTemplateService(CreateMockContext(), null!);
 
         act.Should().Throw<ArgumentNullException>()
             .And.ParamName.Should().Be("logger");

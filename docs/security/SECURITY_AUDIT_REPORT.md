@@ -18,7 +18,7 @@
 |------------|----------|--------|----------|
 | Xamarin Client Secret | `UrGuide.WebApp/Extensions/ServiceCollectionExtensions.cs:141` | ✅ FIXED | Now reads from configuration |
 | IPStack API Key | `UrGuide.WebApp/appsettings.json:44` | ✅ SAFE | Empty placeholder only |
-| SendGrid API Key | `UrGuide.WebApp/appsettings.json:46` | ✅ SAFE | Empty placeholder only |
+| SMTP Credentials | `UrGuide.WebApp/appsettings.json` (Smtp section) | ✅ SAFE | Empty placeholders; set via `Smtp__Username` / `Smtp__Password` env vars |
 | SQL SA Password | `.env.example:6` | ✅ SAFE | Example file with placeholder |
 | Connection Strings | `appsettings*.json` | ✅ SAFE | Uses Windows Authentication (Trusted_Connection) |
 
@@ -107,7 +107,8 @@ Existing protections already in place:
 ```bash
 cd UrGuide.WebApp
 dotnet user-secrets set "IpStack:ApiKey" "test-api-key-12345"
-dotnet user-secrets set "SENDGRID_URGUIDE_API_KEY" "test-sendgrid-key"
+dotnet user-secrets set "Smtp__Username" "test-smtp-user"
+dotnet user-secrets set "Smtp__Password" "test-smtp-password"
 dotnet user-secrets set "IdentityServer:Clients:Xamarin:ClientSecret" "test-secure-xamarin-secret-xyz"
 dotnet user-secrets list
 ```
