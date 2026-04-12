@@ -24,21 +24,23 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 
 - **Backend**: ASP.NET Core 10.0 Web API (.NET 10 LTS)
 - **Database**: Entity Framework Core 10.0 with SQL Server
-- **Authentication**: Duende IdentityServer 7.4 with Duende.IdentityModel 8.0 (OAuth 2.0/OpenID Connect)
+- **Authentication**: Duende IdentityServer 7.4.5 with Duende.IdentityModel 8.0 (OAuth 2.0/OpenID Connect)
 - **Two-Factor Authentication**: Custom TOTP implementation with QR code generation (QRCoder 1.4.3)
 - **Passkey/WebAuthn**: Fido2.AspNet 3.0.1 for passwordless authentication
 - **Real-time Communication**: SignalR for notifications
 - **Message Queue**: MassTransit 8.3.4 with RabbitMQ for asynchronous processing
-- **API Documentation**: Swagger/OpenAPI 3.0 (Swashbuckle.AspNetCore 10.1)
-- **API Versioning**: Asp.Versioning.Mvc 8.1
-- **Validation**: FluentValidation 12.1
-- **Logging**: NLog 6.1 with structured logging
+- **API Documentation**: Swagger/OpenAPI 3.0 (Swashbuckle.AspNetCore 10.1.2)
+- **API Versioning**: Asp.Versioning.Mvc 8.1.1
+- **Validation**: FluentValidation 11.3.1
+- **Logging**: NLog 6.1 with structured logging, Seq for aggregation (NLog.Targets.Seq 4.0.2)
 - **Rate Limiting**: AspNetCoreRateLimit + Custom Tiered Rate Limiting (Anonymous, Authenticated, Premium)
-- **Email**: Proprietary DB-backed template engine with multi-language support (MailKit SMTP delivery)
+- **Email**: Proprietary DB-backed template engine with multi-language support (MailKit 4.15.1 SMTP delivery)
 - **Payments**: Stripe.net 48.0 for payment processing
 - **Health Checks**: ASP.NET Core Health Checks with SQL Server monitoring
-- **.NET Aspire**: Service defaults plus an AppHost that orchestrates the API, SQL Server, RabbitMQ, Elasticsearch, Seq, and SPA containers
+- **.NET Aspire**: Service defaults (Aspire.AppHost.Sdk 13.0) plus an AppHost that orchestrates the API, SQL Server, RabbitMQ, Elasticsearch, Seq, and SPA containers
 - **OpenTelemetry**: Version 1.15.0 for distributed tracing, metrics, and logging
+- **Search**: Elasticsearch with NEST 7.17.5 client for full-text and faceted search
+- **Frontend Apps**: Three standalone React 19 + TypeScript 5.9 + Vite 8.0 + Material-UI v7 applications (Admin Dashboard, Guide Portal, Tourist Website)
 
 ## ✅ Implemented Features
 
@@ -115,6 +117,20 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
   - GET `/api/guide/analytics/performance` – Performance metrics
   - GET `/api/guide/analytics/tour-stats` – Tour statistics
   - GET/POST `/api/messages/*` – Database-persisted messaging
+
+### 🌍 Tourist Website
+- [x] **Standalone Tourist Application**: React 19 + TypeScript + Vite with Material-UI v7
+- [x] **Guide Search & Discovery**: Browse and search for local guides with filters
+- [x] **Guide Profiles**: View detailed guide profiles with reviews and ratings
+- [x] **Tour Request Creation**: Create tour requests and receive bids from guides
+- [x] **Booking Management**: Manage bookings and payment flow
+- [x] **Reviews & Ratings**: Write and read reviews for guides and tours
+- [x] **Direct Messaging**: In-app messaging with guides
+- [x] **Notifications**: Real-time notification center
+- [x] **Payment History**: View past transactions and payment details
+- [x] **User Profile & Settings**: Profile management and preferences
+- [x] **Internationalization**: Full 5-language support (English, Spanish, French, German, Arabic)
+- [x] **Docker Integration**: Production Dockerfile with Nginx and development Dockerfile.dev with hot-reload
 
 ### �👥 Guide System API
 - [x] Guide registration with comprehensive questionnaire
@@ -287,11 +303,7 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
    dotnet user-secrets set "Smtp__Username" "your-smtp-username"
    dotnet user-secrets set "Smtp__Password" "your-smtp-password"
    dotnet user-secrets set "Stripe:SecretKey" "sk_test_..."
-   ```
    dotnet user-secrets set "Stripe:WebhookSecret" "whsec_..."
-   
-   # Set Xamarin Client Secret (required for mobile app)
-   dotnet user-secrets set "IdentityServer:Clients:Xamarin:ClientSecret" "your-secure-secret"
    ```
    
    📖 **For detailed secrets management instructions, see the [Security & Secrets Management](#-security--secrets-management) section below.**
@@ -387,7 +399,7 @@ The Swagger UI provides:
 
 ## 🔑 Authentication
 
-The API uses **OAuth 2.0** and **OpenID Connect** for authentication via Duende IdentityServer 7.0.
+The API uses **OAuth 2.0** and **OpenID Connect** for authentication via Duende IdentityServer 7.4.5.
 
 ### Authentication Flow
 
@@ -664,9 +676,11 @@ Response:
 - **`/api/feedback`** - Reviews and ratings
 - **`/api/galleries`** - Photo galleries
 - **`/api/tourrequest`** - Tour request management
+- **`/api/tour-templates`** - Reusable tour templates
 - **`/api/payment`** - Payment processing for tour bookings
 - **`/api/payout`** - Guide payout management
 - **`/api/refund`** - Refund request processing
+- **`/api/financial`** - Financial reporting and management
 - **`/api/dataexport`** - GDPR-compliant user data export
 - **`/api/analytics`** - Admin analytics dashboard and reporting
 - **`/api/webhook`** - Stripe webhook events
@@ -674,6 +688,29 @@ Response:
 - **`/api/lookup`** - Reference data (countries, cities, etc.)
 - **`/api/notification`** - Notification management
 - **`/api/activity`** - User activity tracking
+- **`/api/dispute`** - Dispute resolution between guides and tourists
+- **`/api/referrals`** - Referral program management
+- **`/api/recommendation`** - Personalized tour and guide recommendations
+- **`/api/reviews`** - Review moderation and management
+- **`/api/guide-verification`** - Guide identity and KYC verification
+- **`/api/guide/dashboard`** - Guide dashboard and analytics
+- **`/api/messages`** - Database-persisted messaging
+- **`/api/search`** - Elasticsearch-powered search with autocomplete
+- **`/api/availability`** - Guide availability and calendar management
+- **`/api/gamification`** - Badges, achievements, and loyalty rewards
+- **`/api/premium`** - Premium subscriptions and membership tiers
+- **`/api/ratelimit`** - Rate limit status and analytics
+- **`/api/emailtemplate`** - Email template CRUD management
+- **`/api/report`** - Reporting and content flagging
+- **`/api/imageprocessing`** - Image upload and processing
+- **`/api/pushnotification`** - Push notification registration and management
+- **`/api/notificationtemplate`** - Push notification template management
+- **`/api/localization`** - Localization resources
+- **`/api/socialauth`** - Social login (Google, Apple, Microsoft)
+- **`/api/twofactor`** - Two-factor authentication management
+- **`/api/passkey`** - WebAuthn/FIDO2 passkey management
+- **`/api/admin`** - Admin user management and operations
+- **`/api/auth`** - JWT authentication (login)
 - **`/notify`** - SignalR Hub for real-time notifications
 
 ### Webhook Management
@@ -798,27 +835,18 @@ cp .env.example .env
 ```
 
 **Required secrets** in `.env`:
-- `SQL_SA_PASSWORD` - Strong database password
-- `ADMIN_DASHBOARD_CLIENT_SECRET` - OAuth2 client secret for admin dashboard
+- `SQL_SA_PASSWORD` - SQL Server SA password (minimum 8 characters, complexity required)
+- `ADMIN_DASHBOARD_CLIENT_SECRET` - OAuth2 client secret for admin dashboard (generate with `openssl rand -base64 32`)
 - `ADMIN_PASSWORD` - Default admin user password
 
 **Optional but recommended**:
-- `IPSTACK_API_KEY` - For IP geolocation
+- `IPSTACK_API_KEY` - IPStack API key for geolocation
 - `Smtp__Host`, `Smtp__Username`, `Smtp__Password` - SMTP server credentials for email delivery
 - `STRIPE_SECRET_KEY` - For payment processing
-- `JWT__KEY` - Custom JWT secret (auto-generated if not set)  
-- `IPSTACK_API_KEY` - IPStack API key (optional)
-**Required Environment Variables:**
-- `SQL_SA_PASSWORD` - SQL Server SA password (minimum 8 characters, complexity required)
-- `IPSTACK_API_KEY` - IPStack API key for geolocation
-- `Smtp__Host` - SMTP server hostname for email delivery (default: localhost)
-- `Smtp__Username` / `Smtp__Password` - SMTP credentials (optional for relay servers)
-- `XAMARIN_CLIENT_SECRET` - Client secret for mobile app
-- `ADMIN_DASHBOARD_CLIENT_SECRET` - Client secret for admin dashboard (generate with `openssl rand -base64 32`)
-- `SEED_ADMIN_ENABLED` - Enable automatic admin user provisioning (true/false)
-- `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_FIRST_NAME`, `ADMIN_LAST_NAME` - Admin credentials
-- `JWT__KEY` - Secure random key for JWT token generation (optional, auto-generated if not set)
+- `JWT__KEY` - Secure random key for JWT token generation (auto-generated if not set)
 - `JWT__EXPIRESINHOUHS` - JWT token expiration in hours (default: 8)
+- `SEED_ADMIN_ENABLED` - Enable automatic admin user provisioning (true/false)
+- `ADMIN_EMAIL`, `ADMIN_FIRST_NAME`, `ADMIN_LAST_NAME` - Admin account details
 
 **IMPORTANT**: Never commit `.env` files to version control (already in .gitignore).
 **SECURITY**: Generate all secrets using `openssl rand -base64 32` or similar secure random generators.
@@ -931,50 +959,58 @@ See [admin-dashboard/DOCKER.md](admin-dashboard/DOCKER.md) for comprehensive Doc
 
 ## 🧪 Testing
 
+### Test Infrastructure
+
+The project includes a comprehensive testing suite organized in four projects:
+
+| Project | Framework | Tests | Description |
+|---------|-----------|-------|-------------|
+| **UrGuide.UnitTests** | xUnit 2.9.3, FluentAssertions 8.3, BbQ.MockLite | 171 | Service, validator, and core logic unit tests |
+| **UrGuide.IntegrationTests** | xUnit 2.9.3, FluentAssertions 8.3, Mvc.Testing | 99 | Controller integration tests with mock services |
+| **UrGuide.E2ETests** | Playwright 1.52.0, xUnit | — | End-to-end browser tests |
+| **UrGuide.PerformanceTests** | BenchmarkDotNet 0.14.0 | — | Micro-benchmarks for critical paths |
+
+### Running Tests
+
+```bash
+# Unit tests
+dotnet test tests/UrGuide.UnitTests/UrGuide.UnitTests.csproj
+
+# Integration tests
+dotnet test tests/UrGuide.IntegrationTests/UrGuide.IntegrationTests.csproj
+
+# Performance benchmarks
+dotnet run -c Release --project tests/UrGuide.PerformanceTests/UrGuide.PerformanceTests.csproj
+```
+
 ### Manual Testing
 
 Use the Swagger UI at `/swagger` for interactive API testing.
 
-### Automated Testing
+## 🖥️ Frontend Applications
 
-Test projects will be automatically detected and run by the CI/CD pipeline. Add test projects following this naming convention:
-- `UrGuide.*.Tests.csproj` for unit tests
-- `UrGuide.*.IntegrationTests.csproj` for integration tests
+The platform includes three standalone React 19 + TypeScript + Vite applications, each with its own Docker container and production Nginx configuration.
 
-_(Comprehensive API testing suite coming soon - see issues catalog)_
+### Shared Technology Stack (All Three Apps)
 
-## � Admin Dashboard Development
+- **React 19.2** - Modern React with hooks
+- **TypeScript 5.9** - Type-safe development
+- **Vite 8.0** - Fast build tool and dev server
+- **Material-UI v7** (@mui/material 7.3) - Enterprise-ready component library
+- **MUI X Data Grid** - Advanced table with pagination, sorting, filtering
+- **TanStack Query v5** - Server state management
+- **React Router v7** - Client-side routing
+- **Axios 1.15** - HTTP client for API calls
+- **i18next 25** - Internationalization (5 languages: en, es, fr, de, ar)
+- **Recharts 3.8** - Data visualization and charts
+- **Firebase 12.11** - FCM push notifications
+- **PWA Support** - Service worker, web manifest, offline support, install prompt
 
-The admin dashboard is a separate React 19 + TypeScript + Vite application located in the `admin-dashboard/` directory.
+### 🛡️ Admin Dashboard (`admin-dashboard/`, port 3001)
 
-### Prerequisites
-- Node.js 18+ and npm
-- UrGuide API running on `https://localhost:5001`
+Full-featured admin interface for platform management.
 
-### Setup and Run
-
-```bash
-# Navigate to admin dashboard
-cd admin-dashboard
-
-# Install dependencies (already done if you followed setup)
-npm install
-
-# Start development server
-npm run dev
-
-# Access dashboard at http://localhost:3001
-```
-
-### Available Commands
-
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build production bundle (output to `dist/`)
-- `npm run preview` - Preview production build locally
-- `npm run lint` - Run ESLint for code quality
-
-### Features
-
+**Features:**
 - **User Management**: Search, filter, suspend, activate, delete users
 - **Role Management**: Assign and update user roles (User, Guide, Admin)
 - **Activity Monitoring**: View user activity logs with timestamps and IP tracking
@@ -982,43 +1018,63 @@ npm run dev
 - **Responsive Design**: Mobile-friendly Material-UI interface
 - **Real-time Updates**: TanStack Query for efficient data synchronization
 
-### Technology Stack
-
-- **React 19.2** - Modern React with hooks
-- **TypeScript 5.9** - Type-safe development
-- **Vite 8.0** - Fast build tool and dev server
-- **Material-UI v7** - Enterprise-ready component library
-- **MUI X Data Grid** - Advanced table with pagination, sorting, filtering
-- **TanStack Query v5** - Server state management
-- **React Router v7** - Client-side routing
-- **Axios** - HTTP client for API calls
-
-### API Integration
-
-The dashboard communicates with the backend admin API endpoints:
-
-```typescript
-// Example: Get users with search
-GET /api/admin/users?PageNumber=1&PageSize=20&Term=john
-
-// Example: Suspend user
-POST /api/admin/users/{userId}/suspend?durationDays=7
-
-// Example: Update roles
-PUT /api/admin/users/roles
-Body: { "userId": "...", "roles": ["User", "Guide"] }
-```
-
-See [Admin API Documentation](docs/implementation/ADMIN_API_DOCUMENTATION.md) for complete API reference.
-
-### Production Build
-
+**Setup:**
 ```bash
 cd admin-dashboard
-npm run build
+npm install
+npm run dev          # Dev server at http://localhost:3001
+npm run build        # Production build → dist/
+npm run lint         # ESLint code quality
+```
 
-# Output will be in admin-dashboard/dist/
-# Can be deployed to any static hosting or embedded in ASP.NET Core wwwroot
+**API Integration:** Communicates with `/api/admin/*` and `/api/auth/*` endpoints.
+See [Admin API Documentation](docs/implementation/ADMIN_API_DOCUMENTATION.md) for complete reference.
+
+### 🧭 Guide Portal (`guide-portal/`, port 3002)
+
+Standalone application for guides to manage their business.
+
+**Features:**
+- **Guide Registration & Profile**: Complete registration flow, profile editing, and KYC/identity verification
+- **Photo Gallery Management**: Create, upload, and manage tour photo galleries
+- **Tour Request Inbox**: Browse, filter, and respond to incoming tour requests
+- **Bid Management**: Create, edit, and withdraw bids on tour requests
+- **Availability Calendar**: Block dates, recurring patterns, iCal import/export
+- **Earnings Dashboard**: Track earnings, view transaction history with Recharts-based trend charts
+- **Payout Management**: Request payouts, view payout history, manage payment methods
+- **Reviews & Ratings**: View reviews, respond to tourist feedback
+- **Client Messaging**: Database-persisted conversations with real-time chat UI
+- **Analytics Dashboard**: Performance metrics, tour statistics, and Recharts-based visualizations
+
+**Setup:**
+```bash
+cd guide-portal
+npm install
+npm run dev          # Dev server at http://localhost:3002
+npm run build        # Production build → dist/
+```
+
+### 🌍 Tourist Website (`tourist-website/`, port 3003)
+
+Public-facing application for tourists to discover guides and book tours.
+
+**Features:**
+- **Guide Search**: Browse and search for local guides
+- **Guide Profiles**: View detailed guide profiles with reviews and ratings
+- **Tour Requests**: Create tour requests and receive bids from guides
+- **Bookings**: Manage bookings and payment flow
+- **Reviews**: Write and read reviews for guides and tours
+- **Messaging**: Direct messaging with guides
+- **Notifications**: Real-time notification center
+- **Payment History**: View past transactions and payment details
+- **Profile & Settings**: User profile management and preferences
+
+**Setup:**
+```bash
+cd tourist-website
+npm install
+npm run dev          # Dev server at http://localhost:3003
+npm run build        # Production build → dist/
 ```
 
 ## �🚀 Deployment
@@ -1115,7 +1171,7 @@ cd UrGuide.WebApp
 dotnet user-secrets set "IpStack:ApiKey" "your-api-key"
 dotnet user-secrets set "Smtp__Username" "your-smtp-user"
 dotnet user-secrets set "Smtp__Password" "your-smtp-password"
-dotnet user-secrets set "IdentityServer:Clients:Xamarin:ClientSecret" "your-secret"
+dotnet user-secrets set "IdentityServer:Clients:AdminDashboard:ClientSecret" "$(openssl rand -base64 32)"
 ```
 
 ### Security Best Practices
@@ -1152,11 +1208,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🐛 Issues & Feature Requests
 
 See the [Issues Catalog](https://github.com/JeanMarcMbouma/urguide/issues) for:
-- Payment integration
-- Enhanced security features
+- ~~Payment integration~~ ✅ **Implemented** (Stripe)
+- ~~Enhanced security features~~ ✅ **Implemented** (2FA, Passkeys, Social Login)
 - ~~API rate limiting improvements~~ ✅ **Implemented**
-- Monitoring and observability
-- API testing suite
+- ~~Monitoring and observability~~ ✅ **Implemented** (OpenTelemetry, Seq, Health Checks)
+- ~~API testing suite~~ ✅ **Implemented** (Unit, Integration, E2E, Performance)
 - ~~Docker containerization~~ ✅ **Implemented**
 - ~~CI/CD pipeline~~ ✅ **Implemented**
 - API client SDK generation

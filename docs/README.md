@@ -41,15 +41,15 @@ Security documentation, audits, and best practices.
 ### 🧪 Testing
 Testing infrastructure and guidelines.
 
-- **Unit Tests** (`tests/UrGuide.UnitTests/`) - 69 unit tests with xUnit, BbQ.MockLite, FluentAssertions, Coverlet
-- **Integration Tests** (`tests/UrGuide.IntegrationTests/`) - 89 controller integration tests
+- **Unit Tests** (`tests/UrGuide.UnitTests/`) - 171 unit tests with xUnit, BbQ.MockLite, FluentAssertions, Coverlet
+- **Integration Tests** (`tests/UrGuide.IntegrationTests/`) - 99 controller integration tests
 - **E2E Tests** (`tests/UrGuide.E2ETests/`) - Playwright-based end-to-end test infrastructure
 - **Performance Tests** (`tests/UrGuide.PerformanceTests/`) - BenchmarkDotNet micro-benchmarks
 
 Run tests:
 ```bash
-dotnet test tests/UrGuide.UnitTests/          # Unit tests (69 tests)
-dotnet test tests/UrGuide.IntegrationTests/   # Integration tests (89 tests)
+dotnet test tests/UrGuide.UnitTests/          # Unit tests (171 tests)
+dotnet test tests/UrGuide.IntegrationTests/   # Integration tests (99 tests)
 dotnet run -c Release --project tests/UrGuide.PerformanceTests/  # Benchmarks
 ```
 
